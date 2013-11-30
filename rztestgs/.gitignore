@@ -1,0 +1,33 @@
+# Build results
+
+debug/
+release/
+x64/
+build/
+bin/
+obj/
+objs/
+ui/
+
+*.ilk
+*.exe
+*.lib
+*.o
+*.pdb
+*.user*
+CMakeLists.txt.*
+Makefile*
+
+#############
+## Windows detritus
+#############
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
