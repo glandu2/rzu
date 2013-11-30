@@ -2,7 +2,7 @@
 #define PLAYERCOUNTMONITOR_H
 
 #include <QObject>
-#include "Network/Server.h"
+#include "Network/RappelzSocket.h"
 #include "Interfaces/ICallbackGuard.h"
 #include <QTimer>
 #include <QCoreApplication>
@@ -12,9 +12,9 @@ class PlayerCountMonitor : public QObject, private ICallbackGuard
 	Q_OBJECT
 
 	public:
-		PlayerCountMonitor(std::string host, quint16 port, int intervalms = 3500);
+		PlayerCountMonitor(std::string host, uint16_t port, int intervalms = 3500);
 
-		inline quint32 getPlayerNumber() { return playerNumber; }
+		inline uint32_t getPlayerNumber() { return playerNumber; }
 		inline void waitFirstUpdate() { while(playerNumber == -1) QCoreApplication::processEvents(); }
 		inline void start() { updatePlayerNumber(); timer.start(); }
 		inline void stop() { timer.stop(); }
@@ -24,16 +24,16 @@ class PlayerCountMonitor : public QObject, private ICallbackGuard
 		void updatePlayerNumber();
 
 	protected:
-		static void onPlayerCountReceived(void* instance, Server* server, const TS_MESSAGE* packetData);
+		static void onPlayerCountReceived(void* instance, RappelzSocket *sock, const TS_MESSAGE* packetData);
 		void playerNumberUpdated();
 
 	private:
-		Server server;
+		RappelzSocket sock;
 		QTimer timer;
 		qint32 playerNumber;
 		quint32 processLoad;
 		std::string host;
-		quint16 port;
+		uint16_t port;
 };
 
 #endif // PLAYERCOUNTMONITOR_H

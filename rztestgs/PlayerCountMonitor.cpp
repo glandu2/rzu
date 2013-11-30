@@ -6,37 +6,36 @@
 
 #define LOG_PREFIX "PlayerCountMonitor: "
 
-PlayerCountMonitor::PlayerCountMonitor(std::string host, quint16 port, int intervalms) {
+PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) {
 	this->playerNumber = -1;
 	this->host = host;
 	this->port = port;
 
 	printf("#msec since epoch, players connected number, process load\n");
 
-	addInstance(server.addPacketListener(Server::ST_Auth, TS_CA_VERSION::packetID, this, onPlayerCountReceived));
-	addInstance(server.addPacketListener(Server::ST_Auth, TS_CC_EVENT::packetID, this, onPlayerCountReceived));
+	addInstance(sock.addPacketListener(TS_CA_VERSION::packetID, this, onPlayerCountReceived));
+	addInstance(sock.addPacketListener(TS_CC_EVENT::packetID, this, onPlayerCountReceived));
 
 	timer.setInterval(intervalms);
 	timer.setSingleShot(false);
 	connect(&timer, SIGNAL(timeout()), this, SLOT(updatePlayerNumber()));
-
-	this->server.setServerFarm(host, port);
 }
 
 void PlayerCountMonitor::updatePlayerNumber() {
-	if(server.getState() == Server::SS_NotConnected) {
-		server.connectToAuth();
-	} else if(server.getState() == Server::SS_ConnectingToAuth) {
-		server.close();
-		server.connectToAuth();
+	if(sock.getState() == ISocket::UnconnectedState) {
+		sock.connect(host, port);
+	} else if(sock.getState() == ISocket::ConnectingState) {
+		sock.close();
+		sock.connect(host, port);
 		qDebug(LOG_PREFIX"Server connection timeout");
 	} else {
 		qDebug(LOG_PREFIX"Timer tick but server is not unconnected, timer is too fast ?");
 	}
 }
 
-void PlayerCountMonitor::onPlayerCountReceived(void* instance, Server* server, const TS_MESSAGE* packetData) {
+void PlayerCountMonitor::onPlayerCountReceived(void* instance, RappelzSocket* sock, const TS_MESSAGE* packetData) {
 	PlayerCountMonitor *thisInstance = static_cast<PlayerCountMonitor*>(instance);
+
 	switch(packetData->id) {
 		case TS_SC_RESULT::packetID:
 		{
@@ -45,8 +44,8 @@ void PlayerCountMonitor::onPlayerCountReceived(void* instance, Server* server, c
 				case TS_CA_VERSION::packetID:
 					thisInstance->playerNumber = result->value ^ 0xADADADAD;
 					thisInstance->processLoad = result->result;
-					server->close();
 					thisInstance->playerNumberUpdated();
+					sock->close();
 					break;
 			}
 			break;
@@ -60,7 +59,7 @@ void PlayerCountMonitor::onPlayerCountReceived(void* instance, Server* server, c
 				TS_MESSAGE::initMessage<TS_CA_VERSION>(&versionMsg);
 				qstrcpy(versionMsg.szVersion, "TEST");
 
-				server->sendPacket(&versionMsg, Server::ST_Auth);
+				sock->sendPacket(&versionMsg);
 			}
 			if(eventMsg->event == TS_CC_EVENT::CE_ServerConnectionLost) {
 				qDebug(LOG_PREFIX"Disconnected from server !");

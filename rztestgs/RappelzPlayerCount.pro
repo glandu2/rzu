@@ -16,9 +16,9 @@ unix {
     QMAKE_CXXFLAGS += -std=c++11
 }
 
-INCLUDEPATH += ../RappelzLib/
+INCLUDEPATH += ../RappelzLib/shared-lib
 
-LIBS += -L../RappelzLib/bin -lRappelzLib
+LIBS += -L../RappelzLib/build-linux-amd64-bin/ -lRappelzLib
 
 TEMPLATE = app
 
