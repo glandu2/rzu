@@ -1,6 +1,14 @@
 #include <QCoreApplication>
 #include "PlayerCountMonitor.h"
 #include <QStringList>
+#include "Network/SocketPoll.h"
+#include <thread>
+
+SocketPoll socketPoll;
+
+void updatePoll() {
+	socketPoll.run();
+}
 
 int main(int argc, char *argv[])
 {
@@ -14,12 +22,14 @@ int main(int argc, char *argv[])
 	}
 
 	if(host.isNull() || port == 0) {
-		host = "127.0.0.1";
+		host = "127.0.0.1"; //127.0.0.1";
 		port = 4500;
 	}
 
 	PlayerCountMonitor playerCount(host.constData(), port);
 	playerCount.start();
+
+	new std::thread(&updatePoll);
 	
 	return a.exec();
 }
