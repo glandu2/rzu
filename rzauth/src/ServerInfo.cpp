@@ -111,7 +111,13 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 
 void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	TS_AG_CLIENT_LOGIN result;
-	ClientData* client = ClientInfo::popPendingClient(std::string(packet->account));
+	ClientData* client;
+	std::unordered_map<std::string, ClientData*>::const_iterator it = pendingClients.find(std::string(packet->account));
+	if(it != pendingClients.cend()) {
+		client = it->second;
+		pendingClients.erase(it);
+	} else
+		client = nullptr;
 
 	TS_MESSAGE::initMessage<TS_AG_CLIENT_LOGIN>(&result);
 	strncpy(result.account, packet->account, 61);

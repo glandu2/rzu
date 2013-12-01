@@ -209,7 +209,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 		clientData->account = std::string(packet->account, 60);
 
 		strncpy((char*)password, packet->password, 61);
-		DesPasswordCipher("MERONG").encrypt(password, 61);
+		DesPasswordCipher("MERONG").decrypt(password, 61);
 	}
 
 	printf("Login request for account %s with password %s\n", clientData->account.c_str(), password);

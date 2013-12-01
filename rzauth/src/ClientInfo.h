@@ -20,12 +20,12 @@ public:
 	~ClientInfo();
 
 	static void startServer();
-	static ClientData* popPendingClient(const std::string& accountName);
 
 protected:
 	static void onNewConnection(void* instance, ISocket* serverSocket);
 	static void onStateChanged(void* instance, ISocket* clientSocket, ISocket::State oldState, ISocket::State newState);
 	static void onDataReceived(void* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
+	static ClientData* popPendingClient(const std::string& accountName);
 
 	void onVersion(const TS_CA_VERSION* packet);
 	void onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet);
