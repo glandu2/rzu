@@ -1,22 +1,18 @@
 cmake_minimum_required(VERSION 2.8)
-project(RappelzLib)
+project(RappelzServerAuth)
 
 set(CMAKE_VERBOSE_MAKEFILE false)
 set(CMAKE_BUILD_TYPE "Debug")
 
-set(SHARED_LIB_DIR "shared-lib")
+set(SOURCE_DIR "src")
 
 get_filename_component(BUILD_DIR_NAME ${CMAKE_BINARY_DIR} NAME)
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_LIST_DIR}/${BUILD_DIR_NAME}-bin")
 set(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_LIST_DIR}/${BUILD_DIR_NAME}-bin")
 
-set(SHARED_LIB_NAME "RappelzLib")
-
-include_directories("${CMAKE_CURRENT_LIST_DIR}/${SHARED_LIB_DIR}")
-include_directories("${CMAKE_CURRENT_LIST_DIR}/${SHARED_LIB_DIR}/Common")
-include_directories("${CMAKE_CURRENT_LIST_DIR}/${SHARED_LIB_DIR}/Interfaces")
-link_directories(${LIBRARY_OUTPUT_PATH})
+include_directories("${CMAKE_CURRENT_LIST_DIR}/../RappelzLib/shared-lib")
+link_directories("${CMAKE_CURRENT_LIST_DIR}/../RappelzLib/build-linux-amd64-bin/")
 
 if(MSVC)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO /INCREMENTAL:NO")
@@ -40,4 +36,4 @@ if(UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath,.")
 endif()
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/${SHARED_LIB_DIR}" ${SHARED_LIB_DIR})
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/${SOURCE_DIR}" ${SOURCE_DIR})
