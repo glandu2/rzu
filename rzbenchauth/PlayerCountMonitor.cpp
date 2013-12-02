@@ -22,9 +22,9 @@ PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int inte
 }
 
 void PlayerCountMonitor::updatePlayerNumber() {
-	if(sock.getState() == ISocket::UnconnectedState) {
+	if(sock.getState() == Socket::UnconnectedState) {
 		sock.connect(host, port);
-	} else if(sock.getState() == ISocket::ConnectingState) {
+	} else if(sock.getState() == Socket::ConnectingState) {
 		sock.close();
 		sock.connect(host, port);
 		qDebug(LOG_PREFIX"Server connection timeout");
