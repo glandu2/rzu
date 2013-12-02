@@ -33,8 +33,8 @@ public:
 	int getUserCount() { return userCount; }
 
 protected:
-	static void onNewConnection(void* instance, ISocket* serverSocket);
-	static void onStateChanged(void* instance, ISocket* clientSocket, ISocket::State oldState, ISocket::State newState);
+	static void onNewConnection(void* instance, Socket* serverSocket);
+	static void onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
 	static void onDataReceived(void* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
 
 	void onServerLogin(const TS_GA_LOGIN* packet);
@@ -43,7 +43,7 @@ protected:
 	void onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet);
 
 private:
-	static ISocket* serverSocket;
+	static Socket* serverSocket;
 	static std::vector<ServerInfo*> servers;
 
 	RappelzSocket* socket;

@@ -22,8 +22,8 @@ public:
 	static void startServer();
 
 protected:
-	static void onNewConnection(void* instance, ISocket* serverSocket);
-	static void onStateChanged(void* instance, ISocket* clientSocket, ISocket::State oldState, ISocket::State newState);
+	static void onNewConnection(void* instance, Socket* serverSocket);
+	static void onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
 	static void onDataReceived(void* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
 	static ClientData* popPendingClient(const std::string& accountName);
 
@@ -34,7 +34,7 @@ protected:
 	void onSelectServer(const TS_CA_SELECT_SERVER* packet);
 	
 private:
-	static ISocket* serverSocket;
+	static Socket* serverSocket;
 	static std::unordered_map<std::string, ClientData*> pendingClients;	//Client that should go to a gameserver (added at TS_AC_ACCOUNT, removed when disconnected or selected a server)
 
 	RappelzSocket* socket;
