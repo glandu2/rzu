@@ -231,6 +231,12 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST* serverListPacket;
 
+	// Check if user authenticated
+	if(clientData == nullptr) {
+		socket->abort();
+		return;
+	}
+
 	const std::vector<ServerInfo*>& serverList = ServerInfo::getServerList();
 
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(serverList.size());
