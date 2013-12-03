@@ -17,7 +17,7 @@
 #include "Packets/TS_AC_SELECT_SERVER.h"
 #include "Packets/TS_AC_SERVER_LIST.h"
 
-ISocket* ClientInfo::serverSocket = new Socket;
+Socket* ClientInfo::serverSocket = new Socket;
 std::unordered_map<std::string, ClientData*> ClientInfo::pendingClients;
 
 ClientInfo::ClientInfo(RappelzSocket* socket) {
@@ -60,7 +60,7 @@ ClientData* ClientInfo::popPendingClient(const std::string& accountName) {
 		return nullptr;
 }
 
-void ClientInfo::onNewConnection(void* instance, ISocket* serverSocket) {
+void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket;
 	static ClientInfo* clientInfo = new ClientInfo(newSocket);
 
@@ -75,10 +75,10 @@ void ClientInfo::onNewConnection(void* instance, ISocket* serverSocket) {
 	} while(1);
 }
 
-void ClientInfo::onStateChanged(void* instance, ISocket* clientSocket, ISocket::State oldState, ISocket::State newState) {
+void ClientInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
 	ClientInfo* thisInstance = static_cast<ClientInfo*>(instance);
 	
-	if(newState == ISocket::UnconnectedState) {
+	if(newState == Socket::UnconnectedState) {
 		delete thisInstance;
 	}
 }

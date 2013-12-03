@@ -7,7 +7,7 @@
 #include "Packets/TS_AG_CLIENT_LOGIN.h"
 #include "Packets/TS_AG_KICK_CLIENT.h"
 
-ISocket* ServerInfo::serverSocket = new Socket;
+Socket* ServerInfo::serverSocket = new Socket;
 std::vector<ServerInfo*> ServerInfo::servers;
 
 ServerInfo::ServerInfo(RappelzSocket* socket)
@@ -34,7 +34,7 @@ ServerInfo::~ServerInfo() {
 	socket->deleteLater();
 }
 
-void ServerInfo::onNewConnection(void* instance, ISocket* serverSocket) {
+void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket;
 	static ServerInfo* serverInfo = new ServerInfo(newSocket);
 
@@ -49,10 +49,10 @@ void ServerInfo::onNewConnection(void* instance, ISocket* serverSocket) {
 	} while(1);
 }
 
-void ServerInfo::onStateChanged(void* instance, ISocket* clientSocket, ISocket::State oldState, ISocket::State newState) {
+void ServerInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
 	ServerInfo* thisInstance = static_cast<ServerInfo*>(instance);
 
-	if(newState == ISocket::UnconnectedState) {
+	if(newState == Socket::UnconnectedState) {
 		delete thisInstance;
 	}
 }
