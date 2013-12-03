@@ -12,6 +12,10 @@ std::vector<ServerInfo*> ServerInfo::servers;
 
 ServerInfo::ServerInfo(RappelzSocket* socket)
 {
+	this->socket = socket;
+	userCount = 0;
+	serverIdx = -1;
+
 	addInstance(socket->addEventListener(this, &onStateChanged));
 	addInstance(socket->addPacketListener(TS_GA_LOGIN::packetID, this, &onDataReceived));
 	addInstance(socket->addPacketListener(TS_GA_CLIENT_LOGIN::packetID, this, &onDataReceived));
@@ -35,7 +39,7 @@ ServerInfo::~ServerInfo() {
 }
 
 void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket;
+	static RappelzSocket *newSocket = new RappelzSocket(false);
 	static ServerInfo* serverInfo = new ServerInfo(newSocket);
 
 	do {
@@ -43,8 +47,8 @@ void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
 		if(!serverSocket->accept(newSocket))
 			break;
 
-		printf("new socket2\n");
-		newSocket = new RappelzSocket;
+		printf("new server connection\n");
+		newSocket = new RappelzSocket(false);
 		serverInfo = new ServerInfo(newSocket);
 	} while(1);
 }
@@ -59,12 +63,6 @@ void ServerInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::St
 
 void ServerInfo::onDataReceived(void* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet) {
 	ServerInfo* thisInstance = static_cast<ServerInfo*>(instance);
-
-	if(packet->msg_check_sum != TS_MESSAGE::checkMessage(packet)) {
-		printf("Bad packet\n");
-		clientSocket->abort();
-		return;
-	}
 
 	switch(packet->id) {
 		case TS_GA_LOGIN::packetID:
@@ -99,11 +97,15 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 	if(servers.size() <= (size_t)serverIdx)
 		servers.resize(serverIdx+1, nullptr);
 
+	printf("Server Login: %s[%d] at %s:%d: ", packet->server_name, packet->server_idx, packet->server_ip, packet->server_port);
+
 	if(servers.at(serverIdx) == nullptr) {
 		servers[serverIdx] = this;
 		result.result = TS_RESULT_SUCCESS;
+		printf("Success\n");
 	} else {
 		result.result = TS_RESULT_ALREADY_EXIST;
+		printf("Failed, server index already used\n");
 	}
 
 	socket->sendPacket(&result);
@@ -123,6 +125,7 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	strncpy(result.account, packet->account, 61);
 
 	if(client == nullptr) {
+		printf("Client %s login on gameserver but not in pendingClient list\n", packet->account);
 		result.nAccountID = 0;
 		result.result = TS_RESULT_ACCESS_DENIED;
 		result.nPCBangUser = 0;
@@ -132,6 +135,7 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		result.nContinuousLogoutTime = 0;
 	} else {
 		//To complete
+		printf("Client %s now on gameserver\n", packet->account);
 		result.nAccountID = client->accountId;
 		result.result = TS_RESULT_SUCCESS;
 		result.nPCBangUser = 0;
@@ -147,6 +151,7 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 }
 
 void ServerInfo::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
+	printf("Client %s has disconnected from gameserver\n", packet->account);
 	userCount--;
 }
 

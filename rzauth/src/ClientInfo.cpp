@@ -61,7 +61,7 @@ ClientData* ClientInfo::popPendingClient(const std::string& accountName) {
 }
 
 void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket;
+	static RappelzSocket *newSocket = new RappelzSocket(true);
 	static ClientInfo* clientInfo = new ClientInfo(newSocket);
 
 	do {
@@ -69,8 +69,8 @@ void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
 		if(!serverSocket->accept(newSocket))
 			break;
 
-		printf("new socket2\n");
-		newSocket = new RappelzSocket;
+		printf("new client connection\n");
+		newSocket = new RappelzSocket(true);
 		clientInfo = new ClientInfo(newSocket);
 	} while(1);
 }
@@ -179,6 +179,8 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 		int bytesWritten, totalLength = 0;
 		unsigned int bytesRead;
 
+		printf("Client login using AES %s\n", accountv2->account);
+
 		clientData->account = std::string(accountv2->account, 60);
 
 		EVP_CIPHER_CTX_init(&d_ctx);
@@ -206,6 +208,8 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 	cleanup_aes:
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else {
+		printf("Client login using DES %s\n", packet->account);
+
 		clientData->account = std::string(packet->account, 60);
 
 		strncpy((char*)password, packet->password, 61);
@@ -230,6 +234,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 
 void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST* serverListPacket;
+	int i, j, count;
 
 	// Check if user authenticated
 	if(clientData == nullptr) {
@@ -239,21 +244,30 @@ void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 	const std::vector<ServerInfo*>& serverList = ServerInfo::getServerList();
 
-	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(serverList.size());
+	for(i = count = 0; i < serverList.size(); i++)
+		if(serverList.at(i) != nullptr)
+			count++;
 
-	serverListPacket->count = serverList.size();
+	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
+
+	serverListPacket->count = count;
 	serverListPacket->last_login_server_idx = 0;
 
-	for(int i = 0; i < serverListPacket->count; i++) {
+	for(i = j = 0; i < serverList.size() && j < serverListPacket->count; i++) {
 		ServerInfo* serverInfo = serverList.at(i);
 
-		serverListPacket->servers[i].server_idx = i;
-		strcpy(serverListPacket->servers[i].server_ip, serverInfo->getServerIp().c_str());
-		serverListPacket->servers[i].server_port = serverInfo->getServerPort();
-		strcpy(serverListPacket->servers[i].server_name, serverInfo->getServerName().c_str());
-		serverListPacket->servers[i].is_adult_server = serverInfo->getIsAdultServer();
-		strcpy(serverListPacket->servers[i].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
-		serverListPacket->servers[i].user_ratio = 99;
+		if(serverInfo == nullptr)
+			continue;
+
+		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
+		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
+		serverListPacket->servers[j].server_port = serverInfo->getServerPort();
+		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
+		serverListPacket->servers[j].is_adult_server = serverInfo->getIsAdultServer();
+		strcpy(serverListPacket->servers[j].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
+		serverListPacket->servers[j].user_ratio = 0;
+
+		j++;
 	}
 
 	socket->sendPacket(serverListPacket);
@@ -281,8 +295,9 @@ void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER_V2>(&result);
 			result.result = 0;
 			result.encrypted_data_size = 16;
+			result.pending_time = 10;
 			result.unknown = 0;
-			result.pending_time = 0;
+			result.unknown2 = 0;
 
 			EVP_CIPHER_CTX e_ctx;
 			int bytesWritten;
@@ -302,7 +317,7 @@ void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 
 			result.result = 0;
 			result.one_time_key = clientData->oneTimePassword;
-			result.pending_time = 0;
+			result.pending_time = 10;
 
 			socket->sendPacket(&result);
 		}
