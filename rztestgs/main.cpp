@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
 	}
 
 	if(host.isNull() || port == 0) {
-		host = "127.0.0.1"; //127.0.0.1";
-		port = 4500;
+		host = "192.168.1.15"; //127.0.0.1";
+		port = 4514;
 	}
 
 	PlayerCountMonitor playerCount(host.constData(), port);

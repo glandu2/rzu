@@ -6,7 +6,7 @@
 
 #define LOG_PREFIX "PlayerCountMonitor: "
 
-PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) {
+PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) : sock(true) {
 	this->playerNumber = -1;
 	this->host = host;
 	this->port = port;
