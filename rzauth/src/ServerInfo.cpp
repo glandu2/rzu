@@ -7,7 +7,7 @@
 #include "Packets/TS_AG_CLIENT_LOGIN.h"
 #include "Packets/TS_AG_KICK_CLIENT.h"
 
-Socket* ServerInfo::serverSocket = new Socket;
+Socket* ServerInfo::serverSocket = new Socket(uv_default_loop());
 std::vector<ServerInfo*> ServerInfo::servers;
 
 ServerInfo::ServerInfo(RappelzSocket* socket)
@@ -39,7 +39,7 @@ ServerInfo::~ServerInfo() {
 }
 
 void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket(false);
+	static RappelzSocket *newSocket = new RappelzSocket(uv_default_loop(), false);
 	static ServerInfo* serverInfo = new ServerInfo(newSocket);
 
 	do {
@@ -48,7 +48,7 @@ void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
 			break;
 
 		printf("new server connection\n");
-		newSocket = new RappelzSocket(false);
+		newSocket = new RappelzSocket(uv_default_loop(), false);
 		serverInfo = new ServerInfo(newSocket);
 	} while(1);
 }
@@ -124,15 +124,18 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	TS_MESSAGE::initMessage<TS_AG_CLIENT_LOGIN>(&result);
 	strncpy(result.account, packet->account, 61);
 
+	result.nAccountID = 0;
+	result.result = TS_RESULT_ACCESS_DENIED;
+	result.nPCBangUser = 0;
+	result.nEventCode = 0;
+	result.nAge = 0;
+	result.nContinuousPlayTime = 0;
+	result.nContinuousLogoutTime = 0;
+
 	if(client == nullptr) {
 		printf("Client %s login on gameserver but not in pendingClient list\n", packet->account);
-		result.nAccountID = 0;
-		result.result = TS_RESULT_ACCESS_DENIED;
-		result.nPCBangUser = 0;
-		result.nEventCode = 0;
-		result.nAge = 0;
-		result.nContinuousPlayTime = 0;
-		result.nContinuousLogoutTime = 0;
+	} else if(client->oneTimePassword != packet->one_time_key) {
+		printf("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", packet->account, client->oneTimePassword, packet->one_time_key);
 	} else {
 		//To complete
 		printf("Client %s now on gameserver\n", packet->account);

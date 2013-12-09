@@ -1,12 +1,10 @@
-#include "Network/SocketPoll.h"
 #include "ClientInfo.h"
 #include "ServerInfo.h"
+#include "uv.h"
 
 int main() {
-	SocketPoll socketPoll;
-
 	ClientInfo::startServer();
 	ServerInfo::startServer();
 
-	socketPoll.run();
+	uv_run(uv_default_loop(), UV_RUN_DEFAULT);
 }

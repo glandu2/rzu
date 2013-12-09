@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
+#include <algorithm>
 
 #include "DesPasswordCipher.h"
 #include <openssl/evp.h>
@@ -11,13 +12,15 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
+#include <sql.h>
+
 #include "Packets/TS_AC_RESULT.h"
 #include "Packets/TS_SC_RESULT.h"
 #include "Packets/TS_AC_AES_KEY_IV.h"
 #include "Packets/TS_AC_SELECT_SERVER.h"
 #include "Packets/TS_AC_SERVER_LIST.h"
 
-Socket* ClientInfo::serverSocket = new Socket;
+Socket* ClientInfo::serverSocket = new Socket(uv_default_loop());
 std::unordered_map<std::string, ClientData*> ClientInfo::pendingClients;
 
 ClientInfo::ClientInfo(RappelzSocket* socket) {
@@ -61,7 +64,7 @@ ClientData* ClientInfo::popPendingClient(const std::string& accountName) {
 }
 
 void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket(true);
+	static RappelzSocket *newSocket = new RappelzSocket(uv_default_loop(), true);
 	static ClientInfo* clientInfo = new ClientInfo(newSocket);
 
 	do {
@@ -70,7 +73,7 @@ void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
 			break;
 
 		printf("new client connection\n");
-		newSocket = new RappelzSocket(true);
+		newSocket = new RappelzSocket(uv_default_loop(), true);
 		clientInfo = new ClientInfo(newSocket);
 	} while(1);
 }
@@ -181,7 +184,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 
 		printf("Client login using AES %s\n", accountv2->account);
 
-		clientData->account = std::string(accountv2->account, 60);
+		clientData->account = std::string(accountv2->account, std::find(accountv2->account, accountv2->account + 60, '\0'));
 
 		EVP_CIPHER_CTX_init(&d_ctx);
 		if(EVP_DecryptInit_ex(&d_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) < 0)
@@ -210,7 +213,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 	} else {
 		printf("Client login using DES %s\n", packet->account);
 
-		clientData->account = std::string(packet->account, 60);
+		clientData->account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
 		strncpy((char*)password, packet->password, 61);
 		DesPasswordCipher("MERONG").decrypt(password, 61);
@@ -219,7 +222,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 	printf("Login request for account %s with password %s\n", clientData->account.c_str(), password);
 	memset(password, 0, 64);
 
-	clientData->accountId = 0;
+	clientData->accountId = 1;
 	clientData->age = 0;
 	clientData->lastLoginServerId = 0;
 	clientData->eventCode = 0;
@@ -227,8 +230,18 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 	TS_AC_RESULT result;
 	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
-	result.result = 0;
-	result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
+
+	if(pendingClients.emplace(clientData->account, clientData).second == true) {
+		result.result = 0;
+		result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
+	} else {
+		result.result = TS_RESULT_ALREADY_EXIST;
+		result.login_flag = 0;
+		pendingClients.erase(clientData->account);
+		delete clientData;
+		clientData = nullptr;
+	}
+
 	socket->sendPacket(&result);
 }
 
@@ -282,7 +295,7 @@ void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 		return;
 	}
 
-	if(packet->server_idx < serverList.size()) {
+	if(packet->server_idx < serverList.size() && serverList.at(packet->server_idx) != nullptr) {
 		ServerInfo* server = serverList.at(packet->server_idx);
 
 		clientData->oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
@@ -295,7 +308,7 @@ void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER_V2>(&result);
 			result.result = 0;
 			result.encrypted_data_size = 16;
-			result.pending_time = 10;
+			result.pending_time = 0;
 			result.unknown = 0;
 			result.unknown2 = 0;
 
@@ -317,7 +330,7 @@ void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 
 			result.result = 0;
 			result.one_time_key = clientData->oneTimePassword;
-			result.pending_time = 10;
+			result.pending_time = 0;
 
 			socket->sendPacket(&result);
 		}

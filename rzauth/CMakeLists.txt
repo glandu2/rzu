@@ -13,6 +13,8 @@ set(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_LIST_DIR}/${BUILD_DIR_NAME}-bin")
 
 include_directories("${CMAKE_CURRENT_LIST_DIR}/../RappelzLib/shared-lib")
 link_directories("${CMAKE_CURRENT_LIST_DIR}/../RappelzLib/build-linux-amd64-bin/")
+include_directories("${CMAKE_CURRENT_LIST_DIR}/../libuv/include")
+link_directories("${CMAKE_CURRENT_LIST_DIR}/../libuv/project-linux/build-linux-amd64-bin")
 
 if(MSVC)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO /INCREMENTAL:NO")
