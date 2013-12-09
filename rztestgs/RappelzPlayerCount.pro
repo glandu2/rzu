@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core
-
-QT       -= gui
+QT       -= gui core
 
 TARGET = RappelzPlayerCount
 CONFIG   += console
@@ -16,9 +14,9 @@ unix {
     QMAKE_CXXFLAGS += -std=c++11
 }
 
-INCLUDEPATH += ../RappelzLib/shared-lib
+INCLUDEPATH += ../RappelzLib/shared-lib ../libuv/include
 
-LIBS += -L../RappelzLib/build-linux-amd64-bin/ -lRappelzLib
+LIBS += -L../RappelzLib/build-linux-amd64-bin/ -lRappelzLib -L../libuv/project-linux/build-linux-amd64-bin/ -luv
 
 TEMPLATE = app
 
