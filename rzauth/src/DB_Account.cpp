@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ClientInfo.h"
+#include "Network/EventLoop.h"
 
 DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const char* password) : clientInfo(clientInfo), account(account) {
 	std::string buffer = "2012";
@@ -14,7 +15,7 @@ DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const
 	buffer.append(password);
 	printf("MD5 of \"%s\" with len %zd\n", buffer.c_str(), buffer.size());
 	MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
-	uv_queue_work(uv_default_loop(), &req, &onProcess, &onDone);
+	uv_queue_work(EventLoop::getLoop(), &req, &onProcess, &onDone);
 }
 
 void DB_Account::onProcess(uv_work_t *req) {

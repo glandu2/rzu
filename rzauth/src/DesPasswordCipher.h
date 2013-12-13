@@ -2,8 +2,12 @@
 #define DESPASSWORDCIPHER_H
 #include <stdlib.h>
 
-class DesPasswordCipher
+#include "Network/Object.h"
+
+class DesPasswordCipher : public Object
 {
+	DECLARE_CLASS(DesPasswordCipher)
+
 	public:
 		DesPasswordCipher(const char *password = NULL) { if(password) init(password); }
 

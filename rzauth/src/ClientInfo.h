@@ -1,6 +1,7 @@
 #ifndef CLIENTMANAGER_H
 #define CLIENTMANAGER_H
 
+#include "Network/Object.h"
 #include "Network/RappelzSocket.h"
 #include <stdint.h>
 #include <unordered_map>
@@ -13,8 +14,10 @@
 #include "Packets/TS_CA_SERVER_LIST.h"
 #include "Packets/TS_CA_SELECT_SERVER.h"
 
-class ClientInfo : public ICallbackGuard
+class ClientInfo : public Object, public ICallbackGuard
 {
+	DECLARE_CLASS(ClientInfo)
+
 public:
 	ClientInfo(RappelzSocket *socket);
 	~ClientInfo();

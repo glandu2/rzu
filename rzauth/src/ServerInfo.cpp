@@ -2,12 +2,13 @@
 #include "ClientInfo.h"
 #include <string.h>
 
+#include "Network/EventLoop.h"
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
 #include "Packets/TS_AG_CLIENT_LOGIN.h"
 #include "Packets/TS_AG_KICK_CLIENT.h"
 
-Socket* ServerInfo::serverSocket = new Socket(uv_default_loop());
+Socket* ServerInfo::serverSocket = new Socket(EventLoop::getLoop());
 std::vector<ServerInfo*> ServerInfo::servers;
 
 ServerInfo::ServerInfo(RappelzSocket* socket)
@@ -39,7 +40,7 @@ ServerInfo::~ServerInfo() {
 }
 
 void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket(uv_default_loop(), false);
+	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), false);
 	static ServerInfo* serverInfo = new ServerInfo(newSocket);
 
 	do {
@@ -48,7 +49,7 @@ void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
 			break;
 
 		printf("new server connection\n");
-		newSocket = new RappelzSocket(uv_default_loop(), false);
+		newSocket = new RappelzSocket(EventLoop::getLoop(), false);
 		serverInfo = new ServerInfo(newSocket);
 	} while(1);
 }
@@ -113,13 +114,7 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 
 void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	TS_AG_CLIENT_LOGIN result;
-	ClientData* client;
-	std::unordered_map<std::string, ClientData*>::const_iterator it = pendingClients.find(std::string(packet->account));
-	if(it != pendingClients.cend()) {
-		client = it->second;
-		pendingClients.erase(it);
-	} else
-		client = nullptr;
+	ClientData* client = ClientData::getClient(std::string(packet->account));
 
 	TS_MESSAGE::initMessage<TS_AG_CLIENT_LOGIN>(&result);
 	strncpy(result.account, packet->account, 61);
@@ -133,7 +128,7 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	result.nContinuousLogoutTime = 0;
 
 	if(client == nullptr) {
-		printf("Client %s login on gameserver but not in pendingClient list\n", packet->account);
+		printf("Client %s login on gameserver but not in clientData list\n", packet->account);
 	} else if(client->oneTimePassword != packet->one_time_key) {
 		printf("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", packet->account, client->oneTimePassword, packet->one_time_key);
 	} else {
@@ -155,6 +150,7 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 
 void ServerInfo::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 	printf("Client %s has disconnected from gameserver\n", packet->account);
+	ClientData::removeClient(packet->account);
 	userCount--;
 }
 

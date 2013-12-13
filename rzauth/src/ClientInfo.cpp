@@ -5,6 +5,7 @@
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include <algorithm>
+#include "Network/EventLoop.h"
 
 #include "DesPasswordCipher.h"
 #include <openssl/evp.h>
@@ -20,11 +21,12 @@
 #include "Packets/TS_AC_SELECT_SERVER.h"
 #include "Packets/TS_AC_SERVER_LIST.h"
 
-Socket* ClientInfo::serverSocket = new Socket(uv_default_loop());
+Socket* ClientInfo::serverSocket = new Socket(EventLoop::getLoop());
 
 ClientInfo::ClientInfo(RappelzSocket* socket) {
 	this->socket = socket;
 	this->useRsaAuth = false;
+	this->clientData = nullptr;
 
 	addInstance(socket->addEventListener(this, &onStateChanged));
 	addInstance(socket->addPacketListener(TS_CA_VERSION::packetID, this, &onDataReceived));
@@ -37,8 +39,8 @@ ClientInfo::ClientInfo(RappelzSocket* socket) {
 ClientInfo::~ClientInfo() {
 	invalidateCallbacks();
 	if(clientData) {
-		ClientData::removeClient(clientData->account);
-		delete clientData;
+		if(ClientData::removeClient(clientData->account))
+			delete clientData;
 	}
 
 	socket->deleteLater();
@@ -51,7 +53,7 @@ void ClientInfo::startServer() {
 }
 
 void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket(uv_default_loop(), true);
+	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), true);
 	static ClientInfo* clientInfo = new ClientInfo(newSocket);
 
 	do {
@@ -60,7 +62,7 @@ void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
 			break;
 
 		printf("new client connection\n");
-		newSocket = new RappelzSocket(uv_default_loop(), true);
+		newSocket = new RappelzSocket(EventLoop::getLoop(), true);
 		clientInfo = new ClientInfo(newSocket);
 	} while(1);
 }
@@ -219,16 +221,9 @@ void ClientInfo::clientAuthResult(bool authOk, const std::string& account, uint3
 		result.result = TS_RESULT_INVALID_PASSWORD;
 		result.login_flag = 0;
 	} else {
-		clientData = new ClientData(this);
-		clientData->account = account;
-		clientData->accountId = accountId;
-		clientData->age = age;
-		clientData->lastLoginServerId = lastLoginServerIdx;
-		clientData->eventCode = eventCode;
-
 		ClientData *alreadyExistingClient = nullptr;
-		bool insertOk = ClientData::tryAddClient(clientData, &alreadyExistingClient);
-		if(insertOk == false) {
+		clientData = ClientData::tryAddClient(this, account, &alreadyExistingClient);
+		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
 
@@ -237,12 +232,13 @@ void ClientInfo::clientAuthResult(bool authOk, const std::string& account, uint3
 				{}//alreadyExistingClient->connectToServer->kick();
 			else
 				alreadyExistingClient->client->socket->close();
-
-			delete clientData;
-			clientData = nullptr;
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
+			clientData->accountId = accountId;
+			clientData->age = age;
+			clientData->lastLoginServerId = lastLoginServerIdx;
+			clientData->eventCode = eventCode;
 		}
 	}
 
@@ -304,8 +300,10 @@ void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 
 		clientData->oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
 
-		clientData->client = nullptr;
-		clientData->server = server;
+		if(ClientData::switchClientToServer(clientData->account, server) == false) {
+			socket->abort();
+			return;
+		}
 
 		if(useRsaAuth) {
 			TS_AC_SELECT_SERVER_V2 result;

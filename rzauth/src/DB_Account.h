@@ -1,14 +1,17 @@
 #ifndef DB_ACCOUNT_H
 #define DB_ACCOUNT_H
 
+#include "Network/Object.h"
 #include "uv.h"
 #include <string>
 #include <stdint.h>
 
 class ClientInfo;
 
-class DB_Account
+class DB_Account : public Object
 {
+	DECLARE_CLASS(DB_Account)
+
 public:
 	DB_Account(ClientInfo* clientInfo, const std::string& account, const char *password);
 
