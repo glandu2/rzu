@@ -61,7 +61,6 @@ void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
 		if(!serverSocket->accept(newSocket))
 			break;
 
-		printf("new client connection\n");
 		newSocket = new RappelzSocket(EventLoop::getLoop(), true);
 		clientInfo = new ClientInfo(newSocket);
 	} while(1);
@@ -133,7 +132,7 @@ void ClientInfo::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	bio = BIO_new_mem_buf((void*)packet->key, packet->key_size);
 	rsaCipher = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 	if(rsaCipher == nullptr) {
-		fprintf(stderr, "ClientInfo: RSA: invalid certificate\n");
+		log("ClientInfo: RSA: invalid certificate\n");
 		socket->abort();
 		goto cleanup;
 	}
@@ -143,7 +142,7 @@ void ClientInfo::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	blockSize = RSA_public_encrypt(32, aesKey, aesKeyMessage->rsa_encrypted_data, rsaCipher, RSA_PKCS1_PADDING);
 	if(blockSize < 0) {
 		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
-		fprintf(stderr, "ClientInfo: RSA encrypt error: %s\n", errorString);
+		log("ClientInfo: RSA encrypt error: %s\n", errorString);
 		socket->abort();
 		goto cleanup;
 	}
@@ -170,7 +169,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 		int bytesWritten, totalLength = 0;
 		unsigned int bytesRead;
 
-		printf("Client login using AES %s\n", accountv2->account);
+		log("Client login using AES %s\n", accountv2->account);
 
 		account = std::string(accountv2->account, std::find(accountv2->account, accountv2->account + 60, '\0'));
 
@@ -199,7 +198,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 	cleanup_aes:
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else {
-		printf("Client login using DES %s\n", packet->account);
+		log("Client login using DES %s\n", packet->account);
 
 		account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
@@ -207,7 +206,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 		DesPasswordCipher("MERONG").decrypt(password, 61);
 	}
 
-	printf("Login request for account %s with password %s\n", account.c_str(), password);
+	log("Login request for account %s with password %s\n", account.c_str(), password);
 
 	new DB_Account(this, account, (char*)password);
 }

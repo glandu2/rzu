@@ -48,7 +48,6 @@ void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
 		if(!serverSocket->accept(newSocket))
 			break;
 
-		printf("new server connection\n");
 		newSocket = new RappelzSocket(EventLoop::getLoop(), false);
 		serverInfo = new ServerInfo(newSocket);
 	} while(1);
@@ -98,15 +97,15 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 	if(servers.size() <= (size_t)serverIdx)
 		servers.resize(serverIdx+1, nullptr);
 
-	printf("Server Login: %s[%d] at %s:%d: ", packet->server_name, packet->server_idx, packet->server_ip, packet->server_port);
+	log("Server Login: %s[%d] at %s:%d: ", packet->server_name, packet->server_idx, packet->server_ip, packet->server_port);
 
 	if(servers.at(serverIdx) == nullptr) {
 		servers[serverIdx] = this;
 		result.result = TS_RESULT_SUCCESS;
-		printf("Success\n");
+		log("Success\n");
 	} else {
 		result.result = TS_RESULT_ALREADY_EXIST;
-		printf("Failed, server index already used\n");
+		log("Failed, server index already used\n");
 	}
 
 	socket->sendPacket(&result);
@@ -128,12 +127,12 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	result.nContinuousLogoutTime = 0;
 
 	if(client == nullptr) {
-		printf("Client %s login on gameserver but not in clientData list\n", packet->account);
+		log("Client %s login on gameserver but not in clientData list\n", packet->account);
 	} else if(client->oneTimePassword != packet->one_time_key) {
-		printf("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", packet->account, client->oneTimePassword, packet->one_time_key);
+		log("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", packet->account, client->oneTimePassword, packet->one_time_key);
 	} else {
 		//To complete
-		printf("Client %s now on gameserver\n", packet->account);
+		log("Client %s now on gameserver\n", packet->account);
 		result.nAccountID = client->accountId;
 		result.result = TS_RESULT_SUCCESS;
 		result.nPCBangUser = 0;
@@ -149,7 +148,7 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 }
 
 void ServerInfo::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
-	printf("Client %s has disconnected from gameserver\n", packet->account);
+	log("Client %s has disconnected from gameserver\n", packet->account);
 	ClientData::removeClient(packet->account);
 	userCount--;
 }
