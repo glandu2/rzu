@@ -63,15 +63,16 @@ void DB_Account::onProcess(uv_work_t *req) {
 	if(!SQL_SUCCEEDED(result))
 		goto cleanup;
 
-	result = SQLConnect(hdbc, (UCHAR*)"SQLEXPRESS", SQL_NTS, (UCHAR*)"sa", SQL_NTS, (UCHAR*)"", SQL_NTS);
+	result = SQLDriverConnect(hdbc, nullptr, (UCHAR*)"driver=FreeTDS;Server=192.168.1.16;Database=Arcadia82;UID=sa;PWD=;Port=1433;", SQL_NTS, nullptr, 0, nullptr, 0);
 	if(!SQL_SUCCEEDED(result)) {
+		printf("Error %d\n", result);
 		goto cleanup;
 	}
 
 	SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 
 	thisInstance->log("Executing query\n");
-	//SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &thisInstance->accountId, 0, nullptr);
+	SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, thisInstance->account.size(), 0, (void*)thisInstance->account.c_str(), thisInstance->account.size(), nullptr);
 	SQLExecDirect(hstmt, (SQLCHAR*)"SELECT account_id, password FROM Auth82.dbo.Account WHERE account_id = 1;", SQL_NTS);
 	if(!SQL_SUCCEEDED(SQLFetch(hstmt))) {
 		goto cleanup;

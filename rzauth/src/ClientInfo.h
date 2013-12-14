@@ -39,8 +39,6 @@ protected:
 	void onSelectServer(const TS_CA_SELECT_SERVER* packet);
 	
 private:
-	static Socket* serverSocket;
-
 	RappelzSocket* socket;
 
 	bool useRsaAuth;

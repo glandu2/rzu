@@ -8,7 +8,6 @@
 #include "Packets/TS_AG_CLIENT_LOGIN.h"
 #include "Packets/TS_AG_KICK_CLIENT.h"
 
-Socket* ServerInfo::serverSocket = new Socket(EventLoop::getLoop());
 std::vector<ServerInfo*> ServerInfo::servers;
 
 ServerInfo::ServerInfo(RappelzSocket* socket)
@@ -25,6 +24,7 @@ ServerInfo::ServerInfo(RappelzSocket* socket)
 }
 
 void ServerInfo::startServer() {
+	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand(time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen("0.0.0.0", 4502);

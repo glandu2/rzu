@@ -21,8 +21,6 @@
 #include "Packets/TS_AC_SELECT_SERVER.h"
 #include "Packets/TS_AC_SERVER_LIST.h"
 
-Socket* ClientInfo::serverSocket = new Socket(EventLoop::getLoop());
-
 ClientInfo::ClientInfo(RappelzSocket* socket) {
 	this->socket = socket;
 	this->useRsaAuth = false;
@@ -47,6 +45,7 @@ ClientInfo::~ClientInfo() {
 }
 
 void ClientInfo::startServer() {
+	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand(time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen("0.0.0.0", 4500);

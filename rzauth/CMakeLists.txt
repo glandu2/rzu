@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(RappelzServerAuth)
 
-set(CMAKE_VERBOSE_MAKEFILE false)
+set(CMAKE_VERBOSE_MAKEFILE true)
 set(CMAKE_BUILD_TYPE "Debug")
 
 set(SOURCE_DIR "src")
@@ -35,7 +35,7 @@ else()
 endif()
 
 if(UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath,.")
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath,.")
 endif()
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/${SOURCE_DIR}" ${SOURCE_DIR})

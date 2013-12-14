@@ -44,7 +44,6 @@ protected:
 	void onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet);
 
 private:
-	static Socket* serverSocket;
 	static std::vector<ServerInfo*> servers;
 
 	RappelzSocket* socket;
