@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
+#include <algorithm>
+#include "Network/EventLoop.h"
 
 #include "DesPasswordCipher.h"
 #include <openssl/evp.h>
@@ -11,18 +13,20 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
+#include "DB_Account.h"
+
 #include "Packets/TS_AC_RESULT.h"
 #include "Packets/TS_SC_RESULT.h"
 #include "Packets/TS_AC_AES_KEY_IV.h"
 #include "Packets/TS_AC_SELECT_SERVER.h"
 #include "Packets/TS_AC_SERVER_LIST.h"
 
-Socket* ClientInfo::serverSocket = new Socket;
-std::unordered_map<std::string, ClientData*> ClientInfo::pendingClients;
+Socket* ClientInfo::serverSocket = new Socket(EventLoop::getLoop());
 
 ClientInfo::ClientInfo(RappelzSocket* socket) {
 	this->socket = socket;
 	this->useRsaAuth = false;
+	this->clientData = nullptr;
 
 	addInstance(socket->addEventListener(this, &onStateChanged));
 	addInstance(socket->addPacketListener(TS_CA_VERSION::packetID, this, &onDataReceived));
@@ -35,8 +39,8 @@ ClientInfo::ClientInfo(RappelzSocket* socket) {
 ClientInfo::~ClientInfo() {
 	invalidateCallbacks();
 	if(clientData) {
-		pendingClients.erase(clientData->account);
-		delete clientData;
+		if(ClientData::removeClient(clientData->account))
+			delete clientData;
 	}
 
 	socket->deleteLater();
@@ -48,20 +52,8 @@ void ClientInfo::startServer() {
 	serverSocket->listen("0.0.0.0", 4500);
 }
 
-ClientData* ClientInfo::popPendingClient(const std::string& accountName) {
-	std::unordered_map<std::string, ClientData*>::const_iterator it;
-
-	it = pendingClients.find(accountName);
-	if(it != pendingClients.cend()) {
-		ClientData* clientData = it->second;
-		pendingClients.erase(it);
-		return clientData;
-	} else
-		return nullptr;
-}
-
 void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket;
+	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), true);
 	static ClientInfo* clientInfo = new ClientInfo(newSocket);
 
 	do {
@@ -69,8 +61,7 @@ void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
 		if(!serverSocket->accept(newSocket))
 			break;
 
-		printf("new socket2\n");
-		newSocket = new RappelzSocket;
+		newSocket = new RappelzSocket(EventLoop::getLoop(), true);
 		clientInfo = new ClientInfo(newSocket);
 	} while(1);
 }
@@ -141,7 +132,7 @@ void ClientInfo::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	bio = BIO_new_mem_buf((void*)packet->key, packet->key_size);
 	rsaCipher = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 	if(rsaCipher == nullptr) {
-		fprintf(stderr, "ClientInfo: RSA: invalid certificate\n");
+		log("ClientInfo: RSA: invalid certificate\n");
 		socket->abort();
 		goto cleanup;
 	}
@@ -151,7 +142,7 @@ void ClientInfo::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	blockSize = RSA_public_encrypt(32, aesKey, aesKeyMessage->rsa_encrypted_data, rsaCipher, RSA_PKCS1_PADDING);
 	if(blockSize < 0) {
 		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
-		fprintf(stderr, "ClientInfo: RSA encrypt error: %s\n", errorString);
+		log("ClientInfo: RSA encrypt error: %s\n", errorString);
 		socket->abort();
 		goto cleanup;
 	}
@@ -170,8 +161,7 @@ cleanup:
 
 void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 	unsigned char password[64];  //size = at most rsa encrypted size
-
-	clientData = new ClientData;
+	std::string account;
 
 	if(useRsaAuth) {
 		const TS_CA_ACCOUNT_V2* accountv2 = reinterpret_cast<const TS_CA_ACCOUNT_V2*>(packet);
@@ -179,7 +169,9 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 		int bytesWritten, totalLength = 0;
 		unsigned int bytesRead;
 
-		clientData->account = std::string(accountv2->account, 60);
+		log("Client login using AES %s\n", accountv2->account);
+
+		account = std::string(accountv2->account, std::find(accountv2->account, accountv2->account + 60, '\0'));
 
 		EVP_CIPHER_CTX_init(&d_ctx);
 		if(EVP_DecryptInit_ex(&d_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) < 0)
@@ -206,30 +198,55 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 	cleanup_aes:
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else {
-		clientData->account = std::string(packet->account, 60);
+		log("Client login using DES %s\n", packet->account);
+
+		account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
 		strncpy((char*)password, packet->password, 61);
 		DesPasswordCipher("MERONG").decrypt(password, 61);
 	}
 
-	printf("Login request for account %s with password %s\n", clientData->account.c_str(), password);
-	memset(password, 0, 64);
+	log("Login request for account %s with password %s\n", account.c_str(), password);
 
-	clientData->accountId = 0;
-	clientData->age = 0;
-	clientData->lastLoginServerId = 0;
-	clientData->eventCode = 0;
+	new DB_Account(this, account, (char*)password);
+}
 
+void ClientInfo::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode) {
 	TS_AC_RESULT result;
 	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
-	result.result = 0;
-	result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
+
+	if(authOk == false) {
+		result.result = TS_RESULT_INVALID_PASSWORD;
+		result.login_flag = 0;
+	} else {
+		ClientData *alreadyExistingClient = nullptr;
+		clientData = ClientData::tryAddClient(this, account, &alreadyExistingClient);
+		if(clientData == nullptr) {
+			result.result = TS_RESULT_ALREADY_EXIST;
+			result.login_flag = 0;
+
+			//thread concurrency when switching from client to server
+			if(alreadyExistingClient->server)
+				{}//alreadyExistingClient->connectToServer->kick();
+			else
+				alreadyExistingClient->client->socket->close();
+		} else {
+			result.result = 0;
+			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
+			clientData->accountId = accountId;
+			clientData->age = age;
+			clientData->lastLoginServerId = lastLoginServerIdx;
+			clientData->eventCode = eventCode;
+		}
+	}
+
 	socket->sendPacket(&result);
 }
 
 void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST* serverListPacket;
+	unsigned int i, j, count;
 
 	// Check if user authenticated
 	if(clientData == nullptr) {
@@ -239,21 +256,30 @@ void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 	const std::vector<ServerInfo*>& serverList = ServerInfo::getServerList();
 
-	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(serverList.size());
+	for(i = count = 0; i < serverList.size(); i++)
+		if(serverList.at(i) != nullptr)
+			count++;
 
-	serverListPacket->count = serverList.size();
+	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
+
+	serverListPacket->count = count;
 	serverListPacket->last_login_server_idx = 0;
 
-	for(int i = 0; i < serverListPacket->count; i++) {
+	for(i = j = 0; i < serverList.size() && j < serverListPacket->count; i++) {
 		ServerInfo* serverInfo = serverList.at(i);
 
-		serverListPacket->servers[i].server_idx = i;
-		strcpy(serverListPacket->servers[i].server_ip, serverInfo->getServerIp().c_str());
-		serverListPacket->servers[i].server_port = serverInfo->getServerPort();
-		strcpy(serverListPacket->servers[i].server_name, serverInfo->getServerName().c_str());
-		serverListPacket->servers[i].is_adult_server = serverInfo->getIsAdultServer();
-		strcpy(serverListPacket->servers[i].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
-		serverListPacket->servers[i].user_ratio = 99;
+		if(serverInfo == nullptr)
+			continue;
+
+		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
+		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
+		serverListPacket->servers[j].server_port = serverInfo->getServerPort();
+		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
+		serverListPacket->servers[j].is_adult_server = serverInfo->getIsAdultServer();
+		strcpy(serverListPacket->servers[j].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
+		serverListPacket->servers[j].user_ratio = 0;
+
+		j++;
 	}
 
 	socket->sendPacket(serverListPacket);
@@ -268,21 +294,24 @@ void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 		return;
 	}
 
-	if(packet->server_idx < serverList.size()) {
+	if(packet->server_idx < serverList.size() && serverList.at(packet->server_idx) != nullptr) {
 		ServerInfo* server = serverList.at(packet->server_idx);
 
 		clientData->oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
 
-		popPendingClient(clientData->account);
-		server->addPendingClient(clientData);
+		if(ClientData::switchClientToServer(clientData->account, server) == false) {
+			socket->abort();
+			return;
+		}
 
 		if(useRsaAuth) {
 			TS_AC_SELECT_SERVER_V2 result;
 			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER_V2>(&result);
 			result.result = 0;
 			result.encrypted_data_size = 16;
-			result.unknown = 0;
 			result.pending_time = 0;
+			result.unknown = 0;
+			result.unknown2 = 0;
 
 			EVP_CIPHER_CTX e_ctx;
 			int bytesWritten;

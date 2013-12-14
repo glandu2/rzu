@@ -1,6 +1,7 @@
 #ifndef SERVERINFO_H
 #define SERVERINFO_H
 
+#include "Network/Object.h"
 #include "Network/RappelzSocket.h"
 #include <stdint.h>
 #include <vector>
@@ -12,8 +13,10 @@
 #include "Packets/TS_GA_CLIENT_LOGOUT.h"
 #include "Packets/TS_GA_CLIENT_KICK_FAILED.h"
 
-class ServerInfo : public ICallbackGuard
+class ServerInfo : public Object, public ICallbackGuard
 {
+	DECLARE_CLASS(ServerInfo)
+
 public:
 	ServerInfo(RappelzSocket* socket);
 	~ServerInfo();
@@ -21,8 +24,6 @@ public:
 	static void startServer();
 
 	static const std::vector<ServerInfo*>& getServerList() { return servers; }
-
-	void addPendingClient(ClientData* client) { pendingClients.emplace(client->account, client); }
 
 	uint8_t getServerIdx() { return serverIdx; }
 	std::string getServerName() { return serverName; }
@@ -48,7 +49,6 @@ private:
 
 	RappelzSocket* socket;
 	int userCount;
-	std::unordered_map<std::string, ClientData*> pendingClients;
 
 	int serverIdx;
 	std::string serverName;

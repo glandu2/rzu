@@ -2,16 +2,21 @@
 #include "ClientInfo.h"
 #include <string.h>
 
+#include "Network/EventLoop.h"
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
 #include "Packets/TS_AG_CLIENT_LOGIN.h"
 #include "Packets/TS_AG_KICK_CLIENT.h"
 
-Socket* ServerInfo::serverSocket = new Socket;
+Socket* ServerInfo::serverSocket = new Socket(EventLoop::getLoop());
 std::vector<ServerInfo*> ServerInfo::servers;
 
 ServerInfo::ServerInfo(RappelzSocket* socket)
 {
+	this->socket = socket;
+	userCount = 0;
+	serverIdx = -1;
+
 	addInstance(socket->addEventListener(this, &onStateChanged));
 	addInstance(socket->addPacketListener(TS_GA_LOGIN::packetID, this, &onDataReceived));
 	addInstance(socket->addPacketListener(TS_GA_CLIENT_LOGIN::packetID, this, &onDataReceived));
@@ -35,7 +40,7 @@ ServerInfo::~ServerInfo() {
 }
 
 void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket;
+	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), false);
 	static ServerInfo* serverInfo = new ServerInfo(newSocket);
 
 	do {
@@ -43,8 +48,7 @@ void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
 		if(!serverSocket->accept(newSocket))
 			break;
 
-		printf("new socket2\n");
-		newSocket = new RappelzSocket;
+		newSocket = new RappelzSocket(EventLoop::getLoop(), false);
 		serverInfo = new ServerInfo(newSocket);
 	} while(1);
 }
@@ -59,12 +63,6 @@ void ServerInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::St
 
 void ServerInfo::onDataReceived(void* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet) {
 	ServerInfo* thisInstance = static_cast<ServerInfo*>(instance);
-
-	if(packet->msg_check_sum != TS_MESSAGE::checkMessage(packet)) {
-		printf("Bad packet\n");
-		clientSocket->abort();
-		return;
-	}
 
 	switch(packet->id) {
 		case TS_GA_LOGIN::packetID:
@@ -99,11 +97,15 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 	if(servers.size() <= (size_t)serverIdx)
 		servers.resize(serverIdx+1, nullptr);
 
+	log("Server Login: %s[%d] at %s:%d: ", packet->server_name, packet->server_idx, packet->server_ip, packet->server_port);
+
 	if(servers.at(serverIdx) == nullptr) {
 		servers[serverIdx] = this;
 		result.result = TS_RESULT_SUCCESS;
+		log("Success\n");
 	} else {
 		result.result = TS_RESULT_ALREADY_EXIST;
+		log("Failed, server index already used\n");
 	}
 
 	socket->sendPacket(&result);
@@ -111,27 +113,26 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 
 void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	TS_AG_CLIENT_LOGIN result;
-	ClientData* client;
-	std::unordered_map<std::string, ClientData*>::const_iterator it = pendingClients.find(std::string(packet->account));
-	if(it != pendingClients.cend()) {
-		client = it->second;
-		pendingClients.erase(it);
-	} else
-		client = nullptr;
+	ClientData* client = ClientData::getClient(std::string(packet->account));
 
 	TS_MESSAGE::initMessage<TS_AG_CLIENT_LOGIN>(&result);
 	strncpy(result.account, packet->account, 61);
 
+	result.nAccountID = 0;
+	result.result = TS_RESULT_ACCESS_DENIED;
+	result.nPCBangUser = 0;
+	result.nEventCode = 0;
+	result.nAge = 0;
+	result.nContinuousPlayTime = 0;
+	result.nContinuousLogoutTime = 0;
+
 	if(client == nullptr) {
-		result.nAccountID = 0;
-		result.result = TS_RESULT_ACCESS_DENIED;
-		result.nPCBangUser = 0;
-		result.nEventCode = 0;
-		result.nAge = 0;
-		result.nContinuousPlayTime = 0;
-		result.nContinuousLogoutTime = 0;
+		log("Client %s login on gameserver but not in clientData list\n", packet->account);
+	} else if(client->oneTimePassword != packet->one_time_key) {
+		log("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", packet->account, client->oneTimePassword, packet->one_time_key);
 	} else {
 		//To complete
+		log("Client %s now on gameserver\n", packet->account);
 		result.nAccountID = client->accountId;
 		result.result = TS_RESULT_SUCCESS;
 		result.nPCBangUser = 0;
@@ -147,6 +148,8 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 }
 
 void ServerInfo::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
+	log("Client %s has disconnected from gameserver\n", packet->account);
+	ClientData::removeClient(packet->account);
 	userCount--;
 }
 

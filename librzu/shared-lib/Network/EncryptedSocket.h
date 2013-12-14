@@ -3,12 +3,13 @@
 
 #include "RC4Cipher.h"
 #include "Socket.h"
-#include "SocketPoll.h"
 
 class EncryptedSocket : public Socket
 {
+	DECLARE_CLASS(EncryptedSocket)
+
 	public:
-		EncryptedSocket();
+		EncryptedSocket(uv_loop_t *uvLoop, bool useEncryption = true);
 		~EncryptedSocket();
 
 		virtual bool connect(const std::string &hostName, uint64_t port);
@@ -17,10 +18,7 @@ class EncryptedSocket : public Socket
 
 	private:
 		RC4Cipher inputEnc, outputEnc;
-
-		static SocketPoll socketPoll;
-
-		static void updatePoll();
+		bool useEncryption;
 
 };
 

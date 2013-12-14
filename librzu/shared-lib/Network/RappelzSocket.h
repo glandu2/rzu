@@ -14,6 +14,8 @@
 
 class RappelzSocket : public EncryptedSocket, private ICallbackGuard
 {
+	DECLARE_CLASS(RappelzSocket)
+
 public:
 	typedef void (*CallbackFunction)(void* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
 	static const uint16_t ALL_PACKETS = 0xFFFE;
@@ -27,7 +29,7 @@ private:
 	};
 
 public:
-	RappelzSocket();
+	RappelzSocket(uv_loop_t* uvLoop, bool useEncryption);
 	virtual ~RappelzSocket();
 
 	void sendPacket(const TS_MESSAGE* data);

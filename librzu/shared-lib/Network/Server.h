@@ -1,6 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include "Object.h"
 #include "../Common/RappelzLib_global.h"
 #include "../Interfaces/IDelegate.h"
 
@@ -26,8 +27,10 @@ struct CallbacksTable;
  * All network flows go through this class which redirect data to the correct server.
  * This class allow to connect to a rappelz server farm without many method calls.
  */
-class RAPPELZLIBSHARED_EXPORT Server : private ICallbackGuard
+class RAPPELZLIBSHARED_EXPORT Server : public Object, private ICallbackGuard
 {
+	DECLARE_CLASS(Server)
+
 	//Types
 	public:
 		enum State {
@@ -54,7 +57,7 @@ class RAPPELZLIBSHARED_EXPORT Server : private ICallbackGuard
 
 	//Methods
 	public:
-		Server();
+		Server(uv_loop_t* uvLoop);
 		virtual ~Server();
 
 		//Set auth server that allow to connect to a world.
