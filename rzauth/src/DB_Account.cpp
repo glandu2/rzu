@@ -73,7 +73,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 
 	thisInstance->log("Executing query\n");
 	SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, thisInstance->account.size(), 0, (void*)thisInstance->account.c_str(), thisInstance->account.size(), nullptr);
-	SQLExecDirect(hstmt, (SQLCHAR*)"SELECT account_id, password FROM Auth82.dbo.Account WHERE account_id = 1;", SQL_NTS);
+	SQLExecDirect(hstmt, (SQLCHAR*)"SELECT account_id, password FROM Auth82.dbo.Account WHERE account = ?;", SQL_NTS);
 	if(!SQL_SUCCEEDED(SQLFetch(hstmt))) {
 		goto cleanup;
 	}
