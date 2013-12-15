@@ -31,7 +31,7 @@ public:
 	int32_t getServerPort() { return serverPort; }
 	std::string getServerScreenshotUrl() { return serverScreenshotUrl; }
 	bool getIsAdultServer() { return isAdultServer; }
-	int getUserCount() { return userCount; }
+	void kickClient(const std::string& account);
 
 protected:
 	static void onNewConnection(void* instance, Socket* serverSocket);
@@ -47,7 +47,6 @@ private:
 	static std::vector<ServerInfo*> servers;
 
 	RappelzSocket* socket;
-	int userCount;
 
 	int serverIdx;
 	std::string serverName;

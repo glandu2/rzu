@@ -6,6 +6,7 @@
 #include <string.h>
 #include "ClientInfo.h"
 #include "Network/EventLoop.h"
+#include "ConfigInfo.h"
 
 static void extract_error(
 		SQLHANDLE handle,
@@ -29,8 +30,24 @@ static void extract_error(
 	while( ret == SQL_SUCCESS );
 }
 
+struct DB_Account::Config DB_Account::config;
+void DB_Account::initializeConfig() {
+	static bool initialized = false;
+	if(!initialized) {
+		initialized = true;
+		config.account = ConfigInfo::get()->get("db.account")->getStringPtr("sa");
+		config.dbName = ConfigInfo::get()->get("db.name")->getStringPtr("Auth");
+		config.driver = ConfigInfo::get()->get("db.driver")->getStringPtr("SQL Server");
+		config.password = ConfigInfo::get()->get("db.password")->getStringPtr("");
+		config.port = ConfigInfo::get()->get("db.port")->getIntPtr(1433);
+		config.salt = ConfigInfo::get()->get("db.salt")->getStringPtr("2012");
+		config.server = ConfigInfo::get()->get("db.server")->getStringPtr("127.0.0.1");
+	}
+}
+
 DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const char* password) : clientInfo(clientInfo), account(account) {
-	std::string buffer = "2012";
+	initializeConfig();
+	std::string buffer = *config.salt;
 	req.data = this;
 	ok = false;
 	accountId = 0;
@@ -48,6 +65,10 @@ void DB_Account::onProcess(uv_work_t *req) {
 	SQLHSTMT hstmt = 0;
 	char password[33] = {0};
 	char givenPassword[33];
+	char connectionString[50];
+
+	sprintf(connectionString, "driver=%s;Server=%s;Database=%s;UID=%s;PWD=%s;Port=%d;",
+			config.driver->c_str(), config.server->c_str(), config.dbName->c_str(), config.account->c_str(), config.password->c_str(), *config.port);
 
 	result = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
 	if(!SQL_SUCCEEDED(result))
@@ -58,12 +79,12 @@ void DB_Account::onProcess(uv_work_t *req) {
 		goto cleanup;
 	}
 
-	thisInstance->log("Connecting to SQLEXPRESS\n");
+	thisInstance->log("Connecting to %s\n", connectionString);
 	result = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
 	if(!SQL_SUCCEEDED(result))
 		goto cleanup;
 
-	result = SQLDriverConnect(hdbc, nullptr, (UCHAR*)"driver=FreeTDS;Server=192.168.1.16;Database=Arcadia82;UID=sa;PWD=;Port=1433;", SQL_NTS, nullptr, 0, nullptr, 0);
+	result = SQLDriverConnect(hdbc, nullptr, (UCHAR*)connectionString, SQL_NTS, nullptr, 0, nullptr, 0);
 	if(!SQL_SUCCEEDED(result)) {
 		printf("Error %d\n", result);
 		goto cleanup;
@@ -73,7 +94,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 
 	thisInstance->log("Executing query\n");
 	SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, thisInstance->account.size(), 0, (void*)thisInstance->account.c_str(), thisInstance->account.size(), nullptr);
-	SQLExecDirect(hstmt, (SQLCHAR*)"SELECT account_id, password FROM Auth82.dbo.Account WHERE account = ?;", SQL_NTS);
+	SQLExecDirect(hstmt, (SQLCHAR*)"SELECT account_id, password FROM dbo.Account WHERE account = ?;", SQL_NTS);
 	if(!SQL_SUCCEEDED(SQLFetch(hstmt))) {
 		goto cleanup;
 	}
@@ -128,6 +149,6 @@ cleanup:
 void DB_Account::onDone(uv_work_t *req, int status) {
 	DB_Account* thisInstance = (DB_Account*) req->data;
 
-	thisInstance->clientInfo->clientAuthResult(thisInstance->ok, thisInstance->account, thisInstance->accountId, 18, 1, 0);
+	thisInstance->clientInfo->clientAuthResult(thisInstance->ok, thisInstance->account, thisInstance->accountId, 19, 1, 0);
 	delete thisInstance;
 }

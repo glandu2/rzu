@@ -10,7 +10,7 @@ uv_mutex_t ClientData::initializeLock() {
 	return mapLock;
 }
 
-ClientData::ClientData(ClientInfo *clientInfo) : accountId(0), client(clientInfo), server(nullptr) {
+ClientData::ClientData(ClientInfo *clientInfo) : accountId(0), client(clientInfo), server(nullptr), inGame(false) {
 
 }
 

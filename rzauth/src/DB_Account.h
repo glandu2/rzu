@@ -19,12 +19,24 @@ public:
 	static void onDone(uv_work_t *req, int status);
 
 private:
+	static void initializeConfig();
+
 	ClientInfo* clientInfo;
 	uv_work_t req;
 	std::string account;
 	bool ok;
 	uint32_t accountId;
 	unsigned char givenPasswordMd5[16];
+
+	static struct Config {
+		std::string* driver;
+		std::string* server;
+		int* port;
+		std::string* dbName;
+		std::string* account;
+		std::string* password;
+		std::string* salt;
+	} config;
 };
 
 #endif // DB_ACCOUNT_H

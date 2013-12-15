@@ -1,6 +1,7 @@
 #include "ServerInfo.h"
 #include "ClientInfo.h"
 #include <string.h>
+#include "ConfigInfo.h"
 
 #include "Network/EventLoop.h"
 #include "Packets/PacketEnums.h"
@@ -13,7 +14,6 @@ std::vector<ServerInfo*> ServerInfo::servers;
 ServerInfo::ServerInfo(RappelzSocket* socket)
 {
 	this->socket = socket;
-	userCount = 0;
 	serverIdx = -1;
 
 	addInstance(socket->addEventListener(this, &onStateChanged));
@@ -27,7 +27,8 @@ void ServerInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand(time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen("0.0.0.0", 4502);
+	serverSocket->listen(ConfigInfo::get()->get("listen.game.ip")->get("0.0.0.0"),
+						 ConfigInfo::get()->get("listen.game.port")->get(4502));
 }
 
 ServerInfo::~ServerInfo() {
@@ -98,6 +99,7 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 		servers.resize(serverIdx+1, nullptr);
 
 	log("Server Login: %s[%d] at %s:%d: ", packet->server_name, packet->server_idx, packet->server_ip, packet->server_port);
+	setObjectName((std::string(getObjectName()) + "[" + packet->server_name + "]").c_str());
 
 	if(servers.at(serverIdx) == nullptr) {
 		servers[serverIdx] = this;
@@ -128,8 +130,12 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 
 	if(client == nullptr) {
 		log("Client %s login on gameserver but not in clientData list\n", packet->account);
+	} else if(client->server != this) {
+		log("Client %s login on wrong gameserver %s, expected %s\n", packet->account, serverName.c_str(), client->server->serverName.c_str());
 	} else if(client->oneTimePassword != packet->one_time_key) {
 		log("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", packet->account, client->oneTimePassword, packet->one_time_key);
+	} else if(client->inGame) {
+		log("Client %s login on gameserver but already connected\n", packet->account);
 	} else {
 		//To complete
 		log("Client %s now on gameserver\n", packet->account);
@@ -141,7 +147,7 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		result.nContinuousPlayTime = 0;
 		result.nContinuousLogoutTime = 0;
 
-		userCount++;
+		client->inGame = true;
 	}
 
 	socket->sendPacket(&result);
@@ -150,9 +156,19 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 void ServerInfo::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 	log("Client %s has disconnected from gameserver\n", packet->account);
 	ClientData::removeClient(packet->account);
-	userCount--;
+}
+
+void ServerInfo::kickClient(const std::string &account) {
+	TS_AG_KICK_CLIENT msg;
+
+	TS_MESSAGE::initMessage<TS_AG_KICK_CLIENT>(&msg);
+	strcpy(msg.account, account.c_str());
+	msg.kick_type = TS_AG_KICK_CLIENT::KICK_TYPE_DUPLICATED_LOGIN;
+
+	socket->sendPacket(&msg);
 }
 
 void ServerInfo::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet) {
-
+	log("Client %s kick failed (removing from client list)\n", packet->account);
+	ClientData::removeClient(packet->account);
 }
