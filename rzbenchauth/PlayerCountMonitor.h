@@ -1,8 +1,8 @@
 #ifndef PLAYERCOUNTMONITOR_H
 #define PLAYERCOUNTMONITOR_H
 
-#include "Network/RappelzSocket.h"
-#include "Interfaces/ICallbackGuard.h"
+#include "RappelzSocket.h"
+#include "ICallbackGuard.h"
 #include "uv.h"
 
 class PlayerCountMonitor : private ICallbackGuard
