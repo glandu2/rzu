@@ -1,8 +1,8 @@
 #ifndef SERVERINFO_H
 #define SERVERINFO_H
 
-#include "Network/Object.h"
-#include "Network/RappelzSocket.h"
+#include "Object.h"
+#include "RappelzSocket.h"
 #include <stdint.h>
 #include <vector>
 #include <string>
@@ -31,7 +31,7 @@ public:
 	int32_t getServerPort() { return serverPort; }
 	std::string getServerScreenshotUrl() { return serverScreenshotUrl; }
 	bool getIsAdultServer() { return isAdultServer; }
-	int getUserCount() { return userCount; }
+	void kickClient(const std::string& account);
 
 protected:
 	static void onNewConnection(void* instance, Socket* serverSocket);
@@ -44,11 +44,9 @@ protected:
 	void onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet);
 
 private:
-	static Socket* serverSocket;
 	static std::vector<ServerInfo*> servers;
 
 	RappelzSocket* socket;
-	int userCount;
 
 	int serverIdx;
 	std::string serverName;

@@ -1,11 +1,12 @@
 #include "ClientInfo.h"
 #include "ServerInfo.h"
-#include "Network/RappelzSocket.h"
+#include "RappelzSocket.h"
 #include <string.h>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include <algorithm>
-#include "Network/EventLoop.h"
+#include "EventLoop.h"
+#include "ConfigInfo.h"
 
 #include "DesPasswordCipher.h"
 #include <openssl/evp.h>
@@ -20,8 +21,6 @@
 #include "Packets/TS_AC_AES_KEY_IV.h"
 #include "Packets/TS_AC_SELECT_SERVER.h"
 #include "Packets/TS_AC_SERVER_LIST.h"
-
-Socket* ClientInfo::serverSocket = new Socket(EventLoop::getLoop());
 
 ClientInfo::ClientInfo(RappelzSocket* socket) {
 	this->socket = socket;
@@ -47,9 +46,11 @@ ClientInfo::~ClientInfo() {
 }
 
 void ClientInfo::startServer() {
+	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand(time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen("0.0.0.0", 4500);
+	serverSocket->listen(ConfigInfo::get()->get("listen.client.ip")->get("0.0.0.0"),
+						 ConfigInfo::get()->get("listen.client.port")->get(4500));
 }
 
 void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
@@ -102,16 +103,9 @@ void ClientInfo::onDataReceived(void* instance, RappelzSocket*, const TS_MESSAGE
 
 void ClientInfo::onVersion(const TS_CA_VERSION* packet) {
 	if(!strcmp(packet->szVersion, "TEST")) {
-		uint32_t totalUserCount = 0;
-		const std::vector<ServerInfo*>& serverList = ServerInfo::getServerList();
+		uint32_t totalUserCount = ClientData::getClientCount();
 		TS_SC_RESULT result;
 		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
-
-		for(size_t i = 0; i < serverList.size(); i++) {
-			ServerInfo* serverInfo = serverList.at(i);
-			if(serverInfo)
-				totalUserCount += serverInfo->getUserCount();
-		}
 
 		result.value = totalUserCount ^ 0xADADADAD;
 		result.result = 0;
@@ -203,10 +197,12 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 		account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
 		strncpy((char*)password, packet->password, 61);
-		DesPasswordCipher("MERONG").decrypt(password, 61);
+		DesPasswordCipher(ConfigInfo::get()->get("listen.client.des_key")->get("MERONG").c_str()).decrypt(password, 61);
 	}
 
 	log("Login request for account %s with password %s\n", account.c_str(), password);
+
+	setObjectName((std::string(getObjectName()) + "[" + account + "]").c_str());
 
 	new DB_Account(this, account, (char*)password);
 }
@@ -226,11 +222,17 @@ void ClientInfo::clientAuthResult(bool authOk, const std::string& account, uint3
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
 
+			log("Client already connected, kicking\n");
+
 			//thread concurrency when switching from client to server
-			if(alreadyExistingClient->server)
-				{}//alreadyExistingClient->connectToServer->kick();
-			else
-				alreadyExistingClient->client->socket->close();
+			if(alreadyExistingClient->server) {
+				if(alreadyExistingClient->inGame)
+					alreadyExistingClient->server->kickClient(account);
+				else
+					ClientData::removeClient(account);
+			} else {
+				alreadyExistingClient->client->socket->abort();
+			}
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;

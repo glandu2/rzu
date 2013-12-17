@@ -1,14 +1,18 @@
 #include "ClientInfo.h"
 #include "ServerInfo.h"
-#include "Network/EventLoop.h"
+#include "EventLoop.h"
+#include "ConfigInfo.h"
 
 //socket->deleteLater in uv_check_t
 void showDebug(uv_timer_t*, int);
 
 int main() {
-	uv_timer_t timer;
-	uv_timer_init(EventLoop::getLoop(), &timer);
-	uv_timer_start(&timer, &showDebug, 0, 3000);
+//	uv_timer_t timer;
+//	uv_timer_init(EventLoop::getLoop(), &timer);
+//	uv_timer_start(&timer, &showDebug, 0, 3000);
+
+	ConfigInfo::get()->readFile("Auth.opt");
+	ConfigInfo::get()->dump(stdout);
 
 	ClientInfo::startServer();
 	ServerInfo::startServer();

@@ -1,7 +1,7 @@
 #ifndef CLIENTDATA_H
 #define CLIENTDATA_H
 
-#include "Network/Object.h"
+#include "Object.h"
 #include <string>
 #include <unordered_map>
 #include <stdint.h>
@@ -25,7 +25,8 @@ public:
 	uint64_t oneTimePassword;
 
 	ClientInfo* client; //if != null: not yet in-game
-	ServerInfo* server; //if != null: in-game
+	ServerInfo* server; //if != null: in-game or gameserver selected
+	bool inGame;
 
 	//Try to add newClient if account is not already in the list (authenticated).
 	//There is at most one account in the hash map.
@@ -36,6 +37,7 @@ public:
 	static bool removeClient(const std::string& account);
 	static bool switchClientToServer(const std::string& account, ServerInfo* server);
 	static ClientData* getClient(const std::string& account);
+	static unsigned int getClientCount() { return connectedClients.size(); }
 
 private:
 	static uv_mutex_t initializeLock();

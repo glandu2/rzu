@@ -1,10 +1,11 @@
-#include "Network/ClassCounter.h"
+#include "ClassCounter.h"
 
 //generated with notepad++ with this pattern: (.*) ->
 //#include "\1.h"\ntemplate<> unsigned long ClassCounter<\1>::objectCount = 0;\ntemplate<> const unsigned int ClassCounter<\1>::classTypeHash = ClassCounter__internal_object_engine_class_counter++;\n
 /* Class list:
 ClientData
 ClientInfo
+ConfigInfo
 DB_Account
 DesPasswordCipher
 ServerInfo
@@ -17,6 +18,10 @@ template<> const unsigned int ClassCounter<ClientData>::classTypeHash = ClassCou
 #include "ClientInfo.h"
 template<> unsigned long ClassCounter<ClientInfo>::objectCount = 0;
 template<> const unsigned int ClassCounter<ClientInfo>::classTypeHash = ClassCounter__internal_object_engine_class_counter++;
+
+#include "ConfigInfo.h"
+template<> unsigned long ClassCounter<ConfigInfo>::objectCount = 0;
+template<> const unsigned int ClassCounter<ConfigInfo>::classTypeHash = ClassCounter__internal_object_engine_class_counter++;
 
 #include "DB_Account.h"
 template<> unsigned long ClassCounter<DB_Account>::objectCount = 0;
