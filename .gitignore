@@ -1,2 +1,39 @@
-*
-!.gitmodules
+# Build results
+
+debug/
+release/
+x64/
+build*/
+bin*/
+obj*/
+internal*/
+
+*.ilk
+*.exe
+*.lib
+*.o
+*.pdb
+*.so*
+*.user*
+CMakeLists.txt.*
+Makefile*
+
+project*/
+data
+
+#############
+## Windows detritus
+#############
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+
+RSATests
