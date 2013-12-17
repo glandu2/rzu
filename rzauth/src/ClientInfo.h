@@ -1,8 +1,8 @@
 #ifndef CLIENTMANAGER_H
 #define CLIENTMANAGER_H
 
-#include "Network/Object.h"
-#include "Network/RappelzSocket.h"
+#include "Object.h"
+#include "RappelzSocket.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>

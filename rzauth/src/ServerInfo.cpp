@@ -3,7 +3,7 @@
 #include <string.h>
 #include "ConfigInfo.h"
 
-#include "Network/EventLoop.h"
+#include "EventLoop.h"
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
 #include "Packets/TS_AG_CLIENT_LOGIN.h"

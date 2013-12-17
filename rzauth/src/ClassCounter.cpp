@@ -1,4 +1,4 @@
-#include "Network/ClassCounter.h"
+#include "ClassCounter.h"
 
 //generated with notepad++ with this pattern: (.*) ->
 //#include "\1.h"\ntemplate<> unsigned long ClassCounter<\1>::objectCount = 0;\ntemplate<> const unsigned int ClassCounter<\1>::classTypeHash = ClassCounter__internal_object_engine_class_counter++;\n

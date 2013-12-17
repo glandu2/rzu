@@ -2,7 +2,7 @@
 #define DESPASSWORDCIPHER_H
 #include <stdlib.h>
 
-#include "Network/Object.h"
+#include "Object.h"
 
 class DesPasswordCipher : public Object
 {

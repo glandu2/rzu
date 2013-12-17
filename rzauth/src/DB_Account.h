@@ -1,7 +1,7 @@
 #ifndef DB_ACCOUNT_H
 #define DB_ACCOUNT_H
 
-#include "Network/Object.h"
+#include "Object.h"
 #include "uv.h"
 #include <string>
 #include <stdint.h>

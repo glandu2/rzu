@@ -1,11 +1,11 @@
 #include "ClientInfo.h"
 #include "ServerInfo.h"
-#include "Network/RappelzSocket.h"
+#include "RappelzSocket.h"
 #include <string.h>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include <algorithm>
-#include "Network/EventLoop.h"
+#include "EventLoop.h"
 #include "ConfigInfo.h"
 
 #include "DesPasswordCipher.h"

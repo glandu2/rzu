@@ -1,7 +1,7 @@
 #ifndef CLIENTDATA_H
 #define CLIENTDATA_H
 
-#include "Network/Object.h"
+#include "Object.h"
 #include <string>
 #include <unordered_map>
 #include <stdint.h>
