@@ -2,6 +2,7 @@
 #include "ClientInfo.h"
 #include <string.h>
 #include "ConfigInfo.h"
+#include <time.h>
 
 #include "EventLoop.h"
 #include "Packets/PacketEnums.h"
