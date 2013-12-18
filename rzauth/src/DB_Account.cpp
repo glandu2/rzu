@@ -25,7 +25,7 @@ static void extract_error(
 		ret = SQLGetDiagRec(type, handle, ++i, state, &native, text,
 							sizeof(text), &len );
 		if (SQL_SUCCEEDED(ret))
-			printf("%s:%d:%d:%s\n", state, i, native, text);
+			printf("%s:%ld:%ld:%s\n", state, i, native, text);
 	}
 	while( ret == SQL_SUCCESS );
 }
