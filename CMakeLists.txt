@@ -18,9 +18,13 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 
   if(MINGW)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc -static-libstdc++ -Wl,--add-stdcall-alias")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fdata-sections -ffunction-sections -fno-exceptions -fno-rtti -fno-asynchronous-unwind-tables -fno-omit-frame-pointer  -fomit-frame-pointer -momit-leaf-frame-pointer")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -fdata-sections -ffunction-sections -fno-exceptions -fno-asynchronous-unwind-tables -fno-omit-frame-pointer  -fomit-frame-pointer -momit-leaf-frame-pointer")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--add-stdcall-alias -Wl,-s,--gc-sections -Wl,-Map,${EXECUTABLE_OUTPUT_PATH}/out.map")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--add-stdcall-alias -Wl,-s,--gc-sections")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--add-stdcall-alias -Wl,-s,--gc-sections")
   endif()
+  # -static-libgcc -static-libstdc++ 
 
   #for qtcreator
   add_definitions("-D__GXX_EXPERIMENTAL_CXX0X__")
