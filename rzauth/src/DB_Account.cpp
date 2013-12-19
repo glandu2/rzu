@@ -24,8 +24,13 @@ static void extract_error(
 	{
 		ret = SQLGetDiagRec(type, handle, ++i, state, &native, text,
 							sizeof(text), &len );
+#ifdef _WIN32
 		if (SQL_SUCCEEDED(ret))
 			printf("%s:%ld:%ld:%s\n", state, i, native, text);
+#else
+		if (SQL_SUCCEEDED(ret))
+			printf("%s:%d:%d:%s\n", state, i, native, text);
+#endif
 	}
 	while( ret == SQL_SUCCESS );
 }
