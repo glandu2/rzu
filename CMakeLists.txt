@@ -36,7 +36,19 @@ if(UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath,.")
 endif()
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzLib" RappelzLib)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzServerAuth" RappelzServerAuth)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzPlayerCount" RappelzPlayerCount)
+# Compile subprojects if existing
+if(EXISTS libuv/CMakeLists.txt)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
+endif()
+
+if(EXISTS RappelzLib/CMakeLists.txt)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzLib" RappelzLib)
+endif()
+
+if(EXISTS RappelzServerAuth/CMakeLists.txt)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzServerAuth" RappelzServerAuth)
+endif()
+
+if(EXISTS RappelzPlayerCount/CMakeLists.txt)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzPlayerCount" RappelzPlayerCount)
+endif()
