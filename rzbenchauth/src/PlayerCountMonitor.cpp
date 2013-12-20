@@ -57,7 +57,7 @@ void PlayerCountMonitor::onPlayerCountReceived(void*, RappelzSocket* sock, const
 			const TS_SC_RESULT* result = reinterpret_cast<const TS_SC_RESULT*>(packetData);
 			switch(result->request_msg_id) {
 				case TS_CA_VERSION::packetID:
-					printf("%lu %d %d\n", time(NULL), result->value ^ 0xADADADAD, result->result);
+                    printf("%lu %d %d\n", (unsigned long)time(NULL), result->value ^ 0xADADADAD, result->result);
 					fflush(stdout);
 					sock->close();
 					break;
