@@ -27,16 +27,6 @@ private:
 	bool ok;
 	uint32_t accountId;
 	unsigned char givenPasswordMd5[16];
-
-	static struct Config {
-		std::string* driver;
-		std::string* server;
-		int* port;
-		std::string* dbName;
-		std::string* account;
-		std::string* password;
-		std::string* salt;
-	} config;
 };
 
 #endif // DB_ACCOUNT_H

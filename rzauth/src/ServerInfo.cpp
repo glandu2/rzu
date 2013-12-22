@@ -1,7 +1,7 @@
 #include "ServerInfo.h"
 #include "ClientInfo.h"
 #include <string.h>
-#include "ConfigInfo.h"
+#include "GlobalConfig.h"
 #include <time.h>
 
 #include "EventLoop.h"
@@ -28,8 +28,8 @@ void ServerInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand(time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(ConfigInfo::get()->get("listen.game.ip")->get("0.0.0.0"),
-						 ConfigInfo::get()->get("listen.game.port")->get(4502));
+	serverSocket->listen(CONFIG_GET(gameConfig.listenIp),
+						 CONFIG_GET(gameConfig.port));
 }
 
 ServerInfo::~ServerInfo() {

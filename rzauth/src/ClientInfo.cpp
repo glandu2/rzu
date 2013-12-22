@@ -6,7 +6,7 @@
 #include <time.h>       /* time */
 #include <algorithm>
 #include "EventLoop.h"
-#include "ConfigInfo.h"
+#include "GlobalConfig.h"
 
 #include "DesPasswordCipher.h"
 #include <openssl/evp.h>
@@ -49,8 +49,8 @@ void ClientInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand(time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(ConfigInfo::get()->get("listen.client.ip")->get("0.0.0.0"),
-						 ConfigInfo::get()->get("listen.client.port")->get(4500));
+	serverSocket->listen(CONFIG_GET(clientConfig.listenIp),
+						 CONFIG_GET(clientConfig.port));
 }
 
 void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
@@ -197,7 +197,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 		account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
 		strncpy((char*)password, packet->password, 61);
-		DesPasswordCipher(ConfigInfo::get()->get("listen.client.des_key")->get("MERONG").c_str()).decrypt(password, 61);
+		DesPasswordCipher(CONFIG_GET(clientConfig.desKey).c_str()).decrypt(password, 61);
 	}
 
 	log("Login request for account %s with password %s\n", account.c_str(), password);

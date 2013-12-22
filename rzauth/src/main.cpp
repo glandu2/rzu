@@ -2,6 +2,7 @@
 #include "ServerInfo.h"
 #include "EventLoop.h"
 #include "ConfigInfo.h"
+#include "GlobalConfig.h"
 
 //socket->deleteLater in uv_check_t
 void showDebug(uv_timer_t*, int);

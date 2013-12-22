@@ -6,7 +6,7 @@
 #include <string.h>
 #include "ClientInfo.h"
 #include "EventLoop.h"
-#include "ConfigInfo.h"
+#include "GlobalConfig.h"
 
 static void extract_error(
 		SQLHANDLE handle,
@@ -35,24 +35,8 @@ static void extract_error(
 	while( ret == SQL_SUCCESS );
 }
 
-struct DB_Account::Config DB_Account::config;
-void DB_Account::initializeConfig() {
-	static bool initialized = false;
-	if(!initialized) {
-		initialized = true;
-		config.account = ConfigInfo::get()->get("db.account")->getStringPtr("sa");
-		config.dbName = ConfigInfo::get()->get("db.name")->getStringPtr("Auth");
-		config.driver = ConfigInfo::get()->get("db.driver")->getStringPtr("SQL Server");
-		config.password = ConfigInfo::get()->get("db.password")->getStringPtr("");
-		config.port = ConfigInfo::get()->get("db.port")->getIntPtr(1433);
-		config.salt = ConfigInfo::get()->get("db.salt")->getStringPtr("2012");
-		config.server = ConfigInfo::get()->get("db.server")->getStringPtr("127.0.0.1");
-	}
-}
-
 DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const char* password) : clientInfo(clientInfo), account(account) {
-	initializeConfig();
-	std::string buffer = *config.salt;
+	std::string buffer = CONFIG_GET(dbAccount.salt);
 	req.data = this;
 	ok = false;
 	accountId = 0;
@@ -73,7 +57,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 	char connectionString[50];
 
 	sprintf(connectionString, "driver=%s;Server=%s;Database=%s;UID=%s;PWD=%s;Port=%d;",
-			config.driver->c_str(), config.server->c_str(), config.dbName->c_str(), config.account->c_str(), config.password->c_str(), *config.port);
+			CONFIG_GET(dbAccount.driver).c_str(), CONFIG_GET(dbAccount.server).c_str(), CONFIG_GET(dbAccount.name).c_str(), CONFIG_GET(dbAccount.account).c_str(), CONFIG_GET(dbAccount.password).c_str(), CONFIG_GET(dbAccount.port));
 
 	result = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
 	if(!SQL_SUCCEEDED(result))
