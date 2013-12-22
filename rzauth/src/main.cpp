@@ -34,8 +34,6 @@ void showDebug(uv_timer_t *, int) {
 	sprintf(debugInfo, "%s\t%lu Socket\n", debugInfo, ClassCounter<Socket>::getObjectCount());
 	sprintf(debugInfo, "%s\t\t%lu EncryptedSocket\n", debugInfo, ClassCounter<EncryptedSocket>::getObjectCount());
 	sprintf(debugInfo, "%s\t\t\t%lu RappelzSocket\n", debugInfo, ClassCounter<RappelzSocket>::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu CircularBuffer\n", debugInfo, ClassCounter<CircularBuffer>::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu RC4Cipher\n", debugInfo, ClassCounter<RC4Cipher>::getObjectCount());
 	sprintf(debugInfo, "%s\t%lu Server\n", debugInfo, ClassCounter<Server>::getObjectCount());
 	sprintf(debugInfo, "%s\t%lu ClientInfo\n", debugInfo, ClassCounter<ClientInfo>::getObjectCount());
 	sprintf(debugInfo, "%s\t%lu ClientData\n", debugInfo, ClassCounter<ClientData>::getObjectCount());
