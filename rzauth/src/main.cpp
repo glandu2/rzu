@@ -21,23 +21,21 @@ int main() {
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
 
-class Server;
-class CircularBuffer;
-class DB_Account;
-
+#include "Server.h"
+#include "DB_Account.h"
 
 void showDebug(uv_timer_t *, int) {
 	char debugInfo[1000];
 	strcpy(debugInfo, "----------------------------------\n");
-	sprintf(debugInfo, "%s%lu Object\n", debugInfo, ClassCounter<Object>::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu EventLoop\n", debugInfo, ClassCounter<EventLoop>::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu Socket\n", debugInfo, ClassCounter<Socket>::getObjectCount());
-	sprintf(debugInfo, "%s\t\t%lu EncryptedSocket\n", debugInfo, ClassCounter<EncryptedSocket>::getObjectCount());
-	sprintf(debugInfo, "%s\t\t\t%lu RappelzSocket\n", debugInfo, ClassCounter<RappelzSocket>::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu Server\n", debugInfo, ClassCounter<Server>::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu ClientInfo\n", debugInfo, ClassCounter<ClientInfo>::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu ClientData\n", debugInfo, ClassCounter<ClientData>::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu DB_Account\n", debugInfo, ClassCounter<DB_Account>::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu ServerInfo\n", debugInfo, ClassCounter<ServerInfo>::getObjectCount());
+	sprintf(debugInfo, "%s%lu Object\n", debugInfo, Object::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu EventLoop\n", debugInfo, EventLoop::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu Socket\n", debugInfo, Socket::getObjectCount());
+	sprintf(debugInfo, "%s\t\t%lu EncryptedSocket\n", debugInfo, EncryptedSocket::getObjectCount());
+	sprintf(debugInfo, "%s\t\t\t%lu RappelzSocket\n", debugInfo, RappelzSocket::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu Server\n", debugInfo, Server::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu ClientInfo\n", debugInfo, ClientInfo::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu ClientData\n", debugInfo, ClientData::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu DB_Account\n", debugInfo, DB_Account::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu ServerInfo\n", debugInfo, ServerInfo::getObjectCount());
 	printf(debugInfo);
 }
