@@ -8,6 +8,10 @@
 #include "EventLoop.h"
 #include "GlobalConfig.h"
 
+#ifdef _WIN32
+#define strncasecmp strnicmp
+#endif
+
 static void extract_error(
 		SQLHANDLE handle,
 		SQLSMALLINT type)
@@ -36,7 +40,7 @@ static void extract_error(
 }
 
 DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const char* password) : clientInfo(clientInfo), account(account) {
-	std::string buffer = CONFIG_GET(dbAccount.salt);
+	std::string buffer = CONFIG_GET()->dbAccount.salt;
 	req.data = this;
 	ok = false;
 	accountId = 0;
@@ -57,7 +61,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 	char connectionString[50];
 
 	sprintf(connectionString, "driver=%s;Server=%s;Database=%s;UID=%s;PWD=%s;Port=%d;",
-			CONFIG_GET(dbAccount.driver).c_str(), CONFIG_GET(dbAccount.server).c_str(), CONFIG_GET(dbAccount.name).c_str(), CONFIG_GET(dbAccount.account).c_str(), CONFIG_GET(dbAccount.password).c_str(), CONFIG_GET(dbAccount.port));
+			CONFIG_GET()->dbAccount.driver.c_str(), CONFIG_GET()->dbAccount.server.c_str(), CONFIG_GET()->dbAccount.name.c_str(), CONFIG_GET()->dbAccount.account.c_str(), CONFIG_GET()->dbAccount.password.c_str(), CONFIG_GET()->dbAccount.port);
 
 	result = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
 	if(!SQL_SUCCEEDED(result))
