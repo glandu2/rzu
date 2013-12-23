@@ -16,7 +16,7 @@ static void extract_error(
 		SQLHANDLE handle,
 		SQLSMALLINT type)
 {
-	SQLINTEGER i = 0;
+	SQLSMALLINT i = 0;
 	SQLINTEGER native;
 	SQLCHAR state[ 7 ];
 	SQLCHAR text[256];
@@ -30,7 +30,7 @@ static void extract_error(
 							sizeof(text), &len );
 #ifdef _WIN32
 		if (SQL_SUCCEEDED(ret))
-			printf("%s:%ld:%ld:%s\n", state, i, native, text);
+			printf("%s:%d:%ld:%s\n", state, i, native, text);
 #else
 		if (SQL_SUCCEEDED(ret))
 			printf("%s:%d:%d:%s\n", state, i, native, text);

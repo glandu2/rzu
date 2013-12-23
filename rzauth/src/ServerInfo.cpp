@@ -26,7 +26,7 @@ ServerInfo::ServerInfo(RappelzSocket* socket)
 
 void ServerInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen(CONFIG_GET()->gameConfig.listenIp,
 						 CONFIG_GET()->gameConfig.port);

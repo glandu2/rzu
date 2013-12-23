@@ -47,7 +47,7 @@ ClientInfo::~ClientInfo() {
 
 void ClientInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen(CONFIG_GET()->clientConfig.listenIp,
 						 CONFIG_GET()->clientConfig.port);
