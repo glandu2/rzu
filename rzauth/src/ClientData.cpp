@@ -21,7 +21,7 @@ ClientData* ClientData::tryAddClient(ClientInfo *clientInfo, const std::string& 
 	uv_mutex_lock(&mapLock);
 
 	newClient = new ClientData(clientInfo);
-	result = connectedClients.emplace(account, newClient);
+	result = connectedClients.insert(std::pair<std::string, ClientData*>(account, newClient));
 	if(result.second == false) {
 		if(oldClient) *oldClient = result.first->second;
 		delete newClient;

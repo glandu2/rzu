@@ -8,7 +8,7 @@
 #include "EventLoop.h"
 #include "GlobalConfig.h"
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #define strncasecmp strnicmp
 #endif
 
