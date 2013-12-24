@@ -3,8 +3,10 @@ project(RappelzPlayerCount)
 
 set(TARGET_NAME RappelzPlayerCount)
 
-add_definitions(-DUSING_UV_SHARED)
-add_definitions(-DUSING_RAPPELZLIB)
+if(BUILD_SHARED_LIBS)
+  add_definitions(-DUSING_UV_SHARED)
+  add_definitions(-DUSING_RAPPELZLIB)
+endif()
 include_directories("${CMAKE_CURRENT_LIST_DIR}/../RappelzLib/src")
 include_directories("${CMAKE_CURRENT_LIST_DIR}/../libuv/include")
 
