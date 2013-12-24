@@ -1,5 +1,6 @@
 #!/bin/sh
 
+git $*
 cd libuv
 git $*
 cd ../RappelzLib
