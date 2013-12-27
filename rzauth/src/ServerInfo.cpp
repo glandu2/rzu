@@ -99,18 +99,18 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 		return;
 	}
 
-	serverIdx = packet->server_idx;
-	serverName = packet->server_name;
-	serverIp = packet->server_ip;
-	serverPort = packet->server_port;
-	serverScreenshotUrl = packet->server_screenshot_url;
-	isAdultServer = packet->is_adult_server;
+	if(servers.size() <= (size_t)packet->server_idx || servers.at(packet->server_idx) == nullptr) {
+		serverIdx = packet->server_idx;
+		serverName = packet->server_name;
+		serverIp = packet->server_ip;
+		serverPort = packet->server_port;
+		serverScreenshotUrl = packet->server_screenshot_url;
+		isAdultServer = packet->is_adult_server;
 
-	if(servers.size() <= (size_t)serverIdx)
-		servers.resize(serverIdx+1, nullptr);
-
-	if(servers.at(serverIdx) == nullptr) {
+		if(servers.size() <= (size_t)serverIdx)
+			servers.resize(serverIdx+1, nullptr);
 		servers[serverIdx] = this;
+
 		result.result = TS_RESULT_SUCCESS;
 		setObjectName((std::string(getObjectName()) + "[" + packet->server_name + "]").c_str());
 		log("Success\n");
