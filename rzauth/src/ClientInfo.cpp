@@ -265,7 +265,7 @@ void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
 
 	serverListPacket->count = count;
-	serverListPacket->last_login_server_idx = 0;
+	serverListPacket->last_login_server_idx = clientData->lastLoginServerId;
 
 	for(i = j = 0; i < serverList.size() && j < serverListPacket->count; i++) {
 		ServerInfo* serverInfo = serverList.at(i);
