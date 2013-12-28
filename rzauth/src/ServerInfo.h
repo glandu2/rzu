@@ -25,7 +25,7 @@ public:
 
 	static const std::vector<ServerInfo*>& getServerList() { return servers; }
 
-	uint8_t getServerIdx() { return serverIdx; }
+	uint16_t getServerIdx() { return serverIdx; }
 	std::string getServerName() { return serverName; }
 	std::string getServerIp() { return serverIp; }
 	int32_t getServerPort() { return serverPort; }
@@ -48,7 +48,7 @@ private:
 
 	RappelzSocket* socket;
 
-	int serverIdx;
+	uint16_t serverIdx;
 	std::string serverName;
 	std::string serverIp;
 	int32_t serverPort;

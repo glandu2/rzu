@@ -1,3 +1,4 @@
+#define __STDC_LIMIT_MACROS
 #include "ServerInfo.h"
 #include "ClientInfo.h"
 #include <string.h>
@@ -15,7 +16,7 @@ std::vector<ServerInfo*> ServerInfo::servers;
 ServerInfo::ServerInfo(RappelzSocket* socket)
 {
 	this->socket = socket;
-	serverIdx = -1;
+	serverIdx = UINT16_MAX;
 
 	addInstance(socket->addEventListener(this, &onStateChanged));
 	addInstance(socket->addPacketListener(TS_GA_LOGIN::packetID, this, &onDataReceived));
@@ -35,7 +36,7 @@ void ServerInfo::startServer() {
 ServerInfo::~ServerInfo() {
 	invalidateCallbacks();
 
-	if(serverIdx >= 0 && (size_t)serverIdx < servers.size())
+	if(serverIdx != UINT16_MAX && (size_t)serverIdx < servers.size())
 		servers[serverIdx] = nullptr;
 
 	socket->deleteLater();
@@ -86,25 +87,32 @@ void ServerInfo::onDataReceived(void* instance, RappelzSocket* clientSocket, con
 }
 
 void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
-	serverIdx = packet->server_idx;
-	serverName = packet->server_name;
-	serverIp = packet->server_ip;
-	serverPort = packet->server_port;
-	serverScreenshotUrl = packet->server_screenshot_url;
-	isAdultServer = packet->is_adult_server;
-
 	TS_AG_LOGIN_RESULT result;
 	TS_MESSAGE::initMessage<TS_AG_LOGIN_RESULT>(&result);
 
-	if(servers.size() <= (size_t)serverIdx)
-		servers.resize(serverIdx+1, nullptr);
+	log("Server Login: %s[%d] at %s:%d\n", packet->server_name, packet->server_idx, packet->server_ip, packet->server_port);
 
-	log("Server Login: %s[%d] at %s:%d: ", packet->server_name, packet->server_idx, packet->server_ip, packet->server_port);
-	setObjectName((std::string(getObjectName()) + "[" + packet->server_name + "]").c_str());
+	if(packet->server_idx == UINT16_MAX) {
+		result.result = TS_RESULT_INVALID_ARGUMENT;
+		log("GameServer attempt to use reserved id, change to a lower id\n");
+		socket->sendPacket(&result);
+		return;
+	}
 
-	if(servers.at(serverIdx) == nullptr) {
+	if(servers.size() <= (size_t)packet->server_idx || servers.at(packet->server_idx) == nullptr) {
+		serverIdx = packet->server_idx;
+		serverName = packet->server_name;
+		serverIp = packet->server_ip;
+		serverPort = packet->server_port;
+		serverScreenshotUrl = packet->server_screenshot_url;
+		isAdultServer = packet->is_adult_server;
+
+		if(servers.size() <= (size_t)serverIdx)
+			servers.resize(serverIdx+1, nullptr);
 		servers[serverIdx] = this;
+
 		result.result = TS_RESULT_SUCCESS;
+		setObjectName((std::string(getObjectName()) + "[" + packet->server_name + "]").c_str());
 		log("Success\n");
 	} else {
 		result.result = TS_RESULT_ALREADY_EXIST;
