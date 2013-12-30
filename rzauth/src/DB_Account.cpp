@@ -58,7 +58,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 	SQLHSTMT hstmt = 0;
 	char password[33] = {0};
 	char givenPassword[33];
-	char connectionString[50];
+	char connectionString[128];
 
 	sprintf(connectionString, "driver=%s;Server=%s;Database=%s;UID=%s;PWD=%s;Port=%d;",
 			CONFIG_GET()->dbAccount.driver.get().c_str(), CONFIG_GET()->dbAccount.server.get().c_str(), CONFIG_GET()->dbAccount.name.get().c_str(), CONFIG_GET()->dbAccount.account.get().c_str(), CONFIG_GET()->dbAccount.password.get().c_str(), CONFIG_GET()->dbAccount.port.get());
