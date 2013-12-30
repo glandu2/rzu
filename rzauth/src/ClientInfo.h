@@ -27,9 +27,9 @@ public:
 	void clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode);
 
 protected:
-	static void onNewConnection(void* instance, Socket* serverSocket);
-	static void onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
-	static void onDataReceived(void* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
+	static void onNewConnection(ICallbackGuard* instance, Socket* serverSocket);
+	static void onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
+	static void onDataReceived(ICallbackGuard* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
 	//static ClientData* popPendingClient(const std::string& accountName);
 
 	void onVersion(const TS_CA_VERSION* packet);

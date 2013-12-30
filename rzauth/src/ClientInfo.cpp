@@ -27,12 +27,12 @@ ClientInfo::ClientInfo(RappelzSocket* socket) {
 	this->useRsaAuth = false;
 	this->clientData = nullptr;
 
-	addInstance(socket->addEventListener(this, &onStateChanged));
-	addInstance(socket->addPacketListener(TS_CA_VERSION::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_CA_RSA_PUBLIC_KEY::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_CA_ACCOUNT::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_CA_SERVER_LIST::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_CA_SELECT_SERVER::packetID, this, &onDataReceived));
+	socket->addEventListener(this, &onStateChanged);
+	socket->addPacketListener(TS_CA_VERSION::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_CA_RSA_PUBLIC_KEY::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_CA_ACCOUNT::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_CA_SERVER_LIST::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_CA_SELECT_SERVER::packetID, this, &onDataReceived);
 }
 
 ClientInfo::~ClientInfo() {
@@ -53,7 +53,7 @@ void ClientInfo::startServer() {
 						 CONFIG_GET()->clientConfig.port);
 }
 
-void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
+void ClientInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), true);
 	static ClientInfo* clientInfo = new ClientInfo(newSocket);
 
@@ -67,7 +67,7 @@ void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
 	} while(1);
 }
 
-void ClientInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+void ClientInfo::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
 	ClientInfo* thisInstance = static_cast<ClientInfo*>(instance);
 	
 	if(newState == Socket::UnconnectedState) {
@@ -75,7 +75,7 @@ void ClientInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::St
 	}
 }
 
-void ClientInfo::onDataReceived(void* instance, RappelzSocket*, const TS_MESSAGE* packet) {
+void ClientInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packet) {
 	ClientInfo* thisInstance = static_cast<ClientInfo*>(instance);
 
 	switch(packet->id) {
@@ -126,7 +126,7 @@ void ClientInfo::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	bio = BIO_new_mem_buf((void*)packet->key, packet->key_size);
 	rsaCipher = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 	if(rsaCipher == nullptr) {
-		log("ClientInfo: RSA: invalid certificate\n");
+		warn("RSA: invalid certificate\n");
 		socket->abort();
 		goto cleanup;
 	}
@@ -136,7 +136,7 @@ void ClientInfo::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	blockSize = RSA_public_encrypt(32, aesKey, aesKeyMessage->rsa_encrypted_data, rsaCipher, RSA_PKCS1_PADDING);
 	if(blockSize < 0) {
 		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
-		log("ClientInfo: RSA encrypt error: %s\n", errorString);
+		warn("RSA encrypt error: %s\n", errorString);
 		socket->abort();
 		goto cleanup;
 	}
@@ -163,7 +163,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 		int bytesWritten, totalLength = 0;
 		unsigned int bytesRead;
 
-		log("Client login using AES %s\n", accountv2->account);
+		debug("Client login using AES %s\n", accountv2->account);
 
 		account = std::string(accountv2->account, std::find(accountv2->account, accountv2->account + 60, '\0'));
 
@@ -192,15 +192,15 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 	cleanup_aes:
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else {
-		log("Client login using DES %s\n", packet->account);
+		debug("Client login using DES %s\n", packet->account);
 
 		account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
 		strncpy((char*)password, packet->password, 61);
-		DesPasswordCipher(CONFIG_GET()->clientConfig.desKey.c_str()).decrypt(password, 61);
+		DesPasswordCipher(CONFIG_GET()->clientConfig.desKey.get().c_str()).decrypt(password, 61);
 	}
 
-	log("Login request for account %s with password %s\n", account.c_str(), password);
+	debug("Login request for account %s with password %s\n", account.c_str(), password);
 
 	setObjectName((std::string(getObjectName()) + "[" + account + "]").c_str());
 
@@ -222,7 +222,7 @@ void ClientInfo::clientAuthResult(bool authOk, const std::string& account, uint3
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
 
-			log("Client already connected, kicking\n");
+			info("Client already connected, kicking\n");
 
 			//thread concurrency when switching from client to server
 			if(alreadyExistingClient->server) {

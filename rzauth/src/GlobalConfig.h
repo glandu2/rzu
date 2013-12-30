@@ -5,8 +5,8 @@
 
 struct GlobalConfig {
 	struct DbAccount {
-		std::string& driver, &server, &name, &account, &password, &salt;
-		int& port;
+		cval<std::string> &driver, &server, &name, &account, &password, &salt;
+		cval<int> &port;
 
 		DbAccount() :
 			driver(CFG("db.driver", "FreeTDS")),
@@ -19,8 +19,8 @@ struct GlobalConfig {
 	} dbAccount;
 
 	struct ClientConfig {
-		std::string& listenIp, &desKey;
-		int& port;
+		cval<std::string> &listenIp, &desKey;
+		cval<int> &port;
 
 		ClientConfig() :
 			listenIp(CFG("listen.client.ip", "0.0.0.0")),
@@ -29,8 +29,8 @@ struct GlobalConfig {
 	} clientConfig;
 
 	struct GameConfig {
-		std::string& listenIp;
-		int& port;
+		cval<std::string> &listenIp;
+		cval<int> &port;
 
 		GameConfig() :
 			listenIp(CFG("listen.game.ip", "0.0.0.0")),

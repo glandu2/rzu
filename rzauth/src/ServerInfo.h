@@ -34,9 +34,9 @@ public:
 	void kickClient(const std::string& account);
 
 protected:
-	static void onNewConnection(void* instance, Socket* serverSocket);
-	static void onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
-	static void onDataReceived(void* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
+	static void onNewConnection(ICallbackGuard* instance, Socket* serverSocket);
+	static void onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
+	static void onDataReceived(ICallbackGuard* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
 
 	void onServerLogin(const TS_GA_LOGIN* packet);
 	void onClientLogin(const TS_GA_CLIENT_LOGIN* packet);

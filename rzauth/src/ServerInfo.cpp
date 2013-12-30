@@ -18,11 +18,11 @@ ServerInfo::ServerInfo(RappelzSocket* socket)
 	this->socket = socket;
 	serverIdx = UINT16_MAX;
 
-	addInstance(socket->addEventListener(this, &onStateChanged));
-	addInstance(socket->addPacketListener(TS_GA_LOGIN::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_GA_CLIENT_LOGIN::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_GA_CLIENT_LOGOUT::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_GA_CLIENT_KICK_FAILED::packetID, this, &onDataReceived));
+	socket->addEventListener(this, &onStateChanged);
+	socket->addPacketListener(TS_GA_LOGIN::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_GA_CLIENT_LOGIN::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_GA_CLIENT_LOGOUT::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_GA_CLIENT_KICK_FAILED::packetID, this, &onDataReceived);
 }
 
 void ServerInfo::startServer() {
@@ -42,7 +42,7 @@ ServerInfo::~ServerInfo() {
 	socket->deleteLater();
 }
 
-void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
+void ServerInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), false);
 	static ServerInfo* serverInfo = new ServerInfo(newSocket);
 
@@ -56,7 +56,7 @@ void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
 	} while(1);
 }
 
-void ServerInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+void ServerInfo::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
 	ServerInfo* thisInstance = static_cast<ServerInfo*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
@@ -64,7 +64,7 @@ void ServerInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::St
 	}
 }
 
-void ServerInfo::onDataReceived(void* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet) {
+void ServerInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet) {
 	ServerInfo* thisInstance = static_cast<ServerInfo*>(instance);
 
 	switch(packet->id) {
@@ -90,11 +90,11 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 	TS_AG_LOGIN_RESULT result;
 	TS_MESSAGE::initMessage<TS_AG_LOGIN_RESULT>(&result);
 
-	log("Server Login: %s[%d] at %s:%d\n", packet->server_name, packet->server_idx, packet->server_ip, packet->server_port);
+	info("Server Login: %s[%d] at %s:%d\n", packet->server_name, packet->server_idx, packet->server_ip, packet->server_port);
 
 	if(packet->server_idx == UINT16_MAX) {
 		result.result = TS_RESULT_INVALID_ARGUMENT;
-		log("GameServer attempt to use reserved id, change to a lower id\n");
+		error("GameServer attempt to use reserved id, change to a lower id\n");
 		socket->sendPacket(&result);
 		return;
 	}
@@ -112,11 +112,11 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 		servers[serverIdx] = this;
 
 		result.result = TS_RESULT_SUCCESS;
-		setObjectName((std::string(getObjectName()) + "[" + packet->server_name + "]").c_str());
-		log("Success\n");
+		setObjectName(12 + serverName.size(), "ServerInfo[%s]", serverName.c_str());
+		debug("Success\n");
 	} else {
 		result.result = TS_RESULT_ALREADY_EXIST;
-		log("Failed, server index already used\n");
+		error("Failed, server index already used\n");
 	}
 
 	socket->sendPacket(&result);
@@ -138,16 +138,16 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	result.nContinuousLogoutTime = 0;
 
 	if(client == nullptr) {
-		log("Client %s login on gameserver but not in clientData list\n", packet->account);
+		warn("Client %s login on gameserver but not in client list\n", packet->account);
 	} else if(client->server != this) {
-		log("Client %s login on wrong gameserver %s, expected %s\n", packet->account, serverName.c_str(), client->server->serverName.c_str());
+		warn("Client %s login on wrong gameserver %s, expected %s\n", packet->account, serverName.c_str(), client->server->serverName.c_str());
 	} else if(client->oneTimePassword != packet->one_time_key) {
-		log("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", packet->account, client->oneTimePassword, packet->one_time_key);
+		warn("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", packet->account, client->oneTimePassword, packet->one_time_key);
 	} else if(client->inGame) {
-		log("Client %s login on gameserver but already connected\n", packet->account);
+		info("Client %s login on gameserver but already connected\n", packet->account);
 	} else {
 		//To complete
-		log("Client %s now on gameserver\n", packet->account);
+		trace("Client %s now on gameserver\n", packet->account);
 		result.nAccountID = client->accountId;
 		result.result = TS_RESULT_SUCCESS;
 		result.nPCBangUser = 0;
@@ -163,7 +163,7 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 }
 
 void ServerInfo::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
-	log("Client %s has disconnected from gameserver\n", packet->account);
+	trace("Client %s has disconnected from gameserver\n", packet->account);
 	ClientData::removeClient(packet->account);
 }
 
@@ -178,6 +178,6 @@ void ServerInfo::kickClient(const std::string &account) {
 }
 
 void ServerInfo::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet) {
-	log("Client %s kick failed (removing from client list)\n", packet->account);
+	warn("Client %s kick failed (removing from client list)\n", packet->account);
 	ClientData::removeClient(packet->account);
 }
