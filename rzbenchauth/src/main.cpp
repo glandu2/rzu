@@ -1,6 +1,7 @@
 #include "PlayerCountMonitor.h"
 #include "uv.h"
 #include <string.h>
+#include "EventLoop.h"
 
 int main(int argc, char *argv[])
 {
@@ -17,5 +18,5 @@ int main(int argc, char *argv[])
 	PlayerCountMonitor playerCount(host, port);
 	playerCount.start();
 
-	uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
