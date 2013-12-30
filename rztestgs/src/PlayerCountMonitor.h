@@ -5,8 +5,9 @@
 #include "ICallbackGuard.h"
 #include "uv.h"
 
-class PlayerCountMonitor : private ICallbackGuard
+class PlayerCountMonitor : private ICallbackGuard, public Object
 {
+	DECLARE_CLASSNAME(PlayerCountMonitor, 0)
 	public:
 		PlayerCountMonitor(std::string host, uint16_t port, int intervalms = 3500);
 		void start();

@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define LOG_PREFIX "PlayerCountMonitor: "
-
 PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) : sock(uv_default_loop(), true) {
 	this->host = host;
 	this->port = port;
@@ -34,7 +32,7 @@ void PlayerCountMonitor::updatePlayerNumber(uv_timer_t* handle, int status) {
 
 	if(status < 0) {
 		const char* errorString = uv_strerror(-status);
-		fprintf(stderr, LOG_PREFIX"Socket: %s\n", errorString);
+		thisInstance->error("Socket: %s\n", errorString);
 		return;
 	}
 
@@ -43,13 +41,14 @@ void PlayerCountMonitor::updatePlayerNumber(uv_timer_t* handle, int status) {
 	} else if(thisInstance->sock.getState() == Socket::ConnectingState) {
 		thisInstance->sock.close();
 		thisInstance->sock.connect(thisInstance->host, thisInstance->port);
-		fprintf(stderr, LOG_PREFIX"Server connection timeout");
+		thisInstance->error("Server connection timeout\n");
 	} else {
-		fprintf(stderr, LOG_PREFIX"Timer tick but server is not unconnected, timer is too fast ?");
+		thisInstance->error("Timer tick but server is not unconnected, timer is too fast ?\n");
 	}
 }
 
-void PlayerCountMonitor::onPlayerCountReceived(void*, RappelzSocket* sock, const TS_MESSAGE* packetData) {
+void PlayerCountMonitor::onPlayerCountReceived(void* instance, RappelzSocket* sock, const TS_MESSAGE* packetData) {
+	PlayerCountMonitor* thisInstance = (PlayerCountMonitor*)instance;
 
 	switch(packetData->id) {
 		case TS_SC_RESULT::packetID:
@@ -76,10 +75,10 @@ void PlayerCountMonitor::onPlayerCountReceived(void*, RappelzSocket* sock, const
 				sock->sendPacket(&versionMsg);
 			}
 			if(eventMsg->event == TS_CC_EVENT::CE_ServerConnectionLost) {
-				fprintf(stderr, LOG_PREFIX"Disconnected from server !");
+				thisInstance->error("Disconnected from server !\n");
 			}
 			if(eventMsg->event == TS_CC_EVENT::CE_ServerUnreachable) {
-				fprintf(stderr, LOG_PREFIX"Unreachable server !");
+				thisInstance->error("Unreachable server !\n");
 			}
 			break;
 		}
