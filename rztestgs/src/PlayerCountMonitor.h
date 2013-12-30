@@ -17,7 +17,7 @@ class PlayerCountMonitor : private ICallbackGuard, public Object
 		static void updatePlayerNumber(uv_timer_t* handle, int status);
 
 	protected:
-		static void onPlayerCountReceived(void* instance, RappelzSocket *sock, const TS_MESSAGE* packetData);
+		static void onPlayerCountReceived(ICallbackGuard* instance, RappelzSocket *sock, const TS_MESSAGE* packetData);
 
 	private:
 		RappelzSocket sock;

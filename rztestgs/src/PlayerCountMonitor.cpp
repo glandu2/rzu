@@ -11,8 +11,8 @@ PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int inte
 
 	printf("#msec since epoch, players connected number, process load\n");
 
-	addInstance(sock.addPacketListener(TS_CA_VERSION::packetID, this, onPlayerCountReceived));
-	addInstance(sock.addPacketListener(TS_CC_EVENT::packetID, this, onPlayerCountReceived));
+	sock.addPacketListener(TS_CA_VERSION::packetID, this, onPlayerCountReceived);
+	sock.addPacketListener(TS_CC_EVENT::packetID, this, onPlayerCountReceived);
 
 	uv_timer_init(uv_default_loop(), &timer);
 	timer.data = this;
@@ -47,7 +47,7 @@ void PlayerCountMonitor::updatePlayerNumber(uv_timer_t* handle, int status) {
 	}
 }
 
-void PlayerCountMonitor::onPlayerCountReceived(void* instance, RappelzSocket* sock, const TS_MESSAGE* packetData) {
+void PlayerCountMonitor::onPlayerCountReceived(ICallbackGuard* instance, RappelzSocket* sock, const TS_MESSAGE* packetData) {
 	PlayerCountMonitor* thisInstance = (PlayerCountMonitor*)instance;
 
 	switch(packetData->id) {

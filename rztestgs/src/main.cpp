@@ -1,7 +1,7 @@
 #include "PlayerCountMonitor.h"
 #include "uv.h"
 #include <string.h>
-#include "Log.h"
+#include "RappelzLibInit.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,7 +14,8 @@ int main(int argc, char *argv[])
 	if(argc >= 3)
 		port = atoi(argv[2]);
 
-	Log::init();
+	RappelzLibInit(argc, argv, nullptr);
+
 	PlayerCountMonitor playerCount(host, port);
 	playerCount.start();
 
