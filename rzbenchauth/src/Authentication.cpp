@@ -23,15 +23,15 @@ Authentication::Authentication(std::string host, AuthCipherMethod method, uint16
 	this->currentState = AS_Idle;
 	this->inProgress = false;
 
-	addInstance(authServer->addPacketListener(TS_CC_EVENT::packetID, this, &onAuthServerConnectionEvent));
-	addInstance(authServer->addPacketListener(TS_AC_AES_KEY_IV::packetID, this, &onAuthPacketReceived));
-	addInstance(authServer->addPacketListener(TS_AC_RESULT::packetID, this, &onAuthPacketReceived));
-	addInstance(authServer->addPacketListener(TS_AC_RESULT_WITH_STRING::packetID, this, &onAuthPacketReceived));
-	addInstance(authServer->addPacketListener(TS_AC_SERVER_LIST::packetID, this, &onAuthPacketReceived));
-	addInstance(authServer->addPacketListener(TS_AC_SELECT_SERVER::packetID, this, &onAuthPacketReceived));
+	authServer->addPacketListener(TS_CC_EVENT::packetID, this, &onAuthServerConnectionEvent);
+	authServer->addPacketListener(TS_AC_AES_KEY_IV::packetID, this, &onAuthPacketReceived);
+	authServer->addPacketListener(TS_AC_RESULT::packetID, this, &onAuthPacketReceived);
+	authServer->addPacketListener(TS_AC_RESULT_WITH_STRING::packetID, this, &onAuthPacketReceived);
+	authServer->addPacketListener(TS_AC_SERVER_LIST::packetID, this, &onAuthPacketReceived);
+	authServer->addPacketListener(TS_AC_SELECT_SERVER::packetID, this, &onAuthPacketReceived);
 
-//	addInstance(server->addPacketListener(Server::ST_Game, TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent));
-//	addInstance(server->addPacketListener(Server::ST_Game, TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived));
+//	server->addPacketListener(Server::ST_Game, TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent);
+//	server->addPacketListener(Server::ST_Game, TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived);
 }
 
 Authentication::~Authentication() {
@@ -97,7 +97,7 @@ bool Authentication::selectServer(uint16_t serverId, Callback<CallbackOnGameResu
 	return true;
 }
 
-void Authentication::onAuthServerConnectionEvent(void* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onAuthServerConnectionEvent(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	if(packetData->id == TS_CC_EVENT::packetID) {
@@ -110,7 +110,7 @@ void Authentication::onAuthServerConnectionEvent(void* instance, RappelzSocket*,
 	}
 }
 
-void Authentication::onGameServerConnectionEvent(void* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onGameServerConnectionEvent(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	if(packetData->id == TS_CC_EVENT::packetID) {
@@ -123,7 +123,7 @@ void Authentication::onGameServerConnectionEvent(void* instance, RappelzSocket*,
 	}
 }
 
-void Authentication::onAuthPacketReceived(void* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onAuthPacketReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	switch(packetData->id) {
@@ -159,7 +159,7 @@ void Authentication::onAuthPacketReceived(void* instance, RappelzSocket*, const 
 	}
 }
 
-void Authentication::onGamePacketReceived(void* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onGamePacketReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	switch(packetData->id) {
@@ -362,8 +362,8 @@ end:
 
 	ServerConnectionInfo selectedServerInfo = serverList.at(selectedServer);
 	gameServer = new RappelzSocket(EventLoop::getLoop(), true);
-	addInstance(gameServer->addPacketListener(TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent));
-	addInstance(gameServer->addPacketListener(TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived));
+	gameServer->addPacketListener(TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent);
+	gameServer->addPacketListener(TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived);
 	gameServer->connect(selectedServerInfo.ip, selectedServerInfo.port);
 	authServer->close();
 }

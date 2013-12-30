@@ -32,9 +32,9 @@ class Authentication : private Object, ICallbackGuard
 			ACM_RSA_AES  //Since mid epic 8.1
 		};
 
-		typedef void (*CallbackOnAuthResult)(void* instance, Authentication* auth, TS_ErrorCode result, const char* resultString);
-		typedef void (*CallbackOnServerList)(void* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>& servers, uint16_t lastSelectedServerId);
-		typedef void (*CallbackOnGameResult)(void* instance, Authentication* auth, TS_ErrorCode result, RappelzSocket* gameServerSocket);
+		typedef void (*CallbackOnAuthResult)(ICallbackGuard* instance, Authentication* auth, TS_ErrorCode result, const char* resultString);
+		typedef void (*CallbackOnServerList)(ICallbackGuard* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>& servers, uint16_t lastSelectedServerId);
+		typedef void (*CallbackOnGameResult)(ICallbackGuard* instance, Authentication* auth, TS_ErrorCode result, RappelzSocket* gameServerSocket);
 
 	public:
 		Authentication(std::string host, AuthCipherMethod method = ACM_DES, uint16_t port = 4500, const std::string& version = "200701120");
@@ -47,10 +47,10 @@ class Authentication : private Object, ICallbackGuard
 		bool selectServer(uint16_t serverId, Callback<CallbackOnGameResult> callback);
 
 	protected:
-		static void onAuthServerConnectionEvent(void* instance, RappelzSocket *server, const TS_MESSAGE* packetData);
-		static void onGameServerConnectionEvent(void* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
-		static void onAuthPacketReceived(void* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
-		static void onGamePacketReceived(void* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
+		static void onAuthServerConnectionEvent(ICallbackGuard* instance, RappelzSocket *server, const TS_MESSAGE* packetData);
+		static void onGameServerConnectionEvent(ICallbackGuard* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
+		static void onAuthPacketReceived(ICallbackGuard* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
+		static void onGamePacketReceived(ICallbackGuard* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
 
 	protected:
 		void onPacketAuthConnected();

@@ -2,6 +2,7 @@
 #include "uv.h"
 #include <string.h>
 #include "EventLoop.h"
+#include "RappelzLibInit.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,6 +15,7 @@ int main(int argc, char *argv[])
 	if(argc >= 3)
 		port = atoi(argv[2]);
 
+	RappelzLibInit(argc, argv, nullptr);
 
 	PlayerCountMonitor playerCount(host, port);
 	playerCount.start();

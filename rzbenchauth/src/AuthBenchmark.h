@@ -15,9 +15,9 @@ public:
 	AuthBenchmark();
 
 protected:
-	static void onAuthResult(void* instance, Authentication* auth, TS_ErrorCode result, const char* resultString);
-	static void onServerList(void* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>& servers);
-	static void onGameResult(void* instance, Authentication* auth, TS_ErrorCode result, RappelzSocket* gameServerSocket);
+	static void onAuthResult(ICallbackGuard* instance, Authentication* auth, TS_ErrorCode result, const char* resultString);
+	static void onServerList(ICallbackGuard* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>& servers);
+	static void onGameResult(ICallbackGuard* instance, Authentication* auth, TS_ErrorCode result, RappelzSocket* gameServerSocket);
 
 private:
 	Authentication* auth;
