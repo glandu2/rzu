@@ -45,7 +45,7 @@ DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const
 	ok = false;
 	accountId = 0;
 	buffer.append(password);
-	log("MD5 of \"%s\" with len %zd\n", buffer.c_str(), buffer.size());
+	trace("MD5 of \"%s\" with len %ld\n", buffer.c_str(), (long)buffer.size());
 	MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
 	uv_queue_work(EventLoop::getLoop(), &req, &onProcess, &onDone);
 }
@@ -61,7 +61,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 	char connectionString[50];
 
 	sprintf(connectionString, "driver=%s;Server=%s;Database=%s;UID=%s;PWD=%s;Port=%d;",
-			CONFIG_GET()->dbAccount.driver.c_str(), CONFIG_GET()->dbAccount.server.c_str(), CONFIG_GET()->dbAccount.name.c_str(), CONFIG_GET()->dbAccount.account.c_str(), CONFIG_GET()->dbAccount.password.c_str(), CONFIG_GET()->dbAccount.port);
+			CONFIG_GET()->dbAccount.driver.get().c_str(), CONFIG_GET()->dbAccount.server.get().c_str(), CONFIG_GET()->dbAccount.name.get().c_str(), CONFIG_GET()->dbAccount.account.get().c_str(), CONFIG_GET()->dbAccount.password.get().c_str(), CONFIG_GET()->dbAccount.port.get());
 
 	result = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
 	if(!SQL_SUCCEEDED(result))
@@ -72,7 +72,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 		goto cleanup;
 	}
 
-	thisInstance->log("Connecting to %s\n", connectionString);
+	thisInstance->trace("Connecting to %s\n", connectionString);
 	result = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
 	if(!SQL_SUCCEEDED(result))
 		goto cleanup;
@@ -85,14 +85,14 @@ void DB_Account::onProcess(uv_work_t *req) {
 
 	SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 
-	thisInstance->log("Executing query\n");
+	thisInstance->trace("Executing query\n");
 	SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, thisInstance->account.size(), 0, (void*)thisInstance->account.c_str(), thisInstance->account.size(), nullptr);
 	SQLExecDirect(hstmt, (SQLCHAR*)"SELECT account_id, password FROM dbo.Account WHERE account = ?;", SQL_NTS);
 	if(!SQL_SUCCEEDED(SQLFetch(hstmt))) {
 		goto cleanup;
 	}
 
-	thisInstance->log("Getting data\n");
+	thisInstance->trace("Getting data\n");
 	SQLGetData(hstmt, 1, SQL_C_LONG, &thisInstance->accountId, sizeof(thisInstance->accountId), NULL);
 	SQLGetData(hstmt, 2, SQL_C_CHAR, (SQLCHAR*)password, sizeof(password), NULL);
 
@@ -112,11 +112,11 @@ void DB_Account::onProcess(uv_work_t *req) {
 	}
 	givenPassword[32] = '\0';
 
-	thisInstance->log("Account password md5: %s;\nDB md5: %s;\n", givenPassword, password);
+	thisInstance->debug("Account password md5: %s;\nDB md5: %s;\n", givenPassword, password);
 
 	if(!strncasecmp(givenPassword, password, 16*2)) {
 		thisInstance->ok = true;
-		thisInstance->log("Ok\n");
+		thisInstance->trace("Ok\n");
 	}
 
 cleanup:
