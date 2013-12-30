@@ -27,12 +27,12 @@ ClientInfo::ClientInfo(RappelzSocket* socket) {
 	this->useRsaAuth = false;
 	this->clientData = nullptr;
 
-	addInstance(socket->addEventListener(this, &onStateChanged));
-	addInstance(socket->addPacketListener(TS_CA_VERSION::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_CA_RSA_PUBLIC_KEY::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_CA_ACCOUNT::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_CA_SERVER_LIST::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_CA_SELECT_SERVER::packetID, this, &onDataReceived));
+	socket->addEventListener(this, &onStateChanged);
+	socket->addPacketListener(TS_CA_VERSION::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_CA_RSA_PUBLIC_KEY::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_CA_ACCOUNT::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_CA_SERVER_LIST::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_CA_SELECT_SERVER::packetID, this, &onDataReceived);
 }
 
 ClientInfo::~ClientInfo() {
@@ -53,7 +53,7 @@ void ClientInfo::startServer() {
 						 CONFIG_GET()->clientConfig.port);
 }
 
-void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
+void ClientInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), true);
 	static ClientInfo* clientInfo = new ClientInfo(newSocket);
 
@@ -67,7 +67,7 @@ void ClientInfo::onNewConnection(void* instance, Socket* serverSocket) {
 	} while(1);
 }
 
-void ClientInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+void ClientInfo::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
 	ClientInfo* thisInstance = static_cast<ClientInfo*>(instance);
 	
 	if(newState == Socket::UnconnectedState) {
@@ -75,7 +75,7 @@ void ClientInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::St
 	}
 }
 
-void ClientInfo::onDataReceived(void* instance, RappelzSocket*, const TS_MESSAGE* packet) {
+void ClientInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packet) {
 	ClientInfo* thisInstance = static_cast<ClientInfo*>(instance);
 
 	switch(packet->id) {

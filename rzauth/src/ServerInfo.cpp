@@ -18,11 +18,11 @@ ServerInfo::ServerInfo(RappelzSocket* socket)
 	this->socket = socket;
 	serverIdx = UINT16_MAX;
 
-	addInstance(socket->addEventListener(this, &onStateChanged));
-	addInstance(socket->addPacketListener(TS_GA_LOGIN::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_GA_CLIENT_LOGIN::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_GA_CLIENT_LOGOUT::packetID, this, &onDataReceived));
-	addInstance(socket->addPacketListener(TS_GA_CLIENT_KICK_FAILED::packetID, this, &onDataReceived));
+	socket->addEventListener(this, &onStateChanged);
+	socket->addPacketListener(TS_GA_LOGIN::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_GA_CLIENT_LOGIN::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_GA_CLIENT_LOGOUT::packetID, this, &onDataReceived);
+	socket->addPacketListener(TS_GA_CLIENT_KICK_FAILED::packetID, this, &onDataReceived);
 }
 
 void ServerInfo::startServer() {
@@ -42,7 +42,7 @@ ServerInfo::~ServerInfo() {
 	socket->deleteLater();
 }
 
-void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
+void ServerInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), false);
 	static ServerInfo* serverInfo = new ServerInfo(newSocket);
 
@@ -56,7 +56,7 @@ void ServerInfo::onNewConnection(void* instance, Socket* serverSocket) {
 	} while(1);
 }
 
-void ServerInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+void ServerInfo::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
 	ServerInfo* thisInstance = static_cast<ServerInfo*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
@@ -64,7 +64,7 @@ void ServerInfo::onStateChanged(void* instance, Socket* clientSocket, Socket::St
 	}
 }
 
-void ServerInfo::onDataReceived(void* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet) {
+void ServerInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet) {
 	ServerInfo* thisInstance = static_cast<ServerInfo*>(instance);
 
 	switch(packet->id) {
@@ -112,7 +112,7 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 		servers[serverIdx] = this;
 
 		result.result = TS_RESULT_SUCCESS;
-		setObjectName((std::string(getObjectName()) + "[" + packet->server_name + "]").c_str());
+		setObjectName(12 + serverName.size(), "ServerInfo[%s]", serverName.c_str());
 		debug("Success\n");
 	} else {
 		result.result = TS_RESULT_ALREADY_EXIST;

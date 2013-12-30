@@ -3,16 +3,17 @@
 #include "EventLoop.h"
 #include "ConfigInfo.h"
 #include "GlobalConfig.h"
+#include "RappelzLibInit.h"
 
 //socket->deleteLater in uv_check_t
 void showDebug(uv_timer_t*, int);
 
-int main() {
+int main(int argc, char **argv) {
 //	uv_timer_t timer;
 //	uv_timer_init(EventLoop::getLoop(), &timer);
 //	uv_timer_start(&timer, &showDebug, 0, 3000);
 
-	ConfigInfo::get()->readFile("Auth.opt");
+	RappelzLibInit(argc, argv, &ConfigInfo::init);
 	ConfigInfo::get()->dump(stdout);
 
 	ClientInfo::startServer();
