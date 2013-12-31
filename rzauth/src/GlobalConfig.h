@@ -38,6 +38,7 @@ struct GlobalConfig {
 	} gameConfig;
 
 	static GlobalConfig* get();
+	static void init();
 };
 
 #define CONFIG_GET() GlobalConfig::get()

@@ -13,8 +13,8 @@ int main(int argc, char **argv) {
 //	uv_timer_init(EventLoop::getLoop(), &timer);
 //	uv_timer_start(&timer, &showDebug, 0, 3000);
 
-	RappelzLibInit(argc, argv, &ConfigInfo::init);
-	ConfigInfo::get()->dump(stdout);
+	RappelzLibInit(argc, argv, &GlobalConfig::init);
+	ConfigInfo::get()->dump(stdout, true);
 
 	ClientInfo::startServer();
 	ServerInfo::startServer();
