@@ -4,6 +4,8 @@
 #include "ConfigInfo.h"
 #include "GlobalConfig.h"
 #include "RappelzLibInit.h"
+#include "Server.h"
+#include "DB_Account.h"
 
 //socket->deleteLater in uv_check_t
 void showDebug(uv_timer_t*, int);
@@ -14,16 +16,12 @@ int main(int argc, char **argv) {
 //	uv_timer_start(&timer, &showDebug, 0, 3000);
 
 	RappelzLibInit(argc, argv, &GlobalConfig::init);
-	ConfigInfo::get()->dump(stdout, true);
 
 	ClientInfo::startServer();
 	ServerInfo::startServer();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
-
-#include "Server.h"
-#include "DB_Account.h"
 
 void showDebug(uv_timer_t *, int) {
 	char debugInfo[1000];
