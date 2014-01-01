@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
 //	uv_timer_start(&timer, &showDebug, 0, 3000);
 
 	RappelzLibInit(argc, argv, &GlobalConfig::init);
+	DB_Account::init();
 
 	ClientInfo::startServer();
 	ServerInfo::startServer();

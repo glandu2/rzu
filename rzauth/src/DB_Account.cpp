@@ -7,36 +7,67 @@
 #include "ClientInfo.h"
 #include "EventLoop.h"
 #include "GlobalConfig.h"
+#include "Log.h"
 
 #ifdef _MSC_VER
 #define strncasecmp strnicmp
 #endif
 
-static void extract_error(
-		SQLHANDLE handle,
-		SQLSMALLINT type)
-{
-	SQLSMALLINT i = 0;
-	SQLINTEGER native;
-	SQLCHAR state[ 7 ];
-	SQLCHAR text[256];
-	SQLSMALLINT len;
-	SQLRETURN ret;
-	fprintf(stderr, "ODBC Error:\n");
+static void extractError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT type);
 
-	do
-	{
-		ret = SQLGetDiagRec(type, handle, ++i, state, &native, text,
-							sizeof(text), &len );
-#ifdef _WIN32
-		if (SQL_SUCCEEDED(ret))
-			printf("%s:%d:%ld:%s\n", state, i, native, text);
-#else
-		if (SQL_SUCCEEDED(ret))
-			printf("%s:%d:%d:%s\n", state, i, native, text);
-#endif
+void* DB_Account::henv = nullptr;
+
+bool DB_Account::init() {
+	SQLRETURN result;
+	result = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
+	if(!SQL_SUCCEEDED(result)) {
+		return false;
 	}
-	while( ret == SQL_SUCCESS );
+	result = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, SQL_IS_INTEGER);
+	if(!SQL_SUCCEEDED(result)) {
+		Log::get()->log(Log::LL_Error, "DB_Account::init", "Can\'t use ODBC 3\n");
+		SQLFreeHandle(SQL_HANDLE_ENV, henv);
+		return false;
+	}
+
+	//Check connection: TODO
+	HDBC hdbc;
+	HSTMT hstmt;
+	std::string connectionString = CONFIG_GET()->dbAccount.connectionString.get();
+	const char* dbQuery = "SELECT * FROM information_schema.tables WHERE table_schema = 'dbo' AND table_name = 'Account';";
+
+	Log::get()->log(Log::LL_Info, "DB_Account::init", "Checking connection to %s\n", connectionString.c_str());
+	if(!openConnection(connectionString, &hdbc, &hstmt)) {
+		Log::get()->log(Log::LL_Error, "DB_Account::init", "Failed to connect to auth database\n", connectionString.c_str());
+		checkError(Log::LL_Error, &hdbc, &hstmt);
+		if(CONFIG_GET()->dbAccount.ignoreInitCheck == false)
+			return false;
+		else
+			return true;
+	}
+	result = SQLExecDirect(hstmt, (SQLCHAR*)dbQuery, SQL_NTS);
+	if(!SQL_SUCCEEDED(result)) {
+		Log::get()->log(Log::LL_Error, "DB_Account::init", "Failed to execute query %s\n", dbQuery);
+		checkError(Log::LL_Error, &hdbc, &hstmt);
+		if(CONFIG_GET()->dbAccount.ignoreInitCheck == false)
+			return false;
+		else
+			return true;
+	}
+	result = SQLFetch(hstmt);
+	if(!SQL_SUCCEEDED(result)) {
+		Log::get()->log(Log::LL_Error, "DB_Account::init", "Failed to fetch data of query %s\n", dbQuery);
+		checkError(Log::LL_Error, &hdbc, &hstmt);
+		if(CONFIG_GET()->dbAccount.ignoreInitCheck == false)
+			return false;
+		else
+			return true;
+	}
+
+	closeConnection(&hdbc, &hstmt);
+	Log::get()->log(Log::LL_Info, "DB_Account::init", "Auth database Ok\n");
+
+	return true;
 }
 
 DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const char* password) : clientInfo(clientInfo), account(account) {
@@ -52,49 +83,29 @@ DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const
 
 void DB_Account::onProcess(uv_work_t *req) {
 	DB_Account* thisInstance = (DB_Account*) req->data;
-	SQLRETURN result;
-	SQLHENV henv = 0;
-	SQLHDBC hdbc = 0;
-	SQLHSTMT hstmt = 0;
 	char password[33] = {0};
 	char givenPassword[33];
-	char connectionString[128];
+	HDBC hdbc;
+	HSTMT hstmt;
 
-	sprintf(connectionString, "driver=%s;Server=%s;Database=%s;UID=%s;PWD=%s;Port=%d;",
-			CONFIG_GET()->dbAccount.driver.get().c_str(), CONFIG_GET()->dbAccount.server.get().c_str(), CONFIG_GET()->dbAccount.name.get().c_str(), CONFIG_GET()->dbAccount.account.get().c_str(), CONFIG_GET()->dbAccount.password.get().c_str(), CONFIG_GET()->dbAccount.port.get());
-
-	result = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
-	if(!SQL_SUCCEEDED(result))
-		goto cleanup;
-
-	result = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, SQL_IS_INTEGER);
-	if(!SQL_SUCCEEDED(result)) {
-		goto cleanup;
+	if(!openConnection(CONFIG_GET()->dbAccount.connectionString.get(), &hdbc, &hstmt)) {
+		checkError(Log::LL_Debug, &hdbc, &hstmt);
+		return;
 	}
-
-	thisInstance->trace("Connecting to %s\n", connectionString);
-	result = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
-	if(!SQL_SUCCEEDED(result))
-		goto cleanup;
-
-	result = SQLDriverConnect(hdbc, nullptr, (UCHAR*)connectionString, SQL_NTS, nullptr, 0, nullptr, 0);
-	if(!SQL_SUCCEEDED(result)) {
-		printf("Error %d\n", result);
-		goto cleanup;
-	}
-
-	SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 
 	thisInstance->trace("Executing query\n");
 	SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, thisInstance->account.size(), 0, (void*)thisInstance->account.c_str(), thisInstance->account.size(), nullptr);
 	SQLExecDirect(hstmt, (SQLCHAR*)"SELECT account_id, password FROM dbo.Account WHERE account = ?;", SQL_NTS);
 	if(!SQL_SUCCEEDED(SQLFetch(hstmt))) {
-		goto cleanup;
+		thisInstance->checkError(Log::LL_Debug, &hdbc, &hstmt);
+		return;
 	}
 
 	thisInstance->trace("Getting data\n");
 	SQLGetData(hstmt, 1, SQL_C_LONG, &thisInstance->accountId, sizeof(thisInstance->accountId), NULL);
 	SQLGetData(hstmt, 2, SQL_C_CHAR, (SQLCHAR*)password, sizeof(password), NULL);
+
+	closeConnection(&hdbc, &hstmt);
 
 
 	for(int i = 0; i < 16; i++) {
@@ -118,25 +129,6 @@ void DB_Account::onProcess(uv_work_t *req) {
 		thisInstance->ok = true;
 		thisInstance->trace("Ok\n");
 	}
-
-cleanup:
-	if(hstmt) {
-		if(result == SQL_ERROR)
-			extract_error(hstmt, SQL_HANDLE_STMT);
-		SQLCloseCursor(hstmt);
-		SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-	}
-	if(hdbc) {
-		if(result == SQL_ERROR)
-			extract_error(hdbc, SQL_HANDLE_DBC);
-		SQLDisconnect(hdbc);
-		SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
-	}
-	if(henv) {
-		if(result == SQL_ERROR)
-			extract_error(henv, SQL_HANDLE_ENV);
-		SQLFreeHandle(SQL_HANDLE_ENV, henv);
-	}
 }
 
 void DB_Account::onDone(uv_work_t *req, int status) {
@@ -144,4 +136,66 @@ void DB_Account::onDone(uv_work_t *req, int status) {
 
 	thisInstance->clientInfo->clientAuthResult(thisInstance->ok, thisInstance->account, thisInstance->accountId, 19, 1, 0);
 	delete thisInstance;
+}
+
+bool DB_Account::openConnection(const std::string& connectionString, void **hdbc, void **hstmt) {
+	SQLRETURN result;
+
+	*hdbc = nullptr;
+	*hstmt = nullptr;
+
+	//Log::get()->log(Log::LL_Trace, "DB_Account", "Connecting to %s\n", connectionString.c_str());
+	result = SQLAllocHandle(SQL_HANDLE_DBC, henv, hdbc);
+	if(!SQL_SUCCEEDED(result)) {
+		return false;
+	}
+
+	result = SQLDriverConnect(*hdbc, nullptr, (UCHAR*)connectionString.c_str(), SQL_NTS, nullptr, 0, nullptr, 0);
+	if(!SQL_SUCCEEDED(result)) {
+		return false;
+	}
+
+	result = SQLAllocHandle(SQL_HANDLE_STMT, *hdbc, hstmt);
+	if(!SQL_SUCCEEDED(result)) {
+		return false;
+	}
+
+	return true;
+}
+
+void DB_Account::closeConnection(void **hdbc, void **hstmt) {
+	if(hstmt && *hstmt) {
+		SQLCloseCursor(*hstmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, *hstmt);
+		*hstmt = nullptr;
+	}
+	if(hdbc && *hdbc) {
+		SQLDisconnect(*hdbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, *hdbc);
+		*hdbc = nullptr;
+	}
+}
+
+void DB_Account::checkError(Log::Level errorLevel, void **hdbc, void **hstmt) {
+	if(hstmt && *hstmt)
+		extractError(errorLevel, *hstmt, SQL_HANDLE_STMT);
+	if(hdbc && *hdbc)
+		extractError(errorLevel, *hdbc, SQL_HANDLE_DBC);
+
+	extractError(errorLevel, henv, SQL_HANDLE_ENV);
+	closeConnection(hdbc, hstmt);
+}
+
+static void extractError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT type) {
+	SQLSMALLINT i = 0, len;
+	SQLINTEGER native;
+	SQLCHAR state[7];
+	SQLCHAR text[256];
+	SQLRETURN ret;
+
+	do {
+		ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, sizeof(text), &len);
+		if (SQL_SUCCEEDED(ret))
+			Log::get()->log(errorLevel, "ODBCERROR", "%s:%d:%ld:%s\n", state, i, (long)native, text);
+	} while(ret == SQL_SUCCESS);
 }
