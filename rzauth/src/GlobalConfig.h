@@ -4,18 +4,32 @@
 #include "ConfigInfo.h"
 
 struct GlobalConfig {
-	struct DbAccount {
+	struct DbAccount : public ICallbackGuard {
 		cval<std::string> &driver, &server, &name, &account, &password, &salt;
 		cval<int> &port;
+		cval<std::string> &connectionString;
+		cval<bool> &ignoreInitCheck;
 
 		DbAccount() :
-			driver(CFG("db.driver", "FreeTDS")),
+			driver(CFG("db.driver", "osdriver")), //Set in .cpp according to OS
 			server(CFG("db.server", "127.0.0.1")),
 			name(CFG("db.name", "Auth")),
 			account(CFG("db.account", "sa")),
 			password(CFG("db.password", "")),
 			salt(CFG("db.salt", "2012")),
-			port(CFG("db.port", 1433)) {}
+			port(CFG("db.port", 1433)),
+			connectionString(CFG("db.connectionstring", "driver=" + driver.get() + ";Server=" + server.get() + ";Database=" + name.get() + ";UID=" + account.get() + ";PWD=" + password.get() + ";Port=" + std::to_string((long long)port.get()) + ";")),
+			ignoreInitCheck(CFG("db.ignoreinitcheck", false))
+		{
+			driver.addListener(this, &updateConnectionString);
+			server.addListener(this, &updateConnectionString);
+			name.addListener(this, &updateConnectionString);
+			account.addListener(this, &updateConnectionString);
+			password.addListener(this, &updateConnectionString);
+			port.addListener(this, &updateConnectionString);
+		}
+
+		static void updateConnectionString(ICallbackGuard* instance);
 	} dbAccount;
 
 	struct ClientConfig {
@@ -38,6 +52,7 @@ struct GlobalConfig {
 	} gameConfig;
 
 	static GlobalConfig* get();
+	static void init();
 };
 
 #define CONFIG_GET() GlobalConfig::get()

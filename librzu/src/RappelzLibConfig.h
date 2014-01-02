@@ -3,14 +3,16 @@
 
 #include "ConfigInfo.h"
 
-struct RappelzLibConfig
+#define CONFIG_FILE_KEY "configfile"
+
+struct RAPPELZLIB_EXTERN RappelzLibConfig
 {
 	struct App {
 		cval<std::string> &appName, &configfile;
 
 		App() :
 			appName(CFG("core.appname", "RappelzEmu")),
-			configfile(CFG("core.configfile", "RappelzEmu.opt")) {}
+			configfile(CFG(CONFIG_FILE_KEY, "rappelzemu.opt")) {}
 	} app;
 
 	struct Log {
@@ -20,7 +22,7 @@ struct RappelzLibConfig
 		Log() :
 			enable(CFG("core.log.enable", true)),
 			dir(CFG("core.log.dir", "log")),
-			file(CFG("core.log.file", CFG("core.appname", "RappelzEmu").get() + ".log")),
+			file(CFG("core.log.file", CFG("core.appname", "rappelzemu").get() + ".log")),
 			level(CFG("core.log.level", "trace")) {}
 	} log;
 
@@ -31,12 +33,14 @@ struct RappelzLibConfig
 		TrafficDump() :
 			enable(CFG("core.trafficdump.enable", false)),
 			dir(CFG("core.trafficdump.dir", "traffic_log")),
-			file(CFG("core.trafficdump.file", "auth_traffic.log")) {}
+			file(CFG("core.trafficdump.file", "rappelzemu.log")) {}
 	} trafficDump;
 
 	static RappelzLibConfig* get();
 };
 
+#ifndef CONFIG_GET
 #define CONFIG_GET() RappelzLibConfig::get()
+#endif
 
 #endif // RAPPELZLIBCONFIG_H

@@ -2,10 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-ConfigValue::ConfigValue(Type type) : type(type), keyName(nullptr) {
-
-}
+#include "RappelzLibConfig.h"
 
 bool ConfigValue::check(Type expectedType, bool soft) {
 	if(expectedType != type && type != None) {
@@ -28,8 +25,13 @@ bool ConfigValue::check(Type expectedType, bool soft) {
 	return true;
 }
 
-ConfigInfo::ConfigInfo() {
 
+// ConfigInfo ////////////////////////////////////////////////////////////////////////
+
+ConfigInfo* ConfigInfo::get() {
+	static ConfigInfo instance;
+
+	return &instance;
 }
 
 ConfigValue* ConfigInfo::getValue(const std::string& key, bool createIfNonExistant) {
@@ -56,7 +58,7 @@ std::pair<std::unordered_map<std::string, ConfigValue*>::iterator, bool> ConfigI
 	return it;
 }
 
-void ConfigInfo::parseCommandLine(int argc, char **argv) {
+void ConfigInfo::parseCommandLine(int argc, char **argv, bool onlyConfigFileLocation) {
 	int i;
 	char* key;
 	char* value;
@@ -72,19 +74,20 @@ void ConfigInfo::parseCommandLine(int argc, char **argv) {
 		if(*key == '\0')
 			continue;
 
-		value = strchr(key, ':');
+		value = strpbrk(key, ":=");
 		if(!value)
 			continue;
 
 		std::string keyStr(key, value - key);
+
+		//Check only config file location value if requested
+		if(onlyConfigFileLocation && keyStr != CONFIG_FILE_KEY)
+			continue;
+
 		value++;
 		ConfigValue* v = getValue(keyStr, false);
 		if(v == nullptr) {
-			debug("Unknown key %s, ignoring\n", keyStr.c_str());
-			continue;
-		}
-		if(v->getType() == ConfigValue::None) {
-			debug("Key %s data type is None, ignoring\n", keyStr.c_str());
+			warn("Unknown key \"%s\", ignoring\n", keyStr.c_str());
 			continue;
 		}
 
@@ -106,7 +109,7 @@ void ConfigInfo::parseCommandLine(int argc, char **argv) {
 				break;
 
 			case ConfigValue::None:
-				debug("Key %s data type is None, ignoring\n", keyStr.c_str());
+				error("Key \"%s\" data type is None, ignoring\n", keyStr.c_str());
 				break;
 		}
 	}
@@ -115,9 +118,7 @@ void ConfigInfo::parseCommandLine(int argc, char **argv) {
 bool ConfigInfo::readFile(const char* filename) {
 	FILE* file;
 	char line[1024];
-	char* p;
-	ConfigValue* v;
-	typedef std::unordered_map<std::string, ConfigValue*>::iterator Iterator;
+	char *p, *key, *value;
 
 	file = fopen(filename, "rb");
 	if(!file) {
@@ -127,52 +128,59 @@ bool ConfigInfo::readFile(const char* filename) {
 
 	while(fgets(line, 1024, file)) {
 		size_t len = strlen(line);
-		if(len < 3)   //minimum: type + space + key char
+
+		//remove leading spaces
+		p = line;
+		while(isspace(*p) && *p)
+			p++;
+
+		key = p;
+		if(key[0] == '#' || key[0] == '\0')	//a comment or end of line (nothing on the line)
 			continue;
 
+		//remove trailing spaces
 		p = line + len - 1;
-		while(isspace(*p))
+		while(isspace(*p) && p > key)
 			p--;
+		if(p == key)
+			continue;
 		*(p+1) = 0;
 
-		p = strchr(line, ':');
+		p = strpbrk(key, ":=");
 		if(!p)
 			continue;
 		*p = 0;
-		p++;
+		value = p+1;
 
-		switch(line[0]) {
-			case 'B':
-				v = new ConfigValue(ConfigValue::Bool);
-				v->set(!strcmp(p, "true") || !strcmp(p, "1"));
-				break;
+		std::string keyStr(key);
 
-			case 'N':
-			case 'I':
-				v = new ConfigValue(ConfigValue::Integer);
-				v->set(atoi(p));
-				break;
-
-			case 'F':
-				v = new ConfigValue(ConfigValue::Float);
-				v->set(atof(p));
-				break;
-
-			case 'S':
-				v = new ConfigValue(ConfigValue::String);
-				v->set(std::string(p));
-				break;
-
-			default:
-				continue;
-		}
-		std::pair<Iterator, bool> it = addValue(std::string(line+2), v);
-		if(it.second == false) {
-			ConfigValue* orig = it.first->second;
-			orig->set(v);
+		ConfigValue* v = getValue(keyStr, false);
+		if(v == nullptr) {
+			warn("Unknown key \"%s\" in config file, ignoring\n", keyStr.c_str());
+			continue;
 		}
 
-		v = nullptr;
+		switch(v->getType()) {
+			case ConfigValue::Bool:
+				v->set(!strcmp(value, "true") || !strcmp(value, "1"));
+				break;
+
+			case ConfigValue::Integer:
+				v->set(atoi(value));
+				break;
+
+			case ConfigValue::Float:
+				v->set(atof(value));
+				break;
+
+			case ConfigValue::String:
+				v->set(std::string(value));
+				break;
+
+			case ConfigValue::None:
+				error("Key \"%s\" data type is None, ignoring\n", keyStr.c_str());
+				break;
+		}
 	}
 
 	fclose(file);
@@ -186,7 +194,7 @@ bool ConfigInfo::writeFile(const char *filename) {
 	file = fopen(filename, "wb");
 	if(!file)
 		return false;
-	dump(file);
+	dump(file, false);
 	fclose(file);
 
 	return true;
@@ -200,9 +208,10 @@ bool ConfigInfo::writeFile(const char *filename) {
 #define INT2STR(i) std::to_string(i)
 #define FLOAT2STR(i) std::to_string(i)
 #endif
-void ConfigInfo::dump(FILE *out) {
+void ConfigInfo::dump(FILE *out, bool showDefault) {
 	std::unordered_map<std::string, ConfigValue*>::const_iterator it, itEnd;
 	std::string val;
+	bool isDefault;
 
 	for(it = config.cbegin(), itEnd = config.cend(); it != itEnd; ++it) {
 		ConfigValue* v = it->second;
@@ -211,29 +220,34 @@ void ConfigInfo::dump(FILE *out) {
 			case ConfigValue::Bool:
 				type = 'B';
 				val = v->get(false) ? "true" : "false";
+				isDefault = v->get(false).isDefault();
 				break;
 
 			case ConfigValue::Integer:
 				type = 'N';
 				val = INT2STR(v->get(0));
+				isDefault = v->get(0).isDefault();
 				break;
 
 			case ConfigValue::Float:
 				type = 'F';
 				val = FLOAT2STR(v->get(0.0f));
+				isDefault = v->get(0.0f).isDefault();
 				break;
 
 			case ConfigValue::String:
 				type = 'S';
 				val = v->get("<NULL>");
+				isDefault = v->get("<NULL>").isDefault();
 				break;
 
 			case ConfigValue::None:
 				type = '0';
 				val = "<NONE>";
+				isDefault = true;
 				break;
 		}
-
-		fprintf(out, "%c %s:%s\n", type, it->first.c_str(), val.c_str());
+		if(!isDefault || showDefault)
+			fprintf(out, "%c%c%s:%s\n", type, isDefault ? '*' : ' ', it->first.c_str(), val.c_str());
 	}
 }

@@ -1,8 +1,15 @@
 #include "Log.h"
-#include "private/RappelzLibConfig.h"
+#include "RappelzLibConfig.h"
 #include <stdio.h>
 #include <time.h>
 #include <stdarg.h>
+
+#ifdef _WIN32
+#include <direct.h>
+#define createdir(dir) mkdir(dir)
+#else
+#define createdir(dir) mkdir(dir, 0755)
+#endif
 
 #ifdef _MSC_VER
 #define va_copy(d,s) ((d) = (s))
@@ -89,22 +96,15 @@ void Log::updateLevel(ICallbackGuard* instance, cval<std::string>* level) {
 
 void Log::updateFile(ICallbackGuard* instance, cval<std::string>* str) {
 	Log* thisInstance = (Log*) instance;
+
 	thisInstance->open();
 }
 
 bool Log::open() {
 	std::string newFileName = dir.get() + "/" + fileName.get();
 	FILE* newfile;
-	bool alreadyOpen = false;
 
-
-	uv_mutex_lock(&lock);
-	if(openedFile == newFileName)
-		alreadyOpen = true;
-	uv_mutex_unlock(&lock);
-
-	if(alreadyOpen)
-		return true;
+	createdir(dir.get().c_str());
 
 	newfile = fopen(newFileName.c_str(), "ab");
 	if(!newfile) {

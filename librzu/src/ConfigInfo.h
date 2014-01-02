@@ -12,36 +12,51 @@
 template<class T>
 class cval {
 public:
-	typedef void (*EventCallback)(ICallbackGuard* instance, cval<T>* value);
+	typedef void (*EventCallback)(ICallbackGuard* instance);
+	typedef void (*EventCallbackWithThis)(ICallbackGuard* instance, cval<T>* value);
 
-	cval() { uv_rwlock_init(&lock); uv_mutex_init(&listenersLock); }
-	cval(const T& value) : value(value) { uv_rwlock_init(&lock); uv_mutex_init(&listenersLock); }
+	cval() : _isDefault(true) { uv_rwlock_init(&lock); uv_mutex_init(&listenersLock); }
+	cval(const T& value) : value(value), _isDefault(true)  { uv_rwlock_init(&lock); uv_mutex_init(&listenersLock); }
 
 	T get() { T val; uv_rwlock_rdlock(&lock); val = value; uv_rwlock_rdunlock(&lock); return val; }
-	void set(const T& val) { uv_rwlock_wrlock(&lock); value = val; uv_rwlock_wrunlock(&lock); dispatchValueChanged(); }
+	T get(const T& def) { T val; uv_rwlock_rdlock(&lock); if(_isDefault) val = def; else val = value; uv_rwlock_rdunlock(&lock); return val; }
+	void set(const T& val) { uv_rwlock_wrlock(&lock); value = val; _isDefault = false; uv_rwlock_wrunlock(&lock); dispatchValueChanged(); }
+	void setDefault(const T& def) { bool changed = false; uv_rwlock_wrlock(&lock); if(_isDefault) { value = def; changed = true; } uv_rwlock_wrunlock(&lock); if(changed) dispatchValueChanged(); }
 
 	operator T() { return get(); }
 	cval<T>& operator=(const T& val) { set(val); return *this; }
 
-	void addListener(ICallbackGuard* instance, EventCallback callback) { listeners.push_back(Callback<EventCallback>(instance, callback)); }
+	bool isDefault() { return _isDefault; }
+
+	void addListener(ICallbackGuard* instance, EventCallback callback) { uv_mutex_lock(&listenersLock); listeners.push_back(Callback<EventCallback>(instance, callback)); uv_mutex_unlock(&listenersLock); }
+	void addListener(ICallbackGuard* instance, EventCallbackWithThis callback) { uv_mutex_lock(&listenersLock); listenersWithThis.push_back(Callback<EventCallbackWithThis>(instance, callback)); uv_mutex_unlock(&listenersLock); }
 	void dispatchValueChanged() {
 		std::list< Callback<EventCallback> > listenersCopy;
+		std::list< Callback<EventCallbackWithThis> > listenersWithThisCopy;
 
 		uv_mutex_lock(&listenersLock);
 		listenersCopy = listeners;
+		listenersWithThisCopy = listenersWithThis;
 		uv_mutex_unlock(&listenersLock);
 
 		auto it = listenersCopy.cbegin();
 		auto itEnd = listenersCopy.cend();
 		for(; it != itEnd; ++it)
-			CALLBACK_CALL(*it, this);
+			CALLBACK_CALL(*it);
+
+		auto itWithThis = listenersWithThisCopy.cbegin();
+		auto itWithThisEnd = listenersWithThisCopy.cend();
+		for(; itWithThis != itWithThisEnd; ++it)
+			CALLBACK_CALL(*itWithThis, this);
 	}
 
 private:
 	std::list< Callback<EventCallback> > listeners;
+	std::list< Callback<EventCallbackWithThis> > listenersWithThis;
 	T value;
 	uv_rwlock_t lock;
 	uv_mutex_t listenersLock;
+	bool _isDefault;
 };
 
 class RAPPELZLIB_EXTERN ConfigValue
@@ -55,7 +70,7 @@ public:
 		None
 	};
 
-	ConfigValue(Type type);
+	ConfigValue(Type type) : type(type), keyName(nullptr) {}
 
 	Type getType() { return type; }
 	void setKeyName(const std::string* keyName) { this->keyName = keyName; }
@@ -65,24 +80,25 @@ public:
 	void set(int val) { if(type == None) type = Integer; if(check(Integer, true)) data.n = val; }
 	void set(float val) { if(type == None) type = Float; if(check(Float, true)) data.f = val; }
 	void set(const std::string& val) { if(type == None) type = String; if(check(String, true)) data.s = val; }
-	void set(const ConfigValue* v) { type = v->type; data = v->data; }
 	void set(double val) { set((float)val); }
 	void set(const char* val) { set(std::string(val)); }
 
-	cval<bool>& get(bool def) { if(type == None) { type = Bool; data.b = def; } check(Bool, false); return data.b; }
-	cval<int>& get(int def) { if(type == None) { type = Integer; data.n = def; } check(Integer, false); return data.n; }
-	cval<float>& get(float def) { if(type == None) { type = Float; data.f = def; } check(Float, false); return data.f; }
-	cval<std::string>& get(const std::string& def) { if(type == None) { type = String; data.s = def; } check(String, false); return data.s; }
-	cval<std::string>& get(const char* def) { if(type == None) { type = String; data.s = def; } check(String, false); return data.s; }
+	cval<bool>& get(bool def) { if(type == None) { type = Bool; data.b = cval<bool>(def); } check(Bool, false); return data.b; }
+	cval<int>& get(int def) { if(type == None) { type = Integer; data.n = cval<int>(def); } check(Integer, false); return data.n; }
+	cval<float>& get(float def) { if(type == None) { type = Float; data.f = cval<float>(def); } check(Float, false); return data.f; }
+	cval<std::string>& get(const std::string& def) { if(type == None) { type = String; data.s = cval<std::string>(def); } check(String, false); return data.s; }
+	cval<std::string>& get(const char* def) { if(type == None) { type = String; data.s = cval<std::string>(def); } check(String, false); return data.s; }
 
 private:
 	Type type;
 	const std::string* keyName;
-	struct {
+	struct Data {
 		cval<bool> b;
 		cval<int> n;
 		cval<float> f;
 		cval<std::string> s;
+
+		Data() : b(false), n(0), f(0.0f) {}
 	} data;
 
 };
@@ -92,12 +108,12 @@ class RAPPELZLIB_EXTERN ConfigInfo : public Object
 	DECLARE_CLASS(ConfigInfo)
 
 public:
-	ConfigInfo();
+	ConfigInfo() {}
 
-	void parseCommandLine(int argc, char **argv);
+	void parseCommandLine(int argc, char **argv, bool onlyConfigFileLocation = false);
 	bool readFile(const char *filename);
 	bool writeFile(const char* filename);
-	void dump(FILE* out);
+	void dump(FILE* out, bool showDefault);
 
 	ConfigValue* getValue(const std::string& key, bool createIfNonExistant = true);
 
@@ -107,19 +123,11 @@ public:
 	static cval<std::string>& get(const char* key, const std::string& def) { return ConfigInfo::get()->getValue(key)->get(def); }
 	static cval<std::string>& get(const char* key, const char* def) { return ConfigInfo::get()->getValue(key)->get(def); }
 
-	static ConfigInfo* get() {
-		static ConfigInfo instance;
-		return &instance;
-	}
-
-	static void init() {
-		ConfigInfo::get();
-	}
+	static ConfigInfo* get();
 
 private:
 	std::pair<std::unordered_map<std::string, ConfigValue*>::iterator, bool> addValue(const std::string& key, ConfigValue* v);
 	std::unordered_map<std::string, ConfigValue*> config;
-
 };
 
 #define CFG(key, defaultValue) ConfigInfo::get(key, defaultValue)
