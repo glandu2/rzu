@@ -10,20 +10,20 @@ DesPasswordCipher
 ServerInfo
 */
 
-#include "Auth/ClientData.h"
+#include "AuthServer/ClientData.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientData)
 
-#include "Auth/ClientInfo.h"
+#include "AuthServer/ClientInfo.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientInfo)
 
-#include "Auth/DB_Account.h"
+#include "AuthServer/DB_Account.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_Account)
 
-#include "Auth/ServerInfo.h"
+#include "AuthServer/ServerInfo.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::ServerInfo)
 
-#include "Upload/ClientInfo.h"
+#include "UploadServer/ClientInfo.h"
 DECLARE_CLASSCOUNT_STATIC(UploadServer::ClientInfo)
 
-#include "Upload/GameServerInfo.h"
+#include "UploadServer/GameServerInfo.h"
 DECLARE_CLASSCOUNT_STATIC(UploadServer::GameServerInfo)

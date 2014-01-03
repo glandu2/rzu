@@ -27,8 +27,8 @@ void GameServerInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(CONFIG_GET()->uploadGameConfig.listenIp,
-						 CONFIG_GET()->uploadGameConfig.port);
+	serverSocket->listen(CONFIG_GET()->upload.game.listenIp,
+						 CONFIG_GET()->upload.game.port);
 }
 
 GameServerInfo::~GameServerInfo() {

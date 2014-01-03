@@ -51,8 +51,8 @@ void ClientInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(CONFIG_GET()->clientConfig.listenIp,
-						 CONFIG_GET()->clientConfig.port);
+	serverSocket->listen(CONFIG_GET()->auth.client.listenIp,
+						 CONFIG_GET()->auth.client.port);
 }
 
 void ClientInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
@@ -199,7 +199,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 		account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
 		strncpy((char*)password, packet->password, 61);
-		DesPasswordCipher(CONFIG_GET()->clientConfig.desKey.get().c_str()).decrypt(password, 61);
+		DesPasswordCipher(CONFIG_GET()->auth.client.desKey.get().c_str()).decrypt(password, 61);
 	}
 
 	debug("Login request for account %s with password %s\n", account.c_str(), password);

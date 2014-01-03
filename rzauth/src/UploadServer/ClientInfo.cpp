@@ -1,15 +1,17 @@
 #include "ClientInfo.h"
 #include "RappelzSocket.h"
-#include <time.h>
 #include "EventLoop.h"
 #include "../GlobalConfig.h"
 #include "Packets/PacketEnums.h"
 #include "GameServerInfo.h"
+#include <time.h>
+#include <stdio.h>
 
 
 #ifdef _WIN32
 #include <direct.h>
 #define createdir(dir) mkdir(dir)
+#define snprintf(buffer, size, ...) _snprintf_s(buffer, size, _TRUNCATE, __VA_ARGS__)
 #else
 #define createdir(dir) mkdir(dir, 0755)
 #endif
@@ -72,8 +74,8 @@ void ClientInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(CONFIG_GET()->uploadClientConfig.listenIp,
-						 CONFIG_GET()->uploadClientConfig.port);
+	serverSocket->listen(CONFIG_GET()->upload.client.listenIp,
+						 CONFIG_GET()->upload.client.port);
 }
 
 void ClientInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
@@ -153,7 +155,7 @@ void ClientInfo::onUpload(const TS_CU_UPLOAD* packet) {
 	} else if(!checkJpegImage(packet->file_contents)) {
 	} else {
 		int filenameSize = currentRequest->getGameServer()->getName().size() + 1 + 10 + 1 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 4 + 1;
-		char filename[filenameSize];
+		char *filename = (char*)alloca(filenameSize);
 		struct tm timeinfo;
 
 		brktimegm(time(NULL), &timeinfo);
@@ -170,8 +172,8 @@ void ClientInfo::onUpload(const TS_CU_UPLOAD* packet) {
 
 		debug("Uploading image %s for client id %u with account id %u for guild %u\n", filename, currentRequest->getClientId(), currentRequest->getAccountId(), currentRequest->getGuildId());
 
-		std::string fullFileName = CONFIG_GET()->uploadClientConfig.uploadDir.get() + "/" + filename;
-		createdir(CONFIG_GET()->uploadClientConfig.uploadDir.get().c_str());
+		std::string fullFileName = CONFIG_GET()->upload.client.uploadDir.get() + "/" + filename;
+		createdir(CONFIG_GET()->upload.client.uploadDir.get().c_str());
 		FILE* file = fopen(fullFileName.c_str(), "wb");
 		if(!file) {
 			warn("Cant open upload target file %s\n", fullFileName.c_str());

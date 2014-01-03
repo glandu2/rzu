@@ -14,13 +14,13 @@ void GlobalConfig::init() {
 	RappelzLibConfig::get()->trafficDump.file.setDefault("auth_traffic.log");
 
 #ifdef _WIN32
-	GlobalConfig::get()->dbAccount.driver.setDefault("SQL Server");
+	GlobalConfig::get()->auth.dbAccount.driver.setDefault("SQL Server");
 #else
-	GlobalConfig::get()->dbAccount.driver.setDefault("FreeTDS");
+	GlobalConfig::get()->auth.dbAccount.driver.setDefault("FreeTDS");
 #endif
 }
 
-void GlobalConfig::DbAccount::updateConnectionString(ICallbackGuard* instance) {
+void GlobalConfig::AuthConfig::DbAccount::updateConnectionString(ICallbackGuard* instance) {
 	DbAccount* thisInstance = (DbAccount*)instance;
 
 	thisInstance->connectionString.setDefault(

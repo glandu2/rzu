@@ -31,8 +31,8 @@ void ServerInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(CONFIG_GET()->gameConfig.listenIp,
-						 CONFIG_GET()->gameConfig.port);
+	serverSocket->listen(CONFIG_GET()->auth.game.listenIp,
+						 CONFIG_GET()->auth.game.port);
 }
 
 ServerInfo::~ServerInfo() {
