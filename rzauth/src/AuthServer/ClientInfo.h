@@ -14,9 +14,11 @@
 #include "Packets/TS_CA_SERVER_LIST.h"
 #include "Packets/TS_CA_SELECT_SERVER.h"
 
+namespace AuthServer {
+
 class ClientInfo : public Object, public ICallbackGuard
 {
-	DECLARE_CLASS(ClientInfo)
+	DECLARE_CLASS(AuthServer::ClientInfo)
 
 public:
 	ClientInfo(RappelzSocket *socket);
@@ -45,5 +47,7 @@ private:
 	unsigned char aesKey[32];
 	ClientData* clientData;
 };
+
+} // namespace AuthServer
 
 #endif // CLIENTMANAGER_H

@@ -7,12 +7,14 @@
 #include <stdint.h>
 #include "uv.h"
 
+namespace AuthServer {
+
 class ClientInfo;
 class ServerInfo;
 
 class ClientData : public Object
 {
-	DECLARE_CLASS(ClientData)
+	DECLARE_CLASS(AuthServer::ClientData)
 
 public:
 	ClientData(ClientInfo* clientInfo);
@@ -46,5 +48,7 @@ private:
 	static uv_mutex_t mapLock;
 	static uv_once_t lockInit;
 };
+
+} // namespace AuthServer
 
 #endif // CLIENTDATA_H

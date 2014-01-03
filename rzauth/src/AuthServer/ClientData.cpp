@@ -1,6 +1,9 @@
 #include "ClientData.h"
 #include "uv.h"
 
+
+namespace AuthServer {
+
 uv_mutex_t ClientData::mapLock = initializeLock();
 uv_once_t ClientData::lockInit = UV_ONCE_INIT;
 std::unordered_map<std::string, ClientData*> ClientData::connectedClients;
@@ -80,3 +83,5 @@ ClientData* ClientData::getClient(const std::string& account) {
 
 	return foundClient;
 }
+
+} // namespace AuthServer

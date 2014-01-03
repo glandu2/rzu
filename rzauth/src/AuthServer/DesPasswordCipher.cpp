@@ -44,6 +44,8 @@
 #include <string.h>
 #include "DesPasswordCipher.h"
 
+namespace AuthServer {
+
 const static char ip[]                                /* initial permutation P        */
 = {
  58, 50, 42, 34, 26, 18, 10, 2,
@@ -511,3 +513,5 @@ void DesPasswordCipher::init( const char *password )
 	sinit();                            /* compression functions        */
 	p32init();                          /* 32-bit permutation in f      */
 }
+
+} // namespace AuthServer

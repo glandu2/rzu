@@ -2,7 +2,7 @@
 #include "ServerInfo.h"
 #include "ClientInfo.h"
 #include <string.h>
-#include "GlobalConfig.h"
+#include "../GlobalConfig.h"
 #include <time.h>
 
 #include "EventLoop.h"
@@ -10,6 +10,8 @@
 #include "Packets/TS_AG_LOGIN_RESULT.h"
 #include "Packets/TS_AG_CLIENT_LOGIN.h"
 #include "Packets/TS_AG_KICK_CLIENT.h"
+
+namespace AuthServer {
 
 std::vector<ServerInfo*> ServerInfo::servers;
 
@@ -181,3 +183,5 @@ void ServerInfo::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet) {
 	warn("Client %s kick failed (removing from client list)\n", packet->account);
 	ClientData::removeClient(packet->account);
 }
+
+} // namespace AuthServer
