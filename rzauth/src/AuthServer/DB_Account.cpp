@@ -6,12 +6,14 @@
 #include <string.h>
 #include "ClientInfo.h"
 #include "EventLoop.h"
-#include "GlobalConfig.h"
+#include "../GlobalConfig.h"
 #include "Log.h"
 
 #ifdef _MSC_VER
 #define strncasecmp strnicmp
 #endif
+
+namespace AuthServer {
 
 static void extractError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT type);
 
@@ -199,3 +201,5 @@ static void extractError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT ty
 			Log::get()->log(errorLevel, "ODBCERROR", "%s:%d:%ld:%s\n", state, i, (long)native, text);
 	} while(ret == SQL_SUCCESS);
 }
+
+} // namespace AuthServer

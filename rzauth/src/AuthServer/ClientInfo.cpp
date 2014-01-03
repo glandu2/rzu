@@ -6,7 +6,7 @@
 #include <time.h>       /* time */
 #include <algorithm>
 #include "EventLoop.h"
-#include "GlobalConfig.h"
+#include "../GlobalConfig.h"
 
 #include "DesPasswordCipher.h"
 #include <openssl/evp.h>
@@ -21,6 +21,8 @@
 #include "Packets/TS_AC_AES_KEY_IV.h"
 #include "Packets/TS_AC_SELECT_SERVER.h"
 #include "Packets/TS_AC_SERVER_LIST.h"
+
+namespace AuthServer {
 
 ClientInfo::ClientInfo(RappelzSocket* socket) {
 	this->socket = socket;
@@ -343,3 +345,5 @@ void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 		socket->abort();
 	}
 }
+
+} // namespace AuthServer

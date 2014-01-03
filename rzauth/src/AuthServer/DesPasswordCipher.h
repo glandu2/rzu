@@ -1,13 +1,12 @@
 #ifndef DESPASSWORDCIPHER_H
 #define DESPASSWORDCIPHER_H
+
 #include <stdlib.h>
 
-#include "Object.h"
+namespace AuthServer {
 
-class DesPasswordCipher : public Object
+class DesPasswordCipher
 {
-	DECLARE_CLASS(DesPasswordCipher)
-
 	public:
 		DesPasswordCipher(const char *password = NULL) { if(password) init(password); }
 
@@ -56,5 +55,7 @@ class DesPasswordCipher : public Object
 		char m_kn[16][6];				// key selections
 
 };
+
+} // namespace AuthServer
 
 #endif // DESPASSWORDCIPHER_H

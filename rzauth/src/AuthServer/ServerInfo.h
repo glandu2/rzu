@@ -13,9 +13,11 @@
 #include "Packets/TS_GA_CLIENT_LOGOUT.h"
 #include "Packets/TS_GA_CLIENT_KICK_FAILED.h"
 
+namespace AuthServer {
+
 class ServerInfo : public Object, public ICallbackGuard
 {
-	DECLARE_CLASS(ServerInfo)
+	DECLARE_CLASS(AuthServer::ServerInfo)
 
 public:
 	ServerInfo(RappelzSocket* socket);
@@ -55,5 +57,7 @@ private:
 	std::string serverScreenshotUrl;
 	bool isAdultServer;
 };
+
+} // namespace AuthServer
 
 #endif // SERVERINFO_H

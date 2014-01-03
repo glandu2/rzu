@@ -1,11 +1,10 @@
-#include "ClientInfo.h"
-#include "ServerInfo.h"
 #include "EventLoop.h"
-#include "ConfigInfo.h"
 #include "GlobalConfig.h"
 #include "RappelzLibInit.h"
-#include "Server.h"
-#include "DB_Account.h"
+
+#include "Auth/ClientInfo.h"
+#include "Auth/ServerInfo.h"
+#include "Auth/DB_Account.h"
 
 #include "Upload/ClientInfo.h"
 #include "Upload/GameServerInfo.h"
@@ -19,12 +18,12 @@ int main(int argc, char **argv) {
 //	uv_timer_start(&timer, &showDebug, 0, 3000);
 
 	RappelzLibInit(argc, argv, &GlobalConfig::init);
-	if(DB_Account::init() == false) {
+	if(AuthServer::DB_Account::init() == false) {
 		return -1;
 	}
 
-	ClientInfo::startServer();
-	ServerInfo::startServer();
+	AuthServer::ClientInfo::startServer();
+	AuthServer::ServerInfo::startServer();
 	UploadServer::ClientInfo::startServer();
 	UploadServer::GameServerInfo::startServer();
 
@@ -39,10 +38,9 @@ void showDebug(uv_timer_t *, int) {
 	sprintf(debugInfo, "%s\t%lu Socket\n", debugInfo, Socket::getObjectCount());
 	sprintf(debugInfo, "%s\t\t%lu EncryptedSocket\n", debugInfo, EncryptedSocket::getObjectCount());
 	sprintf(debugInfo, "%s\t\t\t%lu RappelzSocket\n", debugInfo, RappelzSocket::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu Server\n", debugInfo, Server::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu ClientInfo\n", debugInfo, ClientInfo::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu ClientData\n", debugInfo, ClientData::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu DB_Account\n", debugInfo, DB_Account::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu ServerInfo\n", debugInfo, ServerInfo::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu ClientInfo\n", debugInfo, AuthServer::ClientInfo::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu ClientData\n", debugInfo, AuthServer::ClientData::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu DB_Account\n", debugInfo, AuthServer::DB_Account::getObjectCount());
+	sprintf(debugInfo, "%s\t%lu ServerInfo\n", debugInfo, AuthServer::ServerInfo::getObjectCount());
 	printf(debugInfo);
 }

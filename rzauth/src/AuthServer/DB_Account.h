@@ -7,11 +7,13 @@
 #include <stdint.h>
 #include "Log.h"
 
+namespace AuthServer {
+
 class ClientInfo;
 
 class DB_Account : public Object
 {
-	DECLARE_CLASS(DB_Account)
+	DECLARE_CLASS(AuthServer::DB_Account)
 
 public:
 	static bool init();
@@ -37,5 +39,7 @@ private:
 	uint32_t accountId;
 	unsigned char givenPasswordMd5[16];
 };
+
+} // namespace AuthServer
 
 #endif // DB_ACCOUNT_H
