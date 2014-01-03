@@ -35,14 +35,14 @@ bool DB_Account::init() {
 	//Check connection: TODO
 	HDBC hdbc;
 	HSTMT hstmt;
-	std::string connectionString = CONFIG_GET()->dbAccount.connectionString.get();
+	std::string connectionString = CONFIG_GET()->auth.dbAccount.connectionString.get();
 	const char* dbQuery = "SELECT * FROM information_schema.tables WHERE table_schema = 'dbo' AND table_name = 'Account';";
 
 	Log::get()->log(Log::LL_Info, "DB_Account::init", "Checking connection to %s\n", connectionString.c_str());
 	if(!openConnection(connectionString, &hdbc, &hstmt)) {
 		Log::get()->log(Log::LL_Error, "DB_Account::init", "Failed to connect to auth database\n", connectionString.c_str());
 		checkError(Log::LL_Error, &hdbc, &hstmt);
-		if(CONFIG_GET()->dbAccount.ignoreInitCheck == false)
+		if(CONFIG_GET()->auth.dbAccount.ignoreInitCheck == false)
 			return false;
 		else
 			return true;
@@ -51,7 +51,7 @@ bool DB_Account::init() {
 	if(!SQL_SUCCEEDED(result)) {
 		Log::get()->log(Log::LL_Error, "DB_Account::init", "Failed to execute query %s\n", dbQuery);
 		checkError(Log::LL_Error, &hdbc, &hstmt);
-		if(CONFIG_GET()->dbAccount.ignoreInitCheck == false)
+		if(CONFIG_GET()->auth.dbAccount.ignoreInitCheck == false)
 			return false;
 		else
 			return true;
@@ -60,7 +60,7 @@ bool DB_Account::init() {
 	if(!SQL_SUCCEEDED(result)) {
 		Log::get()->log(Log::LL_Error, "DB_Account::init", "Failed to fetch data of query %s\n", dbQuery);
 		checkError(Log::LL_Error, &hdbc, &hstmt);
-		if(CONFIG_GET()->dbAccount.ignoreInitCheck == false)
+		if(CONFIG_GET()->auth.dbAccount.ignoreInitCheck == false)
 			return false;
 		else
 			return true;
@@ -73,7 +73,7 @@ bool DB_Account::init() {
 }
 
 DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const char* password) : clientInfo(clientInfo), account(account) {
-	std::string buffer = CONFIG_GET()->dbAccount.salt;
+	std::string buffer = CONFIG_GET()->auth.dbAccount.salt;
 	req.data = this;
 	ok = false;
 	accountId = 0;
@@ -90,7 +90,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 	HDBC hdbc;
 	HSTMT hstmt;
 
-	if(!openConnection(CONFIG_GET()->dbAccount.connectionString.get(), &hdbc, &hstmt)) {
+	if(!openConnection(CONFIG_GET()->auth.dbAccount.connectionString.get(), &hdbc, &hstmt)) {
 		checkError(Log::LL_Debug, &hdbc, &hstmt);
 		return;
 	}

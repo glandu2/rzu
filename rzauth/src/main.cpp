@@ -2,12 +2,12 @@
 #include "GlobalConfig.h"
 #include "RappelzLibInit.h"
 
-#include "Auth/ClientInfo.h"
-#include "Auth/ServerInfo.h"
-#include "Auth/DB_Account.h"
+#include "AuthServer/ClientInfo.h"
+#include "AuthServer/ServerInfo.h"
+#include "AuthServer/DB_Account.h"
 
-#include "Upload/ClientInfo.h"
-#include "Upload/GameServerInfo.h"
+#include "UploadServer/ClientInfo.h"
+#include "UploadServer/GameServerInfo.h"
 
 //socket->deleteLater in uv_check_t
 void showDebug(uv_timer_t*, int);
