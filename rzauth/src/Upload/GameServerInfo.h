@@ -18,6 +18,7 @@ public:
 	GameServerInfo(RappelzSocket* socket);
 	~GameServerInfo();
 
+	void sendUploadResult(uint32_t guidId, uint32_t fileSize, const char *fileName);
 	const std::string& getName() { return serverName; }
 
 	static void startServer();

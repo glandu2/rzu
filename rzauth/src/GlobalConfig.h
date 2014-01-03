@@ -53,10 +53,11 @@ struct GlobalConfig {
 
 
 	struct UploadClientConfig {
-		cval<std::string> &listenIp;
+		cval<std::string> &uploadDir, &listenIp;
 		cval<int> &port;
 
 		UploadClientConfig() :
+			uploadDir(CFG("upload.dir", "upload")),
 			listenIp(CFG("listen.upload.client.ip", "0.0.0.0")),
 			port(CFG("listen.upload.client.port", 4617)) {}
 	} uploadClientConfig;

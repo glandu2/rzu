@@ -30,6 +30,8 @@ protected:
 	void onLogin(const TS_CU_LOGIN* packet);
 	void onUpload(const TS_CU_UPLOAD* packet);
 
+	bool checkJpegImage(const char *data);
+
 private:
 	RappelzSocket* socket;
 
