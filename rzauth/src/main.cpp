@@ -7,6 +7,9 @@
 #include "Server.h"
 #include "DB_Account.h"
 
+#include "Upload/ClientInfo.h"
+#include "Upload/GameServerInfo.h"
+
 //socket->deleteLater in uv_check_t
 void showDebug(uv_timer_t*, int);
 
@@ -16,10 +19,14 @@ int main(int argc, char **argv) {
 //	uv_timer_start(&timer, &showDebug, 0, 3000);
 
 	RappelzLibInit(argc, argv, &GlobalConfig::init);
-	DB_Account::init();
+	if(DB_Account::init() == false) {
+		return -1;
+	}
 
 	ClientInfo::startServer();
 	ServerInfo::startServer();
+	UploadServer::ClientInfo::startServer();
+	UploadServer::GameServerInfo::startServer();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }

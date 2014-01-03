@@ -24,3 +24,9 @@ DECLARE_CLASSCOUNT_STATIC(DesPasswordCipher)
 
 #include "ServerInfo.h"
 DECLARE_CLASSCOUNT_STATIC(ServerInfo)
+
+#include "Upload/ClientInfo.h"
+DECLARE_CLASSCOUNT_STATIC(UploadServer::ClientInfo)
+
+#include "Upload/GameServerInfo.h"
+DECLARE_CLASSCOUNT_STATIC(UploadServer::GameServerInfo)
