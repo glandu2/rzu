@@ -8,6 +8,7 @@
 
 #include "UploadServer/ClientInfo.h"
 #include "UploadServer/GameServerInfo.h"
+#include "UploadServer/GuildIconServer.h"
 
 //socket->deleteLater in uv_check_t
 void showDebug(uv_timer_t*, int);
@@ -26,6 +27,7 @@ int main(int argc, char **argv) {
 	AuthServer::ServerInfo::startServer();
 	UploadServer::ClientInfo::startServer();
 	UploadServer::GameServerInfo::startServer();
+	UploadServer::GuildIconServer::startServer();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }

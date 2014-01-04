@@ -6,7 +6,7 @@
 #pragma pack(push, 1)
 struct TS_CU_UPLOAD : public TS_MESSAGE
 {
-	int32_t file_length;
+	uint32_t file_length;
 	char file_contents[0];
 
 	static const uint16_t packetID = 50007;

@@ -56,12 +56,13 @@ struct GlobalConfig {
 	struct UploadConfig {
 		struct ClientConfig {
 			cval<std::string> &uploadDir, &listenIp;
-			cval<int> &port;
+			cval<int> &port, &webPort;
 
 			ClientConfig() :
 				uploadDir(CFG("upload.dir", "upload")),
 				listenIp(CFG("upload.clients.ip", "0.0.0.0")),
-				port(CFG("upload.clients.port", 4617)) {}
+				port(CFG("upload.clients.port", 4617)),
+				webPort(CFG("upload.clients.webport", 80))  {}
 		} client;
 
 		struct GameConfig {
