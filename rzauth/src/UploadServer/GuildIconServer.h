@@ -23,14 +23,24 @@ protected:
 	static void onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
 	static void onDataReceived(ICallbackGuard *instance, Socket* socket);
 
+
+	void parseData(const std::vector<char>& data);
 	void parseUrl(std::string urlString);
 	void sendIcon(const std::string& filename);
 
 private:
 	Socket* socket;
 
-	bool retrievingUrl;
+	enum State : char {
+		WaitStatusLine,
+		RetrievingStatusLine,
+		WaitEndOfHeaders
+	} status;
+
+	char nextByteToMatch;
+
 	std::ostringstream url;
+	uint8_t urlLength;
 };
 
 } // namespace UploadServer
