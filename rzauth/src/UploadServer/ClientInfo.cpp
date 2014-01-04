@@ -6,51 +6,7 @@
 #include "GameServerInfo.h"
 #include <time.h>
 #include <stdio.h>
-
-
-#ifdef _WIN32
-#include <direct.h>
-#define createdir(dir) mkdir(dir)
-#define snprintf(buffer, size, ...) _snprintf_s(buffer, size, _TRUNCATE, __VA_ARGS__)
-#else
-#define createdir(dir) mkdir(dir, 0755)
-#endif
-
-// From ffmpeg http://www.ffmpeg.org/doxygen/trunk/cutils_8c-source.html
-#define ISLEAP(y) (((y) % 4 == 0) && (((y) % 100) != 0 || ((y) % 400) == 0))
-#define LEAPS_COUNT(y) ((y)/4 - (y)/100 + (y)/400)
-
-/* This is our own gmtime_r. It differs from its POSIX counterpart in a
-	couple of places, though. */
-struct tm *brktimegm(time_t secs, struct tm *tm)
-{
-	int days, y, ny, m;
-	int md[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-
-	days = secs / 86400;
-	secs %= 86400;
-	tm->tm_hour = secs / 3600;
-	tm->tm_min = (secs % 3600) / 60;
-	tm->tm_sec =  secs % 60;
-
-	/* oh well, may be someone some day will invent a formula for this stuff */
-	y = 1970; /* start "guessing" */
-	while (days > 365) {
-		ny = (y + days/366);
-		days -= (ny - y) * 365 + LEAPS_COUNT(ny - 1) - LEAPS_COUNT(y - 1);
-		y = ny;
-	}
-	if (days==365 && !ISLEAP(y)) { days=0; y++; }
-	md[1] = ISLEAP(y)?29:28;
-	for (m=0; days >= md[m]; m++)
-		days -= md[m];
-
-	tm->tm_year = y;  /* unlike gmtime_r we store complete year here */
-	tm->tm_mon = m+1; /* unlike gmtime_r tm_mon is from 1 to 12 */
-	tm->tm_mday = days+1;
-
-	return tm;
-}
+#include "Utils.h"
 
 #include "Packets/TS_UC_LOGIN_RESULT.h"
 #include "Packets/TS_UC_UPLOAD.h"
@@ -159,7 +115,7 @@ void ClientInfo::onUpload(const TS_CU_UPLOAD* packet) {
 		char *filename = (char*)alloca(filenameSize);
 		struct tm timeinfo;
 
-		brktimegm(time(NULL), &timeinfo);
+		Utils::getGmTime(time(NULL), &timeinfo);
 
 		snprintf(filename, filenameSize, "%s_%010d_%02d%02d%02d_%02d%02d%02d.jpg",
 				 currentRequest->getGameServer()->getName().c_str(),
@@ -173,8 +129,8 @@ void ClientInfo::onUpload(const TS_CU_UPLOAD* packet) {
 
 		debug("Uploading image %s for client id %u with account id %u for guild %u\n", filename, currentRequest->getClientId(), currentRequest->getAccountId(), currentRequest->getGuildId());
 
-		std::string fullFileName = CONFIG_GET()->upload.client.uploadDir.get() + "/" + filename;
-		createdir(CONFIG_GET()->upload.client.uploadDir.get().c_str());
+		std::string fullFileName = Utils::getFullPath(CONFIG_GET()->upload.client.uploadDir.get() + "/" + filename);
+		Utils::mkdir(CONFIG_GET()->upload.client.uploadDir.get().c_str());
 		FILE* file = fopen(fullFileName.c_str(), "wb");
 		if(!file) {
 			warn("Cant open upload target file %s\n", fullFileName.c_str());

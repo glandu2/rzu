@@ -3,12 +3,30 @@
 #include "../GlobalConfig.h"
 #include <string.h>
 #include <stdio.h>
+#include "Utils.h"
 
 namespace UploadServer {
 
+static const char * const htmlNotFound =
+		"HTTP/1.1 404 Not Found\r\n"
+		"Content-Type: text/html\r\n"
+		"Content-Length: 22\r\n"
+		"\r\n"
+		"<h1>404 Not Found</h1>";
+static int htmlNotFoundSize = strlen(htmlNotFound);
+
+static const char * const htmlFound =
+		"HTTP/1.1 200 Ok\r\n"
+		"Content-Type: image/jpeg\r\n"
+		"Content-Length: %ld\r\n"
+		"\r\n";
+static int htmlFoundSize = strlen(htmlFound);
+
 GuildIconServer::GuildIconServer(Socket* socket) {
 	this->socket = socket;
-	this->retrievingUrl = true;
+	this->status = WaitStatusLine;
+	this->nextByteToMatch = 0;
+	this->urlLength = 0;
 
 	socket->addDataListener(this, &onDataReceived);
 }
@@ -47,81 +65,93 @@ void GuildIconServer::onStateChanged(ICallbackGuard* instance, Socket* clientSoc
 
 void GuildIconServer::onDataReceived(ICallbackGuard *instance, Socket* socket) {
 	GuildIconServer* thisInstance = static_cast<GuildIconServer*>(instance);
-	char buffer[1024];
-	buffer[1023] = 0;
+	std::vector<char> buffer;
 
 	while(socket->getAvailableBytes() > 0) {
-		size_t nbread = socket->read(buffer, 1023);
+		socket->readAll(&buffer);
+		thisInstance->parseData(buffer);
+	}
+}
 
-		if(thisInstance->retrievingUrl) {
-			char *p = strpbrk(buffer, "\r\n");
-			if(p) {
-				thisInstance->retrievingUrl = false;
-				thisInstance->url.write(buffer, p - buffer);
+void GuildIconServer::parseData(const std::vector<char>& data) {
+	static const char * const beginUrl = "GET ";
+	static const char * const endHeader = "\r\n\r\n";
+	ssize_t size = data.size();
+	const char* begin = &data[0];
+
+	for(const char* p = begin; p - begin < size; p++) {
+		if(status == WaitStatusLine) {
+			if(*p == beginUrl[nextByteToMatch]) {
+				nextByteToMatch++;
+				if(nextByteToMatch >= 4) {
+					status = RetrievingStatusLine;
+					nextByteToMatch = 0;
+				}
 			} else {
-				thisInstance->url.write(buffer, nbread);
+				nextByteToMatch = 0;
+			}
+		} else if(status == RetrievingStatusLine) {
+			if(*p == '\r' || *p == '\n') {
+				status = WaitEndOfHeaders;
+			} else if(*p) {
+				if(urlLength < 255) {
+					url.put(*p);
+					urlLength++;
+				} else {
+					status = WaitStatusLine;
+					nextByteToMatch = 0;
+					url.str(std::string());
+					url.clear();
+					urlLength = 0;
+				}
 			}
 		}
 
-		if(strstr(buffer, "\r\n\r\n")) {
-			thisInstance->parseUrl(thisInstance->url.str());
-			thisInstance->url.str(std::string());
-			thisInstance->url.clear();
-			thisInstance->retrievingUrl = true;
+		if(status == RetrievingStatusLine || status == WaitEndOfHeaders) {
+			if(*p == endHeader[nextByteToMatch]) {
+				nextByteToMatch++;
+				if(nextByteToMatch >= 4) {
+					status = WaitStatusLine;
+					nextByteToMatch = 0;
 
+					std::string urlString = url.str();
+					if(!urlString.compare(urlString.size() - 9, std::string::npos, " HTTP/1.1")) {
+						urlString.resize(urlString.size() - 9);
+						parseUrl(urlString);
+					}
+
+					url.str(std::string());
+					url.clear();
+					urlLength = 0;
+				}
+			} else {
+				nextByteToMatch = 0;
+			}
 		}
-		//discard when not reading url
 	}
 }
 
 
 void GuildIconServer::parseUrl(std::string urlString) {
-	if(urlString.size() < 14 || (urlString.size() == 14 && urlString.at(4) == '/')) {
-		//Minimum number of char to have a correct http get request, also exclude GET / HTTP/1.1
-		socket->abort();
-		return;
-	}
-	size_t beforeUrl = 4;
-	size_t afterUrl = urlString.size() - 9;
-
-	trace("Received request\n");
-
-	if(strncmp(urlString.c_str(), "GET ", 4)) {
-		trace("Not a get method\n");
-		socket->abort();
-		return;
-	} else if(urlString.compare(afterUrl, std::string::npos, " HTTP/1.1")) {
-		trace("Not a HTTP/1.1 request\n");
-		socket->abort();
-		return;
-	}
-
 	size_t p;
-	for(p = afterUrl-1; p > beforeUrl; p--) {
+	for(p = urlString.size()-1; p >= 0; p--) {
 		if(urlString.at(p) == '/' || urlString.at(p) == '\\')
 			break;
 	}
-	sendIcon(urlString.substr(p+1, afterUrl-p-1));
+	if(p+1 >= urlString.size()) {
+		//attempt to get a directory
+		socket->write(htmlNotFound, htmlNotFoundSize);
+	} else {
+		sendIcon(urlString.substr(p+1, std::string::npos));
+	}
 }
 
 void GuildIconServer::sendIcon(const std::string& filename) {
-	const char * const noFoundData =
-			"HTTP/1.1 404 Not Found\r\n"
-			"Content-Type: text/html\r\n"
-			"Content-Length: 22\r\n"
-			"\r\n"
-			"<h1>404 Not Found</h1>";
-
-	const char * const foundData =
-			"HTTP/1.1 200 Ok\r\n"
-			"Content-Type: image/jpeg\r\n"
-			"Content-Length: %ld\r\n"
-			"\r\n";
-
-	std::string fullFileName = CONFIG_GET()->upload.client.uploadDir.get() + "/" + filename;
+	std::string fullFileName = Utils::getFullPath(CONFIG_GET()->upload.client.uploadDir.get() + "/" + filename);
 	FILE* file = fopen(fullFileName.c_str(), "rb");
+
 	if(!file) {
-		socket->write(noFoundData, strlen(noFoundData));
+		socket->write(htmlNotFound, htmlNotFoundSize);
 	} else {
 		fseek(file, 0, SEEK_END);
 		size_t fileSize = ftell(file);
@@ -129,9 +159,9 @@ void GuildIconServer::sendIcon(const std::string& filename) {
 		if(fileSize > 64000)
 			fileSize = 64000;
 
-		int bufferSize = strlen(foundData) + 10 + fileSize;
+		int bufferSize = htmlFoundSize + 10 + fileSize;
 		char *buffer = new char[bufferSize];
-		size_t fileContentBegin = sprintf(buffer, foundData, (long int)fileSize);
+		size_t fileContentBegin = sprintf(buffer, htmlFound, (long int)fileSize);
 
 		size_t bytesTransferred = 0;
 		size_t nbrw;
@@ -145,7 +175,7 @@ void GuildIconServer::sendIcon(const std::string& filename) {
 		if(nbrw > 0) {
 			socket->write(buffer, fileContentBegin + fileSize);
 		} else {
-			socket->write(noFoundData, strlen(noFoundData));
+			socket->write(htmlNotFound, htmlNotFoundSize);
 		}
 	}
 }
