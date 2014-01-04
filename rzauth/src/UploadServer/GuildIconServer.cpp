@@ -59,22 +59,24 @@ void GuildIconServer::onDataReceived(ICallbackGuard *instance, Socket* socket) {
 			if(p) {
 				thisInstance->retrievingUrl = false;
 				thisInstance->url.write(buffer, p - buffer);
-				thisInstance->parseUrl();
 			} else {
 				thisInstance->url.write(buffer, nbread);
 			}
 		}
 
-		if(strstr(buffer, "\r\n\r\n"))
+		if(strstr(buffer, "\r\n\r\n")) {
+			thisInstance->parseUrl(thisInstance->url.str());
+			thisInstance->url.str(std::string());
+			thisInstance->url.clear();
 			thisInstance->retrievingUrl = true;
+
+		}
 		//discard when not reading url
 	}
 }
 
 
-void GuildIconServer::parseUrl() {
-	std::string urlString = url.str();
-
+void GuildIconServer::parseUrl(std::string urlString) {
 	if(urlString.size() < 14 || (urlString.size() == 14 && urlString.at(4) == '/')) {
 		//Minimum number of char to have a correct http get request, also exclude GET / HTTP/1.1
 		socket->abort();
