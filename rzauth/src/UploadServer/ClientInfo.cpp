@@ -72,7 +72,6 @@ ClientInfo::~ClientInfo() {
 
 void ClientInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen(CONFIG_GET()->upload.client.listenIp,
 						 CONFIG_GET()->upload.client.port);
@@ -153,6 +152,8 @@ void ClientInfo::onUpload(const TS_CU_UPLOAD* packet) {
 		debug("Upload file is too large: %d bytes. Max 64000 bytes\n", packet->file_length);
 		result.result = TS_RESULT_LIMIT_MAX;
 	} else if(!checkJpegImage(packet->file_contents)) {
+		debug("Upload file is not a jpeg file\n");
+		result.result = TS_RESULT_INVALID_ARGUMENT;
 	} else {
 		int filenameSize = currentRequest->getGameServer()->getName().size() + 1 + 10 + 1 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 4 + 1;
 		char *filename = (char*)alloca(filenameSize);
@@ -196,6 +197,9 @@ void ClientInfo::onUpload(const TS_CU_UPLOAD* packet) {
 }
 
 bool ClientInfo::checkJpegImage(const char *data) {
+	if(memcmp(&data[6], "JFIF", 4))
+		return false;
+
 	return true;
 }
 

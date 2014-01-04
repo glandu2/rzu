@@ -7,8 +7,8 @@
 #pragma pack(push, 1)
 struct TS_US_UPLOAD : public TS_MESSAGE_WNA
 {
-	int32_t guild_id;
-	int32_t file_size;
+	uint32_t guild_id;
+	uint32_t file_size;
 	uint8_t filename_length;
 	uint8_t type;
 	char file_name[0];

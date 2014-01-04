@@ -27,3 +27,6 @@ DECLARE_CLASSCOUNT_STATIC(UploadServer::ClientInfo)
 
 #include "UploadServer/GameServerInfo.h"
 DECLARE_CLASSCOUNT_STATIC(UploadServer::GameServerInfo)
+
+#include "UploadServer/GuildIconServer.h"
+DECLARE_CLASSCOUNT_STATIC(UploadServer::GuildIconServer)
