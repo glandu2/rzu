@@ -3,7 +3,6 @@
 #include "ClientInfo.h"
 #include <string.h>
 #include "../GlobalConfig.h"
-#include <time.h>
 
 #include "EventLoop.h"
 #include "Packets/PacketEnums.h"
@@ -29,7 +28,6 @@ ServerInfo::ServerInfo(RappelzSocket* socket)
 
 void ServerInfo::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen(CONFIG_GET()->auth.game.listenIp,
 						 CONFIG_GET()->auth.game.port);

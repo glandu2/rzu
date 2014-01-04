@@ -15,7 +15,6 @@ GuildIconServer::GuildIconServer(Socket* socket) {
 
 void GuildIconServer::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen(CONFIG_GET()->upload.client.listenIp,
 						 CONFIG_GET()->upload.client.webPort);
