@@ -147,7 +147,7 @@ void GuildIconServer::parseUrl(std::string urlString) {
 }
 
 void GuildIconServer::sendIcon(const std::string& filename) {
-	std::string fullFileName = Utils::getFullPath(CONFIG_GET()->upload.client.uploadDir.get() + "/" + filename);
+	std::string fullFileName = CONFIG_GET()->upload.client.uploadDir.get() + "/" + filename;
 	FILE* file = fopen(fullFileName.c_str(), "rb");
 
 	if(!file) {
