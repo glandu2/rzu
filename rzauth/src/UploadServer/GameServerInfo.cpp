@@ -30,6 +30,8 @@ void GameServerInfo::startServer() {
 }
 
 GameServerInfo::~GameServerInfo() {
+	if(this->serverName.empty() == false)
+		servers.erase(this->serverName);
 	socket->deleteLater();
 }
 
