@@ -27,7 +27,7 @@ bool DB_Account::init() {
 	}
 	result = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, SQL_IS_INTEGER);
 	if(!SQL_SUCCEEDED(result)) {
-		Log::get()->log(Log::LL_Error, "DB_Account::init", "Can\'t use ODBC 3\n");
+		Log::get()->log(Log::LL_Error, "DB_Account::init", 16, "Can\'t use ODBC 3\n");
 		SQLFreeHandle(SQL_HANDLE_ENV, henv);
 		return false;
 	}
@@ -38,9 +38,9 @@ bool DB_Account::init() {
 	std::string connectionString = CONFIG_GET()->auth.dbAccount.connectionString.get();
 	const char* dbQuery = "SELECT * FROM information_schema.tables WHERE table_schema = 'dbo' AND table_name = 'Account';";
 
-	Log::get()->log(Log::LL_Info, "DB_Account::init", "Checking connection to %s\n", connectionString.c_str());
+	Log::get()->log(Log::LL_Info, "DB_Account::init", 16, "Checking connection to %s\n", connectionString.c_str());
 	if(!openConnection(connectionString, &hdbc, &hstmt)) {
-		Log::get()->log(Log::LL_Error, "DB_Account::init", "Failed to connect to auth database\n", connectionString.c_str());
+		Log::get()->log(Log::LL_Error, "DB_Account::init", 16, "Failed to connect to auth database\n", connectionString.c_str());
 		checkError(Log::LL_Error, &hdbc, &hstmt);
 		if(CONFIG_GET()->auth.dbAccount.ignoreInitCheck == false)
 			return false;
@@ -49,7 +49,7 @@ bool DB_Account::init() {
 	}
 	result = SQLExecDirect(hstmt, (SQLCHAR*)dbQuery, SQL_NTS);
 	if(!SQL_SUCCEEDED(result)) {
-		Log::get()->log(Log::LL_Error, "DB_Account::init", "Failed to execute query %s\n", dbQuery);
+		Log::get()->log(Log::LL_Error, "DB_Account::init", 16, "Failed to execute query %s\n", dbQuery);
 		checkError(Log::LL_Error, &hdbc, &hstmt);
 		if(CONFIG_GET()->auth.dbAccount.ignoreInitCheck == false)
 			return false;
@@ -58,7 +58,7 @@ bool DB_Account::init() {
 	}
 	result = SQLFetch(hstmt);
 	if(!SQL_SUCCEEDED(result)) {
-		Log::get()->log(Log::LL_Error, "DB_Account::init", "Failed to fetch data of query %s\n", dbQuery);
+		Log::get()->log(Log::LL_Error, "DB_Account::init", 16, "Failed to fetch data of query %s\n", dbQuery);
 		checkError(Log::LL_Error, &hdbc, &hstmt);
 		if(CONFIG_GET()->auth.dbAccount.ignoreInitCheck == false)
 			return false;
@@ -67,7 +67,7 @@ bool DB_Account::init() {
 	}
 
 	closeConnection(&hdbc, &hstmt);
-	Log::get()->log(Log::LL_Info, "DB_Account::init", "Auth database Ok\n");
+	Log::get()->log(Log::LL_Info, "DB_Account::init", 16, "Auth database Ok\n");
 
 	return true;
 }
@@ -198,7 +198,7 @@ static void extractError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT ty
 	do {
 		ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, sizeof(text), &len);
 		if (SQL_SUCCEEDED(ret))
-			Log::get()->log(errorLevel, "ODBCERROR", "%s:%d:%ld:%s\n", state, i, (long)native, text);
+			Log::get()->log(errorLevel, "ODBCERROR", 9, "%s:%d:%ld:%s\n", state, i, (long)native, text);
 	} while(ret == SQL_SUCCESS);
 }
 

@@ -37,7 +37,7 @@ private:
 		WaitEndOfHeaders
 	} status;
 
-	char nextByteToMatch;
+	uint8_t nextByteToMatch;
 
 	std::ostringstream url;
 	uint8_t urlLength;
