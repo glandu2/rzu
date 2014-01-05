@@ -2,6 +2,7 @@
 #define GLOBALCONFIG_H
 
 #include "ConfigInfo.h"
+#include "Utils.h"
 
 struct GlobalConfig {
 	struct AuthConfig {
@@ -19,7 +20,7 @@ struct GlobalConfig {
 				password(CFG("auth.db.password", "")),
 				salt(CFG("auth.db.salt", "2012")),
 				port(CFG("auth.db.port", 1433)),
-				connectionString(CFG("auth.db.connectionstring", "driver=" + driver.get() + ";Server=" + server.get() + ";Database=" + name.get() + ";UID=" + account.get() + ";PWD=" + password.get() + ";Port=" + std::to_string((long long)port.get()) + ";")),
+				connectionString(CFG("auth.db.connectionstring", "")),
 				ignoreInitCheck(CFG("auth.db.ignoreinitcheck", false))
 			{
 				driver.addListener(this, &updateConnectionString);
@@ -28,6 +29,7 @@ struct GlobalConfig {
 				account.addListener(this, &updateConnectionString);
 				password.addListener(this, &updateConnectionString);
 				port.addListener(this, &updateConnectionString);
+				updateConnectionString(this);
 			}
 
 			static void updateConnectionString(ICallbackGuard* instance);
@@ -62,7 +64,10 @@ struct GlobalConfig {
 				uploadDir(CFG("upload.dir", "upload")),
 				listenIp(CFG("upload.clients.ip", "0.0.0.0")),
 				port(CFG("upload.clients.port", 4617)),
-				webPort(CFG("upload.clients.webport", 80))  {}
+				webPort(CFG("upload.clients.webport", 80))
+			{
+				Utils::autoSetAbsoluteDir(uploadDir);
+			}
 		} client;
 
 		struct GameConfig {

@@ -131,7 +131,7 @@ void ClientInfo::onUpload(const TS_CU_UPLOAD* packet) {
 
 		debug("Uploading image %s for client id %u with account id %u for guild %u\n", filename, currentRequest->getClientId(), currentRequest->getAccountId(), currentRequest->getGuildId());
 
-		std::string absoluteDir = Utils::getFullPath(CONFIG_GET()->upload.client.uploadDir.get());
+		std::string absoluteDir = CONFIG_GET()->upload.client.uploadDir.get();
 		std::string fullFileName = absoluteDir + "/" + filename;
 
 		Utils::mkdir(absoluteDir.c_str());
