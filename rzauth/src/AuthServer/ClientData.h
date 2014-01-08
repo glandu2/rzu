@@ -9,15 +9,15 @@
 
 namespace AuthServer {
 
-class ClientInfo;
-class ServerInfo;
+class ClientSession;
+class GameServerSession;
 
 class ClientData : public Object
 {
 	DECLARE_CLASS(AuthServer::ClientData)
 
 public:
-	ClientData(ClientInfo* clientInfo);
+	ClientData(ClientSession* clientInfo);
 
 	std::string account;
 	uint32_t accountId;
@@ -26,8 +26,8 @@ public:
 	uint32_t eventCode;
 	uint64_t oneTimePassword;
 
-	ClientInfo* client; //if != null: not yet in-game
-	ServerInfo* server; //if != null: in-game or gameserver selected
+	ClientSession* client; //if != null: not yet in-game
+	GameServerSession* server; //if != null: in-game or gameserver selected
 	bool inGame;
 
 	//Try to add newClient if account is not already in the list (authenticated).
@@ -35,9 +35,9 @@ public:
 	//If the account is already in the hash map, fail: return null and put already connected client data in oldClient
 	//If successful, create a new instance of ClientData with given account added to the hash map
 	//Thread safe
-	static ClientData* tryAddClient(ClientInfo* clientInfo, const std::string& account, ClientData** oldClient);
+	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account, ClientData** oldClient);
 	static bool removeClient(const std::string& account);
-	static bool switchClientToServer(const std::string& account, ServerInfo* server);
+	static bool switchClientToServer(const std::string& account, GameServerSession* server);
 	static ClientData* getClient(const std::string& account);
 	static unsigned int getClientCount() { return connectedClients.size(); }
 

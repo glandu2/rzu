@@ -16,13 +16,13 @@
 
 namespace AuthServer {
 
-class ClientInfo : public Object, public ICallbackGuard
+class ClientSession : public Object, public ICallbackGuard
 {
-	DECLARE_CLASS(AuthServer::ClientInfo)
+	DECLARE_CLASS(AuthServer::ClientSession)
 
 public:
-	ClientInfo(RappelzSocket *socket);
-	~ClientInfo();
+	ClientSession(RappelzSocket *socket);
+	~ClientSession();
 
 	static void startServer();
 

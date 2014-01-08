@@ -9,7 +9,7 @@
 
 namespace AuthServer {
 
-class ClientInfo;
+class ClientSession;
 
 class DB_Account : public Object
 {
@@ -18,7 +18,7 @@ class DB_Account : public Object
 public:
 	static bool init();
 
-	DB_Account(ClientInfo* clientInfo, const std::string& account, const char *password);
+	DB_Account(ClientSession* clientInfo, const std::string& account, const char *password);
 
 	static void onProcess(uv_work_t *req);
 	static void onDone(uv_work_t *req, int status);
@@ -32,7 +32,7 @@ private:
 	//one sql env for all connection
 	static void* henv;
 
-	ClientInfo* clientInfo;
+	ClientSession* clientInfo;
 	uv_work_t req;
 	std::string account;
 	bool ok;

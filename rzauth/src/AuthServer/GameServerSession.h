@@ -15,17 +15,17 @@
 
 namespace AuthServer {
 
-class ServerInfo : public Object, public ICallbackGuard
+class GameServerSession : public Object, public ICallbackGuard
 {
-	DECLARE_CLASS(AuthServer::ServerInfo)
+	DECLARE_CLASS(AuthServer::GameServerSession)
 
 public:
-	ServerInfo(RappelzSocket* socket);
-	~ServerInfo();
+	GameServerSession(RappelzSocket* socket);
+	~GameServerSession();
 
 	static void startServer();
 
-	static const std::vector<ServerInfo*>& getServerList() { return servers; }
+	static const std::vector<GameServerSession*>& getServerList() { return servers; }
 
 	uint16_t getServerIdx() { return serverIdx; }
 	std::string getServerName() { return serverName; }
@@ -46,7 +46,7 @@ protected:
 	void onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet);
 
 private:
-	static std::vector<ServerInfo*> servers;
+	static std::vector<GameServerSession*> servers;
 
 	RappelzSocket* socket;
 

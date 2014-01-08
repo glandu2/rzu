@@ -9,12 +9,12 @@
 
 namespace UploadServer {
 
-class GuildIconServer : public Object, public ICallbackGuard
+class IconServerSession : public Object, public ICallbackGuard
 {
-	DECLARE_CLASS(UploadServer::GuildIconServer)
+	DECLARE_CLASS(UploadServer::IconServerSession)
 public:
-	GuildIconServer(Socket* socket);
-	~GuildIconServer();
+	IconServerSession(Socket* socket);
+	~IconServerSession();
 
 	static void startServer();
 

@@ -13,20 +13,20 @@ ServerInfo
 #include "AuthServer/ClientData.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientData)
 
-#include "AuthServer/ClientInfo.h"
-DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientInfo)
+#include "AuthServer/ClientSession.h"
+DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientSession)
 
 #include "AuthServer/DB_Account.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_Account)
 
-#include "AuthServer/ServerInfo.h"
-DECLARE_CLASSCOUNT_STATIC(AuthServer::ServerInfo)
+#include "AuthServer/GameServerSession.h"
+DECLARE_CLASSCOUNT_STATIC(AuthServer::GameServerSession)
 
-#include "UploadServer/ClientInfo.h"
-DECLARE_CLASSCOUNT_STATIC(UploadServer::ClientInfo)
+#include "UploadServer/ClientSession.h"
+DECLARE_CLASSCOUNT_STATIC(UploadServer::ClientSession)
 
-#include "UploadServer/GameServerInfo.h"
-DECLARE_CLASSCOUNT_STATIC(UploadServer::GameServerInfo)
+#include "UploadServer/GameServerSession.h"
+DECLARE_CLASSCOUNT_STATIC(UploadServer::GameServerSession)
 
-#include "UploadServer/GuildIconServer.h"
-DECLARE_CLASSCOUNT_STATIC(UploadServer::GuildIconServer)
+#include "UploadServer/IconServerSession.h"
+DECLARE_CLASSCOUNT_STATIC(UploadServer::IconServerSession)

@@ -1,9 +1,9 @@
-#include "ClientInfo.h"
+#include "ClientSession.h"
 #include "RappelzSocket.h"
 #include "EventLoop.h"
 #include "../GlobalConfig.h"
 #include "Packets/PacketEnums.h"
-#include "GameServerInfo.h"
+#include "GameServerSession.h"
 #include <time.h>
 #include <stdio.h>
 #include "Utils.h"
@@ -13,7 +13,7 @@
 
 namespace UploadServer {
 
-ClientInfo::ClientInfo(RappelzSocket* socket) {
+ClientSession::ClientSession(RappelzSocket* socket) {
 	this->socket = socket;
 	currentRequest = nullptr;
 
@@ -22,20 +22,20 @@ ClientInfo::ClientInfo(RappelzSocket* socket) {
 	socket->addPacketListener(TS_CU_UPLOAD::packetID, this, &onDataReceived);
 }
 
-ClientInfo::~ClientInfo() {
+ClientSession::~ClientSession() {
 	socket->deleteLater();
 }
 
-void ClientInfo::startServer() {
+void ClientSession::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen(CONFIG_GET()->upload.client.listenIp,
 						 CONFIG_GET()->upload.client.port);
 }
 
-void ClientInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
+void ClientSession::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), true);
-	static ClientInfo* clientInfo = new ClientInfo(newSocket);
+	static ClientSession* clientInfo = new ClientSession(newSocket);
 
 	do {
 
@@ -43,20 +43,20 @@ void ClientInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket)
 			break;
 
 		newSocket = new RappelzSocket(EventLoop::getLoop(), true);
-		clientInfo = new ClientInfo(newSocket);
+		clientInfo = new ClientSession(newSocket);
 	} while(1);
 }
 
-void ClientInfo::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
-	ClientInfo* thisInstance = static_cast<ClientInfo*>(instance);
+void ClientSession::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
 		delete thisInstance;
 	}
 }
 
-void ClientInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packet) {
-	ClientInfo* thisInstance = static_cast<ClientInfo*>(instance);
+void ClientSession::onDataReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packet) {
+	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
 
 	switch(packet->id) {
 		case TS_CU_LOGIN::packetID:
@@ -69,7 +69,7 @@ void ClientInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket*, const 
 	}
 }
 
-void ClientInfo::onLogin(const TS_CU_LOGIN* packet) {
+void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 	TS_UC_LOGIN_RESULT result;
 	TS_MESSAGE::initMessage<TS_UC_LOGIN_RESULT>(&result);
 
@@ -93,7 +93,7 @@ void ClientInfo::onLogin(const TS_CU_LOGIN* packet) {
 	socket->sendPacket(&result);
 }
 
-void ClientInfo::onUpload(const TS_CU_UPLOAD* packet) {
+void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	TS_UC_UPLOAD result;
 	TS_MESSAGE::initMessage<TS_UC_UPLOAD>(&result);
 
@@ -156,7 +156,7 @@ void ClientInfo::onUpload(const TS_CU_UPLOAD* packet) {
 	socket->sendPacket(&result);
 }
 
-bool ClientInfo::checkJpegImage(const char *data) {
+bool ClientSession::checkJpegImage(const char *data) {
 	if(memcmp(&data[6], "JFIF", 4))
 		return false;
 

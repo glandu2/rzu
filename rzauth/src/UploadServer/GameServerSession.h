@@ -11,12 +11,12 @@
 
 namespace UploadServer {
 
-class GameServerInfo : public Object, public ICallbackGuard
+class GameServerSession : public Object, public ICallbackGuard
 {
-	DECLARE_CLASS(UploadServer::GameServerInfo)
+	DECLARE_CLASS(UploadServer::GameServerSession)
 public:
-	GameServerInfo(RappelzSocket* socket);
-	~GameServerInfo();
+	GameServerSession(RappelzSocket* socket);
+	~GameServerSession();
 
 	void sendUploadResult(uint32_t guidId, uint32_t fileSize, const char *fileName);
 	const std::string& getName() { return serverName; }
@@ -32,7 +32,7 @@ protected:
 	void onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet);
 
 private:
-	static std::unordered_map<std::string, GameServerInfo*> servers;
+	static std::unordered_map<std::string, GameServerSession*> servers;
 
 	RappelzSocket* socket;
 

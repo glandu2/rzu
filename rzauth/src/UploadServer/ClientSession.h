@@ -11,13 +11,13 @@
 
 namespace UploadServer {
 
-class ClientInfo : public Object, public ICallbackGuard
+class ClientSession : public Object, public ICallbackGuard
 {
-	DECLARE_CLASS(UploadServer::ClientInfo)
+	DECLARE_CLASS(UploadServer::ClientSession)
 
 public:
-	ClientInfo(RappelzSocket *socket);
-	~ClientInfo();
+	ClientSession(RappelzSocket *socket);
+	~ClientSession();
 
 	static void startServer();
 
