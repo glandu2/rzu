@@ -1,5 +1,5 @@
-#include "ClientInfo.h"
-#include "ServerInfo.h"
+#include "ClientSession.h"
+#include "GameServerSession.h"
 #include "RappelzSocket.h"
 #include <string.h>
 #include <stdlib.h>     /* srand, rand */
@@ -24,7 +24,7 @@
 
 namespace AuthServer {
 
-ClientInfo::ClientInfo(RappelzSocket* socket) {
+ClientSession::ClientSession(RappelzSocket* socket) {
 	this->socket = socket;
 	this->useRsaAuth = false;
 	this->clientData = nullptr;
@@ -37,7 +37,7 @@ ClientInfo::ClientInfo(RappelzSocket* socket) {
 	socket->addPacketListener(TS_CA_SELECT_SERVER::packetID, this, &onDataReceived);
 }
 
-ClientInfo::~ClientInfo() {
+ClientSession::~ClientSession() {
 	invalidateCallbacks();
 	if(clientData) {
 		if(ClientData::removeClient(clientData->account))
@@ -47,7 +47,7 @@ ClientInfo::~ClientInfo() {
 	socket->deleteLater();
 }
 
-void ClientInfo::startServer() {
+void ClientSession::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	srand((unsigned int)time(NULL));
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
@@ -55,9 +55,9 @@ void ClientInfo::startServer() {
 						 CONFIG_GET()->auth.client.port);
 }
 
-void ClientInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
+void ClientSession::onNewConnection(IListener* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), true);
-	static ClientInfo* clientInfo = new ClientInfo(newSocket);
+	static ClientSession* clientInfo = new ClientSession(newSocket);
 
 	do {
 
@@ -65,20 +65,20 @@ void ClientInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket)
 			break;
 
 		newSocket = new RappelzSocket(EventLoop::getLoop(), true);
-		clientInfo = new ClientInfo(newSocket);
+		clientInfo = new ClientSession(newSocket);
 	} while(1);
 }
 
-void ClientInfo::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
-	ClientInfo* thisInstance = static_cast<ClientInfo*>(instance);
+void ClientSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
 	
 	if(newState == Socket::UnconnectedState) {
 		delete thisInstance;
 	}
 }
 
-void ClientInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packet) {
-	ClientInfo* thisInstance = static_cast<ClientInfo*>(instance);
+void ClientSession::onDataReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packet) {
+	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
 
 	switch(packet->id) {
 		case TS_CA_VERSION::packetID:
@@ -103,7 +103,7 @@ void ClientInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket*, const 
 	}
 }
 
-void ClientInfo::onVersion(const TS_CA_VERSION* packet) {
+void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 	if(!strcmp(packet->szVersion, "TEST")) {
 		uint32_t totalUserCount = ClientData::getClientCount();
 		TS_SC_RESULT result;
@@ -116,7 +116,7 @@ void ClientInfo::onVersion(const TS_CA_VERSION* packet) {
 	}
 }
 
-void ClientInfo::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
+void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	TS_AC_AES_KEY_IV* aesKeyMessage = nullptr;
 	RSA* rsaCipher;
 	BIO* bio;
@@ -155,7 +155,7 @@ cleanup:
 	RSA_free(rsaCipher);
 }
 
-void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
+void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	unsigned char password[64];  //size = at most rsa encrypted size
 	std::string account;
 
@@ -209,7 +209,7 @@ void ClientInfo::onAccount(const TS_CA_ACCOUNT* packet) {
 	new DB_Account(this, account, (char*)password);
 }
 
-void ClientInfo::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode) {
+void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode) {
 	TS_AC_RESULT result;
 	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
@@ -248,7 +248,7 @@ void ClientInfo::clientAuthResult(bool authOk, const std::string& account, uint3
 	socket->sendPacket(&result);
 }
 
-void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
+void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST* serverListPacket;
 	unsigned int i, j, count;
 
@@ -258,7 +258,7 @@ void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
 		return;
 	}
 
-	const std::vector<ServerInfo*>& serverList = ServerInfo::getServerList();
+	const std::vector<GameServerSession*>& serverList = GameServerSession::getServerList();
 
 	for(i = count = 0; i < serverList.size(); i++)
 		if(serverList.at(i) != nullptr)
@@ -270,7 +270,7 @@ void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
 	serverListPacket->last_login_server_idx = clientData->lastLoginServerId;
 
 	for(i = j = 0; i < serverList.size() && j < serverListPacket->count; i++) {
-		ServerInfo* serverInfo = serverList.at(i);
+		GameServerSession* serverInfo = serverList.at(i);
 
 		if(serverInfo == nullptr)
 			continue;
@@ -290,8 +290,8 @@ void ClientInfo::onServerList(const TS_CA_SERVER_LIST* packet) {
 	TS_MESSAGE_WNA::destroy(serverListPacket);
 }
 
-void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
-	const std::vector<ServerInfo*>& serverList = ServerInfo::getServerList();
+void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
+	const std::vector<GameServerSession*>& serverList = GameServerSession::getServerList();
 
 	if(clientData == nullptr) {
 		socket->abort();
@@ -299,7 +299,7 @@ void ClientInfo::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 	}
 
 	if(packet->server_idx < serverList.size() && serverList.at(packet->server_idx) != nullptr) {
-		ServerInfo* server = serverList.at(packet->server_idx);
+		GameServerSession* server = serverList.at(packet->server_idx);
 
 		clientData->oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
 

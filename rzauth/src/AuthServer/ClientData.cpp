@@ -13,11 +13,11 @@ uv_mutex_t ClientData::initializeLock() {
 	return mapLock;
 }
 
-ClientData::ClientData(ClientInfo *clientInfo) : accountId(0), client(clientInfo), server(nullptr), inGame(false) {
+ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientInfo), server(nullptr), inGame(false) {
 
 }
 
-ClientData* ClientData::tryAddClient(ClientInfo *clientInfo, const std::string& account, ClientData** oldClient) {
+ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, ClientData** oldClient) {
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> result;
 	ClientData* newClient;
 
@@ -49,7 +49,7 @@ bool ClientData::removeClient(const std::string& account) {
 	return ret;
 }
 
-bool ClientData::switchClientToServer(const std::string& account, ServerInfo* server) {
+bool ClientData::switchClientToServer(const std::string& account, GameServerSession* server) {
 	bool ret = false;
 	std::unordered_map<std::string, ClientData*>::const_iterator it;
 

@@ -8,20 +8,20 @@
 
 namespace UploadServer {
 
-class GameServerInfo;
+class GameServerSession;
 
 class UploadRequest
 {
 public:
-	UploadRequest(GameServerInfo *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password);
+	UploadRequest(GameServerSession *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password);
 
-	GameServerInfo* getGameServer() { return gameServer; }
+	GameServerSession* getGameServer() { return gameServer; }
 	uint32_t getClientId() { return client_id; }
 	uint32_t getAccountId() { return account_id; }
 	uint32_t getGuildId() { return guild_sid; }
 	uint32_t getOneTimePassword() { return one_time_password; }
 
-	static UploadRequest* pushRequest(GameServerInfo *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password);
+	static UploadRequest* pushRequest(GameServerSession *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password);
 	static UploadRequest* popRequest(uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password, const std::string& gameServerName);
 	static unsigned int getClientCount() { return pendingRequests.size(); }
 
@@ -32,7 +32,7 @@ private:
 	static uv_mutex_t mapLock;
 	static uv_once_t lockInit;
 
-	GameServerInfo *gameServer;
+	GameServerSession *gameServer;
 	uint32_t client_id;
 	uint32_t account_id;
 	uint32_t guild_sid;

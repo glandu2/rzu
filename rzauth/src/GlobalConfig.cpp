@@ -20,7 +20,7 @@ void GlobalConfig::init() {
 #endif
 }
 
-void GlobalConfig::AuthConfig::DbAccount::updateConnectionString(ICallbackGuard* instance) {
+void GlobalConfig::AuthConfig::DbAccount::updateConnectionString(IListener* instance) {
 	DbAccount* thisInstance = (DbAccount*)instance;
 
 	thisInstance->connectionString.setDefault(

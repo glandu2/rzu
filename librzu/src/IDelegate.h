@@ -3,11 +3,11 @@
 
 #include <unordered_map>
 #include <tuple>
-#include "ICallbackGuard.h"
+#include "IListener.h"
 
 template<typename T>
 struct Callback {
-	ICallbackGuard* instance;
+	IListener* instance;
 	T callback;
 
 	Callback(const Callback& other) : instance(other.instance), callback(other.callback) {}
@@ -17,7 +17,7 @@ struct Callback {
 		other.callback = nullptr;
 	}
 
-	Callback(ICallbackGuard* instance = nullptr, T callback = nullptr) : instance(instance), callback(callback) {
+	Callback(IListener* instance = nullptr, T callback = nullptr) : instance(instance), callback(callback) {
 		if(instance)
 			instance->addInstance((DelegateRef)&this->callback);
 	}
@@ -30,8 +30,8 @@ struct Callback {
 	}
 
 	~Callback() {
-		if(instance)
-			instance->delInstance((DelegateRef)&this->callback);
+		if(instance && callback)
+			instance->delInstance((DelegateRef)&callback);
 	}
 };
 #define CALLBACK_CALL(c, ...) \
@@ -42,8 +42,8 @@ class IDelegateHash {
 public:
 	//typedef void (*CallbackType)(ICallbackGuard* instance, Values...);
 	struct CallbackInfo {
-		CallbackInfo(ICallbackGuard* instance, CallbackType callback) : instance(instance), callback(callback) {}
-		ICallbackGuard *instance;
+		CallbackInfo(IListener* instance, CallbackType callback) : instance(instance), callback(callback) {}
+		IListener *instance;
 		CallbackType callback;
 	};
 	typedef typename std::unordered_map<Key, CallbackInfo>::const_iterator CallbackIterator;
@@ -57,7 +57,8 @@ public:
 		for(it = callbacks.cbegin(); it != callbacks.cend();) {
 			const CallbackInfo& callbackInfo = it->second;
 
-			callbackInfo.instance->delInstance((DelegateRef)&callbackInfo.callback);
+			if(callbackInfo.instance && callbackInfo.callback)
+				callbackInfo.instance->delInstance((DelegateRef)&callbackInfo.callback);
 
 			it = callbacks.erase(it);
 		}
@@ -69,7 +70,7 @@ public:
 		return *this;
 	}
 
-	void add(Key key, ICallbackGuard* instance, CallbackType callback) {
+	void add(Key key, IListener* instance, CallbackType callback) {
 		typename std::unordered_map<Key, CallbackInfo>::iterator it;
 		it = callbacks.insert(std::pair<Key, CallbackInfo>(key, CallbackInfo(instance, callback)));
 		if(instance)
@@ -117,7 +118,7 @@ template<typename CallbackType>
 class IDelegate {
 public:
 	//typedef void (*CallbackType)(ICallbackGuard* instance, Values...);
-	typedef typename std::unordered_map<ICallbackGuard*, CallbackType>::const_iterator CallbackIterator;
+	typedef typename std::unordered_map<IListener*, CallbackType>::const_iterator CallbackIterator;
 
 	IDelegate() {}
 	IDelegate(IDelegate& other) : callbacks(other.callbacks) {}
@@ -126,10 +127,11 @@ public:
 	~IDelegate() {
 		CallbackIterator it;
 		for(it = callbacks.cbegin(); it != callbacks.cend();) {
-			ICallbackGuard* instance = it->first;
+			IListener* instance = it->first;
 			const CallbackType& callbackInfo = it->second;
 
-			instance->delInstance((DelegateRef)&callbackInfo);
+			if(instance && callbackInfo)
+				instance->delInstance((DelegateRef)&callbackInfo);
 
 			it = callbacks.erase(it);
 		}
@@ -141,9 +143,9 @@ public:
 		return *this;
 	}
 
-	void add(ICallbackGuard* instance, CallbackType callback) {
-		typename std::unordered_map<ICallbackGuard*, CallbackType>::iterator it;
-		it = callbacks.insert(std::pair<ICallbackGuard*, CallbackType>(instance, callback)).first;
+	void add(IListener* instance, CallbackType callback) {
+		typename std::unordered_map<IListener*, CallbackType>::iterator it;
+		it = callbacks.insert(std::pair<IListener*, CallbackType>(instance, callback)).first;
 		if(instance)
 			instance->addInstance((DelegateRef)&(it->second));
 	}
@@ -153,7 +155,7 @@ public:
 			*ptr = nullptr;
 	}
 
-	void del(ICallbackGuard* key) {
+	void del(IListener* key) {
 		callbacks.erase(key);
 	}
 
@@ -163,7 +165,7 @@ public:
 		DelegateType::CallbackIterator it, itEnd; \
  \
 		for(it = (c).callbacks.cbegin(), itEnd = (c).callbacks.cend(); it != itEnd;) { \
-			ICallbackGuard* instance = it->first; \
+			IListener* instance = it->first; \
 			auto callback = it->second; \
  \
 			if(callback != nullptr) { \
@@ -176,7 +178,7 @@ public:
 	} while(0)
 
 
-	std::unordered_map<ICallbackGuard*, CallbackType> callbacks;
+	std::unordered_map<IListener*, CallbackType> callbacks;
 };
 
 #endif // IDELEGATE_H

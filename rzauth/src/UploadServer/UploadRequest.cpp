@@ -1,7 +1,7 @@
 #include "UploadRequest.h"
 #include "uv.h"
 #include <time.h>
-#include "GameServerInfo.h"
+#include "GameServerSession.h"
 
 namespace UploadServer {
 
@@ -14,7 +14,7 @@ uv_mutex_t UploadRequest::initializeLock() {
 	return mapLock;
 }
 
-UploadRequest::UploadRequest(GameServerInfo *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password) :
+UploadRequest::UploadRequest(GameServerSession *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password) :
 	gameServer(gameServer),
 	client_id(client_id),
 	account_id(account_id),
@@ -23,7 +23,7 @@ UploadRequest::UploadRequest(GameServerInfo *gameServer, uint32_t client_id, uin
 	timestamp(time(NULL))
 {}
 
-UploadRequest* UploadRequest::pushRequest(GameServerInfo *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password) {
+UploadRequest* UploadRequest::pushRequest(GameServerSession *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password) {
 	std::pair< std::unordered_map<uint32_t, UploadRequest*>::iterator, bool> result;
 	UploadRequest* oldRequest;
 	UploadRequest* newRequest = new UploadRequest(gameServer, client_id, account_id, guild_sid, one_time_password);

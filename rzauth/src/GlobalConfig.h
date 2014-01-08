@@ -6,7 +6,7 @@
 
 struct GlobalConfig {
 	struct AuthConfig {
-		struct DbAccount : public ICallbackGuard {
+		struct DbAccount : public IListener {
 			cval<std::string> &driver, &server, &name, &account, &password, &salt;
 			cval<int> &port;
 			cval<std::string> &connectionString;
@@ -32,7 +32,7 @@ struct GlobalConfig {
 				updateConnectionString(this);
 			}
 
-			static void updateConnectionString(ICallbackGuard* instance);
+			static void updateConnectionString(IListener* instance);
 		} dbAccount;
 
 		struct ClientConfig {

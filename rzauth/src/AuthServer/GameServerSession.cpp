@@ -1,6 +1,6 @@
 #define __STDC_LIMIT_MACROS
-#include "ServerInfo.h"
-#include "ClientInfo.h"
+#include "GameServerSession.h"
+#include "ClientSession.h"
 #include <string.h>
 #include "../GlobalConfig.h"
 
@@ -12,9 +12,9 @@
 
 namespace AuthServer {
 
-std::vector<ServerInfo*> ServerInfo::servers;
+std::vector<GameServerSession*> GameServerSession::servers;
 
-ServerInfo::ServerInfo(RappelzSocket* socket)
+GameServerSession::GameServerSession(RappelzSocket* socket)
 {
 	this->socket = socket;
 	serverIdx = UINT16_MAX;
@@ -26,14 +26,14 @@ ServerInfo::ServerInfo(RappelzSocket* socket)
 	socket->addPacketListener(TS_GA_CLIENT_KICK_FAILED::packetID, this, &onDataReceived);
 }
 
-void ServerInfo::startServer() {
+void GameServerSession::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen(CONFIG_GET()->auth.game.listenIp,
 						 CONFIG_GET()->auth.game.port);
 }
 
-ServerInfo::~ServerInfo() {
+GameServerSession::~GameServerSession() {
 	invalidateCallbacks();
 
 	if(serverIdx != UINT16_MAX && (size_t)serverIdx < servers.size())
@@ -42,9 +42,9 @@ ServerInfo::~ServerInfo() {
 	socket->deleteLater();
 }
 
-void ServerInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
+void GameServerSession::onNewConnection(IListener* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), false);
-	static ServerInfo* serverInfo = new ServerInfo(newSocket);
+	static GameServerSession* serverInfo = new GameServerSession(newSocket);
 
 	do {
 
@@ -52,20 +52,20 @@ void ServerInfo::onNewConnection(ICallbackGuard* instance, Socket* serverSocket)
 			break;
 
 		newSocket = new RappelzSocket(EventLoop::getLoop(), false);
-		serverInfo = new ServerInfo(newSocket);
+		serverInfo = new GameServerSession(newSocket);
 	} while(1);
 }
 
-void ServerInfo::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
-	ServerInfo* thisInstance = static_cast<ServerInfo*>(instance);
+void GameServerSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+	GameServerSession* thisInstance = static_cast<GameServerSession*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
 		delete thisInstance;
 	}
 }
 
-void ServerInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet) {
-	ServerInfo* thisInstance = static_cast<ServerInfo*>(instance);
+void GameServerSession::onDataReceived(IListener* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet) {
+	GameServerSession* thisInstance = static_cast<GameServerSession*>(instance);
 
 	switch(packet->id) {
 		case TS_GA_LOGIN::packetID:
@@ -86,7 +86,7 @@ void ServerInfo::onDataReceived(ICallbackGuard* instance, RappelzSocket* clientS
 	}
 }
 
-void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
+void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	TS_AG_LOGIN_RESULT result;
 	TS_MESSAGE::initMessage<TS_AG_LOGIN_RESULT>(&result);
 
@@ -122,7 +122,7 @@ void ServerInfo::onServerLogin(const TS_GA_LOGIN* packet) {
 	socket->sendPacket(&result);
 }
 
-void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
+void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	TS_AG_CLIENT_LOGIN result;
 	ClientData* client = ClientData::getClient(std::string(packet->account));
 
@@ -162,12 +162,12 @@ void ServerInfo::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	socket->sendPacket(&result);
 }
 
-void ServerInfo::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
+void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 	trace("Client %s has disconnected from gameserver\n", packet->account);
 	ClientData::removeClient(packet->account);
 }
 
-void ServerInfo::kickClient(const std::string &account) {
+void GameServerSession::kickClient(const std::string &account) {
 	TS_AG_KICK_CLIENT msg;
 
 	TS_MESSAGE::initMessage<TS_AG_KICK_CLIENT>(&msg);
@@ -177,7 +177,7 @@ void ServerInfo::kickClient(const std::string &account) {
 	socket->sendPacket(&msg);
 }
 
-void ServerInfo::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet) {
+void GameServerSession::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet) {
 	warn("Client %s kick failed (removing from client list)\n", packet->account);
 	ClientData::removeClient(packet->account);
 }

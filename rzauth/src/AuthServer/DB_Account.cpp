@@ -4,7 +4,7 @@
 #include <openssl/md5.h>
 #include <stdio.h>
 #include <string.h>
-#include "ClientInfo.h"
+#include "ClientSession.h"
 #include "EventLoop.h"
 #include "../GlobalConfig.h"
 #include "Log.h"
@@ -72,7 +72,7 @@ bool DB_Account::init() {
 	return true;
 }
 
-DB_Account::DB_Account(ClientInfo* clientInfo, const std::string& account, const char* password) : clientInfo(clientInfo), account(account) {
+DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, const char* password) : clientInfo(clientInfo), account(account) {
 	std::string buffer = CONFIG_GET()->auth.dbAccount.salt;
 	req.data = this;
 	ok = false;

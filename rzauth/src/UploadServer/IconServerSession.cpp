@@ -1,4 +1,4 @@
-#include "GuildIconServer.h"
+#include "IconServerSession.h"
 #include "EventLoop.h"
 #include "../GlobalConfig.h"
 #include <string.h>
@@ -22,7 +22,7 @@ static const char * const htmlFound =
 		"\r\n";
 static int htmlFoundSize = strlen(htmlFound);
 
-GuildIconServer::GuildIconServer(Socket* socket) {
+IconServerSession::IconServerSession(Socket* socket) {
 	this->socket = socket;
 	this->status = WaitStatusLine;
 	this->nextByteToMatch = 0;
@@ -31,40 +31,40 @@ GuildIconServer::GuildIconServer(Socket* socket) {
 	socket->addDataListener(this, &onDataReceived);
 }
 
-void GuildIconServer::startServer() {
+void IconServerSession::startServer() {
 	Socket* serverSocket = new Socket(EventLoop::getLoop());
 	serverSocket->addConnectionListener(nullptr, &onNewConnection);
 	serverSocket->listen(CONFIG_GET()->upload.client.listenIp,
 						 CONFIG_GET()->upload.client.webPort);
 }
 
-GuildIconServer::~GuildIconServer() {
+IconServerSession::~IconServerSession() {
 	socket->deleteLater();
 }
 
-void GuildIconServer::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
+void IconServerSession::onNewConnection(IListener* instance, Socket* serverSocket) {
 	static Socket *newSocket = new Socket(EventLoop::getLoop());
-	static GuildIconServer* serverInfo = new GuildIconServer(newSocket);
+	static IconServerSession* serverInfo = new IconServerSession(newSocket);
 
 	do {
 		if(!serverSocket->accept(newSocket))
 			break;
 
 		newSocket = new Socket(EventLoop::getLoop());
-		serverInfo = new GuildIconServer(newSocket);
+		serverInfo = new IconServerSession(newSocket);
 	} while(1);
 }
 
-void GuildIconServer::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
-	GuildIconServer* thisInstance = static_cast<GuildIconServer*>(instance);
+void IconServerSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+	IconServerSession* thisInstance = static_cast<IconServerSession*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
 		delete thisInstance;
 	}
 }
 
-void GuildIconServer::onDataReceived(ICallbackGuard *instance, Socket* socket) {
-	GuildIconServer* thisInstance = static_cast<GuildIconServer*>(instance);
+void IconServerSession::onDataReceived(IListener *instance, Socket* socket) {
+	IconServerSession* thisInstance = static_cast<IconServerSession*>(instance);
 	std::vector<char> buffer;
 
 	while(socket->getAvailableBytes() > 0) {
@@ -73,7 +73,7 @@ void GuildIconServer::onDataReceived(ICallbackGuard *instance, Socket* socket) {
 	}
 }
 
-void GuildIconServer::parseData(const std::vector<char>& data) {
+void IconServerSession::parseData(const std::vector<char>& data) {
 	static const char * const beginUrl = "GET ";
 	static const char * const endHeader = "\r\n\r\n";
 	ssize_t size = data.size();
@@ -132,7 +132,7 @@ void GuildIconServer::parseData(const std::vector<char>& data) {
 }
 
 
-void GuildIconServer::parseUrl(std::string urlString) {
+void IconServerSession::parseUrl(std::string urlString) {
 	size_t p;
 	for(p = urlString.size()-1; p >= 0; p--) {
 		if(urlString.at(p) == '/' || urlString.at(p) == '\\')
@@ -146,7 +146,7 @@ void GuildIconServer::parseUrl(std::string urlString) {
 	}
 }
 
-void GuildIconServer::sendIcon(const std::string& filename) {
+void IconServerSession::sendIcon(const std::string& filename) {
 	std::string fullFileName = CONFIG_GET()->upload.client.uploadDir.get() + "/" + filename;
 	FILE* file = fopen(fullFileName.c_str(), "rb");
 
