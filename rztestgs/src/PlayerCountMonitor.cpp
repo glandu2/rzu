@@ -47,7 +47,7 @@ void PlayerCountMonitor::updatePlayerNumber(uv_timer_t* handle, int status) {
 	}
 }
 
-void PlayerCountMonitor::onPlayerCountReceived(ICallbackGuard* instance, RappelzSocket* sock, const TS_MESSAGE* packetData) {
+void PlayerCountMonitor::onPlayerCountReceived(IListener* instance, RappelzSocket* sock, const TS_MESSAGE* packetData) {
 	PlayerCountMonitor* thisInstance = (PlayerCountMonitor*)instance;
 
 	switch(packetData->id) {
