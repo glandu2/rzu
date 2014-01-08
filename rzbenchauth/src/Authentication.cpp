@@ -97,7 +97,7 @@ bool Authentication::selectServer(uint16_t serverId, Callback<CallbackOnGameResu
 	return true;
 }
 
-void Authentication::onAuthServerConnectionEvent(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onAuthServerConnectionEvent(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	if(packetData->id == TS_CC_EVENT::packetID) {
@@ -110,7 +110,7 @@ void Authentication::onAuthServerConnectionEvent(ICallbackGuard* instance, Rappe
 	}
 }
 
-void Authentication::onGameServerConnectionEvent(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onGameServerConnectionEvent(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	if(packetData->id == TS_CC_EVENT::packetID) {
@@ -123,7 +123,7 @@ void Authentication::onGameServerConnectionEvent(ICallbackGuard* instance, Rappe
 	}
 }
 
-void Authentication::onAuthPacketReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onAuthPacketReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	switch(packetData->id) {
@@ -135,7 +135,7 @@ void Authentication::onAuthPacketReceived(ICallbackGuard* instance, RappelzSocke
 		{
 			const TS_AC_RESULT* resultMsg = reinterpret_cast<const TS_AC_RESULT*>(packetData);
 			if(resultMsg->request_msg_id == TS_CA_ACCOUNT::packetID) {
-				CALLBACK_CALL(thisAccount->authResultCallback, thisAccount, (TS_ErrorCode)resultMsg->result, nullptr);
+				CALLBACK_CALL(thisAccount->authResultCallback, thisAccount, (TS_ResultCode)resultMsg->result, nullptr);
 			}
 			break;
 		}
@@ -144,7 +144,7 @@ void Authentication::onAuthPacketReceived(ICallbackGuard* instance, RappelzSocke
 		{
 			const TS_AC_RESULT_WITH_STRING* resultMsg = reinterpret_cast<const TS_AC_RESULT_WITH_STRING*>(packetData);
 			if(resultMsg->request_msg_id == TS_CA_ACCOUNT::packetID) {
-				CALLBACK_CALL(thisAccount->authResultCallback, thisAccount, (TS_ErrorCode)resultMsg->result, resultMsg->string);
+				CALLBACK_CALL(thisAccount->authResultCallback, thisAccount, (TS_ResultCode)resultMsg->result, resultMsg->string);
 			}
 			break;
 		}
@@ -159,7 +159,7 @@ void Authentication::onAuthPacketReceived(ICallbackGuard* instance, RappelzSocke
 	}
 }
 
-void Authentication::onGamePacketReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onGamePacketReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	switch(packetData->id) {

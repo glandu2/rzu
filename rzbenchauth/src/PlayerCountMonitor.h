@@ -2,10 +2,10 @@
 #define PLAYERCOUNTMONITOR_H
 
 #include "RappelzSocket.h"
-#include "ICallbackGuard.h"
+#include "IListener.h"
 #include "uv.h"
 
-class PlayerCountMonitor : private ICallbackGuard
+class PlayerCountMonitor : private IListener
 {
 	public:
 		PlayerCountMonitor(std::string host, uint16_t port, int intervalms = 3500);
@@ -16,7 +16,7 @@ class PlayerCountMonitor : private ICallbackGuard
 		static void updatePlayerNumber(uv_timer_t* handle, int status);
 
 	protected:
-		static void onPlayerCountReceived(ICallbackGuard* instance, RappelzSocket *sock, const TS_MESSAGE* packetData);
+		static void onPlayerCountReceived(IListener* instance, RappelzSocket *sock, const TS_MESSAGE* packetData);
 
 	private:
 		RappelzSocket sock;

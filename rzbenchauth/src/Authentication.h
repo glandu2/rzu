@@ -2,11 +2,12 @@
 #define AUTHENTICATION_H
 
 #include "Object.h"
-#include "ICallbackGuard.h"
+#include "IListener.h"
 #include <string>
 #include <stdint.h>
 #include <IDelegate.h>
 #include "Packets/PacketEnums.h"
+#include <vector>
 
 class Account;
 class RappelzSocket;
@@ -16,7 +17,7 @@ struct TS_AC_SELECT_SERVER;
 struct TS_AC_AES_KEY_IV;
 struct TS_SC_RESULT;
 
-class Authentication : private Object, ICallbackGuard
+class Authentication : private Object, IListener
 {
 	public:
 		struct ServerInfo {
@@ -32,9 +33,9 @@ class Authentication : private Object, ICallbackGuard
 			ACM_RSA_AES  //Since mid epic 8.1
 		};
 
-		typedef void (*CallbackOnAuthResult)(ICallbackGuard* instance, Authentication* auth, TS_ErrorCode result, const char* resultString);
-		typedef void (*CallbackOnServerList)(ICallbackGuard* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>& servers, uint16_t lastSelectedServerId);
-		typedef void (*CallbackOnGameResult)(ICallbackGuard* instance, Authentication* auth, TS_ErrorCode result, RappelzSocket* gameServerSocket);
+		typedef void (*CallbackOnAuthResult)(IListener* instance, Authentication* auth, TS_ResultCode result, const char* resultString);
+		typedef void (*CallbackOnServerList)(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>& servers, uint16_t lastSelectedServerId);
+		typedef void (*CallbackOnGameResult)(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
 
 	public:
 		Authentication(std::string host, AuthCipherMethod method = ACM_DES, uint16_t port = 4500, const std::string& version = "200701120");
@@ -47,10 +48,10 @@ class Authentication : private Object, ICallbackGuard
 		bool selectServer(uint16_t serverId, Callback<CallbackOnGameResult> callback);
 
 	protected:
-		static void onAuthServerConnectionEvent(ICallbackGuard* instance, RappelzSocket *server, const TS_MESSAGE* packetData);
-		static void onGameServerConnectionEvent(ICallbackGuard* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
-		static void onAuthPacketReceived(ICallbackGuard* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
-		static void onGamePacketReceived(ICallbackGuard* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
+		static void onAuthServerConnectionEvent(IListener* instance, RappelzSocket *server, const TS_MESSAGE* packetData);
+		static void onGameServerConnectionEvent(IListener* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
+		static void onAuthPacketReceived(IListener* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
+		static void onGamePacketReceived(IListener* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
 
 	protected:
 		void onPacketAuthConnected();
