@@ -3,13 +3,13 @@
 
 #include "Object.h"
 #include "Socket.h"
-#include "ICallbackGuard.h"
+#include "IListener.h"
 #include <string>
 #include <sstream>
 
 namespace UploadServer {
 
-class IconServerSession : public Object, public ICallbackGuard
+class IconServerSession : public Object, public IListener
 {
 	DECLARE_CLASS(UploadServer::IconServerSession)
 public:
@@ -19,9 +19,9 @@ public:
 	static void startServer();
 
 protected:
-	static void onNewConnection(ICallbackGuard* instance, Socket* serverSocket);
-	static void onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
-	static void onDataReceived(ICallbackGuard *instance, Socket* socket);
+	static void onNewConnection(IListener* instance, Socket* serverSocket);
+	static void onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
+	static void onDataReceived(IListener *instance, Socket* socket);
 
 
 	void parseData(const std::vector<char>& data);

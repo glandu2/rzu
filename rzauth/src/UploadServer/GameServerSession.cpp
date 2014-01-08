@@ -35,7 +35,7 @@ GameServerSession::~GameServerSession() {
 	socket->deleteLater();
 }
 
-void GameServerSession::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
+void GameServerSession::onNewConnection(IListener* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), false);
 	static GameServerSession* serverInfo = new GameServerSession(newSocket);
 
@@ -49,7 +49,7 @@ void GameServerSession::onNewConnection(ICallbackGuard* instance, Socket* server
 	} while(1);
 }
 
-void GameServerSession::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+void GameServerSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
 	GameServerSession* thisInstance = static_cast<GameServerSession*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
@@ -57,7 +57,7 @@ void GameServerSession::onStateChanged(ICallbackGuard* instance, Socket* clientS
 	}
 }
 
-void GameServerSession::onDataReceived(ICallbackGuard* instance, RappelzSocket* , const TS_MESSAGE* packet) {
+void GameServerSession::onDataReceived(IListener* instance, RappelzSocket* , const TS_MESSAGE* packet) {
 	GameServerSession* thisInstance = static_cast<GameServerSession*>(instance);
 
 	switch(packet->id) {

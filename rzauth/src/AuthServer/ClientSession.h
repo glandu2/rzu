@@ -16,7 +16,7 @@
 
 namespace AuthServer {
 
-class ClientSession : public Object, public ICallbackGuard
+class ClientSession : public Object, public IListener
 {
 	DECLARE_CLASS(AuthServer::ClientSession)
 
@@ -29,9 +29,9 @@ public:
 	void clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode);
 
 protected:
-	static void onNewConnection(ICallbackGuard* instance, Socket* serverSocket);
-	static void onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
-	static void onDataReceived(ICallbackGuard* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
+	static void onNewConnection(IListener* instance, Socket* serverSocket);
+	static void onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
+	static void onDataReceived(IListener* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
 	//static ClientData* popPendingClient(const std::string& accountName);
 
 	void onVersion(const TS_CA_VERSION* packet);

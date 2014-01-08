@@ -33,7 +33,7 @@ void ClientSession::startServer() {
 						 CONFIG_GET()->upload.client.port);
 }
 
-void ClientSession::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
+void ClientSession::onNewConnection(IListener* instance, Socket* serverSocket) {
 	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), true);
 	static ClientSession* clientInfo = new ClientSession(newSocket);
 
@@ -47,7 +47,7 @@ void ClientSession::onNewConnection(ICallbackGuard* instance, Socket* serverSock
 	} while(1);
 }
 
-void ClientSession::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+void ClientSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
 	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
@@ -55,7 +55,7 @@ void ClientSession::onStateChanged(ICallbackGuard* instance, Socket* clientSocke
 	}
 }
 
-void ClientSession::onDataReceived(ICallbackGuard* instance, RappelzSocket*, const TS_MESSAGE* packet) {
+void ClientSession::onDataReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packet) {
 	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
 
 	switch(packet->id) {

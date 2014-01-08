@@ -42,7 +42,7 @@ IconServerSession::~IconServerSession() {
 	socket->deleteLater();
 }
 
-void IconServerSession::onNewConnection(ICallbackGuard* instance, Socket* serverSocket) {
+void IconServerSession::onNewConnection(IListener* instance, Socket* serverSocket) {
 	static Socket *newSocket = new Socket(EventLoop::getLoop());
 	static IconServerSession* serverInfo = new IconServerSession(newSocket);
 
@@ -55,7 +55,7 @@ void IconServerSession::onNewConnection(ICallbackGuard* instance, Socket* server
 	} while(1);
 }
 
-void IconServerSession::onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
+void IconServerSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
 	IconServerSession* thisInstance = static_cast<IconServerSession*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
@@ -63,7 +63,7 @@ void IconServerSession::onStateChanged(ICallbackGuard* instance, Socket* clientS
 	}
 }
 
-void IconServerSession::onDataReceived(ICallbackGuard *instance, Socket* socket) {
+void IconServerSession::onDataReceived(IListener *instance, Socket* socket) {
 	IconServerSession* thisInstance = static_cast<IconServerSession*>(instance);
 	std::vector<char> buffer;
 

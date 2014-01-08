@@ -15,7 +15,7 @@
 
 namespace AuthServer {
 
-class GameServerSession : public Object, public ICallbackGuard
+class GameServerSession : public Object, public IListener
 {
 	DECLARE_CLASS(AuthServer::GameServerSession)
 
@@ -36,9 +36,9 @@ public:
 	void kickClient(const std::string& account);
 
 protected:
-	static void onNewConnection(ICallbackGuard* instance, Socket* serverSocket);
-	static void onStateChanged(ICallbackGuard* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
-	static void onDataReceived(ICallbackGuard* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
+	static void onNewConnection(IListener* instance, Socket* serverSocket);
+	static void onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
+	static void onDataReceived(IListener* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
 
 	void onServerLogin(const TS_GA_LOGIN* packet);
 	void onClientLogin(const TS_GA_CLIENT_LOGIN* packet);
