@@ -1,0 +1,1 @@
+const char* @TARGET_NAME@Version = "Git rev @GIT_VERSION@ build on @CURRENT_DATE@";

@@ -1,0 +1,6 @@
+#ifndef @TARGET_NAME@_GIT_VERSION_H
+#define @TARGET_NAME@_GIT_VERSION_H
+
+extern const char* @TARGET_NAME@Version;
+
+#endif
