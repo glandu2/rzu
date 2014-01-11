@@ -2,6 +2,7 @@
 #define UPLOADREQUEST_H
 
 #include <unordered_map>
+#include <string>
 #include <stdint.h>
 #include "uv.h"
 #include <time.h>
