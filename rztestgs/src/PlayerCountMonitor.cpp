@@ -40,7 +40,6 @@ void PlayerCountMonitor::updatePlayerNumber(uv_timer_t* handle, int status) {
 		thisInstance->sock.connect(thisInstance->host, thisInstance->port);
 	} else if(thisInstance->sock.getState() == Socket::ConnectingState) {
 		thisInstance->sock.close();
-		thisInstance->sock.connect(thisInstance->host, thisInstance->port);
 		thisInstance->error("Server connection timeout\n");
 	} else {
 		thisInstance->error("Timer tick but server is not unconnected, timer is too fast ?\n");
