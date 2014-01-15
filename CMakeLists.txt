@@ -41,6 +41,8 @@ if(UNIX)
   set(CMAKE_SKIP_RPATH TRUE)
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+
 # Compile subprojects if existing
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
