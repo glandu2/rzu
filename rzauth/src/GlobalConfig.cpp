@@ -22,8 +22,8 @@ void GlobalConfig::init() {
 #endif
 }
 
-void GlobalConfig::AuthConfig::DbAccount::updateConnectionString(IListener* instance) {
-	DbAccount* thisInstance = (DbAccount*)instance;
+void DbConfig::updateConnectionString(IListener* instance) {
+	DbConfig* thisInstance = (DbConfig*)instance;
 
 	thisInstance->connectionString.setDefault(
 				"driver=" + thisInstance->driver.get() +
