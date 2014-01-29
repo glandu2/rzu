@@ -8,6 +8,7 @@
 PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) : sock(uv_default_loop(), true) {
 	this->host = host;
 	this->port = port;
+	this->connectedTimes = 0;
 
 	printf("#msec since epoch, players connected number, process load\n");
 
@@ -37,11 +38,21 @@ void PlayerCountMonitor::updatePlayerNumber(uv_timer_t* handle, int status) {
 	}
 
 	if(thisInstance->sock.getState() == Socket::UnconnectedState) {
+		thisInstance->connectedTimes = 0;
 		thisInstance->sock.connect(thisInstance->host, thisInstance->port);
 	} else if(thisInstance->sock.getState() == Socket::ConnectingState) {
 		thisInstance->sock.close();
 		thisInstance->error("Server connection timeout\n");
 	} else {
+		if(thisInstance->sock.getState() == Socket::ConnectedState) {
+			thisInstance->connectedTimes++;
+		}
+
+		//we see more than 5 times the socket connected, it should disconnect, close it in case of hanged state
+		if(thisInstance->connectedTimes >= 5) {
+			thisInstance->sock.abort();
+			thisInstance->connectedTimes = 0;
+		}
 		thisInstance->error("Timer tick but server is not unconnected, timer is too fast ?\n");
 	}
 }

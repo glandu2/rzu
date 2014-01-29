@@ -25,6 +25,8 @@ class PlayerCountMonitor : private IListener, public Object
 		std::string host;
 		uint16_t port;
 		int timeout;
+
+		int connectedTimes;
 };
 
 #endif // PLAYERCOUNTMONITOR_H
