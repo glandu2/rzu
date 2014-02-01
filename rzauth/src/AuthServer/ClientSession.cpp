@@ -218,23 +218,11 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 		result.result = TS_RESULT_INVALID_PASSWORD;
 		result.login_flag = 0;
 	} else {
-		ClientData *alreadyExistingClient = nullptr;
-		clientData = ClientData::tryAddClient(this, account, &alreadyExistingClient);
+		clientData = ClientData::tryAddClient(this, account);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
-
-			info("Client already connected, kicking\n");
-
-			//thread concurrency when switching from client to server
-			if(alreadyExistingClient->server) {
-				if(alreadyExistingClient->inGame)
-					alreadyExistingClient->server->kickClient(account);
-				else
-					ClientData::removeClient(account);
-			} else {
-				alreadyExistingClient->client->socket->abort();
-			}
+			info("Client already connected\n");
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;

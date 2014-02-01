@@ -35,7 +35,7 @@ public:
 	//If the account is already in the hash map, fail: return null and put already connected client data in oldClient
 	//If successful, create a new instance of ClientData with given account added to the hash map
 	//Thread safe
-	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account, ClientData** oldClient);
+	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account);
 	static bool removeClient(const std::string& account);
 	static bool switchClientToServer(const std::string& account, GameServerSession* server);
 	static ClientData* getClient(const std::string& account);

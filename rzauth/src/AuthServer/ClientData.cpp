@@ -1,5 +1,7 @@
 #include "ClientData.h"
 #include "uv.h"
+#include "ClientSession.h"
+#include "GameServerSession.h"
 
 
 namespace AuthServer {
@@ -17,7 +19,7 @@ ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientI
 
 }
 
-ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, ClientData** oldClient) {
+ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account) {
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> result;
 	ClientData* newClient;
 
@@ -26,11 +28,19 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 	newClient = new ClientData(clientInfo);
 	result = connectedClients.insert(std::pair<std::string, ClientData*>(account, newClient));
 	if(result.second == false) {
-		if(oldClient) *oldClient = result.first->second;
+		ClientData* oldClient = result.first->second;
 		delete newClient;
 		newClient = nullptr;
+
+		if(oldClient->server) {
+			if(oldClient->inGame)
+				oldClient->server->kickClient(account);
+			else
+				connectedClients.erase(account);
+		} else {
+			oldClient->client->abort();
+		}
 	} else {
-		if(oldClient) *oldClient = nullptr;
 		newClient->account = account;
 	}
 
