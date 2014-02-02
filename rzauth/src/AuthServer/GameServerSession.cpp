@@ -13,12 +13,12 @@ namespace AuthServer {
 std::vector<GameServerSession*> GameServerSession::servers;
 
 GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncryption) {
-	addPacketsToListen(4, (const int[]){
-						   TS_GA_LOGIN::packetID,
-						   TS_GA_CLIENT_LOGIN::packetID,
-						   TS_GA_CLIENT_LOGOUT::packetID,
-						   TS_GA_CLIENT_KICK_FAILED::packetID
-					   });
+	addPacketsToListen(4,
+					   TS_GA_LOGIN::packetID,
+					   TS_GA_CLIENT_LOGIN::packetID,
+					   TS_GA_CLIENT_LOGOUT::packetID,
+					   TS_GA_CLIENT_KICK_FAILED::packetID
+					   );
 	serverIdx = UINT16_MAX;
 }
 

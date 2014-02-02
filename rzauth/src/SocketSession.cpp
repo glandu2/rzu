@@ -3,11 +3,11 @@
 #include "EventLoop.h"
 
 SocketSession::SocketSession() : socket(new Socket(EventLoop::getLoop())), server(nullptr) {
-	socket->addDataListener(this, &onDataReceived);
+	socket->addDataListener(this, &SocketSession::onDataReceived);
 }
 
 SocketSession::SocketSession(Socket* socket) : socket(socket), server(nullptr) {
-	socket->addDataListener(this, &onDataReceived);
+	socket->addDataListener(this, &SocketSession::onDataReceived);
 }
 
 SocketSession::~SocketSession() {

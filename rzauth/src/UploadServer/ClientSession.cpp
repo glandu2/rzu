@@ -14,10 +14,10 @@
 namespace UploadServer {
 
 ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted) {
-	addPacketsToListen(2, (const int[]){
-						   TS_CU_LOGIN::packetID,
-						   TS_CU_UPLOAD::packetID
-					   });
+	addPacketsToListen(2,
+					   TS_CU_LOGIN::packetID,
+					   TS_CU_UPLOAD::packetID
+					   );
 	currentRequest = nullptr;
 }
 

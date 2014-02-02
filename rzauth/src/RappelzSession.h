@@ -20,7 +20,7 @@ public:
 protected:
 	RappelzSession(EncryptedSocket::Mode mode);  //instance create by factory method
 
-	void addPacketsToListen(int packetsIdNum, const int packetsId[]);
+	void addPacketsToListen(int packetsIdNum, int firstPacketId, ...);
 	RappelzSocket* getSocket() { return static_cast<RappelzSocket*>(SocketSession::getSocket()); }
 
 	static void onDataReceived(IListener* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
