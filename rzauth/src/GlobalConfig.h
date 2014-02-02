@@ -85,6 +85,18 @@ struct GlobalConfig {
 		} game;
 	} upload;
 
+	struct Ban {
+		DbConfig dbBan;
+		cval<std::string> &banFile;
+
+		Ban() :
+			dbBan("ban."),
+			banFile(CFG("ban.ipfile", "bannedip.txt"))
+		{
+			Utils::autoSetAbsoluteDir(banFile);
+		}
+	} ban;
+
 	static GlobalConfig* get();
 	static void init();
 };

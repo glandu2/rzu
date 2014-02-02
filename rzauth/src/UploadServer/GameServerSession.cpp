@@ -1,10 +1,8 @@
 #define __STDC_LIMIT_MACROS
 #include "GameServerSession.h"
-#include <string.h>
-#include "../GlobalConfig.h"
 #include "UploadRequest.h"
+#include <string.h>
 
-#include "EventLoop.h"
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_US_LOGIN_RESULT.h"
 #include "Packets/TS_US_REQUEST_UPLOAD.h"
@@ -14,59 +12,28 @@ namespace UploadServer {
 
 std::unordered_map<std::string, GameServerSession*>  GameServerSession::servers;
 
-GameServerSession::GameServerSession(RappelzSocket* socket) {
-	this->socket = socket;
-
-	socket->addEventListener(this, &onStateChanged);
-	socket->addPacketListener(TS_SU_LOGIN::packetID, this, &onDataReceived);
-	socket->addPacketListener(TS_SU_REQUEST_UPLOAD::packetID, this, &onDataReceived);
-}
-
-void GameServerSession::startServer() {
-	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(CONFIG_GET()->upload.game.listenIp,
-						 CONFIG_GET()->upload.game.port);
+GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncryption) {
+	addPacketsToListen(2, (const int[]) {
+						   TS_SU_LOGIN::packetID,
+						   TS_SU_REQUEST_UPLOAD::packetID
+					   });
 }
 
 GameServerSession::~GameServerSession() {
-	if(this->serverName.empty() == false)
+	if(this->serverName.empty() == false) {
 		servers.erase(this->serverName);
-	socket->deleteLater();
-}
-
-void GameServerSession::onNewConnection(IListener* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), false);
-	static GameServerSession* serverInfo = new GameServerSession(newSocket);
-
-	do {
-
-		if(!serverSocket->accept(newSocket))
-			break;
-
-		newSocket = new RappelzSocket(EventLoop::getLoop(), false);
-		serverInfo = new GameServerSession(newSocket);
-	} while(1);
-}
-
-void GameServerSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
-	GameServerSession* thisInstance = static_cast<GameServerSession*>(instance);
-
-	if(newState == Socket::UnconnectedState) {
-		delete thisInstance;
+		info("Server Logout\n");
 	}
 }
 
-void GameServerSession::onDataReceived(IListener* instance, RappelzSocket* , const TS_MESSAGE* packet) {
-	GameServerSession* thisInstance = static_cast<GameServerSession*>(instance);
-
+void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_SU_LOGIN::packetID:
-			thisInstance->onLogin(static_cast<const TS_SU_LOGIN*>(packet));
+			onLogin(static_cast<const TS_SU_LOGIN*>(packet));
 			break;
 
 		case TS_SU_REQUEST_UPLOAD::packetID:
-			thisInstance->onRequestUpload(static_cast<const TS_SU_REQUEST_UPLOAD*>(packet));
+			onRequestUpload(static_cast<const TS_SU_REQUEST_UPLOAD*>(packet));
 			break;
 	}
 }
@@ -76,7 +43,7 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 	TS_MESSAGE::initMessage<TS_US_LOGIN_RESULT>(&result);
 	typedef std::unordered_map<std::string, GameServerSession*>::iterator ServerIterator;
 
-	info("Server Login: %s from %s:%d\n", packet->server_name, socket->getHost().c_str(), socket->getPort());
+	info("Server Login: %s from %s:%d\n", packet->server_name, getSocket()->getHost().c_str(), getSocket()->getPort());
 
 	std::pair<ServerIterator, bool> insertResult = servers.insert(std::pair<std::string, GameServerSession*>(packet->server_name, this));
 
@@ -91,7 +58,7 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 		error("Failed, server \"%s\" already registered\n", packet->server_name);
 	}
 
-	socket->sendPacket(&result);
+	sendPacket(&result);
 }
 
 void GameServerSession::onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet) {
@@ -103,7 +70,7 @@ void GameServerSession::onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet) {
 	UploadRequest::pushRequest(this, packet->client_id, packet->account_id, packet->guild_sid, packet->one_time_password);
 
 	result.result = TS_RESULT_SUCCESS;
-	socket->sendPacket(&result);
+	sendPacket(&result);
 }
 
 void GameServerSession::sendUploadResult(uint32_t guidId, uint32_t fileSize, const char* fileName) {
@@ -115,7 +82,7 @@ void GameServerSession::sendUploadResult(uint32_t guidId, uint32_t fileSize, con
 	result->filename_length = strlen(fileName);
 	result->type = 0;
 	strncpy(result->file_name, fileName, fileNameSize);
-	socket->sendPacket(result);
+	sendPacket(result);
 
 	TS_MESSAGE_WNA::destroy(result);
 }

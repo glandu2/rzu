@@ -28,6 +28,8 @@ public:
 
 	ClientSession* client; //if != null: not yet in-game
 	GameServerSession* server; //if != null: in-game or gameserver selected
+	//never both !client && !server
+
 	bool inGame;
 
 	//Try to add newClient if account is not already in the list (authenticated).
@@ -40,8 +42,11 @@ public:
 	static bool switchClientToServer(const std::string& account, GameServerSession* server);
 	static ClientData* getClient(const std::string& account);
 	static unsigned int getClientCount() { return connectedClients.size(); }
+	static void removeServer(GameServerSession* server); //remove all client that was connected to this server
 
 private:
+	~ClientData() {}
+
 	static uv_mutex_t initializeLock();
 
 	static std::unordered_map<std::string, ClientData*> connectedClients;

@@ -10,8 +10,13 @@
 #include "UploadServer/GameServerSession.h"
 #include "UploadServer/IconServerSession.h"
 
+#include "RappelzServer.h"
+#include "BanManager.h"
+
 //socket->deleteLater in uv_check_t
 void showDebug(uv_timer_t*, int);
+
+//remove connected account when gs is disconnected
 
 int main(int argc, char **argv) {
 //	uv_timer_t timer;
@@ -23,11 +28,22 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
-	AuthServer::ClientSession::startServer();
-	AuthServer::GameServerSession::startServer();
-	UploadServer::ClientSession::startServer();
-	UploadServer::GameServerSession::startServer();
-	UploadServer::IconServerSession::startServer();
+	BanManager banManager;
+	banManager.loadFile();
+
+	RappelzServer<AuthServer::ClientSession> authClientServer;
+	RappelzServer<AuthServer::GameServerSession> authGameServer;
+
+	authClientServer.startServer(CONFIG_GET()->auth.client.listenIp, CONFIG_GET()->auth.client.port, &banManager);
+	authGameServer.startServer(CONFIG_GET()->auth.game.listenIp, CONFIG_GET()->auth.game.port);
+
+	RappelzServer<UploadServer::ClientSession> uploadClientServer;
+	RappelzServer<UploadServer::IconServerSession> uploadIconServer;
+	RappelzServer<UploadServer::GameServerSession> uploadGameServer;
+
+	uploadClientServer.startServer(CONFIG_GET()->upload.client.listenIp, CONFIG_GET()->upload.client.port);
+	uploadIconServer.startServer(CONFIG_GET()->upload.client.listenIp, CONFIG_GET()->upload.client.webPort);
+	uploadGameServer.startServer(CONFIG_GET()->upload.game.listenIp, CONFIG_GET()->upload.game.port);
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
@@ -35,14 +51,6 @@ int main(int argc, char **argv) {
 void showDebug(uv_timer_t *, int) {
 	char debugInfo[1000];
 	strcpy(debugInfo, "----------------------------------\n");
-	sprintf(debugInfo, "%s%lu Object\n", debugInfo, Object::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu EventLoop\n", debugInfo, EventLoop::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu Socket\n", debugInfo, Socket::getObjectCount());
-	sprintf(debugInfo, "%s\t\t%lu EncryptedSocket\n", debugInfo, EncryptedSocket::getObjectCount());
-	sprintf(debugInfo, "%s\t\t\t%lu RappelzSocket\n", debugInfo, RappelzSocket::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu ClientInfo\n", debugInfo, AuthServer::ClientSession::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu ClientData\n", debugInfo, AuthServer::ClientData::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu DB_Account\n", debugInfo, AuthServer::DB_Account::getObjectCount());
-	sprintf(debugInfo, "%s\t%lu ServerInfo\n", debugInfo, AuthServer::GameServerSession::getObjectCount());
-	printf(debugInfo);
+	sprintf(debugInfo, "%s%lu socket Sessions\n", debugInfo, SocketSession::getObjectCount());
+	puts(debugInfo);
 }

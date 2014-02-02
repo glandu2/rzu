@@ -1,8 +1,7 @@
-#ifndef CLIENTMANAGER_H
-#define CLIENTMANAGER_H
+#ifndef CLIENTSESSION_H
+#define CLIENTSESSION_H
 
-#include "Object.h"
-#include "RappelzSocket.h"
+#include "../RappelzSession.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>
@@ -16,23 +15,17 @@
 
 namespace AuthServer {
 
-class ClientSession : public Object, public IListener
+class ClientSession : public RappelzSession
 {
 	DECLARE_CLASS(AuthServer::ClientSession)
 
 public:
-	ClientSession(RappelzSocket *socket);
-	~ClientSession();
-
-	static void startServer();
+	ClientSession();
 
 	void clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode);
 
 protected:
-	static void onNewConnection(IListener* instance, Socket* serverSocket);
-	static void onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
-	static void onDataReceived(IListener* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
-	//static ClientData* popPendingClient(const std::string& accountName);
+	void onPacketReceived(const TS_MESSAGE* packet);
 
 	void onVersion(const TS_CA_VERSION* packet);
 	void onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet);
@@ -41,7 +34,7 @@ protected:
 	void onSelectServer(const TS_CA_SELECT_SERVER* packet);
 	
 private:
-	RappelzSocket* socket;
+	~ClientSession();
 
 	bool useRsaAuth;
 	unsigned char aesKey[32];
@@ -50,4 +43,4 @@ private:
 
 } // namespace AuthServer
 
-#endif // CLIENTMANAGER_H
+#endif // CLIENTSESSION_H
