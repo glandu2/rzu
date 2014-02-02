@@ -21,6 +21,7 @@ class GameServerSession : public RappelzSession
 public:
 	GameServerSession();
 
+	//multithread concurrency when GS is disconnected while new players connect to it
 	static const std::vector<GameServerSession*>& getServerList() { return servers; }
 
 	uint16_t getServerIdx() { return serverIdx; }

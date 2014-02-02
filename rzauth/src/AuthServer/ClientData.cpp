@@ -19,7 +19,7 @@ ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientI
 
 }
 
-ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account) {
+ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code) {
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> result;
 	ClientData* newClient;
 
@@ -42,6 +42,9 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		}
 	} else {
 		newClient->account = account;
+		newClient->accountId = accoundId;
+		newClient->age = age;
+		newClient->eventCode = event_code;
 	}
 
 	uv_mutex_unlock(&mapLock);
@@ -66,22 +69,14 @@ bool ClientData::removeClient(const std::string& account) {
 	return ret;
 }
 
-bool ClientData::switchClientToServer(const std::string& account, GameServerSession* server) {
-	bool ret = false;
-	std::unordered_map<std::string, ClientData*>::const_iterator it;
+bool ClientData::removeClient(ClientData* clientData) {
+	return removeClient(clientData->account);
+}
 
-	uv_mutex_lock(&mapLock);
-
-	it = connectedClients.find(account);
-	if(it != connectedClients.cend()) {
-		ClientData* clientData = it->second;
-		clientData->client = nullptr;
-		clientData->server = server;
-		ret = true;
-	}
-	uv_mutex_unlock(&mapLock);
-
-	return ret;
+void ClientData::switchClientToServer(GameServerSession* server, uint64_t oneTimePassword) {
+	this->oneTimePassword = oneTimePassword;
+	this->client = nullptr;
+	this->server = server;
 }
 
 ClientData* ClientData::getClient(const std::string& account) {

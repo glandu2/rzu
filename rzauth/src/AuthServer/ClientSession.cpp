@@ -23,7 +23,7 @@
 
 namespace AuthServer {
 
-ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted) {
+ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted), useRsaAuth(false), lastLoginServerId(0), clientData(nullptr) {
 	addPacketsToListen(5, (const int[]){
 						   TS_CA_VERSION::packetID,
 						   TS_CA_RSA_PUBLIC_KEY::packetID,
@@ -31,14 +31,11 @@ ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted) {
 						   TS_CA_SERVER_LIST::packetID,
 						   TS_CA_SELECT_SERVER::packetID,
 					   });
-
-	useRsaAuth = false;
-	clientData = nullptr;
 }
 
 ClientSession::~ClientSession() {
 	if(clientData)
-		ClientData::removeClient(clientData->account);
+		ClientData::removeClient(clientData);
 }
 
 void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
@@ -179,8 +176,12 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 	if(authOk == false) {
 		result.result = TS_RESULT_INVALID_PASSWORD;
 		result.login_flag = 0;
+	} else if(clientData != nullptr) { //already connected
+		result.result = TS_RESULT_CLIENT_SIDE_ERROR;
+		result.login_flag = 0;
+		info("Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
-		clientData = ClientData::tryAddClient(this, account);
+		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
@@ -188,10 +189,7 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
-			clientData->accountId = accountId;
-			clientData->age = age;
-			clientData->lastLoginServerId = lastLoginServerIdx;
-			clientData->eventCode = eventCode;
+			this->lastLoginServerId = lastLoginServerIdx;
 		}
 	}
 
@@ -217,7 +215,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
 
 	serverListPacket->count = count;
-	serverListPacket->last_login_server_idx = clientData->lastLoginServerId;
+	serverListPacket->last_login_server_idx = lastLoginServerId;
 
 	for(i = j = 0; i < serverList.size() && j < serverListPacket->count; i++) {
 		GameServerSession* serverInfo = serverList.at(i);
@@ -251,12 +249,11 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 	if(packet->server_idx < serverList.size() && serverList.at(packet->server_idx) != nullptr) {
 		GameServerSession* server = serverList.at(packet->server_idx);
 
-		clientData->oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
+		uint64_t oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
 
-		if(ClientData::switchClientToServer(clientData->account, server) == false) {
-			abortSession();
-			return;
-		}
+		//clientData now managed by target GS
+		clientData->switchClientToServer(server, oneTimePassword);
+		clientData = nullptr;
 
 		if(useRsaAuth) {
 			TS_AC_SELECT_SERVER_V2 result;
@@ -273,7 +270,7 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 			EVP_CIPHER_CTX_init(&e_ctx);
 			EVP_EncryptInit_ex(&e_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16);
 			EVP_EncryptInit_ex(&e_ctx, NULL, NULL, NULL, NULL);
-			EVP_EncryptUpdate(&e_ctx, result.encrypted_data, &bytesWritten, (const unsigned char*)&clientData->oneTimePassword, sizeof(uint64_t));
+			EVP_EncryptUpdate(&e_ctx, result.encrypted_data, &bytesWritten, (const unsigned char*)&oneTimePassword, sizeof(uint64_t));
 			EVP_EncryptFinal_ex(&e_ctx, result.encrypted_data + bytesWritten, &bytesWritten);
 
 			EVP_CIPHER_CTX_cleanup(&e_ctx);
@@ -284,13 +281,11 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER>(&result);
 
 			result.result = 0;
-			result.one_time_key = clientData->oneTimePassword;
+			result.one_time_key = oneTimePassword;
 			result.pending_time = 0;
 
 			sendPacket(&result);
 		}
-
-		clientData = nullptr;
 	} else {
 		abortSession();
 	}

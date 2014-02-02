@@ -38,6 +38,7 @@ private:
 
 	bool useRsaAuth;
 	unsigned char aesKey[32];
+	uint16_t lastLoginServerId;
 	ClientData* clientData;
 };
 

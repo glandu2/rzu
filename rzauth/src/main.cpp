@@ -16,8 +16,6 @@
 //socket->deleteLater in uv_check_t
 void showDebug(uv_timer_t*, int);
 
-//remove connected account when gs is disconnected
-
 int main(int argc, char **argv) {
 //	uv_timer_t timer;
 //	uv_timer_init(EventLoop::getLoop(), &timer);
@@ -41,8 +39,8 @@ int main(int argc, char **argv) {
 	RappelzServer<UploadServer::IconServerSession> uploadIconServer;
 	RappelzServer<UploadServer::GameServerSession> uploadGameServer;
 
-	uploadClientServer.startServer(CONFIG_GET()->upload.client.listenIp, CONFIG_GET()->upload.client.port);
-	uploadIconServer.startServer(CONFIG_GET()->upload.client.listenIp, CONFIG_GET()->upload.client.webPort);
+	uploadClientServer.startServer(CONFIG_GET()->upload.client.listenIp, CONFIG_GET()->upload.client.port, &banManager);
+	uploadIconServer.startServer(CONFIG_GET()->upload.client.listenIp, CONFIG_GET()->upload.client.webPort, &banManager);
 	uploadGameServer.startServer(CONFIG_GET()->upload.game.listenIp, CONFIG_GET()->upload.game.port);
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
