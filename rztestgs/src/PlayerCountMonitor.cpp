@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) : sock(uv_default_loop(), true) {
+PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) : sock(uv_default_loop(), EncryptedSocket::Encrypted) {
 	this->host = host;
 	this->port = port;
 	this->connectedTimes = 0;
