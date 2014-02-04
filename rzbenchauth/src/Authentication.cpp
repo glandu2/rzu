@@ -9,7 +9,7 @@
 #include <openssl/rsa.h>
 
 Authentication::Authentication(std::string host, AuthCipherMethod method, uint16_t port, const std::string& version) {
-	this->authServer = new RappelzSocket(EventLoop::getLoop(), true);
+	this->authServer = new RappelzSocket(EventLoop::getLoop(), EncryptedSocket::Encrypted);
 	this->gameServer = nullptr;
 
 	this->authIp = host;
@@ -18,7 +18,6 @@ Authentication::Authentication(std::string host, AuthCipherMethod method, uint16
 	this->version = version;
 
 	this->rsaCipher = 0;
-	this->aes_key_iv = 0;
 	this->selectedServer = 0;
 	this->currentState = AS_Idle;
 	this->inProgress = false;
@@ -37,8 +36,8 @@ Authentication::Authentication(std::string host, AuthCipherMethod method, uint16
 Authentication::~Authentication() {
 	if(inProgress)
 		warn("Authentication object delete but authentication in progress !\n");
-	if(aes_key_iv)
-		delete[] aes_key_iv;
+	if(authServer)
+		delete authServer;
 	if(gameServer)
 		delete gameServer;
 }
@@ -248,7 +247,6 @@ void Authentication::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) {
 		return;
 	}
 
-	aes_key_iv = new unsigned char[32];
 	memcpy(aes_key_iv, decrypted_data, 32);
 	memset(accountMsg.password, 0, sizeof(accountMsg.password));
 
@@ -316,7 +314,7 @@ void Authentication::onPacketServerList(const TS_AC_SERVER_LIST* packet) {
 	}
 
 	currentState = AS_ProcessServerList;
-	CALLBACK_CALL(serverListCallback, this, serverList, packet->last_login_server_idx);
+	CALLBACK_CALL(serverListCallback, this, &serverList, packet->last_login_server_idx);
 }
 
 void Authentication::onPacketSelectServerResult(const TS_AC_SELECT_SERVER* packet) {
@@ -347,8 +345,6 @@ void Authentication::onPacketSelectServerResult(const TS_AC_SELECT_SERVER* packe
 		ok = true;
 end:
 		EVP_CIPHER_CTX_cleanup(&e_ctx);
-		delete[] aes_key_iv;
-		aes_key_iv = 0;
 
 		if(ok == false) {
 			warn("onPacketSelectServerResult: Could not decrypt TS_AC_SELECT_SERVER\n");
@@ -361,7 +357,7 @@ end:
 	}
 
 	ServerConnectionInfo selectedServerInfo = serverList.at(selectedServer);
-	gameServer = new RappelzSocket(EventLoop::getLoop(), true);
+	gameServer = new RappelzSocket(EventLoop::getLoop(), EncryptedSocket::Encrypted);
 	gameServer->addPacketListener(TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent);
 	gameServer->addPacketListener(TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived);
 	gameServer->connect(selectedServerInfo.ip, selectedServerInfo.port);
@@ -398,6 +394,9 @@ void Authentication::onPacketGameUnreachable() {
 
 void Authentication::onPacketGameAuthResult(const TS_SC_RESULT* packet) {
 	currentState = AS_Idle;
+
+	gameServer->removePacketListener(TS_CC_EVENT::packetID, this);
+	gameServer->removePacketListener(TS_CS_ACCOUNT_WITH_AUTH::packetID, this);
 
 	if(inProgress == true) {
 		if(packet->result == 0)

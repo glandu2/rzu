@@ -34,7 +34,7 @@ class Authentication : private Object, IListener
 		};
 
 		typedef void (*CallbackOnAuthResult)(IListener* instance, Authentication* auth, TS_ResultCode result, const char* resultString);
-		typedef void (*CallbackOnServerList)(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>& servers, uint16_t lastSelectedServerId);
+		typedef void (*CallbackOnServerList)(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
 		typedef void (*CallbackOnGameResult)(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
 
 	public:
@@ -84,7 +84,7 @@ class Authentication : private Object, IListener
 		std::string version;
 		std::string username;
 		std::string password;
-		unsigned char* aes_key_iv;
+		unsigned char aes_key_iv[32];
 		void* rsaCipher;
 		std::vector<ServerConnectionInfo> serverList;
 		int selectedServer;
