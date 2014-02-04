@@ -30,7 +30,7 @@ IconServerSession::IconServerSession() {
 void IconServerSession::onDataReceived() {
 	std::vector<char> buffer;
 
-	while(getSocket()->getAvailableBytes() > 0) {
+	if(getSocket()->getAvailableBytes() > 0) {
 		getSocket()->readAll(&buffer);
 		parseData(buffer);
 	}
@@ -134,11 +134,15 @@ void IconServerSession::sendIcon(const std::string& filename) {
 			bytesTransferred += nbrw;
 		}
 
+		fclose(file);
+
 		if(nbrw > 0) {
 			getSocket()->write(buffer, fileContentBegin + fileSize);
 		} else {
 			getSocket()->write(htmlNotFound, htmlNotFoundSize);
 		}
+
+		delete[] buffer;
 	}
 }
 

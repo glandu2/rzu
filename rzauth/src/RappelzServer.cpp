@@ -42,14 +42,13 @@ void RappelzServerCommon::onNewConnection(IListener* instance, Socket* serverSoc
 		thisInstance->lastWaitingInstance->socket->addEventListener(thisInstance->lastWaitingInstance, &onSocketStateChanged);
 	}
 
-	if(serverSocket->accept(thisInstance->lastWaitingInstance->getSocket(), false)) {
+	if(serverSocket->accept(thisInstance->lastWaitingInstance->getSocket())) {
 		if(thisInstance->banManager && thisInstance->banManager->isBanned(thisInstance->lastWaitingInstance->getSocket()->getPeerInfo().sin_addr.s_addr)) {
 			thisInstance->lastWaitingInstance->getSocket()->abort();
 			thisInstance->info("Kick banned ip %s\n", thisInstance->lastWaitingInstance->getSocket()->getHost().c_str());
 		} else {
 			thisInstance->sockets.push_back(thisInstance->lastWaitingInstance->getSocket());
 			thisInstance->lastWaitingInstance->setServer(thisInstance, --thisInstance->sockets.end());
-			thisInstance->lastWaitingInstance->getSocket()->finishAccept();
 		}
 		thisInstance->lastWaitingInstance = nullptr;
 	}
