@@ -60,8 +60,6 @@ void onServerList(IListener* instance, Authentication* auth, const std::vector<A
 
 void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket) {
 	fprintf(stderr, "login to GS result: %d\n", result);
-	if(result == 1)
-		printf("wtf");
 	if(gameServerSocket)
 		gameServerSocket->close();
 }
