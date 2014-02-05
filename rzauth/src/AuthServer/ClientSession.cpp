@@ -1,12 +1,11 @@
 #include "ClientSession.h"
 #include "GameServerSession.h"
-#include "RappelzSocket.h"
+#include "../GlobalConfig.h"
+
 #include <string.h>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include <algorithm>
-#include "EventLoop.h"
-#include "../GlobalConfig.h"
 
 #include "DesPasswordCipher.h"
 #include <openssl/evp.h>
@@ -24,81 +23,41 @@
 
 namespace AuthServer {
 
-ClientSession::ClientSession(RappelzSocket* socket) {
-	this->socket = socket;
-	this->useRsaAuth = false;
-	this->clientData = nullptr;
-
-	socket->addEventListener(this, &onStateChanged);
-	socket->addPacketListener(TS_CA_VERSION::packetID, this, &onDataReceived);
-	socket->addPacketListener(TS_CA_RSA_PUBLIC_KEY::packetID, this, &onDataReceived);
-	socket->addPacketListener(TS_CA_ACCOUNT::packetID, this, &onDataReceived);
-	socket->addPacketListener(TS_CA_SERVER_LIST::packetID, this, &onDataReceived);
-	socket->addPacketListener(TS_CA_SELECT_SERVER::packetID, this, &onDataReceived);
+ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted), useRsaAuth(false), lastLoginServerId(0), clientData(nullptr) {
+	addPacketsToListen(5,
+					   TS_CA_VERSION::packetID,
+					   TS_CA_RSA_PUBLIC_KEY::packetID,
+					   TS_CA_ACCOUNT::packetID,
+					   TS_CA_SERVER_LIST::packetID,
+					   TS_CA_SELECT_SERVER::packetID
+					   );
 }
 
 ClientSession::~ClientSession() {
-	invalidateCallbacks();
-	if(clientData) {
-		if(ClientData::removeClient(clientData->account))
-			delete clientData;
-	}
-
-	socket->deleteLater();
+	if(clientData)
+		ClientData::removeClient(clientData);
 }
 
-void ClientSession::startServer() {
-	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	srand((unsigned int)time(NULL));
-	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(CONFIG_GET()->auth.client.listenIp,
-						 CONFIG_GET()->auth.client.port);
-}
-
-void ClientSession::onNewConnection(IListener* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), true);
-	static ClientSession* clientInfo = new ClientSession(newSocket);
-
-	do {
-
-		if(!serverSocket->accept(newSocket))
-			break;
-
-		newSocket = new RappelzSocket(EventLoop::getLoop(), true);
-		clientInfo = new ClientSession(newSocket);
-	} while(1);
-}
-
-void ClientSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
-	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
-	
-	if(newState == Socket::UnconnectedState) {
-		delete thisInstance;
-	}
-}
-
-void ClientSession::onDataReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packet) {
-	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
-
+void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_CA_VERSION::packetID:
-			thisInstance->onVersion(static_cast<const TS_CA_VERSION*>(packet));
+			onVersion(static_cast<const TS_CA_VERSION*>(packet));
 			break;
 
 		case TS_CA_RSA_PUBLIC_KEY::packetID:
-			thisInstance->onRsaKey(static_cast<const TS_CA_RSA_PUBLIC_KEY*>(packet));
+			onRsaKey(static_cast<const TS_CA_RSA_PUBLIC_KEY*>(packet));
 			break;
 
 		case TS_CA_ACCOUNT::packetID:
-			thisInstance->onAccount(static_cast<const TS_CA_ACCOUNT*>(packet));
+			onAccount(static_cast<const TS_CA_ACCOUNT*>(packet));
 			break;
 
 		case TS_CA_SERVER_LIST::packetID:
-			thisInstance->onServerList(static_cast<const TS_CA_SERVER_LIST*>(packet));
+			onServerList(static_cast<const TS_CA_SERVER_LIST*>(packet));
 			break;
 
 		case TS_CA_SELECT_SERVER::packetID:
-			thisInstance->onSelectServer(static_cast<const TS_CA_SELECT_SERVER*>(packet));
+			onSelectServer(static_cast<const TS_CA_SELECT_SERVER*>(packet));
 			break;
 	}
 }
@@ -112,7 +71,7 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.value = totalUserCount ^ 0xADADADAD;
 		result.result = 0;
 		result.request_msg_id = packet->id;
-		socket->sendPacket(&result);
+		sendPacket(&result);
 	}
 }
 
@@ -129,7 +88,7 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	rsaCipher = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 	if(rsaCipher == nullptr) {
 		warn("RSA: invalid certificate\n");
-		socket->abort();
+		abortSession();
 		goto cleanup;
 	}
 
@@ -139,14 +98,14 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	if(blockSize < 0) {
 		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
 		warn("RSA encrypt error: %s\n", errorString);
-		socket->abort();
+		abortSession();
 		goto cleanup;
 	}
 
 	aesKeyMessage->data_size = blockSize;
 
 	useRsaAuth = true;
-	socket->sendPacket(aesKeyMessage);
+	sendPacket(aesKeyMessage);
 
 cleanup:
 	if(aesKeyMessage)
@@ -217,35 +176,24 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 	if(authOk == false) {
 		result.result = TS_RESULT_INVALID_PASSWORD;
 		result.login_flag = 0;
+	} else if(clientData != nullptr) { //already connected
+		result.result = TS_RESULT_CLIENT_SIDE_ERROR;
+		result.login_flag = 0;
+		info("Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
-		ClientData *alreadyExistingClient = nullptr;
-		clientData = ClientData::tryAddClient(this, account, &alreadyExistingClient);
+		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
-
-			info("Client already connected, kicking\n");
-
-			//thread concurrency when switching from client to server
-			if(alreadyExistingClient->server) {
-				if(alreadyExistingClient->inGame)
-					alreadyExistingClient->server->kickClient(account);
-				else
-					ClientData::removeClient(account);
-			} else {
-				alreadyExistingClient->client->socket->abort();
-			}
+			info("Client already connected\n");
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
-			clientData->accountId = accountId;
-			clientData->age = age;
-			clientData->lastLoginServerId = lastLoginServerIdx;
-			clientData->eventCode = eventCode;
+			this->lastLoginServerId = lastLoginServerIdx;
 		}
 	}
 
-	socket->sendPacket(&result);
+	sendPacket(&result);
 }
 
 void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
@@ -254,7 +202,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 	// Check if user authenticated
 	if(clientData == nullptr) {
-		socket->abort();
+		abortSession();
 		return;
 	}
 
@@ -267,7 +215,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
 
 	serverListPacket->count = count;
-	serverListPacket->last_login_server_idx = clientData->lastLoginServerId;
+	serverListPacket->last_login_server_idx = lastLoginServerId;
 
 	for(i = j = 0; i < serverList.size() && j < serverListPacket->count; i++) {
 		GameServerSession* serverInfo = serverList.at(i);
@@ -286,7 +234,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		j++;
 	}
 
-	socket->sendPacket(serverListPacket);
+	sendPacket(serverListPacket);
 	TS_MESSAGE_WNA::destroy(serverListPacket);
 }
 
@@ -294,19 +242,18 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 	const std::vector<GameServerSession*>& serverList = GameServerSession::getServerList();
 
 	if(clientData == nullptr) {
-		socket->abort();
+		abortSession();
 		return;
 	}
 
 	if(packet->server_idx < serverList.size() && serverList.at(packet->server_idx) != nullptr) {
 		GameServerSession* server = serverList.at(packet->server_idx);
 
-		clientData->oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
+		uint64_t oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
 
-		if(ClientData::switchClientToServer(clientData->account, server) == false) {
-			socket->abort();
-			return;
-		}
+		//clientData now managed by target GS
+		clientData->switchClientToServer(server, oneTimePassword);
+		clientData = nullptr;
 
 		if(useRsaAuth) {
 			TS_AC_SELECT_SERVER_V2 result;
@@ -323,26 +270,24 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 			EVP_CIPHER_CTX_init(&e_ctx);
 			EVP_EncryptInit_ex(&e_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16);
 			EVP_EncryptInit_ex(&e_ctx, NULL, NULL, NULL, NULL);
-			EVP_EncryptUpdate(&e_ctx, result.encrypted_data, &bytesWritten, (const unsigned char*)&clientData->oneTimePassword, sizeof(uint64_t));
+			EVP_EncryptUpdate(&e_ctx, result.encrypted_data, &bytesWritten, (const unsigned char*)&oneTimePassword, sizeof(uint64_t));
 			EVP_EncryptFinal_ex(&e_ctx, result.encrypted_data + bytesWritten, &bytesWritten);
 
 			EVP_CIPHER_CTX_cleanup(&e_ctx);
 
-			socket->sendPacket(&result);
+			sendPacket(&result);
 		} else {
 			TS_AC_SELECT_SERVER result;
 			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER>(&result);
 
 			result.result = 0;
-			result.one_time_key = clientData->oneTimePassword;
+			result.one_time_key = oneTimePassword;
 			result.pending_time = 0;
 
-			socket->sendPacket(&result);
+			sendPacket(&result);
 		}
-
-		clientData = nullptr;
 	} else {
-		socket->abort();
+		abortSession();
 	}
 }
 

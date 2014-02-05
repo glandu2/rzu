@@ -17,13 +17,17 @@ void GlobalConfig::init() {
 
 #ifdef _WIN32
 	GlobalConfig::get()->auth.dbAccount.driver.setDefault("SQL Server");
+	GlobalConfig::get()->ban.dbBan.driver.setDefault("SQL Server");
 #else
 	GlobalConfig::get()->auth.dbAccount.driver.setDefault("FreeTDS");
+	GlobalConfig::get()->ban.dbBan.driver.setDefault("FreeTDS");
 #endif
+
+	srand((unsigned int)time(NULL));
 }
 
-void GlobalConfig::AuthConfig::DbAccount::updateConnectionString(IListener* instance) {
-	DbAccount* thisInstance = (DbAccount*)instance;
+void DbConfig::updateConnectionString(IListener* instance) {
+	DbConfig* thisInstance = (DbConfig*)instance;
 
 	thisInstance->connectionString.setDefault(
 				"driver=" + thisInstance->driver.get() +

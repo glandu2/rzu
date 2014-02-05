@@ -18,16 +18,18 @@ class ClientData : public Object
 
 public:
 	ClientData(ClientSession* clientInfo);
+	void switchClientToServer(GameServerSession* server, uint64_t oneTimePassword);
 
 	std::string account;
 	uint32_t accountId;
 	uint32_t age;
-	uint16_t lastLoginServerId;
 	uint32_t eventCode;
 	uint64_t oneTimePassword;
 
 	ClientSession* client; //if != null: not yet in-game
 	GameServerSession* server; //if != null: in-game or gameserver selected
+	//never both !client && !server
+
 	bool inGame;
 
 	//Try to add newClient if account is not already in the list (authenticated).
@@ -35,13 +37,18 @@ public:
 	//If the account is already in the hash map, fail: return null and put already connected client data in oldClient
 	//If successful, create a new instance of ClientData with given account added to the hash map
 	//Thread safe
-	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account, ClientData** oldClient);
+	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code);
 	static bool removeClient(const std::string& account);
-	static bool switchClientToServer(const std::string& account, GameServerSession* server);
+	static bool removeClient(ClientData* clientData);
 	static ClientData* getClient(const std::string& account);
 	static unsigned int getClientCount() { return connectedClients.size(); }
+	static void removeServer(GameServerSession* server); //remove all client that was connected to this server
+
+
 
 private:
+	~ClientData() {}
+
 	static uv_mutex_t initializeLock();
 
 	static std::unordered_map<std::string, ClientData*> connectedClients;

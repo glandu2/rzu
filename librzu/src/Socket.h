@@ -5,7 +5,9 @@
 #include "uv.h"
 #include "IListener.h"
 #include "stdint.h"
+#include "IDelegate.h"
 
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -21,9 +23,9 @@ public:
 		UnconnectedState,	//Client & server
 
 		ConnectingState,	//Client
-		Binding,			//Server
+		BindingState,			//Server
 
-		Listening,			//Server
+		ListeningState,			//Server
 		ConnectedState,		//Client
 
 		ClosingState		//Client & Server
@@ -39,19 +41,20 @@ public:
 	Socket(uv_loop_t* uvLoop);
 	virtual ~Socket();
 
-	virtual bool connect(const std::string& hostName, uint16_t port);
-	virtual bool listen(const std::string& interfaceIp, uint16_t port);
+	bool connect(const std::string& hostName, uint16_t port);
+	bool listen(const std::string& interfaceIp, uint16_t port);
 
-	virtual size_t getAvailableBytes();
-	virtual size_t read(void *buffer, size_t size);
-	virtual size_t readAll(std::vector<char>* buffer); //data in buffer will be destroyed
-	virtual size_t write(const void *buffer, size_t size);
-	virtual bool accept(Socket *socket);
+	size_t getAvailableBytes() { return recvBuffer.size(); }
+	size_t read(void *buffer, size_t size);
+	size_t readAll(std::vector<char>* buffer); //data in buffer will be destroyed
+	size_t write(const void *buffer, size_t size);
+	bool accept(Socket *clientSocket);
 
-	virtual void close();
-	virtual void abort();
+	void close();
+	void abort();
 
-	State getState();
+	State getState() { return currentState; }
+	struct sockaddr_in getPeerInfo();
 	const std::string& getHost() { return host; }
 	uint16_t getPort() { return port; }
 
@@ -78,11 +81,22 @@ protected:
 	static void onConnectionClosed(uv_handle_t* handle);
 
 private:
-	SocketInternal *_p;
-	int lastError;
 	uv_loop_t* uvLoop;
 	std::string host;
 	uint16_t port;
+
+	IDelegate<Socket::CallbackOnDataReady> dataListeners;
+	IDelegate<Socket::CallbackOnDataReady> incomingConnectionListeners;
+	IDelegate<Socket::CallbackOnStateChanged> eventListeners;
+	IDelegate<Socket::CallbackOnError> errorListeners;
+
+	uv_tcp_t socket;
+	uv_connect_t connectRequest;
+	uv_shutdown_t shutdownReq;
+	Socket::State currentState;
+
+	std::vector<char> recvBuffer;
+	bool socketInitialized; //for accept to prevent multiple init in case of failure of uv_accept
 };
 
 #endif // SOCKET_H

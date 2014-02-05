@@ -1,70 +1,37 @@
 #include "ClientSession.h"
-#include "RappelzSocket.h"
-#include "EventLoop.h"
-#include "../GlobalConfig.h"
-#include "Packets/PacketEnums.h"
 #include "GameServerSession.h"
+#include "UploadRequest.h"
+#include "../GlobalConfig.h"
+
 #include <time.h>
 #include <stdio.h>
 #include "Utils.h"
 
+#include "Packets/PacketEnums.h"
 #include "Packets/TS_UC_LOGIN_RESULT.h"
 #include "Packets/TS_UC_UPLOAD.h"
 
 namespace UploadServer {
 
-ClientSession::ClientSession(RappelzSocket* socket) {
-	this->socket = socket;
+ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted) {
+	addPacketsToListen(2,
+					   TS_CU_LOGIN::packetID,
+					   TS_CU_UPLOAD::packetID
+					   );
 	currentRequest = nullptr;
-
-	socket->addEventListener(this, &onStateChanged);
-	socket->addPacketListener(TS_CU_LOGIN::packetID, this, &onDataReceived);
-	socket->addPacketListener(TS_CU_UPLOAD::packetID, this, &onDataReceived);
 }
 
 ClientSession::~ClientSession() {
-	socket->deleteLater();
 }
 
-void ClientSession::startServer() {
-	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(CONFIG_GET()->upload.client.listenIp,
-						 CONFIG_GET()->upload.client.port);
-}
-
-void ClientSession::onNewConnection(IListener* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), true);
-	static ClientSession* clientInfo = new ClientSession(newSocket);
-
-	do {
-
-		if(!serverSocket->accept(newSocket))
-			break;
-
-		newSocket = new RappelzSocket(EventLoop::getLoop(), true);
-		clientInfo = new ClientSession(newSocket);
-	} while(1);
-}
-
-void ClientSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
-	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
-
-	if(newState == Socket::UnconnectedState) {
-		delete thisInstance;
-	}
-}
-
-void ClientSession::onDataReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packet) {
-	ClientSession* thisInstance = static_cast<ClientSession*>(instance);
-
+void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_CU_LOGIN::packetID:
-			thisInstance->onLogin(static_cast<const TS_CU_LOGIN*>(packet));
+			onLogin(static_cast<const TS_CU_LOGIN*>(packet));
 			break;
 
 		case TS_CU_UPLOAD::packetID:
-			thisInstance->onUpload(static_cast<const TS_CU_UPLOAD*>(packet));
+			onUpload(static_cast<const TS_CU_UPLOAD*>(packet));
 			break;
 	}
 }
@@ -74,8 +41,8 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 	TS_MESSAGE::initMessage<TS_UC_LOGIN_RESULT>(&result);
 
 	debug("Upload from client %s:%d, client id %u with account id %u for guild id %u on server %30s\n",
-		  socket->getHost().c_str(),
-		  socket->getPort(),
+		  getSocket()->getHost().c_str(),
+		  getSocket()->getPort(),
 		  packet->client_id,
 		  packet->account_id,
 		  packet->guild_id,
@@ -90,7 +57,7 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 	}
 
-	socket->sendPacket(&result);
+	sendPacket(&result);
 }
 
 void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
@@ -98,10 +65,10 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	TS_MESSAGE::initMessage<TS_UC_UPLOAD>(&result);
 
 
-	debug("Upload from client %s:%d\n", socket->getHost().c_str(), socket->getPort());
+	debug("Upload from client %s:%d\n", getSocket()->getHost().c_str(), getSocket()->getPort());
 
 	if(currentRequest == nullptr) {
-		warn("Upload attempt without a request from %s:%d\n", socket->getHost().c_str(), socket->getPort());
+		warn("Upload attempt without a request from %s:%d\n", getSocket()->getHost().c_str(), getSocket()->getPort());
 		result.result = TS_RESULT_NOT_EXIST;
 	} else if(packet->file_length != packet->size - sizeof(TS_CU_UPLOAD)) {
 		warn("Upload packet size invalid, received %u bytes but the packet say %u bytes\n", packet->size - sizeof(TS_CU_UPLOAD), packet->file_length);
@@ -153,7 +120,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 		}
 	}
 
-	socket->sendPacket(&result);
+	sendPacket(&result);
 }
 
 bool ClientSession::checkJpegImage(const char *data) {

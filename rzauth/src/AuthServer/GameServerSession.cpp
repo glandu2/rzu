@@ -2,9 +2,7 @@
 #include "GameServerSession.h"
 #include "ClientSession.h"
 #include <string.h>
-#include "../GlobalConfig.h"
 
-#include "EventLoop.h"
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
 #include "Packets/TS_AG_CLIENT_LOGIN.h"
@@ -14,74 +12,40 @@ namespace AuthServer {
 
 std::vector<GameServerSession*> GameServerSession::servers;
 
-GameServerSession::GameServerSession(RappelzSocket* socket)
-{
-	this->socket = socket;
+GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncryption) {
+	addPacketsToListen(4,
+					   TS_GA_LOGIN::packetID,
+					   TS_GA_CLIENT_LOGIN::packetID,
+					   TS_GA_CLIENT_LOGOUT::packetID,
+					   TS_GA_CLIENT_KICK_FAILED::packetID
+					   );
 	serverIdx = UINT16_MAX;
-
-	socket->addEventListener(this, &onStateChanged);
-	socket->addPacketListener(TS_GA_LOGIN::packetID, this, &onDataReceived);
-	socket->addPacketListener(TS_GA_CLIENT_LOGIN::packetID, this, &onDataReceived);
-	socket->addPacketListener(TS_GA_CLIENT_LOGOUT::packetID, this, &onDataReceived);
-	socket->addPacketListener(TS_GA_CLIENT_KICK_FAILED::packetID, this, &onDataReceived);
-}
-
-void GameServerSession::startServer() {
-	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(CONFIG_GET()->auth.game.listenIp,
-						 CONFIG_GET()->auth.game.port);
 }
 
 GameServerSession::~GameServerSession() {
-	invalidateCallbacks();
-
-	if(serverIdx != UINT16_MAX && (size_t)serverIdx < servers.size())
+	if(serverIdx != UINT16_MAX && (size_t)serverIdx < servers.size()) {
 		servers[serverIdx] = nullptr;
-
-	socket->deleteLater();
-}
-
-void GameServerSession::onNewConnection(IListener* instance, Socket* serverSocket) {
-	static RappelzSocket *newSocket = new RappelzSocket(EventLoop::getLoop(), false);
-	static GameServerSession* serverInfo = new GameServerSession(newSocket);
-
-	do {
-
-		if(!serverSocket->accept(newSocket))
-			break;
-
-		newSocket = new RappelzSocket(EventLoop::getLoop(), false);
-		serverInfo = new GameServerSession(newSocket);
-	} while(1);
-}
-
-void GameServerSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
-	GameServerSession* thisInstance = static_cast<GameServerSession*>(instance);
-
-	if(newState == Socket::UnconnectedState) {
-		delete thisInstance;
+		info("Server %d Logout\n", serverIdx);
+		ClientData::removeServer(this);
 	}
 }
 
-void GameServerSession::onDataReceived(IListener* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet) {
-	GameServerSession* thisInstance = static_cast<GameServerSession*>(instance);
-
+void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_GA_LOGIN::packetID:
-			thisInstance->onServerLogin(static_cast<const TS_GA_LOGIN*>(packet));
+			onServerLogin(static_cast<const TS_GA_LOGIN*>(packet));
 			break;
 
 		case TS_GA_CLIENT_LOGIN::packetID:
-			thisInstance->onClientLogin(static_cast<const TS_GA_CLIENT_LOGIN*>(packet));
+			onClientLogin(static_cast<const TS_GA_CLIENT_LOGIN*>(packet));
 			break;
 
 		case TS_GA_CLIENT_LOGOUT::packetID:
-			thisInstance->onClientLogout(static_cast<const TS_GA_CLIENT_LOGOUT*>(packet));
+			onClientLogout(static_cast<const TS_GA_CLIENT_LOGOUT*>(packet));
 			break;
 
 		case TS_GA_CLIENT_KICK_FAILED::packetID:
-			thisInstance->onClientKickFailed(static_cast<const TS_GA_CLIENT_KICK_FAILED*>(packet));
+			onClientKickFailed(static_cast<const TS_GA_CLIENT_KICK_FAILED*>(packet));
 			break;
 	}
 }
@@ -95,7 +59,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	if(packet->server_idx == UINT16_MAX) {
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 		error("GameServer attempt to use reserved id, change to a lower id\n");
-		socket->sendPacket(&result);
+		sendPacket(&result);
 		return;
 	}
 
@@ -119,7 +83,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 		error("Failed, server index already used\n");
 	}
 
-	socket->sendPacket(&result);
+	sendPacket(&result);
 }
 
 void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
@@ -159,7 +123,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		client->inGame = true;
 	}
 
-	socket->sendPacket(&result);
+	sendPacket(&result);
 }
 
 void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
@@ -174,7 +138,7 @@ void GameServerSession::kickClient(const std::string &account) {
 	strcpy(msg.account, account.c_str());
 	msg.kick_type = TS_AG_KICK_CLIENT::KICK_TYPE_DUPLICATED_LOGIN;
 
-	socket->sendPacket(&msg);
+	sendPacket(&msg);
 }
 
 void GameServerSession::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet) {

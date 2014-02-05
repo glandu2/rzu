@@ -29,12 +29,13 @@ private:
 	};
 
 public:
-	RappelzSocket(uv_loop_t* uvLoop, bool useEncryption);
+	RappelzSocket(uv_loop_t* uvLoop, Mode mode);
 	virtual ~RappelzSocket();
 
 	void sendPacket(const TS_MESSAGE* data);
 
 	void addPacketListener(uint16_t packetId, IListener* instance, CallbackFunction onPacketReceivedCallback);
+	void removePacketListener(uint16_t packetId, IListener* instance);
 
 protected:
 	static void dataReceived(IListener *instance, Socket* socket);

@@ -1,8 +1,7 @@
-#ifndef SERVERINFO_H
-#define SERVERINFO_H
+#ifndef GAMESERVERSESSION_H
+#define GAMESERVERSESSION_H
 
-#include "Object.h"
-#include "RappelzSocket.h"
+#include "../RappelzSession.h"
 #include <stdint.h>
 #include <vector>
 #include <string>
@@ -15,16 +14,14 @@
 
 namespace AuthServer {
 
-class GameServerSession : public Object, public IListener
+class GameServerSession : public RappelzSession
 {
 	DECLARE_CLASS(AuthServer::GameServerSession)
 
 public:
-	GameServerSession(RappelzSocket* socket);
-	~GameServerSession();
+	GameServerSession();
 
-	static void startServer();
-
+	//multithread concurrency when GS is disconnected while new players connect to it
 	static const std::vector<GameServerSession*>& getServerList() { return servers; }
 
 	uint16_t getServerIdx() { return serverIdx; }
@@ -33,12 +30,11 @@ public:
 	int32_t getServerPort() { return serverPort; }
 	std::string getServerScreenshotUrl() { return serverScreenshotUrl; }
 	bool getIsAdultServer() { return isAdultServer; }
+
 	void kickClient(const std::string& account);
 
 protected:
-	static void onNewConnection(IListener* instance, Socket* serverSocket);
-	static void onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState);
-	static void onDataReceived(IListener* instance, RappelzSocket* clientSocket, const TS_MESSAGE* packet);
+	void onPacketReceived(const TS_MESSAGE* packet);
 
 	void onServerLogin(const TS_GA_LOGIN* packet);
 	void onClientLogin(const TS_GA_CLIENT_LOGIN* packet);
@@ -46,9 +42,9 @@ protected:
 	void onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet);
 
 private:
-	static std::vector<GameServerSession*> servers;
+	~GameServerSession();
 
-	RappelzSocket* socket;
+	static std::vector<GameServerSession*> servers;
 
 	uint16_t serverIdx;
 	std::string serverName;
@@ -60,4 +56,4 @@ private:
 
 } // namespace AuthServer
 
-#endif // SERVERINFO_H
+#endif // GAMESERVERSESSION_H

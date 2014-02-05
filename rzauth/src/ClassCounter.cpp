@@ -22,6 +22,15 @@ DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_Account)
 #include "AuthServer/GameServerSession.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::GameServerSession)
 
+#include "RappelzServer.h"
+DECLARE_CLASSCOUNT_STATIC(RappelzServerCommon)
+
+#include "RappelzSession.h"
+DECLARE_CLASSCOUNT_STATIC(RappelzSession)
+
+#include "SocketSession.h"
+DECLARE_CLASSCOUNT_STATIC(SocketSession)
+
 #include "UploadServer/ClientSession.h"
 DECLARE_CLASSCOUNT_STATIC(UploadServer::ClientSession)
 

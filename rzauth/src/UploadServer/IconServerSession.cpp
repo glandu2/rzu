@@ -1,5 +1,4 @@
 #include "IconServerSession.h"
-#include "EventLoop.h"
 #include "../GlobalConfig.h"
 #include <string.h>
 #include <stdio.h>
@@ -22,64 +21,28 @@ static const char * const htmlFound =
 		"\r\n";
 static int htmlFoundSize = strlen(htmlFound);
 
-IconServerSession::IconServerSession(Socket* socket) {
-	this->socket = socket;
+IconServerSession::IconServerSession() {
 	this->status = WaitStatusLine;
 	this->nextByteToMatch = 0;
 	this->urlLength = 0;
-
-	socket->addDataListener(this, &onDataReceived);
 }
 
-void IconServerSession::startServer() {
-	Socket* serverSocket = new Socket(EventLoop::getLoop());
-	serverSocket->addConnectionListener(nullptr, &onNewConnection);
-	serverSocket->listen(CONFIG_GET()->upload.client.listenIp,
-						 CONFIG_GET()->upload.client.webPort);
-}
-
-IconServerSession::~IconServerSession() {
-	socket->deleteLater();
-}
-
-void IconServerSession::onNewConnection(IListener* instance, Socket* serverSocket) {
-	static Socket *newSocket = new Socket(EventLoop::getLoop());
-	static IconServerSession* serverInfo = new IconServerSession(newSocket);
-
-	do {
-		if(!serverSocket->accept(newSocket))
-			break;
-
-		newSocket = new Socket(EventLoop::getLoop());
-		serverInfo = new IconServerSession(newSocket);
-	} while(1);
-}
-
-void IconServerSession::onStateChanged(IListener* instance, Socket* clientSocket, Socket::State oldState, Socket::State newState) {
-	IconServerSession* thisInstance = static_cast<IconServerSession*>(instance);
-
-	if(newState == Socket::UnconnectedState) {
-		delete thisInstance;
-	}
-}
-
-void IconServerSession::onDataReceived(IListener *instance, Socket* socket) {
-	IconServerSession* thisInstance = static_cast<IconServerSession*>(instance);
+void IconServerSession::onDataReceived() {
 	std::vector<char> buffer;
 
-	while(socket->getAvailableBytes() > 0) {
-		socket->readAll(&buffer);
-		thisInstance->parseData(buffer);
+	if(getSocket()->getAvailableBytes() > 0) {
+		getSocket()->readAll(&buffer);
+		parseData(buffer);
 	}
 }
 
 void IconServerSession::parseData(const std::vector<char>& data) {
 	static const char * const beginUrl = "GET ";
 	static const char * const endHeader = "\r\n\r\n";
-	ssize_t size = data.size();
 	const char* begin = &data[0];
+	const char* end = &data[0] + data.size();
 
-	for(const char* p = begin; p - begin < size; p++) {
+	for(const char* p = begin; p < end; p++) {
 		if(status == WaitStatusLine) {
 			if(*p == beginUrl[nextByteToMatch]) {
 				nextByteToMatch++;
@@ -131,7 +94,6 @@ void IconServerSession::parseData(const std::vector<char>& data) {
 	}
 }
 
-
 void IconServerSession::parseUrl(std::string urlString) {
 	size_t p;
 	for(p = urlString.size()-1; p >= 0; p--) {
@@ -140,7 +102,7 @@ void IconServerSession::parseUrl(std::string urlString) {
 	}
 	if(p+1 >= urlString.size()) {
 		//attempt to get a directory
-		socket->write(htmlNotFound, htmlNotFoundSize);
+		getSocket()->write(htmlNotFound, htmlNotFoundSize);
 	} else {
 		sendIcon(urlString.substr(p+1, std::string::npos));
 	}
@@ -151,7 +113,7 @@ void IconServerSession::sendIcon(const std::string& filename) {
 	FILE* file = fopen(fullFileName.c_str(), "rb");
 
 	if(!file) {
-		socket->write(htmlNotFound, htmlNotFoundSize);
+		getSocket()->write(htmlNotFound, htmlNotFoundSize);
 	} else {
 		fseek(file, 0, SEEK_END);
 		size_t fileSize = ftell(file);
@@ -172,11 +134,15 @@ void IconServerSession::sendIcon(const std::string& filename) {
 			bytesTransferred += nbrw;
 		}
 
+		fclose(file);
+
 		if(nbrw > 0) {
-			socket->write(buffer, fileContentBegin + fileSize);
+			getSocket()->write(buffer, fileContentBegin + fileSize);
 		} else {
-			socket->write(htmlNotFound, htmlNotFoundSize);
+			getSocket()->write(htmlNotFound, htmlNotFoundSize);
 		}
+
+		delete[] buffer;
 	}
 }
 

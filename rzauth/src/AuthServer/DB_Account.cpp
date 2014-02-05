@@ -91,7 +91,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 	HSTMT hstmt;
 
 	if(!openConnection(CONFIG_GET()->auth.dbAccount.connectionString.get(), &hdbc, &hstmt)) {
-		checkError(Log::LL_Debug, &hdbc, &hstmt);
+		checkError(Log::LL_Error, &hdbc, &hstmt);
 		return;
 	}
 

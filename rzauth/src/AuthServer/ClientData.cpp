@@ -1,5 +1,7 @@
 #include "ClientData.h"
 #include "uv.h"
+#include "ClientSession.h"
+#include "GameServerSession.h"
 
 
 namespace AuthServer {
@@ -17,7 +19,7 @@ ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientI
 
 }
 
-ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, ClientData** oldClient) {
+ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code) {
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> result;
 	ClientData* newClient;
 
@@ -26,12 +28,23 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 	newClient = new ClientData(clientInfo);
 	result = connectedClients.insert(std::pair<std::string, ClientData*>(account, newClient));
 	if(result.second == false) {
-		if(oldClient) *oldClient = result.first->second;
+		ClientData* oldClient = result.first->second;
 		delete newClient;
 		newClient = nullptr;
+
+		if(oldClient->server) {
+			if(oldClient->inGame)
+				oldClient->server->kickClient(account);
+			else
+				connectedClients.erase(account);
+		} else {
+			oldClient->client->abortSession();
+		}
 	} else {
-		if(oldClient) *oldClient = nullptr;
 		newClient->account = account;
+		newClient->accountId = accoundId;
+		newClient->age = age;
+		newClient->eventCode = event_code;
 	}
 
 	uv_mutex_unlock(&mapLock);
@@ -40,31 +53,30 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 }
 
 bool ClientData::removeClient(const std::string& account) {
-	bool ret;
-
-	uv_mutex_lock(&mapLock);
-	ret = connectedClients.erase(account) > 0;
-	uv_mutex_unlock(&mapLock);
-
-	return ret;
-}
-
-bool ClientData::switchClientToServer(const std::string& account, GameServerSession* server) {
 	bool ret = false;
-	std::unordered_map<std::string, ClientData*>::const_iterator it;
+	std::unordered_map<std::string, ClientData*>::iterator it;
 
 	uv_mutex_lock(&mapLock);
-
 	it = connectedClients.find(account);
-	if(it != connectedClients.cend()) {
+	if(it != connectedClients.end()) {
 		ClientData* clientData = it->second;
-		clientData->client = nullptr;
-		clientData->server = server;
+		connectedClients.erase(it);
+		delete clientData;
 		ret = true;
 	}
 	uv_mutex_unlock(&mapLock);
 
 	return ret;
+}
+
+bool ClientData::removeClient(ClientData* clientData) {
+	return removeClient(clientData->account);
+}
+
+void ClientData::switchClientToServer(GameServerSession* server, uint64_t oneTimePassword) {
+	this->oneTimePassword = oneTimePassword;
+	this->client = nullptr;
+	this->server = server;
 }
 
 ClientData* ClientData::getClient(const std::string& account) {
@@ -82,6 +94,21 @@ ClientData* ClientData::getClient(const std::string& account) {
 	uv_mutex_unlock(&mapLock);
 
 	return foundClient;
+}
+
+void ClientData::removeServer(GameServerSession* server) {
+	std::unordered_map<std::string, ClientData*>::const_iterator it, itEnd;
+
+	uv_mutex_lock(&mapLock);
+	for(it = connectedClients.begin(), itEnd = connectedClients.end(); it != itEnd;) {
+		ClientData* client = it->second;
+		if(client->server == server) {
+			it = connectedClients.erase(it);
+		} else {
+			++it;
+		}
+	}
+	uv_mutex_unlock(&mapLock);
 }
 
 } // namespace AuthServer
