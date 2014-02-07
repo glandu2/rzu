@@ -56,9 +56,9 @@ int Authentication::connect(Account* account, const std::string &password, Callb
 }
 
 void Authentication::abort() {
-	authServer->abort();
+	authServer->close();
 	if(gameServer)
-		gameServer->abort();
+		gameServer->close();
 	currentState = AS_Idle;
 	inProgress = false;
 }
@@ -134,7 +134,7 @@ void Authentication::onAuthPacketReceived(IListener* instance, RappelzSocket*, c
 		{
 			const TS_AC_RESULT* resultMsg = reinterpret_cast<const TS_AC_RESULT*>(packetData);
 			if(resultMsg->request_msg_id == TS_CA_ACCOUNT::packetID) {
-				CALLBACK_CALL(thisAccount->authResultCallback, thisAccount, (TS_ResultCode)resultMsg->result, nullptr);
+				CALLBACK_CALL(thisAccount->authResultCallback, thisAccount, (TS_ResultCode)resultMsg->result, std::string());
 			}
 			break;
 		}
@@ -143,7 +143,7 @@ void Authentication::onAuthPacketReceived(IListener* instance, RappelzSocket*, c
 		{
 			const TS_AC_RESULT_WITH_STRING* resultMsg = reinterpret_cast<const TS_AC_RESULT_WITH_STRING*>(packetData);
 			if(resultMsg->request_msg_id == TS_CA_ACCOUNT::packetID) {
-				CALLBACK_CALL(thisAccount->authResultCallback, thisAccount, (TS_ResultCode)resultMsg->result, resultMsg->string);
+				CALLBACK_CALL(thisAccount->authResultCallback, thisAccount, (TS_ResultCode)resultMsg->result, std::string(resultMsg->string, resultMsg->strSize));
 			}
 			break;
 		}
@@ -182,6 +182,9 @@ void Authentication::onPacketAuthConnected() {
 		return;
 
 	TS_MESSAGE::initMessage<TS_CA_VERSION>(&versionMsg);
+#ifndef NDEBUG
+	memset(versionMsg.szVersion, 0, sizeof(versionMsg.szVersion));
+#endif
 	strcpy(versionMsg.szVersion, version.c_str());
 	authServer->sendPacket(&versionMsg);
 

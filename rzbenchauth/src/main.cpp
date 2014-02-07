@@ -6,44 +6,38 @@
 #include "RappelzLibInit.h"
 #include <stdio.h>
 #include "RappelzSocket.h"
+#include "ConfigInfo.h"
 
-void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const char* resultString);
+void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string &resultString);
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
 void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
 
+static void init() {
+	CFG("ip", "127.0.0.1");
+	CFG("port", 4500);
+	CFG("account", "admin");
+	CFG("password", "admin");
+}
 
 int main(int argc, char *argv[])
 {
-	const char* host = "127.0.0.1";
-	uint16_t port = 4500;
+	RappelzLibInit(argc, argv, &init);
 
-	if(argc >= 2)
-		host = argv[1];
-
-	if(argc >= 3)
-		port = atoi(argv[2]);
-
-	RappelzLibInit(argc, argv, nullptr);
-
-	Account account("account");
-	Authentication auth(host, Authentication::ACM_RSA_AES);
-	auth.connect(&account, "password", Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+	Account account(CFG("account", "admin").get());
+	Authentication auth(CFG("ip", "127.0.0.1").get(), Authentication::ACM_RSA_AES, CFG("port", 4500).get());
+	auth.connect(&account, CFG("password", "admin").get(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
 
-void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const char* resultString) {
-	fprintf(stderr, "Auth result: %d (%s)\n", result, resultString ? resultString : "no associated string");
+void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string& resultString) {
+	fprintf(stderr, "Auth result: %d (%s)\n", result, resultString.empty() ? "no associated string" : resultString.c_str());
 	if(result == TS_RESULT_SUCCESS) {
 		auth->retreiveServerList(Callback<Authentication::CallbackOnServerList>(nullptr, &onServerList));
+	} else {
+		auth->abort();
 	}
 }
-uint16_t serverId;
-std::string serverName;
-std::string serverScreenshotUrl;
-std::string serverIp;
-int32_t serverPort;
-uint16_t userRatio;
 
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId) {
 	fprintf(stderr, "Server list (last id: %d)\n", lastSelectedServerId);
@@ -55,7 +49,10 @@ void onServerList(IListener* instance, Authentication* auth, const std::vector<A
 			   servers->at(i).serverPort,
 			   servers->at(i).userRatio);
 	}
-	auth->selectServer(lastSelectedServerId, Callback<Authentication::CallbackOnGameResult>(nullptr, &onGameResult));
+	if(servers->size() > 0)
+		auth->selectServer(lastSelectedServerId, Callback<Authentication::CallbackOnGameResult>(nullptr, &onGameResult));
+	else
+		auth->abort();
 }
 
 void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket) {
