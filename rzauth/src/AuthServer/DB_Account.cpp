@@ -83,6 +83,10 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	uv_queue_work(EventLoop::getLoop(), &req, &onProcess, &onDone);
 }
 
+void DB_Account::cancel() {
+	clientInfo = 0;
+}
+
 void DB_Account::onProcess(uv_work_t *req) {
 	DB_Account* thisInstance = (DB_Account*) req->data;
 	char password[33] = {0};
@@ -136,7 +140,8 @@ void DB_Account::onProcess(uv_work_t *req) {
 void DB_Account::onDone(uv_work_t *req, int status) {
 	DB_Account* thisInstance = (DB_Account*) req->data;
 
-	thisInstance->clientInfo->clientAuthResult(thisInstance->ok, thisInstance->account, thisInstance->accountId, 19, 1, 0);
+	if(thisInstance->clientInfo)
+		thisInstance->clientInfo->clientAuthResult(thisInstance->ok, thisInstance->account, thisInstance->accountId, 19, 1, 0);
 	delete thisInstance;
 }
 
