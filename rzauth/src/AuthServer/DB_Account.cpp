@@ -15,11 +15,22 @@
 
 namespace AuthServer {
 
+struct DbConnection {
+	HDBC hdbc;
+	HSTMT hstmt;
+};
+
 static void extractError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT type);
 
 void* DB_Account::henv = nullptr;
+uv_key_t DB_Account::connectionKey;
 
 bool DB_Account::init() {
+	if(uv_key_create(&connectionKey) != 0) {
+		Log::get()->log(Log::LL_Error, "DB_Account::init", 16, "Can\'t create TLS connection key\n");
+		return false;
+	}
+
 	SQLRETURN result;
 	result = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
 	if(!SQL_SUCCEEDED(result)) {
@@ -85,6 +96,7 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 
 void DB_Account::cancel() {
 	clientInfo = 0;
+	uv_cancel((uv_req_t*)&req);
 }
 
 void DB_Account::onProcess(uv_work_t *req) {
@@ -101,9 +113,12 @@ void DB_Account::onProcess(uv_work_t *req) {
 
 	thisInstance->trace("Executing query\n");
 	SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, thisInstance->account.size(), 0, (void*)thisInstance->account.c_str(), thisInstance->account.size(), nullptr);
-	SQLExecDirect(hstmt, (SQLCHAR*)"SELECT account_id, password FROM dbo.Account WHERE account = ?;", SQL_NTS);
+	if(!SQL_SUCCEEDED(SQLExecDirect(hstmt, (SQLCHAR*)"SELECT TOP(1) account_id, password FROM dbo.Account WITH(NOLOCK) WHERE account = ?;", SQL_NTS))) {
+		checkError(Log::LL_Info, &hdbc, &hstmt);
+		return;
+	}
 	if(!SQL_SUCCEEDED(SQLFetch(hstmt))) {
-		thisInstance->checkError(Log::LL_Debug, &hdbc, &hstmt);
+		checkError(Log::LL_Debug, &hdbc, &hstmt);
 		return;
 	}
 
@@ -111,7 +126,8 @@ void DB_Account::onProcess(uv_work_t *req) {
 	SQLGetData(hstmt, 1, SQL_C_LONG, &thisInstance->accountId, sizeof(thisInstance->accountId), NULL);
 	SQLGetData(hstmt, 2, SQL_C_CHAR, (SQLCHAR*)password, sizeof(password), NULL);
 
-	closeConnection(&hdbc, &hstmt);
+	if(SQLFetch(hstmt) == SQL_SUCCESS)
+		SQLCloseCursor(hstmt);
 
 
 	for(int i = 0; i < 16; i++) {
@@ -134,6 +150,8 @@ void DB_Account::onProcess(uv_work_t *req) {
 	if(!strncasecmp(givenPassword, password, 16*2)) {
 		thisInstance->ok = true;
 		thisInstance->trace("Ok\n");
+	} else {
+		thisInstance->trace("Not Ok\n");
 	}
 }
 
@@ -147,6 +165,14 @@ void DB_Account::onDone(uv_work_t *req, int status) {
 
 bool DB_Account::openConnection(const std::string& connectionString, void **hdbc, void **hstmt) {
 	SQLRETURN result;
+
+	//Connection already opened, use it
+	DbConnection* dbConnection = (DbConnection*) uv_key_get(&connectionKey);
+	if(dbConnection != nullptr) {
+		*hdbc = dbConnection->hdbc;
+		*hstmt = dbConnection->hstmt;
+		return true;
+	}
 
 	*hdbc = nullptr;
 	*hstmt = nullptr;
@@ -167,10 +193,25 @@ bool DB_Account::openConnection(const std::string& connectionString, void **hdbc
 		return false;
 	}
 
+	//30 sec timeout
+	SQLSetStmtAttr(*hstmt, SQL_ATTR_QUERY_TIMEOUT, (SQLPOINTER)10, 0);
+	SQLSetConnectAttr(*hdbc, SQL_ATTR_CONNECTION_TIMEOUT , (SQLPOINTER)10, 0);
+
+	dbConnection = new DbConnection;
+	dbConnection->hdbc = *hdbc;
+	dbConnection->hstmt = *hstmt;
+	uv_key_set(&connectionKey, dbConnection);
+
 	return true;
 }
 
 void DB_Account::closeConnection(void **hdbc, void **hstmt) {
+	DbConnection* dbConnection = (DbConnection*)uv_key_get(&connectionKey);
+	if(dbConnection) {
+		delete dbConnection;
+		uv_key_set(&connectionKey, nullptr);
+	}
+
 	if(hstmt && *hstmt) {
 		SQLCloseCursor(*hstmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, *hstmt);

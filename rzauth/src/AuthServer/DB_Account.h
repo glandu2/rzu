@@ -35,6 +35,7 @@ private:
 
 	//one sql env for all connection
 	static void* henv;
+	static uv_key_t connectionKey; //one connection per worker thread
 
 	ClientSession* clientInfo;
 	uv_work_t req;
