@@ -20,6 +20,8 @@ public:
 
 	DB_Account(ClientSession* clientInfo, const std::string& account, const char *password);
 
+	void cancel();
+
 	static void onProcess(uv_work_t *req);
 	static void onDone(uv_work_t *req, int status);
 
@@ -29,8 +31,11 @@ protected:
 	static void checkError(Log::Level errorLevel, void **hdbc, void **hstmt);
 
 private:
+	~DB_Account() {}
+
 	//one sql env for all connection
 	static void* henv;
+	static uv_key_t connectionKey; //one connection per worker thread
 
 	ClientSession* clientInfo;
 	uv_work_t req;

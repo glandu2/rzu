@@ -15,6 +15,8 @@
 
 namespace AuthServer {
 
+class DB_Account;
+
 class ClientSession : public RappelzSession
 {
 	DECLARE_CLASS(AuthServer::ClientSession)
@@ -40,6 +42,7 @@ private:
 	unsigned char aesKey[32];
 	uint16_t lastLoginServerId;
 	ClientData* clientData;
+	DB_Account* dbQuery;
 };
 
 } // namespace AuthServer

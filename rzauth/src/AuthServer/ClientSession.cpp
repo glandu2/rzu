@@ -23,7 +23,7 @@
 
 namespace AuthServer {
 
-ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted), useRsaAuth(false), lastLoginServerId(0), clientData(nullptr) {
+ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted), useRsaAuth(false), lastLoginServerId(0), clientData(nullptr), dbQuery(nullptr) {
 	addPacketsToListen(5,
 					   TS_CA_VERSION::packetID,
 					   TS_CA_RSA_PUBLIC_KEY::packetID,
@@ -36,6 +36,8 @@ ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted), use
 ClientSession::~ClientSession() {
 	if(clientData)
 		ClientData::removeClient(clientData);
+	if(dbQuery)
+		dbQuery->cancel();
 }
 
 void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
@@ -118,6 +120,17 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	unsigned char password[64];  //size = at most rsa encrypted size
 	std::string account;
 
+	if(dbQuery != nullptr) {
+		TS_AC_RESULT result;
+		TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
+		result.request_msg_id = TS_CA_ACCOUNT::packetID;
+		result.result = TS_RESULT_CLIENT_SIDE_ERROR;
+		result.login_flag = 0;
+		sendPacket(&result);
+		info("Client connection with a auth request already in progress\n");
+		return;
+	}
+
 	if(useRsaAuth) {
 		const TS_CA_ACCOUNT_V2* accountv2 = reinterpret_cast<const TS_CA_ACCOUNT_V2*>(packet);
 		EVP_CIPHER_CTX d_ctx;
@@ -165,13 +178,15 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 	setObjectName((std::string(getObjectName()) + "[" + account + "]").c_str());
 
-	new DB_Account(this, account, (char*)password);
+	dbQuery = new DB_Account(this, account, (char*)password);
 }
 
 void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode) {
 	TS_AC_RESULT result;
 	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
+
+	dbQuery = nullptr;
 
 	if(authOk == false) {
 		result.result = TS_RESULT_INVALID_PASSWORD;
