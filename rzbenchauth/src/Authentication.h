@@ -8,6 +8,7 @@
 #include <IDelegate.h>
 #include "Packets/PacketEnums.h"
 #include <vector>
+#include "DESPasswordCipher.h"
 
 class Account;
 class RappelzSocket;
@@ -36,13 +37,14 @@ class Authentication : private Object, IListener
 		typedef void (*CallbackOnAuthResult)(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string& resultString);
 		typedef void (*CallbackOnServerList)(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
 		typedef void (*CallbackOnGameResult)(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
+		typedef void (*CallbackOnAuthClosed)(IListener* instance, Authentication* auth);
 
 	public:
 		Authentication(std::string host, AuthCipherMethod method = ACM_DES, uint16_t port = 4500, const std::string& version = "200701120");
 		~Authentication();
 
 		int connect(Account* account, const std::string& password, Callback<CallbackOnAuthResult> callback);
-		void abort();
+		void abort(Callback<CallbackOnAuthClosed> callback);
 
 		bool retreiveServerList(Callback<CallbackOnServerList> callback);
 		bool selectServer(uint16_t serverId, Callback<CallbackOnGameResult> callback);
@@ -55,6 +57,7 @@ class Authentication : private Object, IListener
 
 	protected:
 		void onPacketAuthConnected();
+		void onPacketAuthClosed();
 		void onPacketAuthUnreachable();
 		void onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV *packet);
 		void onPacketServerList(const TS_AC_SERVER_LIST* packet);
@@ -68,12 +71,6 @@ class Authentication : private Object, IListener
 			uint16_t id;
 			std::string ip;
 			uint16_t port;
-		};
-		enum State {
-			AS_Idle,
-			AS_ProcessLogin,
-			AS_ProcessServerList,
-			AS_ProcessServerMove
 		};
 
 	private:
@@ -90,12 +87,12 @@ class Authentication : private Object, IListener
 		int selectedServer;
 		uint64_t oneTimePassword;
 		bool inProgress;
-
-		State currentState;
+		DESPasswordCipher desCipher;
 
 		Callback<CallbackOnAuthResult> authResultCallback;
 		Callback<CallbackOnGameResult> gameResultCallback;
 		Callback<CallbackOnServerList> serverListCallback;
+		Callback<CallbackOnAuthClosed> authClosedCallback;
 };
 
 #endif // AUTHENTICATION_H

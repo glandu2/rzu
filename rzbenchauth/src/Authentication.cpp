@@ -8,7 +8,7 @@
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 
-Authentication::Authentication(std::string host, AuthCipherMethod method, uint16_t port, const std::string& version) {
+Authentication::Authentication(std::string host, AuthCipherMethod method, uint16_t port, const std::string& version) : desCipher("MERONG") {
 	this->authServer = new RappelzSocket(EventLoop::getLoop(), EncryptedSocket::Encrypted);
 	this->gameServer = nullptr;
 
@@ -19,7 +19,6 @@ Authentication::Authentication(std::string host, AuthCipherMethod method, uint16
 
 	this->rsaCipher = 0;
 	this->selectedServer = 0;
-	this->currentState = AS_Idle;
 	this->inProgress = false;
 
 	authServer->addPacketListener(TS_CC_EVENT::packetID, this, &onAuthServerConnectionEvent);
@@ -43,31 +42,28 @@ Authentication::~Authentication() {
 }
 
 int Authentication::connect(Account* account, const std::string &password, Callback<CallbackOnAuthResult> callback) {
-	this->username = account->getName();
+	if(account)
+		this->username = account->getName();
 	this->password = password;
 	this->cipherMethod = cipherMethod;
 	this->authResultCallback = callback;
 
-	currentState = AS_ProcessLogin;
 	inProgress = true;
 
 	authServer->connect(authIp, authPort);
 	return 0;
 }
 
-void Authentication::abort() {
+void Authentication::abort(Callback<CallbackOnAuthClosed> callback) {
+	authClosedCallback = callback;
 	authServer->close();
 	if(gameServer)
 		gameServer->close();
-	currentState = AS_Idle;
 	inProgress = false;
 }
 
 bool Authentication::retreiveServerList(Callback<CallbackOnServerList> callback) {
 	TS_CA_SERVER_LIST getServerListMsg;
-
-	if(currentState == AS_Idle)
-		return false;
 
 	serverListCallback = callback;
 
@@ -79,19 +75,23 @@ bool Authentication::retreiveServerList(Callback<CallbackOnServerList> callback)
 bool Authentication::selectServer(uint16_t serverId, Callback<CallbackOnGameResult> callback) {
 	TS_CA_SELECT_SERVER selectServerMsg;
 
-	currentState = AS_ProcessServerMove;
-	gameResultCallback = callback;
-
-	TS_MESSAGE::initMessage<TS_CA_SELECT_SERVER>(&selectServerMsg);
-	selectServerMsg.server_idx = serverId;
-	authServer->sendPacket(&selectServerMsg);
-
+	selectedServer = -1;
 	for(size_t i = 0; i < serverList.size(); i++) {
 		if(serverList.at(i).id == serverId) {
 			selectedServer = i;
 			break;
 		}
 	}
+	if(selectedServer == -1) {
+		error("Can\'t select server, server list must be retrieved before\n");
+		return false;
+	}
+
+	gameResultCallback = callback;
+
+	TS_MESSAGE::initMessage<TS_CA_SELECT_SERVER>(&selectServerMsg);
+	selectServerMsg.server_idx = serverId;
+	authServer->sendPacket(&selectServerMsg);
 
 	return true;
 }
@@ -104,7 +104,9 @@ void Authentication::onAuthServerConnectionEvent(IListener* instance, RappelzSoc
 
 		if(eventMsg->event == TS_CC_EVENT::CE_ServerConnected)
 			thisAccount->onPacketAuthConnected();
-		else if(eventMsg->event != TS_CC_EVENT::CE_ServerDisconnected)
+		else if(eventMsg->event == TS_CC_EVENT::CE_ServerDisconnected)
+			thisAccount->onPacketAuthClosed();
+		else
 			thisAccount->onPacketAuthUnreachable();
 	}
 }
@@ -177,8 +179,7 @@ void Authentication::onGamePacketReceived(IListener* instance, RappelzSocket*, c
 void Authentication::onPacketAuthConnected() {
 	TS_CA_VERSION versionMsg;
 
-	//Si ce paquet ne provient pas de notre initiative, on l'ignore
-	if(currentState == AS_Idle)
+	if(!authResultCallback.callback)
 		return;
 
 	TS_MESSAGE::initMessage<TS_CA_VERSION>(&versionMsg);
@@ -192,9 +193,15 @@ void Authentication::onPacketAuthConnected() {
 		TS_CA_ACCOUNT accountMsg;
 
 		TS_MESSAGE::initMessage<TS_CA_ACCOUNT>(&accountMsg);
+
+#ifndef NDEBUG
+		memset(accountMsg.account, 0, 61);
+		memset(accountMsg.password, 0, 61);
+#endif
 		strcpy(accountMsg.account, username.c_str());
 		strcpy(accountMsg.password, password.c_str());
-		DESPasswordCipher("MERONG").encrypt(accountMsg.password, 61);
+		//DESPasswordCipher("MERONG").encrypt(accountMsg.password, 61);
+		desCipher.encrypt(accountMsg.password, 61);
 		authServer->sendPacket(&accountMsg);
 	} else if(this->cipherMethod == ACM_RSA_AES) {
 		TS_CA_RSA_PUBLIC_KEY *keyMsg;
@@ -218,9 +225,15 @@ void Authentication::onPacketAuthConnected() {
 	}
 }
 
+void Authentication::onPacketAuthClosed() {
+	CALLBACK_CALL(authClosedCallback, this);
+
+	inProgress = false;
+}
+
 void Authentication::onPacketAuthUnreachable() {
-	currentState = AS_Idle;
 	CALLBACK_CALL(authResultCallback, this, TS_RESULT_UNKNOWN, "Unable to connect to authentication server");
+	inProgress = false;
 }
 
 void Authentication::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) {
@@ -235,18 +248,12 @@ void Authentication::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) {
 	int len = password.size();
 	int p_len = len, f_len = 0;
 
-	//Si ce paquet ne provient pas de notre initiative, on l'ignore
-	if(currentState == AS_Idle)
-		return;
-
 	data_size = RSA_private_decrypt(packet->data_size, (unsigned char*)packet->rsa_encrypted_data, decrypted_data, (RSA*)rsaCipher, RSA_PKCS1_PADDING);
 	RSA_free((RSA*)rsaCipher);
 	rsaCipher = 0;
 	if(data_size != 32) {
 		warn("onPacketAuthPasswordKey: invalid decrypted data size: %d\n", data_size);
-		//Si ce paquet ne provient pas de notre initiative, on l'ignore
-		if(currentState == AS_ProcessLogin)
-			authServer->close();
+		authServer->close();
 		return;
 	}
 
@@ -316,7 +323,6 @@ void Authentication::onPacketServerList(const TS_AC_SERVER_LIST* packet) {
 			selectedServer = i;
 	}
 
-	currentState = AS_ProcessServerList;
 	CALLBACK_CALL(serverListCallback, this, &serverList, packet->last_login_server_idx);
 }
 
@@ -371,10 +377,6 @@ void Authentication::onPacketGameConnected() {
 	TS_CS_VERSION versionMsg;
 	TS_CS_ACCOUNT_WITH_AUTH loginInGameServerMsg;
 
-	//Si ce paquet ne provient pas de notre initiative, on l'ignore
-	if(currentState == AS_Idle)
-		return;
-
 	//continue server move as we are connected now to game server
 	TS_MESSAGE::initMessage<TS_CS_VERSION>(&versionMsg);
 	strcpy(versionMsg.szVersion, version.c_str());
@@ -387,26 +389,21 @@ void Authentication::onPacketGameConnected() {
 }
 
 void Authentication::onPacketGameUnreachable() {
-	currentState = AS_Idle;
-
-	if(inProgress == true)
-		CALLBACK_CALL(gameResultCallback, this, TS_RESULT_NOT_EXIST, nullptr);
+	CALLBACK_CALL(gameResultCallback, this, TS_RESULT_NOT_EXIST, nullptr);
 
 	inProgress = false;
 }
 
 void Authentication::onPacketGameAuthResult(const TS_SC_RESULT* packet) {
-	currentState = AS_Idle;
-
 	gameServer->removePacketListener(TS_CC_EVENT::packetID, this);
 	gameServer->removePacketListener(TS_CS_ACCOUNT_WITH_AUTH::packetID, this);
 
-	if(inProgress == true) {
-		if(packet->result == 0)
-			CALLBACK_CALL(gameResultCallback, this, TS_RESULT_SUCCESS, gameServer);
-		else
-			CALLBACK_CALL(gameResultCallback, this, TS_RESULT_MISC, nullptr);
-	}
+	if(packet->result == 0)
+		CALLBACK_CALL(gameResultCallback, this, TS_RESULT_SUCCESS, gameServer);
+	else
+		CALLBACK_CALL(gameResultCallback, this, TS_RESULT_MISC, nullptr);
+
+	gameResultCallback = nullptr;
 
 	inProgress = false;
 }
