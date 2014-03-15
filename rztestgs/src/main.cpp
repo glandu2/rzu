@@ -4,6 +4,7 @@
 #include "RappelzLibInit.h"
 #include "ConfigInfo.h"
 #include "RappelzPlayerCountGitVersion.h"
+#include "EventLoop.h"
 
 static void init();
 
@@ -16,7 +17,7 @@ int main(int argc, char *argv[])
 	PlayerCountMonitor playerCount(CFG("ip", "127.0.0.1").get(), CFG("port", 4500).get());
 	playerCount.start();
 
-	uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
 
 static void init() {

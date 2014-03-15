@@ -4,8 +4,9 @@
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
+#include "EventLoop.h"
 
-PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) : sock(uv_default_loop(), EncryptedSocket::Encrypted) {
+PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) : sock(EventLoop::getLoop(), EncryptedSocket::Encrypted) {
 	this->host = host;
 	this->port = port;
 	this->connectedTimes = 0;
@@ -15,7 +16,7 @@ PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int inte
 	sock.addPacketListener(TS_CA_VERSION::packetID, this, onPlayerCountReceived);
 	sock.addPacketListener(TS_CC_EVENT::packetID, this, onPlayerCountReceived);
 
-	uv_timer_init(uv_default_loop(), &timer);
+	uv_timer_init(EventLoop::getLoop(), &timer);
 	timer.data = this;
 	timeout = intervalms;
 }
@@ -80,6 +81,9 @@ void PlayerCountMonitor::onPlayerCountReceived(IListener* instance, RappelzSocke
 			if(eventMsg->event == TS_CC_EVENT::CE_ServerConnected) {
 				TS_CA_VERSION versionMsg;
 				TS_MESSAGE::initMessage<TS_CA_VERSION>(&versionMsg);
+#ifndef NDEBUG
+				memset(versionMsg.szVersion, 0, sizeof(versionMsg.szVersion));
+#endif
 				strcpy(versionMsg.szVersion, "TEST");
 
 				sock->sendPacket(&versionMsg);
