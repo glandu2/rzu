@@ -14,7 +14,7 @@ class PlayerCountMonitor : private IListener, public Object
 		void stop();
 
 	protected:
-		static void updatePlayerNumber(uv_timer_t* handle, int status);
+		static void updatePlayerNumber(uv_timer_t* handle);
 
 	protected:
 		static void onPlayerCountReceived(IListener* instance, RappelzSocket *sock, const TS_MESSAGE* packetData);

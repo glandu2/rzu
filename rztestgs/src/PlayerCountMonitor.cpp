@@ -29,14 +29,8 @@ void PlayerCountMonitor::stop() {
 	 uv_timer_stop(&timer);
 }
 
-void PlayerCountMonitor::updatePlayerNumber(uv_timer_t* handle, int status) {
+void PlayerCountMonitor::updatePlayerNumber(uv_timer_t* handle) {
 	PlayerCountMonitor* thisInstance = (PlayerCountMonitor*)handle->data;
-
-	if(status < 0) {
-		const char* errorString = uv_strerror(-status);
-		thisInstance->error("Socket: %s\n", errorString);
-		return;
-	}
 
 	if(thisInstance->sock.getState() == Socket::UnconnectedState) {
 		thisInstance->connectedTimes = 0;
