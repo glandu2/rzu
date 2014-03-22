@@ -17,10 +17,10 @@ void GlobalConfig::init() {
 
 #ifdef _WIN32
 	GlobalConfig::get()->auth.dbAccount.driver.setDefault("SQL Server");
-	GlobalConfig::get()->ban.dbBan.driver.setDefault("SQL Server");
+//	GlobalConfig::get()->ban.dbBan.driver.setDefault("SQL Server");
 #else
 	GlobalConfig::get()->auth.dbAccount.driver.setDefault("FreeTDS");
-	GlobalConfig::get()->ban.dbBan.driver.setDefault("FreeTDS");
+//	GlobalConfig::get()->ban.dbBan.driver.setDefault("FreeTDS");
 #endif
 
 	srand((unsigned int)time(NULL));
