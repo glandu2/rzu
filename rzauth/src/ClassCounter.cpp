@@ -22,6 +22,9 @@ DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_Account)
 #include "AuthServer/GameServerSession.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::GameServerSession)
 
+#include "BanManager.h"
+DECLARE_CLASSCOUNT_STATIC(BanManager)
+
 #include "RappelzServer.h"
 DECLARE_CLASSCOUNT_STATIC(RappelzServerCommon)
 

@@ -8,6 +8,8 @@
 
 class BanManager : public Object
 {
+	DECLARE_CLASS(BanManager)
+
 public:
 	BanManager();
 
