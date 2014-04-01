@@ -13,7 +13,12 @@
 #include "RappelzServer.h"
 #include "BanManager.h"
 
-//socket->deleteLater in uv_check_t
+
+/* TODO
+ * Log packets
+ * disable rsa
+ */
+
 void showDebug(uv_timer_t*, int);
 
 int main(int argc, char **argv) {
