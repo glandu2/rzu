@@ -59,6 +59,7 @@ void RappelzServerCommon::onSocketStateChanged(IListener* instance, Socket*, Soc
 	SocketSession* thisInstance = static_cast<SocketSession*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
+		thisInstance->getServer()->socketClosed(thisInstance->getSocketIterator());
 		delete thisInstance;
 	}
 }

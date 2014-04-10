@@ -16,9 +16,15 @@
 
 /* TODO
  * Log packets
- * disable rsa
+ * Telnet for commands (like stop which would help to have a correct valgrind output):
+ *  - stop - stop the server
+ *  - stats - show stats of the server (player count, active connections, connected GS, ...)
+ *  - set - set variable value
+ *  - get - get variable value
+ *  - dump - dump variables
  */
 
+void runServers();
 void showDebug(uv_timer_t*, int);
 
 int main(int argc, char **argv) {
@@ -31,6 +37,15 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
+	runServers();
+
+	//Make valgrind happy
+	EventLoop::getInstance()->deleteObjects();
+
+	return 0;
+}
+
+void runServers() {
 	BanManager banManager;
 	banManager.loadFile();
 
