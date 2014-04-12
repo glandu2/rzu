@@ -11,3 +11,6 @@ cd ../RappelzServerAuth
 git $*
 cd ../RappelzClient
 git $*
+cd ../RappelzAuthBenchmark
+git $*
+
