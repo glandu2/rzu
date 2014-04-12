@@ -14,14 +14,14 @@ int main(int argc, char *argv[])
 	RappelzLibInit(argc, argv, &init);
 
 
-	PlayerCountMonitor playerCount(CFG("ip", "127.0.0.1").get(), CFG("port", 4500).get());
+	PlayerCountMonitor playerCount(CFG_GET("ip")->getString(), CFG_GET("port")->getInt());
 	playerCount.start();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
 
 static void init() {
-	CFG("global.version", RappelzPlayerCountVersion);
-	CFG("ip", "127.0.0.1");
-	CFG("port", 4500);
+	CFG_CREATE("global.version", RappelzPlayerCountVersion);
+	CFG_CREATE("ip", "127.0.0.1");
+	CFG_CREATE("port", 4500);
 }
