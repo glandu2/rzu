@@ -11,15 +11,15 @@ struct DbConfig : public IListener {
 	cval<bool> &ignoreInitCheck;
 
 	DbConfig(const std::string& prefix) :
-		driver(CFG_STR(prefix + "db.driver", "osdriver")), //Set in .cpp according to OS
-		server(CFG_STR(prefix + "db.server", "127.0.0.1")),
-		name(CFG_STR(prefix + "db.name", "Auth")),
-		account(CFG_STR(prefix + "db.account", "sa")),
-		password(CFG_STR(prefix + "db.password", "")),
-		salt(CFG_STR(prefix + "db.salt", "2012")),
-		port(CFG_STR(prefix + "db.port", 1433)),
-		connectionString(CFG_STR(prefix + "db.connectionstring", "")),
-		ignoreInitCheck(CFG_STR(prefix + "db.ignoreinitcheck", false))
+		driver(CFG_CREATE(prefix + "db.driver", "osdriver")), //Set in .cpp according to OS
+		server(CFG_CREATE(prefix + "db.server", "127.0.0.1")),
+		name(CFG_CREATE(prefix + "db.name", "Auth")),
+		account(CFG_CREATE(prefix + "db.account", "sa")),
+		password(CFG_CREATE(prefix + "db.password", "")),
+		salt(CFG_CREATE(prefix + "db.salt", "2012")),
+		port(CFG_CREATE(prefix + "db.port", 1433)),
+		connectionString(CFG_CREATE(prefix + "db.connectionstring", "")),
+		ignoreInitCheck(CFG_CREATE(prefix + "db.ignoreinitcheck", false))
 	{
 		driver.addListener(this, &updateConnectionString);
 		server.addListener(this, &updateConnectionString);
@@ -43,9 +43,9 @@ struct GlobalConfig {
 			cval<int> &port;
 
 			ClientConfig() :
-				desKey(CFG("auth.clients.des_key", "MERONG")),
-				listenIp(CFG("auth.clients.ip", "0.0.0.0")),
-				port(CFG("auth.clients.port", 4500)) {}
+				desKey(CFG_CREATE("auth.clients.des_key", "MERONG")),
+				listenIp(CFG_CREATE("auth.clients.ip", "0.0.0.0")),
+				port(CFG_CREATE("auth.clients.port", 4500)) {}
 		} client;
 
 		struct GameConfig {
@@ -53,8 +53,8 @@ struct GlobalConfig {
 			cval<int> &port;
 
 			GameConfig() :
-				listenIp(CFG("auth.gameserver.ip", "0.0.0.0")),
-				port(CFG("auth.gameserver.port", 4502)) {}
+				listenIp(CFG_CREATE("auth.gameserver.ip", "0.0.0.0")),
+				port(CFG_CREATE("auth.gameserver.port", 4502)) {}
 		} game;
 
 		AuthConfig() : dbAccount("auth.") {}
@@ -66,10 +66,10 @@ struct GlobalConfig {
 			cval<int> &port, &webPort;
 
 			ClientConfig() :
-				uploadDir(CFG("upload.dir", "upload")),
-				listenIp(CFG("upload.clients.ip", "0.0.0.0")),
-				port(CFG("upload.clients.port", 4617)),
-				webPort(CFG("upload.clients.webport", 80))
+				uploadDir(CFG_CREATE("upload.dir", "upload")),
+				listenIp(CFG_CREATE("upload.clients.ip", "0.0.0.0")),
+				port(CFG_CREATE("upload.clients.port", 4617)),
+				webPort(CFG_CREATE("upload.clients.webport", 80))
 			{
 				Utils::autoSetAbsoluteDir(uploadDir);
 			}
@@ -80,8 +80,8 @@ struct GlobalConfig {
 			cval<int> &port;
 
 			GameConfig() :
-				listenIp(CFG("upload.gameserver.ip", "0.0.0.0")),
-				port(CFG("upload.gameserver.port", 4616)) {}
+				listenIp(CFG_CREATE("upload.gameserver.ip", "0.0.0.0")),
+				port(CFG_CREATE("upload.gameserver.port", 4616)) {}
 		} game;
 	} upload;
 
@@ -91,11 +91,20 @@ struct GlobalConfig {
 
 		Ban() :
 			//dbBan("ban."),
-			banFile(CFG("ban.ipfile", "bannedip.txt"))
+			banFile(CFG_CREATE("ban.ipfile", "bannedip.txt"))
 		{
 			Utils::autoSetAbsoluteDir(banFile);
 		}
 	} ban;
+
+
+	struct Statistics {
+		cstatval<int>& connectionCount, &disconnectionCount;
+
+		Statistics() :
+			connectionCount(CFG_STAT_CREATE("stats.connections", 0)),
+			disconnectionCount(CFG_STAT_CREATE("stats.disconnections", 0)) {}
+	} stats;
 
 	static GlobalConfig* get();
 	static void init();

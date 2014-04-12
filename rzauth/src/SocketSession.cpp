@@ -11,9 +11,9 @@ SocketSession::SocketSession(Socket* socket) : socket(socket), server(nullptr) {
 }
 
 SocketSession::~SocketSession() {
-	if(server) {
-		server->socketClosed(socketIterator);
-	}
+//	if(server) {
+//		server->socketClosed(socketIterator);
+//	}
 	socket->deleteLater();
 }
 

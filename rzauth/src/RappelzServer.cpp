@@ -2,6 +2,7 @@
 #include "EventLoop.h"
 #include "SocketSession.h"
 #include "BanManager.h"
+#include "GlobalConfig.h"
 
 RappelzServerCommon::RappelzServerCommon() : openServer(false), serverSocket(new Socket(EventLoop::getLoop())), lastWaitingInstance(nullptr), banManager(nullptr) {
 	serverSocket->addConnectionListener(this, &onNewConnection);
@@ -50,6 +51,7 @@ void RappelzServerCommon::onNewConnection(IListener* instance, Socket* serverSoc
 			thisInstance->sockets.push_back(thisInstance->lastWaitingInstance->getSocket());
 			thisInstance->lastWaitingInstance->setServer(thisInstance, --thisInstance->sockets.end());
 		}
+		CONFIG_GET()->stats.connectionCount++;
 		thisInstance->lastWaitingInstance = nullptr;
 	}
 }
@@ -59,6 +61,8 @@ void RappelzServerCommon::onSocketStateChanged(IListener* instance, Socket*, Soc
 	SocketSession* thisInstance = static_cast<SocketSession*>(instance);
 
 	if(newState == Socket::UnconnectedState) {
+		CONFIG_GET()->stats.disconnectionCount++;
+		thisInstance->getServer()->socketClosed(thisInstance->getSocketIterator());
 		delete thisInstance;
 	}
 }
