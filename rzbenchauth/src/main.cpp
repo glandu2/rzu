@@ -17,26 +17,26 @@ Account *globalAccount1;
 Account *globalAccount2;
 
 static void init() {
-	CFG("ip", "127.0.0.1");
-	CFG("port", 4500);
-	CFG("account", "admin");
-	CFG("account2", "adideut");
-	CFG("password", "admin");
+	CFG_CREATE("ip", "127.0.0.1");
+	CFG_CREATE("port", 4500);
+	CFG_CREATE("account", "admin");
+	CFG_CREATE("account2", "adideut");
+	CFG_CREATE("password", "admin");
 }
 
 int main(int argc, char *argv[])
 {
 	RappelzLibInit(argc, argv, &init);
 
-	Account account(CFG("account", "admin").get());
-	Account account2(CFG("account2", "adideut").get());
+	Account account(CFG_GET("account")->getString());
+	Account account2(CFG_GET("account2")->getString());
 	globalAccount1 = &account;
 	globalAccount2 = &account2;
 
-	Authentication auth(CFG("ip", "127.0.0.1").get(), Authentication::ACM_DES, CFG("port", 4500).get());
-	Authentication auth2(CFG("ip", "127.0.0.1").get(), Authentication::ACM_DES, CFG("port", 4500).get());
-	auth.connect(globalAccount1, CFG("password", "admin").get(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
-	auth2.connect(globalAccount2, CFG("password", "admin").get(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+	Authentication auth(CFG_GET("ip")->getString(), Authentication::ACM_DES, CFG_GET("port")->getInt());
+	Authentication auth2(CFG_GET("ip")->getString(), Authentication::ACM_DES, CFG_GET("port")->getInt());
+	auth.connect(globalAccount1, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+	auth2.connect(globalAccount2, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
@@ -70,13 +70,13 @@ void onAuthClosed(IListener* instance, Authentication* auth) {
 	static int i = 0;
 	i++;
 	if(i < 1000)
-		auth->connect(nullptr, CFG("password", "admin").get(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+		auth->connect(nullptr, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
 }
 
 void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket) {
 	fprintf(stderr, "login to GS result: %d\n", result);
 	if(gameServerSocket) {
 		gameServerSocket->close();
-		auth->connect(nullptr, CFG("password", "admin").get(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+		auth->connect(nullptr, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
 	}
 }
