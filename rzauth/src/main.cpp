@@ -25,7 +25,7 @@
  */
 
 void runServers();
-void showDebug(uv_timer_t*, int);
+void showDebug(uv_timer_t*);
 
 int main(int argc, char **argv) {
 //	uv_timer_t timer;
@@ -66,9 +66,11 @@ void runServers() {
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
 
-void showDebug(uv_timer_t *, int) {
+void showDebug(uv_timer_t *) {
 	char debugInfo[1000];
 	strcpy(debugInfo, "----------------------------------\n");
 	sprintf(debugInfo, "%s%lu socket Sessions\n", debugInfo, SocketSession::getObjectCount());
+	sprintf(debugInfo, "%sstats.connections = %d\n", debugInfo, CONFIG_GET()->stats.connectionCount.get());
+	sprintf(debugInfo, "%sstats.disconnections = %d\n", debugInfo, CONFIG_GET()->stats.disconnectionCount.get());
 	puts(debugInfo);
 }
