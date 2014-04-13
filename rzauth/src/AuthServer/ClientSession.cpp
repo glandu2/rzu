@@ -137,7 +137,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 		int bytesWritten, totalLength = 0;
 		unsigned int bytesRead;
 
-		debug("Client login using AES %s\n", accountv2->account);
+		debug("Client login using AES\n");
 
 		account = std::string(accountv2->account, std::find(accountv2->account, accountv2->account + 60, '\0'));
 
@@ -166,7 +166,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	cleanup_aes:
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else {
-		debug("Client login using DES %s\n", packet->account);
+		debug("Client login using DES\n");
 
 		account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
@@ -174,7 +174,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 		DesPasswordCipher(CONFIG_GET()->auth.client.desKey.get().c_str()).decrypt(password, 61);
 	}
 
-	debug("Login request for account %s with password %s\n", account.c_str(), password);
+	debug("Login request for account %s\n", account.c_str());
 
 	setObjectName((std::string(getObjectName()) + "[" + account + "]").c_str());
 
