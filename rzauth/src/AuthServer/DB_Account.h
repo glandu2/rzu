@@ -6,10 +6,12 @@
 #include <string>
 #include <stdint.h>
 #include "Log.h"
+#include <list>
 
 namespace AuthServer {
 
 class ClientSession;
+class DbConnectionPool;
 
 class DB_Account : public Object
 {
@@ -25,17 +27,11 @@ public:
 	static void onProcess(uv_work_t *req);
 	static void onDone(uv_work_t *req, int status);
 
-protected:
-	static bool openConnection(const std::string &connectionString, void **hdbc, void **hstmt);
-	static void closeConnection(void **hdbc, void **hstmt);
-	static void checkError(Log::Level errorLevel, void **hdbc, void **hstmt);
-
 private:
 	~DB_Account() {}
 
 	//one sql env for all connection
-	static void* henv;
-	static uv_key_t connectionKey; //one connection per worker thread
+	static DbConnectionPool* dbConnectionPool;
 
 	ClientSession* clientInfo;
 	uv_work_t req;

@@ -18,6 +18,7 @@ public:
 
 	void startServer(const std::string& interfaceIp, uint16_t port, BanManager* banManager = nullptr);
 	void stop();
+	bool isListening() { return serverSocket->getState() == Socket::ListeningState; }
 
 	Socket::State getState() { return serverSocket->getState(); }
 
