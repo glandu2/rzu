@@ -1,6 +1,7 @@
 #define __STDC_LIMIT_MACROS
 #include "GameServerSession.h"
 #include "UploadRequest.h"
+#include "IconServerSession.h"
 #include <string.h>
 
 #include "Packets/PacketEnums.h"
@@ -45,17 +46,23 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 
 	info("Server Login: %s from %s:%d\n", packet->server_name, getSocket()->getHost().c_str(), getSocket()->getPort());
 
-	std::pair<ServerIterator, bool> insertResult = servers.insert(std::pair<std::string, GameServerSession*>(packet->server_name, this));
-
-	if(insertResult.second) {
-		serverName = packet->server_name;
-
-		result.result = TS_RESULT_SUCCESS;
-		setObjectName(16 + serverName.size(), "GameServerInfo[%s]", serverName.c_str());
-		debug("Success\n");
+	if(!IconServerSession::checkName(packet->server_name, strlen(packet->server_name))) {
+		//Forbidden character used in servername
+		error("Server name (app.name in gameserver.opt) has invalid characters, only these are allowed: %s\n", IconServerSession::getAllowedCharsForName());
+		result.result = TS_RESULT_INVALID_TEXT;
 	} else {
-		result.result = TS_RESULT_ALREADY_EXIST;
-		error("Failed, server \"%s\" already registered\n", packet->server_name);
+		std::pair<ServerIterator, bool> insertResult = servers.insert(std::pair<std::string, GameServerSession*>(packet->server_name, this));
+
+		if(insertResult.second) {
+			serverName = packet->server_name;
+
+			result.result = TS_RESULT_SUCCESS;
+			setObjectName(16 + serverName.size(), "GameServerInfo[%s]", serverName.c_str());
+			debug("Success\n");
+		} else {
+			result.result = TS_RESULT_ALREADY_EXIST;
+			error("Failed, server \"%s\" already registered\n", packet->server_name);
+		}
 	}
 
 	sendPacket(&result);

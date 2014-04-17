@@ -56,17 +56,15 @@ void IconServerSession::parseData(const std::vector<char>& data) {
 		} else if(status == RetrievingStatusLine) {
 			if(*p == '\r' || *p == '\n') {
 				status = WaitEndOfHeaders;
-			} else if(*p) {
-				if(urlLength < 255) {
-					url.put(*p);
-					urlLength++;
-				} else {
-					status = WaitStatusLine;
-					nextByteToMatch = 0;
-					url.str(std::string());
-					url.clear();
-					urlLength = 0;
-				}
+			} else if(*p >= 32 && *p <= 126 && urlLength < 255) {
+				url.put(*p);
+				urlLength++;
+			} else {
+				status = WaitStatusLine;
+				nextByteToMatch = 0;
+				url.str(std::string());
+				url.clear();
+				urlLength = 0;
 			}
 		}
 
@@ -97,15 +95,43 @@ void IconServerSession::parseData(const std::vector<char>& data) {
 void IconServerSession::parseUrl(std::string urlString) {
 	size_t p;
 	for(p = urlString.size()-1; p >= 0; p--) {
-		if(urlString.at(p) == '/' || urlString.at(p) == '\\')
+		const char c = urlString.at(p);
+		if(c == '/' || c == '\\' || c == ':')
 			break;
 	}
 	if(p+1 >= urlString.size()) {
 		//attempt to get a directory
 		getSocket()->write(htmlNotFound, htmlNotFoundSize);
 	} else {
-		sendIcon(urlString.substr(p+1, std::string::npos));
+		std::string filename = urlString.substr(p+1, std::string::npos);
+		if(checkName(filename.c_str(), filename.size())) {
+			sendIcon(filename);
+		} else {
+			warn("Request to a invalid filename: \"%s\"\n", filename.c_str());
+			getSocket()->write(htmlNotFound, htmlNotFoundSize);
+		}
 	}
+}
+
+bool IconServerSession::checkName(const char* filename, size_t size) {
+	for(size_t i = 0; i < size; i++) {
+		const char c = filename[i];
+
+		//Update getAllowedCharsForName when changing this condition
+		if(!((c >= '0' && c <= '9') ||
+			 (c >= 'A' && c <= 'Z') ||
+			 (c >= 'a' && c <= 'z') ||
+			 c == '_' || c == '.'))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+const char* IconServerSession::getAllowedCharsForName() {
+	return "0-9, A-Z, a-z, _, and .";
 }
 
 void IconServerSession::sendIcon(const std::string& filename) {
