@@ -13,6 +13,9 @@ class IconServerSession : public SocketSession
 public:
 	IconServerSession();
 
+	static bool checkName(const char* filename, size_t size);
+	static const char* getAllowedCharsForName();
+
 protected:
 	void onDataReceived();
 
