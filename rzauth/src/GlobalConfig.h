@@ -85,6 +85,18 @@ struct GlobalConfig {
 		} game;
 	} upload;
 
+	struct AdminConfig {
+		struct TelnetConfig {
+			cval<std::string> &listenIp;
+			cval<int> &port;
+
+			TelnetConfig() :
+				listenIp(CFG_CREATE("admin.telnet.ip", "127.0.0.1")),
+				port(CFG_CREATE("admin.telnet.port", 4501))
+			{}
+		} telnet;
+	} admin;
+
 	struct Ban {
 		//DbConfig dbBan;
 		cval<std::string> &banFile;

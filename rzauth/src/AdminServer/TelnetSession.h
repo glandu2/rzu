@@ -4,13 +4,19 @@
 #include "../SocketSession.h"
 #include <string>
 #include <sstream>
+#include "AdminInterface.h"
 
 namespace AdminServer {
 
-class TelnetSession : public SocketSession
+class CommandRunner;
+
+class TelnetSession : public SocketSession, public AdminInterface
 {
 public:
 	TelnetSession();
+	~TelnetSession();
+
+	virtual void onConnected();
 
 protected:
 	void onDataReceived();
@@ -18,8 +24,12 @@ protected:
 	void parseData(const std::vector<char>& data);
 	void parseCommand(const std::string& data);
 
+	virtual void write(const void* data, int size) { getSocket()->write(data, size); }
+	virtual void close() { getSocket()->abort(); }
+
 private:
 	std::vector<char> buffer;
+	CommandRunner* commandRunner;
 };
 
 } // namespace AdminServer

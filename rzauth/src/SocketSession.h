@@ -13,6 +13,7 @@ class SocketSession : public Object, public IListener
 
 public:
 	virtual void onDataReceived() {}
+	virtual void onConnected() {}
 
 protected:
 	SocketSession();
