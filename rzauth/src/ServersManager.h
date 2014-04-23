@@ -16,8 +16,11 @@ public:
 	ServersManager();
 	~ServersManager();
 
-	void stop();
-	void start();
+	bool stop();
+	bool start();
+
+	bool start(const std::string& name);
+	bool stop(const std::string& name);
 
 	RappelzServerCommon* getServer(const std::string& name);
 

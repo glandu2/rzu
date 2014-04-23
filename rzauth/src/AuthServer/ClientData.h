@@ -41,7 +41,7 @@ public:
 	static bool removeClient(const std::string& account);
 	static bool removeClient(ClientData* clientData);
 	static ClientData* getClient(const std::string& account);
-	static unsigned int getClientCount() { return connectedClients.size(); }
+	static unsigned int getClientCount() { return (int)connectedClients.size(); }
 	static void removeServer(GameServerSession* server); //remove all client that was connected to this server
 
 

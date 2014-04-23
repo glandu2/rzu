@@ -52,6 +52,9 @@ void RappelzServerCommon::onNewConnection(IListener* instance, Socket* serverSoc
 			thisInstance->lastWaitingInstance->setServer(thisInstance, --thisInstance->sockets.end());
 		}
 		CONFIG_GET()->stats.connectionCount++;
+
+		thisInstance->lastWaitingInstance->onConnected();
+
 		thisInstance->lastWaitingInstance = nullptr;
 	}
 }
