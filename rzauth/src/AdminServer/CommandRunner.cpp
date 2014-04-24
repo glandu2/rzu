@@ -89,7 +89,7 @@ void CommandRunner::getEnv(const std::string& variableName) {
 	}
 
 	std::string val;
-	char type;
+	char type = 'U';
 
 	switch(v->getType()) {
 		case ConfigValue::Bool:

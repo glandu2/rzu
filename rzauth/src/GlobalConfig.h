@@ -95,6 +95,12 @@ struct GlobalConfig {
 				port(CFG_CREATE("admin.telnet.port", 4501))
 			{}
 		} telnet;
+
+		cval<int> &dumpMode;
+
+		AdminConfig() :
+			dumpMode(CFG_CREATE("admin.dump_mode", 0)) //1: no dump, anything else: create dump on crash
+		{}
 	} admin;
 
 	struct Ban {
