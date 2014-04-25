@@ -28,16 +28,17 @@ public:
 
 protected:
 
-	void addServer(const char* name, RappelzServerCommon* server, ConfigValue& listenIp, ConfigValue& listenPort, BanManager* banManager = nullptr);
+	void addServer(const char* name, RappelzServerCommon* server, ConfigValue& listenIp, ConfigValue& listenPort, ConfigValue& autoStart, BanManager* banManager = nullptr);
 
 private:
 	struct ServerInfo {
-		ServerInfo(RappelzServerCommon* server, ConfigValue* listenIp, ConfigValue* listenPort, BanManager* banManager = nullptr) :
-			server(server), listenIp(listenIp), listenPort(listenPort), banManager(banManager) {}
+		ServerInfo(RappelzServerCommon* server, ConfigValue* listenIp, ConfigValue* listenPort, ConfigValue* autoStart, BanManager* banManager = nullptr) :
+			server(server), listenIp(listenIp), listenPort(listenPort), autoStart(autoStart), banManager(banManager) {}
 
 		RappelzServerCommon* server;
 		ConfigValue* listenIp;
 		ConfigValue* listenPort;
+		ConfigValue* autoStart;
 		BanManager* banManager;
 	};
 	std::unordered_map<std::string, ServerInfo*> servers;

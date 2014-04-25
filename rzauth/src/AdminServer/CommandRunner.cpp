@@ -19,11 +19,10 @@ void CommandRunner::startServer(const std::string& name) {
 	else
 		ok = ServersManager::getInstance()->start(name);
 
-	info("Server %s started via admin session\n", name.c_str());
-
 	if(!ok) {
 		iface->write(MSG_UNKNOWN_SERVER_NAME, sizeof(MSG_UNKNOWN_SERVER_NAME));
 	} else {
+		info("Server %s started via admin session\n", name.c_str());
 		iface->write(MSG_START_OK, sizeof(MSG_START_OK));
 	}
 }
@@ -36,11 +35,10 @@ void CommandRunner::stopServer(const std::string& name) {
 	else
 		ok = ServersManager::getInstance()->stop(name);
 
-	info("Server %s stopped via admin session\n", name.c_str());
-
 	if(!ok) {
 		iface->write(MSG_UNKNOWN_SERVER_NAME, sizeof(MSG_UNKNOWN_SERVER_NAME));
 	} else {
+		info("Server %s stopped via admin session\n", name.c_str());
 		iface->write(MSG_STOP_OK, sizeof(MSG_STOP_OK));
 	}
 }
