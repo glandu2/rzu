@@ -12,6 +12,7 @@ class ConfigValue;
 
 class ServersManager : public Object
 {
+	DECLARE_CLASSNAME(ServersManager, 0)
 public:
 	ServersManager();
 	~ServersManager();

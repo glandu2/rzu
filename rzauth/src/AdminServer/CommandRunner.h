@@ -10,6 +10,7 @@ class AdminInterface;
 
 class CommandRunner : public Object
 {
+	DECLARE_CLASS(AdminServer::CommandRunner)
 public:
 	CommandRunner(AdminInterface *iface) : iface(iface) {}
 

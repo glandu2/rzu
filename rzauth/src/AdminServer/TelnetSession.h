@@ -12,6 +12,7 @@ class CommandRunner;
 
 class TelnetSession : public SocketSession, public AdminInterface
 {
+	DECLARE_CLASS(AdminServer::TelnetSession)
 public:
 	TelnetSession();
 	~TelnetSession();

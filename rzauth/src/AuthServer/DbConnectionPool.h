@@ -12,7 +12,9 @@ namespace AuthServer {
 
 class DbConnectionPool;
 
-class DbConnection : public Object {
+class DbConnection : public Object
+{
+	DECLARE_CLASS(AuthServer::DbConnection)
 public:
 	DbConnection(DbConnectionPool* conPool, void *hdbc, void *hstmt) : conPool(conPool), hdbc(hdbc), hstmt(hstmt) { uv_mutex_init(&lock); }
 	~DbConnection() { SQLFreeHandle(SQL_HANDLE_STMT, hstmt); SQLFreeHandle(SQL_HANDLE_DBC, hdbc); uv_mutex_destroy(&lock); }
@@ -64,6 +66,7 @@ private:
 
 class DbConnectionPool : public Object
 {
+	DECLARE_CLASSNAME(AuthServer::DbConnectionPool, 0)
 public:
 	DbConnectionPool();
 	~DbConnectionPool();
