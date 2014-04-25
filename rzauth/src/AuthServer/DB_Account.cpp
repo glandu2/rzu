@@ -53,6 +53,7 @@ bool DB_Account::init() {
 			return true;
 	}
 
+	connection->closeCursor();
 	connection->release();
 	Log::get()->log(Log::LL_Info, "DB_Account::init", 16, "Auth database Ok\n");
 
@@ -121,7 +122,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 	}
 	givenPassword[32] = '\0';
 
-	thisInstance->debug("Account password md5: %s; DB md5: %s;\n", givenPassword, password);
+	thisInstance->trace("Account password md5: %s; DB md5: %s;\n", givenPassword, password);
 
 	if(!strncasecmp(givenPassword, password, 16*2)) {
 		thisInstance->ok = true;
