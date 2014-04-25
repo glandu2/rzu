@@ -17,10 +17,10 @@ RappelzServerCommon::~RappelzServerCommon() {
 	serverSocket->deleteLater();
 }
 
-void RappelzServerCommon::startServer(const std::string &interfaceIp, uint16_t port, BanManager *banManager) {
+bool RappelzServerCommon::startServer(const std::string &interfaceIp, uint16_t port, BanManager *banManager) {
 	this->banManager = banManager;
 	openServer = true;
-	serverSocket->listen(interfaceIp, port);
+	return serverSocket->listen(interfaceIp, port);
 }
 
 void RappelzServerCommon::stop() {
