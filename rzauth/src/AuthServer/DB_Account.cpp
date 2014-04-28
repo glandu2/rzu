@@ -79,7 +79,7 @@ void DB_Account::cancel() {
 
 void DB_Account::onProcess(uv_work_t *req) {
 	DB_Account* thisInstance = (DB_Account*) req->data;
-	char password[33] = {0};
+	char password[34] = {0};
 	char givenPassword[33];
 	DbConnection* connection;
 
