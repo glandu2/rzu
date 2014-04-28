@@ -60,13 +60,14 @@ bool DB_Account::init() {
 	return true;
 }
 
-DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, const char* password) : clientInfo(clientInfo), account(account) {
+DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, const char* password, size_t size) : clientInfo(clientInfo), account(account) {
 	std::string buffer = CONFIG_GET()->auth.dbAccount.salt;
 	req.data = this;
 	ok = false;
 	accountId = 0;
-	buffer.append(password);
-	trace("MD5 of \"%s\" with len %ld\n", buffer.c_str(), (long)buffer.size());
+
+	buffer.append(password, password + size);
+	trace("MD5 of \"%.*s\" with len %ld\n", (long)buffer.size(), buffer.c_str(), (long)buffer.size());
 	MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
 	uv_queue_work(EventLoop::getLoop(), &req, &onProcess, &onDone);
 }
@@ -82,9 +83,17 @@ void DB_Account::onProcess(uv_work_t *req) {
 	char givenPassword[33];
 	DbConnection* connection;
 
-	connection = dbConnectionPool->getConnection(CONFIG_GET()->auth.dbAccount.connectionString.get().c_str());
-	if(!connection)
+	//Accounts with @ before the name are banned accounts
+	if(thisInstance->account.size() == 0 || thisInstance->account[0] == '@') {
+		thisInstance->debug("Account name has invalid character at start: %s\n", thisInstance->account.c_str());
 		return;
+	}
+
+	connection = dbConnectionPool->getConnection(CONFIG_GET()->auth.dbAccount.connectionString.get().c_str());
+	if(!connection) {
+		thisInstance->debug("Could not retrieve a DB connection from pool\n");
+		return;
+	}
 
 	thisInstance->trace("Executing query\n");
 	connection->bindParameter(1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, thisInstance->account.size(), 0, const_cast<char*>(thisInstance->account.c_str()), thisInstance->account.size(), nullptr);

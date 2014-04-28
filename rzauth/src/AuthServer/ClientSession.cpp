@@ -65,7 +65,7 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 }
 
 void ClientSession::onVersion(const TS_CA_VERSION* packet) {
-	if(!strcmp(packet->szVersion, "TEST")) {
+	if(!memcmp(packet->szVersion, "TEST", 4)) {
 		uint32_t totalUserCount = ClientData::getClientCount();
 		TS_SC_RESULT result;
 		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
@@ -79,12 +79,20 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 
 void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	TS_AC_AES_KEY_IV* aesKeyMessage = nullptr;
-	RSA* rsaCipher;
-	BIO* bio;
+	RSA* rsaCipher = nullptr;
+	BIO* bio = nullptr;
 	int blockSize;
 
 	for(int i = 0; i < 32; i++)
 		aesKey[i] = rand() & 0xFF;
+
+	const int expectedKeySize = packet->size - sizeof(TS_MESSAGE) - sizeof(TS_CA_RSA_PUBLIC_KEY);
+
+	if(packet->key_size != expectedKeySize) {
+		warn("RSA: key_size is invalid: %d, expected (from msg size): %d\n", packet->key_size, expectedKeySize);
+		abortSession();
+		goto cleanup;
+	}
 
 	bio = BIO_new_mem_buf((void*)packet->key, packet->key_size);
 	rsaCipher = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
@@ -99,7 +107,7 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	blockSize = RSA_public_encrypt(32, aesKey, aesKeyMessage->rsa_encrypted_data, rsaCipher, RSA_PKCS1_PADDING);
 	if(blockSize < 0) {
 		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
-		warn("RSA encrypt error: %s\n", errorString);
+		warn("RSA: encrypt error: %s\n", errorString);
 		abortSession();
 		goto cleanup;
 	}
@@ -112,13 +120,16 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 cleanup:
 	if(aesKeyMessage)
 		TS_MESSAGE_WNA::destroy(aesKeyMessage);
-	BIO_free(bio);
-	RSA_free(rsaCipher);
+	if(bio)
+		BIO_free(bio);
+	if(rsaCipher)
+		RSA_free(rsaCipher);
 }
 
 void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	unsigned char password[64];  //size = at most rsa encrypted size
 	std::string account;
+	bool ok = false;
 
 	if(dbQuery != nullptr) {
 		TS_AC_RESULT result;
@@ -134,20 +145,25 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	if(useRsaAuth) {
 		const TS_CA_ACCOUNT_V2* accountv2 = reinterpret_cast<const TS_CA_ACCOUNT_V2*>(packet);
 		EVP_CIPHER_CTX d_ctx;
-		int bytesWritten, totalLength = 0;
+		int bytesWritten, totalLength;
 		unsigned int bytesRead;
 
 		debug("Client login using AES\n");
 
 		account = std::string(accountv2->account, std::find(accountv2->account, accountv2->account + 60, '\0'));
 
+		if(accountv2->aes_block_size > sizeof(password) - 16) {
+			warn("RSA: invalid password length: %d\n", accountv2->aes_block_size);
+		}
+
 		EVP_CIPHER_CTX_init(&d_ctx);
+
 		if(EVP_DecryptInit_ex(&d_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) < 0)
 			goto cleanup_aes;
 		if(EVP_DecryptInit_ex(&d_ctx, NULL, NULL, NULL, NULL) < 0)
 			goto cleanup_aes;
 
-		for(bytesRead = 0; bytesRead + 15 < accountv2->aes_block_size; bytesRead += 16) {
+		for(totalLength = bytesRead = 0; bytesRead + 15 < accountv2->aes_block_size; bytesRead += 16) {
 			if(EVP_DecryptUpdate(&d_ctx, password + totalLength, &bytesWritten, accountv2->password + bytesRead, 16) < 0)
 				goto cleanup_aes;
 			totalLength += bytesWritten;
@@ -158,27 +174,33 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 		totalLength += bytesWritten;
 
-		if(totalLength >= 64)
+		if(totalLength >= (int)sizeof(password))
 			goto cleanup_aes;
 
 		password[totalLength] = 0;
+		ok = true;
 
 	cleanup_aes:
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else {
-		debug("Client login using DES\n");
+		std::string key = CONFIG_GET()->auth.client.desKey.get();
+		debug("Client login using DES, key: %s\n", key.c_str());
 
 		account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
-		strncpy((char*)password, packet->password, 61);
-		DesPasswordCipher(CONFIG_GET()->auth.client.desKey.get().c_str()).decrypt(password, 61);
+		memcpy((char*)password, packet->password, 61);
+		DesPasswordCipher(key.c_str()).decrypt(password, 61);
+		password[60] = 0;
+		ok = true;
 	}
 
-	debug("Login request for account %s\n", account.c_str());
+	if(ok) {
+		debug("Login request for account %s\n", account.c_str());
 
-	setObjectName((std::string(getObjectName()) + "[" + account + "]").c_str());
-
-	dbQuery = new DB_Account(this, account, (char*)password);
+		dbQuery = new DB_Account(this, account, (char*)password, strlen((char*)password));
+	} else {
+		warn("Invalid Account message data from %s@%s\n", account.c_str(), getSocket()->getHost().c_str());
+	}
 }
 
 void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode) {
@@ -281,16 +303,27 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 
 			EVP_CIPHER_CTX e_ctx;
 			int bytesWritten;
+			bool ok = false;
 
 			EVP_CIPHER_CTX_init(&e_ctx);
-			EVP_EncryptInit_ex(&e_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16);
-			EVP_EncryptInit_ex(&e_ctx, NULL, NULL, NULL, NULL);
-			EVP_EncryptUpdate(&e_ctx, result.encrypted_data, &bytesWritten, (const unsigned char*)&oneTimePassword, sizeof(uint64_t));
-			EVP_EncryptFinal_ex(&e_ctx, result.encrypted_data + bytesWritten, &bytesWritten);
+			if(EVP_EncryptInit_ex(&e_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) < 0)
+				goto cleanup;
 
-			EVP_CIPHER_CTX_cleanup(&e_ctx);
+			if(EVP_EncryptInit_ex(&e_ctx, NULL, NULL, NULL, NULL) < 0)
+				goto cleanup;
+			if(EVP_EncryptUpdate(&e_ctx, result.encrypted_data, &bytesWritten, (const unsigned char*)&oneTimePassword, sizeof(uint64_t)) < 0)
+				goto cleanup;
+			if(EVP_EncryptFinal_ex(&e_ctx, result.encrypted_data + bytesWritten, &bytesWritten) < 0)
+				goto cleanup;
 
 			sendPacket(&result);
+			ok = true;
+
+		cleanup:
+			EVP_CIPHER_CTX_cleanup(&e_ctx);
+
+			if(!ok)
+				abortSession();
 		} else {
 			TS_AC_SELECT_SERVER result;
 			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER>(&result);

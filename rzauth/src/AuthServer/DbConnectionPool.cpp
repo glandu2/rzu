@@ -18,7 +18,8 @@ DbConnectionPool::DbConnectionPool() {
 	}
 	result = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, SQL_IS_INTEGER);
 	if(!SQL_SUCCEEDED(result)) {
-		warn("Can\'t use ODBC 3\n");
+		outputError(Log::LL_Error, henv, SQL_HANDLE_ENV);
+		error("Can\'t use ODBC 3\n");
 	}
 }
 

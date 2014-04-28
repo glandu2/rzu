@@ -20,7 +20,7 @@ class DB_Account : public Object
 public:
 	static bool init();
 
-	DB_Account(ClientSession* clientInfo, const std::string& account, const char *password);
+	DB_Account(ClientSession* clientInfo, const std::string& account, const char *password, size_t size);
 
 	void cancel();
 
