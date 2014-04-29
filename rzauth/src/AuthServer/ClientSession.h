@@ -1,7 +1,7 @@
 #ifndef CLIENTSESSION_H
 #define CLIENTSESSION_H
 
-#include "../RappelzSession.h"
+#include "RappelzSession.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>

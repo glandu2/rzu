@@ -1,7 +1,7 @@
 #ifndef UPLOADSERVER_CLIENTSESSION_H
 #define UPLOADSERVER_CLIENTSESSION_H
 
-#include "../RappelzSession.h"
+#include "RappelzSession.h"
 
 #include "Packets/TS_CU_LOGIN.h"
 #include "Packets/TS_CU_UPLOAD.h"

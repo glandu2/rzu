@@ -125,7 +125,6 @@ void showDebug(uv_timer_t *) {
 	char debugInfo[1000];
 	strcpy(debugInfo, "----------------------------------\n");
 	sprintf(debugInfo, "%s%lu socket Sessions\n", debugInfo, SocketSession::getObjectCount());
-	sprintf(debugInfo, "%sstats.connections = %d\n", debugInfo, CONFIG_GET()->stats.connectionCount.get());
-	sprintf(debugInfo, "%sstats.disconnections = %d\n", debugInfo, CONFIG_GET()->stats.disconnectionCount.get());
+	sprintf(debugInfo, "%s%lu active connections\n", debugInfo, Socket::getObjectCount());
 	puts(debugInfo);
 }
