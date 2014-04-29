@@ -1,5 +1,5 @@
 #include "CommandRunner.h"
-#include "../ServersManager.h"
+#include "ServersManager.h"
 #include "AdminInterface.h"
 #include "ConfigInfo.h"
 #include <stdlib.h>

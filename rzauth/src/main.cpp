@@ -4,16 +4,24 @@
 
 #include "AuthServer/DB_Account.h"
 #include "ServersManager.h"
+#include "BanManager.h"
 #include "SocketSession.h"
+
+#include "AuthServer/ClientSession.h"
+#include "AuthServer/GameServerSession.h"
+#include "AuthServer/DB_Account.h"
+
+#include "UploadServer/ClientSession.h"
+#include "UploadServer/GameServerSession.h"
+#include "UploadServer/IconServerSession.h"
+
+#include "AdminServer/TelnetSession.h"
 
 
 /* TODO
  * Log packets
  * Telnet for commands (like stop which would help to have a correct valgrind output):
- *  - stop - stop the server
  *  - stats - show stats of the server (player count, active connections, connected GS, ...)
- *  - set - set variable value
- *  - get - get variable value
  *  - dump - dump variables
  */
 
@@ -116,6 +124,50 @@ int main(int argc, char **argv) {
 
 void runServers() {
 	ServersManager serverManager;
+	BanManager banManager;
+
+	RappelzServer<AuthServer::ClientSession> authClientServer;
+	RappelzServer<AuthServer::GameServerSession> authGameServer;
+
+	RappelzServer<UploadServer::ClientSession> uploadClientServer;
+	RappelzServer<UploadServer::IconServerSession> uploadIconServer;
+	RappelzServer<UploadServer::GameServerSession> uploadGameServer;
+
+	RappelzServer<AdminServer::TelnetSession> adminTelnetServer;
+
+	banManager.loadFile();
+
+
+	serverManager.addServer("auth.clients", &authClientServer,
+							CONFIG_GET()->auth.client.listenIp,
+							CONFIG_GET()->auth.client.port,
+							CONFIG_GET()->auth.client.autoStart,
+							&banManager);
+	serverManager.addServer("auth.gameserver", &authGameServer,
+							CONFIG_GET()->auth.game.listenIp,
+							CONFIG_GET()->auth.game.port,
+							CONFIG_GET()->auth.game.autoStart);
+
+	serverManager.addServer("upload.clients", &uploadClientServer,
+							CONFIG_GET()->upload.client.listenIp,
+							CONFIG_GET()->upload.client.port,
+							CONFIG_GET()->upload.client.autoStart,
+							&banManager);
+	serverManager.addServer("upload.iconserver", &uploadIconServer,
+							CONFIG_GET()->upload.client.listenIp,
+							CONFIG_GET()->upload.client.webPort,
+							CONFIG_GET()->upload.client.autoStart,
+							&banManager);
+	serverManager.addServer("upload.gameserver", &uploadGameServer,
+							CONFIG_GET()->upload.game.listenIp,
+							CONFIG_GET()->upload.game.port,
+							CONFIG_GET()->upload.game.autoStart);
+
+	serverManager.addServer("admin.telnet", &adminTelnetServer,
+							CONFIG_GET()->admin.telnet.listenIp,
+							CONFIG_GET()->admin.telnet.port,
+							CONFIG_GET()->admin.telnet.autoStart);
+
 	serverManager.start();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
