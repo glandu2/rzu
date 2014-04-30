@@ -44,6 +44,16 @@ public:
 		return SQL_SUCCEEDED(SQLFetch(hstmt));
 	}
 
+	int getColumnNum(bool *ok) {
+		SQLSMALLINT colCount = 0;
+		bool isOk = SQL_SUCCEEDED(SQLNumResultCols(hstmt, &colCount));
+
+		if(ok != nullptr)
+			*ok = isOk;
+
+		return colCount;
+	}
+
 	bool getData(SQLUSMALLINT ColumnNumber,
 				SQLSMALLINT TargetType,
 				SQLPOINTER TargetValue,

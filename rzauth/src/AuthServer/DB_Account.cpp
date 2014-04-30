@@ -64,7 +64,11 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	std::string buffer = CONFIG_GET()->auth.dbAccount.salt;
 	req.data = this;
 	ok = false;
+
 	accountId = 0;
+	age = 19;
+	lastLoginServerIdx = 1;
+	eventCode = 0;
 
 	buffer.append(password, password + size);
 	trace("MD5 of \"%.*s\" with len %ld\n", (long)buffer.size(), buffer.c_str(), (long)buffer.size());
@@ -79,8 +83,7 @@ void DB_Account::cancel() {
 
 void DB_Account::onProcess(uv_work_t *req) {
 	DB_Account* thisInstance = (DB_Account*) req->data;
-	char password[34] = {0};
-	char givenPassword[33];
+	char givenPasswordString[33];
 	DbConnection* connection;
 
 	//Accounts with @ before the name are banned accounts
@@ -95,57 +98,84 @@ void DB_Account::onProcess(uv_work_t *req) {
 		return;
 	}
 
-	thisInstance->trace("Executing query\n");
-	connection->bindParameter(1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, thisInstance->account.size(), 0, const_cast<char*>(thisInstance->account.c_str()), thisInstance->account.size(), nullptr);
-	if(!connection->execute("SELECT TOP(1) account_id, password FROM dbo.Account WITH(NOLOCK) WHERE account = ?;")) {
+	for(int i = 0; i < 16; i++) {
+		unsigned char val = thisInstance->givenPasswordMd5[i] >> 4;
+		if(val < 10)
+			givenPasswordString[i*2] = val + '0';
+		else
+			givenPasswordString[i*2] = val - 10 + 'a';
+
+		val = thisInstance->givenPasswordMd5[i] & 0x0F;
+		if(val < 10)
+			givenPasswordString[i*2+1] = val + '0';
+		else
+			givenPasswordString[i*2+1] = val - 10 + 'a';
+	}
+	givenPasswordString[32] = '\0';
+
+	thisInstance->trace("Querying for account \"%s\" and password MD5 \"%s\"\n", thisInstance->account.c_str(), givenPasswordString);
+
+	const int paramAccountIndex = CONFIG_GET()->sql.dbAccount.paramAccount.get();
+	const int paramPasswordIndex = CONFIG_GET()->sql.dbAccount.paramPassword.get();
+
+	if(paramAccountIndex > 0)
+		connection->bindParameter(paramAccountIndex, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, thisInstance->account.size(), 0, const_cast<char*>(thisInstance->account.c_str()), thisInstance->account.size(), nullptr);
+
+	if(paramPasswordIndex > 0)
+		connection->bindParameter(paramPasswordIndex, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 32, 0, givenPasswordString, 32, nullptr);
+
+	if(!connection->execute(CONFIG_GET()->sql.dbAccount.query.get().c_str())) {
 		connection->releaseWithError(Log::LL_Info);
 		return;
 	}
 	if(!connection->fetch()) {
+		thisInstance->trace("Not Ok\n");
 		connection->closeCursor();
 		connection->release();
 		return;
 	}
 
 	thisInstance->trace("Getting data\n");
-	connection->getData(1, SQL_C_LONG, &thisInstance->accountId, sizeof(thisInstance->accountId), NULL);
-	connection->getData(2, SQL_C_CHAR, password, sizeof(password), NULL);
+	bool columnCountOk;
+	const int columnCount = connection->getColumnNum(&columnCountOk);
+
+	if(!columnCountOk) {
+		connection->closeCursor();
+		connection->releaseWithError(Log::LL_Error);
+		return;
+	}
+
+	if(columnCount >= 1)
+		connection->getData(1, SQL_C_LONG, &thisInstance->accountId, sizeof(thisInstance->accountId), NULL);
+	else {
+		thisInstance->fatal("No columns in result set for query \"%s\" !\n", CONFIG_GET()->sql.dbAccount.query.get().c_str());
+		connection->closeCursor();
+		connection->releaseWithError(Log::LL_Error);
+	}
+
+	if(columnCount >= 2)
+		connection->getData(2, SQL_C_LONG, &thisInstance->age, sizeof(thisInstance->age), NULL);
+
+	if(columnCount >= 3)
+		connection->getData(3, SQL_C_SHORT, &thisInstance->lastLoginServerIdx, sizeof(thisInstance->lastLoginServerIdx), NULL);
+
+	if(columnCount >= 4)
+		connection->getData(4, SQL_C_LONG, &thisInstance->eventCode, sizeof(thisInstance->eventCode), NULL);
 
 	//if(connection->fetch())
 	connection->closeCursor();
 
 	connection->release();
 
-	for(int i = 0; i < 16; i++) {
-		unsigned char val = thisInstance->givenPasswordMd5[i] >> 4;
-		if(val < 10)
-			givenPassword[i*2] = val + '0';
-		else
-			givenPassword[i*2] = val - 10 + 'a';
-
-		val = thisInstance->givenPasswordMd5[i] & 0x0F;
-		if(val < 10)
-			givenPassword[i*2+1] = val + '0';
-		else
-			givenPassword[i*2+1] = val - 10 + 'a';
-	}
-	givenPassword[32] = '\0';
-
-	thisInstance->trace("Account password md5: %s; DB md5: %s;\n", givenPassword, password);
-
-	if(!strncasecmp(givenPassword, password, 16*2)) {
-		thisInstance->ok = true;
-		thisInstance->trace("Ok\n");
-	} else {
-		thisInstance->trace("Not Ok\n");
-	}
+	thisInstance->ok = true;
+	thisInstance->trace("Ok\n");
 }
 
 void DB_Account::onDone(uv_work_t *req, int status) {
 	DB_Account* thisInstance = (DB_Account*) req->data;
 
-	if(thisInstance->clientInfo)
-		thisInstance->clientInfo->clientAuthResult(thisInstance->ok, thisInstance->account, thisInstance->accountId, 19, 1, 0);
+	if(status >= 0 && thisInstance->clientInfo)
+		thisInstance->clientInfo->clientAuthResult(thisInstance->ok, thisInstance->account, thisInstance->accountId, thisInstance->age, thisInstance->lastLoginServerIdx, thisInstance->eventCode);
 	delete thisInstance;
 }
 

@@ -37,8 +37,12 @@ private:
 	uv_work_t req;
 	std::string account;
 	bool ok;
-	uint32_t accountId;
 	unsigned char givenPasswordMd5[16];
+
+	uint32_t accountId;
+	uint32_t age;
+	uint16_t lastLoginServerIdx;
+	uint32_t eventCode;
 };
 
 } // namespace AuthServer

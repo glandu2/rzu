@@ -249,6 +249,9 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		if(serverList.at(i) != nullptr)
 			count++;
 
+	if(lastLoginServerId >= count)
+		lastLoginServerId = 1;
+
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
 
 	serverListPacket->count = count;
