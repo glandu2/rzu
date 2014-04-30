@@ -86,7 +86,7 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	for(int i = 0; i < 32; i++)
 		aesKey[i] = rand() & 0xFF;
 
-	const int expectedKeySize = packet->size - sizeof(TS_MESSAGE) - sizeof(TS_CA_RSA_PUBLIC_KEY);
+	const int expectedKeySize = packet->size - sizeof(TS_CA_RSA_PUBLIC_KEY);
 
 	if(packet->key_size != expectedKeySize) {
 		warn("RSA: key_size is invalid: %d, expected (from msg size): %d\n", packet->key_size, expectedKeySize);
