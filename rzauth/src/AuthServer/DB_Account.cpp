@@ -53,7 +53,6 @@ bool DB_Account::init() {
 			return true;
 	}
 
-	connection->closeCursor();
 	connection->release();
 	Log::get()->log(Log::LL_Info, "DB_Account::init", 16, "Auth database Ok\n");
 
@@ -65,7 +64,7 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	req.data = this;
 	ok = false;
 
-	accountId = 0;
+	accountId = 0xFFFFFFFF;
 	age = 19;
 	lastLoginServerIdx = 1;
 	eventCode = 0;
@@ -85,6 +84,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 	DB_Account* thisInstance = (DB_Account*) req->data;
 	char givenPasswordString[33];
 	DbConnection* connection;
+	bool columnCountOk;
 
 	//Accounts with @ before the name are banned accounts
 	if(thisInstance->account.size() == 0 || thisInstance->account[0] == '@') {
@@ -94,7 +94,7 @@ void DB_Account::onProcess(uv_work_t *req) {
 
 	connection = dbConnectionPool->getConnection(CONFIG_GET()->auth.dbAccount.connectionString.get().c_str());
 	if(!connection) {
-		thisInstance->debug("Could not retrieve a DB connection from pool\n");
+		thisInstance->warn("Could not retrieve a DB connection from pool\n");
 		return;
 	}
 
@@ -125,50 +125,55 @@ void DB_Account::onProcess(uv_work_t *req) {
 		connection->bindParameter(paramPasswordIndex, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 32, 0, givenPasswordString, 32, nullptr);
 
 	if(!connection->execute(CONFIG_GET()->sql.dbAccount.query.get().c_str())) {
-		connection->releaseWithError(Log::LL_Info);
+		connection->releaseWithError();
 		return;
 	}
 	if(!connection->fetch()) {
 		thisInstance->trace("Not Ok\n");
-		connection->closeCursor();
 		connection->release();
 		return;
 	}
 
 	thisInstance->trace("Getting data\n");
-	bool columnCountOk;
 	const int columnCount = connection->getColumnNum(&columnCountOk);
 
 	if(!columnCountOk) {
-		connection->closeCursor();
-		connection->releaseWithError(Log::LL_Error);
+		connection->releaseWithError();
 		return;
 	}
 
-	if(columnCount >= 1)
-		connection->getData(1, SQL_C_LONG, &thisInstance->accountId, sizeof(thisInstance->accountId), NULL);
-	else {
-		thisInstance->fatal("No columns in result set for query \"%s\" !\n", CONFIG_GET()->sql.dbAccount.query.get().c_str());
-		connection->closeCursor();
-		connection->releaseWithError(Log::LL_Error);
+	for(int i = 0; i < columnCount; i++) {
+		char columnName[32];
+		const int columnIndex = i + 1;
+
+		connection->getColumnName(columnIndex, columnName, sizeof(columnName));
+
+		if(!strcmp(columnName, "account_id")) {
+			connection->getData(columnIndex, SQL_C_LONG, &thisInstance->accountId, sizeof(thisInstance->accountId), NULL);
+
+			//Ok only when we have the account id (password check in SQL query)
+			thisInstance->ok = true;
+		} else if(!strcmp(columnName, "age")) {
+			connection->getData(columnIndex, SQL_C_LONG, &thisInstance->age, sizeof(thisInstance->age), NULL);
+		} else if(!strcmp(columnName, "last_login_server_idx")) {
+			connection->getData(columnIndex, SQL_C_SHORT, &thisInstance->lastLoginServerIdx, sizeof(thisInstance->lastLoginServerIdx), NULL);
+		} else if(!strcmp(columnName, "event_code")) {
+			connection->getData(columnIndex, SQL_C_LONG, &thisInstance->eventCode, sizeof(thisInstance->eventCode), NULL);
+		}
 	}
 
-	if(columnCount >= 2)
-		connection->getData(2, SQL_C_LONG, &thisInstance->age, sizeof(thisInstance->age), NULL);
-
-	if(columnCount >= 3)
-		connection->getData(3, SQL_C_SHORT, &thisInstance->lastLoginServerIdx, sizeof(thisInstance->lastLoginServerIdx), NULL);
-
-	if(columnCount >= 4)
-		connection->getData(4, SQL_C_LONG, &thisInstance->eventCode, sizeof(thisInstance->eventCode), NULL);
-
-	//if(connection->fetch())
-	connection->closeCursor();
+	if(!thisInstance->ok) {
+		thisInstance->debug("Missing account_id column in resultset\n");
+		thisInstance->trace("Not Ok\n");
+	} else {
+		thisInstance->trace("Ok: id %d, age %d, last_login_server_idx %d, event_code %d\n",
+							thisInstance->accountId,
+							thisInstance->age,
+							thisInstance->lastLoginServerIdx,
+							thisInstance->eventCode);
+	}
 
 	connection->release();
-
-	thisInstance->ok = true;
-	thisInstance->trace("Ok\n");
 }
 
 void DB_Account::onDone(uv_work_t *req, int status) {
