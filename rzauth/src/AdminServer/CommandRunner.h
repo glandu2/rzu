@@ -18,6 +18,7 @@ public:
 	void stopServer(const std::string& name);
 	void setEnv(const std::string& variableName, const std::string& value);
 	void getEnv(const std::string& variableName);
+	void listGameServers();
 
 private:
 	AdminInterface *iface;

@@ -3,7 +3,7 @@
 
 #include "RappelzSession.h"
 #include <stdint.h>
-#include <vector>
+#include <unordered_map>
 #include <string>
 #include "ClientData.h"
 
@@ -22,7 +22,7 @@ public:
 	GameServerSession();
 
 	//multithread concurrency when GS is disconnected while new players connect to it
-	static const std::vector<GameServerSession*>& getServerList() { return servers; }
+	static const std::unordered_map<uint16_t, GameServerSession*>& getServerList() { return servers; }
 
 	uint16_t getServerIdx() { return serverIdx; }
 	std::string getServerName() { return serverName; }
@@ -44,7 +44,7 @@ protected:
 private:
 	~GameServerSession();
 
-	static std::vector<GameServerSession*> servers;
+	static std::unordered_map<uint16_t, GameServerSession*> servers;
 
 	uint16_t serverIdx;
 	std::string serverName;

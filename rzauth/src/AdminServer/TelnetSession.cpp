@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include <string>
 #include "CommandRunner.h"
+#include <sstream>
 
 namespace AdminServer {
 
@@ -50,25 +51,30 @@ void TelnetSession::parseData(const std::vector<char>& data) {
 
 void TelnetSession::parseCommand(const std::string& data) {
 	std::vector<std::string> args;
+	std::ostringstream arg;
 
-	const char *p, *begin;
+	const char *p;
 	p = data.c_str();
-	begin = nullptr;
+	bool insideQuotes = false;
 
-	while(p < data.c_str() + data.size()) {
-		if(*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') {
-			if(begin) {
-				args.push_back(std::string(begin, p - begin));
-				begin = nullptr;
+	for(p = data.c_str(); p < data.c_str() + data.size(); p++) {
+		if(*p == '\"') {
+			if(p+1 < data.c_str() + data.size() && *(p+1) == '\"') {
+				p++;
+				arg << '\"';
+			} else {
+				insideQuotes = !insideQuotes;
 			}
-		} else if(!begin) {
-			begin = p;
+		} else if(insideQuotes == false && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')) {
+			args.push_back(arg.str());
+			arg.str("");
+			arg.clear();
+		} else {
+			arg << *p;
 		}
-
-		p++;
 	}
-	if(begin)
-		args.push_back(std::string(begin, p - begin));
+	if(arg.tellp())
+		args.push_back(arg.str());
 
 	if(args.size() > 1 && args[0] == "start")
 		commandRunner->startServer(args[1]);
@@ -78,6 +84,8 @@ void TelnetSession::parseCommand(const std::string& data) {
 		commandRunner->setEnv(args[1], args[2]);
 	else if(args.size() > 1 && args[0] == "get")
 		commandRunner->getEnv(args[1]);
+	else if(args.size() > 0 && args[0] == "list")
+		commandRunner->listGameServers();
 	else
 		write(MSG_UNKNOWN_COMMAND, sizeof(MSG_UNKNOWN_COMMAND));
 }

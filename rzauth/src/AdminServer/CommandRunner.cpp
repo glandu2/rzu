@@ -3,6 +3,7 @@
 #include "AdminInterface.h"
 #include "ConfigInfo.h"
 #include <stdlib.h>
+#include "../AuthServer/GameServerSession.h"
 
 namespace AdminServer {
 
@@ -115,6 +116,29 @@ void CommandRunner::getEnv(const std::string& variableName) {
 	int len = sprintf(buffer, "%c%c%s:%s\r\n", type, v->isDefault() ? '*' : ' ', variableName.c_str(), val.c_str());
 
 	iface->write(buffer, len);
+}
+
+void CommandRunner::listGameServers() {
+	const std::unordered_map<uint16_t, AuthServer::GameServerSession*>& serverList = AuthServer::GameServerSession::getServerList();
+	std::unordered_map<uint16_t, AuthServer::GameServerSession*>::const_iterator it, itEnd;
+
+	char buffer[1024];
+	int len;
+
+	len = sprintf(buffer, "%lu gameserver(s)\r\n", serverList.size());
+	iface->write(buffer, len);
+
+	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
+		AuthServer::GameServerSession* server = it->second;
+
+		len = sprintf(buffer, "Index: %2d, name: %10s, address: %s:%d, screenshot url: %s\r\n",
+					  server->getServerIdx(),
+					  server->getServerName().c_str(),
+					  server->getServerIp().c_str(),
+					  server->getServerPort(),
+					  server->getServerScreenshotUrl().c_str());
+		iface->write(buffer, len);
+	}
 }
 
 } // namespace AdminServer

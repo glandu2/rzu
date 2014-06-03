@@ -260,7 +260,7 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 
 void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST* serverListPacket;
-	unsigned int i, j, count;
+	unsigned int j, count;
 
 	// Check if user authenticated
 	if(clientData == nullptr) {
@@ -268,11 +268,10 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		return;
 	}
 
-	const std::vector<GameServerSession*>& serverList = GameServerSession::getServerList();
+	const std::unordered_map<uint16_t, GameServerSession*>& serverList = GameServerSession::getServerList();
+	std::unordered_map<uint16_t, GameServerSession*>::const_iterator it, itEnd;
 
-	for(i = count = 0; i < serverList.size(); i++)
-		if(serverList.at(i) != nullptr)
-			count++;
+	count = serverList.size();
 
 	if(lastLoginServerId >= count)
 		lastLoginServerId = 1;
@@ -282,11 +281,8 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 	serverListPacket->count = count;
 	serverListPacket->last_login_server_idx = lastLoginServerId;
 
-	for(i = j = 0; i < serverList.size() && j < serverListPacket->count; i++) {
-		GameServerSession* serverInfo = serverList.at(i);
-
-		if(serverInfo == nullptr)
-			continue;
+	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it, j++) {
+		GameServerSession* serverInfo = it->second;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
 		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
@@ -295,8 +291,6 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		serverListPacket->servers[j].is_adult_server = serverInfo->getIsAdultServer();
 		strcpy(serverListPacket->servers[j].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
 		serverListPacket->servers[j].user_ratio = 0;
-
-		j++;
 	}
 
 	sendPacket(serverListPacket);
@@ -305,7 +299,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST_EPIC2* serverListPacket;
-	unsigned int i, j, count;
+	unsigned int j, count;
 
 	// Check if user authenticated
 	if(clientData == nullptr) {
@@ -313,11 +307,10 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 		return;
 	}
 
-	const std::vector<GameServerSession*>& serverList = GameServerSession::getServerList();
+	const std::unordered_map<uint16_t, GameServerSession*>& serverList = GameServerSession::getServerList();
+	std::unordered_map<uint16_t, GameServerSession*>::const_iterator it, itEnd;
 
-	for(i = count = 0; i < serverList.size(); i++)
-		if(serverList.at(i) != nullptr)
-			count++;
+	count = serverList.size();
 
 	if(lastLoginServerId >= count)
 		lastLoginServerId = 1;
@@ -326,26 +319,14 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 
 	serverListPacket->count = count;
 
-	for(i = j = 0; i < serverList.size() && j < serverListPacket->count; i++) {
-	//for(i = j = 0; j < serverListPacket->count; i++) {
-		GameServerSession* serverInfo = serverList.at(i);
-
-		if(serverInfo == nullptr)
-			continue;
+	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it, j++) {
+		GameServerSession* serverInfo = it->second;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
 		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
 		serverListPacket->servers[j].server_port = serverInfo->getServerPort();
 		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
 		serverListPacket->servers[j].user_ratio = 0;
-
-		/*serverListPacket->servers[j].server_idx = 1;
-		strcpy(serverListPacket->servers[j].server_ip, "2.168.1.103");
-		serverListPacket->servers[j].server_port = 4516;
-		memcpy(serverListPacket->servers[j].server_name, "1.2.3.4.5.6.7.8.9.0.1",21);
-		serverListPacket->servers[j].user_ratio = 10;*/
-
-		j++;
 	}
 
 	sendPacket(serverListPacket);
@@ -353,14 +334,14 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 }
 
 void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
-	const std::vector<GameServerSession*>& serverList = GameServerSession::getServerList();
+	const std::unordered_map<uint16_t, GameServerSession*>& serverList = GameServerSession::getServerList();
 
 	if(clientData == nullptr) {
 		abortSession();
 		return;
 	}
 
-	if(packet->server_idx < serverList.size() && serverList.at(packet->server_idx) != nullptr) {
+	if(serverList.find(packet->server_idx) != serverList.end()) {
 		GameServerSession* server = serverList.at(packet->server_idx);
 
 		uint64_t oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
@@ -413,6 +394,7 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 		}
 	} else {
 		abortSession();
+		warn("Attempt to connect to an invalid server idx: %d\n", packet->server_idx);
 	}
 }
 
