@@ -39,12 +39,6 @@ protected:
 private:
 	~ClientSession();
 
-	enum AuthMethod {
-		AM_DES,
-		AM_RSA,
-		AM_DES_E4
-	};
-
 	bool useRsaAuth;
 	bool isEpic2;
 	unsigned char aesKey[32];

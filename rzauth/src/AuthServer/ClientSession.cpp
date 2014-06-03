@@ -304,7 +304,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 }
 
 void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
-	TS_AC_SERVER_LIST_EPIC_2* serverListPacket;
+	TS_AC_SERVER_LIST_EPIC2* serverListPacket;
 	unsigned int i, j, count;
 
 	// Check if user authenticated
@@ -322,7 +322,7 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 	if(lastLoginServerId >= count)
 		lastLoginServerId = 1;
 
-	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST_EPIC_2, TS_AC_SERVER_LIST_EPIC_2::TS_SERVER_INFO>(count);
+	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST_EPIC2, TS_AC_SERVER_LIST_EPIC2::TS_SERVER_INFO>(count);
 
 	serverListPacket->count = count;
 
@@ -370,8 +370,8 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 		clientData = nullptr;
 
 		if(useRsaAuth) {
-			TS_AC_SELECT_SERVER_V2 result;
-			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER_V2>(&result);
+			TS_AC_SELECT_SERVER_RSA result;
+			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER_RSA>(&result);
 			result.result = 0;
 			result.encrypted_data_size = 16;
 			result.pending_time = 0;
