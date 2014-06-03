@@ -18,7 +18,8 @@ DbConnectionPool::DbConnectionPool() {
 	}
 	result = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, SQL_IS_INTEGER);
 	if(!SQL_SUCCEEDED(result)) {
-		warn("Can\'t use ODBC 3\n");
+		outputError(Log::LL_Error, henv, SQL_HANDLE_ENV);
+		error("Can\'t use ODBC 3\n");
 	}
 }
 
@@ -104,15 +105,31 @@ void DbConnectionPool::closeConnection(DbConnection* dbConnection) {
 	dbConnection->deleteLater();
 }
 
-void DbConnection::releaseWithError(Log::Level errorLevel) {
-	if(hstmt)
-		outputError(errorLevel, hstmt, SQL_HANDLE_STMT);
-	if(hdbc)
-		outputError(errorLevel, hdbc, SQL_HANDLE_DBC);
-
-	conPool->extractError(errorLevel);
+void DbConnection::releaseWithError() {
 	conPool->closeConnection(this);
 	release();
+}
+
+bool DbConnection::checkResult(SQLRETURN result, const char* function) {
+	if(result == SQL_SUCCESS_WITH_INFO) {
+		info("%s: additional info\n", function);
+		if(hstmt)
+			outputError(Log::LL_Info, hstmt, SQL_HANDLE_STMT);
+		if(hdbc)
+			outputError(Log::LL_Info, hdbc, SQL_HANDLE_DBC);
+
+		conPool->extractError(Log::LL_Info);
+	} else if(result == SQL_ERROR) {
+		info("%s: error\n", function);
+		if(hstmt)
+			outputError(Log::LL_Error, hstmt, SQL_HANDLE_STMT);
+		if(hdbc)
+			outputError(Log::LL_Error, hdbc, SQL_HANDLE_DBC);
+
+		conPool->extractError(Log::LL_Error);
+	}
+
+	return SQL_SUCCEEDED(result);
 }
 
 void DbConnectionPool::extractError(Log::Level errorLevel) {
@@ -129,7 +146,7 @@ static void outputError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT typ
 	do {
 		ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, sizeof(text), &len);
 		if (SQL_SUCCEEDED(ret))
-			Log::get()->log(errorLevel, "ODBCERROR", 9, "%s:%d:%ld:%s\n", state, i, (long)native, text);
+			Log::get()->log(errorLevel, "ODBC", 4, "%s:%d:%ld:%s\n", state, i, (long)native, text);
 	} while(ret == SQL_SUCCESS);
 }
 

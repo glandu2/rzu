@@ -1,7 +1,7 @@
 #ifndef GUILDICONSERVER_H
 #define GUILDICONSERVER_H
 
-#include "../SocketSession.h"
+#include "SocketSession.h"
 #include <string>
 #include <sstream>
 

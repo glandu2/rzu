@@ -1,7 +1,7 @@
 #ifndef ADMINSERVER_TELNETSESSION_H
 #define ADMINSERVER_TELNETSESSION_H
 
-#include "../SocketSession.h"
+#include "SocketSession.h"
 #include <string>
 #include <sstream>
 #include "AdminInterface.h"

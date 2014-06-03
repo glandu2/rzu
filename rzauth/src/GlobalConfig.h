@@ -56,12 +56,13 @@ struct GlobalConfig {
 			cval<bool> &autoStart;
 
 			GameConfig() :
-				listenIp(CFG_CREATE("auth.gameserver.ip", "0.0.0.0")),
+				listenIp(CFG_CREATE("auth.gameserver.ip", "127.0.0.1")),
 				port(CFG_CREATE("auth.gameserver.port", 4502)),
 				autoStart(CFG_CREATE("auth.gameserver.autostart", true)) {}
 		} game;
 
-		AuthConfig() : dbAccount("auth.") {}
+		AuthConfig() :
+			dbAccount("auth.") {}
 	} auth;
 
 	struct UploadConfig {
@@ -87,7 +88,7 @@ struct GlobalConfig {
 			cval<bool> &autoStart;
 
 			GameConfig() :
-				listenIp(CFG_CREATE("upload.gameserver.ip", "0.0.0.0")),
+				listenIp(CFG_CREATE("upload.gameserver.ip", "127.0.0.1")),
 				port(CFG_CREATE("upload.gameserver.port", 4616)),
 				autoStart(CFG_CREATE("upload.gameserver.autostart", true)) {}
 		} game;
@@ -102,7 +103,7 @@ struct GlobalConfig {
 			TelnetConfig() :
 				listenIp(CFG_CREATE("admin.telnet.ip", "127.0.0.1")),
 				port(CFG_CREATE("admin.telnet.port", 4501)),
-				autoStart(CFG_CREATE("admin.telnet.autostart", false))
+				autoStart(CFG_CREATE("admin.telnet.autostart", true))
 			{}
 		} telnet;
 
@@ -113,26 +114,32 @@ struct GlobalConfig {
 		{}
 	} admin;
 
-	struct Ban {
-		//DbConfig dbBan;
-		cval<std::string> &banFile;
+	struct TrafficDump {
+		cval<bool> &enable;
+		cval<std::string> &dir, &file, &level, &consoleLevel;
 
-		Ban() :
-			//dbBan("ban."),
-			banFile(CFG_CREATE("ban.ipfile", "bannedip.txt"))
+		TrafficDump() :
+			enable(CFG_CREATE("trafficdump.enable", false)),
+			dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
+			file(CFG_CREATE("trafficdump.file", "trafficdump.log")),
+			level(CFG_CREATE("trafficdump.level", "debug")),
+			consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal"))
 		{
-			Utils::autoSetAbsoluteDir(banFile);
+			Utils::autoSetAbsoluteDir(dir);
 		}
-	} ban;
+	} trafficDump;
 
+	struct SqlQueries {
+		struct DbAccount {
+			cval<std::string>& query;
+			cval<int> &paramAccount, &paramPassword;
 
-	struct Statistics {
-		cstatval<int>& connectionCount, &disconnectionCount;
-
-		Statistics() :
-			connectionCount(CFG_STAT_CREATE("stats.connections", 0)),
-			disconnectionCount(CFG_STAT_CREATE("stats.disconnections", 0)) {}
-	} stats;
+			DbAccount() :
+				query(CFG_CREATE("sql.db_account.query", "SELECT account_id FROM Account WHERE account = ? AND password = ?;")),
+				paramAccount(CFG_CREATE("sql.db_account.param.account", 1)),
+				paramPassword(CFG_CREATE("sql.db_account.param.password", 2)) {}
+		} dbAccount;
+	} sql;
 
 	static GlobalConfig* get();
 	static void init();

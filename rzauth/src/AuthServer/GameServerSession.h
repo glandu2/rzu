@@ -1,7 +1,7 @@
 #ifndef GAMESERVERSESSION_H
 #define GAMESERVERSESSION_H
 
-#include "../RappelzSession.h"
+#include "RappelzSession.h"
 #include <stdint.h>
 #include <vector>
 #include <string>

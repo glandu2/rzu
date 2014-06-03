@@ -5,12 +5,12 @@
 #include <unordered_map>
 #include "RappelzServer.h"
 #include <string>
-#include "BanManager.h"
 
+class BanManager;
 
 class ConfigValue;
 
-class ServersManager : public Object
+class RAPPELZLIB_EXTERN ServersManager : public Object
 {
 	DECLARE_CLASSNAME(ServersManager, 0)
 public:
@@ -24,12 +24,9 @@ public:
 	bool stop(const std::string& name);
 
 	RappelzServerCommon* getServer(const std::string& name);
+	void addServer(const char* name, RappelzServerCommon* server, ConfigValue& listenIp, ConfigValue& listenPort, ConfigValue& autoStart, BanManager* banManager = nullptr);
 
 	static ServersManager* getInstance() { return instance; }
-
-protected:
-
-	void addServer(const char* name, RappelzServerCommon* server, ConfigValue& listenIp, ConfigValue& listenPort, ConfigValue& autoStart, BanManager* banManager = nullptr);
 
 private:
 	struct ServerInfo {
@@ -43,7 +40,6 @@ private:
 		BanManager* banManager;
 	};
 	std::unordered_map<std::string, ServerInfo*> servers;
-	BanManager banManager;
 
 	static ServersManager* instance;
 };

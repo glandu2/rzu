@@ -1,112 +1,70 @@
 #include "EventLoop.h"
 #include "GlobalConfig.h"
 #include "RappelzLibInit.h"
+#include "RappelzLibConfig.h"
+#include "CrashHandler.h"
 
 #include "AuthServer/DB_Account.h"
 #include "ServersManager.h"
+#include "BanManager.h"
 #include "SocketSession.h"
+
+#include "AuthServer/ClientSession.h"
+#include "AuthServer/GameServerSession.h"
+#include "AuthServer/DB_Account.h"
+
+#include "UploadServer/ClientSession.h"
+#include "UploadServer/GameServerSession.h"
+#include "UploadServer/IconServerSession.h"
+
+#include "AdminServer/TelnetSession.h"
 
 
 /* TODO
  * Log packets
  * Telnet for commands (like stop which would help to have a correct valgrind output):
- *  - stop - stop the server
  *  - stats - show stats of the server (player count, active connections, connected GS, ...)
- *  - set - set variable value
- *  - get - get variable value
  *  - dump - dump variables
  */
 
-void runServers();
+void runServers(Log* trafficLogger);
 void showDebug(uv_timer_t*);
 
-#ifdef _WIN32
-#include <windows.h>
-#include <dbghelp.h>
-
-//1: no dump, anything else: dump
-static long long int dumpMode = 0;
-
-LONG WINAPI crashHandler(EXCEPTION_POINTERS *ExceptionInfo) {
-	LONG retval = EXCEPTION_CONTINUE_SEARCH;
-	char *szResult = NULL;
-	char szDumpPath[_MAX_PATH*2];
-	char szScratch [_MAX_PATH*2];
-
-
-	if(dumpMode != 1) {
-		if (GetModuleFileName(NULL, szDumpPath, _MAX_PATH)) {
-			char* p = strrchr(szDumpPath, '\\');
-			if(p) {
-				*(p+1) = 0;
-			}
-		} else {
-			if (!GetTempPath(_MAX_PATH, szDumpPath))
-				strcpy(szDumpPath, "c:\\temp\\");
-		}
-
-		strcat(szDumpPath, "crashdump.dmp");
-
-		// create the file
-		HANDLE hFile = CreateFile(szDumpPath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
-								  FILE_ATTRIBUTE_NORMAL, NULL);
-
-		if(hFile != INVALID_HANDLE_VALUE)
-		{
-			MINIDUMP_EXCEPTION_INFORMATION ExInfo;
-
-			ExInfo.ThreadId = GetCurrentThreadId();
-			ExInfo.ExceptionPointers = ExceptionInfo;
-			ExInfo.ClientPointers = FALSE;
-
-			// write the dump
-			BOOL bOK = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpWithDataSegs, &ExInfo, NULL, NULL);
-			if (bOK)
-			{
-				sprintf(szScratch, "Saved dump file to '%s'", szDumpPath);
-				szResult = szScratch;
-				retval = EXCEPTION_EXECUTE_HANDLER;
-			}
-			else
-			{
-				sprintf(szScratch, "Failed to save dump file to '%s' (error %d)", szDumpPath, GetLastError());
-				szResult = szScratch;
-			}
-			CloseHandle(hFile);
-		}
-		else
-		{
-			sprintf(szScratch, "Failed to create dump file '%s' (error %d)", szDumpPath, GetLastError());
-			szResult = szScratch;
-		}
-	}
-
-	if (szResult)
-		MessageBox(NULL, szResult, "Application crashed", MB_OK);
-
-	return retval;
-}
-#endif
-
 int main(int argc, char **argv) {
-//	uv_timer_t timer;
-//	uv_timer_init(EventLoop::getLoop(), &timer);
-//	uv_timer_start(&timer, &showDebug, 0, 3000);
+	CrashHandler::setProcessExceptionHandlers();
+	CrashHandler::setThreadExceptionHandlers();
 
-#ifdef _WIN32
-	SetUnhandledExceptionFilter(&crashHandler);
-#endif
+	RappelzLibInit(argc, argv, nullptr);
 
-	RappelzLibInit(argc, argv, &GlobalConfig::init);
+	GlobalConfig::init();
+	//Only set CONFIG_FILE_KEY
+	ConfigInfo::get()->parseCommandLine(argc, argv, true);
+	ConfigInfo::get()->readFile(RappelzLibConfig::get()->app.configfile.get().c_str());
+	//Set all keys given on the command line to overwrite config file values
+	ConfigInfo::get()->parseCommandLine(argc, argv);
+
+	Log mainLogger(RappelzLibConfig::get()->log.enable,
+					RappelzLibConfig::get()->log.level,
+					RappelzLibConfig::get()->log.consoleLevel,
+					RappelzLibConfig::get()->log.dir,
+					RappelzLibConfig::get()->log.file);
+	Log::setDefaultLogger(&mainLogger);
+
+	Log trafficLogger(CONFIG_GET()->trafficDump.enable,
+					CONFIG_GET()->trafficDump.level,
+					CONFIG_GET()->trafficDump.consoleLevel,
+					CONFIG_GET()->trafficDump.dir,
+					CONFIG_GET()->trafficDump.file);
+
+	ConfigInfo::get()->dump();
+
 	if(AuthServer::DB_Account::init() == false) {
 		return -1;
 	}
 
-#ifdef _WIN32
-	dumpMode = CONFIG_GET()->admin.dumpMode;
-#endif
+	CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
 
-	runServers();
+	runServers(&trafficLogger);
 
 	//Make valgrind happy
 	EventLoop::getInstance()->deleteObjects();
@@ -114,8 +72,52 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-void runServers() {
+void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
+	BanManager banManager;
+
+	RappelzServer<AuthServer::ClientSession> authClientServer(trafficLogger);
+	RappelzServer<AuthServer::GameServerSession> authGameServer(trafficLogger);
+
+	RappelzServer<UploadServer::ClientSession> uploadClientServer(trafficLogger);
+	RappelzServer<UploadServer::IconServerSession> uploadIconServer;
+	RappelzServer<UploadServer::GameServerSession> uploadGameServer(trafficLogger);
+
+	RappelzServer<AdminServer::TelnetSession> adminTelnetServer;
+
+	banManager.loadFile();
+
+
+	serverManager.addServer("auth.clients", &authClientServer,
+							CONFIG_GET()->auth.client.listenIp,
+							CONFIG_GET()->auth.client.port,
+							CONFIG_GET()->auth.client.autoStart,
+							&banManager);
+	serverManager.addServer("auth.gameserver", &authGameServer,
+							CONFIG_GET()->auth.game.listenIp,
+							CONFIG_GET()->auth.game.port,
+							CONFIG_GET()->auth.game.autoStart);
+
+	serverManager.addServer("upload.clients", &uploadClientServer,
+							CONFIG_GET()->upload.client.listenIp,
+							CONFIG_GET()->upload.client.port,
+							CONFIG_GET()->upload.client.autoStart,
+							&banManager);
+	serverManager.addServer("upload.iconserver", &uploadIconServer,
+							CONFIG_GET()->upload.client.listenIp,
+							CONFIG_GET()->upload.client.webPort,
+							CONFIG_GET()->upload.client.autoStart,
+							&banManager);
+	serverManager.addServer("upload.gameserver", &uploadGameServer,
+							CONFIG_GET()->upload.game.listenIp,
+							CONFIG_GET()->upload.game.port,
+							CONFIG_GET()->upload.game.autoStart);
+
+	serverManager.addServer("admin.telnet", &adminTelnetServer,
+							CONFIG_GET()->admin.telnet.listenIp,
+							CONFIG_GET()->admin.telnet.port,
+							CONFIG_GET()->admin.telnet.autoStart);
+
 	serverManager.start();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
@@ -125,7 +127,6 @@ void showDebug(uv_timer_t *) {
 	char debugInfo[1000];
 	strcpy(debugInfo, "----------------------------------\n");
 	sprintf(debugInfo, "%s%lu socket Sessions\n", debugInfo, SocketSession::getObjectCount());
-	sprintf(debugInfo, "%sstats.connections = %d\n", debugInfo, CONFIG_GET()->stats.connectionCount.get());
-	sprintf(debugInfo, "%sstats.disconnections = %d\n", debugInfo, CONFIG_GET()->stats.disconnectionCount.get());
+	sprintf(debugInfo, "%s%lu active connections\n", debugInfo, Socket::getObjectCount());
 	puts(debugInfo);
 }

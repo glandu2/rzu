@@ -1,55 +1,14 @@
 #include "ServersManager.h"
-#include "GlobalConfig.h"
-
-#include "AuthServer/ClientSession.h"
-#include "AuthServer/GameServerSession.h"
-#include "AuthServer/DB_Account.h"
-
-#include "UploadServer/ClientSession.h"
-#include "UploadServer/GameServerSession.h"
-#include "UploadServer/IconServerSession.h"
-
-#include "AdminServer/TelnetSession.h"
+#include "ConfigInfo.h"
 
 ServersManager* ServersManager::instance = nullptr;
 
 ServersManager::ServersManager()
 {
-	banManager.loadFile();
 	if(instance == nullptr)
 		instance = this;
 	else
 		error("Several ServersManager instance !\n");
-
-	addServer("auth.clients", new RappelzServer<AuthServer::ClientSession>,
-			  CONFIG_GET()->auth.client.listenIp,
-			  CONFIG_GET()->auth.client.port,
-			  CONFIG_GET()->auth.client.autoStart,
-			  &banManager);
-	addServer("auth.gameserver", new RappelzServer<AuthServer::GameServerSession>,
-			  CONFIG_GET()->auth.game.listenIp,
-			  CONFIG_GET()->auth.game.port,
-			  CONFIG_GET()->auth.game.autoStart);
-
-	addServer("upload.clients", new RappelzServer<UploadServer::ClientSession>,
-			  CONFIG_GET()->upload.client.listenIp,
-			  CONFIG_GET()->upload.client.port,
-			  CONFIG_GET()->upload.client.autoStart,
-			  &banManager);
-	addServer("upload.iconserver", new RappelzServer<UploadServer::IconServerSession>,
-			  CONFIG_GET()->upload.client.listenIp,
-			  CONFIG_GET()->upload.client.webPort,
-			  CONFIG_GET()->upload.client.autoStart,
-			  &banManager);
-	addServer("upload.gameserver", new RappelzServer<UploadServer::GameServerSession>,
-			  CONFIG_GET()->upload.game.listenIp,
-			  CONFIG_GET()->upload.game.port,
-			  CONFIG_GET()->upload.game.autoStart);
-
-	addServer("admin.telnet", new RappelzServer<AdminServer::TelnetSession>,
-			  CONFIG_GET()->admin.telnet.listenIp,
-			  CONFIG_GET()->admin.telnet.port,
-			  CONFIG_GET()->admin.telnet.autoStart);
 }
 
 ServersManager::~ServersManager()
@@ -61,7 +20,6 @@ ServersManager::~ServersManager()
 
 	for(it = servers.begin(), itEnd = servers.end(); it != itEnd; ++it) {
 		ServerInfo* & server = it->second;
-		delete server->server;
 		delete server;
 		server = nullptr;
 	}

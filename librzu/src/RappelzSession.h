@@ -7,7 +7,7 @@
 
 class RappelzServerCommon;
 
-class RappelzSession : public SocketSession
+class RAPPELZLIB_EXTERN RappelzSession : public SocketSession
 {
 	DECLARE_CLASS(RappelzSession)
 

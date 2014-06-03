@@ -6,8 +6,9 @@
 #include <list>
 
 class RappelzServerCommon;
+class Log;
 
-class SocketSession : public Object, public IListener
+class RAPPELZLIB_EXTERN SocketSession : public Object, public IListener
 {
 	DECLARE_CLASS(SocketSession)
 

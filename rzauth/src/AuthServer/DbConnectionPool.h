@@ -20,8 +20,8 @@ public:
 	~DbConnection() { SQLFreeHandle(SQL_HANDLE_STMT, hstmt); SQLFreeHandle(SQL_HANDLE_DBC, hdbc); uv_mutex_destroy(&lock); }
 
 	bool trylock() { return uv_mutex_trylock(&lock) == 0; }
-	void release() { uv_mutex_unlock(&lock); }
-	void releaseWithError(Log::Level errorLevel = Log::LL_Error);
+	void release() { SQLFreeStmt(hstmt, SQL_CLOSE); SQLFreeStmt(hstmt, SQL_RESET_PARAMS); uv_mutex_unlock(&lock); }
+	void releaseWithError();
 
 	bool bindParameter(SQLUSMALLINT       ipar,
 					  SQLSMALLINT        fParamType,
@@ -33,15 +33,25 @@ public:
 					  SQLLEN             cbValueMax,
 					  SQLLEN 		      *pcbValue)
 	{
-		return SQL_SUCCEEDED(SQLBindParameter(hstmt, ipar, fParamType, fCType, fSqlType, cbColDef, ibScale, rgbValue, cbValueMax, pcbValue));
+		return checkResult(SQLBindParameter(hstmt, ipar, fParamType, fCType, fSqlType, cbColDef, ibScale, rgbValue, cbValueMax, pcbValue), "SQLBindParameter");
 	}
 
 	bool execute(const char* query) {
-		return SQL_SUCCEEDED(SQLExecDirect(hstmt, (SQLCHAR*)query, SQL_NTS));
+		return checkResult(SQLExecDirect(hstmt, (SQLCHAR*)query, SQL_NTS), "SQLExecDirect");
 	}
 
 	bool fetch() {
-		return SQL_SUCCEEDED(SQLFetch(hstmt));
+		return checkResult(SQLFetch(hstmt), "SQLFetch");
+	}
+
+	int getColumnNum(bool *ok) {
+		SQLSMALLINT colCount = 0;
+		bool isOk = checkResult(SQLNumResultCols(hstmt, &colCount), "SQLNumResultCols");
+
+		if(ok != nullptr)
+			*ok = isOk;
+
+		return colCount;
 	}
 
 	bool getData(SQLUSMALLINT ColumnNumber,
@@ -50,12 +60,19 @@ public:
 				SQLLEN BufferLength,
 				SQLLEN *StrLen_or_Ind)
 	{
-		return SQL_SUCCEEDED(SQLGetData(hstmt, ColumnNumber, TargetType, TargetValue, BufferLength, StrLen_or_Ind));
+		return checkResult(SQLGetData(hstmt, ColumnNumber, TargetType, TargetValue, BufferLength, StrLen_or_Ind), "SQLGetData");
 	}
 
-	void closeCursor() {
-		SQLCloseCursor(hstmt);
+	bool getColumnName(SQLUSMALLINT ColumnNumber,
+					   char* ColumnName,
+					   SQLSMALLINT BufferLength)
+	{
+
+		return checkResult(SQLColAttribute(hstmt, ColumnNumber, SQL_DESC_LABEL, ColumnName, BufferLength, NULL, NULL), "SQLColAttribute");
 	}
+
+protected:
+	bool checkResult(SQLRETURN result, const char* function);
 
 private:
 	uv_mutex_t lock;

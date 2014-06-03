@@ -1,7 +1,7 @@
 #ifndef CLIENTSESSION_H
 #define CLIENTSESSION_H
 
-#include "../RappelzSession.h"
+#include "RappelzSession.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>
@@ -33,12 +33,14 @@ protected:
 	void onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet);
 	void onAccount(const TS_CA_ACCOUNT* packet);
 	void onServerList(const TS_CA_SERVER_LIST* packet);
+	void onServerList_epic2(const TS_CA_SERVER_LIST* packet);
 	void onSelectServer(const TS_CA_SELECT_SERVER* packet);
 	
 private:
 	~ClientSession();
 
 	bool useRsaAuth;
+	bool isEpic2;
 	unsigned char aesKey[32];
 	uint16_t lastLoginServerId;
 	ClientData* clientData;

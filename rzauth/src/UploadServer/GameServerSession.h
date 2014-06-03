@@ -1,7 +1,7 @@
 #ifndef GAMESERVERINFO_H
 #define GAMESERVERINFO_H
 
-#include "../RappelzSession.h"
+#include "RappelzSession.h"
 #include <unordered_map>
 
 #include "Packets/TS_SU_LOGIN.h"
