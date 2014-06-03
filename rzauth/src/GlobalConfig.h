@@ -119,7 +119,7 @@ struct GlobalConfig {
 		cval<std::string> &dir, &file, &level, &consoleLevel;
 
 		TrafficDump() :
-			enable(CFG_CREATE("trafficdump.enable", true)),
+			enable(CFG_CREATE("trafficdump.enable", false)),
 			dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
 			file(CFG_CREATE("trafficdump.file", "trafficdump.log")),
 			level(CFG_CREATE("trafficdump.level", "debug")),

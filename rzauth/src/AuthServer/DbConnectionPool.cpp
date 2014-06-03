@@ -112,7 +112,7 @@ void DbConnection::releaseWithError() {
 
 bool DbConnection::checkResult(SQLRETURN result, const char* function) {
 	if(result == SQL_SUCCESS_WITH_INFO) {
-		info("%s: additional info\n");
+		info("%s: additional info\n", function);
 		if(hstmt)
 			outputError(Log::LL_Info, hstmt, SQL_HANDLE_STMT);
 		if(hdbc)
@@ -120,7 +120,7 @@ bool DbConnection::checkResult(SQLRETURN result, const char* function) {
 
 		conPool->extractError(Log::LL_Info);
 	} else if(result == SQL_ERROR) {
-		info("%s: error\n");
+		info("%s: error\n", function);
 		if(hstmt)
 			outputError(Log::LL_Error, hstmt, SQL_HANDLE_STMT);
 		if(hdbc)
