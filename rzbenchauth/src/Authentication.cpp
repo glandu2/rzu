@@ -237,7 +237,7 @@ void Authentication::onPacketAuthUnreachable() {
 }
 
 void Authentication::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) {
-	TS_CA_ACCOUNT_V2 accountMsg;
+	TS_CA_ACCOUNT_RSA accountMsg;
 	unsigned char decrypted_data[256];
 	int data_size;
 	bool ok = false;
@@ -285,7 +285,7 @@ end:
 	//password.fill(0);
 	password.clear();
 
-	TS_MESSAGE::initMessage<TS_CA_ACCOUNT_V2>(&accountMsg);
+	TS_MESSAGE::initMessage<TS_CA_ACCOUNT_RSA>(&accountMsg);
 	memset(accountMsg.account, 0, sizeof(accountMsg.account));
 	strcpy(accountMsg.account, username.c_str());
 	accountMsg.aes_block_size = p_len + f_len;
