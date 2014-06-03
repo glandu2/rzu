@@ -56,7 +56,7 @@ struct GlobalConfig {
 			cval<bool> &autoStart;
 
 			GameConfig() :
-				listenIp(CFG_CREATE("auth.gameserver.ip", "0.0.0.0")),
+				listenIp(CFG_CREATE("auth.gameserver.ip", "127.0.0.1")),
 				port(CFG_CREATE("auth.gameserver.port", 4502)),
 				autoStart(CFG_CREATE("auth.gameserver.autostart", true)) {}
 		} game;
@@ -88,7 +88,7 @@ struct GlobalConfig {
 			cval<bool> &autoStart;
 
 			GameConfig() :
-				listenIp(CFG_CREATE("upload.gameserver.ip", "0.0.0.0")),
+				listenIp(CFG_CREATE("upload.gameserver.ip", "127.0.0.1")),
 				port(CFG_CREATE("upload.gameserver.port", 4616)),
 				autoStart(CFG_CREATE("upload.gameserver.autostart", true)) {}
 		} game;
