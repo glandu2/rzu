@@ -13,7 +13,6 @@ void GlobalConfig::init() {
 	RappelzLibConfig::get()->app.appName.setDefault("RappelzAuthEmu");
 	RappelzLibConfig::get()->app.configfile.setDefault("auth.opt");
 	RappelzLibConfig::get()->log.file.setDefault("auth.log");
-	RappelzLibConfig::get()->trafficDump.file.setDefault("auth_traffic.log");
 
 #ifdef _WIN32
 	GlobalConfig::get()->auth.dbAccount.driver.setDefault("SQL Server");

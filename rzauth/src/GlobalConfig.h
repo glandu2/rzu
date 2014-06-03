@@ -114,6 +114,21 @@ struct GlobalConfig {
 		{}
 	} admin;
 
+	struct TrafficDump {
+		cval<bool> &enable;
+		cval<std::string> &dir, &file, &level, &consoleLevel;
+
+		TrafficDump() :
+			enable(CFG_CREATE("trafficdump.enable", true)),
+			dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
+			file(CFG_CREATE("trafficdump.file", "trafficdump.log")),
+			level(CFG_CREATE("trafficdump.level", "debug")),
+			consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal"))
+		{
+			Utils::autoSetAbsoluteDir(dir);
+		}
+	} trafficDump;
+
 	struct SqlQueries {
 		struct DbAccount {
 			cval<std::string>& query;
