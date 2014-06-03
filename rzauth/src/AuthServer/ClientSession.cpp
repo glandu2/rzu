@@ -23,7 +23,14 @@
 
 namespace AuthServer {
 
-ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted), useRsaAuth(false), lastLoginServerId(0), clientData(nullptr), dbQuery(nullptr) {
+ClientSession::ClientSession()
+	: RappelzSession(EncryptedSocket::Encrypted),
+	  useRsaAuth(false),
+	  isEpic2(false),
+	  lastLoginServerId(0),
+	  clientData(nullptr),
+	  dbQuery(nullptr)
+{
 	addPacketsToListen(5,
 					   TS_CA_VERSION::packetID,
 					   TS_CA_RSA_PUBLIC_KEY::packetID,
@@ -55,7 +62,10 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		case TS_CA_SERVER_LIST::packetID:
-			onServerList(static_cast<const TS_CA_SERVER_LIST*>(packet));
+			if(!isEpic2)
+				onServerList(static_cast<const TS_CA_SERVER_LIST*>(packet));
+			else
+				onServerList_epic2(static_cast<const TS_CA_SERVER_LIST*>(packet));
 			break;
 
 		case TS_CA_SELECT_SERVER::packetID:
@@ -74,6 +84,8 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.result = 0;
 		result.request_msg_id = packet->id;
 		sendPacket(&result);
+	} else if(!memcmp(packet->szVersion, "200609280", 9)) {
+		isEpic2 = true;
 	}
 }
 
@@ -143,7 +155,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	}
 
 	if(useRsaAuth) {
-		const TS_CA_ACCOUNT_V2* accountv2 = reinterpret_cast<const TS_CA_ACCOUNT_V2*>(packet);
+		const TS_CA_ACCOUNT_RSA* accountv2 = reinterpret_cast<const TS_CA_ACCOUNT_RSA*>(packet);
 		EVP_CIPHER_CTX d_ctx;
 		int bytesWritten, totalLength;
 		unsigned int bytesRead;
@@ -186,12 +198,25 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 		std::string key = CONFIG_GET()->auth.client.desKey.get();
 		debug("Client login using DES, key: %s\n", key.c_str());
 
-		account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
+		if(packet->size == sizeof(TS_CA_ACCOUNT_EPIC4)) {
+			const TS_CA_ACCOUNT_EPIC4* accountE4 = reinterpret_cast<const TS_CA_ACCOUNT_EPIC4*>(packet);
 
-		memcpy((char*)password, packet->password, 61);
-		DesPasswordCipher(key.c_str()).decrypt(password, 61);
-		password[60] = 0;
-		ok = true;
+			debug("Client is epic 4\n");
+
+			account = std::string(accountE4->account, std::find(accountE4->account, accountE4->account + 19, '\0'));
+			memcpy((char*)password, accountE4->password, 32);
+			DesPasswordCipher(key.c_str()).decrypt(password, 32);
+			password[32] = 0;
+			ok = true;
+		} else {
+
+			account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
+
+			memcpy((char*)password, packet->password, 61);
+			DesPasswordCipher(key.c_str()).decrypt(password, 61);
+			password[60] = 0;
+			ok = true;
+		}
 	}
 
 	if(ok) {
@@ -270,6 +295,55 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		serverListPacket->servers[j].is_adult_server = serverInfo->getIsAdultServer();
 		strcpy(serverListPacket->servers[j].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
 		serverListPacket->servers[j].user_ratio = 0;
+
+		j++;
+	}
+
+	sendPacket(serverListPacket);
+	TS_MESSAGE_WNA::destroy(serverListPacket);
+}
+
+void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
+	TS_AC_SERVER_LIST_EPIC_2* serverListPacket;
+	unsigned int i, j, count;
+
+	// Check if user authenticated
+	if(clientData == nullptr) {
+		abortSession();
+		return;
+	}
+
+	const std::vector<GameServerSession*>& serverList = GameServerSession::getServerList();
+
+	for(i = count = 0; i < serverList.size(); i++)
+		if(serverList.at(i) != nullptr)
+			count++;
+
+	if(lastLoginServerId >= count)
+		lastLoginServerId = 1;
+
+	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST_EPIC_2, TS_AC_SERVER_LIST_EPIC_2::TS_SERVER_INFO>(count);
+
+	serverListPacket->count = count;
+
+	for(i = j = 0; i < serverList.size() && j < serverListPacket->count; i++) {
+	//for(i = j = 0; j < serverListPacket->count; i++) {
+		GameServerSession* serverInfo = serverList.at(i);
+
+		if(serverInfo == nullptr)
+			continue;
+
+		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
+		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
+		serverListPacket->servers[j].server_port = serverInfo->getServerPort();
+		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
+		serverListPacket->servers[j].user_ratio = 0;
+
+		/*serverListPacket->servers[j].server_idx = 1;
+		strcpy(serverListPacket->servers[j].server_ip, "2.168.1.103");
+		serverListPacket->servers[j].server_port = 4516;
+		memcpy(serverListPacket->servers[j].server_name, "1.2.3.4.5.6.7.8.9.0.1",21);
+		serverListPacket->servers[j].user_ratio = 10;*/
 
 		j++;
 	}
