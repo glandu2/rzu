@@ -11,7 +11,7 @@
 
 namespace AuthServer {
 
-std::vector<GameServerSession*> GameServerSession::servers;
+std::unordered_map<uint16_t, GameServerSession*> GameServerSession::servers;
 
 GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncryption) {
 	addPacketsToListen(4,
@@ -24,8 +24,8 @@ GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncry
 }
 
 GameServerSession::~GameServerSession() {
-	if(serverIdx != UINT16_MAX && (size_t)serverIdx < servers.size()) {
-		servers[serverIdx] = nullptr;
+	if(serverIdx != UINT16_MAX) {
+		servers.erase(serverIdx);
 		info("Server %d Logout\n", serverIdx);
 		ClientData::removeServer(this);
 	}
@@ -71,7 +71,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 		return;
 	}
 
-	if(servers.size() <= (size_t)packet->server_idx || servers.at(packet->server_idx) == nullptr) {
+	if(servers.find(packet->server_idx) == servers.end()) {
 		serverIdx = packet->server_idx;
 		serverName.swap(localServerName);
 		serverIp.swap(localServerIp);
@@ -79,9 +79,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 		serverScreenshotUrl.swap(localScreenshotUrl);
 		isAdultServer = packet->is_adult_server;
 
-		if(servers.size() <= (size_t)serverIdx)
-			servers.resize(serverIdx+1, nullptr);
-		servers[serverIdx] = this;
+		servers.insert(std::pair<uint16_t, GameServerSession*>(serverIdx, this));
 
 		result.result = TS_RESULT_SUCCESS;
 		setObjectName(12 + serverName.size(), "ServerInfo[%s]", serverName.c_str());
@@ -120,7 +118,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		info("Client %s login on gameserver but already connected\n", result.account);
 	} else {
 		//To complete
-		trace("Client %s now on gameserver\n", result.account);
+		debug("Client %s now on gameserver\n", result.account);
 		result.nAccountID = client->accountId;
 		result.result = TS_RESULT_SUCCESS;
 		result.nPCBangUser = 0;
@@ -136,7 +134,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 }
 
 void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
-	trace("Client %s has disconnected from gameserver\n", packet->account);
+	debug("Client %s has disconnected from gameserver\n", packet->account);
 	ClientData::removeClient(packet->account);
 }
 
