@@ -103,7 +103,7 @@ struct GlobalConfig {
 			TelnetConfig() :
 				listenIp(CFG_CREATE("admin.telnet.ip", "127.0.0.1")),
 				port(CFG_CREATE("admin.telnet.port", 4501)),
-				autoStart(CFG_CREATE("admin.telnet.autostart", false))
+				autoStart(CFG_CREATE("admin.telnet.autostart", true))
 			{}
 		} telnet;
 
