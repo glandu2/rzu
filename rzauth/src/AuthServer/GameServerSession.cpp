@@ -134,7 +134,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 }
 
 void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
-	debug("Client %s has disconnected from gameserver\n", packet->account);
+	debug("Client %s has been disconnected from gameserver\n", packet->account);
 	ClientData::removeClient(packet->account);
 }
 
