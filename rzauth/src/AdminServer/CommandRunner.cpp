@@ -69,6 +69,8 @@ void CommandRunner::setEnv(const std::string& variableName, const std::string& v
 			v->setString(value);
 			break;
 	}
+
+	getEnv(variableName);
 }
 
 #ifdef _MSC_VER
