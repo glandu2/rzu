@@ -333,7 +333,7 @@ void Authentication::onPacketSelectServerResult(const TS_AC_SELECT_SERVER* packe
 		oneTimePassword = packet->one_time_key;
 		//pendingTimeBeforeServerMove = packet->v1.pending_time;
 	} else if(this->cipherMethod == ACM_RSA_AES) {
-		const TS_AC_SELECT_SERVER_V2* packetv2 = reinterpret_cast<const TS_AC_SELECT_SERVER_V2*>(packet);
+		const TS_AC_SELECT_SERVER_RSA* packetv2 = reinterpret_cast<const TS_AC_SELECT_SERVER_RSA*>(packet);
 		EVP_CIPHER_CTX e_ctx;
 		const unsigned char *key_data = aes_key_iv;
 		const unsigned char *iv_data = aes_key_iv + 16;
