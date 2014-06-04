@@ -4,6 +4,7 @@
 
 namespace AuthServer {
 
+static bool checkSqlResult(SQLRETURN result, const char* function, SQLHENV henv, SQLHDBC hdbc, SQLHSTMT hstmt);
 static void outputError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT type);
 
 DbConnectionPool::DbConnectionPool() {
@@ -16,15 +17,18 @@ DbConnectionPool::DbConnectionPool() {
 		fatal("Can\t allocate ODBC ENV handle\n");
 		abort();
 	}
-	result = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, SQL_IS_INTEGER);
-	if(!SQL_SUCCEEDED(result)) {
-		outputError(Log::LL_Error, henv, SQL_HANDLE_ENV);
+	result = checkSqlResult(SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, SQL_IS_INTEGER),
+							"SQLSetEnvAttr",
+							henv, nullptr, nullptr);
+	if(!result)
 		error("Can\'t use ODBC 3\n");
-	}
 }
 
 DbConnectionPool::~DbConnectionPool() {
 	std::list<DbConnection*>::iterator it, itEnd;
+
+	info("Closing DB connections pool\n");
+
 	for(it = openedConnections.begin(), itEnd = openedConnections.end(); it != itEnd; ++it) {
 		DbConnection* connection = *it;
 		delete connection;
@@ -59,25 +63,27 @@ DbConnection* DbConnectionPool::addConnection(const char* connectionString, bool
 	SQLHSTMT hstmt = nullptr;
 
 	debug("Connecting to %s\n", connectionString);
-	result = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
-	if(!SQL_SUCCEEDED(result)) {
-		outputError(Log::LL_Error, henv, SQL_HANDLE_ENV);
-		return nullptr;
-	}
 
-	result = SQLDriverConnect(hdbc, nullptr, (UCHAR*)connectionString, SQL_NTS, nullptr, 0, nullptr, 0);
-	if(!SQL_SUCCEEDED(result)) {
-		outputError(Log::LL_Error, hdbc, SQL_HANDLE_DBC);
-		outputError(Log::LL_Error, henv, SQL_HANDLE_ENV);
+	result = checkSqlResult(SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc),
+							"SQLAllocHandle",
+							henv, nullptr, nullptr);
+	if(!result)
+		return nullptr;
+
+	result = checkSqlResult(SQLDriverConnect(hdbc, nullptr, (UCHAR*)connectionString, SQL_NTS, nullptr, 0, nullptr, 0),
+							"SQLDriverConnect",
+							henv, hdbc, nullptr);
+	if(!result) {
 		error("Failed to connect to %s\n", connectionString);
 		SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
 		return nullptr;
 	}
 
-	result = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-	if(!SQL_SUCCEEDED(result)) {
-		outputError(Log::LL_Error, hdbc, SQL_HANDLE_DBC);
-		outputError(Log::LL_Error, henv, SQL_HANDLE_ENV);
+	result = checkSqlResult(SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt),
+							"SQLAllocHandle",
+							henv, hdbc, nullptr);
+	if(!result) {
+		error("Failed to alloc a resultset for %s\n", connectionString);
 		SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
 		return nullptr;
 	}
@@ -111,29 +117,29 @@ void DbConnection::releaseWithError() {
 }
 
 bool DbConnection::checkResult(SQLRETURN result, const char* function) {
+	return checkSqlResult(result, function, conPool->getHenv(), hdbc, hstmt);
+}
+
+static bool checkSqlResult(SQLRETURN result, const char* function, SQLHENV henv, SQLHDBC hdbc, SQLHSTMT hstmt) {
 	if(result == SQL_SUCCESS_WITH_INFO) {
-		info("%s: additional info\n", function);
+		Log::get()->log(Log::LL_Info, "ODBC", 4, "%s: additional info:\n", function);
 		if(hstmt)
 			outputError(Log::LL_Info, hstmt, SQL_HANDLE_STMT);
 		if(hdbc)
 			outputError(Log::LL_Info, hdbc, SQL_HANDLE_DBC);
-
-		conPool->extractError(Log::LL_Info);
+		if(henv)
+			outputError(Log::LL_Info, henv, SQL_HANDLE_ENV);
 	} else if(result == SQL_ERROR) {
-		info("%s: error\n", function);
+		Log::get()->log(Log::LL_Error, "ODBC", 4, "%s: error:\n", function);
 		if(hstmt)
 			outputError(Log::LL_Error, hstmt, SQL_HANDLE_STMT);
 		if(hdbc)
 			outputError(Log::LL_Error, hdbc, SQL_HANDLE_DBC);
-
-		conPool->extractError(Log::LL_Error);
+		if(henv)
+			outputError(Log::LL_Error, henv, SQL_HANDLE_ENV);
 	}
 
 	return SQL_SUCCEEDED(result);
-}
-
-void DbConnectionPool::extractError(Log::Level errorLevel) {
-	outputError(errorLevel, henv, SQL_HANDLE_ENV);
 }
 
 static void outputError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT type) {

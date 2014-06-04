@@ -67,6 +67,7 @@ int main(int argc, char **argv) {
 	runServers(&trafficLogger);
 
 	//Make valgrind happy
+	AuthServer::DB_Account::deinit();
 	EventLoop::getInstance()->deleteObjects();
 
 	return 0;

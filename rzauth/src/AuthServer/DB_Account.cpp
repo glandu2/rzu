@@ -15,12 +15,18 @@
 
 namespace AuthServer {
 
-DbConnectionPool* DB_Account::dbConnectionPool = new DbConnectionPool;
+DbConnectionPool* DB_Account::dbConnectionPool = nullptr;
 
 bool DB_Account::init() {
+	dbConnectionPool = new DbConnectionPool;
+
 	//Check connection
 	std::string connectionString = CONFIG_GET()->auth.dbAccount.connectionString.get();
-	const char* dbQuery = "SELECT * FROM information_schema.tables WHERE table_schema = 'dbo' AND table_name = 'Account';";
+	//const char* dbQuery = "SELECT * FROM information_schema.tables WHERE table_schema = 'dbo' AND table_name = 'Account';";
+	std::string dbQuery = CONFIG_GET()->sql.dbAccount.query;
+	const int paramAccountIndex = CONFIG_GET()->sql.dbAccount.paramAccount.get();
+	const int paramPasswordIndex = CONFIG_GET()->sql.dbAccount.paramPassword.get();
+
 	DbConnection* connection;
 
 	Log::get()->log(Log::LL_Info, "DB_Account::init", 16, "Checking connection to %s\n", connectionString.c_str());
@@ -34,18 +40,15 @@ bool DB_Account::init() {
 			return true;
 	}
 
-	if(!connection->execute(dbQuery)) {
-		Log::get()->log(Log::LL_Error, "DB_Account::init", 16, "Failed to execute query %s\n", dbQuery);
-		connection->releaseWithError();
-		if(CONFIG_GET()->auth.dbAccount.ignoreInitCheck == false)
-			return false;
-		else
-			return true;
-	}
+	if(paramAccountIndex > 0)
+		connection->bindParameter(paramAccountIndex, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 14, 0, (char*)"testconnection", 14, nullptr);
+
+	if(paramPasswordIndex > 0)
+		connection->bindParameter(paramPasswordIndex, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 14, 0, (char*)"testconnection", 14, nullptr);
 
 
-	if(!connection->fetch()) {
-		Log::get()->log(Log::LL_Error, "DB_Account::init", 16, "Failed to fetch data of query %s\n", dbQuery);
+	if(!connection->execute(dbQuery.c_str())) {
+		Log::get()->log(Log::LL_Error, "DB_Account::init", 16, "Failed to execute query %s\n", dbQuery.c_str());
 		connection->releaseWithError();
 		if(CONFIG_GET()->auth.dbAccount.ignoreInitCheck == false)
 			return false;
@@ -57,6 +60,12 @@ bool DB_Account::init() {
 	Log::get()->log(Log::LL_Info, "DB_Account::init", 16, "Auth database Ok\n");
 
 	return true;
+}
+
+void DB_Account::deinit() {
+	DbConnectionPool *conPool = dbConnectionPool;
+	dbConnectionPool = nullptr;
+	delete conPool;
 }
 
 DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, const char* password, size_t size) : clientInfo(clientInfo), account(account) {
@@ -72,7 +81,11 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	buffer.append(password, password + size);
 	trace("MD5 of \"%.*s\" with len %ld\n", (long)buffer.size(), buffer.c_str(), (long)buffer.size());
 	MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
-	uv_queue_work(EventLoop::getLoop(), &req, &onProcess, &onDone);
+
+	if(dbConnectionPool != nullptr)
+		uv_queue_work(EventLoop::getLoop(), &req, &onProcess, &onDone);
+	else
+		onDone(&req, 0);
 }
 
 void DB_Account::cancel() {

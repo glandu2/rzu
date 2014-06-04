@@ -19,6 +19,7 @@ class DB_Account : public Object
 
 public:
 	static bool init();
+	static void deinit();
 
 	DB_Account(ClientSession* clientInfo, const std::string& account, const char *password, size_t size);
 
