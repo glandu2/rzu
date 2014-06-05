@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "RappelzSocket.h"
 #include "ConfigInfo.h"
+#include "RappelzLibConfig.h"
 
 void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string &resultString);
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
@@ -26,7 +27,10 @@ static void init() {
 
 int main(int argc, char *argv[])
 {
-	RappelzLibInit(argc, argv, &init);
+	RappelzLibInit();
+	init();
+	ConfigInfo::get()->init(argc, argv);
+	ConfigInfo::get()->dump();
 
 	Account account(CFG_GET("account")->getString());
 	Account account2(CFG_GET("account2")->getString());
