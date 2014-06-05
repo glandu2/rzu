@@ -10,8 +10,10 @@ static void init();
 
 int main(int argc, char *argv[])
 {
-
-	RappelzLibInit(argc, argv, &init);
+	RappelzLibInit();
+	init();
+	ConfigInfo::get()->init(argc, argv);
+	ConfigInfo::get()->dump();
 
 
 	PlayerCountMonitor playerCount(CFG_GET("ip")->getString(), CFG_GET("port")->getInt());
