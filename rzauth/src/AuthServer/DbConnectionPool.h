@@ -10,14 +10,32 @@
 
 namespace AuthServer {
 
-class DbConnectionPool;
+class DbConnection;
+
+class DbConnectionPool : public Object
+{
+	DECLARE_CLASSNAME(AuthServer::DbConnectionPool, 0)
+public:
+	DbConnectionPool();
+	~DbConnectionPool();
+
+	DbConnection* getConnection(const char* connectionString);
+	DbConnection* addConnection(const char* connectionString, bool createLocked);
+	void closeConnection(DbConnection* dbConnection);
+	void* getHenv() { return henv; }
+
+private:
+	std::list<DbConnection*> openedConnections;
+	uv_mutex_t listLock;
+	void* henv;
+};
 
 class DbConnection : public Object
 {
 	DECLARE_CLASS(AuthServer::DbConnection)
 public:
 	DbConnection(DbConnectionPool* conPool, void *hdbc, void *hstmt) : conPool(conPool), hdbc(hdbc), hstmt(hstmt) { uv_mutex_init(&lock); }
-	~DbConnection() { SQLFreeHandle(SQL_HANDLE_STMT, hstmt); SQLFreeHandle(SQL_HANDLE_DBC, hdbc); uv_mutex_destroy(&lock); }
+	virtual ~DbConnection() { SQLFreeHandle(SQL_HANDLE_STMT, hstmt); SQLDisconnect(hdbc); SQLFreeHandle(SQL_HANDLE_DBC, hdbc); uv_mutex_destroy(&lock); }
 
 	bool trylock() { return uv_mutex_trylock(&lock) == 0; }
 	void release() { SQLFreeStmt(hstmt, SQL_CLOSE); SQLFreeStmt(hstmt, SQL_RESET_PARAMS); uv_mutex_unlock(&lock); }
@@ -79,24 +97,6 @@ private:
 	DbConnectionPool* conPool;
 	SQLHDBC hdbc;
 	SQLHSTMT hstmt;
-};
-
-class DbConnectionPool : public Object
-{
-	DECLARE_CLASSNAME(AuthServer::DbConnectionPool, 0)
-public:
-	DbConnectionPool();
-	~DbConnectionPool();
-
-	DbConnection* getConnection(const char* connectionString);
-	DbConnection* addConnection(const char* connectionString, bool createLocked);
-	void closeConnection(DbConnection* dbConnection);
-	void extractError(Log::Level errorLevel);
-
-private:
-	std::list<DbConnection*> openedConnections;
-	uv_mutex_t listLock;
-	void* henv;
 };
 
 

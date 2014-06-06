@@ -21,27 +21,16 @@
 
 
 /* TODO
- * Log packets
- * Telnet for commands (like stop which would help to have a correct valgrind output):
- *  - stats - show stats of the server (player count, active connections, connected GS, ...)
- *  - dump - dump variables
+ *
  */
 
 void runServers(Log* trafficLogger);
 void showDebug(uv_timer_t*);
 
 int main(int argc, char **argv) {
-	CrashHandler::setProcessExceptionHandlers();
-	CrashHandler::setThreadExceptionHandlers();
-
-	RappelzLibInit(argc, argv, nullptr);
-
+	RappelzLibInit();
 	GlobalConfig::init();
-	//Only set CONFIG_FILE_KEY
-	ConfigInfo::get()->parseCommandLine(argc, argv, true);
-	ConfigInfo::get()->readFile(RappelzLibConfig::get()->app.configfile.get().c_str());
-	//Set all keys given on the command line to overwrite config file values
-	ConfigInfo::get()->parseCommandLine(argc, argv);
+	ConfigInfo::get()->init(argc, argv);
 
 	Log mainLogger(RappelzLibConfig::get()->log.enable,
 					RappelzLibConfig::get()->log.level,
@@ -59,7 +48,7 @@ int main(int argc, char **argv) {
 	ConfigInfo::get()->dump();
 
 	if(AuthServer::DB_Account::init() == false) {
-		return -1;
+		return 1;
 	}
 
 	CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
@@ -67,6 +56,7 @@ int main(int argc, char **argv) {
 	runServers(&trafficLogger);
 
 	//Make valgrind happy
+	AuthServer::DB_Account::deinit();
 	EventLoop::getInstance()->deleteObjects();
 
 	return 0;

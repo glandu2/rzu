@@ -3,6 +3,7 @@
 #include "ClientSession.h"
 #include <string.h>
 #include <algorithm>
+#include "../GlobalConfig.h"
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
@@ -146,6 +147,9 @@ void GameServerSession::kickClient(const std::string &account) {
 	msg.kick_type = TS_AG_KICK_CLIENT::KICK_TYPE_DUPLICATED_LOGIN;
 
 	sendPacket(&msg);
+
+	if(!CONFIG_GET()->auth.game.strictKick.get())
+		ClientData::removeClient(account);
 }
 
 void GameServerSession::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet) {
