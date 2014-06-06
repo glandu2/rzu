@@ -53,12 +53,13 @@ struct GlobalConfig {
 		struct GameConfig {
 			cval<std::string> &listenIp;
 			cval<int> &port;
-			cval<bool> &autoStart;
+			cval<bool> &autoStart, &strictKick;
 
 			GameConfig() :
 				listenIp(CFG_CREATE("auth.gameserver.ip", "127.0.0.1")),
 				port(CFG_CREATE("auth.gameserver.port", 4502)),
-				autoStart(CFG_CREATE("auth.gameserver.autostart", true)) {}
+				autoStart(CFG_CREATE("auth.gameserver.autostart", true)),
+				strictKick(CFG_CREATE("auth.gameserver.strictkick", false)) {}
 		} game;
 
 		AuthConfig() :

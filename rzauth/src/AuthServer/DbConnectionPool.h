@@ -38,7 +38,7 @@ public:
 	virtual ~DbConnection() { SQLFreeHandle(SQL_HANDLE_STMT, hstmt); SQLDisconnect(hdbc); SQLFreeHandle(SQL_HANDLE_DBC, hdbc); uv_mutex_destroy(&lock); }
 
 	bool trylock() { return uv_mutex_trylock(&lock) == 0; }
-	void release() { SQLFreeStmt(hstmt, SQL_CLOSE); SQLFreeStmt(hstmt, SQL_RESET_PARAMS); uv_mutex_unlock(&lock); conPool->closeConnection(this); }
+	void release() { SQLFreeStmt(hstmt, SQL_CLOSE); SQLFreeStmt(hstmt, SQL_RESET_PARAMS); uv_mutex_unlock(&lock); }
 	void releaseWithError();
 
 	bool bindParameter(SQLUSMALLINT       ipar,
