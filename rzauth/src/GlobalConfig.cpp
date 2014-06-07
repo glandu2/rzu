@@ -31,9 +31,9 @@ void DbConfig::updateConnectionString(IListener* instance) {
 	thisInstance->connectionString.setDefault(
 				"driver=" + thisInstance->driver.get() +
 				";Server=" + thisInstance->server.get() +
+				"," + std::to_string((long long)thisInstance->port.get()) +
 				";Database=" + thisInstance->name.get() +
 				";UID=" + thisInstance->account.get() +
 				";PWD=" + thisInstance->password.get() +
-				";Port=" + std::to_string((long long)thisInstance->port.get()) +
 				";");
 }
