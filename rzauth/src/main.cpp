@@ -21,7 +21,8 @@
 
 
 /* TODO
- *
+ * Support lastloginidx update
+ * Cache DES key
  */
 
 void runServers(Log* trafficLogger);
@@ -33,29 +34,32 @@ int main(int argc, char **argv) {
 	ConfigInfo::get()->init(argc, argv);
 
 	Log mainLogger(RappelzLibConfig::get()->log.enable,
-					RappelzLibConfig::get()->log.level,
-					RappelzLibConfig::get()->log.consoleLevel,
-					RappelzLibConfig::get()->log.dir,
-					RappelzLibConfig::get()->log.file);
+				   RappelzLibConfig::get()->log.level,
+				   RappelzLibConfig::get()->log.consoleLevel,
+				   RappelzLibConfig::get()->log.dir,
+				   RappelzLibConfig::get()->log.file,
+				   RappelzLibConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 	Log trafficLogger(CONFIG_GET()->trafficDump.enable,
-					CONFIG_GET()->trafficDump.level,
-					CONFIG_GET()->trafficDump.consoleLevel,
-					CONFIG_GET()->trafficDump.dir,
-					CONFIG_GET()->trafficDump.file);
+					  CONFIG_GET()->trafficDump.level,
+					  CONFIG_GET()->trafficDump.consoleLevel,
+					  CONFIG_GET()->trafficDump.dir,
+					  CONFIG_GET()->trafficDump.file,
+					  RappelzLibConfig::get()->log.maxQueueSize);
 
 	ConfigInfo::get()->dump();
 
-	if(AuthServer::DB_Account::init() == false) {
+	if(AuthServer::DB_Account::init() == false)
 		return 1;
-	}
+	AuthServer::ClientSession::init(CONFIG_GET()->auth.client.desKey);
 
 	CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
 
 	runServers(&trafficLogger);
 
 	//Make valgrind happy
+	AuthServer::ClientSession::deinit();
 	AuthServer::DB_Account::deinit();
 	EventLoop::getInstance()->deleteObjects();
 

@@ -55,7 +55,14 @@ public:
 	}
 
 	bool execute(const char* query) {
-		return checkResult(SQLExecDirect(hstmt, (SQLCHAR*)query, SQL_NTS), "SQLExecDirect");
+		if(strcmp(lastQuery.c_str(), query)) {
+			bool result = checkResult(SQLPrepare(hstmt, (SQLCHAR*)query, SQL_NTS), "SQLPrepare");
+			if(!result)
+				return false;
+			lastQuery = query;
+			info("Cached DB query: %s\n", query);
+		}
+		return checkResult(SQLExecute(hstmt), "SQLExecute");
 	}
 
 	bool fetch() {
@@ -95,6 +102,7 @@ protected:
 private:
 	uv_mutex_t lock;
 	DbConnectionPool* conPool;
+	std::string lastQuery;
 	SQLHDBC hdbc;
 	SQLHSTMT hstmt;
 };

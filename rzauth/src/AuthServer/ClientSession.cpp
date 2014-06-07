@@ -23,6 +23,25 @@
 
 namespace AuthServer {
 
+DesPasswordCipher* ClientSession::desCipher = nullptr;
+std::string ClientSession::currentDesKey;
+
+void ClientSession::init(cval<std::string>& str) {
+	str.addListener(nullptr, &updateDesKey);
+	updateDesKey(nullptr, &str);
+}
+
+void ClientSession::deinit() {
+	delete desCipher;
+}
+
+void ClientSession::updateDesKey(IListener* instance, cval<std::string>* str) {
+	delete desCipher;
+	currentDesKey = str->get();
+	desCipher = new DesPasswordCipher(currentDesKey.c_str());
+}
+
+
 ClientSession::ClientSession()
 	: RappelzSession(EncryptedSocket::Encrypted),
 	  useRsaAuth(false),
@@ -195,8 +214,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	cleanup_aes:
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else {
-		std::string key = CONFIG_GET()->auth.client.desKey.get();
-		debug("Client login using DES, key: %s\n", key.c_str());
+		debug("Client login using DES, key: %s\n", currentDesKey.c_str());
 
 		if(packet->size == sizeof(TS_CA_ACCOUNT_EPIC4)) {
 			const TS_CA_ACCOUNT_EPIC4* accountE4 = reinterpret_cast<const TS_CA_ACCOUNT_EPIC4*>(packet);
@@ -205,15 +223,14 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 			account = std::string(accountE4->account, std::find(accountE4->account, accountE4->account + 19, '\0'));
 			memcpy((char*)password, accountE4->password, 32);
-			DesPasswordCipher(key.c_str()).decrypt(password, 32);
+			desCipher->decrypt(password, 32);
 			password[32] = 0;
 			ok = true;
 		} else {
-
 			account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
 			memcpy((char*)password, packet->password, 61);
-			DesPasswordCipher(key.c_str()).decrypt(password, 61);
+			desCipher->decrypt(password, 61);
 			password[60] = 0;
 			ok = true;
 		}
