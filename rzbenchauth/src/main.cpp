@@ -8,20 +8,26 @@
 #include "RappelzSocket.h"
 #include "ConfigInfo.h"
 #include "RappelzLibConfig.h"
+#include "TimingFunctions.h"
 
 void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string &resultString);
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
 void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
 void onAuthClosed(IListener* instance, Authentication* auth);
 
-Account *globalAccount1;
-Account *globalAccount2;
+std::vector<Account*> accounts;
+std::vector<Authentication*> auths;
+bool printDebug = false;
+int connectionsStarted = 0;
+int connectionsDone = 0;
+int connectionTargetCount;
 
 static void init() {
-	CFG_CREATE("ip", "127.0.0.1");
+	CFG_CREATE("ip", "127.0.0.1" /*"127.0.0.1"*/);
 	CFG_CREATE("port", 4500);
-	CFG_CREATE("account", "admin");
-	CFG_CREATE("account2", "adideut");
+	CFG_CREATE("account", "test");
+	CFG_CREATE("count", 8);
+	CFG_CREATE("targetcount", 3000);
 	CFG_CREATE("password", "admin");
 }
 
@@ -31,22 +37,35 @@ int main(int argc, char *argv[])
 	init();
 	ConfigInfo::get()->init(argc, argv);
 	ConfigInfo::get()->dump();
+	initTimer();
 
-	Account account(CFG_GET("account")->getString());
-	Account account2(CFG_GET("account2")->getString());
-	globalAccount1 = &account;
-	globalAccount2 = &account2;
+	int count = CFG_GET("count")->getInt();
+	std::string accountNamePrefix = CFG_GET("account")->getString();
+	std::string ip = CFG_GET("ip")->getString();
+	int port = CFG_GET("port")->getInt();
+	connectionTargetCount = CFG_GET("targetcount")->getInt();
 
-	Authentication auth(CFG_GET("ip")->getString(), Authentication::ACM_DES, CFG_GET("port")->getInt());
-	Authentication auth2(CFG_GET("ip")->getString(), Authentication::ACM_DES, CFG_GET("port")->getInt());
-	auth.connect(globalAccount1, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
-	auth2.connect(globalAccount2, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+	resetTimer();
+	for(int i = 0; i < count; i++) {
+		Account* account = new Account(accountNamePrefix + std::to_string((long long)i));
+		accounts.push_back(account);
+		Authentication* auth = new Authentication(ip, Authentication::ACM_DES, port);
+		auth->connect(account, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+		auths.push_back(auth);
+		connectionsStarted++;
+	}
+
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+
+	unsigned long long int duration = getTimerValue();
+
+	fprintf(stderr, "%d connections in %llu usec => %f auth/sec\n", connectionsDone, duration, connectionsDone/((float)duration/1000000.0f));
 }
 
 void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string& resultString) {
-	fprintf(stderr, "Auth result: %d (%s)\n", result, resultString.empty() ? "no associated string" : resultString.c_str());
+	if(printDebug || result != TS_RESULT_SUCCESS)
+		fprintf(stderr, "%s: Auth result: %d (%s)\n", auth->getAccountName().c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
 	if(result == TS_RESULT_SUCCESS) {
 		auth->retreiveServerList(Callback<Authentication::CallbackOnServerList>(nullptr, &onServerList));
 	} else {
@@ -55,32 +74,38 @@ void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode resul
 }
 
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId) {
-	fprintf(stderr, "%p Server list (last id: %d)\n", auth, lastSelectedServerId);
-	for(size_t i = 0; i < servers->size(); i++) {
-		fprintf(stderr, "%d: %20s at %16s:%d %d%% user ratio\n",
-			   servers->at(i).serverId,
-			   servers->at(i).serverName.c_str(),
-			   servers->at(i).serverIp.c_str(),
-			   servers->at(i).serverPort,
-			   servers->at(i).userRatio);
+	if(printDebug) {
+		fprintf(stderr, "%p Server list (last id: %d)\n", auth, lastSelectedServerId);
+		for(size_t i = 0; i < servers->size(); i++) {
+			fprintf(stderr, "%d: %20s at %16s:%d %d%% user ratio\n",
+					servers->at(i).serverId,
+					servers->at(i).serverName.c_str(),
+					servers->at(i).serverIp.c_str(),
+					servers->at(i).serverPort,
+					servers->at(i).userRatio);
+		}
 	}
-	if(servers->size() > 0)
-		auth->selectServer(lastSelectedServerId, Callback<Authentication::CallbackOnGameResult>(nullptr, &onGameResult));
-	else
+	/*if(servers->size() > 0)
+		auth->selectServer(servers->at(0).serverId, Callback<Authentication::CallbackOnGameResult>(nullptr, &onGameResult));
+	else*/
 		auth->abort(Callback<Authentication::CallbackOnAuthClosed>(nullptr, &onAuthClosed));
 }
 
 void onAuthClosed(IListener* instance, Authentication* auth) {
-	static int i = 0;
-	i++;
-	if(i < 1000)
+	connectionsDone++;
+	if(connectionsStarted < connectionTargetCount) {
+		connectionsStarted++;
 		auth->connect(nullptr, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+	}
 }
 
 void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket) {
 	fprintf(stderr, "login to GS result: %d\n", result);
 	if(gameServerSocket) {
 		gameServerSocket->close();
-		auth->connect(nullptr, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+		if(connectionsStarted < connectionTargetCount) {
+			connectionsStarted++;
+			auth->connect(nullptr, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+		}
 	}
 }

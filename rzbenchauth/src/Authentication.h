@@ -49,6 +49,8 @@ class Authentication : private Object, IListener
 		bool retreiveServerList(Callback<CallbackOnServerList> callback);
 		bool selectServer(uint16_t serverId, Callback<CallbackOnGameResult> callback);
 
+		const std::string& getAccountName() { return username; }
+
 	protected:
 		static void onAuthServerConnectionEvent(IListener* instance, RappelzSocket *server, const TS_MESSAGE* packetData);
 		static void onGameServerConnectionEvent(IListener* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
