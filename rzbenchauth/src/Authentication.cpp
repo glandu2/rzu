@@ -242,6 +242,9 @@ void Authentication::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) {
 	int data_size;
 	bool ok = false;
 
+	TS_MESSAGE::initMessage<TS_CA_ACCOUNT_RSA>(&accountMsg);
+	memset(accountMsg.account, 0, sizeof(accountMsg.account));
+
 	EVP_CIPHER_CTX e_ctx;
 	const unsigned char *key_data = decrypted_data;
 	const unsigned char *iv_data = decrypted_data + 16;
@@ -285,8 +288,6 @@ end:
 	//password.fill(0);
 	password.clear();
 
-	TS_MESSAGE::initMessage<TS_CA_ACCOUNT_RSA>(&accountMsg);
-	memset(accountMsg.account, 0, sizeof(accountMsg.account));
 	strcpy(accountMsg.account, username.c_str());
 	accountMsg.aes_block_size = p_len + f_len;
 	accountMsg.dummy[0] = accountMsg.dummy[1] = accountMsg.dummy[2] = 0;

@@ -14,6 +14,7 @@ void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode resul
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
 void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
 void onAuthClosed(IListener* instance, Authentication* auth);
+void onAuthClosedWithFailure(IListener* instance, Authentication* auth);
 
 std::vector<Account*> accounts;
 std::vector<Authentication*> auths;
@@ -29,6 +30,8 @@ static void init() {
 	CFG_CREATE("count", 8);
 	CFG_CREATE("targetcount", 3000);
 	CFG_CREATE("password", "admin");
+	CFG_CREATE("usersa", false);
+	CFG_CREATE("printall", false);
 }
 
 int main(int argc, char *argv[])
@@ -44,15 +47,32 @@ int main(int argc, char *argv[])
 	std::string ip = CFG_GET("ip")->getString();
 	int port = CFG_GET("port")->getInt();
 	connectionTargetCount = CFG_GET("targetcount")->getInt();
+	bool usersa = CFG_GET("usersa")->getBool();
+	printDebug = CFG_GET("printall")->getBool();
+
+	if(count > 1) {
+		for(int i = 0; i < count; i++) {
+			Account* account = new Account(accountNamePrefix + std::to_string((long long)i));
+			Authentication* auth = new Authentication(ip, usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port);
+
+			accounts.push_back(account);
+			auths.push_back(auth);
+
+			connectionsStarted++;
+		}
+	} else {
+		Account* account = new Account(accountNamePrefix);
+		Authentication* auth = new Authentication(ip, usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port);
+
+		accounts.push_back(account);
+		auths.push_back(auth);
+
+		connectionsStarted++;
+	}
 
 	resetTimer();
-	for(int i = 0; i < count; i++) {
-		Account* account = new Account(accountNamePrefix + std::to_string((long long)i));
-		accounts.push_back(account);
-		Authentication* auth = new Authentication(ip, Authentication::ACM_DES, port);
-		auth->connect(account, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
-		auths.push_back(auth);
-		connectionsStarted++;
+	for(int i = 0; i < auths.size(); i++) {
+		auths[i]->connect(accounts[i], CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
 	}
 
 
@@ -69,7 +89,7 @@ void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode resul
 	if(result == TS_RESULT_SUCCESS) {
 		auth->retreiveServerList(Callback<Authentication::CallbackOnServerList>(nullptr, &onServerList));
 	} else {
-		auth->abort(Callback<Authentication::CallbackOnAuthClosed>());
+		auth->abort(Callback<Authentication::CallbackOnAuthClosed>(nullptr, &onAuthClosedWithFailure));
 	}
 }
 
@@ -91,7 +111,15 @@ void onServerList(IListener* instance, Authentication* auth, const std::vector<A
 		auth->abort(Callback<Authentication::CallbackOnAuthClosed>(nullptr, &onAuthClosed));
 }
 
+void onAuthClosedWithFailure(IListener* instance, Authentication* auth) {
+	if(printDebug)
+		fprintf(stderr, "%p auth closed with failure\n", auth);
+	//auth->connect(nullptr, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+}
+
 void onAuthClosed(IListener* instance, Authentication* auth) {
+	if(printDebug)
+		fprintf(stderr, "%p auth closed\n", auth);
 	connectionsDone++;
 	if(connectionsStarted < connectionTargetCount) {
 		connectionsStarted++;
