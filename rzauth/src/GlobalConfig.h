@@ -136,7 +136,7 @@ struct GlobalConfig {
 			cval<int> &paramAccount, &paramPassword;
 
 			DbAccount() :
-				query(CFG_CREATE("sql.db_account.query", "SELECT account_id FROM Account WHERE account = ? AND password = ?;")),
+				query(CFG_CREATE("sql.db_account.query", "SELECT account_id FROM \"Account\" WHERE account = ? AND password = ?;")),
 				paramAccount(CFG_CREATE("sql.db_account.param.account", 1)),
 				paramPassword(CFG_CREATE("sql.db_account.param.password", 2)) {}
 		} dbAccount;

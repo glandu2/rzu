@@ -22,7 +22,6 @@
 
 /* TODO
  * Support lastloginidx update
- * Cache DES key
  */
 
 void runServers(Log* trafficLogger);
