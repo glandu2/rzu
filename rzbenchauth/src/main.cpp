@@ -22,6 +22,7 @@ bool printDebug = false;
 int connectionsStarted = 0;
 int connectionsDone = 0;
 int connectionTargetCount;
+bool connectToGs = false;
 
 static void init() {
 	CFG_CREATE("ip", "127.0.0.1" /*"127.0.0.1"*/);
@@ -32,6 +33,7 @@ static void init() {
 	CFG_CREATE("password", "admin");
 	CFG_CREATE("usersa", false);
 	CFG_CREATE("printall", false);
+	CFG_CREATE("connecttogs", false);
 }
 
 int main(int argc, char *argv[])
@@ -46,9 +48,11 @@ int main(int argc, char *argv[])
 	std::string accountNamePrefix = CFG_GET("account")->getString();
 	std::string ip = CFG_GET("ip")->getString();
 	int port = CFG_GET("port")->getInt();
-	connectionTargetCount = CFG_GET("targetcount")->getInt();
 	bool usersa = CFG_GET("usersa")->getBool();
+
+	connectionTargetCount = CFG_GET("targetcount")->getInt();
 	printDebug = CFG_GET("printall")->getBool();
+	connectToGs = CFG_GET("connecttogs")->getBool();
 
 	if(count > 1) {
 		for(int i = 0; i < count; i++) {
@@ -71,7 +75,7 @@ int main(int argc, char *argv[])
 	}
 
 	resetTimer();
-	for(int i = 0; i < auths.size(); i++) {
+	for(size_t i = 0; i < auths.size(); i++) {
 		auths[i]->connect(accounts[i], CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
 	}
 
@@ -105,9 +109,9 @@ void onServerList(IListener* instance, Authentication* auth, const std::vector<A
 					servers->at(i).userRatio);
 		}
 	}
-	/*if(servers->size() > 0)
+	if(connectToGs && servers->size() > 0)
 		auth->selectServer(servers->at(0).serverId, Callback<Authentication::CallbackOnGameResult>(nullptr, &onGameResult));
-	else*/
+	else
 		auth->abort(Callback<Authentication::CallbackOnAuthClosed>(nullptr, &onAuthClosed));
 }
 
@@ -130,6 +134,7 @@ void onAuthClosed(IListener* instance, Authentication* auth) {
 void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket) {
 	fprintf(stderr, "login to GS result: %d\n", result);
 	if(gameServerSocket) {
+		connectionsDone++;
 		gameServerSocket->close();
 		if(connectionsStarted < connectionTargetCount) {
 			connectionsStarted++;
