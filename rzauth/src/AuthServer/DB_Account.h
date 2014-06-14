@@ -1,48 +1,46 @@
 #ifndef DB_ACCOUNT_H
 #define DB_ACCOUNT_H
 
-#include "Object.h"
-#include "uv.h"
+#include "DbQueryJob.h"
 #include <string>
 #include <stdint.h>
-#include "Log.h"
-#include <list>
+
+class DbConnectionPool;
 
 namespace AuthServer {
 
 class ClientSession;
-class DbConnectionPool;
 
-class DB_Account : public Object
+class DB_Account : public DbQueryJob<DB_Account>
 {
 	DECLARE_CLASS(AuthServer::DB_Account)
 
 public:
-	static bool init();
+	static bool init(DbConnectionPool* dbConnectionPool);
 	static void deinit();
 
 	DB_Account(ClientSession* clientInfo, const std::string& account, const char *password, size_t size);
 
-	void cancel();
+	void cancel() { clientInfo = nullptr; DbQueryJob::cancel(); }
 
-	static void onProcess(uv_work_t *req);
-	static void onDone(uv_work_t *req, int status);
+protected:
+	bool onPreProcess();
+	bool onRowDone();
+	void onDone(Status status);
 
 private:
-	~DB_Account() {}
-
-	//one sql env for all connection
-	static DbConnectionPool* dbConnectionPool;
-
 	ClientSession* clientInfo;
-	uv_work_t req;
-	std::string account;
-	bool ok;
-	unsigned char givenPasswordMd5[16];
 
+	//Input
+	std::string account;
+	unsigned char givenPasswordMd5[16];
+	char givenPasswordString[33];
+	bool ok;
+
+	//Output
 	uint32_t accountId;
 	uint32_t age;
-	uint16_t lastLoginServerIdx;
+	uint16_t lastServerIdx;
 	uint32_t eventCode;
 };
 

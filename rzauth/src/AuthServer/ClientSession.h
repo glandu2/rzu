@@ -13,9 +13,10 @@
 #include "Packets/TS_CA_SERVER_LIST.h"
 #include "Packets/TS_CA_SELECT_SERVER.h"
 
+class IDbQueryJob;
+
 namespace AuthServer {
 
-class DB_Account;
 class DesPasswordCipher;
 
 class ClientSession : public RappelzSession
@@ -50,7 +51,7 @@ private:
 	unsigned char aesKey[32];
 	uint16_t lastLoginServerId;
 	ClientData* clientData;
-	DB_Account* dbQuery;
+	IDbQueryJob* dbQuery;
 
 	static DesPasswordCipher* desCipher; //cached DES cipher
 	static std::string currentDesKey;

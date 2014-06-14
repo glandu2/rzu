@@ -14,6 +14,7 @@
 #include <openssl/err.h>
 
 #include "DB_Account.h"
+#include "DB_UpdateLastServerIdx.h"
 
 #include "Packets/TS_AC_RESULT.h"
 #include "Packets/TS_SC_RESULT.h"
@@ -360,8 +361,9 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 
 	if(serverList.find(packet->server_idx) != serverList.end()) {
 		GameServerSession* server = serverList.at(packet->server_idx);
-
 		uint64_t oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
+
+		new DB_UpdateLastServerIdx(clientData->accountId, packet->server_idx);
 
 		//clientData now managed by target GS
 		clientData->switchClientToServer(server, oneTimePassword);

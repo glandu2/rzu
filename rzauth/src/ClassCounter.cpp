@@ -25,8 +25,8 @@ DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientSession)
 #include "AuthServer/DB_Account.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_Account)
 
-#include "AuthServer/DbConnectionPool.h"
-DECLARE_CLASSCOUNT_STATIC(AuthServer::DbConnection)
+#include "AuthServer/DB_UpdateLastServerIdx.h"
+DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_UpdateLastServerIdx)
 
 #include "AuthServer/GameServerSession.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::GameServerSession)

@@ -3,8 +3,10 @@
 #include "RappelzLibInit.h"
 #include "RappelzLibConfig.h"
 #include "CrashHandler.h"
+#include "DbConnectionPool.h"
 
 #include "AuthServer/DB_Account.h"
+#include "AuthServer/DB_UpdateLastServerIdx.h"
 #include "ServersManager.h"
 #include "BanManager.h"
 #include "SocketSession.h"
@@ -20,8 +22,32 @@
 #include "AdminServer/TelnetSession.h"
 
 
-/* TODO
- * Support lastloginidx update
+/* TODO for next version
+ * config files: add "#include"
+ * Reload banmanager on server start
+ * valgrind: memcheck + callgrind + heap tool
+ * optimize DbConnection selection by cached query
+ * auto disable DB query if invalid (avoid bunch of errors)
+ * manage more field in TS_AG_CLIENT_LOGIN (pcbang & play time)
+ * don't start log thread if not enabled
+ */
+
+
+/* TODO:
+ *
+ * DbBinding: cols: optionnal + was set bool
+ * DbBinding: dynamic resize std::string column
+ * 2 init functions names: one for init before config read, one for after
+ * rename header guards
+ * move init to have the same interface for all type of servers
+ * move servers in DLL, the .exe would just host the one the user need to use
+ *  -> separate config
+ * warning: GS with auth in same exe: delay connectToAuth ?
+ */
+
+/* Packet versionning:
+ * Base class with all functions to access field but do nothing
+ * Derived classes with packet fields + function to access them (no virtual stuff)
  */
 
 void runServers(Log* trafficLogger);
@@ -47,10 +73,15 @@ int main(int argc, char **argv) {
 					  CONFIG_GET()->trafficDump.file,
 					  RappelzLibConfig::get()->log.maxQueueSize);
 
+	DbConnectionPool dbConnectionPool;
+
+	if(AuthServer::DB_Account::init(&dbConnectionPool) == false)
+		return 1;
+	if(AuthServer::DB_UpdateLastServerIdx::init(&dbConnectionPool) == false)
+		return 1;
+
 	ConfigInfo::get()->dump();
 
-	if(AuthServer::DB_Account::init() == false)
-		return 1;
 	AuthServer::ClientSession::init(CONFIG_GET()->auth.client.desKey);
 
 	CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);

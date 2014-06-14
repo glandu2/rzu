@@ -15,10 +15,10 @@ void GlobalConfig::init() {
 	RappelzLibConfig::get()->log.file.setDefault("auth.log");
 
 #ifdef _WIN32
-	GlobalConfig::get()->auth.dbAccount.driver.setDefault("SQL Server");
+	GlobalConfig::get()->auth.db.driver.setDefault("SQL Server");
 //	GlobalConfig::get()->ban.dbBan.driver.setDefault("SQL Server");
 #else
-	GlobalConfig::get()->auth.dbAccount.driver.setDefault("FreeTDS");
+	GlobalConfig::get()->auth.db.driver.setDefault("FreeTDS");
 //	GlobalConfig::get()->ban.dbBan.driver.setDefault("FreeTDS");
 #endif
 

@@ -10,9 +10,9 @@ class DesPasswordCipher
 	public:
 		DesPasswordCipher(const char *password = NULL) { if(password) init(password); }
 
-		virtual void init(const char *password);
-		virtual bool encrypt(void *buf, int len);
-		virtual bool decrypt(void *buf, int len);
+		void init(const char *password);
+		bool encrypt(void *buf, int len);
+		bool decrypt(void *buf, int len);
 
 	private:
 

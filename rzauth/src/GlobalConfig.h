@@ -36,7 +36,7 @@ struct DbConfig : public IListener {
 struct GlobalConfig {
 
 	struct AuthConfig {
-		DbConfig dbAccount;
+		DbConfig db;
 
 		struct ClientConfig {
 			cval<std::string> &desKey, &listenIp;
@@ -63,7 +63,7 @@ struct GlobalConfig {
 		} game;
 
 		AuthConfig() :
-			dbAccount("auth.") {}
+			db("auth.") {}
 	} auth;
 
 	struct UploadConfig {
@@ -129,18 +129,6 @@ struct GlobalConfig {
 			Utils::autoSetAbsoluteDir(dir);
 		}
 	} trafficDump;
-
-	struct SqlQueries {
-		struct DbAccount {
-			cval<std::string>& query;
-			cval<int> &paramAccount, &paramPassword;
-
-			DbAccount() :
-				query(CFG_CREATE("sql.db_account.query", "SELECT account_id FROM \"Account\" WHERE account = ? AND password = ?;")),
-				paramAccount(CFG_CREATE("sql.db_account.param.account", 1)),
-				paramPassword(CFG_CREATE("sql.db_account.param.password", 2)) {}
-		} dbAccount;
-	} sql;
 
 	static GlobalConfig* get();
 	static void init();
