@@ -29,7 +29,7 @@ public:
 	static void init(cval<std::string> &str);
 	static void deinit();
 
-	void clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode);
+	void clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang);
 
 protected:
 	void onPacketReceived(const TS_MESSAGE* packet);

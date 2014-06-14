@@ -42,6 +42,7 @@ private:
 	uint32_t age;
 	uint16_t lastServerIdx;
 	uint32_t eventCode;
+	uint32_t pcBang;
 };
 
 } // namespace AuthServer

@@ -19,7 +19,7 @@ ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientI
 
 }
 
-ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code) {
+ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang) {
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> result;
 	ClientData* newClient;
 
@@ -45,6 +45,7 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		newClient->accountId = accoundId;
 		newClient->age = age;
 		newClient->eventCode = event_code;
+		newClient->pcBang = pcBang;
 	}
 
 	uv_mutex_unlock(&mapLock);

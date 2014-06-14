@@ -109,9 +109,6 @@ void runServers(Log *trafficLogger) {
 
 	RappelzServer<AdminServer::TelnetSession> adminTelnetServer;
 
-	banManager.loadFile();
-
-
 	serverManager.addServer("auth.clients", &authClientServer,
 							CONFIG_GET()->auth.client.listenIp,
 							CONFIG_GET()->auth.client.port,

@@ -13,7 +13,7 @@ struct DbAccountConfig {
 	cval<bool>& enable;
 	cval<std::string>& query;
 	cval<int> &paramAccount, &paramPassword;
-	cval<std::string> &colAccountId, &colAge, &colLastServerIdx, &colEventCode;
+	cval<std::string> &colAccountId, &colAge, &colLastServerIdx, &colEventCode, &colPcBang;
 
 	DbAccountConfig() :
 		enable(CFG_CREATE("sql.db_account.enable", true)),
@@ -23,7 +23,8 @@ struct DbAccountConfig {
 		colAccountId    (CFG_CREATE("sql.db_account.column.accountid"    , "account_id")),
 		colAge          (CFG_CREATE("sql.db_account.column.age"          , "age")),
 		colLastServerIdx(CFG_CREATE("sql.db_account.column.lastserveridx", "last_login_server_idx")),
-		colEventCode    (CFG_CREATE("sql.db_account.column.eventcode"    , "event_code"))
+		colEventCode    (CFG_CREATE("sql.db_account.column.eventcode"    , "event_code")),
+		colPcBang    (CFG_CREATE("sql.db_account.column.pcbang"    , "pcbang"))
 	{}
 };
 static DbAccountConfig* config = nullptr;
@@ -43,6 +44,7 @@ bool DB_Account::init(DbConnectionPool* dbConnectionPool) {
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, age, 0, config->colAge));
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, lastServerIdx, 0, config->colLastServerIdx));
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, eventCode, 0, config->colEventCode));
+	cols.emplace_back(DECLARE_COLUMN(DB_Account, pcBang, 0, config->colPcBang));
 
 	dbBinding = new DbQueryBinding(dbConnectionPool, CONFIG_GET()->auth.db.connectionString, config->query, params, cols);
 
@@ -66,6 +68,7 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	age = 19;
 	lastServerIdx = 1;
 	eventCode = 0;
+	pcBang = 0;
 
 	buffer.append(password, password + size);
 	trace("MD5 of \"%.*s\" with len %ld\n", (long)buffer.size(), buffer.c_str(), (long)buffer.size());
@@ -110,7 +113,7 @@ bool DB_Account::onRowDone() {
 
 void DB_Account::onDone(Status status) {
 	if(status != S_Error && status != S_Canceled && clientInfo)
-		clientInfo->clientAuthResult(ok, account, accountId, age, lastServerIdx, eventCode);
+		clientInfo->clientAuthResult(ok, account, accountId, age, lastServerIdx, eventCode, pcBang);
 }
 
 } // namespace AuthServer

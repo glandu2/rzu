@@ -246,7 +246,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	}
 }
 
-void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode) {
+void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang) {
 	TS_AC_RESULT result;
 	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
@@ -261,7 +261,7 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 		result.login_flag = 0;
 		info("Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
-		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode);
+		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode, pcBang);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
