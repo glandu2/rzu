@@ -39,7 +39,7 @@ bool DB_UpdateLastServerIdx::init(DbConnectionPool* dbConnectionPool) {
 	params.emplace_back(DECLARE_PARAMETER(DB_UpdateLastServerIdx, accountId, 0, config->paramAccountId));
 	params.emplace_back(DECLARE_PARAMETER(DB_UpdateLastServerIdx, lastLoginServerIdx, 0, config->paramServerIdx));
 
-	dbBinding = new DbQueryBinding(dbConnectionPool, CONFIG_GET()->auth.db.connectionString, config->query, params, cols);
+	dbBinding = new DbQueryBinding(dbConnectionPool, config->enable, CONFIG_GET()->auth.db.connectionString, config->query, params, cols);
 
 	return true;
 }
@@ -52,7 +52,7 @@ void DB_UpdateLastServerIdx::deinit() {
 }
 
 DB_UpdateLastServerIdx::DB_UpdateLastServerIdx(uint32_t accountId, uint16_t lastLoginServerIdx)
-	: DbQueryJob(config->enable), accountId(accountId), lastLoginServerIdx(lastLoginServerIdx)
+	: accountId(accountId), lastLoginServerIdx(lastLoginServerIdx)
 {
 	execute(DbQueryBinding::EM_NoRow);
 }

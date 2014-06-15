@@ -23,13 +23,8 @@
 
 
 /* TODO for next version
- * config files: add "#include"
- * Reload banmanager on server start
  * valgrind: memcheck + callgrind + heap tool
  * optimize DbConnection selection by cached query
- * auto disable DB query if invalid (avoid bunch of errors)
- * manage more field in TS_AG_CLIENT_LOGIN (pcbang & play time)
- * don't start log thread if not enabled
  */
 
 
@@ -43,11 +38,19 @@
  * move servers in DLL, the .exe would just host the one the user need to use
  *  -> separate config
  * warning: GS with auth in same exe: delay connectToAuth ?
+ * manage more field in TS_AG_CLIENT_LOGIN (play time)
  */
 
 /* Packet versionning:
  * Base class with all functions to access field but do nothing
  * Derived classes with packet fields + function to access them (no virtual stuff)
+ * - Serialization:
+ *   - << overload into socket: create buffer, fill it according to data in struct and version
+ *      template to create buffer with size == packet or manual size + function to serialize into the buffer then to write it in socket
+ *      use macro to generate struct content + serialization function at once ?
+ *   - use get/set: set only when field exist in version, get default value is non existent in version
+ *     -> generate files, no copy (serialization on the fly)
+ *   - best wouldn't need template to use several version ...
  */
 
 void runServers(Log* trafficLogger);
@@ -56,6 +59,14 @@ void showDebug(uv_timer_t*);
 int main(int argc, char **argv) {
 	RappelzLibInit();
 	GlobalConfig::init();
+
+	DbConnectionPool dbConnectionPool;
+
+	if(AuthServer::DB_Account::init(&dbConnectionPool) == false)
+		return 1;
+	if(AuthServer::DB_UpdateLastServerIdx::init(&dbConnectionPool) == false)
+		return 1;
+
 	ConfigInfo::get()->init(argc, argv);
 
 	Log mainLogger(RappelzLibConfig::get()->log.enable,
@@ -73,12 +84,6 @@ int main(int argc, char **argv) {
 					  CONFIG_GET()->trafficDump.file,
 					  RappelzLibConfig::get()->log.maxQueueSize);
 
-	DbConnectionPool dbConnectionPool;
-
-	if(AuthServer::DB_Account::init(&dbConnectionPool) == false)
-		return 1;
-	if(AuthServer::DB_UpdateLastServerIdx::init(&dbConnectionPool) == false)
-		return 1;
 
 	ConfigInfo::get()->dump();
 

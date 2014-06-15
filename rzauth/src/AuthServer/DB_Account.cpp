@@ -46,7 +46,7 @@ bool DB_Account::init(DbConnectionPool* dbConnectionPool) {
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, eventCode, 0, config->colEventCode));
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, pcBang, 0, config->colPcBang));
 
-	dbBinding = new DbQueryBinding(dbConnectionPool, CONFIG_GET()->auth.db.connectionString, config->query, params, cols);
+	dbBinding = new DbQueryBinding(dbConnectionPool, config->enable, CONFIG_GET()->auth.db.connectionString, config->query, params, cols);
 
 	return true;
 }
@@ -59,7 +59,7 @@ void DB_Account::deinit() {
 }
 
 DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, const char* password, size_t size)
-	: DbQueryJob(config->enable), clientInfo(clientInfo), account(account)
+	: clientInfo(clientInfo), account(account)
 {
 	std::string buffer = CONFIG_GET()->auth.db.salt;
 	ok = false;
@@ -112,7 +112,7 @@ bool DB_Account::onRowDone() {
 }
 
 void DB_Account::onDone(Status status) {
-	if(status != S_Error && status != S_Canceled && clientInfo)
+	if(status != S_Canceled && clientInfo)
 		clientInfo->clientAuthResult(ok, account, accountId, age, lastServerIdx, eventCode, pcBang);
 }
 
