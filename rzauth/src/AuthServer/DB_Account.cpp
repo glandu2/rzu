@@ -7,6 +7,9 @@
 #define strncasecmp strnicmp
 #endif
 
+
+template<> DbQueryBinding* DbQueryJob<AuthServer::DB_Account>::dbBinding = nullptr;
+
 namespace AuthServer {
 
 struct DbAccountConfig {
@@ -28,8 +31,6 @@ struct DbAccountConfig {
 	{}
 };
 static DbAccountConfig* config = nullptr;
-
-template<> DbQueryBinding* DbQueryJob<DB_Account>::dbBinding = nullptr;
 
 bool DB_Account::init(DbConnectionPool* dbConnectionPool) {
 	std::vector<DbQueryBinding::ParameterBinding> params;

@@ -13,6 +13,8 @@
 #define strncasecmp strnicmp
 #endif
 
+template<> DbQueryBinding* DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::dbBinding = nullptr;
+
 namespace AuthServer {
 
 struct DbUpdateLastServerIdxConfig {
@@ -27,8 +29,6 @@ struct DbUpdateLastServerIdxConfig {
 		paramAccountId(CFG_CREATE("sql.db_updatelastserveridx.param.accountid", 2)) {}
 };
 static DbUpdateLastServerIdxConfig* config = nullptr;
-
-template<> DbQueryBinding* DbQueryJob<DB_UpdateLastServerIdx>::dbBinding = nullptr;
 
 bool DB_UpdateLastServerIdx::init(DbConnectionPool* dbConnectionPool) {
 	std::vector<DbQueryBinding::ParameterBinding> params;
