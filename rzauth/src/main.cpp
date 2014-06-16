@@ -109,7 +109,7 @@ void runServers(Log *trafficLogger) {
 	RappelzServer<AuthServer::GameServerSession> authGameServer(trafficLogger);
 
 	RappelzServer<UploadServer::ClientSession> uploadClientServer(trafficLogger);
-	RappelzServer<UploadServer::IconServerSession> uploadIconServer;
+	RappelzServer<UploadServer::IconServerSession> uploadIconServer(trafficLogger);
 	RappelzServer<UploadServer::GameServerSession> uploadGameServer(trafficLogger);
 
 	RappelzServer<AdminServer::TelnetSession> adminTelnetServer;
