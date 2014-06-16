@@ -22,15 +22,13 @@ public:
 		LL_Trace
 	};
 
-	Log(cval<bool>& enabled, cval<std::string>& fileMaxLevel, cval<std::string>& consoleMaxLevel, cval<std::string>& dir, cval<std::string>& fileName);
-	Log(cval<bool>& enabled, Level fileMaxLevel, Level consoleMaxLevel, cval<std::string>& dir, cval<std::string>& fileName);
+	Log(cval<bool>& enabled, cval<std::string>& fileMaxLevel, cval<std::string>& consoleMaxLevel, cval<std::string>& dir, cval<std::string>& fileName, cval<int>& maxQueueSize);
+	Log(cval<bool>& enabled, Level fileMaxLevel, Level consoleMaxLevel, cval<std::string>& dir, cval<std::string>& fileName, cval<int>& maxQueueSize);
 
 	~Log();
 
 	void startWriter();
-	void stopWriter();
-	bool open();
-	void close();
+	void stopWriter(bool waitThread = true);
 
 	uv_thread_t getLogWriterThread() { return logWritterThreadId; }
 
@@ -42,7 +40,7 @@ public:
 
 	Level getMaxLevel() { return fileMaxLevel > consoleMaxLevel ? fileMaxLevel : consoleMaxLevel; }
 
-	bool isAllMessageWritten();
+	bool wouldLog(Level level) { return (level <= fileMaxLevel || level <= consoleMaxLevel) && stop == false; }
 
 protected:
 	static void updateEnabled(IListener* instance, cval<bool>* level);
@@ -79,9 +77,8 @@ private:
 	Level consoleMaxLevel;
 	cval<std::string>& dir;
 	cval<std::string>& fileName;
-	void* file;
-	uv_mutex_t fileMutex;
-	uv_timer_t flushTimer;
+	cval<int>& maxQueueSize;
+	bool updateFileRequested;
 };
 
 #endif // LOG_H

@@ -8,18 +8,16 @@
 #include <sqlext.h>
 #include "Log.h"
 
-namespace AuthServer {
-
 class DbConnection;
 
-class DbConnectionPool : public Object
+class RAPPELZLIB_EXTERN DbConnectionPool : public Object
 {
-	DECLARE_CLASSNAME(AuthServer::DbConnectionPool, 0)
+	DECLARE_CLASSNAME(DbConnectionPool, 0)
 public:
 	DbConnectionPool();
 	~DbConnectionPool();
 
-	DbConnection* getConnection(const char* connectionString);
+	DbConnection* getConnection(const char* connectionString, std::string wantedQuery = std::string());
 	DbConnection* addConnection(const char* connectionString, bool createLocked);
 	void closeConnection(DbConnection* dbConnection);
 	void* getHenv() { return henv; }
@@ -30,9 +28,9 @@ private:
 	void* henv;
 };
 
-class DbConnection : public Object
+class RAPPELZLIB_EXTERN DbConnection : public Object
 {
-	DECLARE_CLASS(AuthServer::DbConnection)
+	DECLARE_CLASS(DbConnection)
 public:
 	DbConnection(DbConnectionPool* conPool, void *hdbc, void *hstmt) : conPool(conPool), hdbc(hdbc), hstmt(hstmt) { uv_mutex_init(&lock); }
 	virtual ~DbConnection() { SQLFreeHandle(SQL_HANDLE_STMT, hstmt); SQLDisconnect(hdbc); SQLFreeHandle(SQL_HANDLE_DBC, hdbc); uv_mutex_destroy(&lock); }
@@ -55,7 +53,14 @@ public:
 	}
 
 	bool execute(const char* query) {
-		return checkResult(SQLExecDirect(hstmt, (SQLCHAR*)query, SQL_NTS), "SQLExecDirect");
+		if(strcmp(lastQuery.c_str(), query)) {
+			bool result = checkResult(SQLPrepare(hstmt, (SQLCHAR*)query, SQL_NTS), "SQLPrepare");
+			if(!result)
+				return false;
+			lastQuery = query;
+			debug("Cached DB query: %s\n", query);
+		}
+		return checkResult(SQLExecute(hstmt), "SQLExecute");
 	}
 
 	bool fetch() {
@@ -89,17 +94,18 @@ public:
 		return checkResult(SQLColAttribute(hstmt, ColumnNumber, SQL_DESC_LABEL, ColumnName, BufferLength, NULL, NULL), "SQLColAttribute");
 	}
 
+	const std::string& getCachedQuery() { return lastQuery; }
+
 protected:
 	bool checkResult(SQLRETURN result, const char* function);
 
 private:
 	uv_mutex_t lock;
 	DbConnectionPool* conPool;
+	std::string lastQuery;
 	SQLHDBC hdbc;
 	SQLHSTMT hstmt;
 };
 
-
-} // namespace AuthServer
 
 #endif // DBCONNECTIONPOOL_H

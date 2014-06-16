@@ -14,6 +14,7 @@
 #include <openssl/err.h>
 
 #include "DB_Account.h"
+#include "DB_UpdateLastServerIdx.h"
 
 #include "Packets/TS_AC_RESULT.h"
 #include "Packets/TS_SC_RESULT.h"
@@ -22,6 +23,25 @@
 #include "Packets/TS_AC_SERVER_LIST.h"
 
 namespace AuthServer {
+
+DesPasswordCipher* ClientSession::desCipher = nullptr;
+std::string ClientSession::currentDesKey;
+
+void ClientSession::init(cval<std::string>& str) {
+	str.addListener(nullptr, &updateDesKey);
+	updateDesKey(nullptr, &str);
+}
+
+void ClientSession::deinit() {
+	delete desCipher;
+}
+
+void ClientSession::updateDesKey(IListener* instance, cval<std::string>* str) {
+	delete desCipher;
+	currentDesKey = str->get();
+	desCipher = new DesPasswordCipher(currentDesKey.c_str());
+}
+
 
 ClientSession::ClientSession()
 	: RappelzSession(EncryptedSocket::Encrypted),
@@ -195,8 +215,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	cleanup_aes:
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else {
-		std::string key = CONFIG_GET()->auth.client.desKey.get();
-		debug("Client login using DES, key: %s\n", key.c_str());
+		debug("Client login using DES, key: %s\n", currentDesKey.c_str());
 
 		if(packet->size == sizeof(TS_CA_ACCOUNT_EPIC4)) {
 			const TS_CA_ACCOUNT_EPIC4* accountE4 = reinterpret_cast<const TS_CA_ACCOUNT_EPIC4*>(packet);
@@ -205,15 +224,14 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 			account = std::string(accountE4->account, std::find(accountE4->account, accountE4->account + 19, '\0'));
 			memcpy((char*)password, accountE4->password, 32);
-			DesPasswordCipher(key.c_str()).decrypt(password, 32);
+			desCipher->decrypt(password, 32);
 			password[32] = 0;
 			ok = true;
 		} else {
-
 			account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
 
 			memcpy((char*)password, packet->password, 61);
-			DesPasswordCipher(key.c_str()).decrypt(password, 61);
+			desCipher->decrypt(password, 61);
 			password[60] = 0;
 			ok = true;
 		}
@@ -228,7 +246,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	}
 }
 
-void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode) {
+void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang) {
 	TS_AC_RESULT result;
 	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
@@ -243,7 +261,7 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 		result.login_flag = 0;
 		info("Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
-		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode);
+		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode, pcBang);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
@@ -343,8 +361,9 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 
 	if(serverList.find(packet->server_idx) != serverList.end()) {
 		GameServerSession* server = serverList.at(packet->server_idx);
-
 		uint64_t oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
+
+		new DB_UpdateLastServerIdx(clientData->accountId, packet->server_idx);
 
 		//clientData now managed by target GS
 		clientData->switchClientToServer(server, oneTimePassword);

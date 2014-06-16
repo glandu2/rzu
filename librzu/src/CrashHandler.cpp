@@ -47,7 +47,7 @@ static int __cdecl newHandler(size_t);
 
 static void sigabrtHandler(int);
 static void sigfpeHandler(int /*code*/, int subcode);
-static void sigintHandler(int);
+//static void sigintHandler(int);
 static void sigillHandler(int);
 static void sigsegvHandler(int);
 static void sigtermHandler(int);
@@ -81,20 +81,23 @@ void CrashHandler::setProcessExceptionHandlers()
 	_set_purecall_handler(&pureCallHandler);
 
 	// Catch new operator memory allocation exceptions
+#ifndef __MINGW32__
 	_set_new_handler(&newHandler);
+#endif
 
 	// Catch invalid parameter exceptions.
 	_set_invalid_parameter_handler(&invalidParameterHandler);
 
 	// Set up C++ signal handlers
-
+#ifndef __MINGW32__
 	_set_abort_behavior(_CALL_REPORTFAULT, _CALL_REPORTFAULT);
+#endif
 
 	// Catch an abnormal program termination
 	signal(SIGABRT, &sigabrtHandler);
 
 	// Catch illegal instruction handler
-	signal(SIGINT, &sigintHandler);
+	//signal(SIGINT, &sigintHandler);
 
 	// Catch a termination request
 	signal(SIGTERM, &sigtermHandler);
@@ -109,14 +112,14 @@ void CrashHandler::setThreadExceptionHandlers()
 	// separately for each thread. Each new thread needs to install its own
 	// terminate function. Thus, each thread is in charge of its own termination handling.
 	// http://msdn.microsoft.com/en-us/library/t6fk7h29.aspx
-	set_terminate(&terminateHandler);
+	std::set_terminate(&terminateHandler);
 
 	// Catch unexpected() calls.
 	// In a multithreaded environment, unexpected functions are maintained
 	// separately for each thread. Each new thread needs to install its own
 	// unexpected function. Thus, each thread is in charge of its own unexpected handling.
 	// http://msdn.microsoft.com/en-us/library/h46t5b69.aspx
-	set_unexpected(&unexpectedHandler);
+	std::set_unexpected(&unexpectedHandler);
 
 	// Catch a floating point error
 	typedef void (*sigh)(int);
@@ -140,37 +143,7 @@ void getExceptionPointers(DWORD dwExceptionCode,
 	CONTEXT ContextRecord;
 	memset(&ContextRecord, 0, sizeof(CONTEXT));
 
-#ifdef _X86_
-
-	__asm {
-		mov dword ptr [ContextRecord.Eax], eax
-				mov dword ptr [ContextRecord.Ecx], ecx
-				mov dword ptr [ContextRecord.Edx], edx
-				mov dword ptr [ContextRecord.Ebx], ebx
-				mov dword ptr [ContextRecord.Esi], esi
-				mov dword ptr [ContextRecord.Edi], edi
-				mov word ptr [ContextRecord.SegSs], ss
-				mov word ptr [ContextRecord.SegCs], cs
-				mov word ptr [ContextRecord.SegDs], ds
-				mov word ptr [ContextRecord.SegEs], es
-				mov word ptr [ContextRecord.SegFs], fs
-				mov word ptr [ContextRecord.SegGs], gs
-				pushfd
-				pop [ContextRecord.EFlags]
-	}
-
-	ContextRecord.ContextFlags = CONTEXT_CONTROL;
-#pragma warning(push)
-#pragma warning(disable:4311)
-	ContextRecord.Eip = (ULONG)_ReturnAddress();
-	ContextRecord.Esp = (ULONG)_AddressOfReturnAddress();
-#pragma warning(pop)
-	ContextRecord.Ebp = *((ULONG *)_AddressOfReturnAddress()-1);
-
-
-#elif defined (_IA64_) || defined (_AMD64_)
-
-	/* Need to fill up the Context in IA64 and AMD64. */
+#if defined (_X86_) || defined (_IA64_) || defined (_AMD64_)
 	RtlCaptureContext(&ContextRecord);
 
 #else  /* defined (_IA64_) || defined (_AMD64_) */
@@ -182,7 +155,12 @@ void getExceptionPointers(DWORD dwExceptionCode,
 	ZeroMemory(&ExceptionRecord, sizeof(EXCEPTION_RECORD));
 
 	ExceptionRecord.ExceptionCode = dwExceptionCode;
+
+#ifdef __MINGW32__
+	ExceptionRecord.ExceptionAddress = __builtin_return_address(0);
+#else
 	ExceptionRecord.ExceptionAddress = _ReturnAddress();
+#endif
 
 	///
 
@@ -416,7 +394,7 @@ void sigillHandler(int)
 }
 
 // CRT sigint signal handler
-void sigintHandler(int)
+/*void sigintHandler(int)
 {
 	// Interruption (SIGINT)
 
@@ -430,7 +408,7 @@ void sigintHandler(int)
 	// Terminate process
 	TerminateProcess(GetCurrentProcess(), 1);
 
-}
+}*/
 
 // CRT SIGSEGV signal handler
 void sigsegvHandler(int)

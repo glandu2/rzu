@@ -122,7 +122,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		debug("Client %s now on gameserver\n", result.account);
 		result.nAccountID = client->accountId;
 		result.result = TS_RESULT_SUCCESS;
-		result.nPCBangUser = 0;
+		result.nPCBangUser = client->pcBang != 0;
 		result.nEventCode = client->eventCode;
 		result.nAge = client->age;
 		result.nContinuousPlayTime = 0;

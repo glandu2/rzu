@@ -2,8 +2,6 @@
 #include "Log.h"
 #include <stdlib.h>
 
-namespace AuthServer {
-
 static bool checkSqlResult(SQLRETURN result, const char* function, SQLHENV henv, SQLHDBC hdbc, SQLHSTMT hstmt);
 static void outputError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT type);
 
@@ -37,7 +35,7 @@ DbConnectionPool::~DbConnectionPool() {
 	uv_mutex_destroy(&listLock);
 }
 
-DbConnection* DbConnectionPool::getConnection(const char* connectionString) {
+DbConnection* DbConnectionPool::getConnection(const char* connectionString, std::string wantedQuery) {
 	DbConnection* dbConnection = nullptr;
 
 	uv_mutex_lock(&listLock);
@@ -45,8 +43,21 @@ DbConnection* DbConnectionPool::getConnection(const char* connectionString) {
 	for(it = openedConnections.begin(), itEnd = openedConnections.end(); it != itEnd; ++it) {
 		DbConnection* connection = *it;
 		if(connection->trylock()) {
-			dbConnection = connection;
-			break;
+			if(wantedQuery == std::string() || connection->getCachedQuery() == wantedQuery) {
+				dbConnection = connection;
+				break;
+			} else {
+				connection->release();
+			}
+		}
+	}
+	if(dbConnection == nullptr) {
+		for(it = openedConnections.begin(), itEnd = openedConnections.end(); it != itEnd; ++it) {
+			DbConnection* connection = *it;
+			if(connection->trylock()) {
+				dbConnection = connection;
+				break;
+			}
 		}
 	}
 	uv_mutex_unlock(&listLock);
@@ -155,5 +166,3 @@ static void outputError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT typ
 			Log::get()->log(errorLevel, "ODBC", 4, "%s:%d:%ld:%s\n", state, i, (long)native, text);
 	} while(ret == SQL_SUCCESS);
 }
-
-} // namespace AuthServer

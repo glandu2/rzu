@@ -25,6 +25,7 @@ public:
 	uint32_t age;
 	uint32_t eventCode;
 	uint64_t oneTimePassword;
+	uint32_t pcBang;
 
 	ClientSession* client; //if != null: not yet in-game
 	GameServerSession* server; //if != null: in-game or gameserver selected
@@ -37,7 +38,7 @@ public:
 	//If the account is already in the hash map, fail: return null and put already connected client data in oldClient
 	//If successful, create a new instance of ClientData with given account added to the hash map
 	//Thread safe
-	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code);
+	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang);
 	static bool removeClient(const std::string& account);
 	static bool removeClient(ClientData* clientData);
 	static ClientData* getClient(const std::string& account);
