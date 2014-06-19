@@ -47,7 +47,7 @@ ClientSession::ClientSession()
 	: RappelzSession(EncryptedSocket::Encrypted),
 	  useRsaAuth(false),
 	  isEpic2(false),
-	  lastLoginServerId(0),
+	  lastLoginServerId(1),
 	  clientData(nullptr),
 	  dbQuery(nullptr)
 {
@@ -291,9 +291,6 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 	count = serverList.size();
 
-	if(lastLoginServerId >= count)
-		lastLoginServerId = 1;
-
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
 
 	serverListPacket->count = count;
@@ -329,9 +326,6 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 	std::unordered_map<uint16_t, GameServerSession*>::const_iterator it, itEnd;
 
 	count = serverList.size();
-
-	if(lastLoginServerId >= count)
-		lastLoginServerId = 1;
 
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST_EPIC2, TS_AC_SERVER_LIST_EPIC2::TS_SERVER_INFO>(count);
 
