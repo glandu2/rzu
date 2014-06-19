@@ -56,6 +56,13 @@
 void runServers(Log* trafficLogger);
 void showDebug(uv_timer_t*);
 
+void onTerminate(void* instance) {
+	ServersManager* serverManager = (ServersManager*) instance;
+
+	if(serverManager)
+		serverManager->stop();
+}
+
 int main(int argc, char **argv) {
 	RappelzLibInit();
 	GlobalConfig::init();
@@ -146,7 +153,12 @@ void runServers(Log *trafficLogger) {
 
 	serverManager.start();
 
+
+	CrashHandler::setTerminateCallback(&onTerminate, &serverManager);
+
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+
+	CrashHandler::setTerminateCallback(nullptr, nullptr);
 }
 
 void showDebug(uv_timer_t *) {
