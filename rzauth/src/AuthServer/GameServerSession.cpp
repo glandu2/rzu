@@ -14,14 +14,18 @@ namespace AuthServer {
 
 std::unordered_map<uint16_t, GameServerSession*> GameServerSession::servers;
 
-GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncryption) {
+GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncryption),
+	serverIdx(UINT16_MAX),
+	serverPort(0),
+	isAdultServer(false),
+	playerCount(0)
+{
 	addPacketsToListen(4,
 					   TS_GA_LOGIN::packetID,
 					   TS_GA_CLIENT_LOGIN::packetID,
 					   TS_GA_CLIENT_LOGOUT::packetID,
 					   TS_GA_CLIENT_KICK_FAILED::packetID
 					   );
-	serverIdx = UINT16_MAX;
 }
 
 GameServerSession::~GameServerSession() {
@@ -111,11 +115,11 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 
 	if(client == nullptr) {
 		warn("Client %s login on gameserver but not in client list\n", result.account);
-	} else if(client->server != this) {
-		warn("Client %s login on wrong gameserver %s, expected %s\n", result.account, serverName.c_str(), client->server->serverName.c_str());
+	} else if(client->getGameServer() != this) {
+		warn("Client %s login on wrong gameserver %s, expected %s\n", result.account, serverName.c_str(), client->getGameServer()->serverName.c_str());
 	} else if(client->oneTimePassword != packet->one_time_key) {
 		warn("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", result.account, client->oneTimePassword, packet->one_time_key);
-	} else if(client->inGame) {
+	} else if(client->isConnectedToGame()) {
 		info("Client %s login on gameserver but already connected\n", result.account);
 	} else {
 		//To complete
@@ -128,7 +132,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		result.nContinuousPlayTime = 0;
 		result.nContinuousLogoutTime = 0;
 
-		client->inGame = true;
+		client->connectedToGame();
 	}
 
 	sendPacket(&result);

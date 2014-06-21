@@ -305,7 +305,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
 		serverListPacket->servers[j].is_adult_server = serverInfo->getIsAdultServer();
 		strcpy(serverListPacket->servers[j].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
-		serverListPacket->servers[j].user_ratio = 0;
+		serverListPacket->servers[j].user_ratio = serverInfo->getPlayerCount();
 	}
 
 	sendPacket(serverListPacket);
@@ -338,7 +338,7 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
 		serverListPacket->servers[j].server_port = serverInfo->getServerPort();
 		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
-		serverListPacket->servers[j].user_ratio = 0;
+		serverListPacket->servers[j].user_ratio = serverInfo->getPlayerCount();
 	}
 
 	sendPacket(serverListPacket);
