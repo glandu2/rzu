@@ -54,12 +54,14 @@ struct GlobalConfig {
 			cval<std::string> &listenIp;
 			cval<int> &port;
 			cval<bool> &autoStart, &strictKick;
+			cval<int> &maxPlayers;
 
 			GameConfig() :
 				listenIp(CFG_CREATE("auth.gameserver.ip", "127.0.0.1")),
 				port(CFG_CREATE("auth.gameserver.port", 4502)),
 				autoStart(CFG_CREATE("auth.gameserver.autostart", true)),
-				strictKick(CFG_CREATE("auth.gameserver.strictkick", true)) {}
+				strictKick(CFG_CREATE("auth.gameserver.strictkick", true)),
+				maxPlayers(CFG_CREATE("auth.gameserver.maxplayers", 400)) {}
 		} game;
 
 		AuthConfig() :

@@ -20,7 +20,7 @@ struct DbAccountConfig {
 
 	DbAccountConfig() :
 		enable(CFG_CREATE("sql.db_account.enable", true)),
-		query(CFG_CREATE("sql.db_account.query", "SELECT account_id FROM account WHERE account = ? AND password = ?;")),
+		query(CFG_CREATE("sql.db_account.query", "SELECT * FROM account WHERE account = ? AND password = ?;")),
 		paramAccount (CFG_CREATE("sql.db_account.param.account" , 1)),
 		paramPassword(CFG_CREATE("sql.db_account.param.password", 2)),
 		colAccountId    (CFG_CREATE("sql.db_account.column.accountid"    , "account_id")),

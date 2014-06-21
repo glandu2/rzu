@@ -278,7 +278,7 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 
 void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST* serverListPacket;
-	unsigned int j, count;
+	unsigned int j, count, maxPlayers;
 
 	// Check if user authenticated
 	if(clientData == nullptr) {
@@ -290,11 +290,13 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 	std::unordered_map<uint16_t, GameServerSession*>::const_iterator it, itEnd;
 
 	count = serverList.size();
+	maxPlayers = CONFIG_GET()->auth.game.maxPlayers;
 
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
 
 	serverListPacket->count = count;
 	serverListPacket->last_login_server_idx = lastLoginServerId;
+
 
 	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it, j++) {
 		GameServerSession* serverInfo = it->second;
@@ -305,7 +307,8 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
 		serverListPacket->servers[j].is_adult_server = serverInfo->getIsAdultServer();
 		strcpy(serverListPacket->servers[j].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
-		serverListPacket->servers[j].user_ratio = serverInfo->getPlayerCount();
+		uint32_t userRatio = serverInfo->getPlayerCount() * 100 / maxPlayers;
+		serverListPacket->servers[j].user_ratio = (userRatio > 100)? 100 : userRatio;
 	}
 
 	sendPacket(serverListPacket);
@@ -314,7 +317,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST_EPIC2* serverListPacket;
-	unsigned int j, count;
+	unsigned int j, count, maxPlayers;
 
 	// Check if user authenticated
 	if(clientData == nullptr) {
@@ -326,6 +329,7 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 	std::unordered_map<uint16_t, GameServerSession*>::const_iterator it, itEnd;
 
 	count = serverList.size();
+	maxPlayers = CONFIG_GET()->auth.game.maxPlayers;
 
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST_EPIC2, TS_AC_SERVER_LIST_EPIC2::TS_SERVER_INFO>(count);
 
@@ -339,6 +343,8 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 		serverListPacket->servers[j].server_port = serverInfo->getServerPort();
 		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
 		serverListPacket->servers[j].user_ratio = serverInfo->getPlayerCount();
+		uint32_t userRatio = serverInfo->getPlayerCount() * 100 / maxPlayers;
+		serverListPacket->servers[j].user_ratio = (userRatio > 100)? 100 : userRatio;
 	}
 
 	sendPacket(serverListPacket);
