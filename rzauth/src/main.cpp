@@ -24,7 +24,7 @@
 
 /* TODO for next version
  * valgrind: memcheck + callgrind + heap tool
- * optimize DbConnection selection by cached query
+ * check DB_Account at init
  */
 
 
