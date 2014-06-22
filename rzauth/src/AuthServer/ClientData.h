@@ -27,12 +27,6 @@ public:
 	uint64_t oneTimePassword;
 	uint32_t pcBang;
 
-	ClientSession* client; //if != null: not yet in-game
-	GameServerSession* server; //if != null: in-game or gameserver selected
-	//never both !client && !server
-
-	bool inGame;
-
 	//Try to add newClient if account is not already in the list (authenticated).
 	//There is at most one account in the hash map.
 	//If the account is already in the hash map, fail: return null and put already connected client data in oldClient
@@ -46,15 +40,26 @@ public:
 	static void removeServer(GameServerSession* server); //remove all client that was connected to this server
 
 
+	void connectedToGame();
+	bool isConnectedToGame() { return inGame; }
+
+	ClientSession* getClientSession() { return client; }
+	GameServerSession* getGameServer() { return server; }
 
 private:
-	~ClientData() {}
+	~ClientData();
 
 	static uv_mutex_t initializeLock();
 
 	static std::unordered_map<std::string, ClientData*> connectedClients;
 	static uv_mutex_t mapLock;
 	static uv_once_t lockInit;
+
+
+	ClientSession* client; //if != null: not yet in-game
+	GameServerSession* server; //if != null: in-game or gameserver selected
+	//never both !client && !server
+	bool inGame;
 };
 
 } // namespace AuthServer

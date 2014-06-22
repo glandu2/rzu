@@ -133,11 +133,12 @@ void CommandRunner::listGameServers() {
 	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
 		AuthServer::GameServerSession* server = it->second;
 
-		len = sprintf(buffer, "Index: %2d, name: %10s, address: %s:%d, screenshot url: %s\r\n",
+		len = sprintf(buffer, "Index: %2d, name: %10s, address: %s:%d, players count: %u, screenshot url: %s\r\n",
 					  server->getServerIdx(),
 					  server->getServerName().c_str(),
 					  server->getServerIp().c_str(),
 					  server->getServerPort(),
+					  server->getPlayerCount(),
 					  server->getServerScreenshotUrl().c_str());
 		iface->write(buffer, len);
 	}

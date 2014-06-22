@@ -19,6 +19,19 @@ ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientI
 
 }
 
+ClientData::~ClientData() {
+	if(getGameServer() && inGame)
+		getGameServer()->decPlayerCount();
+}
+
+void ClientData::connectedToGame() {
+	if(!getGameServer())
+		error("Connected to unknown game server ! Code logic error\n");
+	else
+		getGameServer()->incPlayerCount();
+	inGame = true;
+}
+
 ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang) {
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> result;
 	ClientData* newClient;
@@ -32,13 +45,15 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		delete newClient;
 		newClient = nullptr;
 
-		if(oldClient->server) {
+		if(oldClient->getGameServer()) {
 			if(oldClient->inGame)
-				oldClient->server->kickClient(account);
-			else
-				connectedClients.erase(account);
+				oldClient->getGameServer()->kickClient(account);
+			else {
+				connectedClients.erase(result.first); //TODO: ClientData mem leak ?
+				delete oldClient;
+			}
 		} else {
-			oldClient->client->abortSession();
+			oldClient->getClientSession()->abortSession();
 		}
 	} else {
 		newClient->account = account;
@@ -103,8 +118,9 @@ void ClientData::removeServer(GameServerSession* server) {
 	uv_mutex_lock(&mapLock);
 	for(it = connectedClients.begin(), itEnd = connectedClients.end(); it != itEnd;) {
 		ClientData* client = it->second;
-		if(client->server == server) {
+		if(client->getGameServer() == server) {
 			it = connectedClients.erase(it);
+			delete client;
 		} else {
 			++it;
 		}

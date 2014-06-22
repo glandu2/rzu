@@ -33,6 +33,10 @@ public:
 
 	void kickClient(const std::string& account);
 
+	void incPlayerCount() { playerCount++; }
+	void decPlayerCount() { playerCount--; }
+	uint32_t getPlayerCount() { return playerCount; }
+
 protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
 
@@ -52,6 +56,7 @@ private:
 	int32_t serverPort;
 	std::string serverScreenshotUrl;
 	bool isAdultServer;
+	uint32_t playerCount;
 };
 
 } // namespace AuthServer
