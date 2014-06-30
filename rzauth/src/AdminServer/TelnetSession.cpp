@@ -86,6 +86,8 @@ void TelnetSession::parseCommand(const std::string& data) {
 		commandRunner->getEnv(args[1]);
 	else if(args.size() > 0 && args[0] == "list")
 		commandRunner->listGameServers();
+	else if(args.size() > 0 && args[0] == "mem")
+		commandRunner->listObjectsCount();
 	else
 		write(MSG_UNKNOWN_COMMAND, sizeof(MSG_UNKNOWN_COMMAND));
 }

@@ -1,6 +1,7 @@
 #ifndef UPLOADREQUEST_H
 #define UPLOADREQUEST_H
 
+#include "Object.h"
 #include <unordered_map>
 #include <string>
 #include <stdint.h>
@@ -11,8 +12,10 @@ namespace UploadServer {
 
 class GameServerSession;
 
-class UploadRequest
+class UploadRequest : public Object
 {
+	DECLARE_CLASS(UploadServer::UploadRequest)
+
 public:
 	UploadRequest(GameServerSession *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password);
 

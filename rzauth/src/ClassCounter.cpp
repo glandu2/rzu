@@ -39,3 +39,6 @@ DECLARE_CLASSCOUNT_STATIC(UploadServer::GameServerSession)
 
 #include "UploadServer/IconServerSession.h"
 DECLARE_CLASSCOUNT_STATIC(UploadServer::IconServerSession)
+
+#include "UploadServer/UploadRequest.h"
+DECLARE_CLASSCOUNT_STATIC(UploadServer::UploadRequest)

@@ -19,6 +19,7 @@ public:
 	void setEnv(const std::string& variableName, const std::string& value);
 	void getEnv(const std::string& variableName);
 	void listGameServers();
+	void listObjectsCount();
 
 private:
 	AdminInterface *iface;
