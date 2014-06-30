@@ -11,6 +11,7 @@
 #include "TimingFunctions.h"
 
 void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string &resultString);
+void onAuthRetrieveServer(uv_timer_t* handle);
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
 void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
 void onAuthClosed(IListener* instance, Authentication* auth);
@@ -18,11 +19,13 @@ void onAuthClosedWithFailure(IListener* instance, Authentication* auth);
 
 std::vector<Account*> accounts;
 std::vector<Authentication*> auths;
+std::vector<uv_timer_t*> timers;
 bool printDebug = false;
 int connectionsStarted = 0;
 int connectionsDone = 0;
 int connectionTargetCount;
 bool connectToGs = false;
+int delay = 0;
 
 static void init() {
 	CFG_CREATE("ip", "127.0.0.1" /*"127.0.0.1"*/);
@@ -34,6 +37,8 @@ static void init() {
 	CFG_CREATE("usersa", false);
 	CFG_CREATE("printall", false);
 	CFG_CREATE("connecttogs", false);
+	CFG_CREATE("delay", 0);
+	CFG_CREATE("idxoffset", 0);
 }
 
 int main(int argc, char *argv[])
@@ -49,36 +54,39 @@ int main(int argc, char *argv[])
 	std::string ip = CFG_GET("ip")->getString();
 	int port = CFG_GET("port")->getInt();
 	bool usersa = CFG_GET("usersa")->getBool();
+	int idxoffset = CFG_GET("idxoffset")->getInt();
 
 	connectionTargetCount = CFG_GET("targetcount")->getInt();
 	printDebug = CFG_GET("printall")->getBool();
 	connectToGs = CFG_GET("connecttogs")->getBool();
+	delay = CFG_GET("delay")->getInt();
 
-	if(count > 1) {
-		for(int i = 0; i < count; i++) {
-			Account* account = new Account(accountNamePrefix + std::to_string((long long)i));
-			Authentication* auth = new Authentication(ip, usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port);
+	for(int i = 0; i < count; i++) {
+		const std::string accountName = (count > 1)? accountNamePrefix + std::to_string((long long)i + idxoffset) : accountNamePrefix;
 
-			accounts.push_back(account);
-			auths.push_back(auth);
-
-			connectionsStarted++;
-		}
-	} else {
-		Account* account = new Account(accountNamePrefix);
+		Account* account = new Account(accountName);
 		Authentication* auth = new Authentication(ip, usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port);
+		auth->index = i;
 
 		accounts.push_back(account);
 		auths.push_back(auth);
 
-		connectionsStarted++;
+		if(delay) {
+			uv_timer_t* timer = new uv_timer_t;
+			uv_timer_init(EventLoop::getLoop(), timer);
+			timer->data = auth;
+			timers.push_back(timer);
+		}
+
+
 	}
 
 	resetTimer();
+
 	for(size_t i = 0; i < auths.size(); i++) {
 		auths[i]->connect(accounts[i], CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
+		connectionsStarted++;
 	}
-
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
@@ -91,10 +99,20 @@ void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode resul
 	if(printDebug || result != TS_RESULT_SUCCESS)
 		fprintf(stderr, "%s: Auth result: %d (%s)\n", auth->getAccountName().c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
 	if(result == TS_RESULT_SUCCESS) {
-		auth->retreiveServerList(Callback<Authentication::CallbackOnServerList>(nullptr, &onServerList));
+		if(delay == 0)
+			auth->retreiveServerList(Callback<Authentication::CallbackOnServerList>(nullptr, &onServerList));
+		else {
+			uv_timer_start(timers[auth->index], &onAuthRetrieveServer, delay, 0);
+		}
 	} else {
 		auth->abort(Callback<Authentication::CallbackOnAuthClosed>(nullptr, &onAuthClosedWithFailure));
 	}
+}
+
+void onAuthRetrieveServer(uv_timer_t* handle) {
+	Authentication* auth = (Authentication*) handle->data;
+
+	auth->retreiveServerList(Callback<Authentication::CallbackOnServerList>(nullptr, &onServerList));
 }
 
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId) {

@@ -8,7 +8,10 @@
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 
-Authentication::Authentication(std::string host, AuthCipherMethod method, uint16_t port, const std::string& version) : desCipher("MERONG") {
+
+DESPasswordCipher Authentication::desCipher("MERONG");
+
+Authentication::Authentication(std::string host, AuthCipherMethod method, uint16_t port, const std::string& version) {
 	this->authServer = new RappelzSocket(EventLoop::getLoop(), EncryptedSocket::Encrypted);
 	this->gameServer = nullptr;
 

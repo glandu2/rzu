@@ -51,6 +51,8 @@ class Authentication : private Object, IListener
 
 		const std::string& getAccountName() { return username; }
 
+		int index; //for main.cpp
+
 	protected:
 		static void onAuthServerConnectionEvent(IListener* instance, RappelzSocket *server, const TS_MESSAGE* packetData);
 		static void onGameServerConnectionEvent(IListener* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
@@ -89,7 +91,7 @@ class Authentication : private Object, IListener
 		int selectedServer;
 		uint64_t oneTimePassword;
 		bool inProgress;
-		DESPasswordCipher desCipher;
+		static DESPasswordCipher desCipher;
 
 		Callback<CallbackOnAuthResult> authResultCallback;
 		Callback<CallbackOnGameResult> gameResultCallback;
