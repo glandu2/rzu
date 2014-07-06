@@ -102,6 +102,7 @@ int main(int argc, char **argv) {
 
 	//Make valgrind happy
 	AuthServer::ClientSession::deinit();
+	AuthServer::DB_UpdateLastServerIdx::deinit();
 	AuthServer::DB_Account::deinit();
 	EventLoop::getInstance()->deleteObjects();
 
