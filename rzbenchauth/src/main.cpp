@@ -39,6 +39,18 @@ static void init() {
 	CFG_CREATE("connecttogs", false);
 	CFG_CREATE("delay", 0);
 	CFG_CREATE("idxoffset", 0);
+	CFG_CREATE("usecperconnection", 0);
+}
+
+static std::string getIpForConnection(const std::string& originalIp, bool useLocalHost, int connection) {
+	if(useLocalHost) {
+		char buffer[20];
+		sprintf(buffer, "127.0.0.%d", int(connection / 50000) + 1);
+
+		return std::string(buffer);
+	} else {
+		return originalIp;
+	}
 }
 
 int main(int argc, char *argv[])
@@ -55,17 +67,23 @@ int main(int argc, char *argv[])
 	int port = CFG_GET("port")->getInt();
 	bool usersa = CFG_GET("usersa")->getBool();
 	int idxoffset = CFG_GET("idxoffset")->getInt();
+	bool useLocalHost = ip == "127.0.0.1";
+	int usecBetweenConnection = CFG_GET("usecperconnection")->getInt();
 
 	connectionTargetCount = CFG_GET("targetcount")->getInt();
 	printDebug = CFG_GET("printall")->getBool();
 	connectToGs = CFG_GET("connecttogs")->getBool();
 	delay = CFG_GET("delay")->getInt();
 
+	accounts.reserve(count);
+	auths.reserve(count);
+	if(delay)
+		timers.reserve(count);
 	for(int i = 0; i < count; i++) {
 		const std::string accountName = (count > 1)? accountNamePrefix + std::to_string((long long)i + idxoffset) : accountNamePrefix;
 
 		Account* account = new Account(accountName);
-		Authentication* auth = new Authentication(ip, usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port);
+		Authentication* auth = new Authentication(getIpForConnection(ip, useLocalHost, i), usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port);
 		auth->index = i;
 
 		accounts.push_back(account);
@@ -86,6 +104,8 @@ int main(int argc, char *argv[])
 	for(size_t i = 0; i < auths.size(); i++) {
 		auths[i]->connect(accounts[i], CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
 		connectionsStarted++;
+		if(usecBetweenConnection)
+			tfMicroSleep(usecBetweenConnection);
 	}
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
