@@ -45,6 +45,8 @@ protected:
 	void onClientLogout(const TS_GA_CLIENT_LOGOUT* packet);
 	void onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet);
 
+	virtual void updateObjectName();
+
 private:
 	~GameServerSession();
 

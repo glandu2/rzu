@@ -87,7 +87,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 		servers.insert(std::pair<uint16_t, GameServerSession*>(serverIdx, this));
 
 		result.result = TS_RESULT_SUCCESS;
-		setObjectName(12 + serverName.size(), "ServerInfo[%s]", serverName.c_str());
+		setDirtyObjectName();
 		debug("Success\n");
 	} else {
 		result.result = TS_RESULT_ALREADY_EXIST;
@@ -95,6 +95,10 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	}
 
 	sendPacket(&result);
+}
+
+void GameServerSession::updateObjectName() {
+	setObjectName(12 + serverName.size(), "ServerInfo[%s]", serverName.c_str());
 }
 
 void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
