@@ -202,9 +202,18 @@ void Authentication::onPacketAuthConnected() {
 		memset(accountMsg.password, 0, 61);
 #endif
 		strcpy(accountMsg.account, username.c_str());
-		strcpy(accountMsg.password, password.c_str());
-		//DESPasswordCipher("MERONG").encrypt(accountMsg.password, 61);
-		desCipher.encrypt(accountMsg.password, 61);
+
+		static char cachedPassword[61] = {0};
+		static std::string cachedPasswordStr;
+
+		if(cachedPasswordStr != password) {
+			strcpy(cachedPassword, password.c_str());
+			desCipher.encrypt(cachedPassword, 61);
+			cachedPasswordStr = password;
+		}
+
+		strcpy(accountMsg.password, cachedPassword);
+
 		authServer->sendPacket(&accountMsg);
 	} else if(this->cipherMethod == ACM_RSA_AES) {
 		TS_CA_RSA_PUBLIC_KEY *keyMsg;
