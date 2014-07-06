@@ -16,7 +16,6 @@ uv_mutex_t ClientData::initializeLock() {
 }
 
 ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientInfo), server(nullptr), inGame(false) {
-
 }
 
 ClientData::~ClientData() {
@@ -49,7 +48,7 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 			if(oldClient->inGame)
 				oldClient->getGameServer()->kickClient(account);
 			else {
-				connectedClients.erase(result.first); //TODO: ClientData mem leak ?
+				connectedClients.erase(result.first);
 				delete oldClient;
 			}
 		} else {

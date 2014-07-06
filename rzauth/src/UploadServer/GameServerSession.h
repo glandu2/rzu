@@ -26,6 +26,8 @@ protected:
 	void onLogin(const TS_SU_LOGIN* packet);
 	void onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet);
 
+	virtual void updateObjectName();
+
 private:
 
 	static std::unordered_map<std::string, GameServerSession*> servers;

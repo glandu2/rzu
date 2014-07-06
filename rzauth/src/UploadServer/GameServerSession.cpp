@@ -57,7 +57,7 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 			serverName = packet->server_name;
 
 			result.result = TS_RESULT_SUCCESS;
-			setObjectName(16 + serverName.size(), "GameServerInfo[%s]", serverName.c_str());
+			setDirtyObjectName();
 			debug("Success\n");
 		} else {
 			result.result = TS_RESULT_ALREADY_EXIST;
@@ -67,6 +67,11 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 
 	sendPacket(&result);
 }
+
+void GameServerSession::updateObjectName() {
+	setObjectName(19 + serverName.size(), "GameServerSession[%s]", serverName.c_str());
+}
+
 
 void GameServerSession::onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet) {
 	TS_US_REQUEST_UPLOAD result;

@@ -4,6 +4,18 @@
 #include "ConfigInfo.h"
 #include <stdlib.h>
 #include "../AuthServer/GameServerSession.h"
+#include "ClassCounter.h"
+
+
+#ifdef __GLIBC__
+#include <malloc.h>
+#include <unistd.h>
+#endif
+
+#ifdef _WIN32
+#include <crtdbg.h>
+#include <malloc.h>
+#endif
 
 namespace AdminServer {
 
@@ -142,6 +154,70 @@ void CommandRunner::listGameServers() {
 					  server->getServerScreenshotUrl().c_str());
 		iface->write(buffer, len);
 	}
+}
+
+void CommandRunner::listObjectsCount() {
+	std::map<std::string, unsigned long*>::const_iterator it, itEnd;
+	char buffer[1024];
+	int len;
+
+#ifdef __GLIBC__
+	struct mallinfo memUsage = mallinfo();
+	len = sprintf(buffer,
+				  "Memory usage:\r\n"
+				  " heap size: %d\r\n"
+				  " unused chunks: %d\r\n"
+				  " mmap chunks: %d\r\n"
+				  " mmap mem size: %d\r\n"
+				  " used mem size: %d\r\n"
+				  " unused mem size: %d\r\n"
+				  " trailing releasable size: %d\r\n\r\n",
+				  memUsage.arena,
+				  memUsage.ordblks,
+				  memUsage.hblks,
+				  memUsage.hblkhd,
+				  memUsage.uordblks,
+				  memUsage.fordblks,
+				  memUsage.keepcost);
+	iface->write(buffer, len);
+#endif
+
+#if defined(_WIN32) && defined(_DEBUG)
+	_CrtMemState memUsage;
+    size_t heapSize = 0, heapCommit = 0;
+    memset(&memUsage, 0, sizeof(memUsage));
+	_CrtMemDumpStatistics(&memUsage);
+    _heapused(&heapSize, &heapCommit);
+	len = sprintf(buffer,
+				  "Memory usage:\r\n"
+                  " heap size: %ld\r\n"
+                  " commit size: %ld\r\n"
+                  " normal block size: %ld\r\n"
+                  " free block size: %ld\r\n"
+                  " CRT block size: %ld\r\n"
+                  " client block size: %ld\r\n"
+                  " ignore block size: %ld\r\n"
+                  " peak memory size: %ld\r\n"
+                  " used memory size: %ld\r\n\r\n",
+                  heapSize,
+                  heapCommit,
+                  memUsage.lSizes[_NORMAL_BLOCK],
+                  memUsage.lSizes[_FREE_BLOCK],
+                  memUsage.lSizes[_CRT_BLOCK],
+                  memUsage.lSizes[_CLIENT_BLOCK],
+                  memUsage.lSizes[_IGNORE_BLOCK],
+                  memUsage.lHighWaterCount,
+                  memUsage.lTotalCount);
+	iface->write(buffer, len);
+#endif
+
+	for(it = getObjectsCount().cbegin(), itEnd = getObjectsCount().cend(); it != itEnd; ++it) {
+		len = sprintf(buffer, "%s: %ld\r\n",
+					  it->first.c_str(),
+					  *it->second);
+		iface->write(buffer, len);
+	}
+
 }
 
 } // namespace AdminServer
