@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
-project(RappelzBenchmark)
+project(RappelzBenchmarkAuth)
 
-set(TARGET_NAME RappelzBenchmark)
+set(TARGET_NAME RappelzBenchmarkAuth)
 
 if(BUILD_SHARED_LIBS)
   add_definitions(-DUSING_UV_SHARED)
