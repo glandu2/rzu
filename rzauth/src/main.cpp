@@ -94,6 +94,11 @@ int main(int argc, char **argv) {
 
 	ConfigInfo::get()->dump();
 
+	if(dbConnectionPool.checkConnection(CONFIG_GET()->auth.db.connectionString.get().c_str()) == false) {
+		if(CONFIG_GET()->auth.db.ignoreInitCheck.get() == false)
+			return 2;
+	}
+
 	AuthServer::ClientSession::init(CONFIG_GET()->auth.client.desKey);
 
 	CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
