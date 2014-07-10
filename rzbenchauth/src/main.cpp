@@ -99,13 +99,21 @@ int main(int argc, char *argv[])
 
 	}
 
-	resetTimer();
+	fprintf(stderr, "Starting benchmark\n");
+
+	if(usecBetweenConnection == 0)
+		resetTimer();
 
 	for(size_t i = 0; i < auths.size(); i++) {
 		auths[i]->connect(accounts[i], CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
 		connectionsStarted++;
 		if(usecBetweenConnection)
 			tfMicroSleep(usecBetweenConnection);
+	}
+
+	if(usecBetweenConnection != 0) {
+		fprintf(stderr, "Connected %d connections at limited speed, continuing benchmark at full-speed (time counter begin now)\n", connectionsStarted);
+		resetTimer();
 	}
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);

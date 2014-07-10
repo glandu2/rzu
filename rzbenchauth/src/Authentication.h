@@ -8,7 +8,8 @@
 #include <IDelegate.h>
 #include "Packets/PacketEnums.h"
 #include <vector>
-#include "DESPasswordCipher.h"
+#include "uv.h"
+#include "DesPasswordCipher.h"
 
 class Account;
 class RappelzSocket;
@@ -91,7 +92,7 @@ class Authentication : private Object, IListener
 		int selectedServer;
 		uint64_t oneTimePassword;
 		bool inProgress;
-		static DESPasswordCipher desCipher;
+		static DesPasswordCipher desCipher;
 
 		Callback<CallbackOnAuthResult> authResultCallback;
 		Callback<CallbackOnGameResult> gameResultCallback;

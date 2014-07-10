@@ -2,14 +2,14 @@
 #include "Packets/AuthPackets.h"
 #include "RappelzSocket.h"
 #include "EventLoop.h"
-#include "DESPasswordCipher.h"
+#include "DesPasswordCipher.h"
 #include "Account.h"
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 
 
-DESPasswordCipher Authentication::desCipher("MERONG");
+DesPasswordCipher Authentication::desCipher("MERONG");
 
 Authentication::Authentication(std::string host, AuthCipherMethod method, uint16_t port, const std::string& version) {
 	this->authServer = new RappelzSocket(EventLoop::getLoop(), EncryptedSocket::Encrypted);
