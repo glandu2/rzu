@@ -69,6 +69,6 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/RappelzPlayerCount/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzPlayerCount" RappelzPlayerCount)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/RappelzAuthBenchmark/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzAuthBenchmark" RappelzAuthBenchmark)
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/RappelzBenchmarkAuth/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzBenchmarkAuth" RappelzBenchmarkAuth)
 endif()
