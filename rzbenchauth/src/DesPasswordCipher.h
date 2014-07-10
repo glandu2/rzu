@@ -5,11 +5,10 @@
 #include <openssl/des.h>
 #include <string.h>
 
-namespace AuthServer {
-
 class DesPasswordCipher
 {
 	public:
+
 		DesPasswordCipher(const char *password = NULL) { if(password) init(password); }
 
 		void init(const char *password) {
@@ -57,8 +56,8 @@ class DesPasswordCipher
 
 	private:
 		DES_key_schedule keySchedule;
+
 };
 
-} // namespace AuthServer
 
 #endif // DESPASSWORDCIPHER_H
