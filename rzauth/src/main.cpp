@@ -21,13 +21,6 @@
 
 #include "AdminServer/TelnetSession.h"
 
-
-/* TODO for next version
- * valgrind: memcheck + callgrind + heap tool
- * check DB_Account at init
- */
-
-
 /* TODO:
  *
  * DbBinding: cols: optionnal + was set bool
@@ -54,7 +47,6 @@
  */
 
 void runServers(Log* trafficLogger);
-void showDebug(uv_timer_t*);
 
 void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
@@ -165,12 +157,4 @@ void runServers(Log *trafficLogger) {
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
 	CrashHandler::setTerminateCallback(nullptr, nullptr);
-}
-
-void showDebug(uv_timer_t *) {
-	char debugInfo[1000];
-	strcpy(debugInfo, "----------------------------------\n");
-	sprintf(debugInfo, "%s%lu socket Sessions\n", debugInfo, SocketSession::getObjectCount());
-	sprintf(debugInfo, "%s%lu active connections\n", debugInfo, Socket::getObjectCount());
-	puts(debugInfo);
 }
