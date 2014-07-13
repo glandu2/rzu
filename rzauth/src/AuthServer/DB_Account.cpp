@@ -72,7 +72,7 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	pcBang = 0;
 
 	buffer.append(password, password + size);
-	trace("MD5 of \"%.*s\" with len %ld\n", (long)buffer.size(), buffer.c_str(), (long)buffer.size());
+	trace("MD5 of \"%.*s\" with len %d\n", (int)buffer.size(), buffer.c_str(), (int)buffer.size());
 	MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
 
 	execute(DbQueryBinding::EM_OneRow);

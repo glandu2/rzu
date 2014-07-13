@@ -44,7 +44,7 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 	TS_MESSAGE::initMessage<TS_US_LOGIN_RESULT>(&result);
 	typedef std::unordered_map<std::string, GameServerSession*>::iterator ServerIterator;
 
-	info("Server Login: %s from %s:%d\n", packet->server_name, getSocket()->getHost().c_str(), getSocket()->getPort());
+	info("Server Login: %s from %s:%d\n", packet->server_name, getSocket()->getRemoteHostName(), getSocket()->getRemotePort());
 
 	if(!IconServerSession::checkName(packet->server_name, strlen(packet->server_name))) {
 		//Forbidden character used in servername

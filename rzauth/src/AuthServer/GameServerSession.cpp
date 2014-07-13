@@ -4,6 +4,7 @@
 #include <string.h>
 #include <algorithm>
 #include "../GlobalConfig.h"
+#include "PrintfFormats.h"
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
@@ -122,7 +123,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	} else if(client->getGameServer() != this) {
 		warn("Client %s login on wrong gameserver %s, expected %s\n", result.account, serverName.c_str(), client->getGameServer()->serverName.c_str());
 	} else if(client->oneTimePassword != packet->one_time_key) {
-		warn("Client %s login on gameserver but wrong one time password: expected %lu but received %lu\n", result.account, client->oneTimePassword, packet->one_time_key);
+		warn("Client %s login on gameserver but wrong one time password: expected %" PRIu64 " but received %" PRIu64 "\n", result.account, client->oneTimePassword, packet->one_time_key);
 	} else if(client->isConnectedToGame()) {
 		info("Client %s login on gameserver but already connected\n", result.account);
 	} else {

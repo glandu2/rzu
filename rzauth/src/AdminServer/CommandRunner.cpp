@@ -139,7 +139,7 @@ void CommandRunner::listGameServers() {
 	char buffer[1024];
 	int len;
 
-	len = sprintf(buffer, "%lu gameserver(s)\r\n", serverList.size());
+	len = sprintf(buffer, "%u gameserver(s)\r\n", (unsigned int)serverList.size());
 	iface->write(buffer, len);
 
 	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
