@@ -21,6 +21,9 @@
 
 #include "AdminServer/TelnetSession.h"
 
+/* TODO for next version
+ */
+
 /* TODO:
  *
  * DbBinding: cols: optionnal + was set bool
@@ -32,6 +35,7 @@
  *  -> separate config
  * warning: GS with auth in same exe: delay connectToAuth ?
  * manage more field in TS_AG_CLIENT_LOGIN (play time)
+ * One CommandRunner instanciated in main() and pass instance to TelnetSessions
  */
 
 /* Packet versionning:

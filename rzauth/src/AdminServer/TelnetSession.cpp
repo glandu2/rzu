@@ -88,6 +88,8 @@ void TelnetSession::parseCommand(const std::string& data) {
 		commandRunner->listGameServers();
 	else if(args.size() > 0 && args[0] == "mem")
 		commandRunner->listObjectsCount();
+	else if(args.size() > 0 && args[0] == "closedb")
+		commandRunner->closeDbConnections();
 	else
 		write(MSG_UNKNOWN_COMMAND, sizeof(MSG_UNKNOWN_COMMAND));
 }

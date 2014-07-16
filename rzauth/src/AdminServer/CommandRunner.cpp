@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "../AuthServer/GameServerSession.h"
 #include "ClassCounter.h"
+#include "DbConnectionPool.h"
 
 
 #ifdef __GLIBC__
@@ -129,6 +130,13 @@ void CommandRunner::getEnv(const std::string& variableName) {
 	char buffer[1024];
 	int len = sprintf(buffer, "%c%c%s:%s\r\n", type, v->isDefault() ? '*' : ' ', variableName.c_str(), val.c_str());
 
+	iface->write(buffer, len);
+}
+
+void CommandRunner::closeDbConnections() {
+	int connectionsClosed = DbConnectionPool::getInstance()->closeAllConnections();
+	char buffer[1024];
+	int len = sprintf(buffer, "Closed %d DB connections\r\n", connectionsClosed);
 	iface->write(buffer, len);
 }
 
