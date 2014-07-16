@@ -9,8 +9,19 @@
 
 namespace AdminServer {
 
-static const char MSG_WELCOME[] = "Auth server - Administration server\r\n> ";
+static const char MSG_WELCOME[] = "Auth server - Administration server - Type \"help\" for a list of available commands\r\n> ";
+
 static const char MSG_UNKNOWN_COMMAND[] = "Unknown command\r\n";
+static const char MSG_HELP[] =
+		"Available commands:\r\n"
+		"- start <server_name>     Start the server <server_name>. Servers names are listed when starting. If <server_name> is \"all\", all server with autostart on are started.\r\n"
+		"- stop <server_name>      Same as start <server_name> but stop the server. \"stop all\" will stop all servers and exit.\r\n"
+		"- set <variable> <value>  Set config variable <variable> to <value>. Double-quotes are allowed for values with spaces. Use \"\" for a escaped double quote character.\r\n"
+		"- get <variable>          Get config variable value.\r\n"
+		"- list                    List all connected gameservers and information about them.\r\n"
+		"- mem                     List object counts.\r\n"
+		"- closedb                 Close all idle database connections (use this to bring a database offline).\r\n"
+		"\r\n";
 
 TelnetSession::TelnetSession() {
 	commandRunner = new CommandRunner(this);
@@ -90,6 +101,8 @@ void TelnetSession::parseCommand(const std::string& data) {
 		commandRunner->listObjectsCount();
 	else if(args.size() > 0 && args[0] == "closedb")
 		commandRunner->closeDbConnections();
+	else if(args.size() > 0 && args[0] == "help")
+		write(MSG_HELP, sizeof(MSG_HELP));
 	else
 		write(MSG_UNKNOWN_COMMAND, sizeof(MSG_UNKNOWN_COMMAND));
 }
