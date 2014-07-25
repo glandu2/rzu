@@ -25,7 +25,7 @@ protected:
 	void parseData(const std::vector<char>& data);
 	void parseCommand(const std::string& data);
 
-	virtual void write(const void* data, int size) { getSocket()->write(data, size); }
+	virtual void write(const void* data, int size) { if(getSocket()->getState() == Socket::ConnectedState) getSocket()->write(data, size); }
 	virtual void close() { getSocket()->abort(); }
 
 private:
