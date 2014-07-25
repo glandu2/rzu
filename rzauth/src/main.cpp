@@ -114,12 +114,12 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	RappelzServer<AuthServer::ClientSession> authClientServer(trafficLogger);
-	RappelzServer<AuthServer::GameServerSession> authGameServer(trafficLogger);
+	RappelzServer<AuthServer::ClientSession> authClientServer(301, trafficLogger);
+	RappelzServer<AuthServer::GameServerSession> authGameServer(0, trafficLogger);
 
-	RappelzServer<UploadServer::ClientSession> uploadClientServer(trafficLogger);
-	RappelzServer<UploadServer::IconServerSession> uploadIconServer(trafficLogger);
-	RappelzServer<UploadServer::GameServerSession> uploadGameServer(trafficLogger);
+	RappelzServer<UploadServer::ClientSession> uploadClientServer(61, trafficLogger);
+	RappelzServer<UploadServer::IconServerSession> uploadIconServer(31, trafficLogger);
+	RappelzServer<UploadServer::GameServerSession> uploadGameServer(0, trafficLogger);
 
 	RappelzServer<AdminServer::TelnetSession> adminTelnetServer;
 
