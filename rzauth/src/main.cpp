@@ -114,14 +114,14 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	RappelzServer<AuthServer::ClientSession> authClientServer(301, trafficLogger);
-	RappelzServer<AuthServer::GameServerSession> authGameServer(0, trafficLogger);
+	RappelzServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.idleTimeout, trafficLogger);
+	RappelzServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.idleTimeout, trafficLogger);
 
-	RappelzServer<UploadServer::ClientSession> uploadClientServer(61, trafficLogger);
-	RappelzServer<UploadServer::IconServerSession> uploadIconServer(31, trafficLogger);
-	RappelzServer<UploadServer::GameServerSession> uploadGameServer(0, trafficLogger);
+	RappelzServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.idleTimeout, trafficLogger);
+	RappelzServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.client.idleTimeout, trafficLogger);
+	RappelzServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.idleTimeout, trafficLogger);
 
-	RappelzServer<AdminServer::TelnetSession> adminTelnetServer;
+	RappelzServer<AdminServer::TelnetSession> adminTelnetServer(&CONFIG_GET()->admin.telnet.idleTimeout);
 
 	serverManager.addServer("auth.clients", &authClientServer,
 							CONFIG_GET()->auth.client.listenIp,

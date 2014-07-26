@@ -40,25 +40,27 @@ struct GlobalConfig {
 
 		struct ClientConfig {
 			cval<std::string> &desKey, &listenIp;
-			cval<int> &port;
+			cval<int> &port, &idleTimeout;
 			cval<bool> &autoStart;
 
 			ClientConfig() :
 				desKey(CFG_CREATE("auth.clients.des_key", "MERONG")),
 				listenIp(CFG_CREATE("auth.clients.ip", "0.0.0.0")),
 				port(CFG_CREATE("auth.clients.port", 4500)),
+				idleTimeout(CFG_CREATE("auth.clients.idletimeout", 301)),
 				autoStart(CFG_CREATE("auth.clients.autostart", true)) {}
 		} client;
 
 		struct GameConfig {
 			cval<std::string> &listenIp;
-			cval<int> &port;
+			cval<int> &port, &idleTimeout;
 			cval<bool> &autoStart, &strictKick;
 			cval<int> &maxPlayers;
 
 			GameConfig() :
 				listenIp(CFG_CREATE("auth.gameserver.ip", "127.0.0.1")),
 				port(CFG_CREATE("auth.gameserver.port", 4502)),
+				idleTimeout(CFG_CREATE("auth.gameserver.idletimeout", 0)),
 				autoStart(CFG_CREATE("auth.gameserver.autostart", true)),
 				strictKick(CFG_CREATE("auth.gameserver.strictkick", true)),
 				maxPlayers(CFG_CREATE("auth.gameserver.maxplayers", 400)) {}
@@ -71,7 +73,7 @@ struct GlobalConfig {
 	struct UploadConfig {
 		struct ClientConfig {
 			cval<std::string> &uploadDir, &listenIp;
-			cval<int> &port, &webPort;
+			cval<int> &port, &webPort, &idleTimeout;
 			cval<bool> &autoStart;
 
 			ClientConfig() :
@@ -79,6 +81,7 @@ struct GlobalConfig {
 				listenIp(CFG_CREATE("upload.clients.ip", "0.0.0.0")),
 				port(CFG_CREATE("upload.clients.port", 4617)),
 				webPort(CFG_CREATE("upload.clients.webport", 80)),
+				idleTimeout(CFG_CREATE("upload.clients.idletimeout", 61)),
 				autoStart(CFG_CREATE("upload.clients.autostart", true))
 			{
 				Utils::autoSetAbsoluteDir(uploadDir);
@@ -87,12 +90,13 @@ struct GlobalConfig {
 
 		struct GameConfig {
 			cval<std::string> &listenIp;
-			cval<int> &port;
+			cval<int> &port, &idleTimeout;
 			cval<bool> &autoStart;
 
 			GameConfig() :
 				listenIp(CFG_CREATE("upload.gameserver.ip", "127.0.0.1")),
 				port(CFG_CREATE("upload.gameserver.port", 4616)),
+				idleTimeout(CFG_CREATE("upload.gameserver.idletimeout", 0)),
 				autoStart(CFG_CREATE("upload.gameserver.autostart", true)) {}
 		} game;
 	} upload;
@@ -100,12 +104,13 @@ struct GlobalConfig {
 	struct AdminConfig {
 		struct TelnetConfig {
 			cval<std::string> &listenIp;
-			cval<int> &port;
+			cval<int> &port, &idleTimeout;
 			cval<bool> &autoStart;
 
 			TelnetConfig() :
 				listenIp(CFG_CREATE("admin.telnet.ip", "127.0.0.1")),
 				port(CFG_CREATE("admin.telnet.port", 4501)),
+				idleTimeout(CFG_CREATE("admin.telnet.idletimeout", 0)),
 				autoStart(CFG_CREATE("admin.telnet.autostart", true))
 			{}
 		} telnet;
