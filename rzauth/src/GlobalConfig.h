@@ -16,10 +16,10 @@ struct DbConfig : public IListener {
 		name(CFG_CREATE(prefix + "db.name", "Auth")),
 		account(CFG_CREATE(prefix + "db.account", "sa")),
 		password(CFG_CREATE(prefix + "db.password", "")),
-		salt(CFG_CREATE(prefix + "db.salt", "2012")),
+		salt(CFG_CREATE(prefix + "db.salt", "2011")),
 		port(CFG_CREATE(prefix + "db.port", 1433)),
 		connectionString(CFG_CREATE(prefix + "db.connectionstring", "")),
-		ignoreInitCheck(CFG_CREATE(prefix + "db.ignoreinitcheck", false))
+		ignoreInitCheck(CFG_CREATE(prefix + "db.ignoreinitcheck", true))
 	{
 		driver.addListener(this, &updateConnectionString);
 		server.addListener(this, &updateConnectionString);
@@ -129,7 +129,7 @@ struct GlobalConfig {
 		TrafficDump() :
 			enable(CFG_CREATE("trafficdump.enable", false)),
 			dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
-			file(CFG_CREATE("trafficdump.file", "trafficdump.log")),
+			file(CFG_CREATE("trafficdump.file", "auth.log")),
 			level(CFG_CREATE("trafficdump.level", "debug")),
 			consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal"))
 		{
