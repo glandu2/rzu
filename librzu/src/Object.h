@@ -17,7 +17,9 @@
 	static unsigned long __objectCount; \
 	static const unsigned int __classTypeHash; \
 	public: virtual const char *getClassName() { return #C; } \
+	static const char* getStaticClassName() { return #C; } \
 	virtual unsigned int getClassNameSize() { return sizeof(#C); } \
+	static unsigned int getStaticClassNameSize() { return sizeof(#C); } \
 	virtual unsigned int getTrueClassHash() { return __classTypeHash; } \
 	static unsigned int getClassHash() { return __classTypeHash; } \
 	static unsigned long getObjectCount() { return __objectCount; } \
@@ -38,15 +40,15 @@ public:
 	virtual ~Object();
 
 	void setObjectName(const char *name);
-	void setObjectName(int maxLen, const char *format, ...);
+	void setObjectName(int maxLen, const char *format, ...) PRINTFCHECK(3, 4);
 	const char *getObjectName(size_t *size = nullptr);
 
-	void trace(const char *message, ...);
-	void debug(const char *message, ...);
-	void info(const char *message, ...);
-	void warn(const char *message, ...);
-	void error(const char *message, ...);
-	void fatal(const char *message, ...);
+	void trace(const char *message, ...) PRINTFCHECK(2, 3);
+	void debug(const char *message, ...) PRINTFCHECK(2, 3);
+	void info(const char *message, ...) PRINTFCHECK(2, 3);
+	void warn(const char *message, ...) PRINTFCHECK(2, 3);
+	void error(const char *message, ...) PRINTFCHECK(2, 3);
+	void fatal(const char *message, ...) PRINTFCHECK(2, 3);
 
 	virtual void deleteLater();
 

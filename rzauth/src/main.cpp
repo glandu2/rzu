@@ -21,6 +21,9 @@
 
 #include "AdminServer/TelnetSession.h"
 
+/* TODO for next version
+ */
+
 /* TODO:
  *
  * DbBinding: cols: optionnal + was set bool
@@ -32,6 +35,7 @@
  *  -> separate config
  * warning: GS with auth in same exe: delay connectToAuth ?
  * manage more field in TS_AG_CLIENT_LOGIN (play time)
+ * One CommandRunner instanciated in main() and pass instance to TelnetSessions
  */
 
 /* Packet versionning:
@@ -110,14 +114,14 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	RappelzServer<AuthServer::ClientSession> authClientServer(trafficLogger);
-	RappelzServer<AuthServer::GameServerSession> authGameServer(trafficLogger);
+	RappelzServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.idleTimeout, trafficLogger);
+	RappelzServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.idleTimeout, trafficLogger);
 
-	RappelzServer<UploadServer::ClientSession> uploadClientServer(trafficLogger);
-	RappelzServer<UploadServer::IconServerSession> uploadIconServer(trafficLogger);
-	RappelzServer<UploadServer::GameServerSession> uploadGameServer(trafficLogger);
+	RappelzServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.idleTimeout, trafficLogger);
+	RappelzServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.client.idleTimeout, trafficLogger);
+	RappelzServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.idleTimeout, trafficLogger);
 
-	RappelzServer<AdminServer::TelnetSession> adminTelnetServer;
+	RappelzServer<AdminServer::TelnetSession> adminTelnetServer(&CONFIG_GET()->admin.telnet.idleTimeout);
 
 	serverManager.addServer("auth.clients", &authClientServer,
 							CONFIG_GET()->auth.client.listenIp,

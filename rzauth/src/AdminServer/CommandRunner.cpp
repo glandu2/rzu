@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "../AuthServer/GameServerSession.h"
 #include "ClassCounter.h"
+#include "DbConnectionPool.h"
 
 
 #ifdef __GLIBC__
@@ -132,6 +133,13 @@ void CommandRunner::getEnv(const std::string& variableName) {
 	iface->write(buffer, len);
 }
 
+void CommandRunner::closeDbConnections() {
+	int connectionsClosed = DbConnectionPool::getInstance()->closeAllConnections();
+	char buffer[1024];
+	int len = sprintf(buffer, "Closed %d DB connections\r\n", connectionsClosed);
+	iface->write(buffer, len);
+}
+
 void CommandRunner::listGameServers() {
 	const std::unordered_map<uint16_t, AuthServer::GameServerSession*>& serverList = AuthServer::GameServerSession::getServerList();
 	std::unordered_map<uint16_t, AuthServer::GameServerSession*>::const_iterator it, itEnd;
@@ -139,7 +147,7 @@ void CommandRunner::listGameServers() {
 	char buffer[1024];
 	int len;
 
-	len = sprintf(buffer, "%lu gameserver(s)\r\n", serverList.size());
+	len = sprintf(buffer, "%u gameserver(s)\r\n", (unsigned int)serverList.size());
 	iface->write(buffer, len);
 
 	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {

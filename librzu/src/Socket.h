@@ -56,9 +56,12 @@ public:
 	void abort();
 
 	State getState() { return currentState; }
-	struct sockaddr_in getPeerInfo();
-	const std::string& getHost() { return host; }
-	uint16_t getPort() { return port; }
+	const char* getRemoteHostName() { return remoteHostName; }
+	uint32_t getRemoteHost() { return remoteHost; }
+	uint16_t getRemotePort() { return remotePort; }
+	const char* getLocalHostName() { return localHostName; }
+	uint32_t getLocalHost() { return localHost; }
+	uint16_t getLocalPort() { return localPort; }
 
 	void addDataListener(IListener* instance, CallbackOnDataReady listener);
 	void addConnectionListener(IListener* instance, CallbackOnDataReady listener);
@@ -70,13 +73,16 @@ public:
 
 	void setPacketLogger(Log* packetLogger) { this->packetLogger = packetLogger; }
 
+	void resetPacketTransferedFlag() { packetTransferedSinceLastCheck = false; }
+	bool isPacketTransferedSinceLastCheck() { return packetTransferedSinceLastCheck; }
+
 
 protected:
 	void setState(State state);
-	void setPeerInfo(const std::string& host, uint16_t port);
+	void retrieveSocketBoundsInfo();
 	virtual void updateObjectName();
 
-	void packetLog(Log::Level level, const unsigned char *rawData, int size, const char* format, ...);
+	void packetLog(Log::Level level, const unsigned char *rawData, int size, const char* format, ...) PRINTFCHECK(5, 6);
 
 
 	static void onConnected(uv_connect_t* req, int status);
@@ -91,8 +97,12 @@ protected:
 
 private:
 	uv_loop_t* uvLoop;
-	std::string host;
-	uint16_t port;
+	uint32_t remoteHost;
+	uint16_t remotePort;
+	char remoteHostName[INET_ADDRSTRLEN];
+	uint32_t localHost;
+	uint16_t localPort;
+	char localHostName[INET_ADDRSTRLEN];
 
 	IDelegate<Socket::CallbackOnDataReady> dataListeners;
 	IDelegate<Socket::CallbackOnDataReady> incomingConnectionListeners;
@@ -109,6 +119,7 @@ private:
 
 	Log* packetLogger;
 	bool logPackets; //set to false when logging is done in a derived class (ie: RappelzSocket)
+	bool packetTransferedSinceLastCheck; //when checking idle sockets, if this flag is false, then the socket is closed (idle)
 };
 
 #endif // SOCKET_H

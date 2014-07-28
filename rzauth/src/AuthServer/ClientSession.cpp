@@ -242,7 +242,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 		dbQuery = new DB_Account(this, account, (char*)password, strlen((char*)password));
 	} else {
-		warn("Invalid Account message data from %s@%s\n", account.c_str(), getSocket()->getHost().c_str());
+		warn("Invalid Account message data from %s@%s\n", account.c_str(), getSocket()->getRemoteHostName());
 	}
 }
 

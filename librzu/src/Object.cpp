@@ -97,7 +97,7 @@ static void defaultLog(const char* suffix, const char* objectName, const char* m
 	va_start(args, message); \
 	 \
 	if(logger) \
-		logger->log(Log::LL_##level, this, message, args); \
+		logger->logv(Log::LL_##level, this, message, args); \
 	else { \
 		defaultLog(#level, getObjectName(), message, args); \
 	} \
@@ -106,7 +106,7 @@ static void defaultLog(const char* suffix, const char* objectName, const char* m
 void Object::trace(const char *message, ...) {
 	//early check for performance boost if trace is not active
 	Log* logger = Log::get();
-	if(logger && Log::LL_Trace <= logger->getMaxLevel()) {
+	if(logger && logger->wouldLog(Log::LL_Trace)) {
 		LOG_USELOGGER(message, Trace)
 	}
 }
