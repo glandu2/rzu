@@ -34,12 +34,15 @@ static void init() {
 	CFG_CREATE("count", 8);
 	CFG_CREATE("targetcount", 3000);
 	CFG_CREATE("password", "admin");
-	CFG_CREATE("usersa", false);
+	CFG_CREATE("use_rsa", false);
 	CFG_CREATE("printall", false);
 	CFG_CREATE("connecttogs", false);
 	CFG_CREATE("delay", 0);
 	CFG_CREATE("idxoffset", 0);
 	CFG_CREATE("usecperconnection", 0);
+	RappelzLibConfig::get()->app.appName.setDefault("RappelzBenchmarkAuth");
+	RappelzLibConfig::get()->app.configfile.setDefault("benchmarkauth.opt");
+	RappelzLibConfig::get()->log.file.setDefault("benchmarkauth.log");
 }
 
 static std::string getIpForConnection(const std::string& originalIp, bool useLocalHost, int connection) {
@@ -65,7 +68,7 @@ int main(int argc, char *argv[])
 	std::string accountNamePrefix = CFG_GET("account")->getString();
 	std::string ip = CFG_GET("ip")->getString();
 	int port = CFG_GET("port")->getInt();
-	bool usersa = CFG_GET("usersa")->getBool();
+	bool usersa = CFG_GET("use_rsa")->getBool();
 	int idxoffset = CFG_GET("idxoffset")->getInt();
 	bool useLocalHost = ip == "127.0.0.1";
 	int usecBetweenConnection = CFG_GET("usecperconnection")->getInt();
