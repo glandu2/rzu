@@ -48,6 +48,7 @@ ClientSession::ClientSession()
 	  useRsaAuth(false),
 	  isEpic2(false),
 	  lastLoginServerId(1),
+	  serverIdxOffset(0),
 	  clientData(nullptr),
 	  dbQuery(nullptr)
 {
@@ -246,7 +247,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	}
 }
 
-void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang) {
+void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang, uint32_t serverIdxOffset) {
 	TS_AC_RESULT result;
 	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
@@ -279,6 +280,7 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST* serverListPacket;
 	unsigned int j, count, maxPlayers;
+	int maxPublicServerBaseIdx = CONFIG_GET()->auth.client.maxPublicServerIdx;
 
 	// Check if user authenticated
 	if(clientData == nullptr) {
@@ -294,12 +296,19 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
 
-	serverListPacket->count = count;
+	serverListPacket->count = 0;
 	serverListPacket->last_login_server_idx = lastLoginServerId;
 
 
-	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it, j++) {
+	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
 		GameServerSession* serverInfo = it->second;
+
+		//servers with their index higher than maxPublicServerBaseIdx + serverIdxOffset are hidden
+		//serverIdxOffset is a per user value from the DB, default to 0
+		//maxPublicServerBaseIdx is a config value, default to 30
+		//So by default, servers with index > 30 are not shown in client's server list
+		if(serverInfo->getServerIdx() > maxPublicServerBaseIdx + serverIdxOffset)
+			continue;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
 		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
@@ -309,6 +318,9 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		strcpy(serverListPacket->servers[j].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
 		uint32_t userRatio = serverInfo->getPlayerCount() * 100 / maxPlayers;
 		serverListPacket->servers[j].user_ratio = (userRatio > 100)? 100 : userRatio;
+
+		serverListPacket->count++;
+		j++;
 	}
 
 	sendPacket(serverListPacket);
@@ -318,6 +330,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 	TS_AC_SERVER_LIST_EPIC2* serverListPacket;
 	unsigned int j, count, maxPlayers;
+	int maxPublicServerBaseIdx = CONFIG_GET()->auth.client.maxPublicServerIdx;
 
 	// Check if user authenticated
 	if(clientData == nullptr) {
@@ -333,18 +346,28 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 
 	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST_EPIC2, TS_AC_SERVER_LIST_EPIC2::TS_SERVER_INFO>(count);
 
-	serverListPacket->count = count;
+	serverListPacket->count = 0;
 
-	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it, j++) {
+
+	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
 		GameServerSession* serverInfo = it->second;
+
+		//servers with their index higher than maxPublicServerBaseIdx + serverIdxOffset are hidden
+		//serverIdxOffset is a per user value from the DB, default to 0
+		//maxPublicServerBaseIdx is a config value, default to 30
+		//So by default, servers with index > 30 are not shown in client's server list
+		if(serverInfo->getServerIdx() > maxPublicServerBaseIdx + serverIdxOffset)
+			continue;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
 		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
 		serverListPacket->servers[j].server_port = serverInfo->getServerPort();
 		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
-		serverListPacket->servers[j].user_ratio = serverInfo->getPlayerCount();
 		uint32_t userRatio = serverInfo->getPlayerCount() * 100 / maxPlayers;
 		serverListPacket->servers[j].user_ratio = (userRatio > 100)? 100 : userRatio;
+
+		serverListPacket->count++;
+		j++;
 	}
 
 	sendPacket(serverListPacket);

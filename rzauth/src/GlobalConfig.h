@@ -42,13 +42,15 @@ struct GlobalConfig {
 			cval<std::string> &desKey, &listenIp;
 			cval<int> &port, &idleTimeout;
 			cval<bool> &autoStart;
+			cval<int> &maxPublicServerIdx;
 
 			ClientConfig() :
 				desKey(CFG_CREATE("auth.clients.des_key", "MERONG")),
 				listenIp(CFG_CREATE("auth.clients.ip", "0.0.0.0")),
 				port(CFG_CREATE("auth.clients.port", 4500)),
 				idleTimeout(CFG_CREATE("auth.clients.idletimeout", 301)),
-				autoStart(CFG_CREATE("auth.clients.autostart", true)) {}
+				autoStart(CFG_CREATE("auth.clients.autostart", true)),
+				maxPublicServerIdx(CFG_CREATE("auth.clients.maxpublicserveridx", 30)) {}
 		} client;
 
 		struct GameConfig {

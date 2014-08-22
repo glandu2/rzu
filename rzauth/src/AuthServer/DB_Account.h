@@ -43,6 +43,7 @@ private:
 	uint16_t lastServerIdx;
 	uint32_t eventCode;
 	uint32_t pcBang;
+	uint32_t serverIdxOffset;
 };
 
 } // namespace AuthServer
