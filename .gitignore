@@ -17,8 +17,11 @@ internal*/
 *.user*
 CMakeLists.txt.*
 Makefile*
+.directory
+
 
 project*/
+releases/
 data
 
 #############
