@@ -26,6 +26,12 @@
 
 /* TODO:
  *
+ * flood prevention:
+ *	max connections / ip  (limit flooding ips)
+ *  max total connections (avoid too much memory usage)
+ *
+ * Avoid a buffer in Socket (like uv_tcp_t)
+ * Config: init config per classes (no more globalconfig.h) => avoid unused config declaration (benchmark does not use core.log.*)
  * DbBinding: cols: optionnal + was set bool
  * DbBinding: dynamic resize std::string column
  * 2 init functions names: one for init before config read, one for after

@@ -29,7 +29,7 @@ public:
 	static void init(cval<std::string> &str);
 	static void deinit();
 
-	void clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang);
+	void clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang, uint32_t serverMask);
 
 protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
@@ -48,8 +48,10 @@ private:
 
 	bool useRsaAuth;
 	bool isEpic2;
-	unsigned char aesKey[32];
 	uint16_t lastLoginServerId;
+	uint32_t serverIdxOffset;
+	unsigned char aesKey[32];
+
 	ClientData* clientData;
 	IDbQueryJob* dbQuery;
 
