@@ -105,6 +105,14 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.result = 0;
 		result.request_msg_id = packet->id;
 		sendPacket(&result);
+	} else if(!memcmp(packet->szVersion, "INFO", 4)) {
+		TS_SC_RESULT result;
+		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
+
+		result.value = 20;
+		result.result = 0;
+		result.request_msg_id = packet->id;
+		sendPacket(&result);
 	} else if(!memcmp(packet->szVersion, "200609280", 9)) {
 		isEpic2 = true;
 	}
