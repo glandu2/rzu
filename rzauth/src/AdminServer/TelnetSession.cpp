@@ -6,6 +6,7 @@
 #include <string>
 #include "CommandRunner.h"
 #include <sstream>
+#include "CrashHandler.h"
 
 namespace AdminServer {
 
@@ -103,6 +104,8 @@ void TelnetSession::parseCommand(const std::string& data) {
 		commandRunner->closeDbConnections();
 	else if(args.size() > 0 && args[0] == "help")
 		write(MSG_HELP, sizeof(MSG_HELP));
+	else if(args.size() > 0 && args[0] == "terminate")
+		CrashHandler::terminate();
 	else
 		write(MSG_UNKNOWN_COMMAND, sizeof(MSG_UNKNOWN_COMMAND));
 }
