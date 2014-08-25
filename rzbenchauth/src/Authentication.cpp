@@ -24,6 +24,7 @@ Authentication::Authentication(std::string host, AuthCipherMethod method, uint16
 	this->selectedServer = 0;
 	this->inProgress = false;
 
+	reserveCallbackCount(6);
 	authServer->addPacketListener(TS_CC_EVENT::packetID, this, &onAuthServerConnectionEvent);
 	authServer->addPacketListener(TS_AC_AES_KEY_IV::packetID, this, &onAuthPacketReceived);
 	authServer->addPacketListener(TS_AC_RESULT::packetID, this, &onAuthPacketReceived);
