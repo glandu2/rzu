@@ -6,10 +6,11 @@
 #include <string.h>
 #include "EventLoop.h"
 
-PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, int intervalms) : sock(EventLoop::getLoop(), EncryptedSocket::Encrypted) {
+PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, const std::string &reqStr, int intervalms) : sock(EventLoop::getLoop(), EncryptedSocket::Encrypted) {
 	this->host = host;
 	this->port = port;
 	this->connectedTimes = 0;
+	this->reqStr = reqStr;
 
 	printf("#msec since epoch, players connected number, process load\n");
 
@@ -78,7 +79,7 @@ void PlayerCountMonitor::onPlayerCountReceived(IListener* instance, RappelzSocke
 #ifndef NDEBUG
 				memset(versionMsg.szVersion, 0, sizeof(versionMsg.szVersion));
 #endif
-				strcpy(versionMsg.szVersion, "TEST");
+				strcpy(versionMsg.szVersion, thisInstance->reqStr.c_str());
 
 				sock->sendPacket(&versionMsg);
 			}

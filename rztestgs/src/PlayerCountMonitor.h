@@ -9,7 +9,7 @@ class PlayerCountMonitor : private IListener, public Object
 {
 	DECLARE_CLASSNAME(PlayerCountMonitor, 0)
 	public:
-		PlayerCountMonitor(std::string host, uint16_t port, int intervalms = 3500);
+		PlayerCountMonitor(std::string host, uint16_t port, const std::string& reqStr, int intervalms = 3500);
 		void start();
 		void stop();
 
@@ -25,6 +25,7 @@ class PlayerCountMonitor : private IListener, public Object
 		std::string host;
 		uint16_t port;
 		int timeout;
+		std::string reqStr;
 
 		int connectedTimes;
 };
