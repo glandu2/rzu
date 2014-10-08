@@ -53,6 +53,8 @@ static void init() {
 	CFG_CREATE("benchconnection", false);
 	RappelzLibConfig::get()->app.appName.setDefault("RappelzBenchmarkAuth");
 	RappelzLibConfig::get()->app.configfile.setDefault("benchmarkauth.opt");
+	RappelzLibConfig::get()->log.level.setDefault("fatal");
+	RappelzLibConfig::get()->log.consoleLevel.setDefault("info");
 	RappelzLibConfig::get()->log.file.setDefault("benchmarkauth.log");
 }
 
