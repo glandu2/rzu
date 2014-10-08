@@ -8,7 +8,7 @@ if( versioncmakefound )
 endif()
 
 add_executable(${TARGET_NAME} ${SOURCE_FILES})
-add_dependencies(${TARGET_NAME} ${TARGET_NAME}_GitVersion)
+#add_dependencies(${TARGET_NAME} ${TARGET_NAME}_GitVersion)
 
 target_link_libraries(${TARGET_NAME} RappelzLib uv)
 include_directories(${OPENSSL_INCLUDE_DIR})

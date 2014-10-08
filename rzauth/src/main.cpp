@@ -30,6 +30,7 @@
  *	max connections / ip  (limit flooding ips)
  *  max total connections (avoid too much memory usage)
  *
+ * Allow to change gameserver infos via admin interface (like external ip, index (to dyn hide/unhide from players))
  * Avoid a buffer in Socket (like uv_tcp_t)
  * Config: init config per classes (no more globalconfig.h) => avoid unused config declaration (benchmark does not use core.log.*)
  * DbBinding: cols: optionnal + was set bool
