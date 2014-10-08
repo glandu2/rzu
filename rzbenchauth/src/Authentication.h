@@ -21,6 +21,7 @@ struct TS_SC_RESULT;
 
 class Authentication : private Object, IListener
 {
+	DECLARE_CLASSNAME(Authentication, 0)
 	public:
 		struct ServerInfo {
 			uint16_t serverId;

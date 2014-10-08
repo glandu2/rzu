@@ -259,6 +259,7 @@ void Socket::setState(State state) {
 
 		setDirtyObjectName();
 	} else if(state == ConnectedState) {
+		uv_tcp_nodelay(&socket, true);
 		uv_read_start((uv_stream_t*) &socket, &onAllocReceiveBuffer, &onReadCompleted);
 		packetTransferedSinceLastCheck = true;
 	}
