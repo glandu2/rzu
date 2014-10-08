@@ -72,3 +72,11 @@ endif()
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/RappelzBenchmarkAuth/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzBenchmarkAuth" RappelzBenchmarkAuth)
 endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/VStructGen/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/VStructGen" VStructGen)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/RappelzChatGateway/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/RappelzChatGateway" RappelzChatGateway)
+endif()
