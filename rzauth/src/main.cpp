@@ -39,7 +39,7 @@
  * move init to have the same interface for all type of servers
  * move servers in DLL, the .exe would just host the one the user need to use
  *  -> separate config
- * warning: GS with auth in same exe: delay connectToAuth ?
+ *  -> warning: GS with auth in same exe: delay connectToAuth ?
  * manage more field in TS_AG_CLIENT_LOGIN (play time)
  * One CommandRunner instanciated in main() and pass instance to TelnetSessions
  */
@@ -124,7 +124,7 @@ void runServers(Log *trafficLogger) {
 	RappelzServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.idleTimeout, trafficLogger);
 
 	RappelzServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.idleTimeout, trafficLogger);
-	RappelzServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.client.idleTimeout, trafficLogger);
+	RappelzServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.icons.idleTimeout, trafficLogger);
 	RappelzServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.idleTimeout, trafficLogger);
 
 	RappelzServer<AdminServer::TelnetSession> adminTelnetServer(&CONFIG_GET()->admin.telnet.idleTimeout);
@@ -145,9 +145,9 @@ void runServers(Log *trafficLogger) {
 							CONFIG_GET()->upload.client.autoStart,
 							&banManager);
 	serverManager.addServer("upload.iconserver", &uploadIconServer,
-							CONFIG_GET()->upload.client.listenIp,
-							CONFIG_GET()->upload.client.webPort,
-							CONFIG_GET()->upload.client.autoStart,
+							CONFIG_GET()->upload.icons.listenIp,
+							CONFIG_GET()->upload.icons.port,
+							CONFIG_GET()->upload.icons.autoStart,
 							&banManager);
 	serverManager.addServer("upload.gameserver", &uploadGameServer,
 							CONFIG_GET()->upload.game.listenIp,
