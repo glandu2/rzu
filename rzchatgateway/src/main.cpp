@@ -23,12 +23,11 @@
 #include "Packets/TS_SC_DISCONNECT_DESC.h"
 #include "Packets/TS_CS_UPDATE.h"
 
+#include <vector>
+#include <string>
 #include <unordered_map>
 
 class GameServer;
-
-static void onTTYAlloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
-static void onTTYRead(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf);
 
 static void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string &resultString);
 static void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
@@ -37,12 +36,13 @@ static void onAuthClosed(IListener* instance, Authentication* auth);
 static void onAuthClosedWithFailure(IListener* instance, Authentication* auth);
 
 static void onGamePacketReceived(IListener* instance, RappelzSocket* socket, const TS_MESSAGE* packet);
-static void onSocketStateChange(IListener* instance, Socket* socket, Socket::State oldState, Socket::State newState);
-static void onSocketTimer(uv_timer_t* handle);
-static void onSocketGGTimer(uv_timer_t* handle);
-static void onSocketUpdateTimer(uv_timer_t* handle);
+static void onGSSocketStateChange(IListener* instance, Socket* socket, Socket::State oldState, Socket::State newState);
+static void onGSSocketTimer(uv_timer_t* handle);
+static void onGSSocketGGTimer(uv_timer_t* handle);
+static void onGSSocketUpdateTimer(uv_timer_t* handle);
 
-static void resendMsg(GameServer* gameServer, int type, const char* sender, std::string msg);
+static void sendMsgToGS(int type, const char* sender, const char* target, std::string msg);
+static void sendMsgToIRC(int type, const char* sender, std::string msg);
 
 
 bool printDebug = false;
@@ -51,9 +51,11 @@ std::string ip;
 int port;
 bool enableGateway = false;
 
+std::unordered_map<std::string, std::string> mpRepliesPlayers;
+
 class GameServer : public IListener {
 public:
-	GameServer(const std::string& ip, int port, std::string account, std::string password, int serverIdx, std::string playername, Log* packetLog)
+	GameServer(const std::string& ip, int port, const std::string& account, const std::string& password, int serverIdx, const std::string& playername, Log* packetLog)
 		: auth(new Authentication(ip, usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port, packetLog)),
 		  serverIdx(serverIdx),
 		  password(password),
@@ -68,7 +70,7 @@ public:
 		ggTimer.data = this;
 		recoTimer.data = this;
 		updateTimer.data = this;
-		uv_timer_start(&updateTimer, &onSocketUpdateTimer, 5000, 5000);
+		uv_timer_start(&updateTimer, &onGSSocketUpdateTimer, 5000, 5000);
 		connect();
 	}
 
@@ -97,9 +99,173 @@ public:
 	std::list<std::string> messageQueue;
 };
 
-std::vector<GameServer*> gameServers;
-uv_tty_t ttyHandle;
-char ttyBuffer[1000];
+class IrcClient : public IListener {
+public:
+	IrcClient(const std::string& ip, int port, const std::string& channel, const std::string& nickname, Log* packetLog)
+		: channelName(channel), nickname(nickname), ip(ip), port(port), socket(EventLoop::getLoop())
+	{
+		socket.addEventListener(this, &onSocketStateChange);
+		socket.addDataListener(this, &onSocketDataStatic);
+		socket.setPacketLogger(packetLog);
+	}
+
+	void connect(std::string servername) {
+		this->servername = servername.substr(0, servername.find_first_of('('));
+		socket.connect(ip, port);
+	}
+
+	static void onSocketStateChange(IListener* instance, Socket* socket, Socket::State oldState, Socket::State newState) {
+		IrcClient* thisInstance = (IrcClient*) instance;
+		if(newState == Socket::ConnectedState) {
+			char loginText[128];
+			std::string lowerCaseName;
+
+			if(thisInstance->nickname.size() == 0)
+				thisInstance->nickname = thisInstance->servername;
+
+			lowerCaseName = thisInstance->nickname;
+			lowerCaseName[0] = tolower(lowerCaseName[0]);
+
+			if(thisInstance->channelName.size() == 0)
+				thisInstance->channelName = "#rappelz-" + lowerCaseName;
+
+			sprintf(loginText, "NICK %s\r\nUSER gw-%s * * : In-game chat relay with rappelz server %s\r\nJOIN %s\r\n",
+					thisInstance->nickname.c_str(),
+					lowerCaseName.c_str(),
+					thisInstance->servername.c_str(),
+					thisInstance->channelName.c_str());
+
+			thisInstance->socket.write(loginText, strlen(loginText));
+		}
+	}
+
+	static void onSocketDataStatic(IListener* instance, Socket* socket) { ((IrcClient*) instance)->onSocketData(socket); }
+	void onSocketData(Socket* socket) {
+		std::vector<char> dataRecv;
+		socket->readAll(&dataRecv);
+		char *p;
+
+		buffer.insert(buffer.end(), dataRecv.begin(), dataRecv.end());
+		while(buffer.size() > 0 && (p = (char*)Utils::memmem(&buffer[0], buffer.size(), "\r\n", 2))) {
+			std::string line(&buffer[0], p);
+			buffer.erase(buffer.begin(), buffer.begin() + (p - &buffer[0]) + 2);
+			onIrcLine(line);
+		}
+	}
+
+	static void parseIrcMessage(const std::string& message, std::string& prefix, std::string& command, std::string& parameters, std::string& trailing)
+	{
+		size_t prefixEnd, trailingStart;
+		size_t commandEnd;
+
+		// Grab the prefix if it is present. If a message begins
+		// with a colon, the characters following the colon until
+		// the first space are the prefix.
+		if (message[0] == ':') {
+			prefixEnd = message.find_first_of(' ');
+			prefix.assign(message, 1, prefixEnd - 1);
+			prefixEnd++;
+		} else {
+			prefixEnd = 0;
+		}
+
+		// Grab the trailing if it is present. If a message contains
+		// a space immediately following a colon, all characters after
+		// the colon are the trailing part.
+		trailingStart = message.find(" :");
+		if (trailingStart != std::string::npos)
+			trailing.assign(message, trailingStart+2, std::string::npos);
+		else
+			trailingStart = message.size();
+
+		commandEnd = message.find_first_of(" \r\n", prefixEnd);
+		if(commandEnd == std::string::npos)
+			commandEnd = message.size();
+
+		command.assign(message, prefixEnd, commandEnd - prefixEnd);
+		parameters.assign(message, commandEnd, trailingStart - commandEnd);
+	}
+
+	void onIrcLine(const std::string& line) {
+		std::string prefix;
+		std::string command;
+		std::string parameters;
+		std::string trailing;
+
+		parseIrcMessage(line, prefix, command, parameters, trailing);
+
+		if (command == "PING") {
+			std::string pong = "PONG :" + trailing;
+			socket.write(pong.c_str(), pong.size());
+		} else if(command == "PRIVMSG") {
+			std::string sender;
+
+			if(trailing.size() == 0)
+				return;
+
+			sender.assign(prefix, 0, prefix.find_first_of('!'));
+
+			switch(trailing[0]) {
+				case '\"': {
+					std::string target, msg;
+					size_t separator = trailing.find_first_of(' ');
+
+					target.assign(trailing, 1, separator-1);
+
+					if(separator == std::string::npos || separator == trailing.size() - 1) {
+						sendMessage(sender.c_str(), "Utilisation des messages priv\xE9s comme en jeu: \"Player message \xE0 envoyer");
+						break;
+					}
+
+					msg.assign(trailing, separator+1, std::string::npos);
+					mpRepliesPlayers.insert(std::pair<std::string, std::string>(target, sender));
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, sender.c_str(), target.c_str(), msg.c_str());
+					break;
+				}
+
+				case '$':
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_ADV, sender.c_str(), "", trailing.c_str());
+					break;
+
+				case '!':
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_GLOBAL, sender.c_str(), "", trailing.c_str());
+					break;
+
+				case '#':
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_PARTY, sender.c_str(), "", trailing.c_str());
+					break;
+
+				case '%':
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_GUILD, sender.c_str(), "", trailing.c_str());
+					break;
+
+				default:
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_NORMAL, sender.c_str(), "", trailing.c_str());
+			}
+		}
+	}
+
+	void sendMessage(const char* target, const std::string& msg) {
+		char msgText[512];
+		if(target && (target[0] == '\0' || target[0] == '#'))
+			sprintf(msgText, "PRIVMSG %s :%s\r\n", channelName.c_str(), msg.c_str());
+		else
+			sprintf(msgText, "PRIVMSG %s :%s\r\n", target, msg.c_str());
+		socket.write(msgText, strlen(msgText));
+	}
+
+	std::string servername;
+	std::string nickname;
+	std::string channelName;
+	std::string ip;
+	int port;
+
+	Socket socket;
+	std::vector<char> buffer;
+};
+
+GameServer* gameServer = nullptr;
+IrcClient* ircClient = nullptr;
 
 struct TrafficDump {
 	cval<bool> &enable;
@@ -117,18 +283,18 @@ struct TrafficDump {
 }* trafficDump;
 
 static void init() {
-	CFG_CREATE("ip", "127.0.0.1");
-	CFG_CREATE("port", 4500);
+	CFG_CREATE("rappelz.ip", "127.0.0.1");
+	CFG_CREATE("rappelz.port", 4500);
 
-	CFG_CREATE("account1", "test1");
-	CFG_CREATE("password1", "admin");
-	CFG_CREATE("gsindex1", 1);
-	CFG_CREATE("charname1", "Player1");
+	CFG_CREATE("rappelz.account", "account");
+	CFG_CREATE("rappelz.password", "password");
+	CFG_CREATE("rappelz.gsindex", 2);
+	CFG_CREATE("rappelz.charname", "Yrolis");
 
-	CFG_CREATE("account2", "test2");
-	CFG_CREATE("password2", "admin");
-	CFG_CREATE("gsindex2", 2);
-	CFG_CREATE("charname2", "Player2");
+	CFG_CREATE("irc.ip", "127.0.0.1");
+	CFG_CREATE("irc.port", 6667);
+	CFG_CREATE("irc.channel", "");
+	CFG_CREATE("irc.nick", "");
 
 	CFG_CREATE("use_rsa", true);
 	CFG_CREATE("printall", false);
@@ -167,85 +333,26 @@ int main(int argc, char *argv[])
 
 	printDebug = CFG_GET("printall")->getBool();
 	usersa = CFG_GET("use_rsa")->getBool();
-	ip = CFG_GET("ip")->getString();
-	port = CFG_GET("port")->getInt();
+	ip = CFG_GET("rappelz.ip")->getString();
+	port = CFG_GET("rappelz.port")->getInt();
 	enableGateway = CFG_GET("gateway")->getBool();
 
-	std::string account1 = CFG_GET("account1")->getString();
-	std::string password1 = CFG_GET("password1")->getString();
-	int serverIdx1 = CFG_GET("gsindex1")->getInt();
-	std::string charname1 = CFG_GET("charname1")->getString();
+	std::string ircIp = CFG_GET("irc.ip")->getString();
+	int ircPort = CFG_GET("irc.port")->getInt();
+	std::string ircNick = CFG_GET("irc.nick")->getString();
+	std::string ircChannel = CFG_GET("irc.channel")->getString();
 
-	std::string account2 = CFG_GET("account2")->getString();
-	std::string password2 = CFG_GET("password2")->getString();
-	int serverIdx2 = CFG_GET("gsindex2")->getInt();
-	std::string charname2 = CFG_GET("charname2")->getString();
+	std::string account = CFG_GET("account")->getString();
+	std::string password = CFG_GET("password")->getString();
+	int serverIdx = CFG_GET("gsindex")->getInt();
+	std::string charname = CFG_GET("charname")->getString();
 
+	mainLogger.info("Starting chat gateway\n");
 
-	fprintf(stderr, "Starting chat gateway\n");
-
-	gameServers.push_back(new GameServer(ip, port, account1, password1, serverIdx1, charname1, &trafficLogger));
-	gameServers.push_back(new GameServer(ip, port, account2, password2, serverIdx2, charname2, &trafficLogger));
-
-	uv_tty_init(EventLoop::getLoop(), &ttyHandle, 0, 1);
-	uv_read_start((uv_stream_t*)&ttyHandle, &onTTYAlloc, &onTTYRead);
+	gameServer = new GameServer(ip, port, account, password, serverIdx, charname, &trafficLogger);
+	ircClient = new IrcClient(ircIp, ircPort, ircChannel, ircNick, &trafficLogger);
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
-}
-
-static void onTTYAlloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
-	memset(ttyBuffer, 0, sizeof(ttyBuffer));
-	buf->base = ttyBuffer;
-	buf->len = sizeof(ttyBuffer);
-}
-
-static void onTTYRead(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf) {
-	int gsIndex = 0;
-	int type = TS_CS_CHAT_REQUEST::CHAT_NORMAL;
-	std::string target = "";
-	std::string message;
-
-	printf("tty: %s\n", ttyBuffer);
-	char *p = ttyBuffer;
-	if(p[0] >= '0' && p[0] <= '9') {
-		gsIndex = p[0] - '0';
-		p++;
-	}
-
-	switch(p[0]) {
-		case '\"':
-			type = TS_CS_CHAT_REQUEST::CHAT_WHISPER;
-			p++;
-			break;
-	}
-	std::string inputBuffer(p);
-	if(type == TS_CS_CHAT_REQUEST::CHAT_WHISPER) {
-		size_t pos = inputBuffer.find_first_of(' ');
-		target = inputBuffer.substr(0, pos);
-		if(pos == std::string::npos)
-			message = inputBuffer;
-		else
-			message = inputBuffer.substr(pos+1);
-	} else
-		message = inputBuffer;
-
-	char messageFull[500];
-	sprintf(messageFull, "[%d] %s: %s", gsIndex, target.c_str(), message.c_str());
-	printf("tty Msg %d: %s\n", type, messageFull);
-
-	if(gsIndex < (int)gameServers.size() && gameServers.at(gsIndex)->socket && message.size() > 0) {
-		TS_CS_CHAT_REQUEST* chatRqst = TS_MESSAGE_WNA::create<TS_CS_CHAT_REQUEST, char>(message.size());
-
-		chatRqst->len = message.size();
-		strcpy(chatRqst->szTarget, target.c_str());
-		strncpy(chatRqst->message, message.c_str(), chatRqst->len);
-		chatRqst->type = type;
-		chatRqst->request_id = 0;
-
-		gameServers.at(gsIndex)->socket->sendPacket(chatRqst);
-
-		TS_MESSAGE_WNA::destroy(chatRqst);
-	}
 }
 
 //auth bench
@@ -257,8 +364,7 @@ static void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCod
 		auth->retreiveServerList(Callback<Authentication::CallbackOnServerList>(instance, &onServerList));
 	} else if(result == TS_RESULT_ALREADY_EXIST) {
 		auth->abort(Callback<Authentication::CallbackOnAuthClosed>(instance, &onAuthClosedWithFailure));
-		uv_timer_start(&gameServer->recoTimer, &onSocketTimer, 5000, 0);
-		printf("%p timer reco\n", instance);
+		uv_timer_start(&gameServer->recoTimer, &onGSSocketTimer, 5000, 0);
 	} else {
 	}
 }
@@ -279,6 +385,8 @@ static void onServerList(IListener* instance, Authentication* auth, const std::v
 	}
 	if((int)servers->size() > gameServer->serverIdx) {
 		gameServer->serverName = servers->at(gameServer->serverIdx).serverName;
+		if(ircClient->socket.getState() != Socket::ConnectedState)
+			ircClient->connect(gameServer->serverName);
 		auth->selectServer(servers->at(gameServer->serverIdx).serverId, Callback<Authentication::CallbackOnGameResult>(instance, &onGameResult));
 	} else {
 		fprintf(stderr, "%p server not available\n", instance);
@@ -298,10 +406,11 @@ static void onAuthClosed(IListener* instance, Authentication* auth) {
 
 static void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket) {
 	GameServer* gameServer = (GameServer*) instance;
-	fprintf(stderr, "%p login to GS result: %d\n", instance, result);
-	uv_timer_start(&gameServer->ggTimer, &onSocketGGTimer, 280000, 0);
+	if(printDebug)
+		fprintf(stderr, "%p login to GS result: %d\n", instance, result);
+	uv_timer_start(&gameServer->ggTimer, &onGSSocketGGTimer, 280000, 0);
 
-	gameServerSocket->addEventListener(instance, &onSocketStateChange);
+	gameServerSocket->addEventListener(instance, &onGSSocketStateChange);
 	gameServerSocket->addPacketListener(TS_SC_CHAT::packetID, instance, &onGamePacketReceived);
 	gameServerSocket->addPacketListener(TS_SC_CHARACTER_LIST::packetID, instance, &onGamePacketReceived);
 	gameServerSocket->addPacketListener(TS_SC_ENTER::packetID, instance, &onGamePacketReceived);
@@ -335,13 +444,13 @@ static void onGamePacketReceived(IListener* instance, RappelzSocket* socket, con
 			socket->sendPacket(&timeSyncPkt);
 
 			gameServer->socket = socket;
+			ircClient->sendMessage("", "\001ACTION is connected to the game server\001");
 
 			break;
 		}
 		case TS_SC_LOGIN_RESULT::packetID: {
 				TS_SC_LOGIN_RESULT* loginResultPkt = (TS_SC_LOGIN_RESULT*) packet;
 				gameServer->handle = loginResultPkt->handle;
-				printf("%p this char handle: 0x%08X\n", instance, gameServer->handle);
 				break;
 			}
 		case TS_SC_ENTER::packetID: {
@@ -349,7 +458,6 @@ static void onGamePacketReceived(IListener* instance, RappelzSocket* socket, con
 			if(enterPkt->type == 0 && enterPkt->ObjType == 0) {
 				TS_SC_ENTER::PlayerInfo* playerInfo = (TS_SC_ENTER::PlayerInfo*) (((char*)enterPkt) + sizeof(TS_SC_ENTER));
 				playerNames.insert(std::pair<unsigned int, std::string>(enterPkt->handle, std::string(playerInfo->szName)));
-				printf("%p Added player %s with handle 0x%08X\n", instance, playerInfo->szName, enterPkt->handle);
 			}
 			break;
 		}
@@ -359,24 +467,24 @@ static void onGamePacketReceived(IListener* instance, RappelzSocket* socket, con
 			std::unordered_map<unsigned int, std::string>::iterator it = playerNames.find(chatPkt->handle);
 			std::string playerName = "Unknown";
 
+			if(chatPkt->handle == gameServer->handle)
+				break;
+
 			if(it != playerNames.end())
 				playerName = it->second;
-			else if(chatPkt->handle == gameServer->handle)
-				playerName = gameServer->playername;
 
-			resendMsg(gameServer, chatPkt->type, playerName.c_str(), msg);
+			sendMsgToIRC(chatPkt->type, playerName.c_str(), msg);
 			break;
 		}
 		case TS_SC_CHAT::packetID: {
 			TS_SC_CHAT* chatPkt = (TS_SC_CHAT*) packet;
 			std::string msg = std::string(chatPkt->message, chatPkt->len);
-			resendMsg(gameServer, chatPkt->type, chatPkt->szSender, msg);
+			sendMsgToIRC(chatPkt->type, chatPkt->szSender, msg);
 			break;
 		}
 
 		case TS_SC_DISCONNECT_DESC::packetID:
 			if(gameServer->socket) {
-				printf("%p disconnect\n", instance);
 				gameServer->socket->close();
 			} else
 				printf("%p can't disconnect no socket\n", instance);
@@ -384,22 +492,23 @@ static void onGamePacketReceived(IListener* instance, RappelzSocket* socket, con
 	}
 }
 
-static void resendMsg(GameServer* gameServer, int type, const char* sender, std::string msg) {
+static void sendMsgToGS(int type, const char* sender, const char* target, std::string msg) {
 	char messageFull[500];
 	int msgLen;
 
-	if(!strcmp(sender, gameServer->playername.c_str()))
-		return;
-
 	std::replace(msg.begin(), msg.end(), '\x0D', '\x0A');
+	if(msg.size() > 200)
+		msg.resize(200, ' ');
 
-	sprintf(messageFull, "[%s] %s: %s", gameServer->serverName.c_str(), sender, msg.c_str());
-	printf("%p Msg %d: %s\n", gameServer, type, messageFull);
+	if(sender && sender[0])
+		sprintf(messageFull, "%s: %s", sender, msg.c_str());
+	else
+		sprintf(messageFull, "%s", msg.c_str());
+
+	if(printDebug)
+		printf("[IRC] Msg %d: %s\n", type, messageFull);
 
 	if(sender[0] == '@')
-		return;
-
-	if(type != TS_CS_CHAT_REQUEST::CHAT_NORMAL && type != TS_CS_CHAT_REQUEST::CHAT_WHISPER)
 		return;
 
 	if(msg.size() < 1)
@@ -408,67 +517,124 @@ static void resendMsg(GameServer* gameServer, int type, const char* sender, std:
 	msgLen = (strlen(messageFull) > 255) ? 255 : strlen(messageFull);
 
 	TS_CS_CHAT_REQUEST* chatRqst;
+	chatRqst = TS_MESSAGE_WNA::create<TS_CS_CHAT_REQUEST, char>(msgLen);
 
-	if(type == TS_CS_CHAT_REQUEST::CHAT_WHISPER) {
-		const char* messageToWhisper = "Ce perso fait uniquement passerelle entre le chat des serveurs Joker et Pyro. En gros je dis ce qui se dit sur l'autre serveur";
-		chatRqst = TS_MESSAGE_WNA::create<TS_CS_CHAT_REQUEST, char>(strlen(messageToWhisper));
-
-		chatRqst->len = strlen(messageToWhisper);
-		strcpy(chatRqst->szTarget, sender);
-		strncpy(chatRqst->message, messageToWhisper, chatRqst->len);
-		chatRqst->type = TS_CS_CHAT_REQUEST::CHAT_WHISPER;
-		chatRqst->request_id = 0;
-	} else {
-		chatRqst = TS_MESSAGE_WNA::create<TS_CS_CHAT_REQUEST, char>(msgLen);
-
-		chatRqst->len = msgLen;
-		strcpy(chatRqst->szTarget, "");
-		strncpy(chatRqst->message, messageFull, chatRqst->len);
-		chatRqst->type = TS_CS_CHAT_REQUEST::CHAT_NORMAL;
-	}
+	chatRqst->len = msgLen;
+	strcpy(chatRqst->szTarget, target);
+	strncpy(chatRqst->message, messageFull, chatRqst->len);
+	chatRqst->type = type;
+	chatRqst->request_id = 0;
 
 	if(enableGateway) {
-		if(type == TS_CS_CHAT_REQUEST::CHAT_WHISPER) {
+		if(gameServer->socket)
 			gameServer->socket->sendPacket(chatRqst);
-		} else {
-			for(auto it = gameServers.begin(); it != gameServers.end(); ++it) {
-				GameServer* otherServer = *it;
-
-				if(otherServer != gameServer && otherServer->socket)
-					otherServer->socket->sendPacket(chatRqst);
-			}
-		}
 	}
 
 	TS_MESSAGE_WNA::destroy(chatRqst);
 }
 
-static void onSocketStateChange(IListener* instance, Socket* socket, Socket::State oldState, Socket::State newState) {
-	if(newState == Socket::UnconnectedState) {
-		GameServer* gameServer = (GameServer*) instance;
-		gameServer->socket = nullptr;
-		uv_timer_start(&gameServer->recoTimer, &onSocketTimer, 5000, 0);
-		printf("%p timer reco\n", instance);
+static const char* getChatColor(int type) {
+	switch(type) {
+		case TS_CS_CHAT_REQUEST::CHAT_ADV: return "02";
+		case TS_CS_CHAT_REQUEST::CHAT_WHISPER: return "08";
+		case TS_CS_CHAT_REQUEST::CHAT_GLOBAL: return "15";
+		case TS_CS_CHAT_REQUEST::CHAT_EMOTION: return "15";
+		case TS_CS_CHAT_REQUEST::CHAT_GM: return "07";
+		case TS_CS_CHAT_REQUEST::CHAT_GM_WHISPER: return "08";
+		case TS_CS_CHAT_REQUEST::CHAT_PARTY: return "03";
+		case TS_CS_CHAT_REQUEST::CHAT_GUILD: return "06";
+		case TS_CS_CHAT_REQUEST::CHAT_ATTACKTEAM: return "06";
+		case TS_CS_CHAT_REQUEST::CHAT_NOTICE: return "15";
+		case TS_CS_CHAT_REQUEST::CHAT_ANNOUNCE: return "15";
+		case TS_CS_CHAT_REQUEST::CHAT_CENTER_NOTICE: return "15";
+	}
+	return nullptr;
+}
+
+static void sendMsgToIRC(int type, const char* sender, std::string msg) {
+	char messageFull[500];
+
+	std::replace(msg.begin(), msg.end(), '\x0D', ' ');
+	std::replace(msg.begin(), msg.end(), '\x0A', ' ');
+
+	const char* color = getChatColor(type);
+
+	if(printDebug)
+		printf("[GS] Msg %d: %s: %s\n", type, sender, msg.c_str());
+
+	if(sender[0] == '@')
+		return;
+
+	if(msg.size() < 1)
+		return;
+
+	if(ircClient) {
+		if(type == TS_CS_CHAT_REQUEST::CHAT_WHISPER) {
+			size_t separator = msg.find(": ");
+			std::string target;
+
+			if(separator == std::string::npos || separator == msg.size()-2) {
+				auto it = mpRepliesPlayers.find(std::string(sender));
+				if(it == mpRepliesPlayers.end()) {
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Pour envoyer un message priv\xE9, il faut indiquer le nom suivi de \": \". Exemple:");
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Player: message \xE0 envoyer");
+				} else {
+					target = it->second;
+					separator = 0;
+				}
+			} else {
+				target.assign(msg, 0, separator);
+				separator += 2;
+			}
+
+			if(target.size() > 0) {
+				if(color)
+					sprintf(messageFull, "%c%s%s: %s%c", 0x03, color, sender, msg.substr(separator).c_str(), 0x03);
+				else
+					sprintf(messageFull, "%s: %s", sender, msg.substr(separator).c_str());
+
+				ircClient->sendMessage(target.c_str(), messageFull);
+			}
+		} else {
+			if(color)
+				sprintf(messageFull, "%c%s%s: %s%c", 0x03, color, sender, msg.c_str(), 0x03);
+			else
+				sprintf(messageFull, "%s: %s", sender, msg.c_str());
+			ircClient->sendMessage("", messageFull);
+		}
 	}
 }
 
-static void onSocketGGTimer(uv_timer_t* handle) {
+static void onGSSocketStateChange(IListener* instance, Socket* socket, Socket::State oldState, Socket::State newState) {
+	if(newState == Socket::UnconnectedState) {
+		GameServer* gameServer = (GameServer*) instance;
+		gameServer->socket = nullptr;
+		ircClient->sendMessage("", "\001ACTION disconnected from the game server\001");
+		uv_timer_start(&gameServer->recoTimer, &onGSSocketTimer, 5000, 0);
+		if(printDebug)
+			printf("%p timer reco\n", instance);
+	}
+}
+
+static void onGSSocketGGTimer(uv_timer_t* handle) {
 	GameServer* gameServer = (GameServer*) handle->data;
 	if(gameServer->socket) {
-		printf("%p gg reco\n", gameServer);
+		if(printDebug)
+			printf("%p gg reco\n", gameServer);
 		gameServer->socket->close();
 	} else {
 		printf("%p can't gg reco no socket !!!\n", gameServer);
 	}
 }
 
-static void onSocketTimer(uv_timer_t* handle) {
+static void onGSSocketTimer(uv_timer_t* handle) {
 	GameServer* gameServer = (GameServer*) handle->data;
-	printf("%p reco\n", gameServer);
+	if(printDebug)
+		printf("%p reco\n", gameServer);
 	gameServer->connect();
 }
 
-static void onSocketUpdateTimer(uv_timer_t* handle) {
+static void onGSSocketUpdateTimer(uv_timer_t* handle) {
 	GameServer* gameServer = (GameServer*) handle->data;
 	TS_CS_UPDATE updatPkt;
 	TS_MESSAGE::initMessage<TS_CS_UPDATE>(&updatPkt);
@@ -477,7 +643,6 @@ static void onSocketUpdateTimer(uv_timer_t* handle) {
 
 	if(!gameServer->socket)
 		return;
-
 
 	gameServer->socket->sendPacket(&updatPkt);
 }

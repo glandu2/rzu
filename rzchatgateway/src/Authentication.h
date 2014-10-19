@@ -91,12 +91,13 @@ class Authentication : private Object, IListener
 		std::string username;
 		std::string password;
 		unsigned char aes_key_iv[32];
-		void* rsaCipher;
 		std::vector<ServerConnectionInfo> serverList;
 		int selectedServer;
 		uint64_t oneTimePassword;
 		bool inProgress;
 		Log* packetLog;
+
+		static void* rsaCipher;
 		static DesPasswordCipher desCipher;
 
 		Callback<CallbackOnAuthResult> authResultCallback;
