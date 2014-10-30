@@ -6,6 +6,7 @@ set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (one of Debug, Release, Re
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs instead of static")
 
 message("Using ${CMAKE_BUILD_TYPE} mode")
+message("Using shared libs: ${BUILD_SHARED_LIBS}")
 
 get_filename_component(BUILD_DIR_NAME ${CMAKE_BINARY_DIR} NAME)
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
