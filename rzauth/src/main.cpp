@@ -19,7 +19,8 @@
 #include "UploadServer/GameServerSession.h"
 #include "UploadServer/IconServerSession.h"
 
-#include "AdminServer/TelnetSession.h"
+#include "AdminServer/AdminInterface.h"
+#include "AuthServer/BillingInterface.h"
 
 /* TODO for next version
  */
@@ -121,44 +122,49 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	RappelzServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.idleTimeout, trafficLogger);
-	RappelzServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.idleTimeout, trafficLogger);
+	RappelzServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.listener.idleTimeout, trafficLogger);
+	RappelzServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.listener.idleTimeout, trafficLogger);
+	RappelzServer<AuthServer::BillingInterface> billingTelnetServer(&CONFIG_GET()->auth.billing.listener.idleTimeout);
 
-	RappelzServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.idleTimeout, trafficLogger);
-	RappelzServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.icons.idleTimeout, trafficLogger);
-	RappelzServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.idleTimeout, trafficLogger);
+	RappelzServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.listener.idleTimeout, trafficLogger);
+	RappelzServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.icons.listener.idleTimeout, trafficLogger);
+	RappelzServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.listener.idleTimeout, trafficLogger);
 
-	RappelzServer<AdminServer::TelnetSession> adminTelnetServer(&CONFIG_GET()->admin.telnet.idleTimeout);
+	RappelzServer<AdminServer::AdminInterface> adminTelnetServer(&CONFIG_GET()->admin.listener.idleTimeout);
 
 	serverManager.addServer("auth.clients", &authClientServer,
-							CONFIG_GET()->auth.client.listenIp,
-							CONFIG_GET()->auth.client.port,
-							CONFIG_GET()->auth.client.autoStart,
+							CONFIG_GET()->auth.client.listener.listenIp,
+							CONFIG_GET()->auth.client.listener.port,
+							CONFIG_GET()->auth.client.listener.autoStart,
 							&banManager);
 	serverManager.addServer("auth.gameserver", &authGameServer,
-							CONFIG_GET()->auth.game.listenIp,
-							CONFIG_GET()->auth.game.port,
-							CONFIG_GET()->auth.game.autoStart);
+							CONFIG_GET()->auth.game.listener.listenIp,
+							CONFIG_GET()->auth.game.listener.port,
+							CONFIG_GET()->auth.game.listener.autoStart);
+	serverManager.addServer("auth.billing", &billingTelnetServer,
+							CONFIG_GET()->auth.billing.listener.listenIp,
+							CONFIG_GET()->auth.billing.listener.port,
+							CONFIG_GET()->auth.billing.listener.autoStart);
 
 	serverManager.addServer("upload.clients", &uploadClientServer,
-							CONFIG_GET()->upload.client.listenIp,
-							CONFIG_GET()->upload.client.port,
-							CONFIG_GET()->upload.client.autoStart,
+							CONFIG_GET()->upload.client.listener.listenIp,
+							CONFIG_GET()->upload.client.listener.port,
+							CONFIG_GET()->upload.client.listener.autoStart,
 							&banManager);
 	serverManager.addServer("upload.iconserver", &uploadIconServer,
-							CONFIG_GET()->upload.icons.listenIp,
-							CONFIG_GET()->upload.icons.port,
-							CONFIG_GET()->upload.icons.autoStart,
+							CONFIG_GET()->upload.icons.listener.listenIp,
+							CONFIG_GET()->upload.icons.listener.port,
+							CONFIG_GET()->upload.icons.listener.autoStart,
 							&banManager);
 	serverManager.addServer("upload.gameserver", &uploadGameServer,
-							CONFIG_GET()->upload.game.listenIp,
-							CONFIG_GET()->upload.game.port,
-							CONFIG_GET()->upload.game.autoStart);
+							CONFIG_GET()->upload.game.listener.listenIp,
+							CONFIG_GET()->upload.game.listener.port,
+							CONFIG_GET()->upload.game.listener.autoStart);
 
 	serverManager.addServer("admin.telnet", &adminTelnetServer,
-							CONFIG_GET()->admin.telnet.listenIp,
-							CONFIG_GET()->admin.telnet.port,
-							CONFIG_GET()->admin.telnet.autoStart);
+							CONFIG_GET()->admin.listener.listenIp,
+							CONFIG_GET()->admin.listener.port,
+							CONFIG_GET()->admin.listener.autoStart);
 
 	serverManager.start();
 

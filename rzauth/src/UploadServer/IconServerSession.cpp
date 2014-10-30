@@ -93,7 +93,7 @@ void IconServerSession::parseData(const std::vector<char>& data) {
 }
 
 void IconServerSession::parseUrl(std::string urlString) {
-	size_t p;
+	ssize_t p;
 	for(p = urlString.size()-1; p >= 0; p--) {
 		const char c = urlString.at(p);
 		if(c == '/' || c == '\\' || c == ':')

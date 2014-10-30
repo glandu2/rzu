@@ -36,6 +36,7 @@ public:
 	static bool removeClient(const std::string& account);
 	static bool removeClient(ClientData* clientData);
 	static ClientData* getClient(const std::string& account);
+	static ClientData* getClientById(uint32_t accountId);
 	static unsigned int getClientCount() { return (int)connectedClients.size(); }
 	static void removeServer(GameServerSession* server); //remove all client that was connected to this server
 
@@ -52,6 +53,7 @@ private:
 	static uv_mutex_t initializeLock();
 
 	static std::unordered_map<std::string, ClientData*> connectedClients;
+	static std::unordered_map<uint32_t, ClientData*> connectedClientsById;
 	static uv_mutex_t mapLock;
 	static uv_once_t lockInit;
 

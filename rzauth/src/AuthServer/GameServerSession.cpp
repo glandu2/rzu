@@ -10,6 +10,7 @@
 #include "Packets/TS_AG_LOGIN_RESULT.h"
 #include "Packets/TS_AG_CLIENT_LOGIN.h"
 #include "Packets/TS_AG_KICK_CLIENT.h"
+#include "Packets/TS_AG_ITEM_PURCHASED.h"
 
 namespace AuthServer {
 
@@ -27,6 +28,18 @@ GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncry
 					   TS_GA_CLIENT_LOGOUT::packetID,
 					   TS_GA_CLIENT_KICK_FAILED::packetID
 					   );
+}
+
+void GameServerSession::sendNotifyItemPurchased(ClientData* client) {
+	TS_AG_ITEM_PURCHASED itemPurchasedPacket;
+	TS_MESSAGE::initMessage<TS_AG_ITEM_PURCHASED>(&itemPurchasedPacket);
+
+	strncpy(itemPurchasedPacket.account, client->account.c_str(), 60);
+	itemPurchasedPacket.account[60] = 0;
+
+	itemPurchasedPacket.nAccountID = client->accountId;
+
+	sendPacket(&itemPurchasedPacket);
 }
 
 GameServerSession::~GameServerSession() {
