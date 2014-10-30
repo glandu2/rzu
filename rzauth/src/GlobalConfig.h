@@ -75,20 +75,31 @@ struct GlobalConfig {
 	struct UploadConfig {
 		struct ClientConfig {
 			cval<std::string> &uploadDir, &listenIp;
-			cval<int> &port, &webPort, &idleTimeout;
+			cval<int> &port, &idleTimeout;
 			cval<bool> &autoStart;
 
 			ClientConfig() :
 				uploadDir(CFG_CREATE("upload.dir", "upload")),
 				listenIp(CFG_CREATE("upload.clients.ip", "0.0.0.0")),
 				port(CFG_CREATE("upload.clients.port", 4617)),
-				webPort(CFG_CREATE("upload.clients.webport", 80)),
 				idleTimeout(CFG_CREATE("upload.clients.idletimeout", 61)),
 				autoStart(CFG_CREATE("upload.clients.autostart", true))
 			{
 				Utils::autoSetAbsoluteDir(uploadDir);
 			}
 		} client;
+
+		struct IconConfig {
+			cval<std::string> &listenIp;
+			cval<int> &port, &idleTimeout;
+			cval<bool> &autoStart;
+
+			IconConfig() :
+				listenIp(CFG_CREATE("upload.iconserver.ip", "0.0.0.0")),
+				port(CFG_CREATE("upload.iconserver.port", 80)),
+				idleTimeout(CFG_CREATE("upload.iconserver.idletimeout", 31)),
+				autoStart(CFG_CREATE("upload.iconserver.autostart", true)) {}
+		} icons;
 
 		struct GameConfig {
 			cval<std::string> &listenIp;
