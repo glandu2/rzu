@@ -10,11 +10,14 @@ DesPasswordCipher
 ServerInfo
 */
 
-#include "AdminServer/CommandRunner.h"
-DECLARE_CLASSCOUNT_STATIC(AdminServer::CommandRunner)
+#include "AdminServer/AdminInterface.h"
+DECLARE_CLASSCOUNT_STATIC(AdminServer::AdminInterface)
 
-#include "AdminServer/TelnetSession.h"
-DECLARE_CLASSCOUNT_STATIC(AdminServer::TelnetSession)
+#include "AuthServer/BillingInterface.h"
+DECLARE_CLASSCOUNT_STATIC(AuthServer::BillingInterface)
+
+#include "TelnetSession.h"
+DECLARE_CLASSCOUNT_STATIC(TelnetSession)
 
 #include "AuthServer/ClientData.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientData)

@@ -37,6 +37,8 @@ public:
 	void decPlayerCount() { playerCount--; }
 	uint32_t getPlayerCount() { return playerCount; }
 
+	void sendNotifyItemPurchased(ClientData* client);
+
 protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
 

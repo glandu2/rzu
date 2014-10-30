@@ -11,13 +11,13 @@ struct DbConfig : public IListener {
 	cval<bool> &ignoreInitCheck;
 
 	DbConfig(const std::string& prefix) :
-		driver(CFG_CREATE(prefix + "db.driver", "osdriver")), //Set in .cpp according to OS
-		server(CFG_CREATE(prefix + "db.server", "127.0.0.1")),
-		name(CFG_CREATE(prefix + "db.name", "Auth")),
-		account(CFG_CREATE(prefix + "db.account", "sa")),
-		password(CFG_CREATE(prefix + "db.password", "")),
-		salt(CFG_CREATE(prefix + "db.salt", "2011")),
-		port(CFG_CREATE(prefix + "db.port", 1433)),
+		driver(CFG_CREATE(prefix + ".db.driver", "osdriver")), //Set in .cpp according to OS
+		server(CFG_CREATE(prefix + ".db.server", "127.0.0.1")),
+		name(CFG_CREATE(prefix + ".db.name", "Auth")),
+		account(CFG_CREATE(prefix + ".db.account", "sa")),
+		password(CFG_CREATE(prefix + ".db.password", "")),
+		salt(CFG_CREATE(prefix + ".db.salt", "2011")),
+		port(CFG_CREATE(prefix + ".db.port", 1433)),
 		connectionString(CFG_CREATE(prefix + "db.connectionstring", "")),
 		ignoreInitCheck(CFG_CREATE(prefix + "db.ignoreinitcheck", true))
 	{
@@ -33,93 +33,91 @@ struct DbConfig : public IListener {
 	static void updateConnectionString(IListener* instance);
 };
 
+struct ListenerConfig {
+	cval<std::string> &listenIp;
+	cval<int> &port, &idleTimeout;
+	cval<bool> &autoStart;
+
+	ListenerConfig(const std::string& prefix, const char* defaultIp, int defaultPort, bool autoStart = true, int idleTimeout = 0) :
+		listenIp(CFG_CREATE(prefix + ".ip", defaultIp)),
+		port(CFG_CREATE(prefix + ".port", defaultPort)),
+		idleTimeout(CFG_CREATE(prefix + ".idletimeout", idleTimeout)),
+		autoStart(CFG_CREATE(prefix + ".autostart", autoStart))
+	{}
+};
+
 struct GlobalConfig {
 
 	struct AuthConfig {
 		DbConfig db;
 
 		struct ClientConfig {
-			cval<std::string> &desKey, &listenIp;
-			cval<int> &port, &idleTimeout;
-			cval<bool> &autoStart;
+			ListenerConfig listener;
+			cval<std::string> &desKey;
 			cval<int> &maxPublicServerIdx;
 
 			ClientConfig() :
+				listener("auth.clients", "0.0.0.0", 4500, true, 301),
 				desKey(CFG_CREATE("auth.clients.des_key", "MERONG")),
-				listenIp(CFG_CREATE("auth.clients.ip", "0.0.0.0")),
-				port(CFG_CREATE("auth.clients.port", 4500)),
-				idleTimeout(CFG_CREATE("auth.clients.idletimeout", 301)),
-				autoStart(CFG_CREATE("auth.clients.autostart", true)),
 				maxPublicServerIdx(CFG_CREATE("auth.clients.maxpublicserveridx", 30)) {}
 		} client;
 
 		struct GameConfig {
-			cval<std::string> &listenIp;
-			cval<int> &port, &idleTimeout;
-			cval<bool> &autoStart, &strictKick;
+			ListenerConfig listener;
+			cval<bool> &strictKick;
 			cval<int> &maxPlayers;
 
 			GameConfig() :
-				listenIp(CFG_CREATE("auth.gameserver.ip", "127.0.0.1")),
-				port(CFG_CREATE("auth.gameserver.port", 4502)),
-				idleTimeout(CFG_CREATE("auth.gameserver.idletimeout", 0)),
-				autoStart(CFG_CREATE("auth.gameserver.autostart", true)),
+				listener("auth.gameserver", "127.0.0.1", 4502, true, 0),
 				strictKick(CFG_CREATE("auth.gameserver.strictkick", true)),
 				maxPlayers(CFG_CREATE("auth.gameserver.maxplayers", 400)) {}
 		} game;
 
+		struct BillingConfig {
+			ListenerConfig listener;
+
+			BillingConfig() :
+				listener("auth.billing", "127.0.0.1", 4503, true, 0) {}
+		} billing;
+
 		AuthConfig() :
-			db("auth.") {}
+			db("auth") {}
 	} auth;
 
 	struct UploadConfig {
 		struct ClientConfig {
-			cval<std::string> &uploadDir, &listenIp;
-			cval<int> &port, &webPort, &idleTimeout;
-			cval<bool> &autoStart;
+			ListenerConfig listener;
+			cval<std::string> &uploadDir;
 
 			ClientConfig() :
-				uploadDir(CFG_CREATE("upload.dir", "upload")),
-				listenIp(CFG_CREATE("upload.clients.ip", "0.0.0.0")),
-				port(CFG_CREATE("upload.clients.port", 4617)),
-				webPort(CFG_CREATE("upload.clients.webport", 80)),
-				idleTimeout(CFG_CREATE("upload.clients.idletimeout", 61)),
-				autoStart(CFG_CREATE("upload.clients.autostart", true))
+				listener("upload.clients", "0.0.0.0", 4617, true, 61),
+				uploadDir(CFG_CREATE("upload.dir", "upload"))
 			{
 				Utils::autoSetAbsoluteDir(uploadDir);
 			}
 		} client;
 
+		struct IconConfig {
+			ListenerConfig listener;
+
+			IconConfig() :
+				listener("upload.iconserver", "0.0.0.0", 80, true, 31) {}
+		} icons;
+
 		struct GameConfig {
-			cval<std::string> &listenIp;
-			cval<int> &port, &idleTimeout;
-			cval<bool> &autoStart;
+			ListenerConfig listener;
 
 			GameConfig() :
-				listenIp(CFG_CREATE("upload.gameserver.ip", "127.0.0.1")),
-				port(CFG_CREATE("upload.gameserver.port", 4616)),
-				idleTimeout(CFG_CREATE("upload.gameserver.idletimeout", 0)),
-				autoStart(CFG_CREATE("upload.gameserver.autostart", true)) {}
+				listener("upload.gameserver", "127.0.0.1", 4616, true, 0) {}
 		} game;
 	} upload;
 
 	struct AdminConfig {
-		struct TelnetConfig {
-			cval<std::string> &listenIp;
-			cval<int> &port, &idleTimeout;
-			cval<bool> &autoStart;
-
-			TelnetConfig() :
-				listenIp(CFG_CREATE("admin.telnet.ip", "127.0.0.1")),
-				port(CFG_CREATE("admin.telnet.port", 4501)),
-				idleTimeout(CFG_CREATE("admin.telnet.idletimeout", 0)),
-				autoStart(CFG_CREATE("admin.telnet.autostart", true))
-			{}
-		} telnet;
-
+		ListenerConfig listener;
 		cval<int> &dumpMode;
 
 		AdminConfig() :
+			listener("admin.telnet", "127.0.0.1", 4501, true, 0),
 			dumpMode(CFG_CREATE("admin.dump_mode", 0)) //1: no dump, anything else: create dump on crash
 		{}
 	} admin;
