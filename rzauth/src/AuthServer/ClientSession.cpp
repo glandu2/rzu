@@ -255,7 +255,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	}
 }
 
-void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang, uint32_t serverIdxOffset) {
+void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang, uint32_t serverIdxOffset, bool block) {
 	TS_AC_RESULT result;
 	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
@@ -264,6 +264,9 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 
 	if(authOk == false) {
 		result.result = TS_RESULT_INVALID_PASSWORD;
+		result.login_flag = 0;
+	} else if(block == true) {
+		result.result = TS_RESULT_ACCESS_DENIED;
 		result.login_flag = 0;
 	} else if(clientData != nullptr) { //already connected
 		result.result = TS_RESULT_CLIENT_SIDE_ERROR;

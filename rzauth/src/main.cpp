@@ -124,7 +124,7 @@ void runServers(Log *trafficLogger) {
 
 	RappelzServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.listener.idleTimeout, trafficLogger);
 	RappelzServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.listener.idleTimeout, trafficLogger);
-	RappelzServer<AuthServer::BillingInterface> billingTelnetServer(&CONFIG_GET()->auth.billing.listener.idleTimeout);
+	RappelzServer<AuthServer::BillingInterface> billingTelnetServer(&CONFIG_GET()->auth.billing.listener.idleTimeout, trafficLogger);
 
 	RappelzServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.listener.idleTimeout, trafficLogger);
 	RappelzServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.icons.listener.idleTimeout, trafficLogger);
