@@ -16,7 +16,7 @@ struct DbAccountConfig {
 	cval<bool>& enable;
 	cval<std::string>& query;
 	cval<int> &paramAccount, &paramPassword;
-	cval<std::string> &colAccountId, &colAge, &colLastServerIdx, &colEventCode, &colPcBang, &colServerIdxOffset;
+	cval<std::string> &colAccountId, &colAge, &colLastServerIdx, &colEventCode, &colPcBang, &colServerIdxOffset, &colBlock;
 
 	DbAccountConfig() :
 		enable(CFG_CREATE("sql.db_account.enable", true)),
@@ -28,7 +28,8 @@ struct DbAccountConfig {
 		colLastServerIdx(CFG_CREATE("sql.db_account.column.lastserveridx", "last_login_server_idx")),
 		colEventCode    (CFG_CREATE("sql.db_account.column.eventcode"    , "event_code")),
 		colPcBang    (CFG_CREATE("sql.db_account.column.pcbang"    , "pcbang")),
-		colServerIdxOffset    (CFG_CREATE("sql.db_account.column.serveridxoffset", "server_idx_offset"))
+		colServerIdxOffset    (CFG_CREATE("sql.db_account.column.serveridxoffset", "server_idx_offset")),
+		colBlock(CFG_CREATE("sql.db_account.column.block", "block"))
 	{}
 };
 static DbAccountConfig* config = nullptr;
@@ -48,6 +49,7 @@ bool DB_Account::init(DbConnectionPool* dbConnectionPool) {
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, eventCode, 0, config->colEventCode));
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, pcBang, 0, config->colPcBang));
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, serverIdxOffset, 0, config->colServerIdxOffset));
+	cols.emplace_back(DECLARE_COLUMN(DB_Account, block, 0, config->colBlock));
 
 	dbBinding = new DbQueryBinding(dbConnectionPool, config->enable, CONFIG_GET()->auth.db.connectionString, config->query, params, cols);
 
@@ -73,6 +75,7 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	eventCode = 0;
 	pcBang = 0;
 	serverIdxOffset = 0;
+	block = false;
 
 	buffer.append(password, password + size);
 	trace("MD5 of \"%.*s\" with len %d\n", (int)buffer.size(), buffer.c_str(), (int)buffer.size());
@@ -117,7 +120,7 @@ bool DB_Account::onRowDone() {
 
 void DB_Account::onDone(Status status) {
 	if(status != S_Canceled && clientInfo)
-		clientInfo->clientAuthResult(ok, account, accountId, age, lastServerIdx, eventCode, pcBang, serverIdxOffset);
+		clientInfo->clientAuthResult(ok, account, accountId, age, lastServerIdx, eventCode, pcBang, serverIdxOffset, block);
 }
 
 } // namespace AuthServer
