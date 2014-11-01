@@ -16,15 +16,25 @@ static const char MSG_UNKNOWN_COMMAND[] = "Unknown command\r\n";
 
 namespace AuthServer {
 
+static const char MSG_CONNECTED[] = "Connected to billing telnet server\r\n";
+
+void BillingInterface::onConnected() {
+	write(MSG_CONNECTED, sizeof(MSG_CONNECTED));
+}
+
 void BillingInterface::onCommand(const std::vector<std::string>& args) {
 	if(args.size() == 0)
 		return;
 
-	if(args.size() >= 3 && args[0] == "billing_notice")
-		billingNotice(args[1], args[2]);
-	else {
+	if( args[0] == "billing_notify") {
+		if(args.size() >= 3) {
+			billingNotice(args[1], args[2]);
+		} else {
+			debug("Command billing_notify: expected 2 arguments, got %d\n", args.size() - 1);
+		}
+	} else {
 		debug("Unknown billing command: %s\n", args[0].c_str());
-		debug("Usage: billing_notice blank <account_id>\n");
+		debug("Usage: billing_notify blank <account_id>\n");
 	}
 }
 
