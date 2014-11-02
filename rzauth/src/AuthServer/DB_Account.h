@@ -39,6 +39,9 @@ private:
 
 	//Output
 	uint32_t accountId;
+	char password[34];
+	bool nullPassword;
+	bool authOk;
 	uint32_t age;
 	uint16_t lastServerIdx;
 	uint32_t eventCode;

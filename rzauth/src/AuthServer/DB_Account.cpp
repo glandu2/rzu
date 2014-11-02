@@ -16,7 +16,7 @@ struct DbAccountConfig {
 	cval<bool>& enable;
 	cval<std::string>& query;
 	cval<int> &paramAccount, &paramPassword;
-	cval<std::string> &colAccountId, &colAge, &colLastServerIdx, &colEventCode, &colPcBang, &colServerIdxOffset, &colBlock;
+	cval<std::string> &colAccountId, &colPassword, &colAuthOk, &colAge, &colLastServerIdx, &colEventCode, &colPcBang, &colServerIdxOffset, &colBlock;
 
 	DbAccountConfig() :
 		enable(CFG_CREATE("sql.db_account.enable", true)),
@@ -24,6 +24,8 @@ struct DbAccountConfig {
 		paramAccount (CFG_CREATE("sql.db_account.param.account" , 1)),
 		paramPassword(CFG_CREATE("sql.db_account.param.password", 2)),
 		colAccountId    (CFG_CREATE("sql.db_account.column.accountid"    , "account_id")),
+		colPassword     (CFG_CREATE("sql.db_account.column.password"    , "password")),
+		colAuthOk       (CFG_CREATE("sql.db_account.column.authok"    , "auth_ok")),
 		colAge          (CFG_CREATE("sql.db_account.column.age"          , "age")),
 		colLastServerIdx(CFG_CREATE("sql.db_account.column.lastserveridx", "last_login_server_idx")),
 		colEventCode    (CFG_CREATE("sql.db_account.column.eventcode"    , "event_code")),
@@ -44,6 +46,8 @@ bool DB_Account::init(DbConnectionPool* dbConnectionPool) {
 	params.emplace_back(DECLARE_PARAMETER(DB_Account, givenPasswordString, 32, config->paramPassword));
 
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, accountId, 0, config->colAccountId));
+	cols.emplace_back(DECLARE_COLUMN_WITH_INFO(DB_Account, password, sizeof(((DB_Account*)(0))->password), config->colPassword, nullPassword));
+	cols.emplace_back(DECLARE_COLUMN(DB_Account, authOk, 0, config->colAuthOk));
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, age, 0, config->colAge));
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, lastServerIdx, 0, config->colLastServerIdx));
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, eventCode, 0, config->colEventCode));
@@ -70,6 +74,9 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	ok = false;
 
 	accountId = 0xFFFFFFFF;
+	this->password[0] = '\0';
+	nullPassword = true;
+	authOk = true;
 	age = 19;
 	lastServerIdx = 1;
 	eventCode = 0;
@@ -112,15 +119,22 @@ bool DB_Account::onPreProcess() {
 }
 
 bool DB_Account::onRowDone() {
-	if(accountId != 0xFFFFFFFF)
+	if(accountId == 0xFFFFFFFF)
+		return false;
+
+	// Si pas de colonne password, le mdp est checké
+	if(nullPassword == true && password[0] == '\0') {
 		ok = true;
+	} else if(!strcmp(givenPasswordString, password)){
+		ok = true;
+	}
 
 	return false;
 }
 
 void DB_Account::onDone(Status status) {
 	if(status != S_Canceled && clientInfo)
-		clientInfo->clientAuthResult(ok, account, accountId, age, lastServerIdx, eventCode, pcBang, serverIdxOffset, block);
+		clientInfo->clientAuthResult(ok && authOk, account, accountId, age, lastServerIdx, eventCode, pcBang, serverIdxOffset, block);
 }
 
 } // namespace AuthServer
