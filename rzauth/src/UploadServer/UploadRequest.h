@@ -1,5 +1,5 @@
-#ifndef UPLOADREQUEST_H
-#define UPLOADREQUEST_H
+#ifndef UPLOADSERVER_UPLOADREQUEST_H
+#define UPLOADSERVER_UPLOADREQUEST_H
 
 #include "Object.h"
 #include <unordered_map>
@@ -46,4 +46,4 @@ private:
 
 }
 
-#endif // UPLOADREQUEST_H
+#endif // UPLOADSERVER_UPLOADREQUEST_H

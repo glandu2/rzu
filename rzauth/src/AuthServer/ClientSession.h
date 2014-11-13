@@ -1,5 +1,5 @@
-#ifndef CLIENTSESSION_H
-#define CLIENTSESSION_H
+#ifndef AUTHSERVER_CLIENTSESSION_H
+#define AUTHSERVER_CLIENTSESSION_H
 
 #include "RappelzSession.h"
 #include <stdint.h>
@@ -61,4 +61,4 @@ private:
 
 } // namespace AuthServer
 
-#endif // CLIENTSESSION_H
+#endif // AUTHSERVER_CLIENTSESSION_H

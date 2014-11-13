@@ -1,5 +1,5 @@
-#ifndef ADMINSERVER_TELNETSESSION_H
-#define ADMINSERVER_TELNETSESSION_H
+#ifndef TELNETSESSION_H
+#define TELNETSESSION_H
 
 #include "SocketSession.h"
 #include <string>
@@ -29,4 +29,4 @@ private:
 	std::vector<char> buffer;
 };
 
-#endif // ADMINSERVER_TELNETSESSION_H
+#endif // TELNETSESSION_H

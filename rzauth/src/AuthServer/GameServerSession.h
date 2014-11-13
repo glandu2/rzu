@@ -1,5 +1,5 @@
-#ifndef GAMESERVERSESSION_H
-#define GAMESERVERSESSION_H
+#ifndef AUTHSERVER_GAMESERVERSESSION_H
+#define AUTHSERVER_GAMESERVERSESSION_H
 
 #include "RappelzSession.h"
 #include <stdint.h>
@@ -65,4 +65,4 @@ private:
 
 } // namespace AuthServer
 
-#endif // GAMESERVERSESSION_H
+#endif // AUTHSERVER_GAMESERVERSESSION_H

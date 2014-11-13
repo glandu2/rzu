@@ -1,5 +1,5 @@
-#ifndef GAMESERVERINFO_H
-#define GAMESERVERINFO_H
+#ifndef UPLOADSERVER_GAMESERVERSESSION_H
+#define UPLOADSERVER_GAMESERVERSESSION_H
 
 #include "RappelzSession.h"
 #include <unordered_map>
@@ -37,4 +37,4 @@ private:
 
 }
 
-#endif // GAMESERVERINFO_H
+#endif // UPLOADSERVER_GAMESERVERSESSION_H

@@ -1,5 +1,5 @@
-#ifndef ADMINSERVER_BILLINGINTERFACE_H
-#define ADMINSERVER_BILLINGINTERFACE_H
+#ifndef AUTHSERVER_BILLINGINTERFACE_H
+#define AUTHSERVER_BILLINGINTERFACE_H
 
 #include "Object.h"
 #include "../TelnetSession.h"
@@ -19,4 +19,4 @@ protected:
 
 } // namespace AuthServer
 
-#endif // ADMINSERVER_BILLINGINTERFACE_H
+#endif // AUTHSERVER_BILLINGINTERFACE_H

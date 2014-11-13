@@ -1,5 +1,5 @@
-#ifndef GUILDICONSERVER_H
-#define GUILDICONSERVER_H
+#ifndef UPLOADSERVER_ICONSERVERSESSION_H
+#define UPLOADSERVER_ICONSERVERSESSION_H
 
 #include "SocketSession.h"
 #include <string>
@@ -39,4 +39,4 @@ private:
 
 } // namespace UploadServer
 
-#endif // GUILDICONSERVER_H
+#endif // UPLOADSERVER_ICONSERVERSESSION_H

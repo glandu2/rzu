@@ -1,5 +1,5 @@
-#ifndef DB_UPDATELASTSERVERIDX_H
-#define DB_UPDATELASTSERVERIDX_H
+#ifndef AUTHSERVER_DB_UPDATELASTSERVERIDX_H
+#define AUTHSERVER_DB_UPDATELASTSERVERIDX_H
 
 #include "Object.h"
 #include "uv.h"
@@ -29,4 +29,4 @@ private:
 
 } // namespace AuthServer
 
-#endif // DB_UPDATELASTSERVERIDX_H
+#endif // AUTHSERVER_DB_UPDATELASTSERVERIDX_H
