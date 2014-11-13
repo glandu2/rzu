@@ -50,8 +50,10 @@ bool usersa;
 std::string ip;
 int port;
 bool enableGateway = false;
+int autoReco = 280;
 
 std::unordered_map<std::string, std::string> mpRepliesPlayers;
+std::unordered_map<unsigned int, std::string> playerNames;
 
 class GameServer : public IListener {
 public:
@@ -101,8 +103,8 @@ public:
 
 class IrcClient : public IListener {
 public:
-	IrcClient(const std::string& ip, int port, const std::string& channel, const std::string& nickname, Log* packetLog)
-		: channelName(channel), nickname(nickname), ip(ip), port(port), socket(EventLoop::getLoop())
+	IrcClient(const std::string& ip, int port, const std::string& hostname, const std::string& channel, const std::string& nickname, Log* packetLog)
+		: channelName(channel), nickname(nickname), ip(ip), hostname(hostname), port(port), joined(false), socket(EventLoop::getLoop())
 	{
 		socket.addEventListener(this, &onSocketStateChange);
 		socket.addDataListener(this, &onSocketDataStatic);
@@ -118,24 +120,27 @@ public:
 		IrcClient* thisInstance = (IrcClient*) instance;
 		if(newState == Socket::ConnectedState) {
 			char loginText[128];
-			std::string lowerCaseName;
+			std::string lowerCaseServerName;
 
 			if(thisInstance->nickname.size() == 0)
 				thisInstance->nickname = thisInstance->servername;
 
-			lowerCaseName = thisInstance->nickname;
-			lowerCaseName[0] = tolower(lowerCaseName[0]);
+			lowerCaseServerName = thisInstance->servername;
+			lowerCaseServerName[0] = tolower(lowerCaseServerName[0]);
 
 			if(thisInstance->channelName.size() == 0)
-				thisInstance->channelName = "#rappelz-" + lowerCaseName;
+				thisInstance->channelName = "#rappelz-" + lowerCaseServerName;
 
-			sprintf(loginText, "NICK %s\r\nUSER gw-%s * * : In-game chat relay with rappelz server %s\r\nJOIN %s\r\n",
+			sprintf(loginText, "NICK %s\r\nUSER gw-%s gw-%s %s :RappelzChatGateway %s\r\n",
 					thisInstance->nickname.c_str(),
-					lowerCaseName.c_str(),
-					thisInstance->servername.c_str(),
-					thisInstance->channelName.c_str());
+					lowerCaseServerName.c_str(),
+					lowerCaseServerName.c_str(),
+					thisInstance->hostname.c_str(),
+					thisInstance->servername.c_str());
 
 			thisInstance->socket.write(loginText, strlen(loginText));
+		} else if(newState == Socket::UnconnectedState) {
+			thisInstance->joined = false;
 		}
 	}
 
@@ -192,15 +197,26 @@ public:
 		std::string parameters;
 		std::string trailing;
 
+		if(printDebug)
+			puts(line.c_str());
+
 		parseIrcMessage(line, prefix, command, parameters, trailing);
 
-		if (command == "PING") {
+		if(command == "001") {
+			char loginTest[128];
+			sprintf(loginTest, "JOIN %s\r\n", channelName.c_str());
+			socket.write(loginTest, strlen(loginTest));
+		} else if (command == "PING") {
 			std::string pong = "PONG :" + trailing;
 			socket.write(pong.c_str(), pong.size());
 		} else if(command == "PRIVMSG") {
 			std::string sender;
 
 			if(trailing.size() == 0)
+				return;
+
+			//ignore special commands
+			if(trailing[0] < ' ')
 				return;
 
 			sender.assign(prefix, 0, prefix.find_first_of('!'));
@@ -218,25 +234,25 @@ public:
 					}
 
 					msg.assign(trailing, separator+1, std::string::npos);
-					mpRepliesPlayers.insert(std::pair<std::string, std::string>(target, sender));
+					mpRepliesPlayers[target] = sender;
 					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, sender.c_str(), target.c_str(), msg.c_str());
 					break;
 				}
 
 				case '$':
-					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_ADV, sender.c_str(), "", trailing.c_str());
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_ADV, sender.c_str(), "", trailing.c_str()+1);
 					break;
 
 				case '!':
-					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_GLOBAL, sender.c_str(), "", trailing.c_str());
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_GLOBAL, sender.c_str(), "", trailing.c_str()+1);
 					break;
 
 				case '#':
-					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_PARTY, sender.c_str(), "", trailing.c_str());
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_PARTY, sender.c_str(), "", trailing.c_str()+1);
 					break;
 
 				case '%':
-					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_GUILD, sender.c_str(), "", trailing.c_str());
+					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_GUILD, sender.c_str(), "", trailing.c_str()+1);
 					break;
 
 				default:
@@ -255,10 +271,12 @@ public:
 	}
 
 	std::string servername;
-	std::string nickname;
 	std::string channelName;
+	std::string nickname;
 	std::string ip;
+	std::string hostname;
 	int port;
+	bool joined;
 
 	Socket socket;
 	std::vector<char> buffer;
@@ -286,12 +304,13 @@ static void init() {
 	CFG_CREATE("rappelz.ip", "127.0.0.1");
 	CFG_CREATE("rappelz.port", 4500);
 
-	CFG_CREATE("rappelz.account", "account");
-	CFG_CREATE("rappelz.password", "password");
-	CFG_CREATE("rappelz.gsindex", 2);
-	CFG_CREATE("rappelz.charname", "Yrolis");
+	CFG_CREATE("rappelz.account", "test1");
+	CFG_CREATE("rappelz.password", "admin");
+	CFG_CREATE("rappelz.gsindex", 1);
+	CFG_CREATE("rappelz.charname", "Player");
 
 	CFG_CREATE("irc.ip", "127.0.0.1");
+	CFG_CREATE("irc.host", "*");
 	CFG_CREATE("irc.port", 6667);
 	CFG_CREATE("irc.channel", "");
 	CFG_CREATE("irc.nick", "");
@@ -299,6 +318,7 @@ static void init() {
 	CFG_CREATE("use_rsa", true);
 	CFG_CREATE("printall", false);
 	CFG_CREATE("gateway", false);
+	CFG_CREATE("autoreco", 280);
 
 	trafficDump = new TrafficDump;
 
@@ -336,21 +356,23 @@ int main(int argc, char *argv[])
 	ip = CFG_GET("rappelz.ip")->getString();
 	port = CFG_GET("rappelz.port")->getInt();
 	enableGateway = CFG_GET("gateway")->getBool();
+	autoReco = CFG_GET("autoreco")->getInt();
 
 	std::string ircIp = CFG_GET("irc.ip")->getString();
+	std::string ircHost = CFG_GET("irc.host")->getString();
 	int ircPort = CFG_GET("irc.port")->getInt();
 	std::string ircNick = CFG_GET("irc.nick")->getString();
 	std::string ircChannel = CFG_GET("irc.channel")->getString();
 
-	std::string account = CFG_GET("account")->getString();
-	std::string password = CFG_GET("password")->getString();
-	int serverIdx = CFG_GET("gsindex")->getInt();
-	std::string charname = CFG_GET("charname")->getString();
+	std::string account = CFG_GET("rappelz.account")->getString();
+	std::string password = CFG_GET("rappelz.password")->getString();
+	int serverIdx = CFG_GET("rappelz.gsindex")->getInt();
+	std::string charname = CFG_GET("rappelz.charname")->getString();
 
 	mainLogger.info("Starting chat gateway\n");
 
 	gameServer = new GameServer(ip, port, account, password, serverIdx, charname, &trafficLogger);
-	ircClient = new IrcClient(ircIp, ircPort, ircChannel, ircNick, &trafficLogger);
+	ircClient = new IrcClient(ircIp, ircPort, ircHost, ircChannel, ircNick, &trafficLogger);
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
@@ -362,10 +384,9 @@ static void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCod
 		fprintf(stderr, "%p %s: Auth result: %d (%s)\n", instance, auth->getAccountName().c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
 	if(result == TS_RESULT_SUCCESS) {
 		auth->retreiveServerList(Callback<Authentication::CallbackOnServerList>(instance, &onServerList));
-	} else if(result == TS_RESULT_ALREADY_EXIST) {
+	} else {
 		auth->abort(Callback<Authentication::CallbackOnAuthClosed>(instance, &onAuthClosedWithFailure));
 		uv_timer_start(&gameServer->recoTimer, &onGSSocketTimer, 5000, 0);
-	} else {
 	}
 }
 
@@ -408,7 +429,14 @@ static void onGameResult(IListener* instance, Authentication* auth, TS_ResultCod
 	GameServer* gameServer = (GameServer*) instance;
 	if(printDebug)
 		fprintf(stderr, "%p login to GS result: %d\n", instance, result);
-	uv_timer_start(&gameServer->ggTimer, &onGSSocketGGTimer, 280000, 0);
+
+	if(result != TS_RESULT_SUCCESS) {
+		uv_timer_start(&gameServer->recoTimer, &onGSSocketTimer, 5000, 0);
+		return;
+	}
+
+	if(autoReco)
+		uv_timer_start(&gameServer->ggTimer, &onGSSocketGGTimer, autoReco*1000, 0);
 
 	gameServerSocket->addEventListener(instance, &onGSSocketStateChange);
 	gameServerSocket->addPacketListener(TS_SC_CHAT::packetID, instance, &onGamePacketReceived);
@@ -423,8 +451,6 @@ static void onGameResult(IListener* instance, Authentication* auth, TS_ResultCod
 	strcpy(charlistPkt.account, gameServer->auth->getAccountName().c_str());
 	gameServerSocket->sendPacket(&charlistPkt);
 }
-
-std::unordered_map<unsigned int, std::string> playerNames;
 
 static void onGamePacketReceived(IListener* instance, RappelzSocket* socket, const TS_MESSAGE* packet) {
 	GameServer* gameServer = (GameServer*) instance;
@@ -457,7 +483,7 @@ static void onGamePacketReceived(IListener* instance, RappelzSocket* socket, con
 			TS_SC_ENTER* enterPkt = (TS_SC_ENTER*) packet;
 			if(enterPkt->type == 0 && enterPkt->ObjType == 0) {
 				TS_SC_ENTER::PlayerInfo* playerInfo = (TS_SC_ENTER::PlayerInfo*) (((char*)enterPkt) + sizeof(TS_SC_ENTER));
-				playerNames.insert(std::pair<unsigned int, std::string>(enterPkt->handle, std::string(playerInfo->szName)));
+				playerNames[enterPkt->handle] = std::string(playerInfo->szName);
 			}
 			break;
 		}
@@ -575,26 +601,28 @@ static void sendMsgToIRC(int type, const char* sender, std::string msg) {
 
 			if(separator == std::string::npos || separator == msg.size()-2) {
 				auto it = mpRepliesPlayers.find(std::string(sender));
+				separator = 0;
+
 				if(it == mpRepliesPlayers.end()) {
-					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Pour envoyer un message priv\xE9, il faut indiquer le nom suivi de \": \". Exemple:");
-					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Player: message \xE0 envoyer");
+//					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Pour envoyer un message priv\xE9, il faut indiquer le nom suivi de \": \". Exemple:");
+//					sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Player: message \xE0 envoyer");
 				} else {
 					target = it->second;
-					separator = 0;
 				}
 			} else {
 				target.assign(msg, 0, separator);
 				separator += 2;
 			}
 
-			if(target.size() > 0) {
-				if(color)
-					sprintf(messageFull, "%c%s%s: %s%c", 0x03, color, sender, msg.substr(separator).c_str(), 0x03);
-				else
-					sprintf(messageFull, "%s: %s", sender, msg.substr(separator).c_str());
+			if(color)
+				sprintf(messageFull, "%c%s%s: %s%c", 0x03, color, sender, msg.substr(separator).c_str(), 0x03);
+			else
+				sprintf(messageFull, "%s: %s", sender, msg.substr(separator).c_str());
 
+			if(target.size() > 0)
 				ircClient->sendMessage(target.c_str(), messageFull);
-			}
+			else
+				ircClient->sendMessage("", messageFull);
 		} else {
 			if(color)
 				sprintf(messageFull, "%c%s%s: %s%c", 0x03, color, sender, msg.c_str(), 0x03);
