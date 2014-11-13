@@ -1,5 +1,5 @@
-#ifndef TIMINGFUNCTIONS_H_INCLUDED
-#define TIMINGFUNCTIONS_H_INCLUDED
+#ifndef TIMINGFUNCTIONS_H
+#define TIMINGFUNCTIONS_H
 
 #ifdef __linux__
 	#include <unistd.h>
@@ -56,4 +56,4 @@ unsigned long long timingFunction_ucounter;
 	}
 #endif
 
-#endif // TIMINGFUNCTIONS_H_INCLUDED
+#endif // TIMINGFUNCTIONS_H
