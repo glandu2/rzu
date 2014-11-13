@@ -29,15 +29,15 @@
  *
  * flood prevention:
  *	max connections / ip  (limit flooding ips)
- *  max total connections (avoid too much memory usage)
+ *  max total connections (avoid too much memory usage) (no accept until connection count < max)
  *
  * Allow to change gameserver infos via admin interface (like external ip, index (to dyn hide/unhide from players))
  * Avoid a buffer in Socket (like uv_tcp_t)
  * Config: init config per classes (no more globalconfig.h) => avoid unused config declaration (benchmark does not use core.log.*)
- * DbBinding: cols: optionnal + was set bool
+ * DbBinding: cols: optionnal + "was set" bool
  * DbBinding: dynamic resize std::string column
- * 2 init functions names: one for init before config read, one for after
- * rename header guards
+ * 2 init functions names: one for init before config read, one for after (ex: registerConfig)
+ * rename header guards (folder + filename)
  * move init to have the same interface for all type of servers
  * move servers in DLL, the .exe would just host the one the user need to use
  *  -> separate config

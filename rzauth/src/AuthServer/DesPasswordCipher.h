@@ -1,5 +1,5 @@
-#ifndef DESPASSWORDCIPHER_H
-#define DESPASSWORDCIPHER_H
+#ifndef AUTHSERVER_DESPASSWORDCIPHER_H
+#define AUTHSERVER_DESPASSWORDCIPHER_H
 
 #include <stdlib.h>
 #include <openssl/des.h>
@@ -61,4 +61,4 @@ class DesPasswordCipher
 
 } // namespace AuthServer
 
-#endif // DESPASSWORDCIPHER_H
+#endif // AUTHSERVER_DESPASSWORDCIPHER_H

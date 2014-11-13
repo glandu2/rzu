@@ -18,8 +18,8 @@ struct DbConfig : public IListener {
 		password(CFG_CREATE(prefix + ".db.password", "")),
 		salt(CFG_CREATE(prefix + ".db.salt", "2011")),
 		port(CFG_CREATE(prefix + ".db.port", 1433)),
-		connectionString(CFG_CREATE(prefix + "db.connectionstring", "")),
-		ignoreInitCheck(CFG_CREATE(prefix + "db.ignoreinitcheck", true))
+		connectionString(CFG_CREATE(prefix + ".db.connectionstring", "")),
+		ignoreInitCheck(CFG_CREATE(prefix + ".db.ignoreinitcheck", true))
 	{
 		driver.addListener(this, &updateConnectionString);
 		server.addListener(this, &updateConnectionString);

@@ -1,5 +1,5 @@
-#ifndef CLIENTDATA_H
-#define CLIENTDATA_H
+#ifndef AUTHSERVER_CLIENTDATA_H
+#define AUTHSERVER_CLIENTDATA_H
 
 #include "Object.h"
 #include <string>
@@ -66,4 +66,4 @@ private:
 
 } // namespace AuthServer
 
-#endif // CLIENTDATA_H
+#endif // AUTHSERVER_CLIENTDATA_H

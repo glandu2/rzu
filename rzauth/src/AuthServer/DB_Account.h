@@ -1,5 +1,5 @@
-#ifndef DB_ACCOUNT_H
-#define DB_ACCOUNT_H
+#ifndef AUTHSERVER_DB_ACCOUNT_H
+#define AUTHSERVER_DB_ACCOUNT_H
 
 #include "DbQueryJob.h"
 #include <string>
@@ -52,4 +52,4 @@ private:
 
 } // namespace AuthServer
 
-#endif // DB_ACCOUNT_H
+#endif // AUTHSERVER_DB_ACCOUNT_H
