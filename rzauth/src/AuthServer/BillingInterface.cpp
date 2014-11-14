@@ -30,7 +30,7 @@ void BillingInterface::onCommand(const std::vector<std::string>& args) {
 		if(args.size() >= 3) {
 			billingNotice(args[1], args[2]);
 		} else {
-			debug("Command billing_notify: expected 2 arguments, got %d\n", args.size() - 1);
+			debug("Command billing_notify: expected 2 arguments, got %d\n", (int)args.size() - 1);
 		}
 	} else {
 		debug("Unknown billing command: %s\n", args[0].c_str());

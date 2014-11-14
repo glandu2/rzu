@@ -37,13 +37,11 @@
  * DbBinding: cols: optionnal + "was set" bool
  * DbBinding: dynamic resize std::string column
  * 2 init functions names: one for init before config read, one for after (ex: registerConfig)
- * rename header guards (folder + filename)
  * move init to have the same interface for all type of servers
  * move servers in DLL, the .exe would just host the one the user need to use
  *  -> separate config
  *  -> warning: GS with auth in same exe: delay connectToAuth ?
  * manage more field in TS_AG_CLIENT_LOGIN (play time)
- * One CommandRunner instanciated in main() and pass instance to TelnetSessions
  */
 
 /* Packet versionning:

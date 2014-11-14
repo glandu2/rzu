@@ -99,7 +99,7 @@ void IconServerSession::parseUrl(std::string urlString) {
 		if(c == '/' || c == '\\' || c == ':')
 			break;
 	}
-	if(p+1 >= urlString.size()) {
+	if(p+1 >= (ssize_t)urlString.size()) {
 		//attempt to get a directory
 		getSocket()->write(htmlNotFound, htmlNotFoundSize);
 	} else {
