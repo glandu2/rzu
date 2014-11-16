@@ -7,17 +7,10 @@
 
 namespace AuthServer {
 
-static int toLower(int c) {
-	if(c >= 'A' && c <= 'Z')
-		c += 'a' - 'A';
-
-	return c;
-}
-
 uv_mutex_t ClientData::mapLock = initializeLock();
 uv_once_t ClientData::lockInit = UV_ONCE_INIT;
-std::unordered_map<std::string, ClientData*> ClientData::connectedClients;
-std::unordered_map<uint32_t, ClientData*> ClientData::connectedClientsById;
+std::unordered_map<uint32_t, ClientData*> ClientData::connectedClients;
+std::unordered_map<std::string, ClientData*> ClientData::connectedClientsByName;
 
 uv_mutex_t ClientData::initializeLock() {
 	uv_mutex_init(&mapLock);
@@ -32,6 +25,20 @@ ClientData::~ClientData() {
 		getGameServer()->decPlayerCount();
 }
 
+
+static int toLowerChar(int c) {
+	if(c >= 'A' && c <= 'Z')
+		c += 'a' - 'A';
+
+	return c;
+}
+
+std::string ClientData::toLower(const std::string& str) {
+	std::string lcase = str;
+	std::transform(lcase.begin(), lcase.end(), lcase.begin(), toLowerChar);
+	return lcase;
+}
+
 void ClientData::connectedToGame() {
 	if(!getGameServer())
 		error("Connected to unknown game server ! Code logic error\n");
@@ -41,15 +48,13 @@ void ClientData::connectedToGame() {
 }
 
 ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang) {
-	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> result;
+	std::pair< std::unordered_map<uint32_t, ClientData*>::iterator, bool> result;
 	ClientData* newClient;
-	std::string lowercaseAccount = account;
-	std::transform(lowercaseAccount.begin(), lowercaseAccount.end(), lowercaseAccount.begin(), toLower);
 
 	uv_mutex_lock(&mapLock);
 
 	newClient = new ClientData(clientInfo);
-	result = connectedClients.insert(std::pair<std::string, ClientData*>(lowercaseAccount, newClient));
+	result = connectedClients.insert(std::pair<uint32_t, ClientData*>(accoundId, newClient));
 	if(result.second == false) {
 		ClientData* oldClient = result.first->second;
 		delete newClient;
@@ -59,8 +64,8 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 			if(oldClient->inGame)
 				oldClient->getGameServer()->kickClient(account);
 			else {
-				connectedClientsById.erase(oldClient->accountId);
 				connectedClients.erase(result.first);
+				connectedClientsByName.erase(toLower(oldClient->account));
 				delete oldClient;
 			}
 		} else {
@@ -72,7 +77,7 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		newClient->age = age;
 		newClient->eventCode = event_code;
 		newClient->pcBang = pcBang;
-		connectedClientsById.insert(std::pair<uint32_t, ClientData*>(accoundId, newClient));
+		connectedClientsByName.insert(std::pair<std::string, ClientData*>(toLower(account), newClient));
 	}
 
 	uv_mutex_unlock(&mapLock);
@@ -83,15 +88,13 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 bool ClientData::removeClient(const std::string& account) {
 	bool ret = false;
 	std::unordered_map<std::string, ClientData*>::iterator it;
-	std::string lowercaseAccount = account;
-	std::transform(lowercaseAccount.begin(), lowercaseAccount.end(), lowercaseAccount.begin(), toLower);
 
 	uv_mutex_lock(&mapLock);
-	it = connectedClients.find(lowercaseAccount);
-	if(it != connectedClients.end()) {
+	it = connectedClientsByName.find(toLower(account));
+	if(it != connectedClientsByName.end()) {
 		ClientData* clientData = it->second;
-		connectedClients.erase(it);
-		connectedClientsById.erase(clientData->accountId);
+		connectedClientsByName.erase(it);
+		connectedClients.erase(clientData->accountId);
 		delete clientData;
 		ret = true;
 	}
@@ -113,13 +116,11 @@ void ClientData::switchClientToServer(GameServerSession* server, uint64_t oneTim
 ClientData* ClientData::getClient(const std::string& account) {
 	ClientData* foundClient;
 	std::unordered_map<std::string, ClientData*>::const_iterator it;
-	std::string lowercaseAccount = account;
-	std::transform(lowercaseAccount.begin(), lowercaseAccount.end(), lowercaseAccount.begin(), toLower);
 
 	uv_mutex_lock(&mapLock);
 
-	it = connectedClients.find(lowercaseAccount);
-	if(it != connectedClients.cend())
+	it = connectedClientsByName.find(toLower(account));
+	if(it != connectedClientsByName.cend())
 		foundClient = it->second;
 	else
 		foundClient = nullptr;
@@ -135,8 +136,8 @@ ClientData* ClientData::getClientById(uint32_t accountId) {
 
 	uv_mutex_lock(&mapLock);
 
-	it = connectedClientsById.find(accountId);
-	if(it != connectedClientsById.cend())
+	it = connectedClients.find(accountId);
+	if(it != connectedClients.cend())
 		foundClient = it->second;
 	else
 		foundClient = nullptr;
@@ -147,13 +148,13 @@ ClientData* ClientData::getClientById(uint32_t accountId) {
 }
 
 void ClientData::removeServer(GameServerSession* server) {
-	std::unordered_map<std::string, ClientData*>::const_iterator it, itEnd;
+	std::unordered_map<uint32_t, ClientData*>::const_iterator it, itEnd;
 
 	uv_mutex_lock(&mapLock);
 	for(it = connectedClients.begin(), itEnd = connectedClients.end(); it != itEnd;) {
 		ClientData* client = it->second;
 		if(client->getGameServer() == server) {
-			connectedClientsById.erase(client->accountId);
+			connectedClientsByName.erase(toLower(client->account));
 			it = connectedClients.erase(it);
 			delete client;
 		} else {

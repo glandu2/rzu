@@ -17,6 +17,7 @@ struct DbAccountConfig {
 	cval<std::string>& query;
 	cval<int> &paramAccount, &paramPassword;
 	cval<std::string> &colAccountId, &colPassword, &colAuthOk, &colAge, &colLastServerIdx, &colEventCode, &colPcBang, &colServerIdxOffset, &colBlock;
+	cval<bool> &restrictCharacters;
 
 	DbAccountConfig() :
 		enable(CFG_CREATE("sql.db_account.enable", true)),
@@ -31,7 +32,8 @@ struct DbAccountConfig {
 		colEventCode    (CFG_CREATE("sql.db_account.column.eventcode"    , "event_code")),
 		colPcBang    (CFG_CREATE("sql.db_account.column.pcbang"    , "pcbang")),
 		colServerIdxOffset    (CFG_CREATE("sql.db_account.column.serveridxoffset", "server_idx_offset")),
-		colBlock(CFG_CREATE("sql.db_account.column.block", "block"))
+		colBlock(CFG_CREATE("sql.db_account.column.block", "block")),
+		restrictCharacters(CFG_CREATE("auth.clients.restrictchars", true))
 	{}
 };
 static DbAccountConfig* config = nullptr;
@@ -109,8 +111,8 @@ bool DB_Account::isAccountNameValid(const std::string& account) {
 
 bool DB_Account::onPreProcess() {
 	//Accounts with invalid names are refused
-	if(!isAccountNameValid(account)) {
-		debug("Account name has invalid character at start: %s\n", account.c_str());
+	if(config->restrictCharacters.get() && !isAccountNameValid(account)) {
+		debug("Account name has invalid character: %s\n", account.c_str());
 		return false;
 	}
 

@@ -47,13 +47,16 @@ public:
 	ClientSession* getClientSession() { return client; }
 	GameServerSession* getGameServer() { return server; }
 
+protected:
+	static std::string toLower(const std::string& str);
+
 private:
 	~ClientData();
 
 	static uv_mutex_t initializeLock();
 
-	static std::unordered_map<std::string, ClientData*> connectedClients;
-	static std::unordered_map<uint32_t, ClientData*> connectedClientsById;
+	static std::unordered_map<uint32_t, ClientData*> connectedClients;
+	static std::unordered_map<std::string, ClientData*> connectedClientsByName;
 	static uv_mutex_t mapLock;
 	static uv_once_t lockInit;
 
