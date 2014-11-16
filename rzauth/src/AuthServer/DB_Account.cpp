@@ -91,9 +91,25 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	execute(DbQueryBinding::EM_OneRow);
 }
 
+bool DB_Account::isAccountNameValid(const std::string& account) {
+	if(account.size() == 0)
+		return false;
+
+	for(size_t i = 0; i < account.size(); i++) {
+		if((account[i] < 'a' || account[i] > 'z') &&
+			(account[i] < 'A' || account[i] > 'Z') &&
+			(account[i] < '0' || account[i] > '9'))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool DB_Account::onPreProcess() {
-	//Accounts with @ before the name are banned accounts
-	if(account.size() == 0 || account[0] == '@') {
+	//Accounts with invalid names are refused
+	if(!isAccountNameValid(account)) {
 		debug("Account name has invalid character at start: %s\n", account.c_str());
 		return false;
 	}
@@ -122,7 +138,6 @@ bool DB_Account::onRowDone() {
 	if(accountId == 0xFFFFFFFF)
 		return false;
 
-	// Si pas de colonne password, le mdp est checké
 	if(nullPassword == true && password[0] == '\0') {
 		ok = true;
 	} else if(!strcmp(givenPasswordString, password)){

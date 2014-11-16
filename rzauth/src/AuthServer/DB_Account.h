@@ -27,6 +27,7 @@ protected:
 	bool onPreProcess();
 	bool onRowDone();
 	void onDone(Status status);
+	bool isAccountNameValid(const std::string& account);
 
 private:
 	ClientSession* clientInfo;
