@@ -10,9 +10,9 @@
 #include <vector>
 #include "uv.h"
 #include "DesPasswordCipher.h"
+#include "RappelzSocket.h"
 
 class Account;
-class RappelzSocket;
 struct TS_MESSAGE;
 struct TS_AC_SERVER_LIST;
 struct TS_AC_SELECT_SERVER;
@@ -80,7 +80,8 @@ class Authentication : private Object, IListener
 		};
 
 	private:
-		RappelzSocket* authServer, *gameServer;
+		RappelzSocket authServer;
+		RappelzSocket *gameServer;
 		std::string authIp;
 		uint16_t authPort;
 		AuthCipherMethod cipherMethod;
