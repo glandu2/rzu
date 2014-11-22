@@ -2,18 +2,6 @@
 #include "GameServerSession.h"
 #include "ClientData.h"
 
-static const char MSG_UNKNOWN_COMMAND[] = "Unknown command\r\n";
-
-#ifdef __GLIBC__
-#include <malloc.h>
-#include <unistd.h>
-#endif
-
-#ifdef _WIN32
-#include <crtdbg.h>
-#include <malloc.h>
-#endif
-
 namespace AuthServer {
 
 static const char MSG_CONNECTED[] = "Connected to billing telnet server\r\n";

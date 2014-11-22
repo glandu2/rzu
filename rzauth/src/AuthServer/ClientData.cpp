@@ -49,6 +49,7 @@ void ClientData::connectedToGame() {
 
 ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang) {
 	std::pair< std::unordered_map<uint32_t, ClientData*>::iterator, bool> result;
+	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> resultForName;
 	ClientData* newClient;
 
 	uv_mutex_lock(&mapLock);
@@ -77,7 +78,13 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		newClient->age = age;
 		newClient->eventCode = event_code;
 		newClient->pcBang = pcBang;
-		connectedClientsByName.insert(std::pair<std::string, ClientData*>(toLower(account), newClient));
+		resultForName = connectedClientsByName.insert(std::pair<std::string, ClientData*>(toLower(account), newClient));
+		if(resultForName.second == false) {
+			newClient->error("Duplicated account name with different ID: %s\n", account.c_str());
+			connectedClients.erase(result.first);
+			delete newClient;
+			newClient = nullptr;
+		}
 	}
 
 	uv_mutex_unlock(&mapLock);
@@ -97,6 +104,28 @@ bool ClientData::removeClient(const std::string& account) {
 		connectedClients.erase(clientData->accountId);
 		delete clientData;
 		ret = true;
+	} else {
+		Log::get()->log(Log::LL_Error, "ClientData", 10, "Trying to remove a not connected account : %s\n", account.c_str());
+	}
+	uv_mutex_unlock(&mapLock);
+
+	return ret;
+}
+
+bool ClientData::removeClient(uint32_t accountId) {
+	bool ret = false;
+	std::unordered_map<uint32_t, ClientData*>::iterator it;
+
+	uv_mutex_lock(&mapLock);
+	it = connectedClients.find(accountId);
+	if(it != connectedClients.end()) {
+		ClientData* clientData = it->second;
+		connectedClients.erase(it);
+		connectedClientsByName.erase(toLower(clientData->account));
+		delete clientData;
+		ret = true;
+	} else {
+		Log::get()->log(Log::LL_Error, "ClientData", 10, "Trying to remove a not connected account : %d\n", accountId);
 	}
 	uv_mutex_unlock(&mapLock);
 
@@ -104,7 +133,7 @@ bool ClientData::removeClient(const std::string& account) {
 }
 
 bool ClientData::removeClient(ClientData* clientData) {
-	return removeClient(clientData->account);
+	return removeClient(clientData->accountId);
 }
 
 void ClientData::switchClientToServer(GameServerSession* server, uint64_t oneTimePassword) {

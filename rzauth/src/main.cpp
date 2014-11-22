@@ -42,8 +42,7 @@
  *  -> separate config
  *  -> warning: GS with auth in same exe: delay connectToAuth ?
  * manage more field in TS_AG_CLIENT_LOGIN (play time)
- * use account ID as unique key when connecting to detect duplicates
- * use API to make insert & erase together in ClientData
+ * Add API to do logging with static classes in Object (avoid crash using Log::get()->log(...))
  */
 
 /* Packet versionning:

@@ -152,7 +152,7 @@ void IconServerSession::sendIcon(const std::string& filename) {
 		size_t fileContentBegin = sprintf(buffer, htmlFound, (long int)fileSize);
 
 		size_t bytesTransferred = 0;
-		size_t nbrw;
+		size_t nbrw = 0;
 		while(bytesTransferred < fileSize) {
 			nbrw = fread(buffer + fileContentBegin + bytesTransferred, 1, fileSize - bytesTransferred, file);
 			if(nbrw <= 0)

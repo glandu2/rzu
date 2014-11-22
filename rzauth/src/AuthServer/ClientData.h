@@ -33,6 +33,7 @@ public:
 	//If successful, create a new instance of ClientData with given account added to the hash map
 	//Thread safe
 	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang);
+	static bool removeClient(uint32_t accountId);
 	static bool removeClient(const std::string& account);
 	static bool removeClient(ClientData* clientData);
 	static ClientData* getClient(const std::string& account);
