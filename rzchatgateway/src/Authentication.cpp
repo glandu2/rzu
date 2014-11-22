@@ -302,7 +302,7 @@ end:
 	password.clear();
 
 	strcpy(accountMsg.account, username.c_str());
-	accountMsg.aes_block_size = p_len + f_len;
+	accountMsg.password_size = p_len + f_len;
 	accountMsg.dummy[0] = accountMsg.dummy[1] = accountMsg.dummy[2] = 0;
 	accountMsg.unknown_00000100 = 0x00000100;
 	authServer->sendPacket(&accountMsg);

@@ -1,10 +1,10 @@
+#include <stdio.h>
 #include "uv.h"
 #include "Account.h"
 #include "Authentication.h"
 #include <string.h>
 #include "EventLoop.h"
 #include "RappelzLibInit.h"
-#include <stdio.h>
 #include "RappelzSocket.h"
 #include "ConfigInfo.h"
 #include "RappelzLibConfig.h"
