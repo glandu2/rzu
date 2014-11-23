@@ -8,7 +8,6 @@
 namespace AuthServer {
 
 uv_mutex_t ClientData::mapLock = initializeLock();
-uv_once_t ClientData::lockInit = UV_ONCE_INIT;
 std::unordered_map<uint32_t, ClientData*> ClientData::connectedClients;
 std::unordered_map<std::string, ClientData*> ClientData::connectedClientsByName;
 

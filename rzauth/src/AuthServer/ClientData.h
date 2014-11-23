@@ -59,7 +59,6 @@ private:
 	static std::unordered_map<uint32_t, ClientData*> connectedClients;
 	static std::unordered_map<std::string, ClientData*> connectedClientsByName;
 	static uv_mutex_t mapLock;
-	static uv_once_t lockInit;
 
 
 	ClientSession* client; //if != null: not yet in-game

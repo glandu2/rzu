@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
 	DbConnectionPool dbConnectionPool;
 
-	if(AuthServer::DB_Account::init(&dbConnectionPool) == false)
+	if(AuthServer::DB_Account::init(&dbConnectionPool, CONFIG_GET()->auth.client.desKey) == false)
 		return 1;
 	if(AuthServer::DB_UpdateLastServerIdx::init(&dbConnectionPool) == false)
 		return 1;
@@ -102,14 +102,11 @@ int main(int argc, char **argv) {
 			return 2;
 	}
 
-	AuthServer::ClientSession::init(CONFIG_GET()->auth.client.desKey);
-
 	CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
 
 	runServers(&trafficLogger);
 
 	//Make valgrind happy
-	AuthServer::ClientSession::deinit();
 	AuthServer::DB_UpdateLastServerIdx::deinit();
 	AuthServer::DB_Account::deinit();
 	EventLoop::getInstance()->deleteObjects();

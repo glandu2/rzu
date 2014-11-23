@@ -26,9 +26,6 @@ class ClientSession : public RappelzSession
 public:
 	ClientSession();
 
-	static void init(cval<std::string> &str);
-	static void deinit();
-
 	void clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang, uint32_t serverMask, bool block);
 
 protected:
@@ -40,8 +37,6 @@ protected:
 	void onServerList(const TS_CA_SERVER_LIST* packet);
 	void onServerList_epic2(const TS_CA_SERVER_LIST* packet);
 	void onSelectServer(const TS_CA_SELECT_SERVER* packet);
-
-	static void updateDesKey(IListener* instance, cval<std::string>* str);
 	
 private:
 	~ClientSession();
@@ -54,9 +49,6 @@ private:
 
 	ClientData* clientData;
 	IDbQueryJob* dbQuery;
-
-	static DesPasswordCipher* desCipher; //cached DES cipher
-	static std::string currentDesKey;
 };
 
 } // namespace AuthServer

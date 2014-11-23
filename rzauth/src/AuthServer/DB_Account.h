@@ -10,16 +10,17 @@ class DbConnectionPool;
 namespace AuthServer {
 
 class ClientSession;
+class DesPasswordCipher;
 
 class DB_Account : public DbQueryJob<DB_Account>
 {
 	DECLARE_CLASS(AuthServer::DB_Account)
 
 public:
-	static bool init(DbConnectionPool* dbConnectionPool);
+	static bool init(DbConnectionPool* dbConnectionPool, cval<std::string>& desKeyStr);
 	static void deinit();
 
-	DB_Account(ClientSession* clientInfo, const std::string& account, const char *password, size_t size);
+	DB_Account(ClientSession* clientInfo, const std::string& account, bool cryptUseAes, const std::vector<unsigned char>& cryptedPassword, unsigned char aesKey[32]);
 
 	void cancel() { clientInfo = nullptr; DbQueryJob::cancel(); }
 
@@ -28,17 +29,25 @@ protected:
 	bool onRowDone();
 	void onDone(Status status);
 	bool isAccountNameValid(const std::string& account);
+	bool decryptPassword();
+	void setPasswordMD5(unsigned char givenPasswordMd5[16]);
 
 private:
+	static DesPasswordCipher* desCipher; //cached DES cipher
+	static std::string currentDesKey;
+
 	ClientSession* clientInfo;
 
 	//Input
 	std::string account;
-	unsigned char givenPasswordMd5[16];
+	std::vector<unsigned char> cryptedPassword;
+	bool cryptUseAes;
+	unsigned char aesKey[32];
+
 	char givenPasswordString[33];
-	bool ok;
 
 	//Output
+	bool ok;
 	uint32_t accountId;
 	char password[34];
 	bool nullPassword;

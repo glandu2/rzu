@@ -7,8 +7,6 @@
 #include <time.h>       /* time */
 #include <algorithm>
 
-#include "DesPasswordCipher.h"
-#include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
@@ -23,25 +21,6 @@
 #include "Packets/TS_AC_SERVER_LIST.h"
 
 namespace AuthServer {
-
-DesPasswordCipher* ClientSession::desCipher = nullptr;
-std::string ClientSession::currentDesKey;
-
-void ClientSession::init(cval<std::string>& str) {
-	str.addListener(nullptr, &updateDesKey);
-	updateDesKey(nullptr, &str);
-}
-
-void ClientSession::deinit() {
-	delete desCipher;
-}
-
-void ClientSession::updateDesKey(IListener* instance, cval<std::string>* str) {
-	delete desCipher;
-	currentDesKey = str->get();
-	desCipher = new DesPasswordCipher(currentDesKey.c_str());
-}
-
 
 ClientSession::ClientSession()
 	: RappelzSession(EncryptedSocket::Encrypted),
@@ -168,9 +147,8 @@ cleanup:
 }
 
 void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
-	unsigned char password[64];  //size = at most rsa encrypted size
 	std::string account;
-	bool ok = false;
+	std::vector<unsigned char> cryptedPassword;
 
 	if(dbQuery != nullptr) {
 		TS_AC_RESULT result;
@@ -185,74 +163,26 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 	if(useRsaAuth) {
 		const TS_CA_ACCOUNT_RSA* accountv2 = reinterpret_cast<const TS_CA_ACCOUNT_RSA*>(packet);
-		EVP_CIPHER_CTX d_ctx;
-		int bytesWritten, totalLength;
-		unsigned int bytesRead;
-
-		debug("Client login using AES\n");
 
 		account = std::string(accountv2->account, std::find(accountv2->account, accountv2->account + 60, '\0'));
-
-		if(accountv2->aes_block_size > sizeof(password) - 16) {
-			warn("RSA: invalid password length: %d\n", accountv2->aes_block_size);
-		}
-
-		EVP_CIPHER_CTX_init(&d_ctx);
-
-		if(EVP_DecryptInit_ex(&d_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) < 0)
-			goto cleanup_aes;
-		if(EVP_DecryptInit_ex(&d_ctx, NULL, NULL, NULL, NULL) < 0)
-			goto cleanup_aes;
-
-		for(totalLength = bytesRead = 0; bytesRead + 15 < accountv2->aes_block_size; bytesRead += 16) {
-			if(EVP_DecryptUpdate(&d_ctx, password + totalLength, &bytesWritten, accountv2->password + bytesRead, 16) < 0)
-				goto cleanup_aes;
-			totalLength += bytesWritten;
-		}
-
-		if(EVP_DecryptFinal_ex(&d_ctx, password + totalLength, &bytesWritten) < 0)
-			goto cleanup_aes;
-
-		totalLength += bytesWritten;
-
-		if(totalLength >= (int)sizeof(password))
-			goto cleanup_aes;
-
-		password[totalLength] = 0;
-		ok = true;
-
-	cleanup_aes:
-		EVP_CIPHER_CTX_cleanup(&d_ctx);
+		cryptedPassword.assign(accountv2->password, accountv2->password + accountv2->password_size);
 	} else {
-		debug("Client login using DES, key: %s\n", currentDesKey.c_str());
-
 		if(packet->size == sizeof(TS_CA_ACCOUNT_EPIC4)) {
 			const TS_CA_ACCOUNT_EPIC4* accountE4 = reinterpret_cast<const TS_CA_ACCOUNT_EPIC4*>(packet);
 
-			debug("Client is epic 4\n");
+			debug("Client is epic 4 or older\n");
 
 			account = std::string(accountE4->account, std::find(accountE4->account, accountE4->account + 19, '\0'));
-			memcpy((char*)password, accountE4->password, 32);
-			desCipher->decrypt(password, 32);
-			password[32] = 0;
-			ok = true;
+			cryptedPassword.assign(accountE4->password, accountE4->password + sizeof(accountE4->password));
 		} else {
 			account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
-
-			memcpy((char*)password, packet->password, 61);
-			desCipher->decrypt(password, 61);
-			password[60] = 0;
-			ok = true;
+			cryptedPassword.assign(packet->password, packet->password + sizeof(packet->password));
 		}
 	}
 
-	if(ok) {
-		debug("Login request for account %s\n", account.c_str());
+	debug("Login request for account %s\n", account.c_str());
 
-		dbQuery = new DB_Account(this, account, (char*)password, strlen((char*)password));
-	} else {
-		warn("Invalid Account message data from %s@%s\n", account.c_str(), getSocket()->getRemoteHostName());
-	}
+	dbQuery = new DB_Account(this, account, useRsaAuth, cryptedPassword, aesKey);
 }
 
 void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang, uint32_t serverIdxOffset, bool block) {

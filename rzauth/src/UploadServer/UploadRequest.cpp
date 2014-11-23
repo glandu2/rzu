@@ -6,7 +6,6 @@
 namespace UploadServer {
 
 uv_mutex_t UploadRequest::mapLock = initializeLock();
-uv_once_t UploadRequest::lockInit = UV_ONCE_INIT;
 std::unordered_map<uint32_t, UploadRequest*> UploadRequest::pendingRequests;
 
 uv_mutex_t UploadRequest::initializeLock() {
