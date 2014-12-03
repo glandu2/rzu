@@ -17,13 +17,13 @@ void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode resul
 void onAuthClosed(IListener* instance, Authentication* auth);
 void onAuthClosedWithFailure(IListener* instance, Authentication* auth);
 
-void onSocketStateChange(IListener* instance, Socket* socket, Socket::State oldState, Socket::State newState);
+void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState);
 void onSocketTimer(uv_timer_t *handle);
 void onSocketClosed();
 
 std::vector<Account*> accounts;
 std::vector<Authentication*> auths;
-std::vector<Socket*> sockets; //for connections/sec test
+std::vector<Stream*> sockets; //for connections/sec test
 std::vector<uv_timer_t*> timers;
 bool printDebug = false;
 int connectionsStarted = 0;
@@ -117,7 +117,7 @@ void benchmarkConnections() {
 	if(delay)
 		timers.reserve(count);
 	for(int i = 0; i < count; i++) {
-		Socket* socket = new Socket(EventLoop::getLoop(), false);
+		Stream* socket = new Socket(EventLoop::getLoop(), false);
 		socket->addEventListener(nullptr, &onSocketStateChange);
 
 		sockets.push_back(socket);
@@ -137,7 +137,7 @@ void startBenchConnections(int usecBetweenConnection) {
 	useLocalhost = ip == "127.0.0.1";
 
 	for(size_t i = 0; i < sockets.size(); i++) {
-		Socket* socket = sockets[i];
+		Stream* socket = sockets[i];
 		socket->connect(ip, port);
 		connectionsStarted++;
 		if(usecBetweenConnection)
@@ -264,14 +264,14 @@ void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode resul
 }
 
 //conn bench
-void onSocketStateChange(IListener* instance, Socket* socket, Socket::State oldState, Socket::State newState) {
-	if(newState == Socket::ConnectedState) {
+void onSocketStateChange(IListener* instance, Stream* socket, Stream::State oldState, Stream::State newState) {
+	if(newState == Stream::ConnectedState) {
 		socket->close();
 //		if(delay == 0)
 //			socket->close();
 //		else
 //			uv_timer_start(timers[reinterpret_cast<intptr_t>(instance)], &onSocketTimer, delay, 0);
-	} else if(newState == Socket::UnconnectedState) {
+	} else if(newState == Stream::UnconnectedState) {
 		connectionsDone++;
 		if(connectionsStarted < connectionTargetCount) {
 			connectionsStarted++;
@@ -281,6 +281,6 @@ void onSocketStateChange(IListener* instance, Socket* socket, Socket::State oldS
 }
 
 void onSocketTimer(uv_timer_t* handle) {
-	Socket* socket = (Socket*)handle->data;
+	Stream* socket = (Stream*)handle->data;
 	socket->close();
 }
