@@ -23,8 +23,7 @@
 namespace AuthServer {
 
 ClientSession::ClientSession()
-	: RappelzSession(EncryptedSocket::Encrypted),
-	  useRsaAuth(false),
+	: useRsaAuth(false),
 	  isEpic2(false),
 	  lastLoginServerId(1),
 	  serverIdxOffset(0),

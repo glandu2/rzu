@@ -30,8 +30,8 @@ IconServerSession::IconServerSession() {
 void IconServerSession::onDataReceived() {
 	std::vector<char> buffer;
 
-	if(getSocket()->getAvailableBytes() > 0) {
-		getSocket()->readAll(&buffer);
+	if(getStream()->getAvailableBytes() > 0) {
+		getStream()->readAll(&buffer);
 		parseData(buffer);
 	}
 }
@@ -101,14 +101,14 @@ void IconServerSession::parseUrl(std::string urlString) {
 	}
 	if(p+1 >= (ssize_t)urlString.size()) {
 		//attempt to get a directory
-		getSocket()->write(htmlNotFound, htmlNotFoundSize);
+		getStream()->write(htmlNotFound, htmlNotFoundSize);
 	} else {
 		std::string filename = urlString.substr(p+1, std::string::npos);
 		if(checkName(filename.c_str(), filename.size())) {
 			sendIcon(filename);
 		} else {
 			warn("Request to a invalid filename: \"%s\"\n", filename.c_str());
-			getSocket()->write(htmlNotFound, htmlNotFoundSize);
+			getStream()->write(htmlNotFound, htmlNotFoundSize);
 		}
 	}
 }
@@ -139,7 +139,7 @@ void IconServerSession::sendIcon(const std::string& filename) {
 	FILE* file = fopen(fullFileName.c_str(), "rb");
 
 	if(!file) {
-		getSocket()->write(htmlNotFound, htmlNotFoundSize);
+		getStream()->write(htmlNotFound, htmlNotFoundSize);
 	} else {
 		fseek(file, 0, SEEK_END);
 		size_t fileSize = ftell(file);
@@ -163,9 +163,9 @@ void IconServerSession::sendIcon(const std::string& filename) {
 		fclose(file);
 
 		if(nbrw > 0) {
-			getSocket()->write(buffer, fileContentBegin + fileSize);
+			getStream()->write(buffer, fileContentBegin + fileSize);
 		} else {
-			getSocket()->write(htmlNotFound, htmlNotFoundSize);
+			getStream()->write(htmlNotFound, htmlNotFoundSize);
 		}
 
 		delete[] buffer;

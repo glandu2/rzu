@@ -13,7 +13,7 @@ namespace UploadServer {
 
 std::unordered_map<std::string, GameServerSession*>  GameServerSession::servers;
 
-GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncryption) {
+GameServerSession::GameServerSession() {
 	addPacketsToListen(2,
 					   TS_SU_LOGIN::packetID,
 					   TS_SU_REQUEST_UPLOAD::packetID
@@ -44,7 +44,7 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 	TS_MESSAGE::initMessage<TS_US_LOGIN_RESULT>(&result);
 	typedef std::unordered_map<std::string, GameServerSession*>::iterator ServerIterator;
 
-	info("Server Login: %s from %s:%d\n", packet->server_name, getSocket()->getRemoteHostName(), getSocket()->getRemotePort());
+	info("Server Login: %s from %s:%d\n", packet->server_name, getStream()->getRemoteHostName(), getStream()->getRemotePort());
 
 	if(!IconServerSession::checkName(packet->server_name, strlen(packet->server_name))) {
 		//Forbidden character used in servername

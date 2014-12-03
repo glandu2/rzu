@@ -14,7 +14,7 @@
 
 namespace UploadServer {
 
-ClientSession::ClientSession() : RappelzSession(EncryptedSocket::Encrypted) {
+ClientSession::ClientSession() {
 	addPacketsToListen(2,
 					   TS_CU_LOGIN::packetID,
 					   TS_CU_UPLOAD::packetID
@@ -42,8 +42,8 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 	TS_MESSAGE::initMessage<TS_UC_LOGIN_RESULT>(&result);
 
 	debug("Upload from client %s:%d, client id %u with account id %u for guild id %u on server %30s\n",
-		  getSocket()->getRemoteHostName(),
-		  getSocket()->getRemotePort(),
+		  getStream()->getRemoteHostName(),
+		  getStream()->getRemotePort(),
 		  packet->client_id,
 		  packet->account_id,
 		  packet->guild_id,
@@ -66,10 +66,10 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	TS_MESSAGE::initMessage<TS_UC_UPLOAD>(&result);
 
 
-	debug("Upload from client %s:%d\n", getSocket()->getRemoteHostName(), getSocket()->getRemotePort());
+	debug("Upload from client %s:%d\n", getStream()->getRemoteHostName(), getStream()->getRemotePort());
 
 	if(currentRequest == nullptr) {
-		warn("Upload attempt without a request from %s:%d\n", getSocket()->getRemoteHostName(), getSocket()->getRemotePort());
+		warn("Upload attempt without a request from %s:%d\n", getStream()->getRemoteHostName(), getStream()->getRemotePort());
 		result.result = TS_RESULT_NOT_EXIST;
 	} else if(packet->file_length != packet->size - sizeof(TS_CU_UPLOAD)) {
 		warn("Upload packet size invalid, received %d bytes but the packet say %u bytes\n", int(packet->size - sizeof(TS_CU_UPLOAD)), packet->file_length);

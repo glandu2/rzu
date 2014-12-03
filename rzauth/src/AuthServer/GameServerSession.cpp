@@ -16,8 +16,8 @@ namespace AuthServer {
 
 std::unordered_map<uint16_t, GameServerSession*> GameServerSession::servers;
 
-GameServerSession::GameServerSession() : RappelzSession(EncryptedSocket::NoEncryption),
-	serverIdx(UINT16_MAX),
+GameServerSession::GameServerSession()
+  : serverIdx(UINT16_MAX),
 	serverPort(0),
 	isAdultServer(false),
 	playerCount(0)

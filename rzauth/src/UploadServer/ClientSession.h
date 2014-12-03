@@ -1,7 +1,8 @@
 #ifndef UPLOADSERVER_CLIENTSESSION_H
 #define UPLOADSERVER_CLIENTSESSION_H
 
-#include "RappelzSession.h"
+#include "PacketSession.h"
+#include "EncryptedSession.h"
 
 #include "Packets/TS_CU_LOGIN.h"
 #include "Packets/TS_CU_UPLOAD.h"
@@ -10,7 +11,7 @@ namespace UploadServer {
 
 class UploadRequest;
 
-class ClientSession : public RappelzSession
+class ClientSession : public EncryptedSession<PacketSession>
 {
 	DECLARE_CLASS(UploadServer::ClientSession)
 
