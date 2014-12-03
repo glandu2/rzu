@@ -5,7 +5,7 @@
 #include "EventLoop.h"
 #include "RappelzLibInit.h"
 #include <stdio.h>
-#include "RappelzSocket.h"
+#include "PacketSession.h"
 #include "ConfigInfo.h"
 #include "RappelzLibConfig.h"
 #include "TimingFunctions.h"
@@ -13,7 +13,7 @@
 void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string &resultString);
 void onAuthRetrieveServer(uv_timer_t* handle);
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
-void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
+void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, EncryptedSession<PacketSession> *gameServerSocket);
 void onAuthClosed(IListener* instance, Authentication* auth);
 void onAuthClosedWithFailure(IListener* instance, Authentication* auth);
 
@@ -58,15 +58,18 @@ static void init() {
 	RappelzLibConfig::get()->log.file.setDefault("benchmarkauth.log");
 }
 
-static std::string getIpForConnection(const std::string& originalIp, bool useLocalHost, int connection) {
+static std::string getUrlForConnection(std::string originalIp, bool useLocalHost, int connection, int port) {
 	if(useLocalHost) {
 		char buffer[20];
 		sprintf(buffer, "127.0.0.%d", int(connection / 50000) + 1);
 
-		return std::string(buffer);
-	} else {
-		return originalIp;
+		originalIp = std::string(buffer);
 	}
+
+	if(port)
+		originalIp += ":" + std::to_string((long long)port);
+
+	return originalIp;
 }
 
 void benchmarkAuthentication() {
@@ -86,7 +89,7 @@ void benchmarkAuthentication() {
 		const std::string accountName = (count > 1)? accountNamePrefix + std::to_string((long long)i + idxoffset) : accountNamePrefix;
 
 		Account* account = new Account(accountName);
-		Authentication* auth = new Authentication(getIpForConnection(ip, useLocalHost, i), usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port);
+		Authentication* auth = new Authentication(getUrlForConnection(ip, useLocalHost, i, port), usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES);
 		auth->index = i;
 
 		accounts.push_back(account);
@@ -251,11 +254,11 @@ void onAuthClosed(IListener* instance, Authentication* auth) {
 	}
 }
 
-void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket) {
+void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, EncryptedSession<PacketSession> * gameServerSocket) {
 	fprintf(stderr, "login to GS result: %d\n", result);
 	if(gameServerSocket) {
 		connectionsDone++;
-		gameServerSocket->close();
+		gameServerSocket->getStream()->close();
 		if(connectionsStarted < connectionTargetCount) {
 			connectionsStarted++;
 			auth->connect(nullptr, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));

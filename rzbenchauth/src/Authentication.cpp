@@ -10,13 +10,11 @@
 
 DesPasswordCipher Authentication::desCipher("MERONG");
 
-Authentication::Authentication(std::string host, AuthCipherMethod method, uint16_t port, const std::string& version)
-	: authServer(EventLoop::getLoop(), EncryptedSocket::Encrypted)
+Authentication::Authentication(std::string url, AuthCipherMethod method, const std::string& version)
 {
 	this->gameServer = nullptr;
 
-	this->authIp = host;
-	this->authPort = port;
+	this->authUrl = url;
 	this->cipherMethod = method;
 	this->version = version;
 
@@ -49,15 +47,15 @@ int Authentication::connect(Account* account, const std::string &password, Callb
 
 	inProgress = true;
 
-	authServer.connect(authIp, authPort);
+	authServer.connect(authUrl.c_str());
 	return 0;
 }
 
 void Authentication::abort(Callback<CallbackOnAuthClosed> callback) {
 	authClosedCallback = callback;
-	authServer.close();
+	authServer.getStream()->close();
 	if(gameServer)
-		gameServer->close();
+		gameServer->getStream()->close();
 	inProgress = false;
 }
 
@@ -95,7 +93,7 @@ bool Authentication::selectServer(uint16_t serverId, Callback<CallbackOnGameResu
 	return true;
 }
 
-void Authentication::onAuthServerConnectionEvent(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onAuthServerConnectionEvent(IListener* instance, PacketSession*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	if(packetData->id == TS_CC_EVENT::packetID) {
@@ -110,7 +108,7 @@ void Authentication::onAuthServerConnectionEvent(IListener* instance, RappelzSoc
 	}
 }
 
-void Authentication::onGameServerConnectionEvent(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onGameServerConnectionEvent(IListener* instance, PacketSession*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	if(packetData->id == TS_CC_EVENT::packetID) {
@@ -123,7 +121,7 @@ void Authentication::onGameServerConnectionEvent(IListener* instance, RappelzSoc
 	}
 }
 
-void Authentication::onAuthPacketReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onAuthPacketReceived(IListener* instance, PacketSession*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	switch(packetData->id) {
@@ -159,7 +157,7 @@ void Authentication::onAuthPacketReceived(IListener* instance, RappelzSocket*, c
 	}
 }
 
-void Authentication::onGamePacketReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onGamePacketReceived(IListener* instance, PacketSession*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	switch(packetData->id) {
@@ -264,7 +262,7 @@ void Authentication::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) {
 	rsaCipher = 0;
 	if(data_size != 32) {
 		warn("onPacketAuthPasswordKey: invalid decrypted data size: %d\n", data_size);
-		authServer.close();
+		authServer.getStream()->close();
 		return;
 	}
 
@@ -289,7 +287,7 @@ end:
 
 	if(ok == false) {
 		warn("onPacketAuthPasswordKey: could not encrypt password !\n");
-		authServer.close();
+		authServer.getStream()->close();
 		return;
 	}
 
@@ -366,7 +364,7 @@ end:
 
 		if(ok == false) {
 			warn("onPacketSelectServerResult: Could not decrypt TS_AC_SELECT_SERVER\n");
-			authServer.close();
+			authServer.getStream()->close();
 			return;
 		}
 
@@ -375,11 +373,15 @@ end:
 	}
 
 	ServerConnectionInfo selectedServerInfo = serverList.at(selectedServer);
-	gameServer = new RappelzSocket(EventLoop::getLoop(), EncryptedSocket::Encrypted);
+	gameServer = new EncryptedSession<PacketSession>;
 	gameServer->addPacketListener(TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent);
 	gameServer->addPacketListener(TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived);
-	gameServer->connect(selectedServerInfo.ip, selectedServerInfo.port);
-	authServer.close();
+
+	std::string gameUrl = selectedServerInfo.ip;
+	if(selectedServerInfo.port)
+		gameUrl += ":" + selectedServerInfo.port;
+	gameServer->connect(gameUrl.c_str());
+	authServer.getStream()->close();
 }
 
 void Authentication::onPacketGameConnected() {
