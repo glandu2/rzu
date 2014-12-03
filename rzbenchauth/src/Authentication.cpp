@@ -31,9 +31,6 @@ Authentication::Authentication(std::string host, AuthCipherMethod method, uint16
 	authServer.addPacketListener(TS_AC_RESULT_WITH_STRING::packetID, this, &onAuthPacketReceived);
 	authServer.addPacketListener(TS_AC_SERVER_LIST::packetID, this, &onAuthPacketReceived);
 	authServer.addPacketListener(TS_AC_SELECT_SERVER::packetID, this, &onAuthPacketReceived);
-
-//	server->addPacketListener(Server::ST_Game, TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent);
-//	server->addPacketListener(Server::ST_Game, TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived);
 }
 
 Authentication::~Authentication() {
