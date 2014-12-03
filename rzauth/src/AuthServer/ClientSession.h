@@ -14,10 +14,10 @@
 #include "Packets/TS_CA_SELECT_SERVER.h"
 
 class IDbQueryJob;
+class DesPasswordCipher;
 
 namespace AuthServer {
 
-class DesPasswordCipher;
 
 class ClientSession : public RappelzSession
 {

@@ -207,7 +207,7 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
-			info("Client already connected\n");
+			info("Client %s already connected\n", account.c_str());
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;

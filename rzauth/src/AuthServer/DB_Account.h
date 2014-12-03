@@ -6,11 +6,11 @@
 #include <stdint.h>
 
 class DbConnectionPool;
+class DesPasswordCipher;
 
 namespace AuthServer {
 
 class ClientSession;
-class DesPasswordCipher;
 
 class DB_Account : public DbQueryJob<DB_Account>
 {
