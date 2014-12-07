@@ -33,14 +33,14 @@ void PlayerCountMonitor::stop() {
 void PlayerCountMonitor::updatePlayerNumber(uv_timer_t* handle) {
 	PlayerCountMonitor* thisInstance = (PlayerCountMonitor*)handle->data;
 
-	if(thisInstance->sock.getState() == Socket::UnconnectedState) {
+	if(thisInstance->sock.getState() == Stream::UnconnectedState) {
 		thisInstance->connectedTimes = 0;
 		thisInstance->sock.connect(thisInstance->host, thisInstance->port);
-	} else if(thisInstance->sock.getState() == Socket::ConnectingState) {
+	} else if(thisInstance->sock.getState() == Stream::ConnectingState) {
 		thisInstance->sock.close();
 		thisInstance->error("Server connection timeout\n");
 	} else {
-		if(thisInstance->sock.getState() == Socket::ConnectedState) {
+		if(thisInstance->sock.getState() == Stream::ConnectedState) {
 			thisInstance->connectedTimes++;
 		}
 
