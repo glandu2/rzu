@@ -4,7 +4,6 @@
 #include "GameServerSession.h"
 #include <algorithm>
 
-
 namespace AuthServer {
 
 uv_mutex_t ClientData::mapLock = initializeLock();
