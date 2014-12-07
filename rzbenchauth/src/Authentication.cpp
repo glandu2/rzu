@@ -7,7 +7,6 @@
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 
-
 DesPasswordCipher Authentication::desCipher("MERONG");
 
 Authentication::Authentication(std::string host, AuthCipherMethod method, uint16_t port, const std::string& version)
