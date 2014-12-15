@@ -30,13 +30,6 @@ ClientSession::ClientSession()
 	  clientData(nullptr),
 	  dbQuery(nullptr)
 {
-	addPacketsToListen(5,
-					   TS_CA_VERSION::packetID,
-					   TS_CA_RSA_PUBLIC_KEY::packetID,
-					   TS_CA_ACCOUNT::packetID,
-					   TS_CA_SERVER_LIST::packetID,
-					   TS_CA_SELECT_SERVER::packetID
-					   );
 }
 
 ClientSession::~ClientSession() {

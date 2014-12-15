@@ -22,12 +22,6 @@ GameServerSession::GameServerSession()
 	isAdultServer(false),
 	playerCount(0)
 {
-	addPacketsToListen(4,
-					   TS_GA_LOGIN::packetID,
-					   TS_GA_CLIENT_LOGIN::packetID,
-					   TS_GA_CLIENT_LOGOUT::packetID,
-					   TS_GA_CLIENT_KICK_FAILED::packetID
-					   );
 }
 
 void GameServerSession::sendNotifyItemPurchased(ClientData* client) {

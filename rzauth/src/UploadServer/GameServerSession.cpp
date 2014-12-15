@@ -14,10 +14,6 @@ namespace UploadServer {
 std::unordered_map<std::string, GameServerSession*>  GameServerSession::servers;
 
 GameServerSession::GameServerSession() {
-	addPacketsToListen(2,
-					   TS_SU_LOGIN::packetID,
-					   TS_SU_REQUEST_UPLOAD::packetID
-					   );
 }
 
 GameServerSession::~GameServerSession() {

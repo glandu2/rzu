@@ -15,10 +15,6 @@
 namespace UploadServer {
 
 ClientSession::ClientSession() {
-	addPacketsToListen(2,
-					   TS_CU_LOGIN::packetID,
-					   TS_CU_UPLOAD::packetID
-					   );
 	currentRequest = nullptr;
 }
 
