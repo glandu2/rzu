@@ -5,6 +5,7 @@
 #include "ConfigInfo.h"
 #include "RappelzPlayerCountGitVersion.h"
 #include "EventLoop.h"
+#include "RappelzLibConfig.h"
 
 static void init();
 
@@ -14,6 +15,14 @@ int main(int argc, char *argv[])
 	init();
 	ConfigInfo::get()->init(argc, argv);
 	ConfigInfo::get()->dump();
+
+	Log mainLogger(RappelzLibConfig::get()->log.enable,
+				   RappelzLibConfig::get()->log.level,
+				   RappelzLibConfig::get()->log.consoleLevel,
+				   RappelzLibConfig::get()->log.dir,
+				   RappelzLibConfig::get()->log.file,
+				   RappelzLibConfig::get()->log.maxQueueSize);
+	Log::setDefaultLogger(&mainLogger);
 
 
 	PlayerCountMonitor playerCount(CFG_GET("ip")->getString(), CFG_GET("port")->getInt(), CFG_GET("req")->getString(), CFG_GET("interval")->getInt());
