@@ -13,7 +13,7 @@
 void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string &resultString);
 void onAuthRetrieveServer(uv_timer_t* handle);
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
-void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, EncryptedSession<PacketSession> *gameServerSocket);
+void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, PacketSession *gameServerSocket);
 void onAuthClosed(IListener* instance, Authentication* auth);
 void onAuthClosedWithFailure(IListener* instance, Authentication* auth);
 
@@ -58,18 +58,15 @@ static void init() {
 	RappelzLibConfig::get()->log.file.setDefault("benchmarkauth.log");
 }
 
-static std::string getUrlForConnection(std::string originalIp, bool useLocalHost, int connection, int port) {
+static std::string getIpForConnection(const std::string& originalIp, bool useLocalHost, int connection) {
 	if(useLocalHost) {
 		char buffer[20];
 		sprintf(buffer, "127.0.0.%d", int(connection / 50000) + 1);
 
-		originalIp = std::string(buffer);
+		return std::string(buffer);
+	} else {
+		return originalIp;
 	}
-
-	if(port)
-		originalIp += ":" + std::to_string((long long)port);
-
-	return originalIp;
 }
 
 void benchmarkAuthentication() {
@@ -89,7 +86,7 @@ void benchmarkAuthentication() {
 		const std::string accountName = (count > 1)? accountNamePrefix + std::to_string((long long)i + idxoffset) : accountNamePrefix;
 
 		Account* account = new Account(accountName);
-		Authentication* auth = new Authentication(getUrlForConnection(ip, useLocalHost, i, port), usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES);
+		Authentication* auth = new Authentication(getIpForConnection(ip, useLocalHost, i), usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port);
 		auth->index = i;
 
 		accounts.push_back(account);
@@ -254,7 +251,7 @@ void onAuthClosed(IListener* instance, Authentication* auth) {
 	}
 }
 
-void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, EncryptedSession<PacketSession> * gameServerSocket) {
+void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, PacketSession * gameServerSocket) {
 	fprintf(stderr, "login to GS result: %d\n", result);
 	if(gameServerSocket) {
 		connectionsDone++;

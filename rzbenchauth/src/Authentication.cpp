@@ -10,11 +10,12 @@
 
 DesPasswordCipher Authentication::desCipher("MERONG");
 
-Authentication::Authentication(std::string url, AuthCipherMethod method, const std::string& version)
+Authentication::Authentication(std::string ip, AuthCipherMethod method, uint16_t port, const std::string& version)
 {
 	this->gameServer = nullptr;
 
-	this->authUrl = url;
+	this->authIp = ip;
+	this->authPort = port;
 	this->cipherMethod = method;
 	this->version = version;
 
@@ -47,7 +48,7 @@ int Authentication::connect(Account* account, const std::string &password, Callb
 
 	inProgress = true;
 
-	authServer.connect(authUrl.c_str());
+	authServer.connect(authIp.c_str(), authPort);
 	return 0;
 }
 
@@ -373,14 +374,11 @@ end:
 	}
 
 	ServerConnectionInfo selectedServerInfo = serverList.at(selectedServer);
-	gameServer = new EncryptedSession<PacketSession>;
+	gameServer = new EncryptedSession<DelegatedPacketSession>;
 	gameServer->addPacketListener(TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent);
 	gameServer->addPacketListener(TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived);
 
-	std::string gameUrl = selectedServerInfo.ip;
-	if(selectedServerInfo.port)
-		gameUrl += ":" + selectedServerInfo.port;
-	gameServer->connect(gameUrl.c_str());
+	gameServer->connect(selectedServerInfo.ip.c_str(), selectedServerInfo.port);
 	authServer.getStream()->close();
 }
 

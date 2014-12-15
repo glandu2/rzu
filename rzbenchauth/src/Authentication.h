@@ -10,7 +10,7 @@
 #include <vector>
 #include "uv.h"
 #include "DesPasswordCipher.h"
-#include "PacketSession.h"
+#include "DelegatedPacketSession.h"
 #include "EncryptedSession.h"
 
 class Account;
@@ -39,11 +39,11 @@ class Authentication : private Object, IListener
 
 		typedef void (*CallbackOnAuthResult)(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string& resultString);
 		typedef void (*CallbackOnServerList)(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
-		typedef void (*CallbackOnGameResult)(IListener* instance, Authentication* auth, TS_ResultCode result, EncryptedSession<PacketSession> * gameServerSocket);
+		typedef void (*CallbackOnGameResult)(IListener* instance, Authentication* auth, TS_ResultCode result, PacketSession * gameServerSocket);
 		typedef void (*CallbackOnAuthClosed)(IListener* instance, Authentication* auth);
 
 	public:
-		Authentication(std::string url, AuthCipherMethod method = ACM_DES, const std::string& version = "200701120");
+		Authentication(std::string url, AuthCipherMethod method = ACM_DES, uint16_t port = 4500, const std::string& version = "200701120");
 		~Authentication();
 
 		int connect(Account* account, const std::string& password, Callback<CallbackOnAuthResult> callback);
@@ -81,9 +81,10 @@ class Authentication : private Object, IListener
 		};
 
 	private:
-		EncryptedSession<PacketSession> authServer;
-		EncryptedSession<PacketSession> *gameServer;
-		std::string authUrl;
+		EncryptedSession<DelegatedPacketSession> authServer;
+		EncryptedSession<DelegatedPacketSession> *gameServer;
+		std::string authIp;
+		uint16_t authPort;
 		AuthCipherMethod cipherMethod;
 		std::string version;
 		std::string username;
