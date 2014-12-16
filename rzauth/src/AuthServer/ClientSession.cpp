@@ -23,21 +23,13 @@
 namespace AuthServer {
 
 ClientSession::ClientSession()
-	: RappelzSession(EncryptedSocket::Encrypted),
-	  useRsaAuth(false),
+	: useRsaAuth(false),
 	  isEpic2(false),
 	  lastLoginServerId(1),
 	  serverIdxOffset(0),
 	  clientData(nullptr),
 	  dbQuery(nullptr)
 {
-	addPacketsToListen(5,
-					   TS_CA_VERSION::packetID,
-					   TS_CA_RSA_PUBLIC_KEY::packetID,
-					   TS_CA_ACCOUNT::packetID,
-					   TS_CA_SERVER_LIST::packetID,
-					   TS_CA_SELECT_SERVER::packetID
-					   );
 }
 
 ClientSession::~ClientSession() {

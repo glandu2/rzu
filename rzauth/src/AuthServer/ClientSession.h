@@ -1,7 +1,8 @@
 #ifndef AUTHSERVER_CLIENTSESSION_H
 #define AUTHSERVER_CLIENTSESSION_H
 
-#include "RappelzSession.h"
+#include "PacketSession.h"
+#include "EncryptedSession.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>
@@ -18,8 +19,7 @@ class DesPasswordCipher;
 
 namespace AuthServer {
 
-
-class ClientSession : public RappelzSession
+class ClientSession : public EncryptedSession<PacketSession>
 {
 	DECLARE_CLASS(AuthServer::ClientSession)
 

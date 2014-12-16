@@ -9,8 +9,8 @@
 void TelnetSession::onDataReceived() {
 	std::vector<char> buffer;
 
-	if(getSocket()->getAvailableBytes() > 0) {
-		getSocket()->readAll(&buffer);
+	if(getStream()->getAvailableBytes() > 0) {
+		getStream()->readAll(&buffer);
 		parseData(buffer);
 	}
 }

@@ -1,7 +1,7 @@
 #ifndef AUTHSERVER_GAMESERVERSESSION_H
 #define AUTHSERVER_GAMESERVERSESSION_H
 
-#include "RappelzSession.h"
+#include "PacketSession.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>
@@ -14,7 +14,7 @@
 
 namespace AuthServer {
 
-class GameServerSession : public RappelzSession
+class GameServerSession : public PacketSession
 {
 	DECLARE_CLASS(AuthServer::GameServerSession)
 
