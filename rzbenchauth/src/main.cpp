@@ -5,7 +5,7 @@
 #include "EventLoop.h"
 #include "RappelzLibInit.h"
 #include <stdio.h>
-#include "RappelzSocket.h"
+#include "PacketSession.h"
 #include "ConfigInfo.h"
 #include "RappelzLibConfig.h"
 #include "TimingFunctions.h"
@@ -13,7 +13,7 @@
 void onAuthResult(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string &resultString);
 void onAuthRetrieveServer(uv_timer_t* handle);
 void onServerList(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
-void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
+void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, PacketSession *gameServerSocket);
 void onAuthClosed(IListener* instance, Authentication* auth);
 void onAuthClosedWithFailure(IListener* instance, Authentication* auth);
 
@@ -251,11 +251,11 @@ void onAuthClosed(IListener* instance, Authentication* auth) {
 	}
 }
 
-void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket) {
+void onGameResult(IListener* instance, Authentication* auth, TS_ResultCode result, PacketSession * gameServerSocket) {
 	fprintf(stderr, "login to GS result: %d\n", result);
 	if(gameServerSocket) {
 		connectionsDone++;
-		gameServerSocket->close();
+		gameServerSocket->getStream()->close();
 		if(connectionsStarted < connectionTargetCount) {
 			connectionsStarted++;
 			auth->connect(nullptr, CFG_GET("password")->getString(), Callback<Authentication::CallbackOnAuthResult>(nullptr, &onAuthResult));
