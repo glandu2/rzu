@@ -1,11 +1,12 @@
 #ifndef PLAYERCOUNTMONITOR_H
 #define PLAYERCOUNTMONITOR_H
 
-#include "RappelzSocket.h"
+#include "PacketSession.h"
+#include "EncryptedSession.h"
 #include "IListener.h"
 #include "uv.h"
 
-class PlayerCountMonitor : private IListener, public Object
+class PlayerCountMonitor : public EncryptedSession<PacketSession>
 {
 	DECLARE_CLASSNAME(PlayerCountMonitor, 0)
 	public:
@@ -14,13 +15,13 @@ class PlayerCountMonitor : private IListener, public Object
 		void stop();
 
 	protected:
-		static void updatePlayerNumber(uv_timer_t* handle);
+		static void updatePlayerNumberStatic(uv_timer_t* handle);
 
 	protected:
-		static void onPlayerCountReceived(IListener* instance, RappelzSocket *sock, const TS_MESSAGE* packetData);
+		void onPacketReceived(const TS_MESSAGE* packet);
+		void updatePlayerNumber();
 
 	private:
-		RappelzSocket sock;
 		uv_timer_t timer;
 		std::string host;
 		uint16_t port;

@@ -9,5 +9,5 @@ endif()
 
 add_executable(${TARGET_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${TARGET_NAME} RappelzLib uv)
+target_link_libraries(${TARGET_NAME} rzu uv)
 install(TARGETS ${TARGET_NAME} DESTINATION ./)
