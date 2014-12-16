@@ -3,7 +3,7 @@
 #include <string.h>
 #include "RappelzLibInit.h"
 #include "ConfigInfo.h"
-#include "RappelzPlayerCountGitVersion.h"
+#include "PlayerCountGitVersion.h"
 #include "EventLoop.h"
 #include "RappelzLibConfig.h"
 
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 }
 
 static void init() {
-	CFG_CREATE("global.version", RappelzPlayerCountVersion);
+	CFG_CREATE("global.version", PlayerCountVersion);
 	CFG_CREATE("ip", "127.0.0.1");
 	CFG_CREATE("port", 4500);
 	CFG_CREATE("req", "TEST");
