@@ -1,11 +1,13 @@
 #!/bin/sh
 
-echo RappelzUnified: && git $*
+echo rzu-parent: && git $*
 
 echo libuv: && cd libuv && git $*
-echo RappelzLib: && cd ../RappelzLib && git $*
-echo RappelzPlayerCount: && cd ../RappelzPlayerCount && git $*
-echo RappelzServerAuth: && cd ../RappelzServerAuth && git $*
-echo RappelzClient: && cd ../RappelzClient && git $*
-echo RappelzBenchmarkAuth: && cd ../RappelzBenchmarkAuth && git $*
+echo librzu: && cd ../librzu && git $*
+echo rzauth: && cd ../rzauth && git $*
+echo PlayerCount: && cd ../PlayerCount && git $*
+echo ChatGateway: && cd ../ChatGateway && git $*
+echo rzbenchauth: && cd ../rzbenchauth && git $*
+echo VStructGen: && cd ../VStructGen && git $*
+#echo RappelzClient: && cd ../RappelzClient && git $*
 
