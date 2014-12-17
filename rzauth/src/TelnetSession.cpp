@@ -9,8 +9,8 @@
 void TelnetSession::onDataReceived() {
 	std::vector<char> buffer;
 
-	if(getSocket()->getAvailableBytes() > 0) {
-		getSocket()->readAll(&buffer);
+	if(getStream()->getAvailableBytes() > 0) {
+		getStream()->readAll(&buffer);
 		parseData(buffer);
 	}
 }
@@ -33,7 +33,6 @@ void TelnetSession::parseCommand(const std::string& data) {
 	std::ostringstream arg;
 
 	const char *p;
-	p = data.c_str();
 	bool insideQuotes = false;
 
 	for(p = data.c_str(); p < data.c_str() + data.size(); p++) {

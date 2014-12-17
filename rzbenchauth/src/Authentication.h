@@ -10,9 +10,10 @@
 #include <vector>
 #include "uv.h"
 #include "DesPasswordCipher.h"
+#include "DelegatedPacketSession.h"
+#include "EncryptedSession.h"
 
 class Account;
-class RappelzSocket;
 struct TS_MESSAGE;
 struct TS_AC_SERVER_LIST;
 struct TS_AC_SELECT_SERVER;
@@ -38,11 +39,11 @@ class Authentication : private Object, IListener
 
 		typedef void (*CallbackOnAuthResult)(IListener* instance, Authentication* auth, TS_ResultCode result, const std::string& resultString);
 		typedef void (*CallbackOnServerList)(IListener* instance, Authentication* auth, const std::vector<Authentication::ServerInfo>* servers, uint16_t lastSelectedServerId);
-		typedef void (*CallbackOnGameResult)(IListener* instance, Authentication* auth, TS_ResultCode result, RappelzSocket* gameServerSocket);
+		typedef void (*CallbackOnGameResult)(IListener* instance, Authentication* auth, TS_ResultCode result, PacketSession * gameServerSocket);
 		typedef void (*CallbackOnAuthClosed)(IListener* instance, Authentication* auth);
 
 	public:
-		Authentication(std::string host, AuthCipherMethod method = ACM_DES, uint16_t port = 4500, const std::string& version = "200701120");
+		Authentication(std::string url, AuthCipherMethod method = ACM_DES, uint16_t port = 4500, const std::string& version = "200701120");
 		~Authentication();
 
 		int connect(Account* account, const std::string& password, Callback<CallbackOnAuthResult> callback);
@@ -56,10 +57,10 @@ class Authentication : private Object, IListener
 		int index; //for main.cpp
 
 	protected:
-		static void onAuthServerConnectionEvent(IListener* instance, RappelzSocket *server, const TS_MESSAGE* packetData);
-		static void onGameServerConnectionEvent(IListener* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
-		static void onAuthPacketReceived(IListener* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
-		static void onGamePacketReceived(IListener* instance, RappelzSocket* server, const TS_MESSAGE* packetData);
+		static void onAuthServerConnectionEvent(IListener* instance, PacketSession *server, const TS_MESSAGE* packetData);
+		static void onGameServerConnectionEvent(IListener* instance, PacketSession* server, const TS_MESSAGE* packetData);
+		static void onAuthPacketReceived(IListener* instance, PacketSession* server, const TS_MESSAGE* packetData);
+		static void onGamePacketReceived(IListener* instance, PacketSession* server, const TS_MESSAGE* packetData);
 
 	protected:
 		void onPacketAuthConnected();
@@ -80,7 +81,8 @@ class Authentication : private Object, IListener
 		};
 
 	private:
-		RappelzSocket* authServer, *gameServer;
+		EncryptedSession<DelegatedPacketSession> authServer;
+		EncryptedSession<DelegatedPacketSession> *gameServer;
 		std::string authIp;
 		uint16_t authPort;
 		AuthCipherMethod cipherMethod;

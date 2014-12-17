@@ -34,7 +34,6 @@ private:
 
 	static std::unordered_map<uint32_t, UploadRequest*> pendingRequests;
 	static uv_mutex_t mapLock;
-	static uv_once_t lockInit;
 
 	GameServerSession *gameServer;
 	uint32_t client_id;

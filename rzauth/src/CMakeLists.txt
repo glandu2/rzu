@@ -10,7 +10,7 @@ endif()
 add_executable(${TARGET_NAME} ${SOURCE_FILES})
 #add_dependencies(${TARGET_NAME} ${TARGET_NAME}_GitVersion)
 
-target_link_libraries(${TARGET_NAME} RappelzLib uv)
+target_link_libraries(${TARGET_NAME} rzu uv)
 include_directories(${OPENSSL_INCLUDE_DIR})
 target_link_libraries(${TARGET_NAME} ${OPENSSL_LIBRARIES})
 if(WIN32)

@@ -1,6 +1,5 @@
 #include "Authentication.h"
 #include "Packets/AuthPackets.h"
-#include "RappelzSocket.h"
 #include "EventLoop.h"
 #include "DesPasswordCipher.h"
 #include "Account.h"
@@ -8,14 +7,13 @@
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 
-
 DesPasswordCipher Authentication::desCipher("MERONG");
 
-Authentication::Authentication(std::string host, AuthCipherMethod method, uint16_t port, const std::string& version) {
-	this->authServer = new RappelzSocket(EventLoop::getLoop(), EncryptedSocket::Encrypted);
+Authentication::Authentication(std::string ip, AuthCipherMethod method, uint16_t port, const std::string& version)
+{
 	this->gameServer = nullptr;
 
-	this->authIp = host;
+	this->authIp = ip;
 	this->authPort = port;
 	this->cipherMethod = method;
 	this->version = version;
@@ -25,22 +23,17 @@ Authentication::Authentication(std::string host, AuthCipherMethod method, uint16
 	this->inProgress = false;
 
 	reserveCallbackCount(6);
-	authServer->addPacketListener(TS_CC_EVENT::packetID, this, &onAuthServerConnectionEvent);
-	authServer->addPacketListener(TS_AC_AES_KEY_IV::packetID, this, &onAuthPacketReceived);
-	authServer->addPacketListener(TS_AC_RESULT::packetID, this, &onAuthPacketReceived);
-	authServer->addPacketListener(TS_AC_RESULT_WITH_STRING::packetID, this, &onAuthPacketReceived);
-	authServer->addPacketListener(TS_AC_SERVER_LIST::packetID, this, &onAuthPacketReceived);
-	authServer->addPacketListener(TS_AC_SELECT_SERVER::packetID, this, &onAuthPacketReceived);
-
-//	server->addPacketListener(Server::ST_Game, TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent);
-//	server->addPacketListener(Server::ST_Game, TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived);
+	authServer.addPacketListener(TS_CC_EVENT::packetID, this, &onAuthServerConnectionEvent);
+	authServer.addPacketListener(TS_AC_AES_KEY_IV::packetID, this, &onAuthPacketReceived);
+	authServer.addPacketListener(TS_AC_RESULT::packetID, this, &onAuthPacketReceived);
+	authServer.addPacketListener(TS_AC_RESULT_WITH_STRING::packetID, this, &onAuthPacketReceived);
+	authServer.addPacketListener(TS_AC_SERVER_LIST::packetID, this, &onAuthPacketReceived);
+	authServer.addPacketListener(TS_AC_SELECT_SERVER::packetID, this, &onAuthPacketReceived);
 }
 
 Authentication::~Authentication() {
 	if(inProgress)
 		warn("Authentication object delete but authentication in progress !\n");
-	if(authServer)
-		delete authServer;
 	if(gameServer)
 		delete gameServer;
 }
@@ -54,15 +47,15 @@ int Authentication::connect(Account* account, const std::string &password, Callb
 
 	inProgress = true;
 
-	authServer->connect(authIp, authPort);
+	authServer.connect(authIp.c_str(), authPort);
 	return 0;
 }
 
 void Authentication::abort(Callback<CallbackOnAuthClosed> callback) {
 	authClosedCallback = callback;
-	authServer->close();
+	authServer.getStream()->close();
 	if(gameServer)
-		gameServer->close();
+		gameServer->getStream()->close();
 	inProgress = false;
 }
 
@@ -72,7 +65,7 @@ bool Authentication::retreiveServerList(Callback<CallbackOnServerList> callback)
 	serverListCallback = callback;
 
 	TS_MESSAGE::initMessage<TS_CA_SERVER_LIST>(&getServerListMsg);
-	authServer->sendPacket(&getServerListMsg);
+	authServer.sendPacket(&getServerListMsg);
 	return true;
 }
 
@@ -95,12 +88,12 @@ bool Authentication::selectServer(uint16_t serverId, Callback<CallbackOnGameResu
 
 	TS_MESSAGE::initMessage<TS_CA_SELECT_SERVER>(&selectServerMsg);
 	selectServerMsg.server_idx = serverId;
-	authServer->sendPacket(&selectServerMsg);
+	authServer.sendPacket(&selectServerMsg);
 
 	return true;
 }
 
-void Authentication::onAuthServerConnectionEvent(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onAuthServerConnectionEvent(IListener* instance, PacketSession*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	if(packetData->id == TS_CC_EVENT::packetID) {
@@ -115,7 +108,7 @@ void Authentication::onAuthServerConnectionEvent(IListener* instance, RappelzSoc
 	}
 }
 
-void Authentication::onGameServerConnectionEvent(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onGameServerConnectionEvent(IListener* instance, PacketSession*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	if(packetData->id == TS_CC_EVENT::packetID) {
@@ -128,7 +121,7 @@ void Authentication::onGameServerConnectionEvent(IListener* instance, RappelzSoc
 	}
 }
 
-void Authentication::onAuthPacketReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onAuthPacketReceived(IListener* instance, PacketSession*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	switch(packetData->id) {
@@ -164,7 +157,7 @@ void Authentication::onAuthPacketReceived(IListener* instance, RappelzSocket*, c
 	}
 }
 
-void Authentication::onGamePacketReceived(IListener* instance, RappelzSocket*, const TS_MESSAGE* packetData) {
+void Authentication::onGamePacketReceived(IListener* instance, PacketSession*, const TS_MESSAGE* packetData) {
 	Authentication* thisAccount = static_cast<Authentication*>(instance);
 
 	switch(packetData->id) {
@@ -191,7 +184,7 @@ void Authentication::onPacketAuthConnected() {
 	memset(versionMsg.szVersion, 0, sizeof(versionMsg.szVersion));
 #endif
 	strcpy(versionMsg.szVersion, version.c_str());
-	authServer->sendPacket(&versionMsg);
+	authServer.sendPacket(&versionMsg);
 
 	if(this->cipherMethod == ACM_DES) {
 		TS_CA_ACCOUNT accountMsg;
@@ -215,7 +208,7 @@ void Authentication::onPacketAuthConnected() {
 
 		strcpy(accountMsg.password, cachedPassword);
 
-		authServer->sendPacket(&accountMsg);
+		authServer.sendPacket(&accountMsg);
 	} else if(this->cipherMethod == ACM_RSA_AES) {
 		TS_CA_RSA_PUBLIC_KEY *keyMsg;
 		int public_key_size;
@@ -233,7 +226,7 @@ void Authentication::onPacketAuthConnected() {
 		BIO_read(b, keyMsg->key, public_key_size);
 		BIO_free(b);
 
-		authServer->sendPacket(keyMsg);
+		authServer.sendPacket(keyMsg);
 		TS_MESSAGE_WNA::destroy(keyMsg);
 	}
 }
@@ -269,7 +262,7 @@ void Authentication::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) {
 	rsaCipher = 0;
 	if(data_size != 32) {
 		warn("onPacketAuthPasswordKey: invalid decrypted data size: %d\n", data_size);
-		authServer->close();
+		authServer.getStream()->close();
 		return;
 	}
 
@@ -294,7 +287,7 @@ end:
 
 	if(ok == false) {
 		warn("onPacketAuthPasswordKey: could not encrypt password !\n");
-		authServer->close();
+		authServer.getStream()->close();
 		return;
 	}
 
@@ -302,10 +295,10 @@ end:
 	password.clear();
 
 	strcpy(accountMsg.account, username.c_str());
-	accountMsg.aes_block_size = p_len + f_len;
+	accountMsg.password_size = p_len + f_len;
 	accountMsg.dummy[0] = accountMsg.dummy[1] = accountMsg.dummy[2] = 0;
 	accountMsg.unknown_00000100 = 0x00000100;
-	authServer->sendPacket(&accountMsg);
+	authServer.sendPacket(&accountMsg);
 }
 
 void Authentication::onPacketServerList(const TS_AC_SERVER_LIST* packet) {
@@ -371,7 +364,7 @@ end:
 
 		if(ok == false) {
 			warn("onPacketSelectServerResult: Could not decrypt TS_AC_SELECT_SERVER\n");
-			authServer->close();
+			authServer.getStream()->close();
 			return;
 		}
 
@@ -380,11 +373,12 @@ end:
 	}
 
 	ServerConnectionInfo selectedServerInfo = serverList.at(selectedServer);
-	gameServer = new RappelzSocket(EventLoop::getLoop(), EncryptedSocket::Encrypted);
+	gameServer = new EncryptedSession<DelegatedPacketSession>;
 	gameServer->addPacketListener(TS_CC_EVENT::packetID, this, &onGameServerConnectionEvent);
 	gameServer->addPacketListener(TS_CS_ACCOUNT_WITH_AUTH::packetID, this, &onGamePacketReceived);
-	gameServer->connect(selectedServerInfo.ip, selectedServerInfo.port);
-	authServer->close();
+
+	gameServer->connect(selectedServerInfo.ip.c_str(), selectedServerInfo.port);
+	authServer.getStream()->close();
 }
 
 void Authentication::onPacketGameConnected() {

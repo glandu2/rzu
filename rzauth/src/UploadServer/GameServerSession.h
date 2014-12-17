@@ -1,7 +1,8 @@
 #ifndef UPLOADSERVER_GAMESERVERSESSION_H
 #define UPLOADSERVER_GAMESERVERSESSION_H
 
-#include "RappelzSession.h"
+#include "PacketSession.h"
+#include "EncryptedSession.h"
 #include <unordered_map>
 
 #include "Packets/TS_SU_LOGIN.h"
@@ -9,7 +10,7 @@
 
 namespace UploadServer {
 
-class GameServerSession : public RappelzSession
+class GameServerSession : public EncryptedSession<PacketSession>
 {
 	DECLARE_CLASS(UploadServer::GameServerSession)
 public:

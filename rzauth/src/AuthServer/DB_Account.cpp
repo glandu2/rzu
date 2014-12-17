@@ -2,6 +2,8 @@
 #include <openssl/md5.h>
 #include "ClientSession.h"
 #include "../GlobalConfig.h"
+#include <openssl/evp.h>
+#include "DesPasswordCipher.h"
 
 #ifdef _MSC_VER
 #define strncasecmp strnicmp
@@ -37,11 +39,15 @@ struct DbAccountConfig {
 	{}
 };
 static DbAccountConfig* config = nullptr;
+DesPasswordCipher* DB_Account::desCipher = nullptr;
+std::string DB_Account::currentDesKey;
 
-bool DB_Account::init(DbConnectionPool* dbConnectionPool) {
+bool DB_Account::init(DbConnectionPool* dbConnectionPool, cval<std::string>& desKeyStr) {
 	std::vector<DbQueryBinding::ParameterBinding> params;
 	std::vector<DbQueryBinding::ColumnBinding> cols;
 
+	currentDesKey = desKeyStr.get();
+	desCipher = new DesPasswordCipher(desKeyStr.get().c_str());
 	config = new DbAccountConfig;
 
 	params.emplace_back(DECLARE_PARAMETER(DB_Account, account, 0, config->paramAccount));
@@ -67,14 +73,18 @@ void DB_Account::deinit() {
 	dbBinding = nullptr;
 	delete binding;
 	delete config;
+	delete desCipher;
+	currentDesKey = "";
 }
 
-DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, const char* password, size_t size)
+DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, bool cryptUseAes, const std::vector<unsigned char> &cryptedPassword, unsigned char aesKey[32])
 	: clientInfo(clientInfo), account(account)
 {
-	std::string buffer = CONFIG_GET()->auth.db.salt;
-	ok = false;
+	this->cryptedPassword = cryptedPassword;
+	memcpy(this->aesKey, aesKey, sizeof(this->aesKey));
+	this->cryptUseAes = cryptUseAes;
 
+	ok = false;
 	accountId = 0xFFFFFFFF;
 	this->password[0] = '\0';
 	nullPassword = true;
@@ -86,11 +96,91 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	serverIdxOffset = 0;
 	block = false;
 
-	buffer.append(password, password + size);
-	trace("MD5 of \"%.*s\" with len %d\n", (int)buffer.size(), buffer.c_str(), (int)buffer.size());
-	MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
-
 	execute(DbQueryBinding::EM_OneRow);
+}
+
+bool DB_Account::decryptPassword() {
+	char password[64];
+	bool ok = false;
+
+	if(cryptUseAes) {
+		EVP_CIPHER_CTX d_ctx;
+		int bytesWritten, totalLength;
+		unsigned int bytesRead;
+
+		debug("Client login using AES\n");
+
+		// if crypted size is > max size - 128 bits, then the decrypted password will overflow in the destination variable
+		if(cryptedPassword.size() > sizeof(password) - 16) {
+			warn("RSA: invalid password length: %d\n", (int)cryptedPassword.size());
+		}
+
+		EVP_CIPHER_CTX_init(&d_ctx);
+
+		if(EVP_DecryptInit_ex(&d_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) <= 0)
+			goto cleanup_aes;
+		if(EVP_DecryptInit_ex(&d_ctx, NULL, NULL, NULL, NULL) <= 0)
+			goto cleanup_aes;
+
+		for(totalLength = bytesRead = 0; bytesRead + 15 < cryptedPassword.size(); bytesRead += 16) {
+			if(EVP_DecryptUpdate(&d_ctx, (unsigned char*)password + totalLength, &bytesWritten, &cryptedPassword[0] + bytesRead, 16) <= 0)
+				goto cleanup_aes;
+			totalLength += bytesWritten;
+		}
+
+		if(EVP_DecryptFinal_ex(&d_ctx, (unsigned char*)password + totalLength, &bytesWritten) <= 0)
+			goto cleanup_aes;
+
+		totalLength += bytesWritten;
+
+		if(totalLength >= (int)sizeof(password)) {
+			error("Password length overflow: %d >= %d\n", totalLength, (int)sizeof(password));
+			goto cleanup_aes;
+		}
+
+		password[totalLength] = 0;
+		ok = true;
+
+	cleanup_aes:
+		EVP_CIPHER_CTX_cleanup(&d_ctx);
+	} else {
+		memcpy(password, (char*)&cryptedPassword[0], 61);
+
+		debug("Client login using DES, key: %s\n", currentDesKey.c_str());
+		desCipher->decrypt(password, 61);
+
+		password[60] = 0;
+		ok = true;
+	}
+
+	if(ok == true) {
+		unsigned char givenPasswordMd5[16];
+		std::string buffer = CONFIG_GET()->auth.db.salt;
+
+		buffer.append(password, password + strlen(password));
+		trace("MD5 of \"%.*s\" with len %d\n", (int)buffer.size(), buffer.c_str(), (int)buffer.size());
+		MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
+		setPasswordMD5(givenPasswordMd5);
+	}
+
+	return ok;
+}
+
+void DB_Account::setPasswordMD5(unsigned char givenPasswordMd5[16]) {
+	for(int i = 0; i < 16; i++) {
+		unsigned char val = givenPasswordMd5[i] >> 4;
+		if(val < 10)
+			givenPasswordString[i*2] = val + '0';
+		else
+			givenPasswordString[i*2] = val - 10 + 'a';
+
+		val = givenPasswordMd5[i] & 0x0F;
+		if(val < 10)
+			givenPasswordString[i*2+1] = val + '0';
+		else
+			givenPasswordString[i*2+1] = val - 10 + 'a';
+	}
+	givenPasswordString[32] = '\0';
 }
 
 bool DB_Account::isAccountNameValid(const std::string& account) {
@@ -116,20 +206,8 @@ bool DB_Account::onPreProcess() {
 		return false;
 	}
 
-	for(int i = 0; i < 16; i++) {
-		unsigned char val = givenPasswordMd5[i] >> 4;
-		if(val < 10)
-			givenPasswordString[i*2] = val + '0';
-		else
-			givenPasswordString[i*2] = val - 10 + 'a';
-
-		val = givenPasswordMd5[i] & 0x0F;
-		if(val < 10)
-			givenPasswordString[i*2+1] = val + '0';
-		else
-			givenPasswordString[i*2+1] = val - 10 + 'a';
-	}
-	givenPasswordString[32] = '\0';
+	if(decryptPassword() == false)
+		return false;
 
 	trace("Querying for account \"%s\" and password MD5 \"%s\"\n", account.c_str(), givenPasswordString);
 
