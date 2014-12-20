@@ -1,5 +1,4 @@
 #include "uv.h"
-#include "Account.h"
 #include "Authentication.h"
 #include <string.h>
 #include "EventLoop.h"
@@ -21,7 +20,7 @@ void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldS
 void onSocketTimer(uv_timer_t *handle);
 void onSocketClosed();
 
-std::vector<Account*> accounts;
+std::vector<std::string> accounts;
 std::vector<Authentication*> auths;
 std::vector<Stream*> sockets; //for connections/sec test
 std::vector<uv_timer_t*> timers;
@@ -83,9 +82,8 @@ void benchmarkAuthentication() {
 	if(delay)
 		timers.reserve(count);
 	for(int i = 0; i < count; i++) {
-		const std::string accountName = (count > 1)? accountNamePrefix + std::to_string((long long)i + idxoffset) : accountNamePrefix;
+		const std::string account = (count > 1)? accountNamePrefix + std::to_string((long long)i + idxoffset) : accountNamePrefix;
 
-		Account* account = new Account(accountName);
 		Authentication* auth = new Authentication(getIpForConnection(ip, useLocalHost, i), usersa? Authentication::ACM_RSA_AES : Authentication::ACM_DES, port);
 		auth->index = i;
 
