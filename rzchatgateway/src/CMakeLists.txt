@@ -4,7 +4,7 @@ file(GLOB SOURCE_FILES *.cpp *.h)
 
 add_executable(${TARGET_NAME} ${SOURCE_FILES})
 include_directories(${OPENSSL_INCLUDE_DIR})
-target_link_libraries(${TARGET_NAME} RappelzLib uv ${OPENSSL_LIBRARIES})
+target_link_libraries(${TARGET_NAME} rzu uv ${OPENSSL_LIBRARIES})
 if(WIN32)
     target_link_libraries(${TARGET_NAME} Winmm.lib)
 endif()
