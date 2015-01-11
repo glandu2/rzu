@@ -146,7 +146,7 @@ bool DB_Account::decryptPassword() {
 	} else {
 		memcpy(password, (char*)&cryptedPassword[0], 61);
 
-		debug("Client login using DES, key: %s\n", currentDesKey.c_str());
+		debug("Client login using DES\n");
 		desCipher->decrypt(password, 61);
 
 		password[60] = 0;
@@ -158,7 +158,7 @@ bool DB_Account::decryptPassword() {
 		std::string buffer = CONFIG_GET()->auth.db.salt;
 
 		buffer.append(password, password + strlen(password));
-		trace("MD5 of \"%.*s\" with len %d\n", (int)buffer.size(), buffer.c_str(), (int)buffer.size());
+		//trace("MD5 of \"%.*s\" with len %d\n", (int)buffer.size(), buffer.c_str(), (int)buffer.size());
 		MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
 		setPasswordMD5(givenPasswordMd5);
 	}

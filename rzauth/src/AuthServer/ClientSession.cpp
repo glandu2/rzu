@@ -1,6 +1,7 @@
 #include "ClientSession.h"
 #include "GameServerSession.h"
 #include "../GlobalConfig.h"
+#include "rzauthGitVersion.h"
 
 #include <string.h>
 #include <stdlib.h>     /* srand, rand */
@@ -63,6 +64,10 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 		case TS_CA_SELECT_SERVER::packetID:
 			onSelectServer(static_cast<const TS_CA_SELECT_SERVER*>(packet));
 			break;
+
+		default:
+			debug("Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
+			break;
 	}
 }
 
@@ -77,10 +82,11 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.request_msg_id = packet->id;
 		sendPacket(&result);
 	} else if(!memcmp(packet->szVersion, "INFO", 4)) {
+		static uint32_t gitVersionSuffix = strtol(std::string(rzauthVersion+8, 8).c_str(), nullptr, 16);
 		TS_SC_RESULT result;
 		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
 
-		result.value = 20;
+		result.value = gitVersionSuffix ^ 0xADADADAD;
 		result.result = 0;
 		result.request_msg_id = packet->id;
 		sendPacket(&result);
