@@ -32,6 +32,10 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 		case TS_SU_REQUEST_UPLOAD::packetID:
 			onRequestUpload(static_cast<const TS_SU_REQUEST_UPLOAD*>(packet));
 			break;
+
+		default:
+			debug("Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
+			break;
 	}
 }
 

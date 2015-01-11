@@ -64,6 +64,10 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 		case TS_CA_SELECT_SERVER::packetID:
 			onSelectServer(static_cast<const TS_CA_SELECT_SERVER*>(packet));
 			break;
+
+		default:
+			debug("Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
+			break;
 	}
 }
 

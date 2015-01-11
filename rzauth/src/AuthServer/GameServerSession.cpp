@@ -61,6 +61,10 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 		case TS_GA_CLIENT_KICK_FAILED::packetID:
 			onClientKickFailed(static_cast<const TS_GA_CLIENT_KICK_FAILED*>(packet));
 			break;
+
+		default:
+			debug("Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
+			break;
 	}
 }
 
