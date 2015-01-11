@@ -1,5 +1,5 @@
-#ifndef AUTHSESSION_H
-#define AUTHSESSION_H
+#ifndef BENCHMARKAUTHSESSION_H
+#define BENCHMARKAUTHSESSION_H
 
 #include "ClientAuthSession.h"
 #include <string>
@@ -44,4 +44,4 @@ private:
 
 };
 
-#endif // AUTHSESSION_H
+#endif // BENCHMARKAUTHSESSION_H
