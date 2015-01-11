@@ -77,7 +77,7 @@ void PlayerCountMonitor::onPacketReceived(const TS_MESSAGE* packetData) {
 
 				sendPacket(&versionMsg);
 			}
-			if(eventMsg->event == TS_CC_EVENT::CE_ServerConnectionLost) {
+			if(eventMsg->event == TS_CC_EVENT::CE_ServerDisconnected) {
 				error("Disconnected from server !\n");
 			}
 			if(eventMsg->event == TS_CC_EVENT::CE_ServerUnreachable) {
