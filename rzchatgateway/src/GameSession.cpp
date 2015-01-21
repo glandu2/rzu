@@ -66,9 +66,25 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 		case TS_SC_CHARACTER_LIST::packetID: {
 			TS_CS_LOGIN loginPkt;
 			TS_TIMESYNC timeSyncPkt;
+			const TS_SC_CHARACTER_LIST* charListPkt = reinterpret_cast<const TS_SC_CHARACTER_LIST*>(packet);
+			bool characterInList = false;
 
 			TS_MESSAGE::initMessage<TS_CS_LOGIN>(&loginPkt);
 			TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
+
+			debug("Character list: \n");
+			for(int i = 0; i < charListPkt->count; i++) {
+				debug(" - %s\n", charListPkt->characters[i].name);
+				if(!strcmp(playername.c_str(), charListPkt->characters[i].name))
+					characterInList = true;
+			}
+
+			if(!characterInList) {
+				warn("Character \"%s\" not in character list: \n", playername.c_str());
+				for(int i = 0; i < charListPkt->count; i++) {
+					warn(" - %s\n", charListPkt->characters[i].name);
+				}
+			}
 
 			strcpy(loginPkt.szName, playername.c_str());
 			loginPkt.race = 0;

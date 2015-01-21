@@ -48,8 +48,15 @@ void ChatAuthSession::onAuthResult(TS_ResultCode result, const std::string& resu
 void ChatAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t lastSelectedServerId) {
 	bool serverFound = false;
 
+	debug("Server list (last id: %d)\n", lastSelectedServerId);
 	for(size_t i = 0; i < servers.size(); i++) {
 		const ServerInfo& serverInfo = servers.at(i);
+		debug("%d: %20s at %16s:%d %d%% user ratio\n",
+				serverInfo.serverId,
+				serverInfo.serverName.c_str(),
+				serverInfo.serverIp.c_str(),
+				serverInfo.serverPort,
+				serverInfo.userRatio);
 
 		if(serverInfo.serverId == serverIdx && !serverFound) {
 			gameSession->setGameServerName(serverInfo.serverName);

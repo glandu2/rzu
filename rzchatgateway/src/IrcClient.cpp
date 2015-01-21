@@ -104,7 +104,7 @@ void IrcClient::onIrcLine(const std::string& line) {
 		sprintf(loginTest, "JOIN %s\r\n", channelName.c_str());
 		write(loginTest, strlen(loginTest));
 		joined = true;
-		info("Joined IRC channel %s as user %s\n", channelName.c_str(), nickname.c_str());
+		info("Joined IRC channel %s at %s:%d as user %s\n", channelName.c_str(), ip.c_str(), port, nickname.c_str());
 	} else if (command == "PING") {
 		std::string pong = "PONG :" + trailing;
 		write(pong.c_str(), pong.size());

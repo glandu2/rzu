@@ -47,9 +47,9 @@ static void init() {
 	CFG_CREATE("irc.nick", "");
 
 	CFG_CREATE("use_rsa", true);
-	CFG_CREATE("printall", false);
 	CFG_CREATE("gateway", false);
 	CFG_CREATE("autoreco", 280);
+	CFG_CREATE("recodelay", 5000);
 
 	trafficDump = new TrafficDump;
 
@@ -61,12 +61,6 @@ static void init() {
 
 int main(int argc, char *argv[])
 {
-	bool usersa;
-	std::string ip;
-	int port;
-	bool enableGateway = false;
-	int autoReco;
-
 	RappelzLibInit();
 	init();
 	ConfigInfo::get()->init(argc, argv);
@@ -89,11 +83,12 @@ int main(int argc, char *argv[])
 
 	ConfigInfo::get()->dump();
 
-	usersa = CFG_GET("use_rsa")->getBool();
-	ip = CFG_GET("rappelz.ip")->getString();
-	port = CFG_GET("rappelz.port")->getInt();
-	enableGateway = CFG_GET("gateway")->getBool();
-	autoReco = CFG_GET("autoreco")->getInt();
+	bool usersa = CFG_GET("use_rsa")->getBool();
+	std::string ip = CFG_GET("rappelz.ip")->getString();
+	int port = CFG_GET("rappelz.port")->getInt();
+	bool enableGateway = CFG_GET("gateway")->getBool();
+	int autoReco = CFG_GET("autoreco")->getInt();
+	int recoDelay = CFG_GET("recodelay")->getInt();
 
 	std::string ircIp = CFG_GET("irc.ip")->getString();
 	std::string ircHost = CFG_GET("irc.host")->getString();
@@ -111,7 +106,7 @@ int main(int argc, char *argv[])
 	GameSession* gameSession = new GameSession(playername, enableGateway, &trafficLogger);
 	IrcClient* ircClient = new IrcClient(ircIp, ircPort, ircHost, ircChannel, ircNick, &trafficLogger);
 
-	ChatAuthSession* authSession = new ChatAuthSession(gameSession, ip, port, account, password, serverIdx, 5000, autoReco, usersa ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES);
+	ChatAuthSession* authSession = new ChatAuthSession(gameSession, ip, port, account, password, serverIdx, recoDelay, autoReco, usersa ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES);
 
 	gameSession->setIrcClient(ircClient);
 	ircClient->setGameSession(gameSession);
