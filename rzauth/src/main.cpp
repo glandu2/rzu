@@ -1,7 +1,7 @@
 #include "EventLoop.h"
 #include "GlobalConfig.h"
 #include "RappelzLibInit.h"
-#include "RappelzLibConfig.h"
+#include "GlobalCoreConfig.h"
 #include "CrashHandler.h"
 #include "DbConnectionPool.h"
 

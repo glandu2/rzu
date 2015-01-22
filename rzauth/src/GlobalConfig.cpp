@@ -1,5 +1,5 @@
 #include "GlobalConfig.h"
-#include "RappelzLibConfig.h"
+#include "GlobalCoreConfig.h"
 #include "rzauthGitVersion.h"
 
 GlobalConfig* GlobalConfig::get() {
