@@ -5,7 +5,7 @@
 #include "RappelzLibInit.h"
 #include <stdio.h>
 #include "ConfigInfo.h"
-#include "RappelzLibConfig.h"
+#include "GlobalCoreConfig.h"
 #include "TimingFunctions.h"
 
 void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState);
