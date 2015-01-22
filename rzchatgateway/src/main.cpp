@@ -32,13 +32,13 @@ struct TrafficDump {
 }* trafficDump;
 
 static void init() {
-	CFG_CREATE("rappelz.ip", "127.0.0.1");
-	CFG_CREATE("rappelz.port", 4500);
+	CFG_CREATE("game.ip", "127.0.0.1");
+	CFG_CREATE("game.port", 4500);
 
-	CFG_CREATE("rappelz.account", "test1");
-	CFG_CREATE("rappelz.password", "admin");
-	CFG_CREATE("rappelz.gsindex", 1);
-	CFG_CREATE("rappelz.playername", "Player");
+	CFG_CREATE("game.account", "test1");
+	CFG_CREATE("game.password", "admin");
+	CFG_CREATE("game.gsindex", 1);
+	CFG_CREATE("game.playername", "Player");
 
 	CFG_CREATE("irc.ip", "127.0.0.1");
 	CFG_CREATE("irc.host", "*");
@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
 	ConfigInfo::get()->dump();
 
 	bool usersa = CFG_GET("use_rsa")->getBool();
-	std::string ip = CFG_GET("rappelz.ip")->getString();
-	int port = CFG_GET("rappelz.port")->getInt();
+	std::string ip = CFG_GET("game.ip")->getString();
+	int port = CFG_GET("game.port")->getInt();
 	bool enableGateway = CFG_GET("gateway")->getBool();
 	int autoReco = CFG_GET("autoreco")->getInt();
 	int recoDelay = CFG_GET("recodelay")->getInt();
@@ -96,10 +96,10 @@ int main(int argc, char *argv[])
 	std::string ircNick = CFG_GET("irc.nick")->getString();
 	std::string ircChannel = CFG_GET("irc.channel")->getString();
 
-	std::string account = CFG_GET("rappelz.account")->getString();
-	std::string password = CFG_GET("rappelz.password")->getString();
-	int serverIdx = CFG_GET("rappelz.gsindex")->getInt();
-	std::string playername = CFG_GET("rappelz.playername")->getString();
+	std::string account = CFG_GET("game.account")->getString();
+	std::string password = CFG_GET("game.password")->getString();
+	int serverIdx = CFG_GET("game.gsindex")->getInt();
+	std::string playername = CFG_GET("game.playername")->getString();
 
 	mainLogger.info("Starting chat gateway\n");
 
