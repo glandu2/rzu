@@ -6,7 +6,7 @@
 #include "RappelzLibInit.h"
 #include "PacketSession.h"
 #include "ConfigInfo.h"
-#include "RappelzLibConfig.h"
+#include "GlobalCoreConfig.h"
 #include "Log.h"
 #include "IrcClient.h"
 #include "GameSession.h"
