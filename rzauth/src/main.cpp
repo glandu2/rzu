@@ -80,12 +80,12 @@ int main(int argc, char **argv) {
 
 	ConfigInfo::get()->init(argc, argv);
 
-	Log mainLogger(RappelzLibConfig::get()->log.enable,
-				   RappelzLibConfig::get()->log.level,
-				   RappelzLibConfig::get()->log.consoleLevel,
-				   RappelzLibConfig::get()->log.dir,
-				   RappelzLibConfig::get()->log.file,
-				   RappelzLibConfig::get()->log.maxQueueSize);
+	Log mainLogger(GlobalCoreConfig::get()->log.enable,
+				   GlobalCoreConfig::get()->log.level,
+				   GlobalCoreConfig::get()->log.consoleLevel,
+				   GlobalCoreConfig::get()->log.dir,
+				   GlobalCoreConfig::get()->log.file,
+				   GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 	Log trafficLogger(CONFIG_GET()->trafficDump.enable,
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
 					  CONFIG_GET()->trafficDump.consoleLevel,
 					  CONFIG_GET()->trafficDump.dir,
 					  CONFIG_GET()->trafficDump.file,
-					  RappelzLibConfig::get()->log.maxQueueSize);
+					  GlobalCoreConfig::get()->log.maxQueueSize);
 
 
 	ConfigInfo::get()->dump();
