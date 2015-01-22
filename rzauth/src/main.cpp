@@ -43,6 +43,7 @@
  *  -> warning: GS with auth in same exe: delay connectToAuth ?
  * manage more field in TS_AG_CLIENT_LOGIN (play time)
  * Add API to do logging with static classes in Object (avoid crash using Log::get()->log(...))
+ * Add log to LogServer (using LS_11N4S)
  */
 
 /* Packet versionning:
