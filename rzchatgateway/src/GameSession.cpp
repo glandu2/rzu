@@ -24,7 +24,6 @@ GameSession::GameSession(const std::string& playername, bool enableGateway, Log 
 	uv_timer_init(EventLoop::getLoop(), &updateTimer);
 	updateTimer.data = this;
 	connectedInGame = false;
-	//getStream()->setPacketLogger(packetLog);
 }
 
 void GameSession::onGameConnected() {
@@ -167,7 +166,6 @@ void GameSession::sendMsgToGS(int type, const char* sender, const char* target, 
 
 	if(msg.size() < 1)
 		return;
-
 
 	if(!enableGateway)
 		return;

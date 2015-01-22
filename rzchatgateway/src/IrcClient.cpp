@@ -7,7 +7,6 @@
 IrcClient::IrcClient(const std::string& ip, int port, const std::string& hostname, const std::string& channel, const std::string& nickname, Log* packetLog)
 	: gameSession(nullptr), channelName(channel), nickname(nickname), ip(ip), hostname(hostname), port(port), joined(false)
 {
-	//getStream()->setPacketLogger(packetLog);
 }
 
 void IrcClient::connect(std::string servername) {
@@ -56,39 +55,6 @@ void IrcClient::onDataReceived() {
 	}
 }
 
-void IrcClient::parseIrcMessage(const std::string& message, std::string& prefix, std::string& command, std::string& parameters, std::string& trailing)
-{
-	size_t prefixEnd, trailingStart;
-	size_t commandEnd;
-
-	// Grab the prefix if it is present. If a message begins
-	// with a colon, the characters following the colon until
-	// the first space are the prefix.
-	if (message[0] == ':') {
-		prefixEnd = message.find_first_of(' ');
-		prefix.assign(message, 1, prefixEnd - 1);
-		prefixEnd++;
-	} else {
-		prefixEnd = 0;
-	}
-
-	// Grab the trailing if it is present. If a message contains
-	// a space immediately following a colon, all characters after
-	// the colon are the trailing part.
-	trailingStart = message.find(" :");
-	if (trailingStart != std::string::npos)
-		trailing.assign(message, trailingStart+2, std::string::npos);
-	else
-		trailingStart = message.size();
-
-	commandEnd = message.find_first_of(" \r\n", prefixEnd);
-	if(commandEnd == std::string::npos)
-		commandEnd = message.size();
-
-	command.assign(message, prefixEnd, commandEnd - prefixEnd);
-	parameters.assign(message, commandEnd, trailingStart - commandEnd);
-}
-
 void IrcClient::onIrcLine(const std::string& line) {
 	std::string prefix;
 	std::string command;
@@ -100,12 +66,12 @@ void IrcClient::onIrcLine(const std::string& line) {
 	parseIrcMessage(line, prefix, command, parameters, trailing);
 
 	if(command == "001") {
-		char loginTest[128];
-		sprintf(loginTest, "JOIN %s\r\n", channelName.c_str());
-		write(loginTest, strlen(loginTest));
+		char login[128];
+		sprintf(login, "JOIN %s\r\n", channelName.c_str());
+		write(login, strlen(login));
 		joined = true;
 		info("Joined IRC channel %s at %s:%d as user %s\n", channelName.c_str(), ip.c_str(), port, nickname.c_str());
-	} else if (command == "PING") {
+	} else if(command == "PING") {
 		std::string pong = "PONG :" + trailing;
 		write(pong.c_str(), pong.size());
 	} else if(command == "PRIVMSG") {
@@ -239,4 +205,31 @@ void IrcClient::sendMsgToIRC(int type, const char* sender, std::string msg) {
 			sprintf(messageFull, "%s: %s", sender, msg.c_str());
 		sendMessage("", messageFull);
 	}
+}
+
+void IrcClient::parseIrcMessage(const std::string& message, std::string& prefix, std::string& command, std::string& parameters, std::string& trailing)
+{
+	size_t prefixEnd, trailingStart;
+	size_t commandEnd;
+
+	if (message[0] == ':') {
+		prefixEnd = message.find_first_of(' ');
+		prefix.assign(message, 1, prefixEnd - 1);
+		prefixEnd++;
+	} else {
+		prefixEnd = 0;
+	}
+
+	trailingStart = message.find(" :");
+	if (trailingStart != std::string::npos)
+		trailing.assign(message, trailingStart+2, std::string::npos);
+	else
+		trailingStart = message.size();
+
+	commandEnd = message.find_first_of(" \r\n", prefixEnd);
+	if(commandEnd == std::string::npos)
+		commandEnd = message.size();
+
+	command.assign(message, prefixEnd, commandEnd - prefixEnd);
+	parameters.assign(message, commandEnd, trailingStart - commandEnd);
 }
