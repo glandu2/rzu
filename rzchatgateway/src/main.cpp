@@ -53,9 +53,9 @@ static void init() {
 
 	trafficDump = new TrafficDump;
 
-	RappelzLibConfig::get()->app.appName.setDefault("RappelzChatGateway");
-	RappelzLibConfig::get()->app.configfile.setDefault("chatgateway.opt");
-	RappelzLibConfig::get()->log.file.setDefault("chatgateway.log");
+	GlobalCoreConfig::get()->app.appName.setDefault("RappelzChatGateway");
+	GlobalCoreConfig::get()->app.configfile.setDefault("chatgateway.opt");
+	GlobalCoreConfig::get()->log.file.setDefault("chatgateway.log");
 }
 
 
@@ -65,12 +65,12 @@ int main(int argc, char *argv[])
 	init();
 	ConfigInfo::get()->init(argc, argv);
 
-	Log mainLogger(RappelzLibConfig::get()->log.enable,
-				   RappelzLibConfig::get()->log.level,
-				   RappelzLibConfig::get()->log.consoleLevel,
-				   RappelzLibConfig::get()->log.dir,
-				   RappelzLibConfig::get()->log.file,
-				   RappelzLibConfig::get()->log.maxQueueSize);
+	Log mainLogger(GlobalCoreConfig::get()->log.enable,
+				   GlobalCoreConfig::get()->log.level,
+				   GlobalCoreConfig::get()->log.consoleLevel,
+				   GlobalCoreConfig::get()->log.dir,
+				   GlobalCoreConfig::get()->log.file,
+				   GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 	Log trafficLogger(trafficDump->enable,
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 					  trafficDump->consoleLevel,
 					  trafficDump->dir,
 					  trafficDump->file,
-					  RappelzLibConfig::get()->log.maxQueueSize);
+					  GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultPacketLogger(&trafficLogger);
 
 	ConfigInfo::get()->dump();
