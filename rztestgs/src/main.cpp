@@ -5,7 +5,7 @@
 #include "ConfigInfo.h"
 #include "PlayerCountGitVersion.h"
 #include "EventLoop.h"
-#include "RappelzLibConfig.h"
+#include "GlobalCoreConfig.h"
 
 static void init();
 
