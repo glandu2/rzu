@@ -16,12 +16,12 @@ int main(int argc, char *argv[])
 	ConfigInfo::get()->init(argc, argv);
 	ConfigInfo::get()->dump();
 
-	Log mainLogger(RappelzLibConfig::get()->log.enable,
-				   RappelzLibConfig::get()->log.level,
-				   RappelzLibConfig::get()->log.consoleLevel,
-				   RappelzLibConfig::get()->log.dir,
-				   RappelzLibConfig::get()->log.file,
-				   RappelzLibConfig::get()->log.maxQueueSize);
+	Log mainLogger(GlobalCoreConfig::get()->log.enable,
+				   GlobalCoreConfig::get()->log.level,
+				   GlobalCoreConfig::get()->log.consoleLevel,
+				   GlobalCoreConfig::get()->log.dir,
+				   GlobalCoreConfig::get()->log.file,
+				   GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 
