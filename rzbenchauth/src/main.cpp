@@ -33,11 +33,11 @@ static void init() {
 	CFG_CREATE("idxoffset", 0);
 	CFG_CREATE("usecperconnection", 0);
 	CFG_CREATE("benchconnection", false);
-	RappelzLibConfig::get()->app.appName.setDefault("RappelzBenchmarkAuth");
-	RappelzLibConfig::get()->app.configfile.setDefault("benchmarkauth.opt");
-	RappelzLibConfig::get()->log.level.setDefault("fatal");
-	RappelzLibConfig::get()->log.consoleLevel.setDefault("info");
-	RappelzLibConfig::get()->log.file.setDefault("benchmarkauth.log");
+	GlobalCoreConfig::get()->app.appName.setDefault("RappelzBenchmarkAuth");
+	GlobalCoreConfig::get()->app.configfile.setDefault("benchmarkauth.opt");
+	GlobalCoreConfig::get()->log.level.setDefault("fatal");
+	GlobalCoreConfig::get()->log.consoleLevel.setDefault("info");
+	GlobalCoreConfig::get()->log.file.setDefault("benchmarkauth.log");
 }
 
 static std::string getIpForConnection(const std::string& originalIp, bool useLocalHost, int connection) {
@@ -115,12 +115,12 @@ int main(int argc, char *argv[])
 	ConfigInfo::get()->dump();
 	initTimer();
 
-	Log mainLogger(RappelzLibConfig::get()->log.enable,
-				   RappelzLibConfig::get()->log.level,
-				   RappelzLibConfig::get()->log.consoleLevel,
-				   RappelzLibConfig::get()->log.dir,
-				   RappelzLibConfig::get()->log.file,
-				   RappelzLibConfig::get()->log.maxQueueSize);
+	Log mainLogger(GlobalCoreConfig::get()->log.enable,
+				   GlobalCoreConfig::get()->log.level,
+				   GlobalCoreConfig::get()->log.consoleLevel,
+				   GlobalCoreConfig::get()->log.dir,
+				   GlobalCoreConfig::get()->log.file,
+				   GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 	int usecBetweenConnection = CFG_GET("usecperconnection")->getInt();
