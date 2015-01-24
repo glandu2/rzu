@@ -1,6 +1,6 @@
 #include "EventLoop.h"
 #include "GlobalConfig.h"
-#include "RappelzLibInit.h"
+#include "LibRzuInit.h"
 #include "GlobalCoreConfig.h"
 #include "CrashHandler.h"
 #include "DbConnectionPool.h"
@@ -68,7 +68,7 @@ void onTerminate(void* instance) {
 }
 
 int main(int argc, char **argv) {
-	RappelzLibInit();
+	LibRzuInit();
 	GlobalConfig::init();
 
 	DbConnectionPool dbConnectionPool;
@@ -119,15 +119,15 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	RappelzServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.listener.idleTimeout, trafficLogger);
-	RappelzServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.listener.idleTimeout, trafficLogger);
-	RappelzServer<AuthServer::BillingInterface> billingTelnetServer(&CONFIG_GET()->auth.billing.listener.idleTimeout, trafficLogger);
+	SessionServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.listener.idleTimeout, trafficLogger);
+	SessionServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.listener.idleTimeout, trafficLogger);
+	SessionServer<AuthServer::BillingInterface> billingTelnetServer(&CONFIG_GET()->auth.billing.listener.idleTimeout, trafficLogger);
 
-	RappelzServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.listener.idleTimeout, trafficLogger);
-	RappelzServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.icons.listener.idleTimeout, trafficLogger);
-	RappelzServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.listener.idleTimeout, trafficLogger);
+	SessionServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.listener.idleTimeout, trafficLogger);
+	SessionServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.icons.listener.idleTimeout, trafficLogger);
+	SessionServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.listener.idleTimeout, trafficLogger);
 
-	RappelzServer<AdminServer::AdminInterface> adminTelnetServer(&CONFIG_GET()->admin.listener.idleTimeout);
+	SessionServer<AdminServer::AdminInterface> adminTelnetServer(&CONFIG_GET()->admin.listener.idleTimeout);
 
 	serverManager.addServer("auth.clients", &authClientServer,
 							CONFIG_GET()->auth.client.listener.listenIp,

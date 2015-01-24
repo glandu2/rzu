@@ -10,7 +10,7 @@ GlobalConfig* GlobalConfig::get() {
 void GlobalConfig::init() {
 	GlobalConfig::get();
 	CFG_CREATE("global.version", rzauthVersion);
-	GlobalCoreConfig::get()->app.appName.setDefault("RappelzAuthEmu");
+	GlobalCoreConfig::get()->app.appName.setDefault("rzauth");
 	GlobalCoreConfig::get()->app.configfile.setDefault("auth.opt");
 	GlobalCoreConfig::get()->log.file.setDefault("auth.log");
 
