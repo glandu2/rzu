@@ -158,7 +158,6 @@ bool DB_Account::decryptPassword() {
 		std::string buffer = CONFIG_GET()->auth.db.salt;
 
 		buffer.append(password, password + strlen(password));
-		//trace("MD5 of \"%.*s\" with len %d\n", (int)buffer.size(), buffer.c_str(), (int)buffer.size());
 		MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
 		setPasswordMD5(givenPasswordMd5);
 	}
@@ -215,14 +214,18 @@ bool DB_Account::onPreProcess() {
 }
 
 bool DB_Account::onRowDone() {
-	if(accountId == 0xFFFFFFFF)
+	if(accountId == 0xFFFFFFFF) {
+		trace("Account %s not found in database\n", account.c_str());
 		return false;
+	}
 
 	if(nullPassword == true && password[0] == '\0') {
 		ok = true;
 	} else if(!strcmp(givenPasswordString, password)){
 		ok = true;
 	}
+
+	trace("Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", account.c_str(), givenPasswordString, password);
 
 	return false;
 }

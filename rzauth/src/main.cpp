@@ -1,7 +1,7 @@
 #include "EventLoop.h"
 #include "GlobalConfig.h"
-#include "RappelzLibInit.h"
-#include "RappelzLibConfig.h"
+#include "LibRzuInit.h"
+#include "GlobalCoreConfig.h"
 #include "CrashHandler.h"
 #include "DbConnectionPool.h"
 
@@ -43,6 +43,7 @@
  *  -> warning: GS with auth in same exe: delay connectToAuth ?
  * manage more field in TS_AG_CLIENT_LOGIN (play time)
  * Add API to do logging with static classes in Object (avoid crash using Log::get()->log(...))
+ * Add log to LogServer (using LS_11N4S)
  */
 
 /* Packet versionning:
@@ -67,7 +68,7 @@ void onTerminate(void* instance) {
 }
 
 int main(int argc, char **argv) {
-	RappelzLibInit();
+	LibRzuInit();
 	GlobalConfig::init();
 
 	DbConnectionPool dbConnectionPool;
@@ -79,12 +80,12 @@ int main(int argc, char **argv) {
 
 	ConfigInfo::get()->init(argc, argv);
 
-	Log mainLogger(RappelzLibConfig::get()->log.enable,
-				   RappelzLibConfig::get()->log.level,
-				   RappelzLibConfig::get()->log.consoleLevel,
-				   RappelzLibConfig::get()->log.dir,
-				   RappelzLibConfig::get()->log.file,
-				   RappelzLibConfig::get()->log.maxQueueSize);
+	Log mainLogger(GlobalCoreConfig::get()->log.enable,
+				   GlobalCoreConfig::get()->log.level,
+				   GlobalCoreConfig::get()->log.consoleLevel,
+				   GlobalCoreConfig::get()->log.dir,
+				   GlobalCoreConfig::get()->log.file,
+				   GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 	Log trafficLogger(CONFIG_GET()->trafficDump.enable,
@@ -92,7 +93,7 @@ int main(int argc, char **argv) {
 					  CONFIG_GET()->trafficDump.consoleLevel,
 					  CONFIG_GET()->trafficDump.dir,
 					  CONFIG_GET()->trafficDump.file,
-					  RappelzLibConfig::get()->log.maxQueueSize);
+					  GlobalCoreConfig::get()->log.maxQueueSize);
 
 
 	ConfigInfo::get()->dump();
@@ -118,15 +119,15 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	RappelzServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.listener.idleTimeout, trafficLogger);
-	RappelzServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.listener.idleTimeout, trafficLogger);
-	RappelzServer<AuthServer::BillingInterface> billingTelnetServer(&CONFIG_GET()->auth.billing.listener.idleTimeout, trafficLogger);
+	SessionServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.listener.idleTimeout, trafficLogger);
+	SessionServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.listener.idleTimeout, trafficLogger);
+	SessionServer<AuthServer::BillingInterface> billingTelnetServer(&CONFIG_GET()->auth.billing.listener.idleTimeout, trafficLogger);
 
-	RappelzServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.listener.idleTimeout, trafficLogger);
-	RappelzServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.icons.listener.idleTimeout, trafficLogger);
-	RappelzServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.listener.idleTimeout, trafficLogger);
+	SessionServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.listener.idleTimeout, trafficLogger);
+	SessionServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.icons.listener.idleTimeout, trafficLogger);
+	SessionServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.listener.idleTimeout, trafficLogger);
 
-	RappelzServer<AdminServer::AdminInterface> adminTelnetServer(&CONFIG_GET()->admin.listener.idleTimeout);
+	SessionServer<AdminServer::AdminInterface> adminTelnetServer(&CONFIG_GET()->admin.listener.idleTimeout);
 
 	serverManager.addServer("auth.clients", &authClientServer,
 							CONFIG_GET()->auth.client.listener.listenIp,
