@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(RappelzUnified)
+project(rzu-unified)
 
 set(CMAKE_VERBOSE_MAKEFILE false CACHE BOOL "Print compilation commands")
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (one of Debug, Release, RelWithDebInfo, MinSizeRel)")
