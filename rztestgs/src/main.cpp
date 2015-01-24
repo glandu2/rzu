@@ -37,4 +37,8 @@ static void init() {
 	CFG_CREATE("port", 4500);
 	CFG_CREATE("req", "TEST");
 	CFG_CREATE("interval", 3500);
+
+	GlobalCoreConfig::get()->app.appName.setDefault("rzplayercount");
+	GlobalCoreConfig::get()->app.configfile.setDefault("playercount.opt");
+	GlobalCoreConfig::get()->log.file.setDefault("playercount.log");
 }
