@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(rzu-unified)
+project(rzu-parent)
 
 set(CMAKE_VERBOSE_MAKEFILE false CACHE BOOL "Print compilation commands")
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (one of Debug, Release, RelWithDebInfo, MinSizeRel)")
@@ -66,8 +66,8 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzgame/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzgame" rzgame)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/PlayerCount/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/PlayerCount" PlayerCount)
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzplayercount/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzplayercount" rzplayercount)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzbenchauth/CMakeLists.txt")
@@ -78,6 +78,6 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/VStructGen/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/VStructGen" VStructGen)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/ChatGateway/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/ChatGateway" ChatGateway)
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzchatgateway/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzchatgateway" rzchatgateway)
 endif()
