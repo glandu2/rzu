@@ -22,7 +22,7 @@ int port;
 bool useLocalhost;
 
 static void init() {
-	CFG_CREATE("ip", "127.0.0.1" /*"127.0.0.1"*/);
+	CFG_CREATE("ip", "127.0.0.1");
 	CFG_CREATE("port", 4500);
 	CFG_CREATE("account", "test");
 	CFG_CREATE("count", 8);
