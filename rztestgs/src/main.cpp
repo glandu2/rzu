@@ -1,7 +1,7 @@
 #include "PlayerCountMonitor.h"
 #include "uv.h"
 #include <string.h>
-#include "RappelzLibInit.h"
+#include "LibRzuInit.h"
 #include "ConfigInfo.h"
 #include "PlayerCountGitVersion.h"
 #include "EventLoop.h"
@@ -11,7 +11,7 @@ static void init();
 
 int main(int argc, char *argv[])
 {
-	RappelzLibInit();
+	LibRzuInit();
 	init();
 	ConfigInfo::get()->init(argc, argv);
 	ConfigInfo::get()->dump();
