@@ -53,7 +53,7 @@ static void init() {
 
 	trafficDump = new TrafficDump;
 
-	GlobalCoreConfig::get()->app.appName.setDefault("ChatGateway");
+	GlobalCoreConfig::get()->app.appName.setDefault("rzchatgateway");
 	GlobalCoreConfig::get()->app.configfile.setDefault("chatgateway.opt");
 	GlobalCoreConfig::get()->log.file.setDefault("chatgateway.log");
 }

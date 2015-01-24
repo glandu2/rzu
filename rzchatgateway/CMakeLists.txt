@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
-project(ChatGateway)
+project(rzchatgateway)
 
-set(TARGET_NAME ChatGateway)
+set(TARGET_NAME rzchatgateway)
 
 if(BUILD_SHARED_LIBS)
   add_definitions(-DUSING_UV_SHARED)

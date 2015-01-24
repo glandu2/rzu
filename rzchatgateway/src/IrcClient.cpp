@@ -28,7 +28,7 @@ void IrcClient::onStateChanged(Stream::State oldState, Stream::State newState) {
 		if(channelName.size() == 0)
 			channelName = "#rappelz-" + lowerCaseServerName;
 
-		sprintf(loginText, "NICK %s\r\nUSER gw-%s gw-%s %s :BotChatGateway %s\r\n",
+		sprintf(loginText, "NICK %s\r\nUSER gw-%s gw-%s %s :rzchatgateway %s\r\n",
 				nickname.c_str(),
 				lowerCaseServerName.c_str(),
 				lowerCaseServerName.c_str(),
