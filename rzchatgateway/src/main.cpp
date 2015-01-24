@@ -3,7 +3,7 @@
 #include "ClientAuthSession.h"
 #include <string.h>
 #include "EventLoop.h"
-#include "RappelzLibInit.h"
+#include "LibRzuInit.h"
 #include "PacketSession.h"
 #include "ConfigInfo.h"
 #include "GlobalCoreConfig.h"
@@ -53,7 +53,7 @@ static void init() {
 
 	trafficDump = new TrafficDump;
 
-	GlobalCoreConfig::get()->app.appName.setDefault("RappelzChatGateway");
+	GlobalCoreConfig::get()->app.appName.setDefault("ChatGateway");
 	GlobalCoreConfig::get()->app.configfile.setDefault("chatgateway.opt");
 	GlobalCoreConfig::get()->log.file.setDefault("chatgateway.log");
 }
@@ -61,7 +61,7 @@ static void init() {
 
 int main(int argc, char *argv[])
 {
-	RappelzLibInit();
+	LibRzuInit();
 	init();
 	ConfigInfo::get()->init(argc, argv);
 
