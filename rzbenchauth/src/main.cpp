@@ -2,7 +2,7 @@
 #include "BenchmarkAuthSession.h"
 #include <string.h>
 #include "EventLoop.h"
-#include "RappelzLibInit.h"
+#include "LibRzuInit.h"
 #include <stdio.h>
 #include "ConfigInfo.h"
 #include "GlobalCoreConfig.h"
@@ -33,7 +33,7 @@ static void init() {
 	CFG_CREATE("idxoffset", 0);
 	CFG_CREATE("usecperconnection", 0);
 	CFG_CREATE("benchconnection", false);
-	GlobalCoreConfig::get()->app.appName.setDefault("RappelzBenchmarkAuth");
+	GlobalCoreConfig::get()->app.appName.setDefault("rzbenchauth");
 	GlobalCoreConfig::get()->app.configfile.setDefault("benchmarkauth.opt");
 	GlobalCoreConfig::get()->log.level.setDefault("fatal");
 	GlobalCoreConfig::get()->log.consoleLevel.setDefault("info");
@@ -109,7 +109,7 @@ void startBenchConnections(int usecBetweenConnection) {
 
 int main(int argc, char *argv[])
 {
-	RappelzLibInit();
+	LibRzuInit();
 	init();
 	ConfigInfo::get()->init(argc, argv);
 	ConfigInfo::get()->dump();
