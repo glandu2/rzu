@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
-project(PlayerCount)
+project(rzplayercount)
 
-set(TARGET_NAME PlayerCount)
+set(TARGET_NAME rzplayercount)
 
 if(BUILD_SHARED_LIBS)
   add_definitions(-DUSING_UV_SHARED)
