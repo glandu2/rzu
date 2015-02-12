@@ -137,6 +137,18 @@ struct GlobalConfig {
 		}
 	} trafficDump;
 
+	struct LogServerConfig {
+		cval<std::string> &ip;
+		cval<int> &port;
+		cval<bool> &enable;
+
+		LogServerConfig() :
+			ip(CFG_CREATE("logclient.ip", "127.0.0.1")),
+			port(CFG_CREATE("logclient.port", 4516)),
+			enable(CFG_CREATE("logclient.enable", true))
+		{}
+	} logclient;
+
 	static GlobalConfig* get();
 	static void init();
 };

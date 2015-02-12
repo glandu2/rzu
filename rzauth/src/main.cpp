@@ -22,6 +22,8 @@
 #include "AdminServer/AdminInterface.h"
 #include "AuthServer/BillingInterface.h"
 
+#include "AuthServer/LogServerClient.h"
+
 /* TODO for next version
  */
 
@@ -159,6 +161,10 @@ void runServers(Log *trafficLogger) {
 				CONFIG_GET()->admin.listener.port,
 				&CONFIG_GET()->admin.listener.idleTimeout);
 
+	AuthServer::LogServerClient logServerClient(
+				CONFIG_GET()->logclient.ip,
+				CONFIG_GET()->logclient.port);
+
 
 	serverManager.addServer("auth.clients", &authClientServer, CONFIG_GET()->auth.client.listener.autoStart);
 	serverManager.addServer("auth.gameserver", &authGameServer, CONFIG_GET()->auth.game.listener.autoStart);
@@ -170,11 +176,19 @@ void runServers(Log *trafficLogger) {
 
 	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart);
 
+	serverManager.addServer("logserver", &logServerClient, CONFIG_GET()->logclient.enable);
+
 	serverManager.start();
 
 	CrashHandler::setTerminateCallback(&onTerminate, &serverManager);
 
+	AuthServer::LogServerClient::sendLog(AuthServer::LogServerClient::LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, "START", -1);
+
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+
+	AuthServer::LogServerClient::sendLog(AuthServer::LogServerClient::LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, "END", -1);
 
 	CrashHandler::setTerminateCallback(nullptr, nullptr);
 }
