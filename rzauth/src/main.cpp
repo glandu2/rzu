@@ -9,7 +9,7 @@
 #include "AuthServer/DB_UpdateLastServerIdx.h"
 #include "ServersManager.h"
 #include "BanManager.h"
-#include "SocketSession.h"
+#include "SessionServer.h"
 
 #include "AuthServer/ClientSession.h"
 #include "AuthServer/GameServerSession.h"
@@ -119,52 +119,58 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	SessionServer<AuthServer::ClientSession> authClientServer(&CONFIG_GET()->auth.client.listener.idleTimeout, trafficLogger);
-	SessionServer<AuthServer::GameServerSession> authGameServer(&CONFIG_GET()->auth.game.listener.idleTimeout, trafficLogger);
-	SessionServer<AuthServer::BillingInterface> billingTelnetServer(&CONFIG_GET()->auth.billing.listener.idleTimeout, trafficLogger);
+	SessionServer<AuthServer::ClientSession> authClientServer(
+				CONFIG_GET()->auth.client.listener.listenIp,
+				CONFIG_GET()->auth.client.listener.port,
+				&CONFIG_GET()->auth.client.listener.idleTimeout,
+				trafficLogger,
+				&banManager);
+	SessionServer<AuthServer::GameServerSession> authGameServer(
+				CONFIG_GET()->auth.game.listener.listenIp,
+				CONFIG_GET()->auth.game.listener.port,
+				&CONFIG_GET()->auth.game.listener.idleTimeout,
+				trafficLogger);
+	SessionServer<AuthServer::BillingInterface> billingTelnetServer(
+				CONFIG_GET()->auth.billing.listener.listenIp,
+				CONFIG_GET()->auth.billing.listener.port,
+				&CONFIG_GET()->auth.billing.listener.idleTimeout,
+				trafficLogger);
 
-	SessionServer<UploadServer::ClientSession> uploadClientServer(&CONFIG_GET()->upload.client.listener.idleTimeout, trafficLogger);
-	SessionServer<UploadServer::IconServerSession> uploadIconServer(&CONFIG_GET()->upload.icons.listener.idleTimeout, trafficLogger);
-	SessionServer<UploadServer::GameServerSession> uploadGameServer(&CONFIG_GET()->upload.game.listener.idleTimeout, trafficLogger);
+	SessionServer<UploadServer::ClientSession> uploadClientServer(
+				CONFIG_GET()->upload.client.listener.listenIp,
+				CONFIG_GET()->upload.client.listener.port,
+				&CONFIG_GET()->upload.client.listener.idleTimeout,
+				trafficLogger,
+				&banManager);
+	SessionServer<UploadServer::IconServerSession> uploadIconServer(
+				CONFIG_GET()->upload.icons.listener.listenIp,
+				CONFIG_GET()->upload.icons.listener.port,
+				&CONFIG_GET()->upload.icons.listener.idleTimeout,
+				trafficLogger,
+				&banManager);
+	SessionServer<UploadServer::GameServerSession> uploadGameServer(
+				CONFIG_GET()->upload.game.listener.listenIp,
+				CONFIG_GET()->upload.game.listener.port,
+				&CONFIG_GET()->upload.game.listener.idleTimeout,
+				trafficLogger);
 
-	SessionServer<AdminServer::AdminInterface> adminTelnetServer(&CONFIG_GET()->admin.listener.idleTimeout);
+	SessionServer<AdminServer::AdminInterface> adminTelnetServer(
+				CONFIG_GET()->admin.listener.listenIp,
+				CONFIG_GET()->admin.listener.port,
+				&CONFIG_GET()->admin.listener.idleTimeout);
 
-	serverManager.addServer("auth.clients", &authClientServer,
-							CONFIG_GET()->auth.client.listener.listenIp,
-							CONFIG_GET()->auth.client.listener.port,
-							CONFIG_GET()->auth.client.listener.autoStart,
-							&banManager);
-	serverManager.addServer("auth.gameserver", &authGameServer,
-							CONFIG_GET()->auth.game.listener.listenIp,
-							CONFIG_GET()->auth.game.listener.port,
-							CONFIG_GET()->auth.game.listener.autoStart);
-	serverManager.addServer("auth.billing", &billingTelnetServer,
-							CONFIG_GET()->auth.billing.listener.listenIp,
-							CONFIG_GET()->auth.billing.listener.port,
-							CONFIG_GET()->auth.billing.listener.autoStart);
 
-	serverManager.addServer("upload.clients", &uploadClientServer,
-							CONFIG_GET()->upload.client.listener.listenIp,
-							CONFIG_GET()->upload.client.listener.port,
-							CONFIG_GET()->upload.client.listener.autoStart,
-							&banManager);
-	serverManager.addServer("upload.iconserver", &uploadIconServer,
-							CONFIG_GET()->upload.icons.listener.listenIp,
-							CONFIG_GET()->upload.icons.listener.port,
-							CONFIG_GET()->upload.icons.listener.autoStart,
-							&banManager);
-	serverManager.addServer("upload.gameserver", &uploadGameServer,
-							CONFIG_GET()->upload.game.listener.listenIp,
-							CONFIG_GET()->upload.game.listener.port,
-							CONFIG_GET()->upload.game.listener.autoStart);
+	serverManager.addServer("auth.clients", &authClientServer, CONFIG_GET()->auth.client.listener.autoStart);
+	serverManager.addServer("auth.gameserver", &authGameServer, CONFIG_GET()->auth.game.listener.autoStart);
+	serverManager.addServer("auth.billing", &billingTelnetServer, CONFIG_GET()->auth.billing.listener.autoStart);
 
-	serverManager.addServer("admin.telnet", &adminTelnetServer,
-							CONFIG_GET()->admin.listener.listenIp,
-							CONFIG_GET()->admin.listener.port,
-							CONFIG_GET()->admin.listener.autoStart);
+	serverManager.addServer("upload.clients", &uploadClientServer, CONFIG_GET()->upload.client.listener.autoStart);
+	serverManager.addServer("upload.iconserver", &uploadIconServer, CONFIG_GET()->upload.icons.listener.autoStart);
+	serverManager.addServer("upload.gameserver", &uploadGameServer, CONFIG_GET()->upload.game.listener.autoStart);
+
+	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart);
 
 	serverManager.start();
-
 
 	CrashHandler::setTerminateCallback(&onTerminate, &serverManager);
 
