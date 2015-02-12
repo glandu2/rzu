@@ -81,3 +81,7 @@ endif()
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzchatgateway/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzchatgateway" rzchatgateway)
 endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzgamereconnect/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzgamereconnect" rzgamereconnect)
+endif()
