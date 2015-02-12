@@ -17,7 +17,7 @@ namespace AuthServer {
 struct DbAccountConfig {
 	cval<bool>& enable;
 	cval<std::string>& query;
-	cval<int> &paramAccount, &paramPassword;
+	cval<int> &paramAccount, &paramPassword, &paramIp;
 	cval<std::string> &colAccountId, &colPassword, &colAuthOk, &colAge, &colLastServerIdx, &colEventCode, &colPcBang, &colServerIdxOffset, &colBlock;
 	cval<bool> &restrictCharacters;
 
@@ -26,6 +26,7 @@ struct DbAccountConfig {
 		query(CFG_CREATE("sql.db_account.query", "SELECT * FROM account WHERE account = ? AND password = ?;")),
 		paramAccount (CFG_CREATE("sql.db_account.param.account" , 1)),
 		paramPassword(CFG_CREATE("sql.db_account.param.password", 2)),
+		paramIp(CFG_CREATE("sql.db_account.param.ip", -1)),
 		colAccountId    (CFG_CREATE("sql.db_account.column.accountid"    , "account_id")),
 		colPassword     (CFG_CREATE("sql.db_account.column.password"    , "password")),
 		colAuthOk       (CFG_CREATE("sql.db_account.column.authok"    , "auth_ok")),
@@ -52,6 +53,7 @@ bool DB_Account::init(DbConnectionPool* dbConnectionPool, cval<std::string>& des
 
 	params.emplace_back(DECLARE_PARAMETER(DB_Account, account, 0, config->paramAccount));
 	params.emplace_back(DECLARE_PARAMETER(DB_Account, givenPasswordString, 32, config->paramPassword));
+	params.emplace_back(DECLARE_PARAMETER(DB_Account, ip, 0, config->paramIp));
 
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, accountId, 0, config->colAccountId));
 	cols.emplace_back(DECLARE_COLUMN_WITH_INFO(DB_Account, password, sizeof(((DB_Account*)(0))->password), config->colPassword, nullPassword));
@@ -77,9 +79,11 @@ void DB_Account::deinit() {
 	currentDesKey = "";
 }
 
-DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, bool cryptUseAes, const std::vector<unsigned char> &cryptedPassword, unsigned char aesKey[32])
+DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, const char* ip, bool cryptUseAes, const std::vector<unsigned char> &cryptedPassword, unsigned char aesKey[32])
 	: clientInfo(clientInfo), account(account)
 {
+	strncpy(this->ip, ip, INET_ADDRSTRLEN);
+	this->ip[INET_ADDRSTRLEN-1] = 0;
 	this->cryptedPassword = cryptedPassword;
 	memcpy(this->aesKey, aesKey, sizeof(this->aesKey));
 	this->cryptUseAes = cryptUseAes;

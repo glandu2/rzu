@@ -180,7 +180,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 	debug("Login request for account %s\n", account.c_str());
 
-	dbQuery = new DB_Account(this, account, useRsaAuth, cryptedPassword, aesKey);
+	dbQuery = new DB_Account(this, account, getStream()->getRemoteIpStr(), useRsaAuth, cryptedPassword, aesKey);
 }
 
 void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang, uint32_t serverIdxOffset, bool block) {

@@ -20,7 +20,7 @@ public:
 	static bool init(DbConnectionPool* dbConnectionPool, cval<std::string>& desKeyStr);
 	static void deinit();
 
-	DB_Account(ClientSession* clientInfo, const std::string& account, bool cryptUseAes, const std::vector<unsigned char>& cryptedPassword, unsigned char aesKey[32]);
+	DB_Account(ClientSession* clientInfo, const std::string& account, const char* ip, bool cryptUseAes, const std::vector<unsigned char>& cryptedPassword, unsigned char aesKey[32]);
 
 	void cancel() { clientInfo = nullptr; DbQueryJob::cancel(); }
 
@@ -40,6 +40,7 @@ private:
 
 	//Input
 	std::string account;
+	char ip[INET_ADDRSTRLEN];
 	std::vector<unsigned char> cryptedPassword;
 	bool cryptUseAes;
 	unsigned char aesKey[32];
