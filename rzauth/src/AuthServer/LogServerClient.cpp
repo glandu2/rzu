@@ -30,12 +30,24 @@ LogServerClient::LogServerClient(cval<std::string>& ip, cval<int>& port) :
 
 void LogServerClient::onConnected() {
 	info("Connected to Log server %s:%d\n", ip.get().c_str(), port.get());
+
 	sendLog(LM_SERVER_LOGIN, 0, 0, 0, uv_thread_self(), 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, "Name", NTS, CONFIG_GET()->app.appName.get().c_str(), NTS);
+			0, 0, 0, 0, "Main", NTS, CONFIG_GET()->app.appName.get().c_str(), NTS);
+
+	sendLog(LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, "START", -1);
+
 	for(size_t i = 0; i < pendingMessages.size(); i++) {
 		sendLog(pendingMessages[i]);
 	}
 	pendingMessages.clear();
+}
+
+void LogServerClient::stop() {
+	sendLog(LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, "END", -1);
+
+	closeSession();
 }
 
 void LogServerClient::onDisconnected() {
@@ -98,7 +110,7 @@ void LogServerClient::sendLog(unsigned short id,
 			 const char * str4,
 			 int len4)
 {
-	if(instance == nullptr)
+	if(!instance || !instance->getStream() || instance->getStream()->getState() == Stream::UnconnectedState)
 		return;
 
 	Message message;

@@ -15,7 +15,8 @@ uv_mutex_t ClientData::initializeLock() {
 	return mapLock;
 }
 
-ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientInfo), server(nullptr), inGame(false) {
+ClientData::ClientData(ClientSession *clientInfo)
+	: accountId(0), client(clientInfo), server(nullptr), inGame(false) {
 }
 
 ClientData::~ClientData() {
@@ -45,7 +46,7 @@ void ClientData::connectedToGame() {
 	inGame = true;
 }
 
-ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang) {
+ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang, uint32_t ip) {
 	std::pair< std::unordered_map<uint32_t, ClientData*>::iterator, bool> result;
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> resultForName;
 	ClientData* newClient;
@@ -76,6 +77,7 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		newClient->age = age;
 		newClient->eventCode = event_code;
 		newClient->pcBang = pcBang;
+		newClient->ip = ip;
 		resultForName = connectedClientsByName.insert(std::pair<std::string, ClientData*>(toLower(account), newClient));
 		if(resultForName.second == false) {
 			newClient->error("Duplicated account name with different ID: %s\n", account.c_str());

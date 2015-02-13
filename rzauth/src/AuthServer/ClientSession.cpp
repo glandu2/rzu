@@ -15,6 +15,8 @@
 #include "DB_Account.h"
 #include "DB_UpdateLastServerIdx.h"
 
+#include "LogServerClient.h"
+
 #include "Packets/TS_AC_RESULT.h"
 #include "Packets/TS_SC_RESULT.h"
 #include "Packets/TS_AC_AES_KEY_IV.h"
@@ -201,11 +203,14 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 		result.login_flag = 0;
 		info("Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
-		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode, pcBang);
+		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode, pcBang, getStream()->getRemoteIp());
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
 			info("Client %s already connected\n", account.c_str());
+
+			LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_AUTH_LOGIN, accountId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+					account.c_str(), -1, getStream()->getRemoteIpStr(), -1, 0 /*previous ip*/, 0, 0, 0);
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
