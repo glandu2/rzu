@@ -27,13 +27,15 @@ public:
 	uint64_t oneTimePassword;
 	uint32_t pcBang;
 	uint32_t ip;
+	time_t loginTime;
+	bool kickRequested;
 
 	//Try to add newClient if account is not already in the list (authenticated).
 	//There is at most one account in the hash map.
 	//If the account is already in the hash map, fail: return null and put already connected client data in oldClient
 	//If successful, create a new instance of ClientData with given account added to the hash map
 	//Thread safe
-	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang, uint32_t ip);
+	static ClientData* tryAddClient(ClientSession* clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang, uint32_t ip, ClientData** oldClient = nullptr);
 	static bool removeClient(uint32_t accountId);
 	static bool removeClient(const std::string& account);
 	static bool removeClient(ClientData* clientData);

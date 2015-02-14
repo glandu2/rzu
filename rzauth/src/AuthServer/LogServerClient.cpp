@@ -1,5 +1,6 @@
 #include "LogServerClient.h"
 #include "GlobalCoreConfig.h"
+#include <string.h>
 
 namespace AuthServer {
 

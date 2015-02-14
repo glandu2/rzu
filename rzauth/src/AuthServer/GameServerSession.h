@@ -31,7 +31,7 @@ public:
 	std::string getServerScreenshotUrl() { return serverScreenshotUrl; }
 	bool getIsAdultServer() { return isAdultServer; }
 
-	void kickClient(const std::string& account);
+	void kickClient(ClientData *clientData);
 
 	void incPlayerCount() { playerCount++; }
 	void decPlayerCount() { playerCount--; }

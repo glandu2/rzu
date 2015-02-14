@@ -203,14 +203,33 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 		result.login_flag = 0;
 		info("Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
-		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode, pcBang, getStream()->getRemoteIp());
+		ClientData* oldClient;
+		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode, pcBang, getStream()->getRemoteIp(), &oldClient);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
 			info("Client %s already connected\n", account.c_str());
 
-			LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_AUTH_LOGIN, accountId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-					account.c_str(), -1, getStream()->getRemoteIpStr(), -1, 0 /*previous ip*/, 0, 0, 0);
+			char ipStr[INET_ADDRSTRLEN];
+			GameServerSession* oldCientGameSession = oldClient->getGameServer();
+
+			uv_inet_ntop(AF_INET, &oldClient->ip, ipStr, sizeof(ipStr));
+
+			if(!oldCientGameSession) {
+				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_AUTH_LOGIN, accountId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+										 account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
+
+				oldClient->getClientSession()->abortSession();
+			} else {
+				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_GAME_LOGIN, accountId, 0, 0, oldCientGameSession->getServerIdx(), 0, 0, 0, 0, 0, 0, 0,
+										 account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
+
+				if(oldClient->isConnectedToGame())
+					oldCientGameSession->kickClient(oldClient);
+				else {
+					ClientData::removeClient(oldClient);
+				}
+			}
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;

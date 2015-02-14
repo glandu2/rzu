@@ -3,6 +3,7 @@
 #include "ClientSession.h"
 #include "GameServerSession.h"
 #include <algorithm>
+#include <time.h>
 
 namespace AuthServer {
 
@@ -16,7 +17,8 @@ uv_mutex_t ClientData::initializeLock() {
 }
 
 ClientData::ClientData(ClientSession *clientInfo)
-	: accountId(0), client(clientInfo), server(nullptr), inGame(false) {
+	: accountId(0), kickRequested(false),
+	  client(clientInfo), server(nullptr), inGame(false) {
 }
 
 ClientData::~ClientData() {
@@ -44,12 +46,16 @@ void ClientData::connectedToGame() {
 	else
 		getGameServer()->incPlayerCount();
 	inGame = true;
+	loginTime = time(nullptr);
 }
 
-ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang, uint32_t ip) {
+ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang, uint32_t ip, ClientData** oldClientPtr) {
 	std::pair< std::unordered_map<uint32_t, ClientData*>::iterator, bool> result;
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> resultForName;
 	ClientData* newClient;
+
+	if(oldClientPtr)
+		*oldClientPtr = nullptr;
 
 	uv_mutex_lock(&mapLock);
 
@@ -60,17 +66,8 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		delete newClient;
 		newClient = nullptr;
 
-		if(oldClient->getGameServer()) {
-			if(oldClient->inGame)
-				oldClient->getGameServer()->kickClient(account);
-			else {
-				connectedClients.erase(result.first);
-				connectedClientsByName.erase(toLower(oldClient->account));
-				delete oldClient;
-			}
-		} else {
-			oldClient->getClientSession()->abortSession();
-		}
+		if(oldClientPtr)
+			*oldClientPtr = oldClient;
 	} else {
 		newClient->account = account;
 		newClient->accountId = accoundId;
