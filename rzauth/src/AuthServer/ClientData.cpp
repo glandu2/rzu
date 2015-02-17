@@ -1,7 +1,7 @@
 #include "ClientData.h"
 #include "uv.h"
 #include "ClientSession.h"
-#include "GameServerSession.h"
+#include "GameData.h"
 #include <algorithm>
 #include <time.h>
 
@@ -133,7 +133,7 @@ bool ClientData::removeClient(ClientData* clientData) {
 	return removeClient(clientData->accountId);
 }
 
-void ClientData::switchClientToServer(GameServerSession* server, uint64_t oneTimePassword) {
+void ClientData::switchClientToServer(GameData* server, uint64_t oneTimePassword) {
 	this->oneTimePassword = oneTimePassword;
 	this->client = nullptr;
 	this->server = server;
@@ -173,7 +173,7 @@ ClientData* ClientData::getClientById(uint32_t accountId) {
 	return foundClient;
 }
 
-void ClientData::removeServer(GameServerSession* server) {
+void ClientData::removeServer(GameData* server) {
 	std::unordered_map<uint32_t, ClientData*>::const_iterator it, itEnd;
 
 	uv_mutex_lock(&mapLock);

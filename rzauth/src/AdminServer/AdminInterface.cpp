@@ -2,7 +2,7 @@
 #include "ServersManager.h"
 #include "ConfigInfo.h"
 #include <stdlib.h>
-#include "../AuthServer/GameServerSession.h"
+#include "../AuthServer/GameData.h"
 #include "ClassCounter.h"
 #include "DbConnectionPool.h"
 #include "CrashHandler.h"
@@ -191,8 +191,8 @@ void AdminInterface::closeDbConnections() {
 }
 
 void AdminInterface::listGameServers() {
-	const std::unordered_map<uint16_t, AuthServer::GameServerSession*>& serverList = AuthServer::GameServerSession::getServerList();
-	std::unordered_map<uint16_t, AuthServer::GameServerSession*>::const_iterator it, itEnd;
+	const std::unordered_map<uint16_t, AuthServer::GameData*>& serverList = AuthServer::GameData::getServerList();
+	std::unordered_map<uint16_t, AuthServer::GameData*>::const_iterator it, itEnd;
 
 	char buffer[1024];
 	int len;
@@ -201,7 +201,7 @@ void AdminInterface::listGameServers() {
 	write(buffer, len);
 
 	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
-		AuthServer::GameServerSession* server = it->second;
+		AuthServer::GameData* server = it->second;
 
 		len = sprintf(buffer, "Index: %2d, name: %10s, address: %s:%d, players count: %u, screenshot url: %s\r\n",
 					  server->getServerIdx(),

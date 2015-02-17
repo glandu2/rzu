@@ -10,7 +10,7 @@
 namespace AuthServer {
 
 class ClientSession;
-class GameServerSession;
+class GameData;
 
 class ClientData : public Object
 {
@@ -18,7 +18,7 @@ class ClientData : public Object
 
 public:
 	ClientData(ClientSession* clientInfo);
-	void switchClientToServer(GameServerSession* server, uint64_t oneTimePassword);
+	void switchClientToServer(GameData* server, uint64_t oneTimePassword);
 
 	std::string account;
 	uint32_t accountId;
@@ -42,14 +42,14 @@ public:
 	static ClientData* getClient(const std::string& account);
 	static ClientData* getClientById(uint32_t accountId);
 	static unsigned int getClientCount() { return (int)connectedClients.size(); }
-	static void removeServer(GameServerSession* server); //remove all client that was connected to this server
+	static void removeServer(GameData* server); //remove all client that was connected to this server
 
 
 	void connectedToGame();
 	bool isConnectedToGame() { return inGame; }
 
 	ClientSession* getClientSession() { return client; }
-	GameServerSession* getGameServer() { return server; }
+	GameData* getGameServer() { return server; }
 
 protected:
 	static std::string toLower(const std::string& str);
@@ -65,7 +65,7 @@ private:
 
 
 	ClientSession* client; //if != null: not yet in-game
-	GameServerSession* server; //if != null: in-game or gameserver selected
+	GameData* server; //if != null: in-game or gameserver selected
 	//never both !client && !server
 	bool inGame;
 };

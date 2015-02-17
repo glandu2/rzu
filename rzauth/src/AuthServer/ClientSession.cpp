@@ -1,5 +1,5 @@
 #include "ClientSession.h"
-#include "GameServerSession.h"
+#include "GameData.h"
 #include "../GlobalConfig.h"
 #include "rzauthGitVersion.h"
 
@@ -211,21 +211,21 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 			info("Client %s already connected\n", account.c_str());
 
 			char ipStr[INET_ADDRSTRLEN];
-			GameServerSession* oldCientGameSession = oldClient->getGameServer();
+			GameData* oldCientGameData = oldClient->getGameServer();
 
 			uv_inet_ntop(AF_INET, &oldClient->ip, ipStr, sizeof(ipStr));
 
-			if(!oldCientGameSession) {
+			if(!oldCientGameData) {
 				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_AUTH_LOGIN, accountId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 										 account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
 
 				oldClient->getClientSession()->abortSession();
 			} else {
-				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_GAME_LOGIN, accountId, 0, 0, oldCientGameSession->getServerIdx(), 0, 0, 0, 0, 0, 0, 0,
+				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_GAME_LOGIN, accountId, 0, 0, oldCientGameData->getServerIdx(), 0, 0, 0, 0, 0, 0, 0,
 										 account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
 
 				if(oldClient->isConnectedToGame())
-					oldCientGameSession->kickClient(oldClient);
+					oldCientGameData->kickClient(oldClient);
 				else {
 					ClientData::removeClient(oldClient);
 				}
@@ -252,8 +252,8 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		return;
 	}
 
-	const std::unordered_map<uint16_t, GameServerSession*>& serverList = GameServerSession::getServerList();
-	std::unordered_map<uint16_t, GameServerSession*>::const_iterator it, itEnd;
+	const std::unordered_map<uint16_t, GameData*>& serverList = GameData::getServerList();
+	std::unordered_map<uint16_t, GameData*>::const_iterator it, itEnd;
 
 	count = serverList.size();
 	maxPlayers = CONFIG_GET()->auth.game.maxPlayers;
@@ -265,13 +265,17 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 
 	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
-		GameServerSession* serverInfo = it->second;
+		GameData* serverInfo = it->second;
 
 		//servers with their index higher than maxPublicServerBaseIdx + serverIdxOffset are hidden
 		//serverIdxOffset is a per user value from the DB, default to 0
 		//maxPublicServerBaseIdx is a config value, default to 30
 		//So by default, servers with index > 30 are not shown in client's server list
 		if(serverInfo->getServerIdx() > maxPublicServerBaseIdx + serverIdxOffset)
+			continue;
+
+		//Don't display offline game servers
+		if(serverInfo->getGameServer() == nullptr)
 			continue;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
@@ -302,8 +306,8 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 		return;
 	}
 
-	const std::unordered_map<uint16_t, GameServerSession*>& serverList = GameServerSession::getServerList();
-	std::unordered_map<uint16_t, GameServerSession*>::const_iterator it, itEnd;
+	const std::unordered_map<uint16_t, GameData*>& serverList = GameData::getServerList();
+	std::unordered_map<uint16_t, GameData*>::const_iterator it, itEnd;
 
 	count = serverList.size();
 	maxPlayers = CONFIG_GET()->auth.game.maxPlayers;
@@ -314,13 +318,17 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 
 
 	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
-		GameServerSession* serverInfo = it->second;
+		GameData* serverInfo = it->second;
 
 		//servers with their index higher than maxPublicServerBaseIdx + serverIdxOffset are hidden
 		//serverIdxOffset is a per user value from the DB, default to 0
 		//maxPublicServerBaseIdx is a config value, default to 30
 		//So by default, servers with index > 30 are not shown in client's server list
 		if(serverInfo->getServerIdx() > maxPublicServerBaseIdx + serverIdxOffset)
+			continue;
+
+		//Don't display offline game servers
+		if(serverInfo->getGameServer() == nullptr)
 			continue;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
@@ -339,7 +347,7 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 }
 
 void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
-	const std::unordered_map<uint16_t, GameServerSession*>& serverList = GameServerSession::getServerList();
+	const std::unordered_map<uint16_t, GameData*>& serverList = GameData::getServerList();
 
 	if(clientData == nullptr) {
 		abortSession();
@@ -347,7 +355,7 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 	}
 
 	if(serverList.find(packet->server_idx) != serverList.end()) {
-		GameServerSession* server = serverList.at(packet->server_idx);
+		GameData* server = serverList.at(packet->server_idx);
 		uint64_t oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
 
 		new DB_UpdateLastServerIdx(clientData->accountId, packet->server_idx);
