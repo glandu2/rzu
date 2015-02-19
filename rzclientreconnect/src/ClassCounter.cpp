@@ -13,35 +13,14 @@ ServerInfo
 #include "AdminServer/AdminInterface.h"
 DECLARE_CLASSCOUNT_STATIC(AdminServer::AdminInterface)
 
-#include "AuthServer/BillingInterface.h"
-DECLARE_CLASSCOUNT_STATIC(AuthServer::BillingInterface)
-
 #include "TelnetSession.h"
 DECLARE_CLASSCOUNT_STATIC(TelnetSession)
+
+#include "AuthServer/AuthSession.h"
+DECLARE_CLASSCOUNT_STATIC(AuthServer::AuthSession)
 
 #include "AuthServer/ClientData.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientData)
 
-#include "AuthServer/ClientSession.h"
-DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientSession)
-
-#include "AuthServer/DB_Account.h"
-DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_Account)
-
-#include "AuthServer/DB_UpdateLastServerIdx.h"
-DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_UpdateLastServerIdx)
-
 #include "AuthServer/GameServerSession.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::GameServerSession)
-
-#include "UploadServer/ClientSession.h"
-DECLARE_CLASSCOUNT_STATIC(UploadServer::ClientSession)
-
-#include "UploadServer/GameServerSession.h"
-DECLARE_CLASSCOUNT_STATIC(UploadServer::GameServerSession)
-
-#include "UploadServer/IconServerSession.h"
-DECLARE_CLASSCOUNT_STATIC(UploadServer::IconServerSession)
-
-#include "UploadServer/UploadRequest.h"
-DECLARE_CLASSCOUNT_STATIC(UploadServer::UploadRequest)

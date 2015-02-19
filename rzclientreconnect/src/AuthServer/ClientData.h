@@ -18,14 +18,14 @@ class ClientData : public Object
 
 public:
 	ClientData(ClientSession* clientInfo);
-	void switchClientToServer(GameServerSession* server, uint64_t oneTimePassword);
 
 	std::string account;
 	uint32_t accountId;
-	uint32_t age;
-	uint32_t eventCode;
-	uint64_t oneTimePassword;
-	uint32_t pcBang;
+	uint8_t pcBang;
+	int32_t age;
+	int32_t eventCode;
+	uint32_t nContinuousPlayTime;
+	uint32_t nContinuousLogoutTime;
 
 	//Try to add newClient if account is not already in the list (authenticated).
 	//There is at most one account in the hash map.

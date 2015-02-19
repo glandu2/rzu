@@ -1,6 +1,5 @@
 #include "ClientData.h"
 #include "uv.h"
-#include "ClientSession.h"
 #include "GameServerSession.h"
 #include <algorithm>
 
@@ -19,8 +18,6 @@ ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientI
 }
 
 ClientData::~ClientData() {
-	if(getGameServer() && inGame)
-		getGameServer()->decPlayerCount();
 }
 
 
@@ -40,8 +37,6 @@ std::string ClientData::toLower(const std::string& str) {
 void ClientData::connectedToGame() {
 	if(!getGameServer())
 		error("Connected to unknown game server ! Code logic error\n");
-	else
-		getGameServer()->incPlayerCount();
 	inGame = true;
 }
 
@@ -60,15 +55,11 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		newClient = nullptr;
 
 		if(oldClient->getGameServer()) {
-			if(oldClient->inGame)
-				oldClient->getGameServer()->kickClient(account);
-			else {
+			if(!oldClient->inGame) {
 				connectedClients.erase(result.first);
 				connectedClientsByName.erase(toLower(oldClient->account));
 				delete oldClient;
 			}
-		} else {
-			oldClient->getClientSession()->abortSession();
 		}
 	} else {
 		newClient->account = account;
@@ -132,12 +123,6 @@ bool ClientData::removeClient(uint32_t accountId) {
 
 bool ClientData::removeClient(ClientData* clientData) {
 	return removeClient(clientData->accountId);
-}
-
-void ClientData::switchClientToServer(GameServerSession* server, uint64_t oneTimePassword) {
-	this->oneTimePassword = oneTimePassword;
-	this->client = nullptr;
-	this->server = server;
 }
 
 ClientData* ClientData::getClient(const std::string& account) {
