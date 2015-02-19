@@ -28,6 +28,7 @@ public:
 	void sendNotifyItemPurchased(ClientData* client);
 
 protected:
+	void onConnected();
 	void onPacketReceived(const TS_MESSAGE* packet);
 
 	void onServerLogin(const TS_GA_LOGIN* packet);

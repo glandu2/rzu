@@ -51,7 +51,7 @@ void LogServerClient::stop() {
 	closeSession();
 }
 
-void LogServerClient::onDisconnected() {
+void LogServerClient::onDisconnected(bool causedByRemote) {
 	info("Disconnected from Log server %s:%d\n", ip.get().c_str(), port.get());
 }
 

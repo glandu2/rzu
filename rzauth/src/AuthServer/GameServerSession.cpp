@@ -36,20 +36,27 @@ void GameServerSession::sendNotifyItemPurchased(ClientData* client) {
 }
 
 GameServerSession::~GameServerSession() {
-	if(gameData && useAutoReconnectFeature) {
-		warn("Game server disconnected without logout\n");
-		gameData->setGameServer(nullptr);
-	} else if(gameData) {
-		info("Server %d Logout\n", gameData->getServerIdx());
-		GameData::remove(gameData);
+	if(gameData && gameData->getGameServer() == this) {
+		if(useAutoReconnectFeature) {
+			warn("Game server disconnected without logout\n");
+			gameData->setGameServer(nullptr);
+		} else {
+			info("Server %d Logout\n", gameData->getServerIdx());
+			GameData::remove(gameData);
+		}
 	}
+	// else the server connection changed (this one was maybe halfopen)
+}
+
+void GameServerSession::onConnected() {
+	getStream()->setKeepAlive(30);
 }
 
 void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
-		case TS_GA_LOGIN::packetIDEx:
+		case TS_GA_LOGIN_WITH_LOGOUT::packetID:
 			useAutoReconnectFeature = true;
-			onServerLogin(static_cast<const TS_GA_LOGIN*>(packet));
+			onServerLogin(static_cast<const TS_GA_LOGIN_WITH_LOGOUT*>(packet));
 			break;
 
 		case TS_GA_LOGIN::packetID:
@@ -106,7 +113,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 		result.result = TS_RESULT_SUCCESS;
 		debug("Success\n");
 		this->gameData = gameData;
-	} else if(useAutoReconnectFeature && oldGameData && !oldGameData->getGameServer()) {
+	} else if(useAutoReconnectFeature && oldGameData) {
 		if(oldGameData->getServerIdx() == packet->server_idx &&
 				oldGameData->getServerName() == localServerName &&
 				oldGameData->getServerIp() == localServerIp &&
@@ -114,6 +121,15 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 				oldGameData->getServerScreenshotUrl() == localScreenshotUrl &&
 				oldGameData->getIsAdultServer() == packet->is_adult_server)
 		{
+			GameServerSession* gameServer = oldGameData->getGameServer();
+
+			if(gameServer) {
+				info("Received same game info for server %s[%d] but from different connection, dropping the old one (maybe halfopen ?)\n",
+					 localServerName.c_str(), packet->server_idx);
+				gameServer->closeSession();
+			} else {
+				info("Game server %s[%d] reconnected\n", localServerName.c_str(), packet->server_idx);
+			}
 			oldGameData->setGameServer(this);
 			this->gameData = oldGameData;
 		} else {

@@ -44,7 +44,7 @@ public:
 	bool isStarted() { return getStream() && getStream()->getState() == Stream::ConnectedState; }
 
 	void onConnected();
-	void onDisconnected();
+	void onDisconnected(bool causedByRemote);
 
 	void sendLog(const Message& message);
 

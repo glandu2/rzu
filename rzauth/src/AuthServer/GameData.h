@@ -13,6 +13,8 @@ class ClientData;
 
 class GameData : public Object
 {
+	DECLARE_CLASS(AuthServer::GameData)
+
 public:
 	//multithread concurrency when GS is disconnected while new players connect to it
 	static const std::unordered_map<uint16_t, GameData*>& getServerList() { return servers; }
@@ -30,7 +32,7 @@ public:
 	void sendNotifyItemPurchased(ClientData* client);
 
 	GameServerSession* getGameServer() { return gameServerSession; }
-	bool setGameServer(GameServerSession* gameServerSession);
+	void setGameServer(GameServerSession* gameServerSession);
 
 	uint16_t getServerIdx() { return serverIdx; }
 	std::string getServerName() { return serverName; }

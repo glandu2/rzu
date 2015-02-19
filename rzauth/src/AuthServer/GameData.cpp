@@ -74,14 +74,8 @@ void GameData::remove(GameData* gameData) {
 	delete gameData;
 }
 
-bool GameData::setGameServer(GameServerSession *gameServerSession) {
-	if(this->gameServerSession && gameServerSession) {
-		error("Attempt to overwrite existing game server session\n");
-		return false;
-	}
-
+void GameData::setGameServer(GameServerSession *gameServerSession) {
 	this->gameServerSession = gameServerSession;
-	return true;
 }
 
 void GameData::kickClient(ClientData *client) {

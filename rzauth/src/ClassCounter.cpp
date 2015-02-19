@@ -31,6 +31,9 @@ DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_Account)
 #include "AuthServer/DB_UpdateLastServerIdx.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_UpdateLastServerIdx)
 
+#include "AuthServer/GameData.h"
+DECLARE_CLASSCOUNT_STATIC(AuthServer::GameData)
+
 #include "AuthServer/GameServerSession.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::GameServerSession)
 
