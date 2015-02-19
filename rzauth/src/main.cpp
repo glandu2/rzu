@@ -182,13 +182,7 @@ void runServers(Log *trafficLogger) {
 
 	CrashHandler::setTerminateCallback(&onTerminate, &serverManager);
 
-	AuthServer::LogServerClient::sendLog(AuthServer::LogServerClient::LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, "START", -1);
-
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
-
-	AuthServer::LogServerClient::sendLog(AuthServer::LogServerClient::LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, "END", -1);
 
 	CrashHandler::setTerminateCallback(nullptr, nullptr);
 }

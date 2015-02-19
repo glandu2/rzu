@@ -8,7 +8,7 @@
 #include "GlobalCoreConfig.h"
 #include "TimingFunctions.h"
 
-void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState);
+void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState, bool causedByRemote);
 
 BenchmarkConfig config;
 std::vector<BenchmarkAuthSession*> auths;
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 }
 
 //conn bench
-void onSocketStateChange(IListener* instance, Stream* socket, Stream::State oldState, Stream::State newState) {
+void onSocketStateChange(IListener* instance, Stream* socket, Stream::State oldState, Stream::State newState, bool causedByRemote) {
 	if(newState == Stream::ConnectedState) {
 		socket->close();
 	} else if(newState == Stream::UnconnectedState) {

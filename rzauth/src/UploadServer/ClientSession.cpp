@@ -42,7 +42,7 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 	TS_MESSAGE::initMessage<TS_UC_LOGIN_RESULT>(&result);
 
 	debug("Upload from client %s:%d, client id %u with account id %u for guild id %u on server %30s\n",
-		  getStream()->getRemoteHostName(),
+		  getStream()->getRemoteIpStr(),
 		  getStream()->getRemotePort(),
 		  packet->client_id,
 		  packet->account_id,
@@ -66,10 +66,10 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	TS_MESSAGE::initMessage<TS_UC_UPLOAD>(&result);
 
 
-	debug("Upload from client %s:%d\n", getStream()->getRemoteHostName(), getStream()->getRemotePort());
+	debug("Upload from client %s:%d\n", getStream()->getRemoteIpStr(), getStream()->getRemotePort());
 
 	if(currentRequest == nullptr) {
-		warn("Upload attempt without a request from %s:%d\n", getStream()->getRemoteHostName(), getStream()->getRemotePort());
+		warn("Upload attempt without a request from %s:%d\n", getStream()->getRemoteIpStr(), getStream()->getRemotePort());
 		result.result = TS_RESULT_NOT_EXIST;
 	} else if(packet->file_length != packet->size - sizeof(TS_CU_UPLOAD)) {
 		warn("Upload packet size invalid, received %d bytes but the packet say %u bytes\n", int(packet->size - sizeof(TS_CU_UPLOAD)), packet->file_length);

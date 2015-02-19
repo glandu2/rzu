@@ -40,11 +40,11 @@ public:
 	static const int NTS = -1;
 
 	bool start() { return connect(ip.get().c_str(), port.get()); }
-	void stop() { closeSession(); }
+	void stop();
 	bool isStarted() { return getStream() && getStream()->getState() == Stream::ConnectedState; }
 
 	void onConnected();
-	void onDisconnected();
+	void onDisconnected(bool causedByRemote);
 
 	void sendLog(const Message& message);
 

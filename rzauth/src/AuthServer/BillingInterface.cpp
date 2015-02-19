@@ -1,5 +1,5 @@
 #include "BillingInterface.h"
-#include "GameServerSession.h"
+#include "GameData.h"
 #include "ClientData.h"
 
 namespace AuthServer {

@@ -2,12 +2,12 @@
 #include "ServersManager.h"
 #include "ConfigInfo.h"
 #include <stdlib.h>
-#include "../AuthServer/GameData.h"
+#include "../AuthServer/GameServerSession.h"
 #include "ClassCounter.h"
 #include "DbConnectionPool.h"
 #include "CrashHandler.h"
 
-static const char MSG_WELCOME[] = "Auth server - Administration server - Type \"help\" for a list of available commands\r\n> ";
+static const char MSG_WELCOME[] = "GS auto reconnect server - Administration server - Type \"help\" for a list of available commands\r\n> ";
 
 static const char MSG_UNKNOWN_COMMAND[] = "Unknown command\r\n";
 static const char MSG_HELP[] =
@@ -191,8 +191,8 @@ void AdminInterface::closeDbConnections() {
 }
 
 void AdminInterface::listGameServers() {
-	const std::unordered_map<uint16_t, AuthServer::GameData*>& serverList = AuthServer::GameData::getServerList();
-	std::unordered_map<uint16_t, AuthServer::GameData*>::const_iterator it, itEnd;
+	const std::unordered_map<uint16_t, AuthServer::AuthSession*>& serverList = AuthServer::AuthSession::getServerList();
+	std::unordered_map<uint16_t, AuthServer::AuthSession*>::const_iterator it, itEnd;
 
 	char buffer[1024];
 	int len;
@@ -201,14 +201,13 @@ void AdminInterface::listGameServers() {
 	write(buffer, len);
 
 	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
-		AuthServer::GameData* server = it->second;
+		AuthServer::AuthSession* server = it->second;
 
-		len = sprintf(buffer, "Index: %2d, name: %10s, address: %s:%d, players count: %u, screenshot url: %s\r\n",
+		len = sprintf(buffer, "Index: %2d, name: %10s, address: %s:%d, screenshot url: %s\r\n",
 					  server->getServerIdx(),
 					  server->getServerName().c_str(),
 					  server->getServerIp().c_str(),
 					  server->getServerPort(),
-					  server->getPlayerCount(),
 					  server->getServerScreenshotUrl().c_str());
 		write(buffer, len);
 	}
@@ -242,30 +241,30 @@ void AdminInterface::listObjectsCount() {
 
 #if defined(_WIN32) && defined(_DEBUG)
 	_CrtMemState memUsage;
-    size_t heapSize = 0, heapCommit = 0;
-    memset(&memUsage, 0, sizeof(memUsage));
+	size_t heapSize = 0, heapCommit = 0;
+	memset(&memUsage, 0, sizeof(memUsage));
 	_CrtMemDumpStatistics(&memUsage);
-    _heapused(&heapSize, &heapCommit);
+	_heapused(&heapSize, &heapCommit);
 	len = sprintf(buffer,
 				  "Memory usage:\r\n"
-                  " heap size: %ld\r\n"
-                  " commit size: %ld\r\n"
-                  " normal block size: %ld\r\n"
-                  " free block size: %ld\r\n"
-                  " CRT block size: %ld\r\n"
-                  " client block size: %ld\r\n"
-                  " ignore block size: %ld\r\n"
-                  " peak memory size: %ld\r\n"
-                  " used memory size: %ld\r\n\r\n",
-                  heapSize,
-                  heapCommit,
-                  memUsage.lSizes[_NORMAL_BLOCK],
-                  memUsage.lSizes[_FREE_BLOCK],
-                  memUsage.lSizes[_CRT_BLOCK],
-                  memUsage.lSizes[_CLIENT_BLOCK],
-                  memUsage.lSizes[_IGNORE_BLOCK],
-                  memUsage.lHighWaterCount,
-                  memUsage.lTotalCount);
+				  " heap size: %ld\r\n"
+				  " commit size: %ld\r\n"
+				  " normal block size: %ld\r\n"
+				  " free block size: %ld\r\n"
+				  " CRT block size: %ld\r\n"
+				  " client block size: %ld\r\n"
+				  " ignore block size: %ld\r\n"
+				  " peak memory size: %ld\r\n"
+				  " used memory size: %ld\r\n\r\n",
+				  heapSize,
+				  heapCommit,
+				  memUsage.lSizes[_NORMAL_BLOCK],
+				  memUsage.lSizes[_FREE_BLOCK],
+				  memUsage.lSizes[_CRT_BLOCK],
+				  memUsage.lSizes[_CLIENT_BLOCK],
+				  memUsage.lSizes[_IGNORE_BLOCK],
+				  memUsage.lHighWaterCount,
+				  memUsage.lTotalCount);
 	write(buffer, len);
 #endif
 

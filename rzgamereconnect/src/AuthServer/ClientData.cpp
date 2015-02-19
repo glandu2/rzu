@@ -1,9 +1,7 @@
 #include "ClientData.h"
 #include "uv.h"
-#include "ClientSession.h"
-#include "GameData.h"
+#include "GameServerSession.h"
 #include <algorithm>
-#include <time.h>
 
 namespace AuthServer {
 
@@ -16,14 +14,10 @@ uv_mutex_t ClientData::initializeLock() {
 	return mapLock;
 }
 
-ClientData::ClientData(ClientSession *clientInfo)
-	: accountId(0), kickRequested(false),
-	  client(clientInfo), server(nullptr), inGame(false) {
+ClientData::ClientData(ClientSession *clientInfo) : accountId(0), client(clientInfo), server(nullptr), inGame(false) {
 }
 
 ClientData::~ClientData() {
-	if(getGameServer() && inGame)
-		getGameServer()->decPlayerCount();
 }
 
 
@@ -43,19 +37,13 @@ std::string ClientData::toLower(const std::string& str) {
 void ClientData::connectedToGame() {
 	if(!getGameServer())
 		error("Connected to unknown game server ! Code logic error\n");
-	else
-		getGameServer()->incPlayerCount();
 	inGame = true;
-	loginTime = time(nullptr);
 }
 
-ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang, uint32_t ip, ClientData** oldClientPtr) {
+ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang) {
 	std::pair< std::unordered_map<uint32_t, ClientData*>::iterator, bool> result;
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> resultForName;
 	ClientData* newClient;
-
-	if(oldClientPtr)
-		*oldClientPtr = nullptr;
 
 	uv_mutex_lock(&mapLock);
 
@@ -66,15 +54,19 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		delete newClient;
 		newClient = nullptr;
 
-		if(oldClientPtr)
-			*oldClientPtr = oldClient;
+		if(oldClient->getGameServer()) {
+			if(!oldClient->inGame) {
+				connectedClients.erase(result.first);
+				connectedClientsByName.erase(toLower(oldClient->account));
+				delete oldClient;
+			}
+		}
 	} else {
 		newClient->account = account;
 		newClient->accountId = accoundId;
 		newClient->age = age;
 		newClient->eventCode = event_code;
 		newClient->pcBang = pcBang;
-		newClient->ip = ip;
 		resultForName = connectedClientsByName.insert(std::pair<std::string, ClientData*>(toLower(account), newClient));
 		if(resultForName.second == false) {
 			newClient->error("Duplicated account name with different ID: %s\n", account.c_str());
@@ -133,12 +125,6 @@ bool ClientData::removeClient(ClientData* clientData) {
 	return removeClient(clientData->accountId);
 }
 
-void ClientData::switchClientToServer(GameData* server, uint64_t oneTimePassword) {
-	this->oneTimePassword = oneTimePassword;
-	this->client = nullptr;
-	this->server = server;
-}
-
 ClientData* ClientData::getClient(const std::string& account) {
 	ClientData* foundClient;
 	std::unordered_map<std::string, ClientData*>::const_iterator it;
@@ -173,7 +159,7 @@ ClientData* ClientData::getClientById(uint32_t accountId) {
 	return foundClient;
 }
 
-void ClientData::removeServer(GameData* server) {
+void ClientData::removeServer(GameServerSession* server) {
 	std::unordered_map<uint32_t, ClientData*>::const_iterator it, itEnd;
 
 	uv_mutex_lock(&mapLock);
