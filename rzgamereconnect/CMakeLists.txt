@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
-project(rzauth)
+project(rzgamereconnect)
 
-set(TARGET_NAME rzauth)
+set(TARGET_NAME rzgamereconnect)
 
 if(BUILD_SHARED_LIBS)
   add_definitions(-DUSING_UV_SHARED)
