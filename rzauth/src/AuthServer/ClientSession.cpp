@@ -274,8 +274,8 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		if(serverInfo->getServerIdx() > maxPublicServerBaseIdx + serverIdxOffset)
 			continue;
 
-		//Don't display offline game servers
-		if(serverInfo->getGameServer() == nullptr)
+		//Don't display not ready game servers (offline or not yet received all player list)
+		if(!serverInfo->isReady())
 			continue;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
@@ -327,8 +327,8 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 		if(serverInfo->getServerIdx() > maxPublicServerBaseIdx + serverIdxOffset)
 			continue;
 
-		//Don't display offline game servers
-		if(serverInfo->getGameServer() == nullptr)
+		//Don't display not ready game servers (offline or not yet received all player list)
+		if(!serverInfo->isReady())
 			continue;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();

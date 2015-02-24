@@ -21,7 +21,8 @@ GameData::GameData(GameServerSession *gameServerSession,
 	  serverPort(serverPort),
 	  serverScreenshotUrl(serverScreenshotUrl),
 	  isAdultServer(isAdultServer),
-	  playerCount(0)
+	  playerCount(0),
+	  ready(false)
 {
 	setDirtyObjectName();
 
@@ -75,7 +76,16 @@ void GameData::remove(GameData* gameData) {
 }
 
 void GameData::setGameServer(GameServerSession *gameServerSession) {
-	this->gameServerSession = gameServerSession;
+	GameServerSession* oldGameServerSession = this->gameServerSession;
+
+	if(this->gameServerSession != gameServerSession) {
+		this->gameServerSession = gameServerSession;
+
+		if(oldGameServerSession)
+			oldGameServerSession->setGameData(nullptr);
+		if(gameServerSession)
+			gameServerSession->setGameData(this);
+	}
 }
 
 void GameData::kickClient(ClientData *client) {

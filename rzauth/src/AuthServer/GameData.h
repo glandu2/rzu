@@ -28,6 +28,9 @@ public:
 							GameData **oldGameData = nullptr);
 	static void remove(GameData* gameData);
 
+	void setReady(bool ready) { this->ready = ready; if(ready) info("GS ready\n"); }
+	bool isReady() { return getGameServer() != nullptr && ready; }
+
 	void kickClient(ClientData *client);
 	void sendNotifyItemPurchased(ClientData* client);
 
@@ -60,6 +63,8 @@ private:
 
 	static std::unordered_map<uint16_t, GameData*> servers;
 
+	GameServerSession* gameServerSession;
+
 	uint16_t serverIdx;
 	std::string serverName;
 	std::string serverIp;
@@ -67,7 +72,8 @@ private:
 	std::string serverScreenshotUrl;
 	bool isAdultServer;
 	uint32_t playerCount;
-	GameServerSession* gameServerSession;
+
+	bool ready;
 };
 
 } // namespace AuthServer
