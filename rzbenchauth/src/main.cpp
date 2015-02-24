@@ -59,6 +59,9 @@ void benchmarkAuthentication() {
 	config.method = CFG_GET("use_rsa")->getBool()? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES;
 	config.version = "200701120";
 
+	if(count > config.connectionTargetCount)
+		count = config.connectionTargetCount;
+
 	auths.reserve(count);
 	for(int i = 0; i < count; i++) {
 		BenchmarkAuthSession* auth = new BenchmarkAuthSession(&config);
@@ -83,6 +86,9 @@ void startBenchAuth(int usecBetweenConnection) {
 
 void benchmarkConnections() {
 	int count = CFG_GET("count")->getInt();
+
+	if(count > config.connectionTargetCount)
+		count = config.connectionTargetCount;
 
 	sockets.reserve(count);
 	for(int i = 0; i < count; i++) {
