@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
 
 void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
-	BanManager banManager;
 
 	SessionServer<AuthServer::GameServerSession> authGameServer(
 				CONFIG_GET()->game.listener.ip,
