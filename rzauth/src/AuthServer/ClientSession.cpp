@@ -84,9 +84,14 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.request_msg_id = packet->id;
 		sendPacket(&result);
 	} else if(!memcmp(packet->szVersion, "INFO", 4)) {
-		static uint32_t gitVersionSuffix = strtol(std::string(rzauthVersion+8, 8).c_str(), nullptr, 16);
+		static uint32_t gitVersionSuffix = 0;
 		TS_SC_RESULT result;
 		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
+
+		if(gitVersionSuffix == 0) {
+			std::string shaPart(rzauthVersion+8, 8);
+			gitVersionSuffix = strtol(shaPart.c_str(), nullptr, 16);
+		}
 
 		result.value = gitVersionSuffix ^ 0xADADADAD;
 		result.result = 0;
