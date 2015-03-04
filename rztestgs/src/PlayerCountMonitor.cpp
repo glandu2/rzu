@@ -49,39 +49,38 @@ void PlayerCountMonitor::updatePlayerNumber() {
 	}
 }
 
+void PlayerCountMonitor::onConnected() {
+	TS_CA_VERSION versionMsg;
+	TS_MESSAGE::initMessage<TS_CA_VERSION>(&versionMsg);
+#ifndef NDEBUG
+	memset(versionMsg.szVersion, 0, sizeof(versionMsg.szVersion));
+#endif
+	strcpy(versionMsg.szVersion, reqStr.c_str());
+
+	sendPacket(&versionMsg);
+}
+
+void PlayerCountMonitor::onDisconnected(bool causedByRemote) {
+	if(causedByRemote) {
+		error("Disconnected by server !\n");
+	}
+}
+
 void PlayerCountMonitor::onPacketReceived(const TS_MESSAGE* packetData) {
 	switch(packetData->id) {
 		case TS_SC_RESULT::packetID:
 		{
 			const TS_SC_RESULT* result = reinterpret_cast<const TS_SC_RESULT*>(packetData);
 			switch(result->request_msg_id) {
-				case TS_CA_VERSION::packetID:
-                    printf("%lu %d %d\n", (unsigned long)time(NULL), result->value ^ 0xADADADAD, result->result);
+				case TS_CA_VERSION::packetID: {
+					if(reqStr == "INFO")
+						printf("%lu 0x%x %d\n", (unsigned long)time(NULL), ((unsigned int)result->value) ^ 0xADADADAD, result->result);
+					else
+						printf("%lu %d %d\n", (unsigned long)time(NULL), result->value ^ 0xADADADAD, result->result);
 					fflush(stdout);
 					close();
 					break;
-			}
-			break;
-		}
-
-		case TS_CC_EVENT::packetID:
-		{
-			const TS_CC_EVENT* eventMsg = reinterpret_cast<const TS_CC_EVENT*>(packetData);
-			if(eventMsg->event == TS_CC_EVENT::CE_ServerConnected) {
-				TS_CA_VERSION versionMsg;
-				TS_MESSAGE::initMessage<TS_CA_VERSION>(&versionMsg);
-#ifndef NDEBUG
-				memset(versionMsg.szVersion, 0, sizeof(versionMsg.szVersion));
-#endif
-				strcpy(versionMsg.szVersion, reqStr.c_str());
-
-				sendPacket(&versionMsg);
-			}
-			if(eventMsg->event == TS_CC_EVENT::CE_ServerDisconnected) {
-				//error("Disconnected from server !\n");
-			}
-			if(eventMsg->event == TS_CC_EVENT::CE_ServerUnreachable) {
-				error("Unreachable server !\n");
+				}
 			}
 			break;
 		}
