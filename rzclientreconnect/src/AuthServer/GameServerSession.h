@@ -29,6 +29,7 @@ protected:
 
 	void onServerLogin(const TS_GA_LOGIN* packet);
 	void onClientLogin(const TS_GA_CLIENT_LOGIN* packet);
+	void onClientLogout(const TS_GA_CLIENT_LOGOUT* packet);
 
 	virtual void updateObjectName();
 

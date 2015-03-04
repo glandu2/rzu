@@ -129,21 +129,23 @@ void AuthSession::onPacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		case TS_AG_CLIENT_LOGIN_EXTENDED::packetID: {
-			TS_GA_CLIENT_LOGGED_LIST::AccountInfo accountInfo;
 			const TS_AG_CLIENT_LOGIN_EXTENDED* clientLoginIn = static_cast<const TS_AG_CLIENT_LOGIN_EXTENDED*>(packet);
 
 			debug("Login client %s\n", clientLoginIn->account);
 
+			if(clientLoginIn->result == TS_RESULT_SUCCESS) {
+				TS_GA_CLIENT_LOGGED_LIST::AccountInfo accountInfo;
 
-			strcpy(accountInfo.account, clientLoginIn->account);
-			accountInfo.ip = clientLoginIn->ip;
-			accountInfo.loginTime = clientLoginIn->loginTime;
-			accountInfo.nAccountID = clientLoginIn->nAccountID;
-			accountInfo.nAge = clientLoginIn->nAge;
-			accountInfo.nEventCode = clientLoginIn->nEventCode;
-			accountInfo.nPCBangUser = clientLoginIn->nPCBangUser;
+				strcpy(accountInfo.account, clientLoginIn->account);
+				accountInfo.ip = clientLoginIn->ip;
+				accountInfo.loginTime = clientLoginIn->loginTime;
+				accountInfo.nAccountID = clientLoginIn->nAccountID;
+				accountInfo.nAge = clientLoginIn->nAge;
+				accountInfo.nEventCode = clientLoginIn->nEventCode;
+				accountInfo.nPCBangUser = clientLoginIn->nPCBangUser;
 
-			accountList.push_back(accountInfo);
+				accountList.push_back(accountInfo);
+			}
 
 			if(!gameServerSession)
 				break;
@@ -216,49 +218,35 @@ void AuthSession::sendLogin() {
 }
 
 void AuthSession::sendAccountList() {
-	const int MAXCOUNT_PER_PACKET = 2;
+	const int MAXCOUNT_PER_PACKET = (16000 - sizeof(TS_GA_CLIENT_LOGGED_LIST)) / sizeof(TS_GA_CLIENT_LOGGED_LIST::AccountInfo);
 
 	synchronizedWithAuth = true;
 
 	TS_GA_CLIENT_LOGGED_LIST* accountListPacket;
-	size_t count = accountList.size() <= MAXCOUNT_PER_PACKET ? accountList.size() : MAXCOUNT_PER_PACKET;
-	accountListPacket = TS_MESSAGE_WNA::create<TS_GA_CLIENT_LOGGED_LIST, TS_GA_CLIENT_LOGGED_LIST::AccountInfo>(count);
-	accountListPacket->count = 0;
-	accountListPacket->final_packet = false;
+	int maxCount = accountList.size() <= MAXCOUNT_PER_PACKET ? accountList.size() : MAXCOUNT_PER_PACKET;
+	accountListPacket = TS_MESSAGE_WNA::create<TS_GA_CLIENT_LOGGED_LIST, TS_GA_CLIENT_LOGGED_LIST::AccountInfo>(maxCount);
 
 	debug("Sending %d accounts\n", (int)accountList.size());
 
-	if(accountList.size() == 0) {
-		accountListPacket->final_packet = true;
-		sendPacket(accountListPacket);
-	} else {
-		size_t i = 0;
-		auto it = accountList.begin();
-		for(; it != accountList.end(); ++it) {
-			TS_GA_CLIENT_LOGGED_LIST::AccountInfo* accountInfo = &(accountListPacket->accountInfo[accountListPacket->count]);
+	auto it = accountList.begin();
+	do {
+		int count = 0;
+
+		for(; it != accountList.end() && count < maxCount; ++it, ++count) {
 			const TS_GA_CLIENT_LOGGED_LIST::AccountInfo& accountItem = *it;
+			TS_GA_CLIENT_LOGGED_LIST::AccountInfo* accountInfo = &accountListPacket->accountInfo[count];
 
 			*accountInfo = accountItem;
-
-			accountListPacket->count++;
-			i++;
-
-			if(it == --accountList.end())
-				accountListPacket->final_packet = true;
-
-			if(accountListPacket->count >= count)
-				sendPacket(accountListPacket);
-
-			if(it == --accountList.end() && accountListPacket->count >= count) {
-				TS_MESSAGE_WNA::destroy(accountListPacket);
-
-				count = (accountList.size() - i) <= MAXCOUNT_PER_PACKET ? (accountList.size() - i) : MAXCOUNT_PER_PACKET;
-				accountListPacket = TS_MESSAGE_WNA::create<TS_GA_CLIENT_LOGGED_LIST, TS_GA_CLIENT_LOGGED_LIST::AccountInfo>(count);
-				accountListPacket->count = 0;
-				accountListPacket->final_packet = false;
-			}
 		}
-	}
+
+		if(it == accountList.end())
+			accountListPacket->final_packet = true;
+		else
+			accountListPacket->final_packet = false;
+		accountListPacket->count = count;
+
+		sendPacket(accountListPacket);
+	} while(it != accountList.end());
 
 	TS_MESSAGE_WNA::destroy(accountListPacket);
 

@@ -48,8 +48,7 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		case TS_GA_CLIENT_LOGOUT::packetID:
-			authSession->logoutClient(static_cast<const TS_GA_CLIENT_LOGOUT*>(packet)->account);
-			authSession->sendPacket(packet);
+			onClientLogout(static_cast<const TS_GA_CLIENT_LOGOUT*>(packet));
 			break;
 
 		case TS_CC_EVENT::packetID:
@@ -113,6 +112,13 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 
 		sendPacket(&result);
 	} else {
+		authSession->sendPacket(packet);
+	}
+}
+
+void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
+	authSession->logoutClient(static_cast<const TS_GA_CLIENT_LOGOUT*>(packet)->account);
+	if(authSession->isConnected()) {
 		authSession->sendPacket(packet);
 	}
 }
