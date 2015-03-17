@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(rzu-parent)
+enable_testing()
 
 set(CMAKE_VERBOSE_MAKEFILE false CACHE BOOL "Print compilation commands")
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (one of Debug, Release, RelWithDebInfo, MinSizeRel)")
@@ -49,13 +50,23 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 
+include(AddTestableExecutable)
+
 # Compile subprojects if existing
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
 endif()
 
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest)
+endif()
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/librzu/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/librzu" librzu)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rztest/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rztest" rztest)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzauth/CMakeLists.txt")
@@ -74,10 +85,6 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzbenchauth/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzbenchauth" rzbenchauth)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/VStructGen/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/VStructGen" VStructGen)
-endif()
-
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzchatgateway/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzchatgateway" rzchatgateway)
 endif()
@@ -88,5 +95,9 @@ endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzfilter/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzfilter" rzfilter)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/VStructGen/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/VStructGen" VStructGen)
 endif()
 
