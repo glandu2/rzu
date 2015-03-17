@@ -105,7 +105,7 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 }
 
 bool DB_Account::decryptPassword() {
-	char password[64];
+	char password[64+16];
 	bool ok = false;
 
 	if(cryptUseAes) {
