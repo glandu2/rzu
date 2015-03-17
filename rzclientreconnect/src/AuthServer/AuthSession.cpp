@@ -107,7 +107,6 @@ void AuthSession::onDisconnected(bool causedByRemote) {
 }
 
 void AuthSession::onPacketReceived(const TS_MESSAGE* packet) {
-
 	switch(packet->id) {
 		case TS_AG_LOGIN_RESULT::packetID:
 			if(pendingLogin && gameServerSession)
