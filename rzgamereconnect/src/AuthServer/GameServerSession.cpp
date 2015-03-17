@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "../GlobalConfig.h"
 #include "PrintfFormats.h"
+#include "AuthSession.h"
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"

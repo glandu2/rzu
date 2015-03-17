@@ -2,7 +2,7 @@
 #include "ServersManager.h"
 #include "ConfigInfo.h"
 #include <stdlib.h>
-#include "../AuthServer/GameServerSession.h"
+#include "../AuthServer/AuthSession.h"
 #include "ClassCounter.h"
 #include "DbConnectionPool.h"
 #include "CrashHandler.h"

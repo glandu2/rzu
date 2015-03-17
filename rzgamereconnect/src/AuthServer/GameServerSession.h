@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <string>
 #include "ClientData.h"
-#include "AuthSession.h"
 
 #include "Packets/TS_GA_LOGIN.h"
 #include "Packets/TS_GA_CLIENT_LOGIN.h"
@@ -14,6 +13,8 @@
 #include "Packets/TS_GA_CLIENT_KICK_FAILED.h"
 
 namespace AuthServer {
+
+class AuthSession;
 
 class GameServerSession : public PacketSession
 {
