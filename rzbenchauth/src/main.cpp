@@ -7,6 +7,7 @@
 #include "ConfigInfo.h"
 #include "GlobalCoreConfig.h"
 #include "TimingFunctions.h"
+#include "PrintfFormats.h"
 
 void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState, bool causedByRemote);
 
@@ -160,7 +161,7 @@ int main(int argc, char *argv[])
 
 	unsigned long long int duration = getTimerValue();
 
-	mainLogger.log(Log::LL_Info, "main", 4, "%d connections in %llu usec => %f auth/sec\n", config.connectionsDone, duration, config.connectionsDone/((float)duration/1000000.0f));
+	mainLogger.log(Log::LL_Info, "main", 4, "%d connections in %" PRIu64 " usec => %f auth/sec\n", config.connectionsDone, duration, config.connectionsDone/((float)duration/1000000.0f));
 }
 
 //conn bench
