@@ -7,7 +7,5 @@ if( versioncmakefound )
     add_git_version_info(${TARGET_NAME}_GitVersion SOURCE_FILES)
 endif()
 
-add_executable(${TARGET_NAME} ${SOURCE_FILES})
-
-target_link_libraries(${TARGET_NAME} rzu uv)
-install(TARGETS ${TARGET_NAME} DESTINATION ./)
+set(LIBS rzu)
+add_exe(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")
