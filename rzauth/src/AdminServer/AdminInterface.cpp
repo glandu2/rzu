@@ -6,6 +6,7 @@
 #include "ClassCounter.h"
 #include "DbConnectionPool.h"
 #include "CrashHandler.h"
+#include <string.h>
 
 static const char MSG_WELCOME[] = "Auth server - Administration server - Type \"help\" for a list of available commands\r\n> ";
 

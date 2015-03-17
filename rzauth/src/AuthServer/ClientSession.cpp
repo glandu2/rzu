@@ -84,9 +84,14 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.request_msg_id = packet->id;
 		sendPacket(&result);
 	} else if(!memcmp(packet->szVersion, "INFO", 4)) {
-		static uint32_t gitVersionSuffix = strtol(std::string(rzauthVersion+8, 8).c_str(), nullptr, 16);
+		static uint32_t gitVersionSuffix = 0;
 		TS_SC_RESULT result;
 		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
+
+		if(gitVersionSuffix == 0) {
+			std::string shaPart(rzauthVersion+8, 8);
+			gitVersionSuffix = strtoul(shaPart.c_str(), nullptr, 16);
+		}
 
 		result.value = gitVersionSuffix ^ 0xADADADAD;
 		result.result = 0;
@@ -114,10 +119,13 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 		goto cleanup;
 	}
 
+	ERR_clear_error();
+
 	bio = BIO_new_mem_buf((void*)packet->key, packet->key_size);
 	rsaCipher = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 	if(rsaCipher == nullptr) {
-		warn("RSA: invalid certificate\n");
+		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
+		warn("RSA: invalid certificate: %s\n", errorString);
 		abortSession();
 		goto cleanup;
 	}
@@ -274,8 +282,8 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		if(serverInfo->getServerIdx() > maxPublicServerBaseIdx + serverIdxOffset)
 			continue;
 
-		//Don't display offline game servers
-		if(serverInfo->getGameServer() == nullptr)
+		//Don't display not ready game servers (offline or not yet received all player list)
+		if(!serverInfo->isReady())
 			continue;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
@@ -327,8 +335,8 @@ void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
 		if(serverInfo->getServerIdx() > maxPublicServerBaseIdx + serverIdxOffset)
 			continue;
 
-		//Don't display offline game servers
-		if(serverInfo->getGameServer() == nullptr)
+		//Don't display not ready game servers (offline or not yet received all player list)
+		if(!serverInfo->isReady())
 			continue;
 
 		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
@@ -356,7 +364,7 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 
 	if(serverList.find(packet->server_idx) != serverList.end()) {
 		GameData* server = serverList.at(packet->server_idx);
-		uint64_t oneTimePassword = (uint64_t)rand()*rand()*rand()*rand();
+		uint64_t oneTimePassword = ((uint64_t)rand())*rand()*rand()*rand();
 
 		new DB_UpdateLastServerIdx(clientData->accountId, packet->server_idx);
 

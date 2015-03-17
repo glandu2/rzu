@@ -2,10 +2,11 @@
 #include "ServersManager.h"
 #include "ConfigInfo.h"
 #include <stdlib.h>
-#include "../AuthServer/GameServerSession.h"
+#include "../AuthServer/AuthSession.h"
 #include "ClassCounter.h"
 #include "DbConnectionPool.h"
 #include "CrashHandler.h"
+#include "Utils.h"
 
 static const char MSG_WELCOME[] = "GS auto reconnect server - Administration server - Type \"help\" for a list of available commands\r\n> ";
 
@@ -17,6 +18,7 @@ static const char MSG_HELP[] =
 		"- set <variable> <value>  Set config variable <variable> to <value>. Double-quotes are allowed for values with spaces. Use \"\" for a escaped double quote character.\r\n"
 		"- get <variable>          Get config variable value.\r\n"
 		"- list                    List all connected gameservers and information about them.\r\n"
+		"- list <server idx>       List all connected accounts and information about them on server with specified index.\r\n"
 		"- mem                     List object counts.\r\n"
 		"- closedb                 Close all idle database connections (use this to bring a database offline).\r\n"
 		"\r\n";
@@ -60,6 +62,8 @@ void AdminInterface::onCommand(const std::vector<std::string> &args) {
 		setEnv(args[1], args[2]);
 	else if(args.size() > 1 && args[0] == "get")
 		getEnv(args[1]);
+	else if(args.size() > 1 && args[0] == "list")
+		listAccountInGameServer(args[1]);
 	else if(args.size() > 0 && args[0] == "list")
 		listGameServers();
 	else if(args.size() > 0 && args[0] == "mem")
@@ -191,8 +195,9 @@ void AdminInterface::closeDbConnections() {
 }
 
 void AdminInterface::listGameServers() {
-	const std::unordered_map<uint16_t, AuthServer::AuthSession*>& serverList = AuthServer::AuthSession::getServerList();
-	std::unordered_map<uint16_t, AuthServer::AuthSession*>::const_iterator it, itEnd;
+	auto& serverList = AuthServer::AuthSession::getServerList();
+	auto it = serverList.cbegin();
+	auto itEnd = serverList.cend();
 
 	char buffer[1024];
 	int len;
@@ -200,15 +205,59 @@ void AdminInterface::listGameServers() {
 	len = sprintf(buffer, "%u gameserver(s)\r\n", (unsigned int)serverList.size());
 	write(buffer, len);
 
-	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
+	for(; it != itEnd; ++it) {
 		AuthServer::AuthSession* server = it->second;
 
-		len = sprintf(buffer, "Index: %2d, name: %10s, address: %s:%d, screenshot url: %s\r\n",
+		len = sprintf(buffer, "Index: %2d, name: %10s, address: %s:%d, player count: %d, screenshot url: %s\r\n",
 					  server->getServerIdx(),
 					  server->getServerName().c_str(),
 					  server->getServerIp().c_str(),
 					  server->getServerPort(),
+					  (int)server->getAccountList().size(),
 					  server->getServerScreenshotUrl().c_str());
+		write(buffer, len);
+	}
+}
+
+void AdminInterface::listAccountInGameServer(const std::string& serverIdx) {
+	auto& serverList = AuthServer::AuthSession::getServerList();
+	auto authSessionIt = serverList.find(atoi(serverIdx.c_str()));
+
+	if(authSessionIt == serverList.end()) {
+		static const char invalidServer[] = "No such server index\r\n";
+		write(invalidServer, sizeof(invalidServer));
+		return;
+	}
+
+	AuthServer::AuthSession* authSession = authSessionIt->second;
+	auto& accountList = authSession->getAccountList();
+	char buffer[1024];
+	int len;
+
+	len = sprintf(buffer, "Gameserver %s[%d]: %u account(s)\r\n",
+				  authSession->getServerName().c_str(), authSession->getServerIdx(), (unsigned int)accountList.size());
+	write(buffer, len);
+
+	auto it = accountList.begin();
+	auto itEnd = accountList.end();
+	for(; it != itEnd; ++it) {
+		const TS_GA_CLIENT_LOGGED_LIST::AccountInfo& accountInfo = *it;
+		char ipStr[16];
+		tm loginTimeTm;
+
+		uv_inet_ntop(AF_INET, &accountInfo.ip, ipStr, sizeof(ipStr));
+		Utils::getGmTime(accountInfo.loginTime, &loginTimeTm);
+
+		len = sprintf(buffer, "Account id: %d, name: %s, ip: %s, login time: %d-%02d-%02d %02d:%02d:%02d\r\n",
+					  accountInfo.nAccountID,
+					  accountInfo.account,
+					  ipStr,
+					  loginTimeTm.tm_year,
+					  loginTimeTm.tm_mon,
+					  loginTimeTm.tm_mday,
+					  loginTimeTm.tm_hour,
+					  loginTimeTm.tm_min,
+					  loginTimeTm.tm_sec);
 		write(buffer, len);
 	}
 }

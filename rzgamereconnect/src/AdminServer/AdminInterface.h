@@ -24,6 +24,7 @@ protected:
 	void getEnv(const std::string& variableName);
 	void closeDbConnections();
 	void listGameServers();
+	void listAccountInGameServer(const std::string& serverIdx);
 	void listObjectsCount();
 };
 

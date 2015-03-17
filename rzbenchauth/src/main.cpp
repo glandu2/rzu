@@ -7,6 +7,7 @@
 #include "ConfigInfo.h"
 #include "GlobalCoreConfig.h"
 #include "TimingFunctions.h"
+#include "PrintfFormats.h"
 
 void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState, bool causedByRemote);
 
@@ -59,6 +60,9 @@ void benchmarkAuthentication() {
 	config.method = CFG_GET("use_rsa")->getBool()? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES;
 	config.version = "200701120";
 
+	if(count > config.connectionTargetCount)
+		count = config.connectionTargetCount;
+
 	auths.reserve(count);
 	for(int i = 0; i < count; i++) {
 		BenchmarkAuthSession* auth = new BenchmarkAuthSession(&config);
@@ -83,6 +87,9 @@ void startBenchAuth(int usecBetweenConnection) {
 
 void benchmarkConnections() {
 	int count = CFG_GET("count")->getInt();
+
+	if(count > config.connectionTargetCount)
+		count = config.connectionTargetCount;
 
 	sockets.reserve(count);
 	for(int i = 0; i < count; i++) {
@@ -154,7 +161,7 @@ int main(int argc, char *argv[])
 
 	unsigned long long int duration = getTimerValue();
 
-	mainLogger.log(Log::LL_Info, "main", 4, "%d connections in %llu usec => %f auth/sec\n", config.connectionsDone, duration, config.connectionsDone/((float)duration/1000000.0f));
+	mainLogger.log(Log::LL_Info, "main", 4, "%d connections in %" PRIu64 " usec => %f auth/sec\n", config.connectionsDone, duration, config.connectionsDone/((float)duration/1000000.0f));
 }
 
 //conn bench

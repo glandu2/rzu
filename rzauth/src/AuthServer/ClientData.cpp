@@ -40,15 +40,6 @@ std::string ClientData::toLower(const std::string& str) {
 	return lcase;
 }
 
-void ClientData::connectedToGame() {
-	if(!getGameServer())
-		error("Connected to unknown game server ! Code logic error\n");
-	else
-		getGameServer()->incPlayerCount();
-	inGame = true;
-	loginTime = time(nullptr);
-}
-
 ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang, uint32_t ip, ClientData** oldClientPtr) {
 	std::pair< std::unordered_map<uint32_t, ClientData*>::iterator, bool> result;
 	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> resultForName;
@@ -137,6 +128,15 @@ void ClientData::switchClientToServer(GameData* server, uint64_t oneTimePassword
 	this->oneTimePassword = oneTimePassword;
 	this->client = nullptr;
 	this->server = server;
+}
+
+void ClientData::connectedToGame() {
+	if(!getGameServer())
+		error("Connected to unknown game server ! Code logic error\n");
+	else
+		getGameServer()->incPlayerCount();
+	inGame = true;
+	loginTime = time(nullptr);
 }
 
 ClientData* ClientData::getClient(const std::string& account) {

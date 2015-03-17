@@ -1,16 +1,10 @@
-#ifndef PACKETBASEMESSAGE_H
-#define PACKETBASEMESSAGE_H
+#ifndef PACKETS_PACKETBASEMESSAGE_H
+#define PACKETS_PACKETBASEMESSAGE_H
 
 #include <string.h>
+#include "../MessageBuffer.h"
 
-#include "../BufferReader.h"
-#include "../BufferWriter.h"
-
-#ifdef __GNUC__
-#include <stdint-gcc.h>
-#else
 #include <stdint.h>
-#endif
 
 #ifndef __GNUC__
 #pragma warning(disable:4200)  //array [0] extension
@@ -67,7 +61,6 @@ struct TS_CC_EVENT : public TS_MESSAGE {
 	enum ClientError {
 		CE_ServerConnected,
 		CE_ServerDisconnected,
-		CE_ServerConnectionLost,
 		CE_ServerUnreachable
 	} event;
 	static const uint16_t packetID = 0xFFFF;
@@ -106,17 +99,27 @@ struct TS_MESSAGE_WNA : public TS_MESSAGE {
 struct TS_MESSAGE_BASE {
 	uint16_t id;
 
-	virtual int getSize() const = 0;
-	virtual void serialize(BufferWriter* buffer) const {}
-	virtual void deserialize(BufferReader* buffer) {}
-};
+	TS_MESSAGE_BASE(uint16_t id) : id(id) {}
 
-struct TS_MESSAGE_SERIALIZABLE : TS_MESSAGE_BASE {
-	void serializeHeader(BufferWriter* buffer) const {
-		buffer->write32(buffer->getSize());
-		buffer->write16(id);
-		buffer->write8(checkMessage(buffer->getSize(), id));
+	virtual uint32_t getSize(int version) const {
+		return 7;
 	}
+
+	template<class T>
+	void serialize(T* buffer) const {
+		uint32_t size = getSize(buffer->version);
+		buffer->write("size", size);
+		buffer->write("id", id);
+		buffer->write("msg_checksum", checkMessage(size, id));
+	}
+
+	template<class T>
+	void deserialize(T* buffer) {
+		buffer->discard("size", 4);
+		buffer->read("id", id);
+		buffer->discard("msg_checksum", 1);
+	}
+
 private:
 	static uint8_t checkMessage(uint32_t size, uint16_t id) {
 		uint8_t value = 0;
@@ -133,28 +136,6 @@ private:
 	}
 };
 
-struct TS_MESSAGE_HEADER : TS_MESSAGE_BASE {
-	BufferReader* buffer;
-
-	void deserializeHeader(BufferReader* buffer) {
-		this->buffer = buffer;
-
-		buffer->read32();
-		buffer->read16(&id);
-		buffer->read8();
-	}
-
-	template<class TS_TYPE>
-	operator TS_TYPE() {
-		TS_TYPE val;
-		val.id = id;
-		val.buffer = buffer;
-
-		val.deserialize(buffer);
-		return val;
-	}
-};
-
 #pragma pack(pop)
 
-#endif // PACKETBASEMESSAGE_H
+#endif // PACKETS_PACKETBASEMESSAGE_H
