@@ -90,7 +90,7 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 
 		if(gitVersionSuffix == 0) {
 			std::string shaPart(rzauthVersion+8, 8);
-			gitVersionSuffix = strtol(shaPart.c_str(), nullptr, 16);
+			gitVersionSuffix = strtoul(shaPart.c_str(), nullptr, 16);
 		}
 
 		result.value = gitVersionSuffix ^ 0xADADADAD;
