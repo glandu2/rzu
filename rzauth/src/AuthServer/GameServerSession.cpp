@@ -228,7 +228,6 @@ void GameServerSession::onServerLogout(const TS_GA_LOGOUT* packet) {
 
 void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	ClientData* client;
-	char ipStr[INET_ADDRSTRLEN] = "";
 	char account[61];
 
 	client = ClientData::getClient(std::string(packet->account));
@@ -237,9 +236,6 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	account[sizeof(account) - 1] = '\0';
 
 	TS_ResultCode result = TS_RESULT_ACCESS_DENIED;
-
-	if(client)
-		uv_inet_ntop(AF_INET, &client->ip, ipStr, sizeof(ipStr));
 
 	if(!gameData) {
 		error("Received client login for account %s but game server is not logged on\n", account);
@@ -259,6 +255,9 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		result = TS_RESULT_SUCCESS;
 
 		client->connectedToGame();
+
+		char ipStr[INET_ADDRSTRLEN] = "";
+		uv_inet_ntop(AF_INET, &client->ip, ipStr, sizeof(ipStr));
 
 		LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_LOGIN, client->accountId, client->pcBang, client->eventCode, gameData->getServerIdx(), client->age, 0, 0, 0, 0, 0, 0,
 				client->account.c_str(), -1, ipStr, -1, 0, 0, 0, 0);

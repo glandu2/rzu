@@ -3,6 +3,7 @@
 #include "ClientSession.h"
 #include "../GlobalConfig.h"
 #include <openssl/evp.h>
+#include <openssl/err.h>
 #include "DesPasswordCipher.h"
 
 #ifdef _MSC_VER
@@ -146,6 +147,9 @@ bool DB_Account::decryptPassword() {
 		ok = true;
 
 	cleanup_aes:
+		unsigned long errorCode = ERR_get_error();
+		if(errorCode)
+			warn("AES: error while processing password for account %s: %s\n", account.c_str(), ERR_error_string(errorCode, nullptr));
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else {
 		memcpy(password, (char*)&cryptedPassword[0], 61);

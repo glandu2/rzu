@@ -119,10 +119,13 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 		goto cleanup;
 	}
 
+	ERR_clear_error();
+
 	bio = BIO_new_mem_buf((void*)packet->key, packet->key_size);
 	rsaCipher = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 	if(rsaCipher == nullptr) {
-		warn("RSA: invalid certificate\n");
+		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
+		warn("RSA: invalid certificate: %s\n", errorString);
 		abortSession();
 		goto cleanup;
 	}
