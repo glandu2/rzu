@@ -5,7 +5,7 @@
 
 TEST(TS_CA_VERSION, playercount) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -32,7 +32,7 @@ TEST(TS_CA_VERSION, playercount) {
 
 TEST(TS_CA_VERSION, version) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -61,7 +61,7 @@ TEST(TS_CA_VERSION, version) {
 
 TEST(TS_CA_VERSION, nonnullterminated) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);

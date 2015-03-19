@@ -21,15 +21,35 @@ static void sendAccountDES(TestConnectionChannel* channel, const char* account, 
 	TS_MESSAGE::initMessage(&accountPacket);
 
 	strcpy(accountPacket.account, account);
-	strcpy(accountPacket.password, password);
+	strcpy(reinterpret_cast<char*>(accountPacket.password), password);
 	DesPasswordCipher("MERONG").encrypt(accountPacket.password, sizeof(accountPacket.password));
 
 	channel->sendPacket(&accountPacket);
 }
 
+static void expectAuthResult(TestConnectionChannel::Event& event, uint16_t result, int32_t login_flag) {
+	ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type);
+	EXPECT_TRUE(event.packet->id == TS_AC_RESULT::packetID || event.packet->id == TS_AC_RESULT_WITH_STRING::packetID);
+
+	if(event.packet->id == TS_AC_RESULT::packetID) {
+		const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
+
+		EXPECT_EQ(result, packet->result);
+		EXPECT_EQ(login_flag, packet->login_flag);
+	} else if(event.packet->id == TS_AC_RESULT_WITH_STRING::packetID) {
+		const TS_AC_RESULT_WITH_STRING* packet = AGET_PACKET(TS_AC_RESULT_WITH_STRING);
+
+		if(result != TS_RESULT_SUCCESS)
+			EXPECT_EQ(TS_RESULT_MISC, packet->result);
+		else
+			EXPECT_EQ(TS_RESULT_SUCCESS, packet->result);
+		EXPECT_EQ(login_flag, packet->login_flag);
+	}
+}
+
 TEST(TS_CA_ACCOUNT_DES, valid) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -38,11 +58,7 @@ TEST(TS_CA_ACCOUNT_DES, valid) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
-
-		EXPECT_EQ(TS_RESULT_SUCCESS, packet->result);
-		EXPECT_EQ(TS_AC_RESULT::LSF_EULA_ACCEPTED, packet->login_flag);
-
+		expectAuthResult(event, TS_RESULT_SUCCESS, TS_AC_RESULT::LSF_EULA_ACCEPTED);
 		channel->closeSession();
 	});
 
@@ -52,20 +68,16 @@ TEST(TS_CA_ACCOUNT_DES, valid) {
 
 TEST(TS_CA_ACCOUNT_DES, invalid_account) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		sendVersion(channel);
-		sendAccountDES(channel, "invalid_account", "admin");
+		sendAccountDES(channel, "invalidaccount", "admin");
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
-
-		EXPECT_EQ(TS_RESULT_INVALID_PASSWORD, packet->result);
-		EXPECT_EQ(0, packet->login_flag);
-
+		expectAuthResult(event, TS_RESULT_NOT_EXIST, 0);
 		channel->closeSession();
 	});
 
@@ -75,7 +87,7 @@ TEST(TS_CA_ACCOUNT_DES, invalid_account) {
 
 TEST(TS_CA_ACCOUNT_DES, invalid_password) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -84,11 +96,7 @@ TEST(TS_CA_ACCOUNT_DES, invalid_password) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
-
-		EXPECT_EQ(TS_RESULT_INVALID_PASSWORD, packet->result);
-		EXPECT_EQ(0, packet->login_flag);
-
+		expectAuthResult(event, TS_RESULT_NOT_EXIST, 0);
 		channel->closeSession();
 	});
 
@@ -98,7 +106,7 @@ TEST(TS_CA_ACCOUNT_DES, invalid_password) {
 
 TEST(TS_CA_ACCOUNT_DES, garbage_data) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -114,11 +122,7 @@ TEST(TS_CA_ACCOUNT_DES, garbage_data) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
-
-		EXPECT_EQ(TS_RESULT_INVALID_PASSWORD, packet->result);
-		EXPECT_EQ(0, packet->login_flag);
-
+		expectAuthResult(event, TS_RESULT_NOT_EXIST, 0);
 		channel->closeSession();
 	});
 
@@ -126,9 +130,9 @@ TEST(TS_CA_ACCOUNT_DES, garbage_data) {
 	test.run();
 }
 
-TEST(TS_CA_ACCOUNT_DES, garbage_data_after_DES) {
+TEST(TS_CA_ACCOUNT_DES, garbage_data_before_des) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -145,11 +149,7 @@ TEST(TS_CA_ACCOUNT_DES, garbage_data_after_DES) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
-
-		EXPECT_EQ(TS_RESULT_INVALID_PASSWORD, packet->result);
-		EXPECT_EQ(0, packet->login_flag);
-
+		expectAuthResult(event, TS_RESULT_NOT_EXIST, 0);
 		channel->closeSession();
 	});
 

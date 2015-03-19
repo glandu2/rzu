@@ -200,7 +200,7 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 	dbQuery = nullptr;
 
 	if(authOk == false) {
-		result.result = TS_RESULT_INVALID_PASSWORD;
+		result.result = TS_RESULT_NOT_EXIST;
 		result.login_flag = 0;
 	} else if(block == true) {
 		result.result = TS_RESULT_ACCESS_DENIED;

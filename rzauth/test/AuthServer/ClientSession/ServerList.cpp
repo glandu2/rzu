@@ -23,7 +23,7 @@ static void sendAccountDES(TestConnectionChannel* channel, const char* account, 
 	TS_MESSAGE::initMessage(&accountPacket);
 
 	strcpy(accountPacket.account, account);
-	strcpy(accountPacket.password, password);
+	strcpy(reinterpret_cast<char*>(accountPacket.password), password);
 	DesPasswordCipher("MERONG").encrypt(accountPacket.password, sizeof(accountPacket.password));
 
 	channel->sendPacket(&accountPacket);
@@ -31,7 +31,7 @@ static void sendAccountDES(TestConnectionChannel* channel, const char* account, 
 
 TEST(TS_CA_SERVER_LIST, empty_list) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
