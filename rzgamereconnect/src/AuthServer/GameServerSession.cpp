@@ -1,7 +1,6 @@
 #define __STDC_LIMIT_MACROS
 #include "GameServerSession.h"
 #include <string.h>
-#include <algorithm>
 #include "../GlobalConfig.h"
 #include "PrintfFormats.h"
 #include "AuthSession.h"
@@ -66,9 +65,9 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	//to manage non null terminated strings
 	std::string localServerName, localServerIp, localScreenshotUrl;
 
-	localServerName = std::string(packet->server_name, std::find(packet->server_name, packet->server_name + sizeof(packet->server_name), '\0'));
-	localServerIp = std::string(packet->server_ip, std::find(packet->server_ip, packet->server_ip + sizeof(packet->server_ip), '\0'));
-	localScreenshotUrl = std::string(packet->server_screenshot_url, std::find(packet->server_screenshot_url, packet->server_screenshot_url + sizeof(packet->server_screenshot_url), '\0'));
+	localServerName = Utils::convertToString(packet->server_name, sizeof(packet->server_name));
+	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip));
+	localScreenshotUrl = Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url));
 
 	info("Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
 
