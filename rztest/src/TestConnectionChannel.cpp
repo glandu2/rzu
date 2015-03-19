@@ -26,8 +26,7 @@ void TestConnectionChannel::startClient() {
 	else
 		session = new TestPacketSession<PacketSession>(this);
 
-	std::string host = getHostname(name);
-	session->connect(host.c_str(), 0);
+	session->connect(host.get().c_str(), port);
 }
 
 void TestConnectionChannel::startServer() {
@@ -36,7 +35,7 @@ void TestConnectionChannel::startServer() {
 		return;
 	}
 
-	TestPacketServer* server = new TestPacketServer(this, getHostname(name), encrypted);
+	TestPacketServer* server = new TestPacketServer(this, host, port, encrypted);
 
 	server->start();
 }
@@ -55,24 +54,22 @@ void TestConnectionChannel::onEventReceived(PacketSession *session, Event::Type 
 	Event event;
 	event.type = type;
 	event.packet = nullptr;
-	event.origineName = name;
-
-	callEventCallback(name, event, session);
+	callEventCallback(event, session);
 }
 
 void TestConnectionChannel::onPacketReceived(PacketSession *session, const TS_MESSAGE *packet) {
 	Event event;
 	event.type = Event::Packet;
 	event.packet = packet;
-	event.origineName = name;
-	callEventCallback(name, event, session);
+	callEventCallback(event, session);
 }
 
-void TestConnectionChannel::callEventCallback(std::string name, Event event, PacketSession* session) {
+void TestConnectionChannel::callEventCallback(Event event, PacketSession* session) {
 	if(eventCallbacks.size() > 0) {
 		(eventCallbacks.front())(this, event);
 		eventCallbacks.pop_front();
-	} else {
+	}
+	if(eventCallbacks.size() == 0) {
 		session->closeSession();
 	}
 }
@@ -83,20 +80,6 @@ void TestConnectionChannel::registerSession(PacketSession *session) {
 
 void TestConnectionChannel::unregisterSession() {
 	session = nullptr;
-}
-
-
-
-std::string TestConnectionChannel::getHostname(std::string serverName) {
-	std::string name;
-#ifdef WIN32
-	name = std::string("pipe:\\\\.\\pipe\\") + serverName;
-#else
-	name = std::string("pipe:/tmp/") + serverName;
-	remove(name.c_str());
-#endif
-
-	return name;
 }
 
 TS_MESSAGE *TestConnectionChannel::copyMessage(const TS_MESSAGE *packet) {

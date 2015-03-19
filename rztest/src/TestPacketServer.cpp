@@ -1,10 +1,9 @@
 #include "TestPacketServer.h"
 #include "EncryptedSession.h"
 
-TestPacketServer::TestPacketServer(TestConnectionChannel* channel, const std::string& host, bool encryptedConnection, Log *packetLogger)
-	: SessionServerCommon(pipeName, port, nullptr, packetLogger),
-	  channel(channel), encryptedConnection(encryptedConnection),
-	  pipeName(host), port(0)
+TestPacketServer::TestPacketServer(TestConnectionChannel* channel, cval<std::string>& host, cval<int>& port, bool encryptedConnection, Log *packetLogger)
+	: SessionServerCommon(host, port, nullptr, packetLogger),
+	  channel(channel), encryptedConnection(encryptedConnection)
 {
 }
 

@@ -11,7 +11,7 @@ RzTest::RzTest()
 }
 
 void RzTest::addChannel(TestConnectionChannel* channel) {
-	channels.insert(std::make_pair(channel->getName(), channel));
+	channels.push_back(channel);
 	channel->start();
 }
 /*

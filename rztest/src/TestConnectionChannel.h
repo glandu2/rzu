@@ -27,7 +27,6 @@ public:
 			Packet
 		};
 		Type type;
-		std::string origineName;
 		const TS_MESSAGE* packet;
 
 		template<typename T>
@@ -35,7 +34,9 @@ public:
 			const T* p = static_cast<const T*>(packet);
 			if(!p)
 				return nullptr;
-			else if(p->id == T::packetID)
+
+			EXPECT_EQ(T::packetID, p->id);
+			if(p->id == T::packetID)
 				return p;
 			else
 				return nullptr;
@@ -51,7 +52,8 @@ public:
 	typedef std::function<void(TestConnectionChannel* channel, Event event)> EventCallback;
 
 public:
-	TestConnectionChannel(Type type, std::string name, bool encrypted) : type(type), name(name), encrypted(encrypted), session(nullptr) {}
+	TestConnectionChannel(Type type, cval<std::string>& host, cval<int>& port, bool encrypted)
+		: type(type), host(host), port(port), encrypted(encrypted), session(nullptr) {}
 	~TestConnectionChannel();
 
 	void addCallback(EventCallback callback) { eventCallbacks.push_back(callback); }
@@ -69,16 +71,14 @@ public:
 	void registerSession(PacketSession* session);
 	void unregisterSession();
 
-	std::string getName() { return name; }
-
 protected:
-	void callEventCallback(std::string name, Event event, PacketSession* session);
-	static std::string getHostname(std::string serverName);
+	void callEventCallback(Event event, PacketSession* session);
 	static TS_MESSAGE *copyMessage(const TS_MESSAGE *packet);
 
 private:
 	Type type;
-	std::string name;
+	cval<std::string>& host;
+	cval<int>& port;
 	bool encrypted;
 	PacketSession* session;
 	std::list<EventCallback> eventCallbacks;

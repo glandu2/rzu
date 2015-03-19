@@ -2,11 +2,10 @@
 #define RZTEST_H
 
 #include "Object.h"
-#include <string>
-#include <unordered_map>
 #include <list>
 #include "TestConnectionChannel.h"
 #include "Extern.h"
+#include "GlobalConfig.h"
 
 class TestPacketServer;
 struct TS_MESSAGE;
@@ -25,7 +24,7 @@ public:
 protected:
 
 private:
-	std::unordered_map<std::string, TestConnectionChannel*> channels;
+	std::list<TestConnectionChannel*> channels;
 	std::vector<char*> testedExecArgs;
 };
 

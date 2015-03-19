@@ -11,7 +11,7 @@ class RZTEST_EXTERN TestPacketServer : public SessionServerCommon
 {
 	DECLARE_CLASS(TestPacketServer)
 public:
-	TestPacketServer(TestConnectionChannel* channel, const std::string& host, bool encryptedConnection, Log* packetLogger = nullptr);
+	TestPacketServer(TestConnectionChannel* channel, cval<std::string>& host, cval<int>& port, bool encryptedConnection, Log* packetLogger = nullptr);
 
 	void updateObjectName();
 
@@ -22,8 +22,6 @@ protected:
 private:
 	TestConnectionChannel* channel;
 	bool encryptedConnection;
-	cval<std::string> pipeName;
-	cval<int> port;
 };
 
 #endif // TESTPACKETSERVER_H

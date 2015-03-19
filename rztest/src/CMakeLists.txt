@@ -7,6 +7,5 @@ if( versioncmakefound )
     add_git_version_info(${TARGET_NAME}_GitVersion SOURCE_FILES)
 endif()
 
-include_directories("${GTEST_INCLUDE}")
 set(LIBS rzu gtest)
 add_lib(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")
