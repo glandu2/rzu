@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
-#include <algorithm>
 
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
@@ -172,19 +171,19 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	if(useRsaAuth) {
 		const TS_CA_ACCOUNT_RSA* accountv2 = reinterpret_cast<const TS_CA_ACCOUNT_RSA*>(packet);
 
-		account = std::string(accountv2->account, std::find(accountv2->account, accountv2->account + 60, '\0'));
-		cryptedPassword.assign(accountv2->password, accountv2->password + accountv2->password_size);
+		account = Utils::convertToString(accountv2->account, sizeof(accountv2->account));
+		cryptedPassword = Utils::convertToDataArray(accountv2->password, sizeof(accountv2->password), accountv2->password_size);
 	} else {
 		if(packet->size == sizeof(TS_CA_ACCOUNT_EPIC4)) {
 			const TS_CA_ACCOUNT_EPIC4* accountE4 = reinterpret_cast<const TS_CA_ACCOUNT_EPIC4*>(packet);
 
 			debug("Client is epic 4 or older\n");
 
-			account = std::string(accountE4->account, std::find(accountE4->account, accountE4->account + 19, '\0'));
-			cryptedPassword.assign(accountE4->password, accountE4->password + sizeof(accountE4->password));
+			account = Utils::convertToString(accountE4->account, sizeof(accountE4->account));
+			cryptedPassword = Utils::convertToDataArray(accountE4->password, sizeof(accountE4->password));
 		} else {
-			account = std::string(packet->account, std::find(packet->account, packet->account + 60, '\0'));
-			cryptedPassword.assign(packet->password, packet->password + sizeof(packet->password));
+			account = Utils::convertToString(packet->account, sizeof(packet->account));
+			cryptedPassword = Utils::convertToDataArray(packet->password, sizeof(packet->password));
 		}
 	}
 
