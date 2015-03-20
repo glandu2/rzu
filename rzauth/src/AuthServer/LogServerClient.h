@@ -3,6 +3,7 @@
 
 #include "SocketSession.h"
 #include "StartableObject.h"
+#include "ConfigParamVal.h"
 
 namespace AuthServer {
 
