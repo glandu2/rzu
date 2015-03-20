@@ -2,6 +2,7 @@
 #include "TestPacketServer.h"
 #include "TestPacketSession.h"
 #include "EncryptedSession.h"
+#include "ConfigParamVal.h"
 
 TestConnectionChannel::~TestConnectionChannel() {
 	if(session && type == Client)

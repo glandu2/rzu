@@ -35,7 +35,8 @@ public:
 			if(!p)
 				return nullptr;
 
-			EXPECT_EQ(T::packetID, p->id);
+			// force taking the value instead of reference to packetID
+			EXPECT_EQ((const uint16_t)T::packetID, p->id);
 			if(p->id == T::packetID)
 				return p;
 			else
