@@ -14,11 +14,11 @@ struct DbConfig : public IListener {
 		driver(CFG_CREATE(prefix + ".db.driver", "osdriver")), //Set in .cpp according to OS
 		server(CFG_CREATE(prefix + ".db.server", "127.0.0.1")),
 		name(CFG_CREATE(prefix + ".db.name", "Auth")),
-		account(CFG_CREATE(prefix + ".db.account", "sa")),
-		password(CFG_CREATE(prefix + ".db.password", "")),
+		account(CFG_CREATE(prefix + ".db.account", "sa", true)),
+		password(CFG_CREATE(prefix + ".db.password", "", true)),
 		salt(CFG_CREATE(prefix + ".db.salt", "2011")),
 		port(CFG_CREATE(prefix + ".db.port", 1433)),
-		connectionString(CFG_CREATE(prefix + ".db.connectionstring", "")),
+		connectionString(CFG_CREATE(prefix + ".db.connectionstring", "", true)),
 		ignoreInitCheck(CFG_CREATE(prefix + ".db.ignoreinitcheck", true))
 	{
 		driver.addListener(this, &updateConnectionString);
