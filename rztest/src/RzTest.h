@@ -5,7 +5,6 @@
 #include <list>
 #include "TestConnectionChannel.h"
 #include "Extern.h"
-#include "GlobalConfig.h"
 
 class TestPacketServer;
 struct TS_MESSAGE;
@@ -19,7 +18,7 @@ public:
 	RzTest();
 
 	void addChannel(TestConnectionChannel* channel);
-	void run();
+	static void run();
 
 protected:
 

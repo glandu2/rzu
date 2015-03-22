@@ -19,6 +19,7 @@ class RzTest;
 
 class RZTEST_EXTERN TestConnectionChannel : public Object
 {
+	DECLARE_CLASS(TestConnectionChannel)
 public:
 	struct Event {
 		enum Type {

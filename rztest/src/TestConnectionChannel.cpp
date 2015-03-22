@@ -18,7 +18,7 @@ void TestConnectionChannel::start() {
 
 void TestConnectionChannel::startClient() {
 	if(session) {
-		error("Client session already started\n");
+		error("Client session to %s:%d already started\n", host.get().c_str(), port.get());
 		return;
 	}
 
@@ -32,7 +32,7 @@ void TestConnectionChannel::startClient() {
 
 void TestConnectionChannel::startServer() {
 	if(session) {
-		error("Client session already started\n");
+		error("Server session on %s:%d already started\n", host.get().c_str(), port.get());
 		return;
 	}
 
@@ -69,8 +69,7 @@ void TestConnectionChannel::callEventCallback(Event event, PacketSession* sessio
 	if(eventCallbacks.size() > 0) {
 		(eventCallbacks.front())(this, event);
 		eventCallbacks.pop_front();
-	}
-	if(eventCallbacks.size() == 0) {
+	} else if(eventCallbacks.size() == 0) {
 		session->closeSession();
 	}
 }
