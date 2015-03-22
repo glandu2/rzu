@@ -12,4 +12,3 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 set(LIBS rzu ${OPENSSL_LIBRARIES})
 
 add_exe(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")
-

@@ -48,7 +48,7 @@ protected:
 private:
 	void fillClientLoginResult(TS_AG_CLIENT_LOGIN* packet, const char* account, TS_ResultCode result, ClientData* clientData);
 	void fillClientLoginExtendedResult(TS_AG_CLIENT_LOGIN_EXTENDED* packet, const char* account, TS_ResultCode result, ClientData* clientData);
-	void sendClientLoginResult(const char* account, TS_ResultCode result, ClientData* clientData);
+	void sendClientLoginResult(const char *account, TS_ResultCode result, ClientData* clientData);
 
 private:
 	~GameServerSession();
