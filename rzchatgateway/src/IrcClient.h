@@ -23,7 +23,7 @@ protected:
 	static const char* getChatColor(int type);
 
 private:
-	void onStateChanged(Stream::State oldState, Stream::State newState);
+	void onStateChanged(Stream::State oldState, Stream::State newState, bool causedByRemote);
 	void onDataReceived();
 	void onIrcLine(const std::string& line);
 

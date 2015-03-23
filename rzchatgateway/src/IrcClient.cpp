@@ -14,7 +14,7 @@ void IrcClient::connect(std::string servername) {
 	SocketSession::connect(ip.c_str(), port);
 }
 
-void IrcClient::onStateChanged(Stream::State oldState, Stream::State newState) {
+void IrcClient::onStateChanged(Stream::State oldState, Stream::State newState, bool causedByRemote) {
 	if(newState == Stream::ConnectedState) {
 		char loginText[128];
 		std::string lowerCaseServerName;
@@ -72,7 +72,7 @@ void IrcClient::onIrcLine(const std::string& line) {
 		joined = true;
 		info("Joined IRC channel %s at %s:%d as user %s\n", channelName.c_str(), ip.c_str(), port, nickname.c_str());
 	} else if(command == "PING") {
-		std::string pong = "PONG :" + trailing;
+		std::string pong = "PONG :" + trailing + "\r\n";
 		write(pong.c_str(), pong.size());
 	} else if(command == "PRIVMSG") {
 		std::string sender;
