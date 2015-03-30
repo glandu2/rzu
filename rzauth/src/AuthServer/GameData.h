@@ -28,7 +28,7 @@ public:
 							GameData **oldGameData = nullptr);
 	static void remove(GameData* gameData);
 
-	void setReady(bool ready) { this->ready = ready; if(ready) info("GS ready\n"); }
+	void setReady(bool ready) { this->ready = ready; }
 	bool isReady() { return getGameServer() != nullptr && ready; }
 
 	void kickClient(ClientData *client);

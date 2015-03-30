@@ -173,10 +173,16 @@ void GameServerSession::onAccountList(const TS_GA_CLIENT_LOGGED_LIST *packet) {
 		return;
 	}
 
+	const uint32_t expectedSize = packet->count * sizeof(TS_GA_CLIENT_LOGGED_LIST::AccountInfo) + sizeof(TS_GA_CLIENT_LOGGED_LIST);
+	if(expectedSize != packet->size) {
+		error("Wrong account list packet size, expected %d but got %d\n", expectedSize, packet->size);
+		return;
+	}
+
 	for(uint8_t i = 0; i < packet->count; i++) {
 		TS_GA_CLIENT_LOGGED_LIST::AccountInfo accountInfo = packet->accountInfo[i];
 		accountInfo.account[sizeof(((TS_GA_CLIENT_LOGGED_LIST::AccountInfo*)0)->account) - 1] = '\0';
-		alreadyConnectedAccounts.push_back(packet->accountInfo[i]);
+		alreadyConnectedAccounts.push_back(accountInfo);
 	}
 	debug("Added %d accounts\n", packet->count);
 
