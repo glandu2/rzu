@@ -1,7 +1,10 @@
 #include "gtest.h"
 #include "RzTest.h"
+#include "../GlobalConfig.h"
 #include "Packets/TS_CA_VERSION.h"
 #include "Packets/TS_SC_RESULT.h"
+
+namespace AuthServer {
 
 TEST(TS_CA_VERSION, playercount) {
 	RzTest test;
@@ -27,6 +30,7 @@ TEST(TS_CA_VERSION, playercount) {
 	});
 
 	test.addChannel(&auth);
+	auth.start();
 	test.run();
 }
 
@@ -56,6 +60,7 @@ TEST(TS_CA_VERSION, version) {
 	});
 
 	test.addChannel(&auth);
+	auth.start();
 	test.run();
 }
 
@@ -87,5 +92,8 @@ TEST(TS_CA_VERSION, nonnullterminated) {
 	});
 
 	test.addChannel(&auth);
+	auth.start();
 	test.run();
 }
+
+} // namespace AuthServer
