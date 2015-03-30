@@ -171,7 +171,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	if(useRsaAuth) {
 		const TS_CA_ACCOUNT_RSA* accountv2 = reinterpret_cast<const TS_CA_ACCOUNT_RSA*>(packet);
 
-		account = Utils::convertToString(accountv2->account, sizeof(accountv2->account));
+		account = Utils::convertToString(accountv2->account, sizeof(accountv2->account)-1);
 		cryptedPassword = Utils::convertToDataArray(accountv2->password, sizeof(accountv2->password), accountv2->password_size);
 	} else {
 		if(packet->size == sizeof(TS_CA_ACCOUNT_EPIC4)) {
@@ -179,7 +179,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 			debug("Client is epic 4 or older\n");
 
-			account = Utils::convertToString(accountE4->account, sizeof(accountE4->account));
+			account = Utils::convertToString(accountE4->account, sizeof(accountE4->account)-1);
 			cryptedPassword = Utils::convertToDataArray(accountE4->password, sizeof(accountE4->password));
 		} else {
 			account = Utils::convertToString(packet->account, sizeof(packet->account));

@@ -111,9 +111,9 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	//to manage non null terminated strings
 	std::string localServerName, localServerIp, localScreenshotUrl;
 
-	localServerName = Utils::convertToString(packet->server_name, sizeof(packet->server_name));
-	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip));
-	localScreenshotUrl = Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url));
+	localServerName = Utils::convertToString(packet->server_name, sizeof(packet->server_name)-1);
+	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip)-1);
+	localScreenshotUrl = Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url)-1);
 
 	info("Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
 
@@ -186,11 +186,12 @@ void GameServerSession::onAccountList(const TS_GA_CLIENT_LOGGED_LIST *packet) {
 
 		for(size_t i = 0; i < alreadyConnectedAccounts.size(); i++) {
 			const TS_GA_CLIENT_LOGGED_LIST::AccountInfo& accountInfo = alreadyConnectedAccounts[i];
+			std::string account = Utils::convertToString(accountInfo.account, sizeof(accountInfo.account)-1);
 
-			debug("Adding already connected account %s\n", accountInfo.account);
+			debug("Adding already connected account %s\n", account.c_str());
 
 			ClientData* clientData = ClientData::tryAddClient(nullptr,
-															  accountInfo.account,
+															  account.c_str(),
 															  accountInfo.nAccountID,
 															  accountInfo.nAge,
 															  accountInfo.nEventCode,
@@ -205,15 +206,16 @@ void GameServerSession::onAccountList(const TS_GA_CLIENT_LOGGED_LIST *packet) {
 				TS_AG_KICK_CLIENT msg;
 
 				TS_MESSAGE::initMessage<TS_AG_KICK_CLIENT>(&msg);
-				strcpy(msg.account, accountInfo.account);
+				strcpy(msg.account, account.c_str());
 				msg.kick_type = TS_AG_KICK_CLIENT::KICK_TYPE_DUPLICATED_LOGIN;
 
-				info("Kicked client %s while synchronizing account list\n", accountInfo.account);
+				info("Kicked client %s while synchronizing account list\n", account.c_str());
 				sendPacket(&msg);
 			}
 		}
-		alreadyConnectedAccounts.clear();
 		gameData->setReady(true);
+		info("Synchronized account list with %d accounts\n", alreadyConnectedAccounts.size());
+		alreadyConnectedAccounts.clear();
 	}
 }
 
@@ -237,6 +239,8 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 
 	if(!gameData) {
 		error("Received client login for account %s but game server is not logged on\n", account.c_str());
+	} else if(account.size() >= sizeof(packet->account)) {
+		error("Account name too long:  \"%s\" (max %d characters)\n", account.c_str(), (int)sizeof(packet->account)-1);
 	} else if(client == nullptr || client->getGameServer() == nullptr) {
 		warn("Client %s login on gameserver but not in client list\n", account.c_str());
 	} else if(client->getGameServer() != gameData) {
