@@ -21,14 +21,11 @@ AuthSession::AuthSession(GameServerSession *gameServerSession)
 	  sentLoginPacket(false),
 	  pendingLogin(false),
 	  serverInfoValid(false),
-	  synchronizedWithAuth(false),
-	  uniqueIdentifier(0)
+	  synchronizedWithAuth(false)
 {
 	recoTimer = new uv_timer_t;
 	uv_timer_init(EventLoop::getLoop(), recoTimer);
 	recoTimer->data = this;
-	while(uniqueIdentifier == 0)
-		uniqueIdentifier = ((uint64_t)rand())*rand()*rand()*rand();
 }
 
 static void close_timer(uv_handle_t* timer) {
