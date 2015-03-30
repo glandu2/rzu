@@ -65,9 +65,9 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	//to manage non null terminated strings
 	std::string localServerName, localServerIp, localScreenshotUrl;
 
-	localServerName = Utils::convertToString(packet->server_name, sizeof(packet->server_name));
-	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip));
-	localScreenshotUrl = Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url));
+	localServerName = Utils::convertToString(packet->server_name, sizeof(packet->server_name)-1);
+	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip)-1);
+	localScreenshotUrl = Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url)-1);
 
 	info("Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
 

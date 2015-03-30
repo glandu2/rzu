@@ -88,8 +88,7 @@ void AuthSession::onConnected() {
 	getStream()->setKeepAlive(31);
 
 	info("Connected to auth server\n");
-	if(!disconnectRequested)
-		sendLogin();
+	sendLogin();
 }
 
 void AuthSession::onDisconnected(bool causedByRemote) {
@@ -121,18 +120,21 @@ void AuthSession::onPacketReceived(const TS_MESSAGE* packet) {
 			}
 
 			if(disconnectRequested)
-				closeSession();
+				disconnect();
 			break;
 
 		case TS_AG_CLIENT_LOGIN_EXTENDED::packetID: {
 			const TS_AG_CLIENT_LOGIN_EXTENDED* clientLoginIn = static_cast<const TS_AG_CLIENT_LOGIN_EXTENDED*>(packet);
+
+			if(!gameServerSession)
+				break;
 
 			debug("Login client %s\n", clientLoginIn->account);
 
 			if(clientLoginIn->result == TS_RESULT_SUCCESS) {
 				TS_GA_CLIENT_LOGGED_LIST::AccountInfo accountInfo;
 
-				strcpy(accountInfo.account, clientLoginIn->account);
+				memcpy(accountInfo.account, clientLoginIn->account, sizeof(accountInfo.account));
 				accountInfo.ip = clientLoginIn->ip;
 				accountInfo.loginTime = clientLoginIn->loginTime;
 				accountInfo.nAccountID = clientLoginIn->nAccountID;
@@ -143,13 +145,10 @@ void AuthSession::onPacketReceived(const TS_MESSAGE* packet) {
 				accountList.push_back(accountInfo);
 			}
 
-			if(!gameServerSession)
-				break;
-
 			TS_AG_CLIENT_LOGIN clientLoginOut;
 			TS_MESSAGE::initMessage<TS_AG_CLIENT_LOGIN>(&clientLoginOut);
 
-			strcpy(clientLoginOut.account, clientLoginIn->account);
+			memcpy(clientLoginOut.account, clientLoginIn->account, sizeof(clientLoginOut.account));
 			clientLoginOut.nAccountID = clientLoginIn->nAccountID;
 			clientLoginOut.nAge = clientLoginIn->nAge;
 			clientLoginOut.nEventCode = clientLoginIn->nEventCode;

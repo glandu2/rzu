@@ -70,7 +70,6 @@ private:
 	bool pendingLogin;
 	bool serverInfoValid;
 	bool synchronizedWithAuth;
-	uint64_t uniqueIdentifier;
 	uv_timer_t* recoTimer;
 
 	std::vector<TS_MESSAGE*> pendingMessages;
