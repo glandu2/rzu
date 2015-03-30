@@ -11,6 +11,7 @@
 #include "gtest.h"
 
 class RzTest;
+class TestPacketServer;
 
 #define AGET_PACKET(type_) \
 	event.getPacket<type_>(); \
@@ -52,13 +53,17 @@ public:
 
 	//typedef void (*EventCallback)(RzTest* test, Event event, PacketSession* session);
 	typedef std::function<void(TestConnectionChannel* channel, Event event)> EventCallback;
+	typedef std::function<void(TestConnectionChannel* channel)> YieldCallback;
 
 public:
 	TestConnectionChannel(Type type, cval<std::string>& host, cval<int>& port, bool encrypted)
-		: type(type), host(host), port(port), encrypted(encrypted), session(nullptr) {}
+		: type(type), host(host), port(port), encrypted(encrypted), session(nullptr), server(nullptr), test(nullptr) {}
 	~TestConnectionChannel();
 
+	void setTest(RzTest* test) { this->test = test; }
+
 	void addCallback(EventCallback callback) { eventCallbacks.push_back(callback); }
+	void addYield(YieldCallback callback, int time = 1);
 
 	void start();
 	void startClient();
@@ -75,7 +80,16 @@ public:
 
 protected:
 	void callEventCallback(Event event, PacketSession* session);
+	static void executeTimerForYield(uv_timer_t* timer);
+	static void closeTimerForYield(uv_handle_t *timer);
 	static TS_MESSAGE *copyMessage(const TS_MESSAGE *packet);
+
+private:
+	struct YieldData {
+		uv_timer_t timer;
+		YieldCallback callback;
+		TestConnectionChannel *instance;
+	};
 
 private:
 	Type type;
@@ -83,7 +97,9 @@ private:
 	cval<int>& port;
 	bool encrypted;
 	PacketSession* session;
+	TestPacketServer* server;
 	std::list<EventCallback> eventCallbacks;
+	RzTest* test;
 };
 
 #endif // TESTCONNECTIONCHANNEL_H

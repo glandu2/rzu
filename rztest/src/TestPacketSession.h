@@ -12,6 +12,7 @@ class RZTEST_EXTERN TestPacketSession : public T
 {
 public:
 	TestPacketSession(TestConnectionChannel* channel);
+	~TestPacketSession();
 
 	void onConnected();
 
@@ -25,7 +26,15 @@ private:
 
 template<class T>
 TestPacketSession<T>::TestPacketSession(TestConnectionChannel *channel)
-	: channel(channel) {}
+	: channel(channel)
+{
+	channel->registerSession(this);
+}
+
+template<class T>
+TestPacketSession<T>::~TestPacketSession() {
+	channel->unregisterSession();
+}
 
 template<class T>
 void TestPacketSession<T>::onConnected() {

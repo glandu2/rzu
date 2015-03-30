@@ -12,6 +12,14 @@ RzTest::RzTest()
 
 void RzTest::addChannel(TestConnectionChannel* channel) {
 	channels.push_back(channel);
+	channel->setTest(this);
+}
+
+void RzTest::abortTest() {
+	for(auto it = channels.begin(); it != channels.end(); ++it) {
+		TestConnectionChannel* channel = *it;
+		channel->closeSession();
+	}
 }
 /*
 void RzTest::addClientConnection(std::string name, std::string testedExecutableConfig, bool encryptedSession) {

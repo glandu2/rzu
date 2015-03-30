@@ -18,6 +18,7 @@ public:
 	RzTest();
 
 	void addChannel(TestConnectionChannel* channel);
+	void abortTest();
 	static void run();
 
 protected:
