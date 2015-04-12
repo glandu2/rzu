@@ -2,7 +2,10 @@
 #define AUTHSESSION_H
 
 #include "PacketSession.h"
-#include "Packets/TS_GA_CLIENT_LOGGED_LIST.h"
+#include "Packets/TS_GA_ACCOUNT_LIST.h"
+
+struct TS_AG_LOGIN_RESULT;
+struct TS_AG_CLIENT_LOGIN_EXTENDED;
 
 namespace AuthServer {
 
@@ -12,11 +15,17 @@ class AuthSession : public PacketSession
 {
 	DECLARE_CLASS(AuthServer::AuthSession)
 public:
-	AuthSession(GameServerSession* gameServerSession);
+	AuthSession(GameServerSession* gameServerSession,
+				uint16_t serverIdx,
+				std::string serverName,
+				std::string serverIp,
+				int32_t serverPort,
+				std::string serverScreenshotUrl,
+				bool isAdultServer);
 	~AuthSession();
 
 	static const std::unordered_map<uint16_t, AuthSession*>& getServerList() { return servers; }
-	const std::list<TS_GA_CLIENT_LOGGED_LIST::AccountInfo>& getAccountList() { return accountList; }
+	const std::list<TS_GA_ACCOUNT_LIST::AccountInfo>& getAccountList() { return accountList; }
 
 	void connect();
 	void disconnect();
@@ -28,12 +37,7 @@ public:
 	void onConnected();
 	void onDisconnected(bool causedByRemote);
 
-	bool loginServer(uint16_t serverIdx,
-					 std::string serverName,
-					 std::string serverIp,
-					 int32_t serverPort,
-					 std::string serverScreenshotUrl,
-					 bool isAdultServer);
+	bool loginServer();
 	void logoutClient(const char* account);
 
 	void sendPacket(const TS_MESSAGE* message);
@@ -51,7 +55,12 @@ protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
 	static void onTimerReconnect(uv_timer_t* timer);
 	void sendPacketToNetwork(const TS_MESSAGE* message);
-	void updateObjectName();
+	//void updateObjectName();
+
+	void onLoginResult(const TS_AG_LOGIN_RESULT *packet);
+	void onClientLoginResult(const TS_AG_CLIENT_LOGIN_EXTENDED *packet);
+
+	void sendPendingMessages();
 
 private:
 	static std::unordered_map<uint16_t, AuthSession*> servers;
@@ -65,15 +74,13 @@ private:
 	std::string serverScreenshotUrl;
 	bool isAdultServer;
 
-	bool disconnectRequested;
 	bool sentLoginPacket;
 	bool pendingLogin;
-	bool serverInfoValid;
 	bool synchronizedWithAuth;
 	uv_timer_t* recoTimer;
 
 	std::vector<TS_MESSAGE*> pendingMessages;
-	std::list<TS_GA_CLIENT_LOGGED_LIST::AccountInfo> accountList;
+	std::list<TS_GA_ACCOUNT_LIST::AccountInfo> accountList;
 };
 
 } // namespace AuthServer

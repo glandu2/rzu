@@ -241,7 +241,7 @@ void AdminInterface::listAccountInGameServer(const std::string& serverIdx) {
 	auto it = accountList.begin();
 	auto itEnd = accountList.end();
 	for(; it != itEnd; ++it) {
-		const TS_GA_CLIENT_LOGGED_LIST::AccountInfo& accountInfo = *it;
+		const TS_GA_ACCOUNT_LIST::AccountInfo& accountInfo = *it;
 		char ipStr[16];
 		tm loginTimeTm;
 

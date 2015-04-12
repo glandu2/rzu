@@ -14,27 +14,36 @@
 namespace AuthServer {
 
 GameServerSession::GameServerSession()
-  : authSession(nullptr)
+  : authSession(nullptr), serverIdx(UINT16_MAX)
 {
 }
 
 GameServerSession::~GameServerSession() {
+	if(authSession)
+		authSession->forceClose();
 }
 
 void GameServerSession::onConnected() {
-	authSession = new AuthSession(this);
-	authSession->connect();
 }
 
 void GameServerSession::onDisconnected(bool causedByRemote) {
-	if(causedByRemote) {
-		info("GS disconnected, disconnecting auth session\n");
-		authSession->disconnect();
-	} else if(authSession) {
-		authSession->forceClose();
+	if(authSession) {
+		if(causedByRemote) {
+			info("GS disconnected, disconnecting auth session\n");
+			authSession->disconnect();
+		} else if(authSession) {
+			authSession->forceClose();
+		}
 	}
 
 	authSession = nullptr;
+}
+
+void GameServerSession::disconnectAuth() {
+	if(authSession) {
+		authSession->disconnect();
+		authSession = nullptr;
+	}
 }
 
 void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
@@ -55,8 +64,10 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		default:
-			debug("Received packet id %d from GS, forwarding to auth\n", packet->id);
-			authSession->sendPacket(packet);
+			if(authSession) {
+				debug("Received packet id %d from GS, forwarding to auth\n", packet->id);
+				authSession->sendPacket(packet);
+			}
 			break;
 	}
 }
@@ -71,17 +82,25 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 
 	info("Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
 
-	if(!authSession->loginServer(packet->server_idx,
-							 localServerName,
-							 localServerIp,
-							 packet->server_port,
-							 localScreenshotUrl,
-							 packet->is_adult_server))
-	{
-		error("Server %s[%d] already logged on, ignoring login message for %s[%d]\n",
-			  authSession->getServerName().c_str(), authSession->getServerIdx(), localServerName.c_str(), packet->server_idx);
+	if(authSession != nullptr) {
+		error("Server %s[%d] already logged on\n",
+			  authSession->getServerName().c_str(), authSession->getServerIdx());
+
+		TS_AG_LOGIN_RESULT result;
+		TS_MESSAGE::initMessage<TS_AG_LOGIN_RESULT>(&result);
+		result.result = TS_RESULT_INVALID_ARGUMENT;
+		sendPacket(&result);
 		return;
 	}
+
+	authSession = new AuthSession(this,
+								  packet->server_idx,
+								  localServerName,
+								  localServerIp,
+								  packet->server_port,
+								  localScreenshotUrl,
+								  packet->is_adult_server);
+	authSession->connect();
 
 	serverIdx = packet->server_idx;
 
@@ -89,6 +108,11 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 }
 
 void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
+	if(!authSession) {
+		warn("Received client login but GS not logged on\n");
+		return;
+	}
+
 	if(!authSession->isSynchronizedWithAuth()) {
 		TS_AG_CLIENT_LOGIN result;
 		TS_MESSAGE::initMessage<TS_AG_CLIENT_LOGIN>(&result);
@@ -117,15 +141,20 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 }
 
 void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
+	if(!authSession) {
+		warn("Received client logout but GS not logged on\n");
+		return;
+	}
+
 	authSession->logoutClient(static_cast<const TS_GA_CLIENT_LOGOUT*>(packet)->account);
-	if(authSession->isConnected()) {
+	if(authSession->isSynchronizedWithAuth()) {
 		authSession->sendPacket(packet);
 	}
 }
-
+/*
 void GameServerSession::updateObjectName() {
 	if(authSession)
 		setObjectName(12 + authSession->getServerName().size(), "ServerInfo[%s]", authSession->getServerName().c_str());
-}
+}*/
 
 } // namespace AuthServer
