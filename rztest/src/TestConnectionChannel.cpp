@@ -36,6 +36,10 @@ void TestConnectionChannel::addYield(YieldCallback callback, int time) {
 	uv_timer_start(&yieldData->timer, &executeTimerForYield, time, 0);
 }
 
+int TestConnectionChannel::getPort() {
+	return port.get();
+}
+
 void TestConnectionChannel::start() {
 	if(type == Client)
 		startClient();

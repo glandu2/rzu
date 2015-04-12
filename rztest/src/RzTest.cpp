@@ -54,4 +54,8 @@ void RzTest::addServerListener(std::string name, std::string testedExecutableCon
 
 void RzTest::run() {
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+	for(auto it = channels.begin(); it != channels.end(); ++it) {
+		TestConnectionChannel* channel = *it;
+		EXPECT_EQ(0, channel->getPendingCallbacks()) << channel->getPort();
+	}
 }

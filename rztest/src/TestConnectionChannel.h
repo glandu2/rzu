@@ -65,6 +65,9 @@ public:
 	void addCallback(EventCallback callback) { eventCallbacks.push_back(callback); }
 	void addYield(YieldCallback callback, int time = 1);
 
+	size_t getPendingCallbacks() { return eventCallbacks.size(); }
+	int getPort();
+
 	void start();
 	void startClient();
 	void startServer();

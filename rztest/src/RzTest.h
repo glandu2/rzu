@@ -19,7 +19,7 @@ public:
 
 	void addChannel(TestConnectionChannel* channel);
 	void abortTest();
-	static void run();
+	void run();
 
 protected:
 
