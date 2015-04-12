@@ -23,6 +23,8 @@ class GameServerSession : public PacketSession
 public:
 	GameServerSession();
 
+	void disconnectAuth();
+
 protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
 	void onConnected();
@@ -32,7 +34,7 @@ protected:
 	void onClientLogin(const TS_GA_CLIENT_LOGIN* packet);
 	void onClientLogout(const TS_GA_CLIENT_LOGOUT* packet);
 
-	virtual void updateObjectName();
+	//virtual void updateObjectName();
 
 private:
 	~GameServerSession();
