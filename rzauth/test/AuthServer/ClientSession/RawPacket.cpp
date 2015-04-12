@@ -13,7 +13,7 @@ TEST(RAW_PACKET, large_size) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		static const int PACKET_SIZE = 1*1024*1024; // 1MB
 
-		TS_MESSAGE *packet = (TS_MESSAGE*)malloc(PACKET_SIZE);
+		TS_MESSAGE *packet = (TS_MESSAGE*)calloc(PACKET_SIZE, 1);
 		packet->size = PACKET_SIZE;
 		packet->id = 0;
 		packet->msg_check_sum = 0;
@@ -40,7 +40,7 @@ TEST(RAW_PACKET, unknown_id) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		static const int PACKET_SIZE = 1*1024; // 1kB
 
-		TS_MESSAGE* packet = (TS_MESSAGE*)malloc(PACKET_SIZE);
+		TS_MESSAGE* packet = (TS_MESSAGE*)calloc(PACKET_SIZE, 1);
 		packet->size = PACKET_SIZE;
 		packet->id = 32165;
 		packet->msg_check_sum = 0;

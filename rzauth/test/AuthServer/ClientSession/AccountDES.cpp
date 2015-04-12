@@ -31,7 +31,8 @@ TEST(TS_CA_ACCOUNT_DES, valid) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_ACCOUNT_DES, double_account_before_result) {
@@ -55,10 +56,12 @@ TEST(TS_CA_ACCOUNT_DES, double_account_before_result) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_ACCOUNT_DES, double_account_after_result) {
+	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -78,10 +81,12 @@ TEST(TS_CA_ACCOUNT_DES, double_account_after_result) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_ACCOUNT_DES, duplicate_auth_account_connection) {
+	RzTest test;
 	TestConnectionChannel auth1(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 	TestConnectionChannel auth2(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
@@ -112,7 +117,9 @@ TEST(TS_CA_ACCOUNT_DES, duplicate_auth_account_connection) {
 	});
 
 	auth1.start();
-	RzTest::run();
+	test.addChannel(&auth1);
+	test.addChannel(&auth2);
+	test.run();
 }
 
 TEST(TS_CA_ACCOUNT_DES, valid_disconect_before_result) {
@@ -131,10 +138,12 @@ TEST(TS_CA_ACCOUNT_DES, valid_disconect_before_result) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_ACCOUNT_DES, invalid_account) {
+	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -149,10 +158,12 @@ TEST(TS_CA_ACCOUNT_DES, invalid_account) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_ACCOUNT_DES, invalid_password) {
+	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -167,10 +178,12 @@ TEST(TS_CA_ACCOUNT_DES, invalid_password) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_ACCOUNT_DES, garbage_data) {
+	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -192,10 +205,12 @@ TEST(TS_CA_ACCOUNT_DES, garbage_data) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_ACCOUNT_DES, garbage_data_epic4) {
+	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -217,10 +232,12 @@ TEST(TS_CA_ACCOUNT_DES, garbage_data_epic4) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_ACCOUNT_DES, garbage_data_before_des) {
+	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -243,7 +260,8 @@ TEST(TS_CA_ACCOUNT_DES, garbage_data_before_des) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 } // namespace AuthServer

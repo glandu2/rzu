@@ -10,6 +10,7 @@
 namespace AuthServer {
 
 TEST(TS_GA_CLIENT_LOGIN, unexpected_client) {
+	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 
 	addGameLoginScenario(game, 6, "Server name 10", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -32,10 +33,12 @@ TEST(TS_GA_CLIENT_LOGIN, unexpected_client) {
 	});
 
 	game.start();
-	RzTest::run();
+	test.addChannel(&game);
+	test.run();
 }
 
 TEST(TS_GA_CLIENT_LOGIN, long_account) {
+	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 
 	addGameLoginScenario(game, 7, "Server name 10", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -58,7 +61,8 @@ TEST(TS_GA_CLIENT_LOGIN, long_account) {
 	});
 
 	game.start();
-	RzTest::run();
+	test.addChannel(&game);
+	test.run();
 }
 
 } // namespace AuthServer

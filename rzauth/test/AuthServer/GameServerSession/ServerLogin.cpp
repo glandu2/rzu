@@ -11,6 +11,7 @@
 namespace AuthServer {
 
 TEST(TS_GA_LOGIN, valid) {
+	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -27,10 +28,12 @@ TEST(TS_GA_LOGIN, valid) {
 	});
 
 	game.start();
-	RzTest::run();
+	test.addChannel(&game);
+	test.run();
 }
 
 TEST(TS_GA_LOGIN, double_login) {
+	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	static_assert(sizeof(((TS_GA_LOGIN*)0)->server_name) == 21, "Test expect a name field size of 21");
 
@@ -56,10 +59,12 @@ TEST(TS_GA_LOGIN, double_login) {
 	});
 
 	game.start();
-	RzTest::run();
+	test.addChannel(&game);
+	test.run();
 }
 
 TEST(TS_GA_LOGIN, duplicate_index) {
+	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel game2(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 
@@ -91,10 +96,13 @@ TEST(TS_GA_LOGIN, duplicate_index) {
 	});
 
 	game.start();
-	RzTest::run();
+	test.addChannel(&game);
+	test.addChannel(&game2);
+	test.run();
 }
 
 TEST(TS_GA_LOGIN, long_values) {
+	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	static_assert(sizeof(((TS_GA_LOGIN*)0)->server_name) == 21, "Test expect a name field size of 21");
 
@@ -118,7 +126,8 @@ TEST(TS_GA_LOGIN, long_values) {
 	});
 
 	game.start();
-	RzTest::run();
+	test.addChannel(&game);
+	test.run();
 }
 
 } // namespace AuthServer

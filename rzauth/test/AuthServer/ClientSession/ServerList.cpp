@@ -13,6 +13,7 @@
 namespace AuthServer {
 
 TEST(TS_CA_SERVER_LIST, empty_list) {
+	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	addClientLoginToServerListScenario(auth, AM_Aes, "test2", "admin");
@@ -26,10 +27,12 @@ TEST(TS_CA_SERVER_LIST, empty_list) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_SERVER_LIST, not_authenticated) {
+	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -45,10 +48,12 @@ TEST(TS_CA_SERVER_LIST, not_authenticated) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_SERVER_LIST, not_authenticated_epic2) {
+	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -69,7 +74,8 @@ TEST(TS_CA_SERVER_LIST, not_authenticated_epic2) {
 	});
 
 	auth.start();
-	RzTest::run();
+	test.addChannel(&auth);
+	test.run();
 }
 
 TEST(TS_CA_SERVER_LIST, two_gs_list) {

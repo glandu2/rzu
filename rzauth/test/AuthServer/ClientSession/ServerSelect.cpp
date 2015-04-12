@@ -205,6 +205,7 @@ TEST(TS_CA_SELECT_SERVER, not_authenticated) {
 		ASSERT_EQ(TestConnectionChannel::Event::Disconnection, event.type);
 	});
 
+	auth.start();
 	test.addChannel(&auth);
 	test.run();
 }
