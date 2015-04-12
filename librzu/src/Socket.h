@@ -1,22 +1,12 @@
 #ifndef SOCKET_H
 #define SOCKET_H
-/*
-#include "Pipe.h"
-
-#define Socket Pipe*/
 
 #include "Stream.h"
 #include "uv.h"
-#include "IListener.h"
-#include "stdint.h"
-#include "IDelegate.h"
-#include "Log.h"
-
-#include <unordered_map>
+#include <stdint.h>
 #include <string>
-#include <vector>
 
-class LIB_EXTERN Socket : public Stream
+class RZU_EXTERN Socket : public Stream
 {
 	DECLARE_CLASS(Socket)
 public:

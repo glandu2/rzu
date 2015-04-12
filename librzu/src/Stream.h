@@ -4,15 +4,14 @@
 #include "Object.h"
 #include "uv.h"
 #include "IListener.h"
-#include "stdint.h"
 #include "IDelegate.h"
+#include <stdint.h>
 #include "Log.h"
 
-#include <unordered_map>
 #include <string>
 #include <vector>
 
-class LIB_EXTERN Stream : public Object
+class RZU_EXTERN Stream : public Object
 {
 
 public:

@@ -6,11 +6,10 @@
 #include <list>
 #include <string>
 #include <sqlext.h>
-#include "Log.h"
 
 class DbConnection;
 
-class LIB_EXTERN DbConnectionPool : public Object
+class RZU_EXTERN DbConnectionPool : public Object
 {
 	DECLARE_CLASSNAME(DbConnectionPool, 0)
 public:

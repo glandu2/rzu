@@ -1,11 +1,8 @@
 #ifndef AUTHSERVER_DB_UPDATELASTSERVERIDX_H
 #define AUTHSERVER_DB_UPDATELASTSERVERIDX_H
 
-#include "Object.h"
 #include "uv.h"
-#include <string>
 #include <stdint.h>
-#include "Log.h"
 #include "DbQueryJob.h"
 
 class DbConnectionPool;

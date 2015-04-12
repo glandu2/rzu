@@ -5,7 +5,7 @@
 #include "Utils.h"
 
 struct DbConfig : public IListener {
-	cval<std::string> &driver, &server, &name, &account, &password, &salt;
+	cval<std::string> &driver, &server, &name, &account, &password, &cryptedPassword, &salt;
 	cval<int> &port;
 	cval<std::string> &connectionString;
 	cval<bool> &ignoreInitCheck;
@@ -14,11 +14,12 @@ struct DbConfig : public IListener {
 		driver(CFG_CREATE(prefix + ".db.driver", "osdriver")), //Set in .cpp according to OS
 		server(CFG_CREATE(prefix + ".db.server", "127.0.0.1")),
 		name(CFG_CREATE(prefix + ".db.name", "Auth")),
-		account(CFG_CREATE(prefix + ".db.account", "sa")),
-		password(CFG_CREATE(prefix + ".db.password", "")),
+		account(CFG_CREATE(prefix + ".db.account", "sa", true)),
+		password(CFG_CREATE(prefix + ".db.password", "", true)),
+		cryptedPassword(CFG_CREATE(prefix + ".db.cryptedpassword", "", true)),
 		salt(CFG_CREATE(prefix + ".db.salt", "2011")),
 		port(CFG_CREATE(prefix + ".db.port", 1433)),
-		connectionString(CFG_CREATE(prefix + ".db.connectionstring", "")),
+		connectionString(CFG_CREATE(prefix + ".db.connectionstring", "", true)),
 		ignoreInitCheck(CFG_CREATE(prefix + ".db.ignoreinitcheck", true))
 	{
 		driver.addListener(this, &updateConnectionString);
@@ -26,6 +27,7 @@ struct DbConfig : public IListener {
 		name.addListener(this, &updateConnectionString);
 		account.addListener(this, &updateConnectionString);
 		password.addListener(this, &updateConnectionString);
+		cryptedPassword.addListener(this, &updateConnectionString);
 		port.addListener(this, &updateConnectionString);
 		updateConnectionString(this);
 	}

@@ -1,11 +1,14 @@
 #include "gtest.h"
 #include "RzTest.h"
+#include "../GlobalConfig.h"
 #include "Packets/TS_CA_VERSION.h"
 #include "Packets/TS_SC_RESULT.h"
 
+namespace AuthServer {
+
 TEST(TS_CA_VERSION, playercount) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -27,12 +30,13 @@ TEST(TS_CA_VERSION, playercount) {
 	});
 
 	test.addChannel(&auth);
+	auth.start();
 	test.run();
 }
 
 TEST(TS_CA_VERSION, version) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -56,12 +60,13 @@ TEST(TS_CA_VERSION, version) {
 	});
 
 	test.addChannel(&auth);
+	auth.start();
 	test.run();
 }
 
 TEST(TS_CA_VERSION, nonnullterminated) {
 	RzTest test;
-	TestConnectionChannel auth(TestConnectionChannel::Client, "auth", true);
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -87,5 +92,8 @@ TEST(TS_CA_VERSION, nonnullterminated) {
 	});
 
 	test.addChannel(&auth);
+	auth.start();
 	test.run();
 }
+
+} // namespace AuthServer

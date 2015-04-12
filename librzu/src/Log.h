@@ -4,12 +4,13 @@
 #include <string>
 #include <vector>
 #include "Object.h"
+#include "IListener.h"
 #include "uv.h"
-#include "ConfigInfo.h"
 
 struct TS_MESSAGE;
+template<typename T> class cval;
 
-class LIB_EXTERN Log : public Object, public IListener
+class RZU_EXTERN Log : public Object, public IListener
 {
 	DECLARE_CLASS(Log)
 public:

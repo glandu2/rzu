@@ -125,7 +125,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 }
 
 bool ClientSession::checkJpegImage(const char *data) {
-	if(memcmp(&data[6], "JFIF", 4))
+	if(*(const uint16_t*)data != 0xFFD8)
 		return false;
 
 	return true;

@@ -1,7 +1,5 @@
 #include "DbConnectionPool.h"
 #include "Log.h"
-#include <stdlib.h>
-#include "EventLoop.h"
 #include "DbConnection.h"
 
 static void outputError(Log::Level errorLevel, SQLHANDLE handle, SQLSMALLINT type);
@@ -43,10 +41,10 @@ DbConnectionPool::~DbConnectionPool() {
 bool DbConnectionPool::checkConnection(const char* connectionString) {
 	DbConnection* dbConnection;
 
-	info("Checking connection to \"%s\"\n", connectionString);
+	info("Checking connection to database\n");
 	dbConnection = getConnection(connectionString, "");
 	if(!dbConnection) {
-		error("Could not retrieve a DB connection from pool\n");
+		error("Could not retrieve a DB connection from pool to \"%s\"\n", connectionString);
 		return false;
 	}
 	dbConnection->releaseAndClose();

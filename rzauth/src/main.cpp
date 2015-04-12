@@ -72,6 +72,7 @@ void onTerminate(void* instance) {
 int main(int argc, char **argv) {
 	LibRzuInit();
 	GlobalConfig::init();
+	BanManager::registerConfig();
 
 	DbConnectionPool dbConnectionPool;
 

@@ -8,6 +8,7 @@
 #include "GlobalCoreConfig.h"
 #include "TimingFunctions.h"
 #include "PrintfFormats.h"
+#include "Socket.h"
 
 void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState, bool causedByRemote);
 

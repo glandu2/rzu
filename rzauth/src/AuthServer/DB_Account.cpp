@@ -118,6 +118,7 @@ bool DB_Account::decryptPassword() {
 		// if crypted size is > max size - 128 bits, then the decrypted password will overflow in the destination variable
 		if(cryptedPassword.size() > sizeof(password) - 16) {
 			warn("RSA: invalid password length: %d\n", (int)cryptedPassword.size());
+			return false;
 		}
 
 		EVP_CIPHER_CTX_init(&d_ctx);

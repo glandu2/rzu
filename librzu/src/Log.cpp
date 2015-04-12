@@ -1,10 +1,9 @@
 #include "Log.h"
-#include "GlobalCoreConfig.h"
 #include <stdio.h>
 #include <time.h>
 #include <stdarg.h>
 #include "Utils.h"
-#include "EventLoop.h"
+#include "ConfigParamVal.h"
 
 static const char * const  LEVELSTRINGS[] = { "FATAL", "ERROR", "Warn", "Info", "Debug", "Trace" };
 
@@ -93,7 +92,7 @@ void Log::updateLevel(bool isConsole, const std::string& level) {
 		*levelToChange = LL_Fatal;
 	else if(level == "error")
 		*levelToChange = LL_Error;
-	else if(level == "warning")
+	else if(level == "warning" || level == "warn")
 		*levelToChange = LL_Warning;
 	else if(level == "info")
 		*levelToChange = LL_Info;
@@ -213,6 +212,8 @@ int c99vsnprintf(char* dest, int size, const char* format, va_list args) {
 		result = _vscprintf(format, argsForCount);
 #endif
 
+	va_end(argsForCount);
+
 	return result;
 }
 
@@ -225,6 +226,7 @@ void stringformat(std::string& dest, const char* message, va_list args) {
 
 	if(result < 0) {
 		dest = message;
+		va_end(argsFor2ndPass);
 		return;
 	}
 
@@ -236,6 +238,7 @@ void stringformat(std::string& dest, const char* message, va_list args) {
 		vsnprintf(&dest[0], dest.size(), message, argsFor2ndPass);
 		dest.resize(result);
 	}
+	va_end(argsFor2ndPass);
 }
 
 void Log::logv(Level level, const char *objectName, size_t objectNameSize, const char* message, va_list args) {
