@@ -9,7 +9,7 @@
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_GA_LOGIN.h"
-#include "Packets/TS_GA_CLIENT_LOGGED_LIST.h"
+#include "Packets/TS_GA_ACCOUNT_LIST.h"
 #include "Packets/TS_GA_LOGOUT.h"
 #include "Packets/TS_GA_CLIENT_LOGIN.h"
 #include "Packets/TS_GA_CLIENT_LOGOUT.h"
@@ -39,7 +39,7 @@ protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
 
 	void onServerLogin(const TS_GA_LOGIN* packet);
-	void onAccountList(const TS_GA_CLIENT_LOGGED_LIST *packet);
+	void onAccountList(const TS_GA_ACCOUNT_LIST *packet);
 	void onServerLogout(const TS_GA_LOGOUT* packet);
 	void onClientLogin(const TS_GA_CLIENT_LOGIN* packet);
 	void onClientLogout(const TS_GA_CLIENT_LOGOUT* packet);
@@ -56,7 +56,7 @@ private:
 	GameData* gameData;
 	bool useAutoReconnectFeature;
 
-	std::vector<TS_GA_CLIENT_LOGGED_LIST::AccountInfo> alreadyConnectedAccounts;
+	std::vector<TS_GA_ACCOUNT_LIST::AccountInfo> alreadyConnectedAccounts;
 };
 
 } // namespace AuthServer

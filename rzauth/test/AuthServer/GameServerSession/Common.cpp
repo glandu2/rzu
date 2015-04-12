@@ -4,7 +4,7 @@
 #include "Packets/TS_GA_CLIENT_LOGOUT.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
 #include "Packets/TS_GA_LOGOUT.h"
-#include "Packets/TS_GA_CLIENT_LOGGED_LIST.h"
+#include "Packets/TS_GA_ACCOUNT_LIST.h"
 #include "Packets/PacketEnums.h"
 
 namespace AuthServer {
@@ -84,9 +84,9 @@ void addGameLoginScenario(TestConnectionChannel &game,
 void sendGameConnectedAccounts(TestConnectionChannel *channel, std::vector<AccountInfo> accounts) {
 	static const int MAXCOUNT_PER_PACKET = 2;
 
-	TS_GA_CLIENT_LOGGED_LIST* accountListPacket;
+	TS_GA_ACCOUNT_LIST* accountListPacket;
 	int maxCount = accounts.size() <= MAXCOUNT_PER_PACKET ? accounts.size() : MAXCOUNT_PER_PACKET;
-	accountListPacket = TS_MESSAGE_WNA::create<TS_GA_CLIENT_LOGGED_LIST, TS_GA_CLIENT_LOGGED_LIST::AccountInfo>(maxCount);
+	accountListPacket = TS_MESSAGE_WNA::create<TS_GA_ACCOUNT_LIST, TS_GA_ACCOUNT_LIST::AccountInfo>(maxCount);
 
 	auto it = accounts.begin();
 	do {
@@ -94,7 +94,7 @@ void sendGameConnectedAccounts(TestConnectionChannel *channel, std::vector<Accou
 
 		for(; it != accounts.end() && count < maxCount; ++it, ++count) {
 			const AccountInfo& accountItem = *it;
-			TS_GA_CLIENT_LOGGED_LIST::AccountInfo* accountInfo = &accountListPacket->accountInfo[count];
+			TS_GA_ACCOUNT_LIST::AccountInfo* accountInfo = &accountListPacket->accountInfo[count];
 
 			strcpy(accountInfo->account, accountItem.account.c_str());
 			accountInfo->nAccountID = accountItem.nAccountID;

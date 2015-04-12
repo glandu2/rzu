@@ -78,8 +78,8 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			onServerLogin(static_cast<const TS_GA_LOGIN*>(packet));
 			break;
 
-		case TS_GA_CLIENT_LOGGED_LIST::packetID:
-			onAccountList(static_cast<const TS_GA_CLIENT_LOGGED_LIST*>(packet));
+		case TS_GA_ACCOUNT_LIST::packetID:
+			onAccountList(static_cast<const TS_GA_ACCOUNT_LIST*>(packet));
 			break;
 
 		case TS_GA_LOGOUT::packetID:
@@ -167,21 +167,21 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	sendPacket(&result);
 }
 
-void GameServerSession::onAccountList(const TS_GA_CLIENT_LOGGED_LIST *packet) {
+void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST *packet) {
 	if(!gameData) {
 		error("Received account list but game server is not logged on\n");
 		return;
 	}
 
-	const uint32_t expectedSize = packet->count * sizeof(TS_GA_CLIENT_LOGGED_LIST::AccountInfo) + sizeof(TS_GA_CLIENT_LOGGED_LIST);
+	const uint32_t expectedSize = packet->count * sizeof(TS_GA_ACCOUNT_LIST::AccountInfo) + sizeof(TS_GA_ACCOUNT_LIST);
 	if(expectedSize != packet->size) {
 		error("Wrong account list packet size, expected %d but got %d\n", expectedSize, packet->size);
 		return;
 	}
 
 	for(uint8_t i = 0; i < packet->count; i++) {
-		TS_GA_CLIENT_LOGGED_LIST::AccountInfo accountInfo = packet->accountInfo[i];
-		accountInfo.account[sizeof(((TS_GA_CLIENT_LOGGED_LIST::AccountInfo*)0)->account) - 1] = '\0';
+		TS_GA_ACCOUNT_LIST::AccountInfo accountInfo = packet->accountInfo[i];
+		accountInfo.account[sizeof(((TS_GA_ACCOUNT_LIST::AccountInfo*)0)->account) - 1] = '\0';
 		alreadyConnectedAccounts.push_back(accountInfo);
 	}
 	debug("Added %d accounts\n", packet->count);
@@ -191,7 +191,7 @@ void GameServerSession::onAccountList(const TS_GA_CLIENT_LOGGED_LIST *packet) {
 		ClientData::removeServer(gameData);
 
 		for(size_t i = 0; i < alreadyConnectedAccounts.size(); i++) {
-			const TS_GA_CLIENT_LOGGED_LIST::AccountInfo& accountInfo = alreadyConnectedAccounts[i];
+			const TS_GA_ACCOUNT_LIST::AccountInfo& accountInfo = alreadyConnectedAccounts[i];
 			std::string account = Utils::convertToString(accountInfo.account, sizeof(accountInfo.account)-1);
 
 			debug("Adding already connected account %s\n", account.c_str());
