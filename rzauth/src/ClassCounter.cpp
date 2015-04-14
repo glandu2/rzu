@@ -28,6 +28,9 @@ DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientSession)
 #include "AuthServer/DB_Account.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_Account)
 
+#include "AuthServer/DB_SecurityNoCheck.h"
+DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_SecurityNoCheck)
+
 #include "AuthServer/DB_UpdateLastServerIdx.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::DB_UpdateLastServerIdx)
 

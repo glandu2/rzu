@@ -7,18 +7,21 @@
 #include "LogServerClient.h"
 #include <time.h>
 #include "GameData.h"
+#include "DB_SecurityNoCheck.h"
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
 #include "Packets/TS_AG_CLIENT_LOGIN.h"
 #include "Packets/TS_AG_KICK_CLIENT.h"
 #include "Packets/TS_AG_ITEM_PURCHASED.h"
+#include "Packets/TS_AG_SECURITY_NO_CHECK.h"
 
 namespace AuthServer {
 
 GameServerSession::GameServerSession()
   : gameData(nullptr),
-	useAutoReconnectFeature(false)
+	useAutoReconnectFeature(false),
+	securityNoSendMode(true)
 {
 }
 
@@ -45,6 +48,11 @@ GameServerSession::~GameServerSession() {
 		}
 	}
 	// else the server connection changed (this one was maybe halfopen)
+
+	for(auto it = securityNoCheckQueries.begin(); it != securityNoCheckQueries.end(); ++it) {
+		DB_SecurityNoCheck* securityNoCheckDb = *it;
+		securityNoCheckDb->cancel();
+	}
 }
 
 void GameServerSession::onConnected() {
@@ -96,6 +104,10 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 
 		case TS_GA_CLIENT_KICK_FAILED::packetID:
 			onClientKickFailed(static_cast<const TS_GA_CLIENT_KICK_FAILED*>(packet));
+			break;
+
+		case TS_GA_SECURITY_NO_CHECK::packetID:
+			onSecurityNoCheck(static_cast<const TS_GA_SECURITY_NO_CHECK*>(packet));
 			break;
 
 		default:
@@ -332,6 +344,45 @@ void GameServerSession::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packe
 			clientData->account.c_str(), -1, 0, 0, 0, 0, "FKICK", -1);
 
 	ClientData::removeClient(clientData);
+}
+
+void GameServerSession::onSecurityNoCheck(const TS_GA_SECURITY_NO_CHECK *packet) {
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
+	std::string securityNo = Utils::convertToString(packet->security, sizeof(packet->security)-1);
+
+	int32_t mode = TS_GA_SECURITY_NO_CHECK::SC_NONE;
+	if(packet->size >= sizeof(TS_GA_SECURITY_NO_CHECK))
+		mode = packet->mode;
+	else
+		securityNoSendMode = false;
+
+	securityNoCheckQueries.push_back(new DB_SecurityNoCheck(this, account, securityNo, mode));
+}
+
+void GameServerSession::onSecurityNoCheckResult(DB_SecurityNoCheck* securityNoCheckDb, const std::string& account, int32_t mode, bool ok) {
+	if(ok)
+		debug("Security no check for account %s: ok\n", account.c_str());
+	else
+		debug("Security no check for account %s: wrong\n", account.c_str());
+
+	securityNoCheckQueries.remove(securityNoCheckDb);
+
+	if(securityNoSendMode == true) {
+		TS_AG_SECURITY_NO_CHECK securityNoCheckPacket;
+		TS_MESSAGE::initMessage(&securityNoCheckPacket);
+
+		strcpy(securityNoCheckPacket.account, account.c_str());
+		securityNoCheckPacket.mode = mode;
+		securityNoCheckPacket.result = ok;
+		sendPacket(&securityNoCheckPacket);
+	} else {
+		TS_AG_SECURITY_NO_CHECK_EPIC5 securityNoCheckPacket;
+		TS_MESSAGE::initMessage(&securityNoCheckPacket);
+
+		strcpy(securityNoCheckPacket.account, account.c_str());
+		securityNoCheckPacket.result = ok;
+		sendPacket(&securityNoCheckPacket);
+	}
 }
 
 void GameServerSession::sendClientLoginResult(const char* account, TS_ResultCode result, ClientData* clientData) {
