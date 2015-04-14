@@ -34,7 +34,7 @@
  *  max total connections (avoid too much memory usage) (no accept until connection count < max)
  *
  * Allow to change gameserver infos via admin interface (like external ip, index (to dyn hide/unhide from players))
- * Avoid a buffer in Socket (like uv_tcp_t)
+ * Avoid a buffer in Socket (do async like uv_tcp_t)
  * Config: init config per classes (no more globalconfig.h) => avoid unused config declaration (benchmark does not use core.log.*)
  * DbBinding: cols: optionnal + "was set" bool
  * DbBinding: dynamic resize std::string column
@@ -45,7 +45,7 @@
  *  -> warning: GS with auth in same exe: delay connectToAuth ?
  * manage more field in TS_AG_CLIENT_LOGIN (play time)
  * Add API to do logging with static classes in Object (avoid crash using Log::get()->log(...))
- * Add log to LogServer (using LS_11N4S)
+ * rzgamereconnect for upload
  */
 
 /* Packet versionning:
