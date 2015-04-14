@@ -5,8 +5,6 @@
 #include "CrashHandler.h"
 #include "DbConnectionPool.h"
 
-#include "AuthServer/DB_Account.h"
-#include "AuthServer/DB_UpdateLastServerIdx.h"
 #include "ServersManager.h"
 #include "BanManager.h"
 #include "SessionServer.h"
@@ -14,6 +12,8 @@
 #include "AuthServer/ClientSession.h"
 #include "AuthServer/GameServerSession.h"
 #include "AuthServer/DB_Account.h"
+#include "AuthServer/DB_UpdateLastServerIdx.h"
+#include "AuthServer/DB_SecurityNoCheck.h"
 
 #include "UploadServer/ClientSession.h"
 #include "UploadServer/GameServerSession.h"
@@ -79,6 +79,8 @@ int main(int argc, char **argv) {
 	if(AuthServer::DB_Account::init(&dbConnectionPool, CONFIG_GET()->auth.client.desKey) == false)
 		return 1;
 	if(AuthServer::DB_UpdateLastServerIdx::init(&dbConnectionPool) == false)
+		return 1;
+	if(AuthServer::DB_SecurityNoCheck::init(&dbConnectionPool) == false)
 		return 1;
 
 	ConfigInfo::get()->init(argc, argv);
