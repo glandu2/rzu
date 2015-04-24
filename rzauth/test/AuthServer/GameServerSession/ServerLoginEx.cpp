@@ -104,7 +104,7 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_1) {
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
 
 		std::vector<AccountInfo> accounts;
-		AccountInfo a = {"test1", 3, 0, 0, 0, 0, 0};
+		AccountInfo a = {"test1", 1, 0, 0, 0, 0, 0};
 		accounts.push_back(a);
 		sendGameConnectedAccounts(channel, accounts);
 
@@ -176,19 +176,19 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_4) {
 
 		std::vector<AccountInfo> accounts;
 		{
-			AccountInfo a = {"test1", 3, 0, 0, 0, 0, 0};
+			AccountInfo a = {"test1", 1, 0, 0, 0, 0, 0};
 			accounts.push_back(a);
 		}
 		{
-			AccountInfo a = {"test2", 4, 0, 0, 0, 0, 0};
+			AccountInfo a = {"test2", 2, 0, 0, 0, 0, 0};
 			accounts.push_back(a);
 		}
 		{
-			AccountInfo a = {"test3", 5, 0, 0, 0, 0, 0};
+			AccountInfo a = {"test3", 3, 0, 0, 0, 0, 0};
 			accounts.push_back(a);
 		}
 		{
-			AccountInfo a = {"test4", 6, 0, 0, 0, 0, 0};
+			AccountInfo a = {"test4", 4, 0, 0, 0, 0, 0};
 			accounts.push_back(a);
 		}
 		sendGameConnectedAccounts(channel, accounts);
@@ -271,7 +271,7 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_1_kick) {
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
 
 		std::vector<AccountInfo> accounts;
-		AccountInfo a = {"test2", 4, 0, 0, 0, 0, 0};
+		AccountInfo a = {"test2", 2, 0, 0, 0, 0, 0};
 		accounts.push_back(a);
 		sendGameConnectedAccounts(channel, accounts);
 	});
