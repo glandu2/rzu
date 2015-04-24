@@ -18,6 +18,7 @@ class GameData : public Object
 public:
 	//multithread concurrency when GS is disconnected while new players connect to it
 	static const std::unordered_map<uint16_t, GameData*>& getServerList() { return servers; }
+
 	static GameData* tryAdd(GameServerSession* gameServerSession,
 							uint16_t serverIdx,
 							std::string serverName,

@@ -60,7 +60,7 @@ void DB_SecurityNoCheck::deinit() {
 }
 
 DB_SecurityNoCheck::DB_SecurityNoCheck(GameServerSession* gameServerSession, std::string account, std::string securityNo, int32_t mode)
-	: gameServerSession(gameServerSession), account(account), securityNo(securityNo), securityNoOk(false), mode(mode)
+	: gameServerSession(gameServerSession), account(account), securityNo(securityNo), mode(mode), securityNoOk(false)
 {
 	execute(DbQueryBinding::EM_OneRow);
 }

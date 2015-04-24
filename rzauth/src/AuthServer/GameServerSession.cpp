@@ -232,7 +232,7 @@ void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST *packet) {
 			}
 		}
 		gameData->setReady(true);
-		info("Synchronized account list with %d accounts\n", alreadyConnectedAccounts.size());
+		info("Synchronized account list with %d accounts\n", (int)alreadyConnectedAccounts.size());
 		alreadyConnectedAccounts.clear();
 	}
 }

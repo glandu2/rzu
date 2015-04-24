@@ -69,6 +69,8 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		resultForName = connectedClientsByName.insert(std::pair<std::string, ClientData*>(toLower(account), newClient));
 		if(resultForName.second == false) {
 			newClient->error("Duplicated account name with different ID: %s\n", account.c_str());
+			if(oldClientPtr)
+				*oldClientPtr = resultForName.first->second;
 			connectedClients.erase(result.first);
 			delete newClient;
 			newClient = nullptr;
