@@ -4,6 +4,7 @@ echo ----rzu-parent: && git $*
 
 echo ----libuv: && cd libuv && git $*
 echo ----librzu: && cd ../librzu && git $*
+echo ----gtest: && cd ../gtest && git $*
 echo ----rztest: && cd ../rztest && git $*
 echo ----zlib: && cd ../zlib && git $*
 echo ----rzauth: && cd ../rzauth && git $*
