@@ -1,5 +1,5 @@
 #include "RunTests.h"
-#include "gtest.h"
+#include "gtest/gtest.h"
 #include "LibRzuInit.h"
 #include "Log.h"
 #include "GlobalCoreConfig.h"

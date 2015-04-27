@@ -55,6 +55,10 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 			onAccount(static_cast<const TS_CA_ACCOUNT*>(packet));
 			break;
 
+		case TS_CA_IMBC_ACCOUNT::packetID:
+			onImbcAccount(static_cast<const TS_CA_IMBC_ACCOUNT*>(packet));
+			break;
+
 		case TS_CA_SERVER_LIST::packetID:
 			if(!isEpic2)
 				onServerList(static_cast<const TS_CA_SERVER_LIST*>(packet));
@@ -182,12 +186,42 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 			account = Utils::convertToString(accountE4->account, sizeof(accountE4->account)-1);
 			cryptedPassword = Utils::convertToDataArray(accountE4->password, sizeof(accountE4->password));
 		} else {
-			account = Utils::convertToString(packet->account, sizeof(packet->account));
+			account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
 			cryptedPassword = Utils::convertToDataArray(packet->password, sizeof(packet->password));
 		}
 	}
 
 	debug("Login request for account %s\n", account.c_str());
+
+	dbQuery = new DB_Account(this, account, getStream()->getRemoteIpStr(), useRsaAuth, cryptedPassword, aesKey);
+}
+
+void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
+	std::string account;
+	std::vector<unsigned char> cryptedPassword;
+
+	if(dbQuery != nullptr) {
+		TS_AC_RESULT result;
+		TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
+		result.request_msg_id = TS_CA_ACCOUNT::packetID;
+		result.result = TS_RESULT_CLIENT_SIDE_ERROR;
+		result.login_flag = 0;
+		sendPacket(&result);
+		info("Client IMBC connection with a auth request already in progress\n");
+		return;
+	}
+
+	if(useRsaAuth) {
+		const TS_CA_IMBC_ACCOUNT_RSA* accountv2 = reinterpret_cast<const TS_CA_IMBC_ACCOUNT_RSA*>(packet);
+
+		account = Utils::convertToString(accountv2->account, sizeof(accountv2->account)-1);
+		cryptedPassword = Utils::convertToDataArray(accountv2->password, sizeof(accountv2->password), accountv2->password_size);
+	} else {
+		account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
+		cryptedPassword = Utils::convertToDataArray(packet->password, sizeof(packet->password));
+	}
+
+	debug("IMBC Login request for account %s\n", account.c_str());
 
 	dbQuery = new DB_Account(this, account, getStream()->getRemoteIpStr(), useRsaAuth, cryptedPassword, aesKey);
 }

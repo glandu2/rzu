@@ -249,7 +249,7 @@ void GameServerSession::onServerLogout(const TS_GA_LOGOUT* packet) {
 
 void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	ClientData* client;
-	std::string account = Utils::convertToString(packet->account, sizeof(packet->account));
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
 
 	client = ClientData::getClient(account);
 
@@ -287,7 +287,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 }
 
 void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
-	std::string account = Utils::convertToString(packet->account, sizeof(packet->account));
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
 
 	if(!gameData) {
 		error("Received client logout for account %s but game server is not logged on\n", account.c_str());
@@ -326,7 +326,7 @@ void GameServerSession::kickClient(ClientData* clientData) {
 }
 
 void GameServerSession::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet) {
-	std::string account = Utils::convertToString(packet->account, sizeof(packet->account));
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
 
 	if(!gameData) {
 		error("Received client kick failed for account %s but game server is not logged on\n", account.c_str());

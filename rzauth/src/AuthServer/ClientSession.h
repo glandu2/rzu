@@ -11,6 +11,7 @@
 #include "Packets/TS_CA_VERSION.h"
 #include "Packets/TS_CA_RSA_PUBLIC_KEY.h"
 #include "Packets/TS_CA_ACCOUNT.h"
+#include "Packets/TS_CA_IMBC_ACCOUNT.h"
 #include "Packets/TS_CA_SERVER_LIST.h"
 #include "Packets/TS_CA_SELECT_SERVER.h"
 
@@ -34,6 +35,7 @@ protected:
 	void onVersion(const TS_CA_VERSION* packet);
 	void onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet);
 	void onAccount(const TS_CA_ACCOUNT* packet);
+	void onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet);
 	void onServerList(const TS_CA_SERVER_LIST* packet);
 	void onServerList_epic2(const TS_CA_SERVER_LIST* packet);
 	void onSelectServer(const TS_CA_SELECT_SERVER* packet);
