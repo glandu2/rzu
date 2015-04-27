@@ -41,19 +41,21 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 	TS_UC_LOGIN_RESULT result;
 	TS_MESSAGE::initMessage<TS_UC_LOGIN_RESULT>(&result);
 
-	debug("Upload from client %s:%d, client id %u with account id %u for guild id %u on server %30s\n",
+	std::string serverName = Utils::convertToString(packet->raw_server_name, sizeof(packet->raw_server_name)-1);
+
+	debug("Upload from client %s:%d, client id %u with account id %u for guild id %u on server %s\n",
 		  getStream()->getRemoteIpStr(),
 		  getStream()->getRemotePort(),
 		  packet->client_id,
 		  packet->account_id,
 		  packet->guild_id,
-		  packet->raw_server_name);
+		  serverName.c_str());
 
-	currentRequest = UploadRequest::popRequest(packet->client_id, packet->account_id, packet->guild_id, packet->one_time_password, packet->raw_server_name);
+	currentRequest = UploadRequest::popRequest(packet->client_id, packet->account_id, packet->guild_id, packet->one_time_password, serverName);
 
-	if(currentRequest)
+	if(currentRequest) {
 		result.result = TS_RESULT_SUCCESS;
-	else {
+	} else {
 		debug("Invalid client, otp given is %u\n", packet->one_time_password);
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 	}
