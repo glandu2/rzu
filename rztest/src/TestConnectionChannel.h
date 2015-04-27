@@ -8,7 +8,7 @@
 #include "PacketSession.h"
 
 #include <functional>
-#include "gtest.h"
+#include "gtest/gtest.h"
 
 class RzTest;
 class TestPacketServer;
