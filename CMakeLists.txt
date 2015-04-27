@@ -60,6 +60,10 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
 endif()
 
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/zlib" zlib)
+endif()
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest)
 endif()

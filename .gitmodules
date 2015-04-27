@@ -7,3 +7,6 @@
 [submodule "libuv"]
 	path = libuv
 	url = ../libuv
+[submodule "zlib"]
+	path = zlib
+	url = ../zlib
