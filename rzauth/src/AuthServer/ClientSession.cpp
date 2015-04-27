@@ -182,7 +182,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 			account = Utils::convertToString(accountE4->account, sizeof(accountE4->account)-1);
 			cryptedPassword = Utils::convertToDataArray(accountE4->password, sizeof(accountE4->password));
 		} else {
-			account = Utils::convertToString(packet->account, sizeof(packet->account));
+			account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
 			cryptedPassword = Utils::convertToDataArray(packet->password, sizeof(packet->password));
 		}
 	}
