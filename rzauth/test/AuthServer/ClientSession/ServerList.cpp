@@ -21,6 +21,7 @@ TEST(TS_CA_SERVER_LIST, empty_list) {
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_AC_SERVER_LIST* packet = AGET_PACKET(TS_AC_SERVER_LIST);
 
+		EXPECT_EQ(4, packet->last_login_server_idx);
 		EXPECT_EQ(0, packet->count);
 
 		channel->closeSession();

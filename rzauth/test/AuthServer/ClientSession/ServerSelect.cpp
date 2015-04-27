@@ -72,7 +72,7 @@ TEST(TS_CA_SELECT_SERVER, valid_aes) {
 
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
 		EXPECT_STREQ("test5", packet->account);
-		EXPECT_EQ(7, packet->nAccountID);
+		EXPECT_EQ(5, packet->nAccountID);
 		EXPECT_EQ(0, packet->nPCBangUser);
 		EXPECT_EQ(0, packet->nEventCode);
 		EXPECT_EQ(19, packet->nAge);
@@ -132,7 +132,7 @@ TEST(TS_CA_SELECT_SERVER, valid_des) {
 
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
 		EXPECT_STREQ("test6", packet->account);
-		EXPECT_EQ(8, packet->nAccountID);
+		EXPECT_EQ(6, packet->nAccountID);
 		EXPECT_EQ(0, packet->nPCBangUser);
 		EXPECT_EQ(0, packet->nEventCode);
 		EXPECT_EQ(19, packet->nAge);

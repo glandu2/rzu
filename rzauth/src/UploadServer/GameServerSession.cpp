@@ -3,6 +3,7 @@
 #include "UploadRequest.h"
 #include "IconServerSession.h"
 #include <string.h>
+#include "Utils.h"
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_US_LOGIN_RESULT.h"
@@ -44,24 +45,26 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 	TS_MESSAGE::initMessage<TS_US_LOGIN_RESULT>(&result);
 	typedef std::unordered_map<std::string, GameServerSession*>::iterator ServerIterator;
 
-	info("Server Login: %s from %s:%d\n", packet->server_name, getStream()->getRemoteIpStr(), getStream()->getRemotePort());
+	std::string serverName = Utils::convertToString(packet->server_name, sizeof(packet->server_name)-1);
 
-	if(!IconServerSession::checkName(packet->server_name, strlen(packet->server_name))) {
+	info("Server Login: %s from %s:%d\n", serverName.c_str(), getStream()->getRemoteIpStr(), getStream()->getRemotePort());
+
+	if(!IconServerSession::checkName(serverName.c_str(), serverName.size())) {
 		//Forbidden character used in servername
 		error("Server name (app.name in gameserver.opt) has invalid characters, only these are allowed: %s\n", IconServerSession::getAllowedCharsForName());
 		result.result = TS_RESULT_INVALID_TEXT;
 	} else {
-		std::pair<ServerIterator, bool> insertResult = servers.insert(std::pair<std::string, GameServerSession*>(packet->server_name, this));
+		std::pair<ServerIterator, bool> insertResult = servers.insert(std::pair<std::string, GameServerSession*>(serverName, this));
 
 		if(insertResult.second) {
-			serverName = packet->server_name;
+			this->serverName = serverName;
 
 			result.result = TS_RESULT_SUCCESS;
 			setDirtyObjectName();
 			debug("Success\n");
 		} else {
 			result.result = TS_RESULT_ALREADY_EXIST;
-			error("Failed, server \"%s\" already registered\n", packet->server_name);
+			error("Failed, server \"%s\" already registered\n", serverName.c_str());
 		}
 	}
 

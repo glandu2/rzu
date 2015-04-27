@@ -9,7 +9,7 @@ endif()
 
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
-set(LIBS uv ${OPENSSL_LIBRARIES})
+set(LIBS uv ${OPENSSL_LIBRARIES} z)
 if(WIN32)
     list(APPEND LIBS odbc32 dbghelp)
 else()
@@ -18,5 +18,7 @@ endif()
 
 add_lib(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")
 if(BUILD_SHARED_LIBS)
-    install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ./)
+    install(TARGETS ${TARGET_NAME}
+        RUNTIME DESTINATION ./
+        LIBRARY DESTINATION ./)
 endif()

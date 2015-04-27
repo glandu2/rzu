@@ -168,7 +168,7 @@ TEST(TS_GA_SECURITY_NO_CHECK, garbage_data) {
 TEST(TS_GA_SECURITY_NO_CHECK, double_query) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
-	int modeDone = 0;
+	uint32_t modeDone = 0;
 
 	addGameLoginScenario(game, 20, "Server name 20", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		TS_GA_SECURITY_NO_CHECK securityNoPacket;
