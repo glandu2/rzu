@@ -7,7 +7,7 @@
 struct DbConfig : public IListener {
 	cval<std::string> &driver, &server, &name, &account, &password, &cryptedPassword, &salt;
 	cval<int> &port;
-	cval<std::string> &connectionString;
+	cval<std::string> &connectionString, &cryptedConnectionString;
 	cval<bool> &ignoreInitCheck;
 
 	DbConfig(const std::string& prefix) :
@@ -20,6 +20,7 @@ struct DbConfig : public IListener {
 		salt(CFG_CREATE(prefix + ".db.salt", "2011")),
 		port(CFG_CREATE(prefix + ".db.port", 1433)),
 		connectionString(CFG_CREATE(prefix + ".db.connectionstring", "", true)),
+		cryptedConnectionString(CFG_CREATE(prefix + ".db.cryptedconnectionstring", "", true)),
 		ignoreInitCheck(CFG_CREATE(prefix + ".db.ignoreinitcheck", true))
 	{
 		driver.addListener(this, &updateConnectionString);
@@ -29,6 +30,7 @@ struct DbConfig : public IListener {
 		password.addListener(this, &updateConnectionString);
 		cryptedPassword.addListener(this, &updateConnectionString);
 		port.addListener(this, &updateConnectionString);
+		cryptedConnectionString.addListener(this, &updateConnectionString);
 		updateConnectionString(this);
 	}
 
