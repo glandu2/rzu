@@ -80,14 +80,14 @@ void DB_Account::deinit() {
 	currentDesKey = "";
 }
 
-DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, const char* ip, bool cryptUseAes, const std::vector<unsigned char> &cryptedPassword, unsigned char aesKey[32])
+DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, const char* ip, EncryptMode cryptMode, const std::vector<unsigned char> &cryptedPassword, unsigned char aesKey[32])
 	: clientInfo(clientInfo), account(account)
 {
 	strncpy(this->ip, ip, INET_ADDRSTRLEN);
 	this->ip[INET_ADDRSTRLEN-1] = 0;
 	this->cryptedPassword = cryptedPassword;
 	memcpy(this->aesKey, aesKey, sizeof(this->aesKey));
-	this->cryptUseAes = cryptUseAes;
+	this->cryptMode = cryptMode;
 
 	ok = false;
 	accountId = 0xFFFFFFFF;
@@ -108,7 +108,7 @@ bool DB_Account::decryptPassword() {
 	char password[64+16];
 	bool ok = false;
 
-	if(cryptUseAes) {
+	if(cryptMode == EM_AES) {
 		EVP_CIPHER_CTX d_ctx;
 		int bytesWritten, totalLength;
 		unsigned int bytesRead;
@@ -152,14 +152,30 @@ bool DB_Account::decryptPassword() {
 		if(errorCode)
 			warn("AES: error while processing password for account %s: %s\n", account.c_str(), ERR_error_string(errorCode, nullptr));
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
+	} else if(cryptMode == EM_None) {
+		if(cryptedPassword.size() >= sizeof(password)) {
+			error("Password length overflow: %d >= %d\n", (int)cryptedPassword.size(), (int)sizeof(password));
+		} else {
+			memcpy(password, (char*)&cryptedPassword[0], cryptedPassword.size());
+			password[cryptedPassword.size()] = 0;
+
+			debug("Client login using clear text\n");
+
+			ok = true;
+		}
 	} else {
-		memcpy(password, (char*)&cryptedPassword[0], 61);
+		if(cryptedPassword.size() >= sizeof(password)) {
+			error("Password length overflow: %d >= %d\n", (int)cryptedPassword.size(), (int)sizeof(password));
+		} else {
+			memcpy(password, (char*)&cryptedPassword[0], cryptedPassword.size());
 
-		debug("Client login using DES\n");
-		desCipher->decrypt(password, 61);
+			debug("Client login using DES\n");
+			desCipher->decrypt(password, (int)cryptedPassword.size());
+                       password[cryptedPassword.size()] = 0;
 
-		password[60] = 0;
-		ok = true;
+			password[60] = 0;
+			ok = true;
+		}
 	}
 
 	if(ok == true) {

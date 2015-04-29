@@ -15,12 +15,18 @@ class ClientSession;
 class DB_Account : public DbQueryJob<DB_Account>
 {
 	DECLARE_CLASS(AuthServer::DB_Account)
+public:
+	enum EncryptMode {
+		EM_None,
+		EM_DES,
+		EM_AES
+	};
 
 public:
 	static bool init(DbConnectionPool* dbConnectionPool, cval<std::string>& desKeyStr);
 	static void deinit();
 
-	DB_Account(ClientSession* clientInfo, const std::string& account, const char* ip, bool cryptUseAes, const std::vector<unsigned char>& cryptedPassword, unsigned char aesKey[32]);
+	DB_Account(ClientSession* clientInfo, const std::string& account, const char* ip, EncryptMode cryptMode, const std::vector<unsigned char>& cryptedPassword, unsigned char aesKey[32]);
 
 	void cancel() { clientInfo = nullptr; DbQueryJob::cancel(); }
 
@@ -42,7 +48,7 @@ private:
 	std::string account;
 	char ip[INET_ADDRSTRLEN];
 	std::vector<unsigned char> cryptedPassword;
-	bool cryptUseAes;
+	EncryptMode cryptMode;
 	unsigned char aesKey[32];
 
 	char givenPasswordString[33];
