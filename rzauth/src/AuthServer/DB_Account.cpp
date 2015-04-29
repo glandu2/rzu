@@ -248,9 +248,9 @@ bool DB_Account::onRowDone() {
 		ok = true;
 	} else if(!strcmp(givenPasswordString, password)){
 		ok = true;
+	} else {
+		trace("Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", account.c_str(), givenPasswordString, password);
 	}
-
-	trace("Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", account.c_str(), givenPasswordString, password);
 
 	return false;
 }

@@ -22,7 +22,7 @@ struct DbSecurityNoCheckConfig : private IListener {
 
 	DbSecurityNoCheckConfig() :
 		enable(CFG_CREATE("sql.db_securitynocheck.enable", true)),
-		query(CFG_CREATE("sql.db_securitynocheck.query", "{CALL smp_check_security(?, ?)}")),
+		query(CFG_CREATE("sql.db_securitynocheck.query", "SELECT account FROM account WHERE account = ? AND password = ?")),
 		paramAccount(CFG_CREATE("sql.db_securitynocheck.param.account", 1)),
 		paramSecurityNo(CFG_CREATE("sql.db_securitynocheck.param.securityno", 2)),
 		securityNoSalt(CFG_CREATE("auth.securityno.salt", "2011"))
