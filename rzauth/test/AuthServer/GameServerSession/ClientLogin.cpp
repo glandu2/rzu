@@ -49,7 +49,7 @@ TEST(TS_GA_CLIENT_LOGIN, long_account) {
 		const TS_AG_CLIENT_LOGIN* packet = AGET_PACKET(TS_AG_CLIENT_LOGIN);
 
 		EXPECT_EQ(TS_RESULT_ACCESS_DENIED, packet->result);
-		EXPECT_STREQ("61_chars_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", packet->account);
+		EXPECT_STREQ("61_chars_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", packet->account);
 		EXPECT_EQ(0, packet->nAccountID);
 		EXPECT_EQ(0, packet->nPCBangUser);
 		EXPECT_EQ(0, packet->nEventCode);
