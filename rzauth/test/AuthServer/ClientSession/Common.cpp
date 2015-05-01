@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Packets/TS_CA_VERSION.h"
 #include "Packets/TS_CA_ACCOUNT.h"
+#include "Packets/TS_CA_IMBC_ACCOUNT.h"
 #include "Packets/TS_CA_SERVER_LIST.h"
 #include "Packets/TS_CA_RSA_PUBLIC_KEY.h"
 #include "Packets/TS_AC_RESULT.h"
@@ -26,6 +27,16 @@ void sendAccountDES(TestConnectionChannel* channel, const char* account, const c
 	strcpy(accountPacket.account, account);
 	strcpy(reinterpret_cast<char*>(accountPacket.password), password);
 	DesPasswordCipher("MERONG").encrypt(accountPacket.password, sizeof(accountPacket.password));
+
+	channel->sendPacket(&accountPacket);
+}
+
+void sendAccountIMBC(TestConnectionChannel* channel, const char* account, const char* password) {
+	TS_CA_IMBC_ACCOUNT accountPacket;
+	TS_MESSAGE::initMessage(&accountPacket);
+
+	strcpy(accountPacket.account, account);
+	strcpy(reinterpret_cast<char*>(accountPacket.password), password);
 
 	channel->sendPacket(&accountPacket);
 }
@@ -66,12 +77,13 @@ void parseAESKey(RSA* rsaCipher, const TS_AC_AES_KEY_IV* packet, unsigned char a
 	memcpy(aes_key_iv, decrypted_data, 32);
 }
 
-void prepareAccountRSAPacket(unsigned char aes_key_iv[32], TS_CA_ACCOUNT_RSA* accountMsg, const char* account, const char* password) {
+template<typename PacketType>
+void prepareAccountRSAPacket(unsigned char aes_key_iv[32], PacketType *accountMsg, const char* account, const char* password) {
 	EVP_CIPHER_CTX e_ctx;
 	const unsigned char *key_data = aes_key_iv;
 	const unsigned char *iv_data = aes_key_iv + 16;
 
-	int len = strlen(password);
+	int len = (int)strlen(password);
 	int p_len = len, f_len = 0;
 
 	TS_MESSAGE::initMessage(accountMsg);
@@ -88,12 +100,20 @@ void prepareAccountRSAPacket(unsigned char aes_key_iv[32], TS_CA_ACCOUNT_RSA* ac
 	EVP_CIPHER_CTX_cleanup(&e_ctx);
 
 	accountMsg->password_size = p_len + f_len;
-	accountMsg->dummy[0] = accountMsg->dummy[1] = accountMsg->dummy[2] = 0;
-	accountMsg->unknown_00000100 = 0x00000100;
 }
+template void prepareAccountRSAPacket<TS_CA_ACCOUNT_RSA>(unsigned char aes_key_iv[32], TS_CA_ACCOUNT_RSA *accountMsg, const char* account, const char* password);
+template void prepareAccountRSAPacket<TS_CA_IMBC_ACCOUNT_RSA>(unsigned char aes_key_iv[32], TS_CA_IMBC_ACCOUNT_RSA *accountMsg, const char* account, const char* password);
 
 void sendAccountRSA(unsigned char aes_key_iv[32], TestConnectionChannel* channel, const char* account, const char* password) {
 	TS_CA_ACCOUNT_RSA accountMsg;
+	prepareAccountRSAPacket(aes_key_iv, &accountMsg, account, password);
+	accountMsg.dummy[0] = accountMsg.dummy[1] = accountMsg.dummy[2] = 0;
+	accountMsg.unknown_00000100 = 0x00000100;
+	channel->sendPacket(&accountMsg);
+}
+
+void sendAccountIMBC_RSA(unsigned char aes_key_iv[32], TestConnectionChannel* channel, const char* account, const char* password) {
+	TS_CA_IMBC_ACCOUNT_RSA accountMsg;
 	prepareAccountRSAPacket(aes_key_iv, &accountMsg, account, password);
 	channel->sendPacket(&accountMsg);
 }

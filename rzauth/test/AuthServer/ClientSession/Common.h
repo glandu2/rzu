@@ -18,8 +18,12 @@ RSA* createRSAKey();
 void freeRSAKey(RSA* rsaCipher);
 void sendRSAKey(RSA* rsaCipher, TestConnectionChannel* channel);
 void parseAESKey(RSA* rsaCipher, const TS_AC_AES_KEY_IV* packet, unsigned char aes_key_iv[]);
-void prepareAccountRSAPacket(unsigned char aes_key_iv[32], TS_CA_ACCOUNT_RSA* accountMsg, const char* account, const char* password);
+template<typename PacketType>
+void prepareAccountRSAPacket(unsigned char aes_key_iv[32], PacketType* accountMsg, const char* account, const char* password);
 void sendAccountRSA(unsigned char aes_key_iv[32], TestConnectionChannel* channel, const char* account, const char* password);
+
+void sendAccountIMBC(TestConnectionChannel* channel, const char* account, const char* password);
+void sendAccountIMBC_RSA(unsigned char aes_key_iv[32], TestConnectionChannel* channel, const char* account, const char* password);
 
 void expectAuthResult(TestConnectionChannel::Event& event, uint16_t result, int32_t login_flag);
 
