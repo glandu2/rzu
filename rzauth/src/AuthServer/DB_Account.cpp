@@ -171,9 +171,8 @@ bool DB_Account::decryptPassword() {
 
 			debug("Client login using DES\n");
 			desCipher->decrypt(password, (int)cryptedPassword.size());
-                       password[cryptedPassword.size()] = 0;
+			password[cryptedPassword.size()] = 0;
 
-			password[60] = 0;
 			ok = true;
 		}
 	}
