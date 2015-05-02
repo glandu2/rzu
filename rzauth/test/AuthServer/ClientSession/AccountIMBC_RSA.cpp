@@ -209,7 +209,10 @@ TEST_F(TS_CA_IMBC_ACCOUNT_RSA_Test, long_password_64_chars) {
 	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_AC_AES_KEY_IV* packet = AGET_PACKET(TS_AC_AES_KEY_IV);
 		parseAESKey(rsaCipher, packet, aes_key_iv);
-		TS_CA_IMBC_ACCOUNT_RSA accountMsg;
+		union {
+			char maxSize[1024];
+			TS_CA_IMBC_ACCOUNT_RSA accountMsg;
+		};
 		prepareAccountRSAPacket(aes_key_iv, &accountMsg, "testPw64Chars", "64_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
 		channel->sendPacket(&accountMsg);
