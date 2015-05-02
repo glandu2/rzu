@@ -16,9 +16,6 @@ DECLARE_CLASSCOUNT_STATIC(AdminServer::AdminInterface)
 #include "AuthServer/BillingInterface.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::BillingInterface)
 
-#include "TelnetSession.h"
-DECLARE_CLASSCOUNT_STATIC(TelnetSession)
-
 #include "AuthServer/ClientData.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::ClientData)
 
