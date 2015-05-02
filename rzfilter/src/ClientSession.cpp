@@ -64,8 +64,6 @@ void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 
 		for(int i = 0; i < serverList->count; i++) {
 			TS_AC_SERVER_LIST::TS_SERVER_INFO *currentServerInfo = &serverDetailList[i];
-			if(strlen(currentServerInfo->server_name) < 17)
-				strcat(currentServerInfo->server_name, "(f)");
 			strcpy(currentServerInfo->server_ip, filterIp.c_str());
 			if(filterPort > 0)
 				currentServerInfo->server_port = filterPort;
