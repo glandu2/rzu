@@ -15,3 +15,6 @@ DECLARE_CLASSCOUNT_STATIC(ClientSession)
 
 #include "ServerSession.h"
 DECLARE_CLASSCOUNT_STATIC(ServerSession)
+
+#include "AdminInterface.h"
+DECLARE_CLASSCOUNT_STATIC(AdminInterface)

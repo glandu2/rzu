@@ -41,6 +41,14 @@ struct GlobalConfig {
 		{}
 	} client;
 
+	struct AdminConfig {
+		ListenerConfig listener;
+
+		AdminConfig() :
+			listener("admin.telnet", "127.0.0.1", 4901, true, 0)
+		{}
+	} admin;
+
 	struct TrafficDump {
 		cval<bool> &enable;
 		cval<std::string> &dir, &file, &level, &consoleLevel;
