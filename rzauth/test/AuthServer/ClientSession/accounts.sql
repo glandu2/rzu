@@ -1,10 +1,10 @@
 CREATE TABLE "account" (
         "account_id"    INTEGER NOT NULL,
-        "account"       TEXT NOT NULL,
-        "password"      TEXT,
+        "account"       VARCHAR(61) NOT NULL,
+        "password"      VARCHAR(61),
         "last_login_server_idx" INTEGER,
         "server_idx_offset"     INTEGER,
-        "security_no"   TEXT,
+        "security_no"   VARCHAR(61),
         PRIMARY KEY(account_id)
 );
 INSERT INTO "account" VALUES(0,'test0','613b5247e3398350918cb622a3ec19e9',NULL,NULL,NULL);
