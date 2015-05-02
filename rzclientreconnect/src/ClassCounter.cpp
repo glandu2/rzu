@@ -13,9 +13,6 @@ ServerInfo
 #include "AdminServer/AdminInterface.h"
 DECLARE_CLASSCOUNT_STATIC(AdminServer::AdminInterface)
 
-#include "TelnetSession.h"
-DECLARE_CLASSCOUNT_STATIC(TelnetSession)
-
 #include "AuthServer/AuthSession.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::AuthSession)
 
