@@ -15,7 +15,8 @@ Log::Log(cval<bool>& enabled, cval<std::string>& fileMaxLevel, cval<std::string>
 	consoleMaxLevel(LL_Info),
 	dir(dir),
 	fileName(fileName),
-	maxQueueSize(maxQueueSize)
+	maxQueueSize(maxQueueSize),
+	maxQueueSizeReached(0)
 {
 	construct(enabled, dir, fileName);
 
@@ -31,7 +32,8 @@ Log::Log(cval<bool>& enabled, Level fileMaxLevel, Level consoleMaxLevel, cval<st
 	consoleMaxLevel(LL_Info),
 	dir(dir),
 	fileName(fileName),
-	maxQueueSize(maxQueueSize)
+	maxQueueSize(maxQueueSize),
+	maxQueueSizeReached(0)
 {
 	construct(enabled, dir, fileName);
 
@@ -258,8 +260,14 @@ void Log::logv(Level level, const char *objectName, size_t objectNameSize, const
 		this->messageQueue.push_back(msg);
 	else
 		this->messageQueueFull = true;
+	if(this->messageQueue.size() > maxQueueSizeReached)
+		maxQueueSizeReached = this->messageQueue.size();
 	uv_cond_signal(&this->messageListCond);
 	uv_mutex_unlock(&this->messageListMutex);
+}
+
+size_t Log::getQueueUsage() {
+	return maxQueueSizeReached;
 }
 
 /*************************************/
@@ -320,8 +328,17 @@ void Log::logWritterThread() {
 	uv_once(&initMutexOnce, &initMutex);
 
 	while(endLoop == false) {
-		uv_mutex_lock(&this->messageListMutex);
+		size_t pendingMessages;
 
+		uv_mutex_lock(&this->messageListMutex);
+		pendingMessages = this->messageQueue.size();
+		uv_mutex_unlock(&this->messageListMutex);
+
+		// Flush only if we will wait
+		if(pendingMessages == 0 && logFile)
+			fflush(logFile);
+
+		uv_mutex_lock(&this->messageListMutex);
 		while(this->messageQueue.size() == 0 && this->stop == false) {
 			uv_cond_wait(&this->messageListCond, &this->messageListMutex);
 		}
@@ -363,6 +380,7 @@ void Log::logWritterThread() {
 					fprintf(logFile, "Failed to change log file to %s\n", this->fileName.get().c_str());
 				}
 				logFile = newfile;
+				setvbuf(logFile, nullptr, _IOFBF, 64*1024);
 			}
 		}
 
@@ -395,9 +413,6 @@ void Log::logWritterThread() {
 
 			delete msg;
 		}
-
-		if(logFile)
-			fflush(logFile);
 
 		messagesToWrite->clear();
 	}

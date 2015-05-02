@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 
-class TelnetSession : public SocketSession
+class RZU_EXTERN TelnetSession : public SocketSession
 {
 	DECLARE_CLASS(TelnetSession)
 public:
