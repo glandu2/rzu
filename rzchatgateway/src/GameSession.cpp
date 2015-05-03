@@ -100,6 +100,8 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 				TS_SC_LOGIN_RESULT* loginResultPkt = (TS_SC_LOGIN_RESULT*) packet;
 				handle = loginResultPkt->handle;
 				connectedInGame = true;
+				info("Connected with character %s\n", playername.c_str());
+
 				for(size_t i = 0; i < messageQueue.size(); i++) {
 					TS_CS_CHAT_REQUEST* chatRqst = messageQueue.at(i);
 					sendPacket(chatRqst);

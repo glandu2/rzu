@@ -48,7 +48,7 @@ static void init() {
 
 	CFG_CREATE("use_rsa", true);
 	CFG_CREATE("gateway", false);
-	CFG_CREATE("autoreco", 280);
+	CFG_CREATE("autoreco", 0);
 	CFG_CREATE("recodelay", 5000);
 
 	trafficDump = new TrafficDump;
