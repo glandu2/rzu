@@ -161,7 +161,7 @@ void GameSession::sendMsgToGS(int type, const char* sender, const char* target, 
 
 	debug("[IRC] Msg %d: %s\n", type, messageFull);
 
-	if(sender[0] == '@')
+	if(sender && sender[0] == '@')
 		return;
 
 	if(msg.size() < 1)
