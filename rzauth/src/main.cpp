@@ -172,6 +172,7 @@ void runServers(Log *trafficLogger) {
 	serverManager.addServer("auth.clients", &authClientServer, CONFIG_GET()->auth.client.listener.autoStart);
 	serverManager.addServer("auth.gameserver", &authGameServer, CONFIG_GET()->auth.game.listener.autoStart);
 	serverManager.addServer("auth.billing", &billingTelnetServer, CONFIG_GET()->auth.billing.listener.autoStart);
+	serverManager.addServer("auth.logclient", &logServerClient, CONFIG_GET()->logclient.enable);
 
 	serverManager.addServer("upload.clients", &uploadClientServer, CONFIG_GET()->upload.client.listener.autoStart);
 	serverManager.addServer("upload.iconserver", &uploadIconServer, CONFIG_GET()->upload.icons.listener.autoStart);
@@ -179,7 +180,6 @@ void runServers(Log *trafficLogger) {
 
 	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart);
 
-	serverManager.addServer("logserver", &logServerClient, CONFIG_GET()->logclient.enable);
 
 	serverManager.start();
 
