@@ -1,6 +1,7 @@
 #ifndef TIMINGFUNCTIONS_H
 #define TIMINGFUNCTIONS_H
 
+#include <stdint.h>
 #ifdef __linux__
 	#include <unistd.h>
 	#define tfMicroSleep(i) usleep(i)
@@ -11,7 +12,7 @@
 		timeEndPeriod(1);
 #endif
 
-unsigned long long timingFunction_ucounter;
+uint64_t timingFunction_ucounter;
 
 #if defined(__linux__)
 
@@ -29,9 +30,9 @@ unsigned long long timingFunction_ucounter;
 		timingFunction_ucounter = clk.tv_sec*1000000 + clk.tv_nsec/1000;
 	}
 
-	unsigned long long getTimerValue() {
+	uint64_t getTimerValue() {
 		struct timespec clk;
-		unsigned long long uclk;
+		uint64_t uclk;
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &clk);
 		uclk = clk.tv_sec*1000000 + clk.tv_nsec/1000;
@@ -49,7 +50,7 @@ unsigned long long timingFunction_ucounter;
 		timingFunction_ucounter = clk.QuadPart;
 	}
 
-	unsigned long long getTimerValue() {
+	uint64_t getTimerValue() {
 		LARGE_INTEGER clk;
 		QueryPerformanceCounter(&clk);
 		return (clk.QuadPart - timingFunction_ucounter)*1000000/clockFreq.QuadPart;

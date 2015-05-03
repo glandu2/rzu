@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
-	unsigned long long int duration = getTimerValue();
+	uint64_t duration = getTimerValue();
 
 	mainLogger.log(Log::LL_Info, "main", 4, "%d connections in %" PRIu64 " usec => %f auth/sec\n", config.connectionsDone, duration, config.connectionsDone/((float)duration/1000000.0f));
 }
