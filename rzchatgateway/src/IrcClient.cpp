@@ -10,7 +10,7 @@ IrcClient::IrcClient(const std::string& ip, int port, const std::string& hostnam
 }
 
 void IrcClient::connect(std::string servername) {
-	this->servername = servername.substr(0, servername.find_first_of('('));
+	this->servername = servername.substr(0, servername.find_first_of(" \t("));
 	SocketSession::connect(ip.c_str(), port);
 }
 
