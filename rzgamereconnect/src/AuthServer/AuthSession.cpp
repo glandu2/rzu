@@ -2,6 +2,7 @@
 #include "GameServerSession.h"
 #include "../GlobalConfig.h"
 #include "EventLoop.h"
+#include <stdlib.h>
 
 #include "Packets/TS_GA_LOGOUT.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"

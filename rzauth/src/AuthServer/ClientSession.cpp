@@ -4,8 +4,7 @@
 #include "rzauthGitVersion.h"
 
 #include <string.h>
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>       /* time */
+#include <stdlib.h>
 
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
