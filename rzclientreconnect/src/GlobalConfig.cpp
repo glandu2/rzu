@@ -13,6 +13,4 @@ void GlobalConfig::init() {
 	GlobalCoreConfig::get()->app.appName.setDefault("rzgamereconnect");
 	GlobalCoreConfig::get()->app.configfile.setDefault("rzgamereconnect.opt");
 	GlobalCoreConfig::get()->log.file.setDefault("rzgamereconnect.log");
-
-	srand((unsigned int)time(NULL));
 }
