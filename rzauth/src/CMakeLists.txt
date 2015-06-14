@@ -8,7 +8,8 @@ if( versioncmakefound )
 endif()
 
 find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR})
+find_package(ODBC REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR} ${ODBC_INCLUDE_DIR})
 set(LIBS rzu ${OPENSSL_LIBRARIES})
 
 add_exe(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")

@@ -2,6 +2,7 @@
 #include "GlobalCoreConfig.h"
 #include "rzauthGitVersion.h"
 #include "DbPasswordCipher.h"
+#include "Utils.h"
 
 GlobalConfig* GlobalConfig::get() {
 	static GlobalConfig config;
@@ -20,8 +21,6 @@ void GlobalConfig::init() {
 #else
 	GlobalConfig::get()->auth.db.driver.setDefault("FreeTDS");
 #endif
-
-	srand((unsigned int)time(NULL));
 }
 
 void DbConfig::updateConnectionString(IListener* instance) {
@@ -42,7 +41,7 @@ void DbConfig::updateConnectionString(IListener* instance) {
 		thisInstance->connectionString.setDefault(
 					"driver=" + thisInstance->driver.get() +
 					";Server=" + thisInstance->server.get() +
-					"," + std::to_string((long long)thisInstance->port.get()) +
+					"," + Utils::convertToString(thisInstance->port.get()) +
 					";Database=" + thisInstance->name.get() +
 					";UID=" + thisInstance->account.get() +
 					";PWD=" + password +

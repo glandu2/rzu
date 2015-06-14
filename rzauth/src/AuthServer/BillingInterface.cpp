@@ -1,6 +1,7 @@
 #include "BillingInterface.h"
 #include "GameData.h"
 #include "ClientData.h"
+#include <stdlib.h>
 
 namespace AuthServer {
 

@@ -7,6 +7,7 @@
 #include "DbConnectionPool.h"
 #include "CrashHandler.h"
 #include <string.h>
+#include "Utils.h"
 
 static const char MSG_WELCOME[] = "Auth server - Administration server - Type \"help\" for a list of available commands\r\n> ";
 
@@ -137,14 +138,6 @@ void AdminInterface::setEnv(const std::string& variableName, const std::string& 
 	getEnv(variableName);
 }
 
-#ifdef _MSC_VER
-#define INT2STR(i) std::to_string((long long)(i))
-#define FLOAT2STR(i) std::to_string((long double)(i))
-#else
-#define INT2STR(i) std::to_string(i)
-#define FLOAT2STR(i) std::to_string(i)
-#endif
-
 void AdminInterface::getEnv(const std::string& variableName) {
 	ConfigValue* v = ConfigInfo::get()->getValue(variableName);
 
@@ -164,12 +157,12 @@ void AdminInterface::getEnv(const std::string& variableName) {
 
 		case ConfigValue::Integer:
 			type = 'N';
-			val = INT2STR(v->getInt());
+			val = Utils::convertToString(v->getInt());
 			break;
 
 		case ConfigValue::Float:
 			type = 'F';
-			val = FLOAT2STR(v->getFloat());
+			val = Utils::convertToString(v->getFloat());
 			break;
 
 		case ConfigValue::String:
