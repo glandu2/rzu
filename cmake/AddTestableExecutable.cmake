@@ -25,6 +25,6 @@ function(add_rztest name sources)
   include_directories("${RZTEST_INCLUDE}")
 
   add_executable("${name}_test" ${sources})
-  target_link_libraries("${name}_test" gtest rztest)
+  target_link_libraries("${name}_test" rztest)
   add_test("${name}_test" "${EXECUTABLE_OUTPUT_PATH}/${name}_test")
 endfunction()
