@@ -15,7 +15,7 @@ Root project for these sub-projects:
 How to compile
 --------------
 
-To compile this project, you need OpenSSL library.
+To compile this project, you need [OpenSSL library](http://slproweb.com/products/Win32OpenSSL.html) (Windows: [x86](http://slproweb.com/download/Win32OpenSSL-1_0_2a.exe), [x64](http://slproweb.com/download/Win64OpenSSL-1_0_2a.exe)) and [cmake](http://www.cmake.org/download/#latest).
 Then (with Visual Studio) :
 ```
 git clone --recursive https://github.com/glandu2/rzu-parent.git
