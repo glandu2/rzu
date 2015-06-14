@@ -9,6 +9,7 @@
 #include "TimingFunctions.h"
 #include "PrintfFormats.h"
 #include "Socket.h"
+#include "Utils.h"
 
 void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState, bool causedByRemote);
 
@@ -78,7 +79,7 @@ void startBenchAuth(int usecBetweenConnection) {
 	bool useLocalHost = ip == "127.0.0.1";
 
 	for(size_t i = 0; i < auths.size(); i++) {
-		const std::string account = (auths.size() > 1)? accountNamePrefix + std::to_string((long long)i + idxoffset) : accountNamePrefix;
+		const std::string account = (auths.size() > 1)? accountNamePrefix + Utils::convertToString((int)i + idxoffset) : accountNamePrefix;
 
 		auths[i]->connect(getIpForConnection(ip, useLocalHost, i), account, CFG_GET("password")->getString());
 		if(usecBetweenConnection)
@@ -121,8 +122,8 @@ int main(int argc, char *argv[])
 	init();
 	ConfigInfo::get()->init(argc, argv);
 	ConfigInfo::get()->dump();
-	initTimer();
 
+	uint64_t startTime;
 	Log mainLogger(GlobalCoreConfig::get()->log.enable,
 				   GlobalCoreConfig::get()->log.level,
 				   GlobalCoreConfig::get()->log.consoleLevel,
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
 	mainLogger.log(Log::LL_Info, "main", 4, "Starting benchmark\n");
 
 	if(usecBetweenConnection == 0)
-		resetTimer();
+		startTime = uv_hrtime();
 
 	if(benchConnections)
 		startBenchConnections(usecBetweenConnection);
@@ -155,12 +156,12 @@ int main(int argc, char *argv[])
 
 	if(usecBetweenConnection != 0) {
 		mainLogger.log(Log::LL_Info, "main", 4, "Connected %d connections at limited speed, continuing benchmark at full-speed (time counter begin now)\n", config.connectionsStarted);
-		resetTimer();
+		startTime = uv_hrtime();
 	}
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
-	uint64_t duration = getTimerValue();
+	uint64_t duration = uv_hrtime() - startTime;
 
 	mainLogger.log(Log::LL_Info, "main", 4, "%d connections in %" PRIu64 " usec => %f auth/sec\n", config.connectionsDone, duration, config.connectionsDone/((float)duration/1000000.0f));
 }
