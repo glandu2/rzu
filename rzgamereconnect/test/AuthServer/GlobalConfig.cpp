@@ -12,8 +12,6 @@ void GlobalConfig::init() {
 	GlobalConfig::get();
 	GlobalCoreConfig::get()->log.level.setDefault("fatal");
 	GlobalCoreConfig::get()->log.consoleLevel.setDefault("info");
-
-	srand((unsigned int)time(NULL));
 }
 
 } // namespace AuthServer
