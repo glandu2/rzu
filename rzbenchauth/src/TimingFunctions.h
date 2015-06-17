@@ -1,7 +1,7 @@
 #ifndef TIMINGFUNCTIONS_H
 #define TIMINGFUNCTIONS_H
 
-#ifdef __unix__
+#ifndef _WIN32
 	#include <unistd.h>
 	#define tfMicroSleep(i) usleep(i)
 #else
