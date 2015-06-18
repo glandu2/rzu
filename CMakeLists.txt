@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(rzu-parent)
 enable_testing()
-cmake_policy(SET CMP0042 NEW) # MACOSX_RPATH = ON by default
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 
@@ -16,6 +15,7 @@ get_filename_component(BUILD_DIR_NAME ${CMAKE_BINARY_DIR} NAME)
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
 
+include(DetectOS)
 include(FindCXXFeatures)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS}")
 
@@ -31,16 +31,15 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" S
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -Wall")
 
-  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES AIX)
+  if(NOT DETECTED_OS_AIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
   endif()
-  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  if(NOT DETECTED_OS_AIX AND NOT DETECTED_OS_MAC)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--as-needed")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed")
   endif()
-
 
   if(MINGW)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti  -static-libgcc")
@@ -50,10 +49,22 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" S
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--add-stdcall-alias -static-libgcc")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--add-stdcall-alias -static-libgcc")
   endif()
+
+  add_definitions(-D__STDC_FORMAT_MACROS)
+endif()
+
+if(DETECTED_OS_MAC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
 endif()
 
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH "$ORIGIN/")
+if(DETECTED_OS_MAC)
+  set(CMAKE_MACOSX_RPATH ON)
+  set(CMAKE_INSTALL_RPATH "@executable_path")
+else()
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/")
+endif()
 
 include(AddTestableExecutable)
 if(CMAKE_COMPILER_IS_GNUCXX)
