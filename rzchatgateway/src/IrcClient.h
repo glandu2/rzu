@@ -27,6 +27,8 @@ private:
 	void onDataReceived();
 	void onIrcLine(const std::string& line);
 
+	using SocketSession::connect;
+
 private:
 	GameSession* gameSession;
 
