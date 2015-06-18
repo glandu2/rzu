@@ -25,6 +25,8 @@ protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
 
 private:
+	using SocketSession::connect;
+
 	ClientSession* clientSession;
 
 	std::vector<TS_MESSAGE*> pendingMessages;
