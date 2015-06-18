@@ -63,6 +63,8 @@ protected:
 	void sendPendingMessages();
 
 private:
+	using SocketSession::connect;
+
 	static std::unordered_map<uint16_t, AuthSession*> servers;
 
 	GameServerSession* gameServerSession;
