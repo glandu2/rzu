@@ -1,5 +1,6 @@
 #include "LogServerClient.h"
 #include "GlobalCoreConfig.h"
+#include "Utils.h"
 #include <string.h>
 
 namespace AuthServer {
@@ -32,7 +33,7 @@ LogServerClient::LogServerClient(cval<std::string>& ip, cval<int>& port) :
 void LogServerClient::onConnected() {
 	info("Connected to Log server %s:%d\n", ip.get().c_str(), port.get());
 
-	sendLog(LM_SERVER_LOGIN, 0, 0, 0, uv_thread_self(), 0, 0, 0, 0, 0, 0, 0,
+	sendLog(LM_SERVER_LOGIN, 0, 0, 0, Utils::getPid(), 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, "Main", NTS, CONFIG_GET()->app.appName.get().c_str(), NTS);
 
 	sendLog(LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -117,7 +118,7 @@ void LogServerClient::sendLog(unsigned short id,
 	Message message;
 
 	message.id = id;
-	message.thread_id = uv_thread_self();
+	message.thread_id = Utils::getPid();
 	message.type = 1;
 
 	message.n1 = n1;
