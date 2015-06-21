@@ -44,11 +44,9 @@ void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 }
 
 void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
-	if(packet->id != TS_CC_EVENT::packetID) {
-		debug("Received packet id %d from client, forwarding to server\n", packet->id);
-		if(packetFilter->onClientPacket(this, &serverSession, packet))
-			serverSession.sendPacket(packet);
-	}
+	debug("Received packet id %d from client, forwarding to server\n", packet->id);
+	if(packetFilter->onClientPacket(this, &serverSession, packet))
+		serverSession.sendPacket(packet);
 }
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
@@ -70,7 +68,7 @@ void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 		}
 		sendPacket(serverList);
 		free(buffer);
-	} else if(packet->id != TS_CC_EVENT::packetID) {
+	} else {
 		debug("Received packet id %d from server, forwarding to client\n", packet->id);
 		if(packetFilter->onServerPacket(this, &serverSession, packet))
 			sendPacket(packet);

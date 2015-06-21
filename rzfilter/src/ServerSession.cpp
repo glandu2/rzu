@@ -46,8 +46,6 @@ void ServerSession::sendPacket(const TS_MESSAGE* message) {
 }
 
 void ServerSession::onPacketReceived(const TS_MESSAGE* packet) {
-	if(packet->id != TS_CC_EVENT::packetID) {
-		debug("Received packet id %d from server, forwarding to client\n", packet->id);
-		clientSession->onServerPacketReceived(packet);
-	}
+	debug("Received packet id %d from server, forwarding to client\n", packet->id);
+	clientSession->onServerPacketReceived(packet);
 }
