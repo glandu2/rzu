@@ -259,9 +259,6 @@ void AuthSession::onPacketReceived(const TS_MESSAGE* packet) {
 			onClientLoginResult(static_cast<const TS_AG_CLIENT_LOGIN_EXTENDED*>(packet));
 			break;
 
-		case TS_CC_EVENT::packetID:
-			break;
-
 		default:
 			if(gameServerSession) {
 				debug("Received packet id %d from auth, forwarding to GS\n", packet->id);
