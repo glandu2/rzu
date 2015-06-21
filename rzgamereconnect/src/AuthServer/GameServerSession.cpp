@@ -60,9 +60,6 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			onClientLogout(static_cast<const TS_GA_CLIENT_LOGOUT*>(packet));
 			break;
 
-		case TS_CC_EVENT::packetID:
-			break;
-
 		default:
 			if(authSession) {
 				debug("Received packet id %d from GS, forwarding to auth\n", packet->id);
