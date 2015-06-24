@@ -20,6 +20,7 @@ void ServerSession::connect() {
 
 void ServerSession::onConnected() {
 	info("Connected to server\n");
+	getStream()->setNoDelay(true);
 
 	for(size_t i = 0; i < pendingMessages.size(); i++) {
 		TS_MESSAGE* message = pendingMessages.at(i);

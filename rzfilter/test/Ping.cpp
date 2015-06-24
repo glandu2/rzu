@@ -78,6 +78,9 @@ public:
 		outputSocket = accept(outputServerSocket, (struct sockaddr *) &csin, &csinSize);
 		ASSERT_NE(-1, outputSocket);
 
+		int flag = 1;
+		ASSERT_NE(-1, setsockopt(inputSocket, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(flag)));
+
 		char** buffers = new char*[PING_LOOPS];
 		for(int i = 0; i < PING_LOOPS; i++) {
 			char* buffer = new char[packetSize];

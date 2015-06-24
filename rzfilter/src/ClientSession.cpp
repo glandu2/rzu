@@ -23,6 +23,7 @@ void ClientSession::onConnected() {
 	info("Client connected, connecting server session\n");
 	serverSession.connect();
 	setDirtyObjectName();
+	getStream()->setNoDelay(true);
 }
 
 void ClientSession::onDisconnected(bool causedByRemote) {
