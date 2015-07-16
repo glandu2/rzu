@@ -23,7 +23,6 @@ protected:
 	void setEnv(const std::string& variableName, const std::string& value);
 	void getEnv(const std::string& variableName);
 	void closeDbConnections();
-	void listGameServers();
 	void listObjectsCount();
 };
 

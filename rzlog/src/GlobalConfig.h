@@ -13,7 +13,7 @@ struct DbConfig : public IListener {
 	DbConfig(const std::string& prefix) :
 		driver(CFG_CREATE(prefix + ".db.driver", "osdriver")), //Set in .cpp according to OS
 		server(CFG_CREATE(prefix + ".db.server", "127.0.0.1")),
-		name(CFG_CREATE(prefix + ".db.name", "Auth")),
+		name(CFG_CREATE(prefix + ".db.name", "Log")),
 		account(CFG_CREATE(prefix + ".db.account", "sa", true)),
 		password(CFG_CREATE(prefix + ".db.password", "", true)),
 		cryptedPassword(CFG_CREATE(prefix + ".db.cryptedpassword", "", true)),
@@ -52,76 +52,26 @@ struct ListenerConfig {
 
 struct GlobalConfig {
 
-	struct AuthConfig {
+	struct LogConfig {
 		DbConfig db;
 
 		struct ClientConfig {
 			ListenerConfig listener;
-			cval<std::string> &desKey;
-			cval<int> &maxPublicServerIdx;
 
 			ClientConfig() :
-				listener("auth.clients", "0.0.0.0", 4500, true, 301),
-				desKey(CFG_CREATE("auth.clients.des_key", "MERONG")),
-				maxPublicServerIdx(CFG_CREATE("auth.clients.maxpublicserveridx", 30)) {}
+				listener("log.clients", "127.0.0.1", 4516, true, 0) {}
 		} client;
 
-		struct GameConfig {
-			ListenerConfig listener;
-			cval<bool> &strictKick;
-			cval<int> &maxPlayers;
-
-			GameConfig() :
-				listener("auth.gameserver", "127.0.0.1", 4502, true, 0),
-				strictKick(CFG_CREATE("auth.gameserver.strictkick", true)),
-				maxPlayers(CFG_CREATE("auth.gameserver.maxplayers", 400)) {}
-		} game;
-
-		struct BillingConfig {
-			ListenerConfig listener;
-
-			BillingConfig() :
-				listener("auth.billing", "127.0.0.1", 4503, true, 0) {}
-		} billing;
-
-		AuthConfig() :
-			db("auth") {}
-	} auth;
-
-	struct UploadConfig {
-		struct ClientConfig {
-			ListenerConfig listener;
-			cval<std::string> &uploadDir;
-
-			ClientConfig() :
-				listener("upload.clients", "0.0.0.0", 4617, true, 61),
-				uploadDir(CFG_CREATE("upload.dir", "upload"))
-			{
-				Utils::autoSetAbsoluteDir(uploadDir);
-			}
-		} client;
-
-		struct IconConfig {
-			ListenerConfig listener;
-
-			IconConfig() :
-				listener("upload.iconserver", "0.0.0.0", 80, true, 31) {}
-		} icons;
-
-		struct GameConfig {
-			ListenerConfig listener;
-
-			GameConfig() :
-				listener("upload.gameserver", "127.0.0.1", 4616, true, 0) {}
-		} game;
-	} upload;
+		LogConfig() :
+			db("log") {}
+	} log;
 
 	struct AdminConfig {
 		ListenerConfig listener;
 		cval<int> &dumpMode;
 
 		AdminConfig() :
-			listener("admin.telnet", "127.0.0.1", 4501, true, 0),
+			listener("admin.telnet", "127.0.0.1", 4517, true, 0),
 			dumpMode(CFG_CREATE("admin.dump_mode", 0)) //1: no dump, anything else: create dump on crash
 		{}
 	} admin;
@@ -133,25 +83,13 @@ struct GlobalConfig {
 		TrafficDump() :
 			enable(CFG_CREATE("trafficdump.enable", false)),
 			dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
-			file(CFG_CREATE("trafficdump.file", "auth.log")),
+			file(CFG_CREATE("trafficdump.file", "rzlog.log")),
 			level(CFG_CREATE("trafficdump.level", "debug")),
 			consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal"))
 		{
 			Utils::autoSetAbsoluteDir(dir);
 		}
 	} trafficDump;
-
-	struct LogServerConfig {
-		cval<std::string> &ip;
-		cval<int> &port;
-		cval<bool> &enable;
-
-		LogServerConfig() :
-			ip(CFG_CREATE("logclient.ip", "127.0.0.1")),
-			port(CFG_CREATE("logclient.port", 4516)),
-			enable(CFG_CREATE("logclient.enable", true))
-		{}
-	} logclient;
 
 	static GlobalConfig* get();
 	static void init();

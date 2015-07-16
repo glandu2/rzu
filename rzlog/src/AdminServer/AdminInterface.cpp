@@ -2,14 +2,13 @@
 #include "ServersManager.h"
 #include "ConfigInfo.h"
 #include <stdlib.h>
-#include "../AuthServer/GameData.h"
 #include "ClassCounter.h"
 #include "DbConnectionPool.h"
 #include "CrashHandler.h"
 #include <string.h>
 #include "Utils.h"
 
-static const char MSG_WELCOME[] = "Auth server - Administration server - Type \"help\" for a list of available commands\r\n> ";
+static const char MSG_WELCOME[] = "Log server - Administration server - Type \"help\" for a list of available commands\r\n> ";
 
 static const char MSG_UNKNOWN_COMMAND[] = "Unknown command\r\n";
 static const char MSG_HELP[] =
@@ -18,7 +17,6 @@ static const char MSG_HELP[] =
 		"- stop <server_name>      Same as start <server_name> but stop the server. \"stop all\" will stop all servers and exit.\r\n"
 		"- set <variable> <value>  Set config variable <variable> to <value>. Double-quotes are allowed for values with spaces. Use \"\" for a escaped double quote character.\r\n"
 		"- get <variable>          Get config variable value.\r\n"
-		"- list                    List all connected gameservers and information about them.\r\n"
 		"- mem                     List object counts.\r\n"
 		"- closedb                 Close all idle database connections (use this to bring a database offline).\r\n"
 		"\r\n";
@@ -62,8 +60,6 @@ void AdminInterface::onCommand(const std::vector<std::string> &args) {
 		setEnv(args[1], args[2]);
 	else if(args.size() > 1 && args[0] == "get")
 		getEnv(args[1]);
-	else if(args.size() > 0 && args[0] == "list")
-		listGameServers();
 	else if(args.size() > 0 && args[0] == "mem")
 		listObjectsCount();
 	else if(args.size() > 0 && args[0] == "closedb")
@@ -182,30 +178,6 @@ void AdminInterface::closeDbConnections() {
 	char buffer[1024];
 	int len = sprintf(buffer, "Closed %d DB connections\r\n", connectionsClosed);
 	write(buffer, len);
-}
-
-void AdminInterface::listGameServers() {
-	const std::unordered_map<uint16_t, AuthServer::GameData*>& serverList = AuthServer::GameData::getServerList();
-	std::unordered_map<uint16_t, AuthServer::GameData*>::const_iterator it, itEnd;
-
-	char buffer[1024];
-	int len;
-
-	len = sprintf(buffer, "%u gameserver(s)\r\n", (unsigned int)serverList.size());
-	write(buffer, len);
-
-	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
-		AuthServer::GameData* server = it->second;
-
-		len = sprintf(buffer, "Index: %2d, name: %10s, address: %s:%d, players count: %u, screenshot url: %s\r\n",
-					  server->getServerIdx(),
-					  server->getServerName().c_str(),
-					  server->getServerIp().c_str(),
-					  server->getServerPort(),
-					  server->getPlayerCount(),
-					  server->getServerScreenshotUrl().c_str());
-		write(buffer, len);
-	}
 }
 
 void AdminInterface::listObjectsCount() {

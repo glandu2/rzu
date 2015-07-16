@@ -7,10 +7,9 @@ if( versioncmakefound )
     add_git_version_info(${TARGET_NAME}_GitVersion SOURCE_FILES)
 endif()
 
-find_package(OpenSSL REQUIRED)
 find_package(ODBC REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR} ${ODBC_INCLUDE_DIR})
-set(LIBS rzu ${OPENSSL_LIBRARIES})
+include_directories(${ODBC_INCLUDE_DIR})
+set(LIBS rzu)
 
 add_exe(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ./)
