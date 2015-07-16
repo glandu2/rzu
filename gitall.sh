@@ -12,6 +12,7 @@ echo ----rzbenchauth: && cd ../rzbenchauth && git $*
 echo ----rzgamereconnect: && cd ../rzgamereconnect && git $*
 echo ----rzchatgateway: && cd ../rzchatgateway && git $*
 echo ----rzplayercount: && cd ../rzplayercount && git $*
+echo ----rzlog: && cd ../rzlog && git $*
 echo ----rzfilter: && cd ../rzfilter && git $*
 echo ----VStructGen: && cd ../VStructGen && git $*
 #echo RappelzClient: && cd ../RappelzClient && git $*
