@@ -66,7 +66,7 @@ bool DB_Account::init(DbConnectionPool* dbConnectionPool, cval<std::string>& des
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, serverIdxOffset, 0, config->colServerIdxOffset));
 	cols.emplace_back(DECLARE_COLUMN(DB_Account, block, 0, config->colBlock));
 
-	dbBinding = new DbQueryBinding(dbConnectionPool, config->enable, CONFIG_GET()->auth.db.connectionString, config->query, params, cols);
+	dbBinding = new DbQueryBinding(dbConnectionPool, config->enable, CONFIG_GET()->auth.db.connectionString, config->query, params, cols, DbQueryBinding::EM_OneRow);
 
 	return true;
 }
@@ -101,7 +101,7 @@ DB_Account::DB_Account(ClientSession* clientInfo, const std::string& account, co
 	serverIdxOffset = 0;
 	block = false;
 
-	execute(DbQueryBinding::EM_OneRow);
+	execute();
 }
 
 bool DB_Account::decryptPassword() {

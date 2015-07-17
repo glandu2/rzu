@@ -47,7 +47,7 @@ bool DB_SecurityNoCheck::init(DbConnectionPool* dbConnectionPool) {
 	params.emplace_back(DECLARE_PARAMETER(DB_SecurityNoCheck, account, 0, config->paramAccount));
 	params.emplace_back(DECLARE_PARAMETER(DB_SecurityNoCheck, securityNoMd5String, 32, config->paramSecurityNo));
 
-	dbBinding = new DbQueryBinding(dbConnectionPool, config->enable, CONFIG_GET()->auth.db.connectionString, config->query, params, cols);
+	dbBinding = new DbQueryBinding(dbConnectionPool, config->enable, CONFIG_GET()->auth.db.connectionString, config->query, params, cols, DbQueryBinding::EM_OneRow);
 
 	return true;
 }
@@ -62,7 +62,7 @@ void DB_SecurityNoCheck::deinit() {
 DB_SecurityNoCheck::DB_SecurityNoCheck(GameServerSession* gameServerSession, std::string account, std::string securityNo, int32_t mode)
 	: gameServerSession(gameServerSession), account(account), securityNo(securityNo), mode(mode), securityNoOk(false)
 {
-	execute(DbQueryBinding::EM_OneRow);
+	execute();
 }
 
 bool DB_SecurityNoCheck::onRowDone() {
