@@ -4,39 +4,6 @@
 #include "ConfigInfo.h"
 #include "Utils.h"
 
-struct DbConfig : public IListener {
-	cval<std::string> &driver, &server, &name, &account, &password, &cryptedPassword, &salt;
-	cval<int> &port;
-	cval<std::string> &connectionString, &cryptedConnectionString;
-	cval<bool> &ignoreInitCheck;
-
-	DbConfig(const std::string& prefix) :
-		driver(CFG_CREATE(prefix + ".db.driver", "osdriver")), //Set in .cpp according to OS
-		server(CFG_CREATE(prefix + ".db.server", "127.0.0.1")),
-		name(CFG_CREATE(prefix + ".db.name", "Log")),
-		account(CFG_CREATE(prefix + ".db.account", "sa", true)),
-		password(CFG_CREATE(prefix + ".db.password", "", true)),
-		cryptedPassword(CFG_CREATE(prefix + ".db.cryptedpassword", "", true)),
-		salt(CFG_CREATE(prefix + ".db.salt", "2011")),
-		port(CFG_CREATE(prefix + ".db.port", 1433)),
-		connectionString(CFG_CREATE(prefix + ".db.connectionstring", "", true)),
-		cryptedConnectionString(CFG_CREATE(prefix + ".db.cryptedconnectionstring", "", true)),
-		ignoreInitCheck(CFG_CREATE(prefix + ".db.ignoreinitcheck", true))
-	{
-		driver.addListener(this, &updateConnectionString);
-		server.addListener(this, &updateConnectionString);
-		name.addListener(this, &updateConnectionString);
-		account.addListener(this, &updateConnectionString);
-		password.addListener(this, &updateConnectionString);
-		cryptedPassword.addListener(this, &updateConnectionString);
-		port.addListener(this, &updateConnectionString);
-		cryptedConnectionString.addListener(this, &updateConnectionString);
-		updateConnectionString(this);
-	}
-
-	static void updateConnectionString(IListener* instance);
-};
-
 struct ListenerConfig {
 	cval<std::string> &listenIp;
 	cval<int> &port, &idleTimeout;
@@ -53,7 +20,7 @@ struct ListenerConfig {
 struct GlobalConfig {
 
 	struct LogConfig {
-		DbConfig db;
+		cval<std::string> &logDir;
 
 		struct ClientConfig {
 			ListenerConfig listener;
@@ -63,7 +30,10 @@ struct GlobalConfig {
 		} client;
 
 		LogConfig() :
-			db("log") {}
+			logDir(CFG_CREATE("log.dir", "log"))
+		{
+			Utils::autoSetAbsoluteDir(logDir);
+		}
 	} log;
 
 	struct AdminConfig {

@@ -10,7 +10,6 @@
 #include "SessionServer.h"
 
 #include "LogServer/ClientSession.h"
-#include "LogServer/DB_InsertLog.h"
 
 #include "AdminServer/AdminInterface.h"
 
@@ -27,11 +26,6 @@ int main(int argc, char **argv) {
 	LibRzuInit();
 	GlobalConfig::init();
 	BanManager::registerConfig();
-
-	DbConnectionPool dbConnectionPool;
-
-	if(LogServer::DB_InsertLog::init(&dbConnectionPool) == false)
-		return 1;
 
 	ConfigInfo::get()->init(argc, argv);
 
@@ -53,17 +47,11 @@ int main(int argc, char **argv) {
 
 	ConfigInfo::get()->dump();
 
-	if(dbConnectionPool.checkConnection(CONFIG_GET()->log.db.connectionString.get().c_str()) == false) {
-		if(CONFIG_GET()->log.db.ignoreInitCheck.get() == false)
-			return 2;
-	}
-
 	CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
 
 	runServers(&trafficLogger);
 
 	//Make valgrind happy
-	LogServer::DB_InsertLog::deinit();
 	EventLoop::getInstance()->deleteObjects();
 
 	return 0;

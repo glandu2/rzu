@@ -1,13 +1,15 @@
 #include "ClientSession.h"
 #include "../GlobalConfig.h"
-#include "DB_InsertLog.h"
 #include <time.h>
 #include "Utils.h"
+#include <time.h>
+#include <string.h>
 
 namespace LogServer {
 
 ClientSession::ClientSession() {
 	file = nullptr;
+	memset(&fileDate, 0, sizeof(fileDate));
 }
 
 ClientSession::~ClientSession() {
@@ -15,9 +17,64 @@ ClientSession::~ClientSession() {
 		fclose(file);
 }
 
+bool ClientSession::isDateNeedNewFile(const struct tm& date) {
+	if(date.tm_year == fileDate.year &&
+			date.tm_mon == fileDate.month &&
+			date.tm_mday == fileDate.day &&
+			date.tm_hour == fileDate.hour)
+		return false;
+	else
+		return true;
+}
+
+void ClientSession::updateOpenedFile(const struct tm& date) {
+	if(!serverName.empty() && (file == nullptr || isDateNeedNewFile(date))) {
+		if(file)
+			fclose(file);
+
+		fileDate.year = date.tm_year;
+		fileDate.month = date.tm_mon;
+		fileDate.day = date.tm_mday;
+		fileDate.hour = date.tm_hour;
+
+		char filename[512];
+		sprintf(filename,
+				"%s_%04d-%02d-%02d %02d.txt",
+				serverName.c_str(),
+				fileDate.year,
+				fileDate.month,
+				fileDate.day,
+				fileDate.hour);
+
+		std::string absoluteDir = CONFIG_GET()->log.logDir.get();
+		std::string fullFileName = absoluteDir + "/" + filename;
+
+		file = fopen(fullFileName.c_str(), "wt");
+	}
+}
+
+bool ClientSession::checkName(std::string name) {
+	const char* p = name.c_str();
+	size_t size = name.size();
+
+	for(size_t i = 0; i < size; i++) {
+		const char c = p[i];
+
+		if(!((c >= '0' && c <= '9') ||
+			 (c >= 'A' && c <= 'Z') ||
+			 (c >= 'a' && c <= 'z') ||
+			 c == '_' || c == '.'))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 void ClientSession::onPacketReceived(const LS_11N4S* packet) {
 	debug("Received log packet id %d, size %d\n", packet->id, packet->size);
-	DB_InsertLog::LogData logData;
+	LogData logData;
 
 	const int expectedSize = sizeof(*packet) + packet->len1 + packet->len2 + packet->len3 + packet->len4;
 	if(expectedSize > packet->size) {
@@ -62,26 +119,23 @@ void ClientSession::onPacketReceived(const LS_11N4S* packet) {
 	p += packet->len3;
 	logData.s4 = Utils::convertToString(p, packet->len4);
 
-	//new DB_InsertLog(logData);
-
-	if(file == nullptr && logData.id == 101) {
-		char filename[256];
-		sprintf(filename,
-				"G:\\%s_%04d-%02d-%02d %02d.txt",
-				logData.s4.c_str(),
-				logData.date.year,
-				logData.date.month,
-				logData.date.day,
-				logData.date.hour);
-
-		file = fopen(filename, "wt");
+	if(logData.id == 101) {
+		if(!serverName.empty()) {
+			warn("Already received login message for server %s. Received new name is %s (ignored)\n", serverName.c_str(), logData.s4.c_str());
+		} else if(!checkName(logData.s4)) {
+			error("Received login message with invalid characters in server name: %s\n", logData.s4.c_str());
+		} else {
+			serverName = logData.s4;
+		}
 	}
+
+	updateOpenedFile(date);
 
 	if(file) {
 		static char lineBuffer[20 + 20*13 + 255*4 + 18];
 		int len = sprintf(lineBuffer,
 						  "%04d-%02d-%02d %02d:%02d:%02d.%03d\t"
-						  "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
+						  "%d\t%d\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t"
 						  "%s\t%s\t%s\t%s\n",
 						  logData.date.year,
 						  logData.date.month,
@@ -89,7 +143,7 @@ void ClientSession::onPacketReceived(const LS_11N4S* packet) {
 						  logData.date.hour,
 						  logData.date.minute,
 						  logData.date.second,
-						  timemsec % 1000,
+						  (int)(timemsec % 1000),
 
 						  logData.thread_id,
 						  logData.id,

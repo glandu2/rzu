@@ -9,8 +9,5 @@ DECLARE_CLASSCOUNT_STATIC(AdminServer::AdminInterface)
 #include "LogServer/ClientSession.h"
 DECLARE_CLASSCOUNT_STATIC(LogServer::ClientSession)
 
-#include "LogServer/DB_InsertLog.h"
-DECLARE_CLASSCOUNT_STATIC(LogServer::DB_InsertLog)
-
 #include "LogServer/LogPacketSession.h"
 DECLARE_CLASSCOUNT_STATIC(LogServer::LogPacketSession)

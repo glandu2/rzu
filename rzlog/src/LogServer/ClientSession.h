@@ -2,6 +2,7 @@
 #define UPLOADSERVER_CLIENTSESSION_H
 
 #include "LogPacketSession.h"
+#include <sql.h>
 
 #include "LS_11N4S.h"
 
@@ -16,12 +17,32 @@ class ClientSession : public LogPacketSession
 public:
 	ClientSession();
 
+	struct LogData {
+		SQL_TIMESTAMP_STRUCT date;
+		uint32_t thread_id;
+		uint16_t id;
+
+		int64_t n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11;
+		std::string s1, s2, s3, s4;
+	};
+
 protected:
 	void onPacketReceived(const LS_11N4S* packet);
+
+	bool isDateNeedNewFile(const struct tm& date);
+	bool checkName(std::string name);
+	void updateOpenedFile(const tm &date);
 
 private:
 	~ClientSession();
 	FILE* file;
+	std::string serverName;
+	struct {
+		uint16_t year;
+		uint8_t month;
+		uint8_t day;
+		uint8_t hour;
+	} fileDate;
 };
 
 }
