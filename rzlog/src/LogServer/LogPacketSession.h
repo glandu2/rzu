@@ -9,7 +9,7 @@ class SessionServerCommon;
 
 namespace LogServer {
 
-class RZU_EXTERN LogPacketSession : public SocketSession
+class LogPacketSession : public SocketSession
 {
 	DECLARE_CLASS(LogServer::LogPacketSession)
 
