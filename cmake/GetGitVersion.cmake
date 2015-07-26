@@ -27,8 +27,6 @@ else()
 	set(${CURRENT_DATE} 000000000000)
 endif()
 
-message("Build date: \"${CURRENT_DATE}\"")
-
 #string(TIMESTAMP CURRENT_DATE UTC)
 #set(CURRENT_DATE "11/01/2014 01:07")
 configure_file(${SRC} ${DST} @ONLY)

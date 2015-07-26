@@ -1,4 +1,17 @@
 function(add_exe name sources)
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/metadata.rc.in")
+    file(GLOB ICON_FILES "../res/*.ico")
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/metadata.rc"
+        COMMAND ${CMAKE_COMMAND} -D SRC="${CMAKE_CURRENT_SOURCE_DIR}/metadata.rc.in"
+            -D DST="${CMAKE_CURRENT_BINARY_DIR}/metadata.rc"
+            -D TARGET_NAME=${TARGET_NAME}
+            -D WORKINGDIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -P ${CUSTOM_CMAKE_MODULES_PATH}/GetGitVersion.cmake
+        DEPENDS ${ICON_FILES} "${CMAKE_CURRENT_SOURCE_DIR}/metadata.rc.in" ${CUSTOM_CMAKE_MODULES_PATH}/GetGitVersion.cmake
+    )
+    list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/metadata.rc" "${CMAKE_CURRENT_SOURCE_DIR}/metadata.rc.in")
+  endif()
   add_executable(${name} ${sources})
   # To support mixing linking in static and dynamic libraries, link each
   # library in with an extra call to target_link_libraries.

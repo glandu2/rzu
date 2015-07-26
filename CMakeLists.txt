@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 project(rzu-parent)
 enable_testing()
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+set(CUSTOM_CMAKE_MODULES_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+list(APPEND CMAKE_MODULE_PATH "${CUSTOM_CMAKE_MODULES_PATH}")
 
 set(CMAKE_VERBOSE_MAKEFILE false CACHE BOOL "Print compilation commands")
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (one of Debug, Release, RelWithDebInfo, MinSizeRel)")
