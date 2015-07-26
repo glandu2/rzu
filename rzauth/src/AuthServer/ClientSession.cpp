@@ -49,28 +49,27 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 
 	switch(packet->id) {
 		case TS_CA_VERSION::packetID:
-			onVersion(buffer.deserialize<TS_CA_VERSION>());
+			process<TS_CA_VERSION>(&buffer, &ClientSession::onVersion);
 			break;
 
 		case TS_CA_RSA_PUBLIC_KEY::packetID:
-			onRsaKey(buffer.deserialize<TS_CA_RSA_PUBLIC_KEY>());
+			process<TS_CA_RSA_PUBLIC_KEY>(&buffer, &ClientSession::onRsaKey);
 			break;
 
 		case TS_CA_ACCOUNT::packetID:
-			onAccount(buffer.deserialize<TS_CA_ACCOUNT>());
+			process<TS_CA_ACCOUNT>(&buffer, &ClientSession::onAccount);
 			break;
 
 		case TS_CA_IMBC_ACCOUNT::packetID:
-			onImbcAccount(buffer.deserialize<TS_CA_IMBC_ACCOUNT>());
+			process<TS_CA_IMBC_ACCOUNT>(&buffer, &ClientSession::onImbcAccount);
 			break;
 
-		case TS_CA_SERVER_LIST::packetID: {
-			onServerList(buffer.deserialize<TS_CA_SERVER_LIST>());
+		case TS_CA_SERVER_LIST::packetID:
+			process<TS_CA_SERVER_LIST>(&buffer, &ClientSession::onServerList);
 			break;
-		}
 
 		case TS_CA_SELECT_SERVER::packetID:
-			onSelectServer(buffer.deserialize<TS_CA_SELECT_SERVER>());
+			process<TS_CA_SELECT_SERVER>(&buffer, &ClientSession::onSelectServer);
 			break;
 
 		default:
@@ -212,7 +211,7 @@ void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT& packet) {
 	}
 
 	account = Utils::convertToString(packet.account, sizeof(packet.account)-1);
-	cryptedPassword = Utils::convertToDataArray(packet.password, packet.password_size);
+	cryptedPassword = Utils::convertToDataArray(packet.password, sizeof(packet.password), packet.password_size);
 
 	debug("IMBC Login request for account %s\n", account.c_str());
 
