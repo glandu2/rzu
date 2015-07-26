@@ -55,6 +55,10 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" S
   add_definitions(-D__STDC_FORMAT_MACROS)
 endif()
 
+if(DETECTED_OS_WIN)
+  add_definitions(-DNOMINMAX)
+endif()
+
 if(DETECTED_OS_MAC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
