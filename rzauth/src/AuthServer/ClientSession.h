@@ -31,21 +31,19 @@ public:
 
 protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
-	void detectClientVersion(const TS_MESSAGE* packet);
 
-	void onVersion(const TS_CA_VERSION& packet);
-	void onRsaKey(const TS_CA_RSA_PUBLIC_KEY& packet);
-	void onAccount(const TS_CA_ACCOUNT& packet);
-	void onImbcAccount(const TS_CA_IMBC_ACCOUNT& packet);
-	void onServerList(const TS_CA_SERVER_LIST& packet);
-	void onServerList_epic2(const TS_CA_SERVER_LIST packet);
-	void onSelectServer(const TS_CA_SELECT_SERVER& packet);
+	void onVersion(const TS_CA_VERSION* packet);
+	void onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet);
+	void onAccount(const TS_CA_ACCOUNT* packet);
+	void onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet);
+	void onServerList(const TS_CA_SERVER_LIST* packet);
+	void onSelectServer(const TS_CA_SELECT_SERVER* packet);
 	
 private:
 	~ClientSession();
 
 	bool useRsaAuth;
-	int version;
+	bool isEpic2;
 	uint16_t lastLoginServerId;
 	uint32_t serverIdxOffset;
 	unsigned char aesKey[32];
