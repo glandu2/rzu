@@ -14,6 +14,6 @@ echo ----rzchatgateway: && cd ../rzchatgateway && git $*
 echo ----rzplayercount: && cd ../rzplayercount && git $*
 echo ----rzlog: && cd ../rzlog && git $*
 echo ----rzfilter: && cd ../rzfilter && git $*
-echo ----VStructGen: && cd ../VStructGen && git $*
+#echo ----VStructGen: && cd ../VStructGen && git $*
 #echo RappelzClient: && cd ../RappelzClient && git $*
 
