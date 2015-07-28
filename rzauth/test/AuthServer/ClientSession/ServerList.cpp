@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "Packets/TS_AC_SERVER_LIST.h"
+#include "Packets/Flat/TS_AC_SERVER_LIST.h"
 #include "Packets/TS_AC_RESULT.h"
 #include "Packets/TS_CA_VERSION.h"
 #include "Packets/TS_CA_SERVER_LIST.h"
