@@ -5,7 +5,7 @@
 #include "Packets/TS_GA_LOGIN.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
 #include "Packets/TS_AG_KICK_CLIENT.h"
-#include "Packets/TS_AC_SERVER_LIST.h"
+#include "Packets/Flat/TS_AC_SERVER_LIST.h"
 #include "Packets/TS_GA_CLIENT_LOGOUT.h"
 #include "Common.h"
 #include "../ClientSession/Common.h"
