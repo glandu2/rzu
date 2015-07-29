@@ -7,6 +7,7 @@
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AC_SERVER_LIST.h"
+#include "Packets/Epics.h"
 
 #include "PacketFilter.h"
 
@@ -52,23 +53,27 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == TS_AC_SERVER_LIST::packetID && CONFIG_GET()->client.authMode.get() == true) {
-		char* buffer = (char*) malloc(packet->size);
-		memcpy(buffer, packet, packet->size);
+		MessageBuffer buffer(packet, EPIC_9_1);
+		TS_AC_SERVER_LIST serverList;
 
-		TS_AC_SERVER_LIST* serverList = reinterpret_cast<TS_AC_SERVER_LIST*>(buffer);
-		TS_AC_SERVER_LIST::TS_SERVER_INFO* serverDetailList = reinterpret_cast<TS_AC_SERVER_LIST::TS_SERVER_INFO*>(buffer+sizeof(TS_AC_SERVER_LIST));
+		serverList.deserialize(&buffer);
+		if(!buffer.checkFinalSize()) {
+			error("Unsupported packet TS_AC_SERVER_LIST, size: %d", packet->size);
+			return;
+		}
+
+		std::vector<TS_SERVER_INFO>& serverDetailList = serverList.servers;
 
 		std::string filterIp = CONFIG_GET()->client.gameFilterIp.get();
 		int filterPort = CONFIG_GET()->client.gameFilterPort.get();
 
-		for(int i = 0; i < serverList->count; i++) {
-			TS_AC_SERVER_LIST::TS_SERVER_INFO *currentServerInfo = &serverDetailList[i];
-			strcpy(currentServerInfo->server_ip, filterIp.c_str());
+		for(size_t i = 0; i < serverDetailList.size(); i++) {
+			TS_SERVER_INFO& currentServerInfo = serverDetailList[i];
+			strcpy(currentServerInfo.server_ip, filterIp.c_str());
 			if(filterPort > 0)
-				currentServerInfo->server_port = filterPort;
+				currentServerInfo.server_port = filterPort;
 		}
-		sendPacket(serverList);
-		free(buffer);
+		PacketSession::sendPacket(serverList, EPIC_9_1);
 	} else {
 		debug("Received packet id %d from server, forwarding to client\n", packet->id);
 		if(packetFilter->onServerPacket(this, &serverSession, packet))
