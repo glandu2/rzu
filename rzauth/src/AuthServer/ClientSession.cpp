@@ -15,6 +15,7 @@
 
 #include "LogServerClient.h"
 
+#include "Packets/Epics.h"
 #include "Packets/TS_AC_RESULT.h"
 #include "Packets/TS_SC_RESULT.h"
 #include "Packets/TS_AC_AES_KEY_IV.h"
@@ -59,10 +60,7 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		case TS_CA_SERVER_LIST::packetID:
-			if(!isEpic2)
-				onServerList(static_cast<const TS_CA_SERVER_LIST*>(packet));
-			else
-				onServerList_epic2(static_cast<const TS_CA_SERVER_LIST*>(packet));
+			onServerList(static_cast<const TS_CA_SERVER_LIST*>(packet));
 			break;
 
 		case TS_CA_SELECT_SERVER::packetID:
@@ -282,8 +280,8 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 }
 
 void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
-	TS_AC_SERVER_LIST* serverListPacket;
-	unsigned int j, count, maxPlayers;
+	TS_AC_SERVER_LIST serverListPacket;
+
 	int maxPublicServerBaseIdx = CONFIG_GET()->auth.client.maxPublicServerIdx;
 
 	// Check if user authenticated
@@ -295,16 +293,11 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 	const std::unordered_map<uint16_t, GameData*>& serverList = GameData::getServerList();
 	std::unordered_map<uint16_t, GameData*>::const_iterator it, itEnd;
 
-	count = serverList.size();
-	maxPlayers = CONFIG_GET()->auth.game.maxPlayers;
+	unsigned int maxPlayers = CONFIG_GET()->auth.game.maxPlayers;
 
-	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST, TS_AC_SERVER_LIST::TS_SERVER_INFO>(count);
+	serverListPacket.last_login_server_idx = lastLoginServerId;
 
-	serverListPacket->count = 0;
-	serverListPacket->last_login_server_idx = lastLoginServerId;
-
-
-	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
+	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
 		GameData* serverInfo = it->second;
 
 		//servers with their index higher than maxPublicServerBaseIdx + serverIdxOffset are hidden
@@ -318,72 +311,21 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		if(!serverInfo->isReady())
 			continue;
 
-		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
-		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
-		serverListPacket->servers[j].server_port = serverInfo->getServerPort();
-		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
-		serverListPacket->servers[j].is_adult_server = serverInfo->getIsAdultServer();
-		strcpy(serverListPacket->servers[j].server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
+		TS_SERVER_INFO serverData;
+		serverData.server_idx = serverInfo->getServerIdx();
+		serverData.server_port = serverInfo->getServerPort();
+		serverData.is_adult_server = serverInfo->getIsAdultServer();
+		strcpy(serverData.server_ip, serverInfo->getServerIp().c_str());
+		strcpy(serverData.server_name, serverInfo->getServerName().c_str());
+		strcpy(serverData.server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
+
 		uint32_t userRatio = serverInfo->getPlayerCount() * 100 / maxPlayers;
-		serverListPacket->servers[j].user_ratio = (userRatio > 100)? 100 : userRatio;
+		serverData.user_ratio = (userRatio > 100)? 100 : userRatio;
 
-		serverListPacket->count++;
-		j++;
+		serverListPacket.servers.push_back(serverData);
 	}
 
-	sendPacket(serverListPacket);
-	TS_MESSAGE_WNA::destroy(serverListPacket);
-}
-
-void ClientSession::onServerList_epic2(const TS_CA_SERVER_LIST* packet) {
-	TS_AC_SERVER_LIST_EPIC2* serverListPacket;
-	unsigned int j, count, maxPlayers;
-	int maxPublicServerBaseIdx = CONFIG_GET()->auth.client.maxPublicServerIdx;
-
-	// Check if user authenticated
-	if(clientData == nullptr) {
-		abortSession();
-		return;
-	}
-
-	const std::unordered_map<uint16_t, GameData*>& serverList = GameData::getServerList();
-	std::unordered_map<uint16_t, GameData*>::const_iterator it, itEnd;
-
-	count = serverList.size();
-	maxPlayers = CONFIG_GET()->auth.game.maxPlayers;
-
-	serverListPacket = TS_MESSAGE_WNA::create<TS_AC_SERVER_LIST_EPIC2, TS_AC_SERVER_LIST_EPIC2::TS_SERVER_INFO>(count);
-
-	serverListPacket->count = 0;
-
-
-	for(j = 0, it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
-		GameData* serverInfo = it->second;
-
-		//servers with their index higher than maxPublicServerBaseIdx + serverIdxOffset are hidden
-		//serverIdxOffset is a per user value from the DB, default to 0
-		//maxPublicServerBaseIdx is a config value, default to 30
-		//So by default, servers with index > 30 are not shown in client's server list
-		if(serverInfo->getServerIdx() > maxPublicServerBaseIdx + serverIdxOffset)
-			continue;
-
-		//Don't display not ready game servers (offline or not yet received all player list)
-		if(!serverInfo->isReady())
-			continue;
-
-		serverListPacket->servers[j].server_idx = serverInfo->getServerIdx();
-		strcpy(serverListPacket->servers[j].server_ip, serverInfo->getServerIp().c_str());
-		serverListPacket->servers[j].server_port = serverInfo->getServerPort();
-		strcpy(serverListPacket->servers[j].server_name, serverInfo->getServerName().c_str());
-		uint32_t userRatio = serverInfo->getPlayerCount() * 100 / maxPlayers;
-		serverListPacket->servers[j].user_ratio = (userRatio > 100)? 100 : userRatio;
-
-		serverListPacket->count++;
-		j++;
-	}
-
-	sendPacket(serverListPacket);
-	TS_MESSAGE_WNA::destroy(serverListPacket);
+	sendPacket(serverListPacket, isEpic2 ? EPIC_2_1 : EPIC_9_1);
 }
 
 void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
