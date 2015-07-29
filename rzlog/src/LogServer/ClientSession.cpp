@@ -4,6 +4,7 @@
 #include "Utils.h"
 #include <time.h>
 #include <string.h>
+#include "PrintfFormats.h"
 
 namespace LogServer {
 
@@ -135,7 +136,7 @@ void ClientSession::onPacketReceived(const LS_11N4S* packet) {
 		static char lineBuffer[20 + 20*13 + 255*4 + 18];
 		int len = sprintf(lineBuffer,
 						  "%04d-%02d-%02d %02d:%02d:%02d.%03d\t"
-						  "%d\t%d\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t"
+						  "%d\t%d\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t"
 						  "%s\t%s\t%s\t%s\n",
 						  logData.date.year,
 						  logData.date.month,

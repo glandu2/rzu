@@ -62,7 +62,7 @@ void LogPacketSession::onDataReceived() {
 		if(buffer->currentMessage.size != 0 && buffer->discardPacket) {
 			buffer->currentMessage.size -= (uint32_t) inputStream->discard(buffer->currentMessage.size);
 		} else if(buffer->currentMessage.size != 0 && inputStream->getAvailableBytes() >= buffer->currentMessage.size) {
-			if(buffer->currentMessage.size+4 > buffer->bufferSize) {
+			if(buffer->currentMessage.size+4u > buffer->bufferSize) {
 				if(buffer->bufferSize)
 					delete[] buffer->buffer;
 				buffer->bufferSize = buffer->currentMessage.size+4;
