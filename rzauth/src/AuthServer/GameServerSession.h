@@ -7,6 +7,7 @@
 #include <string>
 #include "ClientData.h"
 #include <list>
+#include "DB_SecurityNoCheck.h"
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_GA_LOGIN.h"
@@ -37,7 +38,7 @@ public:
 
 	void setGameData(GameData* gameData);
 
-	void onSecurityNoCheckResult(DB_SecurityNoCheck* securityNoCheckDb, const std::string& account, int32_t mode, bool ok);
+	void onSecurityNoCheckResult(DB_SecurityNoCheck *query);
 
 protected:
 	void onConnected();
@@ -64,7 +65,7 @@ private:
 	bool securityNoSendMode; //if true, send mode in security no reply (with e6+)
 
 	std::vector<TS_GA_ACCOUNT_LIST::AccountInfo> alreadyConnectedAccounts;
-	std::list<DB_SecurityNoCheck*> securityNoCheckQueries;
+	DbQueryJobRef securityNoCheckQueries;
 };
 
 } // namespace AuthServer

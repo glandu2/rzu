@@ -7,7 +7,6 @@
 #include "LogServerClient.h"
 #include <time.h>
 #include "GameData.h"
-#include "DB_SecurityNoCheck.h"
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
@@ -48,11 +47,6 @@ GameServerSession::~GameServerSession() {
 		}
 	}
 	// else the server connection changed (this one was maybe halfopen)
-
-	for(auto it = securityNoCheckQueries.begin(); it != securityNoCheckQueries.end(); ++it) {
-		DB_SecurityNoCheck* securityNoCheckDb = *it;
-		securityNoCheckDb->cancel();
-	}
 }
 
 void GameServerSession::onConnected() {
@@ -356,30 +350,32 @@ void GameServerSession::onSecurityNoCheck(const TS_GA_SECURITY_NO_CHECK *packet)
 	else
 		securityNoSendMode = false;
 
-	securityNoCheckQueries.push_back(new DB_SecurityNoCheck(this, account, securityNo, mode));
+	DB_SecurityNoCheckData::Input input(account, securityNo, mode);
+	securityNoCheckQueries.executeDbQuery<DB_SecurityNoCheckData, DB_SecurityNoCheck>(this, &GameServerSession::onSecurityNoCheckResult, input);
 }
 
-void GameServerSession::onSecurityNoCheckResult(DB_SecurityNoCheck* securityNoCheckDb, const std::string& account, int32_t mode, bool ok) {
-	if(ok)
-		debug("Security no check for account %s: ok\n", account.c_str());
-	else
-		debug("Security no check for account %s: wrong\n", account.c_str());
+void GameServerSession::onSecurityNoCheckResult(DB_SecurityNoCheck *query) {
+	bool ok = query->getResults().size() == 1;
+	DB_SecurityNoCheckData::Input* input = query->getInput();
 
-	securityNoCheckQueries.remove(securityNoCheckDb);
+	if(ok)
+		debug("Security no check for account %s: ok\n", input->account.c_str());
+	else
+		debug("Security no check for account %s: wrong\n", input->account.c_str());
 
 	if(securityNoSendMode == true) {
 		TS_AG_SECURITY_NO_CHECK securityNoCheckPacket;
 		TS_MESSAGE::initMessage(&securityNoCheckPacket);
 
-		strcpy(securityNoCheckPacket.account, account.c_str());
-		securityNoCheckPacket.mode = mode;
+		strcpy(securityNoCheckPacket.account, input->account.c_str());
+		securityNoCheckPacket.mode = input->mode;
 		securityNoCheckPacket.result = ok;
 		sendPacket(&securityNoCheckPacket);
 	} else {
 		TS_AG_SECURITY_NO_CHECK_EPIC5 securityNoCheckPacket;
 		TS_MESSAGE::initMessage(&securityNoCheckPacket);
 
-		strcpy(securityNoCheckPacket.account, account.c_str());
+		strcpy(securityNoCheckPacket.account, input->account.c_str());
 		securityNoCheckPacket.result = ok;
 		sendPacket(&securityNoCheckPacket);
 	}

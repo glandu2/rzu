@@ -10,9 +10,6 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
-#include "DB_Account.h"
-#include "DB_UpdateLastServerIdx.h"
-
 #include "LogServerClient.h"
 
 #include "Packets/Epics.h"
@@ -29,16 +26,13 @@ ClientSession::ClientSession()
 	  isEpic2(false),
 	  lastLoginServerId(1),
 	  serverIdxOffset(0),
-	  clientData(nullptr),
-	  dbQuery(nullptr)
+	  clientData(nullptr)
 {
 }
 
 ClientSession::~ClientSession() {
 	if(clientData)
 		ClientData::removeClient(clientData);
-	if(dbQuery)
-		dbQuery->cancel();
 }
 
 void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
@@ -99,6 +93,7 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		sendPacket(&result);
 	} else if(!memcmp(packet->szVersion, "200609280", 9) || !memcmp(packet->szVersion, "Creer", 5)) {
 		isEpic2 = true;
+		debug("Client is epic 2\n");
 	}
 }
 
@@ -158,7 +153,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	std::string account;
 	std::vector<unsigned char> cryptedPassword;
 
-	if(dbQuery != nullptr) {
+	if(dbQuery.inProgress()) {
 		TS_AC_RESULT result;
 		TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 		result.request_msg_id = TS_CA_ACCOUNT::packetID;
@@ -178,7 +173,9 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 		if(packet->size == sizeof(TS_CA_ACCOUNT_EPIC4)) {
 			const TS_CA_ACCOUNT_EPIC4* accountE4 = reinterpret_cast<const TS_CA_ACCOUNT_EPIC4*>(packet);
 
-			debug("Client is epic 4 or older\n");
+			// If not already logged, log client epic <= 4
+			if(!isEpic2)
+				debug("Client is epic 4 or older\n");
 
 			account = Utils::convertToString(accountE4->account, sizeof(accountE4->account)-1);
 			cryptedPassword = Utils::convertToDataArray(accountE4->password, sizeof(accountE4->password));
@@ -190,14 +187,15 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 	debug("Login request for account %s\n", account.c_str());
 
-	dbQuery = new DB_Account(this, account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_Account::EM_AES : DB_Account::EM_DES, cryptedPassword, aesKey);
+	DB_AccountData::Input input(account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_DES, cryptedPassword, aesKey);
+	dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
 }
 
 void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
 	std::string account;
 	std::vector<unsigned char> cryptedPassword;
 
-	if(dbQuery != nullptr) {
+	if(dbQuery.inProgress()) {
 		TS_AC_RESULT result;
 		TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 		result.request_msg_id = TS_CA_ACCOUNT::packetID;
@@ -220,20 +218,31 @@ void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
 
 	debug("IMBC Login request for account %s\n", account.c_str());
 
-	dbQuery = new DB_Account(this, account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_Account::EM_AES : DB_Account::EM_None, cryptedPassword, aesKey);
+	DB_AccountData::Input input(account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_None, cryptedPassword, aesKey);
+	dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
 }
 
-void ClientSession::clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang, uint32_t serverIdxOffset, bool block) {
+void ClientSession::clientAuthResult(DB_Account* query) {
 	TS_AC_RESULT result;
 	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
+
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
+	result.login_flag = 0;
 
-	dbQuery = nullptr;
+	auto results = query->getResults();
+	if(results.size() == 0 || results.size() > 1) {
+		result.result = TS_RESULT_NOT_EXIST;
+		sendPacket(&result);
+		return;
+	}
 
-	if(authOk == false) {
+	const DB_AccountData::Output& output = results[0];
+	const DB_AccountData::Input* input = query->getInput();
+
+	if(output.ok == false || output.auth_ok == false) {
 		result.result = TS_RESULT_NOT_EXIST;
 		result.login_flag = 0;
-	} else if(block == true) {
+	} else if(output.block == true) {
 		result.result = TS_RESULT_ACCESS_DENIED;
 		result.login_flag = 0;
 	} else if(clientData != nullptr) { //already connected
@@ -242,11 +251,11 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 		info("Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
 		ClientData* oldClient;
-		clientData = ClientData::tryAddClient(this, account, accountId, age, eventCode, pcBang, getStream()->getRemoteIp(), &oldClient);
+		clientData = ClientData::tryAddClient(this, input->account, output.account_id, output.age, output.event_code, output.pcbang, getStream()->getRemoteIp(), &oldClient);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
-			info("Client %s already connected\n", account.c_str());
+			info("Client %s already connected\n", input->account.c_str());
 
 			char ipStr[INET_ADDRSTRLEN];
 			GameData* oldCientGameData = oldClient->getGameServer();
@@ -254,13 +263,13 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 			uv_inet_ntop(AF_INET, &oldClient->ip, ipStr, sizeof(ipStr));
 
 			if(!oldCientGameData) {
-				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_AUTH_LOGIN, accountId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-										 account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
+				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_AUTH_LOGIN, output.account_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+										 input->account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
 
 				oldClient->getClientSession()->abortSession();
 			} else {
-				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_GAME_LOGIN, accountId, 0, 0, oldCientGameData->getServerIdx(), 0, 0, 0, 0, 0, 0, 0,
-										 account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
+				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_GAME_LOGIN, output.account_id, 0, 0, oldCientGameData->getServerIdx(), 0, 0, 0, 0, 0, 0, 0,
+										 input->account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
 
 				if(oldClient->isConnectedToGame())
 					oldCientGameData->kickClient(oldClient);
@@ -271,8 +280,8 @@ void ClientSession::clientAuthResult(bool authOk, const std::string& account, ui
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
-			this->lastLoginServerId = lastLoginServerIdx;
-			this->serverIdxOffset = serverIdxOffset;
+			this->lastLoginServerId = output.last_login_server_idx;
+			this->serverIdxOffset = output.server_idx_offset;
 		}
 	}
 
@@ -325,7 +334,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		serverListPacket.servers.push_back(serverData);
 	}
 
-	sendPacket(serverListPacket, isEpic2 ? EPIC_2_1 : EPIC_9_1);
+	sendPacket(serverListPacket, isEpic2 ? EPIC_2 : EPIC_9_1);
 }
 
 void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
@@ -340,11 +349,13 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 		GameData* server = serverList.at(packet->server_idx);
 		uint64_t oneTimePassword = ((uint64_t)rand())*rand()*rand()*rand();
 
-		new DB_UpdateLastServerIdx(clientData->accountId, packet->server_idx);
+		DbQueryJob<DB_UpdateLastServerIdx>::executeNoResult(DB_UpdateLastServerIdx::Input(clientData->accountId, packet->server_idx));
 
 		//clientData now managed by target GS
 		clientData->switchClientToServer(server, oneTimePassword);
 		clientData = nullptr;
+
+		debug("Client choose server idx %d\n", packet->server_idx);
 
 		if(useRsaAuth) {
 			TS_AC_SELECT_SERVER_RSA result;
