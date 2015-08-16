@@ -2,6 +2,8 @@
 #include "AuthServerSession.h"
 #include <string.h>
 #include "ConfigInfo.h"
+#include "Utils.h"
+#include "ClientSession.h"
 
 #include "Packets/PacketEnums.h"
 #include "Packets/TS_GA_LOGIN.h"
@@ -52,18 +54,27 @@ AuthServerSession::~AuthServerSession() {
 	instance = nullptr;
 }
 
-void AuthServerSession::loginClient(const char *account) {
+void AuthServerSession::loginClient(ClientSession* clientSession, const std::string &account, uint64_t oneTimePassword) {
 	TS_GA_CLIENT_LOGIN loginMsg;
-	TS_MESSAGE::initMessage<TS_GA_CLIENT_LOGIN>(&loginMsg);
 
-	strcpy(loginMsg.account, account);
-	loginMsg.one_time_key = 0;
+	if(pendingClients.find(account) != pendingClients.end()) {
+		warn("Client %s already logging in\n", account.c_str());
+		return;
+	}
+
+	debug("Login request for account %s\n", account.c_str());
+
+	TS_MESSAGE::initMessage(&loginMsg);
+
+	strcpy(loginMsg.account, account.c_str());
+	loginMsg.one_time_key = oneTimePassword;
 	sendPacket(&loginMsg);
+	pendingClients.insert(std::make_pair(account, clientSession));
 }
 
 void AuthServerSession::logoutClient(const char *account) {
 	TS_GA_CLIENT_LOGOUT loginMsg;
-	TS_MESSAGE::initMessage<TS_GA_CLIENT_LOGOUT>(&loginMsg);
+	TS_MESSAGE::initMessage(&loginMsg);
 
 	strcpy(loginMsg.account, account);
 	loginMsg.nContinuousPlayTime = 0;
@@ -78,18 +89,10 @@ cval<bool>& AuthServerSession::getAutoStartConfig() {
 	return config->authAutoConnect;
 }
 
-void AuthServerSession::onPacketReceived(const TS_MESSAGE* packet) {
-	switch(packet->id) {
-		case TS_AG_LOGIN_RESULT::packetID:
-			onLoginResult(static_cast<const TS_AG_LOGIN_RESULT*>(packet));
-			break;
-	}
-}
-
 void AuthServerSession::onConnected() {
 	TS_GA_LOGIN loginMsg;
 
-	TS_MESSAGE::initMessage<TS_GA_LOGIN>(&loginMsg);
+	TS_MESSAGE::initMessage(&loginMsg);
 	loginMsg.server_idx = config->serverIdx;
 	strncpy(loginMsg.server_name, config->name.get().c_str(), sizeof(loginMsg.server_name));
 	strncpy(loginMsg.server_screenshot_url, config->screenshotUrl.get().c_str(), sizeof(loginMsg.server_screenshot_url));
@@ -100,11 +103,40 @@ void AuthServerSession::onConnected() {
 	sendPacket(&loginMsg);
 }
 
+void AuthServerSession::onPacketReceived(const TS_MESSAGE* packet) {
+	switch(packet->id) {
+		case TS_AG_LOGIN_RESULT::packetID:
+			onLoginResult(static_cast<const TS_AG_LOGIN_RESULT*>(packet));
+			break;
+
+		case TS_AG_CLIENT_LOGIN::packetID:
+			onClientLoginResult(static_cast<const TS_AG_CLIENT_LOGIN*>(packet));
+			break;
+	}
+}
+
 void AuthServerSession::onLoginResult(const TS_AG_LOGIN_RESULT* packet) {
 	if(packet->result != TS_RESULT_SUCCESS)
 		error("Login to auth failed, result: %d\n", packet->result);
 	else
 		info("Registered with auth successfully\n");
+}
+
+void AuthServerSession::onClientLoginResult(const TS_AG_CLIENT_LOGIN* packet) {
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
+	auto it = pendingClients.find(account);
+	if(it != pendingClients.end()) {
+		ClientSession* client = it->second;
+		pendingClients.erase(it);
+		client->onAccountLoginResult(packet->result,
+									 account,
+									 packet->nAccountID,
+									 packet->nPCBangUser,
+									 packet->nEventCode,
+									 packet->nAge,
+									 packet->nContinuousPlayTime,
+									 packet->nContinuousLogoutTime);
+	}
 }
 
 } //namespace UploadServer

@@ -11,6 +11,7 @@
 
 #include "GameServer/AuthServerSession.h"
 #include "GameServer/ClientSession.h"
+#include "GameServer/Database/CharacterList.h"
 
 #include "AdminServer/AdminInterface.h"
 
@@ -32,6 +33,11 @@ int main(int argc, char **argv) {
 
 	GameServer::AuthServerSession::init();
 
+	DbConnectionPool dbConnectionPool;
+
+	if(DbQueryJob<Database::CharacterList>::init(&dbConnectionPool) == false)
+		return 1;
+
 	ConfigInfo::get()->init(argc, argv);
 
 	{
@@ -49,9 +55,11 @@ int main(int argc, char **argv) {
 						  CONFIG_GET()->trafficDump.dir,
 						  CONFIG_GET()->trafficDump.file,
 						  GlobalCoreConfig::get()->log.maxQueueSize);
-
+		Log::setDefaultPacketLogger(&trafficLogger);
 
 		ConfigInfo::get()->dump();
+
+		dbConnectionPool.checkConnection(CONFIG_GET()->game.db.connectionString.get().c_str());
 
 		CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
 
@@ -74,7 +82,9 @@ void runServers(Log *trafficLogger) {
 				CONFIG_GET()->admin.telnet.port);
 	SessionServer<GameServer::ClientSession> clientsServer(
 				CONFIG_GET()->game.clients.listenIp,
-				CONFIG_GET()->game.clients.port);
+				CONFIG_GET()->game.clients.port,
+				nullptr,
+				trafficLogger);
 	GameServer::AuthServerSession authConnection;
 
 	banManager.loadFile();
