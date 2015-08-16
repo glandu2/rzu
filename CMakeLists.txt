@@ -134,10 +134,6 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzfilter/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzfilter" rzfilter)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/VStructGen/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/VStructGen" VStructGen)
-endif()
-
 # Packaging
 
 SET(CPACK_NSIS_DISPLAY_NAME "Rappelz Emu - Glandu2")
