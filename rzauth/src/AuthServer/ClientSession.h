@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <string>
 #include "ClientData.h"
+#include "DB_Account.h"
+#include "DB_UpdateLastServerIdx.h"
 
 #include "Packets/TS_CA_VERSION.h"
 #include "Packets/TS_CA_RSA_PUBLIC_KEY.h"
@@ -27,7 +29,7 @@ class ClientSession : public EncryptedSession<PacketSession>
 public:
 	ClientSession();
 
-	void clientAuthResult(bool authOk, const std::string& account, uint32_t accountId, uint32_t age, uint16_t lastLoginServerIdx, uint32_t eventCode, uint32_t pcBang, uint32_t serverMask, bool block);
+	void clientAuthResult(DB_Account *query);
 
 protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
@@ -49,7 +51,7 @@ private:
 	unsigned char aesKey[32];
 
 	ClientData* clientData;
-	IDbQueryJob* dbQuery;
+	DbQueryJobRef dbQuery;
 };
 
 } // namespace AuthServer

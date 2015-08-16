@@ -65,23 +65,31 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 		case TS_SC_CHARACTER_LIST::packetID: {
 			TS_CS_LOGIN loginPkt;
 			TS_TIMESYNC timeSyncPkt;
-			const TS_SC_CHARACTER_LIST* charListPkt = reinterpret_cast<const TS_SC_CHARACTER_LIST*>(packet);
+			MessageBuffer buffer(packet, EPIC_9_1);
 			bool characterInList = false;
+
+			TS_SC_CHARACTER_LIST charListPkt;
+			charListPkt.deserialize(&buffer);
+			if(!buffer.checkFinalSize()) {
+				error("Received packet with invalid data: id: %d, size: %d, field: %s\n", buffer.getMessageId(), buffer.getSize(), buffer.getFieldInOverflow().c_str());
+				abortSession();
+				break;
+			}
 
 			TS_MESSAGE::initMessage<TS_CS_LOGIN>(&loginPkt);
 			TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
 
 			debug("Character list: \n");
-			for(int i = 0; i < charListPkt->count; i++) {
-				debug(" - %s\n", charListPkt->characters[i].name);
-				if(!strcmp(playername.c_str(), charListPkt->characters[i].name))
+			for(int i = 0; i < charListPkt.characters.size(); i++) {
+				debug(" - %s\n", charListPkt.characters[i].name);
+				if(!strcmp(playername.c_str(), charListPkt.characters[i].name))
 					characterInList = true;
 			}
 
 			if(!characterInList) {
 				warn("Character \"%s\" not in character list: \n", playername.c_str());
-				for(int i = 0; i < charListPkt->count; i++) {
-					warn(" - %s\n", charListPkt->characters[i].name);
+				for(int i = 0; i < charListPkt.characters.size(); i++) {
+					warn(" - %s\n", charListPkt.characters[i].name);
 				}
 			}
 

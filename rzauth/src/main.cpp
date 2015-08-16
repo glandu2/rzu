@@ -76,11 +76,15 @@ int main(int argc, char **argv) {
 
 	DbConnectionPool dbConnectionPool;
 
-	if(AuthServer::DB_Account::init(&dbConnectionPool, CONFIG_GET()->auth.client.desKey) == false)
+	if(!DbQueryJob<AuthServer::DB_AccountData>::init(&dbConnectionPool))
 		return 1;
-	if(AuthServer::DB_UpdateLastServerIdx::init(&dbConnectionPool) == false)
+	if(!DbQueryJob<AuthServer::DB_SecurityNoCheckData>::init(&dbConnectionPool))
 		return 1;
-	if(AuthServer::DB_SecurityNoCheck::init(&dbConnectionPool) == false)
+	if(!DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::init(&dbConnectionPool))
+		return 1;
+	if(!AuthServer::DB_Account::init(CONFIG_GET()->auth.client.desKey))
+		return 1;
+	if(!AuthServer::DB_SecurityNoCheck::init())
 		return 1;
 
 	ConfigInfo::get()->init(argc, argv);
@@ -113,8 +117,10 @@ int main(int argc, char **argv) {
 	runServers(&trafficLogger);
 
 	//Make valgrind happy
-	AuthServer::DB_UpdateLastServerIdx::deinit();
 	AuthServer::DB_Account::deinit();
+	DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::deinit();
+	DbQueryJob<AuthServer::DB_SecurityNoCheckData>::deinit();
+	DbQueryJob<AuthServer::DB_AccountData>::deinit();
 	EventLoop::getInstance()->deleteObjects();
 
 	return 0;

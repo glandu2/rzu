@@ -3,6 +3,7 @@
 
 #include "ConfigInfo.h"
 #include "Utils.h"
+#include "Packets/Epics.h"
 
 struct DbConfig : public IListener {
 	cval<std::string> &driver, &server, &name, &account, &password, &salt;
@@ -55,17 +56,26 @@ struct GlobalConfig {
 	} admin;
 
 	struct GameConfig {
+		DbConfig db;
+
 		struct ClientsConfig {
 			cval<std::string> &listenIp;
-			cval<int> &port;
+			cval<int> &port, &idleTimeout;
 			cval<bool> &autoStart;
+			cval<int> &epic;
 
 			ClientsConfig() :
 				listenIp(CFG_CREATE("game.clients.ip", "127.0.0.1")),
 				port(CFG_CREATE("game.clients.port", 4514)),
-				autoStart(CFG_CREATE("game.clients.autostart", true))
+				idleTimeout(CFG_CREATE("game.clients.idletimeout", 300)),
+				autoStart(CFG_CREATE("game.clients.autostart", true)),
+				epic(CFG_CREATE("game.clients.epic", EPIC_9_1))
 			{}
 		} clients;
+
+		GameConfig() :
+			db("game.")
+		{}
 	} game;
 
 	struct TrafficDump {
@@ -75,7 +85,7 @@ struct GlobalConfig {
 		TrafficDump() :
 			enable(CFG_CREATE("trafficdump.enable", false)),
 			dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
-			file(CFG_CREATE("trafficdump.file", "trafficdump.log")),
+			file(CFG_CREATE("trafficdump.file", "game.log")),
 			level(CFG_CREATE("trafficdump.level", "debug")),
 			consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal"))
 		{

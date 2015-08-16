@@ -4,8 +4,11 @@
 #include "PacketSession.h"
 #include "StartableObject.h"
 #include "Packets/TS_AG_LOGIN_RESULT.h"
+#include "Packets/TS_AG_CLIENT_LOGIN.h"
 
 namespace GameServer {
+
+class ClientSession;
 
 class AuthServerSession : public PacketSession, public StartableObject
 {
@@ -18,14 +21,14 @@ public:
 
 	bool start();
 	void stop() { closeSession(); }
-	bool isStarted() { return getStream() && getStream()->getState() == Stream::ConnectedState; }
+	bool isStarted() override { return getStream() && getStream()->getState() == Stream::ConnectedState; }
 
 	AuthServerSession();
 	~AuthServerSession();
 
 	static AuthServerSession* get() { return instance; }
 
-	void loginClient(const char* account);
+	void loginClient(ClientSession *clientSession, const std::string& account, uint64_t oneTimePassword);
 	void logoutClient(const char* account);
 
 protected:
@@ -34,8 +37,10 @@ protected:
 
 	void onConnected();
 	void onLoginResult(const TS_AG_LOGIN_RESULT* packet);
+	void onClientLoginResult(const TS_AG_CLIENT_LOGIN* packet);
 
 	static AuthServerSession* instance;
+	std::unordered_map<std::string, ClientSession*> pendingClients;
 };
 
 }

@@ -9,19 +9,17 @@ class DbConnectionPool;
 
 namespace AuthServer {
 
-class DB_UpdateLastServerIdx : public DbQueryJob<DB_UpdateLastServerIdx>
+struct DB_UpdateLastServerIdx
 {
-	DECLARE_CLASS(AuthServer::DB_UpdateLastServerIdx)
+	struct Input {
+		Input(uint32_t accountId, uint16_t lastLoginServerIdx) : accountId(accountId), lastLoginServerIdx(lastLoginServerIdx) {}
+		Input() {}
 
-public:
-	static bool init(DbConnectionPool* dbConnectionPool);
-	static void deinit();
+		uint32_t accountId;
+		uint16_t lastLoginServerIdx;
+	};
 
-	DB_UpdateLastServerIdx(uint32_t accountId, uint16_t lastLoginServerIdx);
-
-private:
-	uint32_t accountId;
-	uint16_t lastLoginServerIdx;
+	struct Output {};
 };
 
 } // namespace AuthServer
