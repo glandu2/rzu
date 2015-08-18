@@ -66,20 +66,10 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 			packet->process(this, &GameSession::onCharacterList, EPIC_9_1);
 			break;
 
-		case TS_SC_LOGIN_RESULT::packetID: {
-				TS_SC_LOGIN_RESULT* loginResultPkt = (TS_SC_LOGIN_RESULT*) packet;
-				handle = loginResultPkt->handle;
-				connectedInGame = true;
-				info("Connected with character %s\n", playername.c_str());
+		case TS_SC_LOGIN_RESULT::packetID:
+			packet->process(this, &GameSession::onCharacterLoginResult, EPIC_9_1);
+			break;
 
-				for(size_t i = 0; i < messageQueue.size(); i++) {
-					TS_CS_CHAT_REQUEST* chatRqst = messageQueue.at(i);
-					sendPacket(chatRqst);
-					TS_MESSAGE_WNA::destroy(chatRqst);
-				}
-				messageQueue.clear();
-				break;
-			}
 		case TS_SC_ENTER::packetID: {
 			TS_SC_ENTER* enterPkt = (TS_SC_ENTER*) packet;
 			if(enterPkt->type == 0 && enterPkt->ObjType == 0) {
@@ -147,6 +137,19 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	sendPacket(&timeSyncPkt);
 
 	ircClient->sendMessage("", "\001ACTION is connected to the game server\001");
+}
+
+void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT *packet) {
+	handle = packet->handle;
+	connectedInGame = true;
+	info("Connected with character %s\n", playername.c_str());
+
+	for(size_t i = 0; i < messageQueue.size(); i++) {
+		TS_CS_CHAT_REQUEST* chatRqst = messageQueue.at(i);
+		sendPacket(chatRqst);
+		TS_MESSAGE_WNA::destroy(chatRqst);
+	}
+	messageQueue.clear();
 }
 
 void GameSession::sendMsgToGS(int type, const char* sender, const char* target, std::string msg) {
