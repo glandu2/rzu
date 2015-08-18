@@ -9,13 +9,13 @@ PacketFilter::PacketFilter()
 
 void PacketFilter::sendChatMessage(IFilterEndpoint* client, const char* msg) {
 	TS_SC_CHAT* chatRqst;
-	int msgLen = strlen(msg);
+	size_t msgLen = strlen(msg);
 	if(msgLen > 126)
 		msgLen = 126;
 
-	chatRqst = TS_MESSAGE_WNA::create<TS_SC_CHAT, char>(msgLen+1);
+	chatRqst = TS_MESSAGE_WNA::create<TS_SC_CHAT, char>((int)msgLen+1);
 
-	chatRqst->len = msgLen;
+	chatRqst->len = (uint16_t)msgLen;
 	strncpy(chatRqst->message, msg, chatRqst->len);
 	chatRqst->message[chatRqst->len] = 0;
 	strcpy(chatRqst->szSender, "Filter");
