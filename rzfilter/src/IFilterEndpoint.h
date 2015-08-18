@@ -1,7 +1,7 @@
 #ifndef IFILTERENDPOINT_H
 #define IFILTERENDPOINT_H
 
-#include "Packets/PacketBaseMessage.h"
+#include "PacketBaseMessage.h"
 
 class IFilterEndpoint
 {

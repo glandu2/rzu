@@ -5,9 +5,9 @@
 #include "GlobalConfig.h"
 #include "PrintfFormats.h"
 
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_AC_SERVER_LIST.h"
-#include "Packets/Epics.h"
+#include "PacketEnums.h"
+#include "AuthClient/TS_AC_SERVER_LIST.h"
+#include "PacketEpics.h"
 
 #include "PacketFilter.h"
 

@@ -2,7 +2,7 @@
 #define IFILTER_H
 
 #include "IFilterEndpoint.h"
-#include "Packets/PacketBaseMessage.h"
+#include "PacketBaseMessage.h"
 
 class IFilter
 {

@@ -1,6 +1,6 @@
 #include "PacketFilter.h"
-#include "Packets/TS_SC_SKILL.h"
-#include "Packets/TS_SC_CHAT.h"
+#include "GameClient/TS_SC_SKILL.h"
+#include "GameClient/TS_SC_CHAT.h"
 #include <sstream>
 
 PacketFilter::PacketFilter()
