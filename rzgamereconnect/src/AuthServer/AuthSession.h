@@ -2,7 +2,7 @@
 #define AUTHSESSION_H
 
 #include "PacketSession.h"
-#include "Packets/TS_GA_ACCOUNT_LIST.h"
+#include "AuthGame/TS_GA_ACCOUNT_LIST.h"
 
 struct TS_AG_LOGIN_RESULT;
 struct TS_AG_CLIENT_LOGIN_EXTENDED;

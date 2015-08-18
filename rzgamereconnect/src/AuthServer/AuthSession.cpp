@@ -4,10 +4,10 @@
 #include "EventLoop.h"
 #include <stdlib.h>
 
-#include "Packets/TS_GA_LOGOUT.h"
-#include "Packets/TS_AG_LOGIN_RESULT.h"
-#include "Packets/TS_AG_CLIENT_LOGIN.h"
-#include "Packets/PacketEnums.h"
+#include "AuthGame/TS_GA_LOGOUT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_AG_CLIENT_LOGIN.h"
+#include "PacketEnums.h"
 
 namespace AuthServer {
 

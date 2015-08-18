@@ -5,11 +5,11 @@
 #include "PrintfFormats.h"
 #include "AuthSession.h"
 
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_AG_LOGIN_RESULT.h"
-#include "Packets/TS_AG_CLIENT_LOGIN.h"
-#include "Packets/TS_AG_KICK_CLIENT.h"
-#include "Packets/TS_AG_ITEM_PURCHASED.h"
+#include "PacketEnums.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_AG_CLIENT_LOGIN.h"
+#include "AuthGame/TS_AG_KICK_CLIENT.h"
+#include "AuthGame/TS_AG_ITEM_PURCHASED.h"
 
 namespace AuthServer {
 
