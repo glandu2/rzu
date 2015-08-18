@@ -109,8 +109,7 @@ void ClientSession::onCharacterList(DbQueryJob<Database::CharacterList> *query) 
 void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_CS_ACCOUNT_WITH_AUTH::packetID: {
-			MessageBuffer buffer(packet, CONFIG_GET()->game.clients.epic.get());
-			process<TS_CS_ACCOUNT_WITH_AUTH>(&buffer, &ClientSession::onAccountWithAuth);
+			packet->process(this, &ClientSession::onAccountWithAuth, CONFIG_GET()->game.clients.epic.get());
 			break;
 		}
 
@@ -120,10 +119,10 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	}
 }
 
-void ClientSession::onAccountWithAuth(TS_CS_ACCOUNT_WITH_AUTH& packet) {
-	std::string account = Utils::convertToString(packet.account, sizeof(packet.account) - 1);
+void ClientSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH* packet) {
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
 
-	AuthServerSession::get()->loginClient(this, account, packet.one_time_key);
+	AuthServerSession::get()->loginClient(this, account, packet->one_time_key);
 }
 
 void ClientSession::onCharacterListQuery(const TS_CS_CHARACTER_LIST* packet) {

@@ -30,7 +30,7 @@ protected:
 
 	void onPacketReceived(const TS_MESSAGE* packet);
 
-	void onAccountWithAuth(TS_CS_ACCOUNT_WITH_AUTH& packet);
+	void onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH *packet);
 	void onCharacterListQuery(const TS_CS_CHARACTER_LIST* packet);
 
 private:
