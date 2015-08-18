@@ -72,7 +72,7 @@ void AuthServerSession::loginClient(ClientSession* clientSession, const std::str
 	pendingClients.insert(std::make_pair(account, clientSession));
 }
 
-void AuthServerSession::logoutClient(const char *account) {
+void AuthServerSession::logoutClient(const char *account, uint32_t playTime) {
 	TS_GA_CLIENT_LOGOUT loginMsg;
 	TS_MESSAGE::initMessage(&loginMsg);
 

@@ -29,7 +29,7 @@ public:
 	static AuthServerSession* get() { return instance; }
 
 	void loginClient(ClientSession *clientSession, const std::string& account, uint64_t oneTimePassword);
-	void logoutClient(const char* account);
+	void logoutClient(const char* account, uint32_t playTime);
 
 protected:
 
