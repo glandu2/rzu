@@ -4,17 +4,17 @@
 #include "EventLoop.h"
 #include <algorithm>
 
-#include "Packets/TS_SC_CHAT.h"
-#include "Packets/TS_SC_CHAT_LOCAL.h"
-#include "Packets/TS_CS_CHAT_REQUEST.h"
-#include "Packets/TS_CS_CHARACTER_LIST.h"
-#include "Packets/TS_SC_CHARACTER_LIST.h"
-#include "Packets/TS_CS_LOGIN.h"
-#include "Packets/TS_SC_LOGIN_RESULT.h"
-#include "Packets/TS_TIMESYNC.h"
-#include "Packets/TS_SC_ENTER.h"
-#include "Packets/TS_SC_DISCONNECT_DESC.h"
-#include "Packets/TS_CS_UPDATE.h"
+#include "GameClient/TS_SC_CHAT.h"
+#include "GameClient/TS_SC_CHAT_LOCAL.h"
+#include "GameClient/TS_CS_CHAT_REQUEST.h"
+#include "GameClient/TS_CS_CHARACTER_LIST.h"
+#include "GameClient/TS_SC_CHARACTER_LIST.h"
+#include "GameClient/TS_CS_LOGIN.h"
+#include "GameClient/TS_SC_LOGIN_RESULT.h"
+#include "GameClient/TS_TIMESYNC.h"
+#include "GameClient/TS_SC_ENTER.h"
+#include "GameClient/TS_SC_DISCONNECT_DESC.h"
+#include "GameClient/TS_CS_UPDATE.h"
 
 GameSession::GameSession(const std::string& playername, bool enableGateway, Log *packetLog)
 	: playername(playername), enableGateway(enableGateway)

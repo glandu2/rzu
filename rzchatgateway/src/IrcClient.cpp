@@ -2,7 +2,7 @@
 #include "Utils.h"
 #include <algorithm>
 #include "GameSession.h"
-#include "Packets/TS_CS_CHAT_REQUEST.h"
+#include "GameClient/TS_CS_CHAT_REQUEST.h"
 
 IrcClient::IrcClient(const std::string& ip, int port, const std::string& hostname, const std::string& channel, const std::string& nickname, Log* packetLog)
 	: gameSession(nullptr), channelName(channel), nickname(nickname), ip(ip), hostname(hostname), port(port), joined(false)
