@@ -83,7 +83,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 		debug("Upload file is not a jpeg file\n");
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 	} else {
-		int filenameSize = currentRequest->getGameServer()->getName().size() + 1 + 10 + 1 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 4 + 1;
+		size_t filenameSize = currentRequest->getGameServer()->getName().size() + 1 + 10 + 1 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 4 + 1;
 		char *filename = (char*)alloca(filenameSize);
 		struct tm timeinfo;
 
@@ -110,7 +110,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 			warn("Cant open upload target file %s\n", fullFileName.c_str());
 			result.result = TS_RESULT_ACCESS_DENIED;
 		} else {
-			int dataWritten = fwrite(&packet->file_contents, packet->file_length, 1, file);
+			size_t dataWritten = fwrite(&packet->file_contents, packet->file_length, 1, file);
 			fclose(file);
 
 			if(dataWritten == 1) {
