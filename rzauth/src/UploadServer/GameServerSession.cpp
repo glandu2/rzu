@@ -5,10 +5,10 @@
 #include <string.h>
 #include "Utils.h"
 
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_US_LOGIN_RESULT.h"
-#include "Packets/TS_US_REQUEST_UPLOAD.h"
-#include "Packets/TS_US_UPLOAD.h"
+#include "PacketEnums.h"
+#include "UploadGame/TS_US_LOGIN_RESULT.h"
+#include "UploadGame/TS_US_REQUEST_UPLOAD.h"
+#include "UploadGame/TS_US_UPLOAD.h"
 
 namespace UploadServer {
 

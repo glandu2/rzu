@@ -12,12 +12,12 @@
 
 #include "LogServerClient.h"
 
-#include "Packets/Epics.h"
-#include "Packets/TS_AC_RESULT.h"
-#include "Packets/TS_SC_RESULT.h"
-#include "Packets/TS_AC_AES_KEY_IV.h"
-#include "Packets/TS_AC_SELECT_SERVER.h"
-#include "Packets/TS_AC_SERVER_LIST.h"
+#include "PacketEpics.h"
+#include "AuthClient/TS_AC_RESULT.h"
+#include "GameClient/TS_SC_RESULT.h"
+#include "AuthClient/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/TS_AC_SELECT_SERVER.h"
+#include "AuthClient/TS_AC_SERVER_LIST.h"
 
 namespace AuthServer {
 

@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_AG_CLIENT_LOGIN.h"
+#include "PacketEnums.h"
+#include "AuthGame/TS_AG_CLIENT_LOGIN.h"
 #include "Common.h"
 
 #include "DesPasswordCipher.h"

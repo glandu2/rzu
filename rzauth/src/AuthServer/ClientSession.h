@@ -10,12 +10,12 @@
 #include "DB_Account.h"
 #include "DB_UpdateLastServerIdx.h"
 
-#include "Packets/TS_CA_VERSION.h"
-#include "Packets/TS_CA_RSA_PUBLIC_KEY.h"
-#include "Packets/TS_CA_ACCOUNT.h"
-#include "Packets/TS_CA_IMBC_ACCOUNT.h"
-#include "Packets/TS_CA_SERVER_LIST.h"
-#include "Packets/TS_CA_SELECT_SERVER.h"
+#include "AuthClient/TS_CA_VERSION.h"
+#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
+#include "AuthClient/TS_CA_ACCOUNT.h"
+#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/TS_CA_SERVER_LIST.h"
+#include "AuthClient/TS_CA_SELECT_SERVER.h"
 
 class IDbQueryJob;
 class DesPasswordCipher;

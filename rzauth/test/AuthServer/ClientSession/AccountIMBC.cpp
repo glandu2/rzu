@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 #include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "Packets/TS_CA_IMBC_ACCOUNT.h"
-#include "Packets/TS_AC_RESULT.h"
-#include "Packets/PacketEnums.h"
+#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/TS_AC_RESULT.h"
+#include "PacketEnums.h"
 #include "Common.h"
 
 #include "DesPasswordCipher.h"

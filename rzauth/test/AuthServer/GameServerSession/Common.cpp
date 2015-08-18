@@ -1,11 +1,11 @@
 #include "Common.h"
-#include "Packets/TS_GA_LOGIN.h"
-#include "Packets/TS_GA_CLIENT_LOGIN.h"
-#include "Packets/TS_GA_CLIENT_LOGOUT.h"
-#include "Packets/TS_AG_LOGIN_RESULT.h"
-#include "Packets/TS_GA_LOGOUT.h"
-#include "Packets/TS_GA_ACCOUNT_LIST.h"
-#include "Packets/PacketEnums.h"
+#include "AuthGame/TS_GA_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_GA_LOGOUT.h"
+#include "AuthGame/TS_GA_ACCOUNT_LIST.h"
+#include "PacketEnums.h"
 
 namespace AuthServer {
 

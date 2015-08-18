@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 #include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_AG_SECURITY_NO_CHECK.h"
-#include "Packets/TS_GA_SECURITY_NO_CHECK.h"
+#include "PacketEnums.h"
+#include "AuthGame/TS_AG_SECURITY_NO_CHECK.h"
+#include "AuthGame/TS_GA_SECURITY_NO_CHECK.h"
 #include "Common.h"
 
 #include "DesPasswordCipher.h"

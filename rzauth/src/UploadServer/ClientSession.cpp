@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include "Utils.h"
 
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_UC_LOGIN_RESULT.h"
-#include "Packets/TS_UC_UPLOAD.h"
+#include "PacketEnums.h"
+#include "UploadClient/TS_UC_LOGIN_RESULT.h"
+#include "UploadClient/TS_UC_UPLOAD.h"
 
 namespace UploadServer {
 
