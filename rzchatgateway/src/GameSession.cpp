@@ -62,48 +62,10 @@ void GameSession::onUpdatePacketExpired(uv_timer_t *timer) {
 
 void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 	switch(packet->id) {
-		case TS_SC_CHARACTER_LIST::packetID: {
-			TS_CS_LOGIN loginPkt;
-			TS_TIMESYNC timeSyncPkt;
-			MessageBuffer buffer(packet, EPIC_9_1);
-			bool characterInList = false;
-
-			TS_SC_CHARACTER_LIST charListPkt;
-			charListPkt.deserialize(&buffer);
-			if(!buffer.checkFinalSize()) {
-				error("Received packet with invalid data: id: %d, size: %d, field: %s\n", buffer.getMessageId(), buffer.getSize(), buffer.getFieldInOverflow().c_str());
-				abortSession();
-				break;
-			}
-
-			TS_MESSAGE::initMessage<TS_CS_LOGIN>(&loginPkt);
-			TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
-
-			debug("Character list: \n");
-			for(int i = 0; i < charListPkt.characters.size(); i++) {
-				debug(" - %s\n", charListPkt.characters[i].name);
-				if(!strcmp(playername.c_str(), charListPkt.characters[i].name))
-					characterInList = true;
-			}
-
-			if(!characterInList) {
-				warn("Character \"%s\" not in character list: \n", playername.c_str());
-				for(int i = 0; i < charListPkt.characters.size(); i++) {
-					warn(" - %s\n", charListPkt.characters[i].name);
-				}
-			}
-
-			strcpy(loginPkt.szName, playername.c_str());
-			loginPkt.race = 0;
-			sendPacket(&loginPkt);
-
-			timeSyncPkt.time = 0;
-			sendPacket(&timeSyncPkt);
-
-			ircClient->sendMessage("", "\001ACTION is connected to the game server\001");
-
+		case TS_SC_CHARACTER_LIST::packetID:
+			packet->process(this, &GameSession::onCharacterList, EPIC_9_1);
 			break;
-		}
+
 		case TS_SC_LOGIN_RESULT::packetID: {
 				TS_SC_LOGIN_RESULT* loginResultPkt = (TS_SC_LOGIN_RESULT*) packet;
 				handle = loginResultPkt->handle;
@@ -155,9 +117,41 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 	}
 }
 
+void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
+	TS_CS_LOGIN loginPkt;
+	TS_TIMESYNC timeSyncPkt;
+	bool characterInList = false;
+
+	TS_MESSAGE::initMessage<TS_CS_LOGIN>(&loginPkt);
+	TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
+
+	debug("Character list: \n");
+	for(int i = 0; i < packet->characters.size(); i++) {
+		debug(" - %s\n", packet->characters[i].name);
+		if(!strcmp(playername.c_str(), packet->characters[i].name))
+			characterInList = true;
+	}
+
+	if(!characterInList) {
+		warn("Character \"%s\" not in character list: \n", playername.c_str());
+		for(int i = 0; i < packet->characters.size(); i++) {
+			warn(" - %s\n", packet->characters[i].name);
+		}
+	}
+
+	strcpy(loginPkt.szName, playername.c_str());
+	loginPkt.race = 0;
+	sendPacket(&loginPkt);
+
+	timeSyncPkt.time = 0;
+	sendPacket(&timeSyncPkt);
+
+	ircClient->sendMessage("", "\001ACTION is connected to the game server\001");
+}
+
 void GameSession::sendMsgToGS(int type, const char* sender, const char* target, std::string msg) {
 	char messageFull[500];
-	int msgLen;
+	uint8_t msgLen;
 
 
 	std::replace(msg.begin(), msg.end(), '\x0D', '\x0A');
@@ -180,7 +174,7 @@ void GameSession::sendMsgToGS(int type, const char* sender, const char* target, 
 	if(!enableGateway)
 		return;
 
-	msgLen = (strlen(messageFull) > 255) ? 255 : strlen(messageFull);
+	msgLen = (uint8_t)((strlen(messageFull) > 255) ? 255 : strlen(messageFull));
 
 	TS_CS_CHAT_REQUEST* chatRqst;
 	chatRqst = TS_MESSAGE_WNA::create<TS_CS_CHAT_REQUEST, char>(msgLen);
