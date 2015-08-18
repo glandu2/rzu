@@ -5,10 +5,10 @@
 #include "../GlobalConfig.h"
 #include "DbQueryJobCallback.h"
 
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_SC_RESULT.h"
-#include "Packets/TS_GA_CLIENT_LOGIN.h"
-#include "Packets/TS_SC_CHARACTER_LIST.h"
+#include "PacketEnums.h"
+#include "GameClient/TS_SC_RESULT.h"
+#include "AuthGame/TS_GA_CLIENT_LOGIN.h"
+#include "GameClient/TS_SC_CHARACTER_LIST.h"
 
 namespace GameServer {
 

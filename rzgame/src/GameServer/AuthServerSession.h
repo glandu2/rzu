@@ -3,8 +3,8 @@
 
 #include "PacketSession.h"
 #include "StartableObject.h"
-#include "Packets/TS_AG_LOGIN_RESULT.h"
-#include "Packets/TS_AG_CLIENT_LOGIN.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_AG_CLIENT_LOGIN.h"
 
 namespace GameServer {
 

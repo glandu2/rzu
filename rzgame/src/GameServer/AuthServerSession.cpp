@@ -5,10 +5,10 @@
 #include "Utils.h"
 #include "ClientSession.h"
 
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_GA_LOGIN.h"
-#include "Packets/TS_GA_CLIENT_LOGIN.h"
-#include "Packets/TS_GA_CLIENT_LOGOUT.h"
+#include "PacketEnums.h"
+#include "AuthGame/TS_GA_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
 
 namespace GameServer {
 

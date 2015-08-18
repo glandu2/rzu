@@ -7,8 +7,9 @@
 #include "Database/CharacterList.h"
 #include "DbQueryJobCallback.h"
 
-#include "Packets/TS_CS_ACCOUNT_WITH_AUTH.h"
-#include "Packets/TS_CS_CHARACTER_LIST.h"
+#include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
+#include "GameClient/TS_CS_CHARACTER_LIST.h"
+#include "GameClient/TS_SC_RESULT.h"
 
 namespace GameServer {
 
