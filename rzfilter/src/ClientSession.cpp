@@ -53,12 +53,11 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == TS_AC_SERVER_LIST::packetID && CONFIG_GET()->client.authMode.get() == true) {
-		MessageBuffer buffer(packet, EPIC_9_1);
+		MessageBuffer buffer(packet, packet->size, EPIC_9_1);
 		TS_AC_SERVER_LIST serverList;
 
 		serverList.deserialize(&buffer);
 		if(!buffer.checkFinalSize()) {
-			error("Unsupported packet TS_AC_SERVER_LIST, size: %d", packet->size);
 			return;
 		}
 
