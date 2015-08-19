@@ -79,7 +79,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	} else if(packet->file_length > 64000) {
 		debug("Upload file is too large: %d bytes. Max 64000 bytes\n", packet->file_length);
 		result.result = TS_RESULT_LIMIT_MAX;
-	} else if(!checkJpegImage(packet->file_contents)) {
+	} else if(!checkJpegImage(packet->file_length, packet->file_contents)) {
 		debug("Upload file is not a jpeg file\n");
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 	} else {
@@ -126,8 +126,8 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	sendPacket(&result);
 }
 
-bool ClientSession::checkJpegImage(const char *data) {
-	if(*(const uint16_t*)data != 0xFFD8)
+bool ClientSession::checkJpegImage(uint32_t length, const unsigned char *data) {
+	if(length < 2 || data[0] != 0xFF || data[1] != 0xD8)
 		return false;
 
 	return true;
