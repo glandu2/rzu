@@ -10,7 +10,7 @@
 
 namespace UploadServer {
 
-class GameServerSession : public EncryptedSession<PacketSession>
+class GameServerSession : public PacketSession
 {
 	DECLARE_CLASS(UploadServer::GameServerSession)
 public:
@@ -27,10 +27,7 @@ protected:
 	void onLogin(const TS_SU_LOGIN* packet);
 	void onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet);
 
-	virtual void updateObjectName();
-
 private:
-
 	static std::unordered_map<std::string, GameServerSession*> servers;
 
 	std::string serverName;

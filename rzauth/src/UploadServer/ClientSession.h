@@ -24,7 +24,7 @@ protected:
 	void onLogin(const TS_CU_LOGIN* packet);
 	void onUpload(const TS_CU_UPLOAD* packet);
 
-	bool checkJpegImage(const char *data);
+	bool checkJpegImage(uint32_t length, const unsigned char *data);
 
 private:
 	~ClientSession();
