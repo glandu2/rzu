@@ -71,11 +71,6 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 	sendPacket(&result);
 }
 
-void GameServerSession::updateObjectName() {
-	setObjectName(19 + serverName.size(), "GameServerSession[%s]", serverName.c_str());
-}
-
-
 void GameServerSession::onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet) {
 	TS_US_REQUEST_UPLOAD result;
 	TS_MESSAGE::initMessage<TS_US_REQUEST_UPLOAD>(&result);
