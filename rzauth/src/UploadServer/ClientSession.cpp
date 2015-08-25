@@ -57,7 +57,7 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 		result.result = TS_RESULT_SUCCESS;
 	} else {
 		debug("Invalid client, otp given is %u\n", packet->one_time_password);
-		result.result = TS_RESULT_INVALID_ARGUMENT;
+		result.result = TS_RESULT_NOT_EXIST;
 	}
 
 	sendPacket(&result);
