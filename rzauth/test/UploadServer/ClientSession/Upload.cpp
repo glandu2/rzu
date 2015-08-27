@@ -102,10 +102,10 @@ TEST(TS_CU_UPLOAD, valid) {
 
 		EXPECT_EQ(2, packet->guild_id);
 		EXPECT_EQ(sizeof(ONE_PIXEL_IMAGE), packet->file_size);
-		EXPECT_EQ(36, packet->filename_length);
+		EXPECT_EQ(36, (int)packet->filename_length);
 		EXPECT_EQ(0, packet->type);
-		EXPECT_STREQ(expectedFilename, packet->file_name);
-		EXPECT_EQ(packet->filename_length, strlen(packet->file_name));
+		EXPECT_STREQ(expectedFilename, std::string(packet->file_name, packet->filename_length).c_str());
+		EXPECT_EQ(sizeof(*packet) + packet->filename_length, packet->size);
 
 		channel->closeSession();
 	});
