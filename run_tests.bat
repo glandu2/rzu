@@ -1,3 +1,4 @@
+@echo off
 start rzauth /configfile:auth-test.opt
 rzauth_test --gtest_repeat=2
 IF ERRORLEVEL 1 (

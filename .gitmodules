@@ -13,3 +13,12 @@
 [submodule "gtest"]
 	path = gtest
 	url = ../gtest
+[submodule "libuv"]
+	path = libuv
+	url = ../libuv.git
+[submodule "zlib"]
+	path = zlib
+	url = ../zlib.git
+[submodule "gtest"]
+	path = gtest
+	url = ../gtest.git
