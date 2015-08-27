@@ -216,10 +216,20 @@ void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
 		cryptedPassword = Utils::convertToDataArray(packet->password, sizeof(packet->password));
 	}
 
-	debug("IMBC Login request for account %s\n", account.c_str());
+	if(CONFIG_GET()->auth.client.enableImbc.get() == false) {
+		TS_AC_RESULT result;
+		TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
+		result.request_msg_id = TS_CA_ACCOUNT::packetID;
+		result.result = TS_RESULT_ACCESS_DENIED;
+		result.login_flag = 0;
+		sendPacket(&result);
+		debug("Refused IMBC connection (IMBC is disabled) for account %s\n", account.c_str());
+	} else {
+		debug("IMBC Login request for account %s\n", account.c_str());
 
-	DB_AccountData::Input input(account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_None, cryptedPassword, aesKey);
-	dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
+		DB_AccountData::Input input(account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_None, cryptedPassword, aesKey);
+		dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
+	}
 }
 
 void ClientSession::clientAuthResult(DB_Account* query) {
