@@ -4,10 +4,10 @@
 #include "EventLoop.h"
 #include <stdlib.h>
 
-#include "Packets/TS_GA_LOGOUT.h"
-#include "Packets/TS_AG_LOGIN_RESULT.h"
-#include "Packets/TS_AG_CLIENT_LOGIN.h"
-#include "Packets/PacketEnums.h"
+#include "AuthGame/TS_GA_LOGOUT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_AG_CLIENT_LOGIN.h"
+#include "PacketEnums.h"
 
 namespace AuthServer {
 
@@ -113,7 +113,7 @@ void AuthSession::sendAccountList() {
 	synchronizedWithAuth = true;
 
 	TS_GA_ACCOUNT_LIST* accountListPacket;
-	const int maxCount = accountList.size() <= MAX_COUNT_PER_PACKET ? accountList.size() : MAX_COUNT_PER_PACKET;
+	const int maxCount = (int)(accountList.size() <= MAX_COUNT_PER_PACKET ? accountList.size() : MAX_COUNT_PER_PACKET);
 	accountListPacket = TS_MESSAGE_WNA::create<TS_GA_ACCOUNT_LIST, TS_GA_ACCOUNT_LIST::AccountInfo>(maxCount);
 
 	debug("Sending %d accounts\n", (int)accountList.size());

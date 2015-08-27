@@ -1,5 +1,5 @@
 #include "RzTest.h"
-#include "Packets/PacketBaseMessage.h"
+#include "PacketBaseMessage.h"
 #include "EventLoop.h"
 #include "TestPacketSession.h"
 #include "TestPacketServer.h"

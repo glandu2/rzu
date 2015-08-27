@@ -8,6 +8,8 @@
 
 class IrcClient;
 struct TS_CS_CHAT_REQUEST;
+struct TS_SC_CHARACTER_LIST;
+struct TS_SC_LOGIN_RESULT;
 
 class GameSession : public ClientGameSession {
 public:
@@ -24,6 +26,9 @@ public:
 
 protected:
 	static void onUpdatePacketExpired(uv_timer_t *timer);
+
+	void onCharacterList(const TS_SC_CHARACTER_LIST* packet);
+	void onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet);
 
 private:
 	std::string playername;

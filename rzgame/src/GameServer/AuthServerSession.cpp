@@ -5,10 +5,10 @@
 #include "Utils.h"
 #include "ClientSession.h"
 
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_GA_LOGIN.h"
-#include "Packets/TS_GA_CLIENT_LOGIN.h"
-#include "Packets/TS_GA_CLIENT_LOGOUT.h"
+#include "PacketEnums.h"
+#include "AuthGame/TS_GA_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
 
 namespace GameServer {
 
@@ -72,7 +72,7 @@ void AuthServerSession::loginClient(ClientSession* clientSession, const std::str
 	pendingClients.insert(std::make_pair(account, clientSession));
 }
 
-void AuthServerSession::logoutClient(const char *account) {
+void AuthServerSession::logoutClient(const char *account, uint32_t playTime) {
 	TS_GA_CLIENT_LOGOUT loginMsg;
 	TS_MESSAGE::initMessage(&loginMsg);
 

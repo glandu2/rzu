@@ -12,14 +12,14 @@ static const char * const htmlNotFound =
 		"Content-Length: 22\r\n"
 		"\r\n"
 		"<h1>404 Not Found</h1>";
-static int htmlNotFoundSize = strlen(htmlNotFound);
+static size_t htmlNotFoundSize = strlen(htmlNotFound);
 
 static const char * const htmlFound =
 		"HTTP/1.1 200 Ok\r\n"
 		"Content-Type: image/jpeg\r\n"
 		"Content-Length: %ld\r\n"
 		"\r\n";
-static int htmlFoundSize = strlen(htmlFound);
+static size_t htmlFoundSize = strlen(htmlFound);
 
 IconServerSession::IconServerSession() {
 	this->status = WaitStatusLine;
@@ -147,7 +147,7 @@ void IconServerSession::sendIcon(const std::string& filename) {
 		if(fileSize > 64000)
 			fileSize = 64000;
 
-		int bufferSize = htmlFoundSize + 10 + fileSize;
+		size_t bufferSize = htmlFoundSize + 10 + fileSize;
 		char *buffer = new char[bufferSize];
 		size_t fileContentBegin = sprintf(buffer, htmlFound, (long int)fileSize);
 

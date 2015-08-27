@@ -3,8 +3,8 @@
 
 #include "PacketSession.h"
 #include "StartableObject.h"
-#include "Packets/TS_AG_LOGIN_RESULT.h"
-#include "Packets/TS_AG_CLIENT_LOGIN.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_AG_CLIENT_LOGIN.h"
 
 namespace GameServer {
 
@@ -29,7 +29,7 @@ public:
 	static AuthServerSession* get() { return instance; }
 
 	void loginClient(ClientSession *clientSession, const std::string& account, uint64_t oneTimePassword);
-	void logoutClient(const char* account);
+	void logoutClient(const char* account, uint32_t playTime);
 
 protected:
 

@@ -5,8 +5,8 @@
 #include "EncryptedSession.h"
 #include <unordered_map>
 
-#include "Packets/TS_SU_LOGIN.h"
-#include "Packets/TS_SU_REQUEST_UPLOAD.h"
+#include "UploadGame/TS_SU_LOGIN.h"
+#include "UploadGame/TS_SU_REQUEST_UPLOAD.h"
 
 namespace UploadServer {
 

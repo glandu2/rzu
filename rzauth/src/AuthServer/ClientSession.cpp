@@ -12,12 +12,12 @@
 
 #include "LogServerClient.h"
 
-#include "Packets/Epics.h"
-#include "Packets/TS_AC_RESULT.h"
-#include "Packets/TS_SC_RESULT.h"
-#include "Packets/TS_AC_AES_KEY_IV.h"
-#include "Packets/TS_AC_SELECT_SERVER.h"
-#include "Packets/TS_AC_SERVER_LIST.h"
+#include "PacketEpics.h"
+#include "AuthClient/TS_AC_RESULT.h"
+#include "GameClient/TS_SC_RESULT.h"
+#include "AuthClient/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/TS_AC_SELECT_SERVER.h"
+#include "AuthClient/TS_AC_SERVER_LIST.h"
 
 namespace AuthServer {
 
@@ -216,10 +216,20 @@ void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
 		cryptedPassword = Utils::convertToDataArray(packet->password, sizeof(packet->password));
 	}
 
-	debug("IMBC Login request for account %s\n", account.c_str());
+	if(CONFIG_GET()->auth.client.enableImbc.get() == false) {
+		TS_AC_RESULT result;
+		TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
+		result.request_msg_id = TS_CA_ACCOUNT::packetID;
+		result.result = TS_RESULT_ACCESS_DENIED;
+		result.login_flag = 0;
+		sendPacket(&result);
+		debug("Refused IMBC connection (IMBC is disabled) for account %s\n", account.c_str());
+	} else {
+		debug("IMBC Login request for account %s\n", account.c_str());
 
-	DB_AccountData::Input input(account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_None, cryptedPassword, aesKey);
-	dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
+		DB_AccountData::Input input(account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_None, cryptedPassword, aesKey);
+		dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
+	}
 }
 
 void ClientSession::clientAuthResult(DB_Account* query) {

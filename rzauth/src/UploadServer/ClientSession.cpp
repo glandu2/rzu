@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include "Utils.h"
 
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_UC_LOGIN_RESULT.h"
-#include "Packets/TS_UC_UPLOAD.h"
+#include "PacketEnums.h"
+#include "UploadClient/TS_UC_LOGIN_RESULT.h"
+#include "UploadClient/TS_UC_UPLOAD.h"
 
 namespace UploadServer {
 
@@ -57,7 +57,7 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 		result.result = TS_RESULT_SUCCESS;
 	} else {
 		debug("Invalid client, otp given is %u\n", packet->one_time_password);
-		result.result = TS_RESULT_INVALID_ARGUMENT;
+		result.result = TS_RESULT_NOT_EXIST;
 	}
 
 	sendPacket(&result);
@@ -83,7 +83,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 		debug("Upload file is not a jpeg file\n");
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 	} else {
-		int filenameSize = currentRequest->getGameServer()->getName().size() + 1 + 10 + 1 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 4 + 1;
+		size_t filenameSize = currentRequest->getGameServer()->getName().size() + 1 + 10 + 1 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 4 + 1;
 		char *filename = (char*)alloca(filenameSize);
 		struct tm timeinfo;
 
@@ -110,7 +110,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 			warn("Cant open upload target file %s\n", fullFileName.c_str());
 			result.result = TS_RESULT_ACCESS_DENIED;
 		} else {
-			int dataWritten = fwrite(&packet->file_contents, packet->file_length, 1, file);
+			size_t dataWritten = fwrite(&packet->file_contents, packet->file_length, 1, file);
 			fclose(file);
 
 			if(dataWritten == 1) {

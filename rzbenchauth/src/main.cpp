@@ -81,7 +81,7 @@ void startBenchAuth(int usecBetweenConnection) {
 	for(size_t i = 0; i < auths.size(); i++) {
 		const std::string account = (auths.size() > 1)? accountNamePrefix + Utils::convertToString((int)i + idxoffset) : accountNamePrefix;
 
-		auths[i]->connect(getIpForConnection(ip, useLocalHost, i), account, CFG_GET("password")->getString());
+		auths[i]->connect(getIpForConnection(ip, useLocalHost, (int)i), account, CFG_GET("password")->getString());
 		if(usecBetweenConnection)
 			tfMicroSleep(usecBetweenConnection);
 	}

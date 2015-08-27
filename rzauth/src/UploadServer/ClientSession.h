@@ -4,8 +4,8 @@
 #include "PacketSession.h"
 #include "EncryptedSession.h"
 
-#include "Packets/TS_CU_LOGIN.h"
-#include "Packets/TS_CU_UPLOAD.h"
+#include "UploadClient/TS_CU_LOGIN.h"
+#include "UploadClient/TS_CU_UPLOAD.h"
 
 namespace UploadServer {
 

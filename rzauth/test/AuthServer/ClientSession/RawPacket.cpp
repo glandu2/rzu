@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "Packets/PacketBaseMessage.h"
+#include "PacketBaseMessage.h"
 
 namespace AuthServer {
 

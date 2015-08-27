@@ -1,11 +1,11 @@
 #include "Common.h"
-#include "Packets/TS_GA_LOGIN.h"
-#include "Packets/TS_GA_CLIENT_LOGIN.h"
-#include "Packets/TS_GA_CLIENT_LOGOUT.h"
-#include "Packets/TS_AG_LOGIN_RESULT.h"
-#include "Packets/TS_GA_LOGOUT.h"
-#include "Packets/TS_GA_ACCOUNT_LIST.h"
-#include "Packets/PacketEnums.h"
+#include "AuthGame/TS_GA_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_GA_LOGOUT.h"
+#include "AuthGame/TS_GA_ACCOUNT_LIST.h"
+#include "PacketEnums.h"
 
 namespace AuthServer {
 
@@ -85,7 +85,7 @@ void sendGameConnectedAccounts(TestConnectionChannel *channel, std::vector<Accou
 	static const int MAXCOUNT_PER_PACKET = 2;
 
 	TS_GA_ACCOUNT_LIST* accountListPacket;
-	int maxCount = accounts.size() <= MAXCOUNT_PER_PACKET ? accounts.size() : MAXCOUNT_PER_PACKET;
+	int maxCount = (int)(accounts.size() <= MAXCOUNT_PER_PACKET ? accounts.size() : MAXCOUNT_PER_PACKET);
 	accountListPacket = TS_MESSAGE_WNA::create<TS_GA_ACCOUNT_LIST, TS_GA_ACCOUNT_LIST::AccountInfo>(maxCount);
 
 	auto it = accounts.begin();

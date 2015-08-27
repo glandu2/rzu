@@ -3,7 +3,7 @@
 
 #include "ConfigInfo.h"
 #include "Utils.h"
-#include "Packets/Epics.h"
+#include "PacketEpics.h"
 
 struct DbConfig : public IListener {
 	cval<std::string> &driver, &server, &name, &account, &password, &salt;

@@ -59,11 +59,14 @@ struct GlobalConfig {
 			ListenerConfig listener;
 			cval<std::string> &desKey;
 			cval<int> &maxPublicServerIdx;
+			cval<bool> &enableImbc;
 
 			ClientConfig() :
 				listener("auth.clients", "0.0.0.0", 4500, true, 301),
 				desKey(CFG_CREATE("auth.clients.des_key", "MERONG")),
-				maxPublicServerIdx(CFG_CREATE("auth.clients.maxpublicserveridx", 30)) {}
+				maxPublicServerIdx(CFG_CREATE("auth.clients.maxpublicserveridx", 30)),
+				enableImbc(CFG_CREATE("auth.clients.enableimbc", true))
+			{}
 		} client;
 
 		struct GameConfig {

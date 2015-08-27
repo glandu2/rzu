@@ -5,10 +5,10 @@
 #include <string.h>
 #include "Utils.h"
 
-#include "Packets/PacketEnums.h"
-#include "Packets/TS_US_LOGIN_RESULT.h"
-#include "Packets/TS_US_REQUEST_UPLOAD.h"
-#include "Packets/TS_US_UPLOAD.h"
+#include "PacketEnums.h"
+#include "UploadGame/TS_US_LOGIN_RESULT.h"
+#include "UploadGame/TS_US_REQUEST_UPLOAD.h"
+#include "UploadGame/TS_US_UPLOAD.h"
 
 namespace UploadServer {
 
@@ -84,12 +84,12 @@ void GameServerSession::onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet) {
 }
 
 void GameServerSession::sendUploadResult(uint32_t guidId, uint32_t fileSize, const char* fileName) {
-	int fileNameSize = strlen(fileName);
+	uint8_t fileNameSize = (uint8_t)strlen(fileName);
 	TS_US_UPLOAD *result = TS_MESSAGE_WNA::create<TS_US_UPLOAD, char>(fileNameSize);
 
 	result->guild_id = guidId;
 	result->file_size = fileSize;
-	result->filename_length = strlen(fileName);
+	result->filename_length = fileNameSize;
 	result->type = 0;
 	strncpy(result->file_name, fileName, fileNameSize);
 	sendPacket(result);
