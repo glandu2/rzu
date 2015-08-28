@@ -1,9 +1,9 @@
 #ifndef PLAYERCOUNTMONITOR_H
 #define PLAYERCOUNTMONITOR_H
 
-#include "PacketSession.h"
-#include "EncryptedSession.h"
-#include "IListener.h"
+#include "NetSession/PacketSession.h"
+#include "NetSession/EncryptedSession.h"
+#include "Core/IListener.h"
 #include "uv.h"
 
 class PlayerCountMonitor : public EncryptedSession<PacketSession>

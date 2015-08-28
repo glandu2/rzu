@@ -2,10 +2,10 @@
 #include "uv.h"
 #include <string.h>
 #include "LibRzuInit.h"
-#include "ConfigInfo.h"
+#include "Config/ConfigInfo.h"
 #include "rzplayercountGitVersion.h"
-#include "EventLoop.h"
-#include "GlobalCoreConfig.h"
+#include "Core/EventLoop.h"
+#include "Config/GlobalCoreConfig.h"
 
 static void init();
 
