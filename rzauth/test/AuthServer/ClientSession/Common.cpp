@@ -6,7 +6,7 @@
 #include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
 #include "AuthClient/TS_AC_RESULT.h"
 #include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
-#include "DesPasswordCipher.h"
+#include "Cipher/DesPasswordCipher.h"
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>

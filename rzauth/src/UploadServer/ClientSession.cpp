@@ -2,11 +2,11 @@
 #include "GameServerSession.h"
 #include "UploadRequest.h"
 #include "../GlobalConfig.h"
-#include "PrintfFormats.h"
+#include "Core/PrintfFormats.h"
 
 #include <time.h>
 #include <stdio.h>
-#include "Utils.h"
+#include "Core/Utils.h"
 
 #include "PacketEnums.h"
 #include "UploadClient/TS_UC_LOGIN_RESULT.h"

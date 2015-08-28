@@ -1,8 +1,7 @@
 #ifndef UPLOADSERVER_GAMESERVERSESSION_H
 #define UPLOADSERVER_GAMESERVERSESSION_H
 
-#include "PacketSession.h"
-#include "EncryptedSession.h"
+#include "NetSession/PacketSession.h"
 #include <unordered_map>
 
 #include "UploadGame/TS_SU_LOGIN.h"

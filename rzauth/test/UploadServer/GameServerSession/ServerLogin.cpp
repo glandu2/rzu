@@ -5,8 +5,6 @@
 #include "UploadGame/TS_SU_LOGIN.h"
 #include "UploadGame/TS_US_LOGIN_RESULT.h"
 
-#include "Common.h"
-
 namespace UploadServer {
 
 TEST(TS_SU_LOGIN, valid) {

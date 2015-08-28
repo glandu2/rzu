@@ -6,9 +6,6 @@
 #include "UploadClient/TS_UC_LOGIN_RESULT.h"
 #include "UploadClient/TS_UC_UPLOAD.h"
 #include "PacketEnums.h"
-#include "Common.h"
-
-#include "DesPasswordCipher.h"
 
 /*
  * Double login

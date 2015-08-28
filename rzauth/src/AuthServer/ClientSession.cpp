@@ -12,7 +12,7 @@
 
 #include "LogServerClient.h"
 
-#include "PacketEpics.h"
+#include "Packet/PacketEpics.h"
 #include "AuthClient/TS_AC_RESULT.h"
 #include "GameClient/TS_SC_RESULT.h"
 #include "AuthClient/TS_AC_AES_KEY_IV.h"

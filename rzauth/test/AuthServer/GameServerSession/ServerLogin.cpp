@@ -6,7 +6,7 @@
 #include "AuthGame/TS_AG_LOGIN_RESULT.h"
 #include "Common.h"
 
-#include "DesPasswordCipher.h"
+#include "Cipher/DesPasswordCipher.h"
 
 namespace AuthServer {
 

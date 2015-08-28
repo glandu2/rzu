@@ -1,8 +1,8 @@
 #ifndef GLOBALCONFIG_H
 #define GLOBALCONFIG_H
 
-#include "ConfigInfo.h"
-#include "Utils.h"
+#include "Config/ConfigInfo.h"
+#include "Core/Utils.h"
 
 struct DbConfig : public IListener {
 	cval<std::string> &driver, &server, &name, &account, &password, &cryptedPassword, &salt;

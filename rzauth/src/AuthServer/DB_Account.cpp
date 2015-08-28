@@ -4,7 +4,7 @@
 #include "../GlobalConfig.h"
 #include <openssl/evp.h>
 #include <openssl/err.h>
-#include "DesPasswordCipher.h"
+#include "Cipher/DesPasswordCipher.h"
 
 template<>
 DbQueryBinding* DbQueryJob<AuthServer::DB_AccountData>::dbBinding = nullptr;

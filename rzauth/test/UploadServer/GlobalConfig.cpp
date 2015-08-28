@@ -1,5 +1,5 @@
 #include "GlobalConfig.h"
-#include "GlobalCoreConfig.h"
+#include "Config/GlobalCoreConfig.h"
 
 namespace UploadServer {
 

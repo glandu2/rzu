@@ -3,7 +3,7 @@
 
 #include "uv.h"
 #include <stdint.h>
-#include "DbQueryJobCallback.h"
+#include "Database/DbQueryJobCallback.h"
 
 class DbConnectionPool;
 

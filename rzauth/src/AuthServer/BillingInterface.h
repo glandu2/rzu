@@ -1,8 +1,8 @@
 #ifndef AUTHSERVER_BILLINGINTERFACE_H
 #define AUTHSERVER_BILLINGINTERFACE_H
 
-#include "Object.h"
-#include "TelnetSession.h"
+#include "Core/Object.h"
+#include "NetSession/TelnetSession.h"
 #include <string>
 
 namespace AuthServer {

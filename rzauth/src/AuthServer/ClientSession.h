@@ -1,8 +1,8 @@
 #ifndef AUTHSERVER_CLIENTSESSION_H
 #define AUTHSERVER_CLIENTSESSION_H
 
-#include "PacketSession.h"
-#include "EncryptedSession.h"
+#include "NetSession/PacketSession.h"
+#include "NetSession/EncryptedSession.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>

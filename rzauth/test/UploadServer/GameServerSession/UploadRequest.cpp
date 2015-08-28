@@ -7,9 +7,6 @@
 #include "UploadGame/TS_SU_REQUEST_UPLOAD.h"
 #include "UploadGame/TS_US_REQUEST_UPLOAD.h"
 #include "UploadGame/TS_US_UPLOAD.h"
-#include "Common.h"
-
-#include "DesPasswordCipher.h"
 
 namespace UploadServer {
 

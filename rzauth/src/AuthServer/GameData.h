@@ -1,7 +1,7 @@
 #ifndef GAMEDATA_H
 #define GAMEDATA_H
 
-#include "Object.h"
+#include "Core/Object.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>
