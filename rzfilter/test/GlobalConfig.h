@@ -1,7 +1,7 @@
 #ifndef GLOBALCONFIG_H
 #define GLOBALCONFIG_H
 
-#include "ConfigInfo.h"
+#include "Config/ConfigInfo.h"
 
 struct ConnectionConfig {
 	cval<std::string>& ip;

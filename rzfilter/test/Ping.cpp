@@ -3,7 +3,7 @@
 #include "AuthClient/TS_CA_SERVER_LIST.h"
 #include "GlobalConfig.h"
 
-#include "RC4Cipher.h"
+#include "Cipher/RC4Cipher.h"
 
 #ifndef _WIN32
 #define closesocket close

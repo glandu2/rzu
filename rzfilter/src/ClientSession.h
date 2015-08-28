@@ -1,8 +1,8 @@
 #ifndef CLIENTSESSION_H
 #define CLIENTSESSION_H
 
-#include "EncryptedSession.h"
-#include "PacketSession.h"
+#include "NetSession/EncryptedSession.h"
+#include "NetSession/PacketSession.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>

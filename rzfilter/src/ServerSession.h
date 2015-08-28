@@ -1,8 +1,8 @@
 #ifndef AUTHSESSION_H
 #define AUTHSESSION_H
 
-#include "EncryptedSession.h"
-#include "PacketSession.h"
+#include "NetSession/EncryptedSession.h"
+#include "NetSession/PacketSession.h"
 #include "IFilterEndpoint.h"
 
 class ClientSession;

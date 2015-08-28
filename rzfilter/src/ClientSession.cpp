@@ -3,11 +3,11 @@
 #include <string.h>
 #include <algorithm>
 #include "GlobalConfig.h"
-#include "PrintfFormats.h"
+#include "Core/PrintfFormats.h"
 
 #include "PacketEnums.h"
 #include "AuthClient/TS_AC_SERVER_LIST.h"
-#include "PacketEpics.h"
+#include "Packet/PacketEpics.h"
 
 #include "PacketFilter.h"
 
