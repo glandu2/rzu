@@ -1,12 +1,12 @@
 #include "AdminInterface.h"
-#include "ServersManager.h"
-#include "ConfigInfo.h"
+#include "NetSession/ServersManager.h"
+#include "Config/ConfigInfo.h"
 #include <stdlib.h>
 #include "../AuthServer/AuthSession.h"
 #include "ClassCounter.h"
-#include "DbConnectionPool.h"
-#include "CrashHandler.h"
-#include "Utils.h"
+#include "Database/DbConnectionPool.h"
+#include "Core/CrashHandler.h"
+#include "Core/Utils.h"
 
 static const char MSG_WELCOME[] = "GS auto reconnect server - Administration server - Type \"help\" for a list of available commands\r\n> ";
 
