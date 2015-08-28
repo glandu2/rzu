@@ -1,7 +1,7 @@
 #include "AuthSession.h"
 #include "GameServerSession.h"
 #include "../GlobalConfig.h"
-#include "EventLoop.h"
+#include "Core/EventLoop.h"
 #include <stdlib.h>
 
 #include "AuthGame/TS_GA_LOGOUT.h"

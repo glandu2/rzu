@@ -2,7 +2,7 @@
 #include "GameServerSession.h"
 #include <string.h>
 #include "../GlobalConfig.h"
-#include "PrintfFormats.h"
+#include "Core/PrintfFormats.h"
 #include "AuthSession.h"
 
 #include "PacketEnums.h"
