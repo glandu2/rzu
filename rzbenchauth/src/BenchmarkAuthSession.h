@@ -1,7 +1,7 @@
 #ifndef BENCHMARKAUTHSESSION_H
 #define BENCHMARKAUTHSESSION_H
 
-#include "ClientAuthSession.h"
+#include "NetSession/ClientAuthSession.h"
 #include <string>
 
 struct BenchmarkConfig {
