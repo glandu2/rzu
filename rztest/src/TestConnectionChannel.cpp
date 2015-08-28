@@ -1,10 +1,10 @@
 #include "TestConnectionChannel.h"
 #include "TestPacketServer.h"
 #include "TestPacketSession.h"
-#include "EncryptedSession.h"
-#include "ConfigParamVal.h"
+#include "NetSession/EncryptedSession.h"
+#include "Config/ConfigParamVal.h"
 #include "RzTest.h"
-#include "EventLoop.h"
+#include "Core/EventLoop.h"
 
 TestConnectionChannel::~TestConnectionChannel() {
 	if(session && type == Client)

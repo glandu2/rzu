@@ -5,7 +5,7 @@
 #include <list>
 
 #include "Extern.h"
-#include "PacketSession.h"
+#include "NetSession/PacketSession.h"
 
 #include <functional>
 #include "gtest/gtest.h"

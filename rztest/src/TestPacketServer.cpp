@@ -1,5 +1,5 @@
 #include "TestPacketServer.h"
-#include "EncryptedSession.h"
+#include "NetSession/EncryptedSession.h"
 
 TestPacketServer::TestPacketServer(TestConnectionChannel* channel, cval<std::string>& host, cval<int>& port, bool encryptedConnection, Log *packetLogger)
 	: SessionServerCommon(host, port, nullptr, packetLogger),

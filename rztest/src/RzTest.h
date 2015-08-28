@@ -1,7 +1,7 @@
 #ifndef RZTEST_H
 #define RZTEST_H
 
-#include "Object.h"
+#include "Core/Object.h"
 #include <list>
 #include "TestConnectionChannel.h"
 #include "Extern.h"

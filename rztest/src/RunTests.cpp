@@ -1,8 +1,8 @@
 #include "RunTests.h"
 #include "gtest/gtest.h"
 #include "LibRzuInit.h"
-#include "Log.h"
-#include "GlobalCoreConfig.h"
+#include "Core/Log.h"
+#include "Config/GlobalCoreConfig.h"
 
 int runTests(int argc, char **argv, ConfigInitCallback configInit) {
 

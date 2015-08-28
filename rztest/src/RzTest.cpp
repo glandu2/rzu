@@ -1,9 +1,9 @@
 #include "RzTest.h"
-#include "PacketBaseMessage.h"
-#include "EventLoop.h"
+#include "Packet/PacketBaseMessage.h"
+#include "Core/EventLoop.h"
 #include "TestPacketSession.h"
 #include "TestPacketServer.h"
-#include "EncryptedSession.h"
+#include "NetSession/EncryptedSession.h"
 #include <tuple>
 
 RzTest::RzTest()
