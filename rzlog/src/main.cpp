@@ -1,13 +1,13 @@
-#include "EventLoop.h"
+#include "Core/EventLoop.h"
 #include "GlobalConfig.h"
 #include "LibRzuInit.h"
-#include "GlobalCoreConfig.h"
-#include "CrashHandler.h"
-#include "DbConnectionPool.h"
+#include "Config/GlobalCoreConfig.h"
+#include "Core/CrashHandler.h"
+#include "Database/DbConnectionPool.h"
 
-#include "ServersManager.h"
-#include "BanManager.h"
-#include "SessionServer.h"
+#include "NetSession/ServersManager.h"
+#include "NetSession/BanManager.h"
+#include "NetSession/SessionServer.h"
 
 #include "LogServer/ClientSession.h"
 

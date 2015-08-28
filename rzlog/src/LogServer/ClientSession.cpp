@@ -1,10 +1,10 @@
 #include "ClientSession.h"
 #include "../GlobalConfig.h"
 #include <time.h>
-#include "Utils.h"
+#include "Core/Utils.h"
 #include <time.h>
 #include <string.h>
-#include "PrintfFormats.h"
+#include "Core/PrintfFormats.h"
 
 namespace LogServer {
 

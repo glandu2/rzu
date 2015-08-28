@@ -1,8 +1,8 @@
 #ifndef GLOBALCONFIG_H
 #define GLOBALCONFIG_H
 
-#include "ConfigInfo.h"
-#include "Utils.h"
+#include "Config/ConfigInfo.h"
+#include "Core/Utils.h"
 
 struct ListenerConfig {
 	cval<std::string> &listenIp;
