@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
-project(rzbenchauth)
+project(rzbenchlog)
 
-set(TARGET_NAME rzbenchauth)
+set(TARGET_NAME rzbenchlog)
 
 if(BUILD_SHARED_LIBS)
   add_definitions(-DUSING_UV_SHARED)
