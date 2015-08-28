@@ -1,7 +1,7 @@
 #include "GameSession.h"
 #include "ChatAuthSession.h"
 #include "IrcClient.h"
-#include "EventLoop.h"
+#include "Core/EventLoop.h"
 #include <algorithm>
 
 #include "GameClient/TS_SC_CHAT.h"
@@ -116,7 +116,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
 
 	debug("Character list: \n");
-	for(int i = 0; i < packet->characters.size(); i++) {
+	for(size_t i = 0; i < packet->characters.size(); i++) {
 		debug(" - %s\n", packet->characters[i].name);
 		if(!strcmp(playername.c_str(), packet->characters[i].name))
 			characterInList = true;
@@ -124,7 +124,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 
 	if(!characterInList) {
 		warn("Character \"%s\" not in character list: \n", playername.c_str());
-		for(int i = 0; i < packet->characters.size(); i++) {
+		for(size_t i = 0; i < packet->characters.size(); i++) {
 			warn(" - %s\n", packet->characters[i].name);
 		}
 	}

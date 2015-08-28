@@ -1,7 +1,7 @@
 #ifndef CHATAUTHSESSION_H
 #define CHATAUTHSESSION_H
 
-#include "ClientAuthSession.h"
+#include "NetSession/ClientAuthSession.h"
 #include <string>
 
 class GameSession;
