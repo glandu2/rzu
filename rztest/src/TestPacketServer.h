@@ -1,7 +1,7 @@
 #ifndef TESTPACKETSERVER_H
 #define TESTPACKETSERVER_H
 
-#include "SessionServer.h"
+#include "NetSession/SessionServer.h"
 #include "TestPacketSession.h"
 #include "Extern.h"
 

@@ -1,7 +1,7 @@
 #ifndef UPLOADSERVER_ICONSERVERSESSION_H
 #define UPLOADSERVER_ICONSERVERSESSION_H
 
-#include "SocketSession.h"
+#include "NetSession/SocketSession.h"
 #include <string>
 #include <sstream>
 

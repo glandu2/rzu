@@ -12,7 +12,7 @@
 #include "AuthGame/TS_GA_ACCOUNT_LIST.h"
 #include "Common.h"
 
-#include "DesPasswordCipher.h"
+#include "Cipher/DesPasswordCipher.h"
 
 namespace AuthServer {
 

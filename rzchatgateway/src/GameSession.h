@@ -1,8 +1,8 @@
 #ifndef GAMESESSION_H
 #define GAMESESSION_H
 
-#include "PacketSession.h"
-#include "ClientGameSession.h"
+#include "NetSession/PacketSession.h"
+#include "NetSession/ClientGameSession.h"
 #include <vector>
 #include <unordered_map>
 

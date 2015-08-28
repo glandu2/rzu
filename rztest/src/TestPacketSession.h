@@ -1,7 +1,7 @@
 #ifndef TESTPACKETSESSION_H
 #define TESTPACKETSESSION_H
 
-#include "PacketSession.h"
+#include "NetSession/PacketSession.h"
 #include "TestConnectionChannel.h"
 #include "Extern.h"
 

@@ -2,7 +2,7 @@
 #include "../GlobalConfig.h"
 #include <string.h>
 #include <stdio.h>
-#include "Utils.h"
+#include "Core/Utils.h"
 
 namespace UploadServer {
 

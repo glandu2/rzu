@@ -1,8 +1,9 @@
 #ifndef AUTHSERVER_DB_ACCOUNT_H
 #define AUTHSERVER_DB_ACCOUNT_H
 
-#include "DbQueryJobCallback.h"
+#include "Database/DbQueryJobCallback.h"
 #include <string>
+#include <string.h>
 #include <stdint.h>
 
 class DbConnectionPool;

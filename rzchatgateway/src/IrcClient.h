@@ -1,7 +1,7 @@
 #ifndef IRCCLIENT_H
 #define IRCCLIENT_H
 
-#include "SocketSession.h"
+#include "NetSession/SocketSession.h"
 #include <unordered_map>
 
 class GameSession;

@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "ClientSession.h"
-#include "EventLoop.h"
+#include "Core/EventLoop.h"
 #include "../GlobalConfig.h"
-#include "DbConnectionPool.h"
+#include "Database/DbConnectionPool.h"
 
 
 template<>

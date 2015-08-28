@@ -1,7 +1,7 @@
 #ifndef AUTHSERVER_DB_ACCOUNT_H
 #define AUTHSERVER_DB_ACCOUNT_H
 
-#include "DbQueryJob.h"
+#include "Database/DbQueryJob.h"
 #include <string>
 #include <stdint.h>
 

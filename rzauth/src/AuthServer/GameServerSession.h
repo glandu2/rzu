@@ -1,7 +1,7 @@
 #ifndef AUTHSERVER_GAMESERVERSESSION_H
 #define AUTHSERVER_GAMESERVERSESSION_H
 
-#include "PacketSession.h"
+#include "NetSession/PacketSession.h"
 #include <stdint.h>
 #include <unordered_map>
 #include <string>

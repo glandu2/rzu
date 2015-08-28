@@ -10,7 +10,7 @@
 #include "Common.h"
 #include "../ClientSession/Common.h"
 
-#include "DesPasswordCipher.h"
+#include "Cipher/DesPasswordCipher.h"
 
 namespace AuthServer {
 

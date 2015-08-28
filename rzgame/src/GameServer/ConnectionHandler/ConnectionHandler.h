@@ -1,8 +1,8 @@
 #ifndef ICONNECTIONHANDLER_H
 #define ICONNECTIONHANDLER_H
 
-#include "Object.h"
-#include "PacketBaseMessage.h"
+#include "Core/Object.h"
+#include "Packet/PacketBaseMessage.h"
 
 namespace GameServer {
 

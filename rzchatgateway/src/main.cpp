@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include "uv.h"
-#include "ClientAuthSession.h"
 #include <string.h>
-#include "EventLoop.h"
+#include "Core/EventLoop.h"
 #include "LibRzuInit.h"
-#include "PacketSession.h"
-#include "ConfigInfo.h"
-#include "GlobalCoreConfig.h"
-#include "Log.h"
+#include "Config/ConfigInfo.h"
+#include "Config/GlobalCoreConfig.h"
+#include "Core/Log.h"
 #include "IrcClient.h"
 #include "GameSession.h"
 #include "ChatAuthSession.h"

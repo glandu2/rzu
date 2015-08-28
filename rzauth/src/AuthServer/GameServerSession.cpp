@@ -3,7 +3,7 @@
 #include "ClientSession.h"
 #include <string.h>
 #include "../GlobalConfig.h"
-#include "PrintfFormats.h"
+#include "Core/PrintfFormats.h"
 #include "LogServerClient.h"
 #include <time.h>
 #include "GameData.h"

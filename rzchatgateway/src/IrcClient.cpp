@@ -1,5 +1,5 @@
 #include "IrcClient.h"
-#include "Utils.h"
+#include "Core/Utils.h"
 #include <algorithm>
 #include "GameSession.h"
 #include "GameClient/TS_CS_CHAT_REQUEST.h"

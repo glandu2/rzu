@@ -1,6 +1,6 @@
 #include "ChatAuthSession.h"
 #include "GameSession.h"
-#include "EventLoop.h"
+#include "Core/EventLoop.h"
 
 ChatAuthSession::ChatAuthSession(GameSession* gameSession, const std::string& ip, uint16_t port, const std::string& account, const std::string& password, int serverIdx, int delayTime, int ggRecoTime, AuthCipherMethod method)
 	: ClientAuthSession(gameSession), gameSession(gameSession), ip(ip), port(port), account(account), password(password), serverIdx(serverIdx), method(method), delayTime(delayTime), ggRecoTime(ggRecoTime)

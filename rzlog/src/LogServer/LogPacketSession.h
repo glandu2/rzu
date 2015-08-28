@@ -1,9 +1,9 @@
 #ifndef LOGSERVER_LOGPACKETSESSION_H
 #define LOGSERVER_LOGPACKETSESSION_H
 
-#include "SocketSession.h"
+#include "NetSession/SocketSession.h"
 #include "LS_11N4S.h"
-#include "Stream.h"
+#include "Stream/Stream.h"
 
 class SessionServerCommon;
 

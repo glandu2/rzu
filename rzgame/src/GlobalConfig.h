@@ -1,9 +1,9 @@
 #ifndef GLOBALCONFIG_H
 #define GLOBALCONFIG_H
 
-#include "ConfigInfo.h"
-#include "Utils.h"
-#include "PacketEpics.h"
+#include "Config/ConfigInfo.h"
+#include "Core/Utils.h"
+#include "Packet/PacketEpics.h"
 
 struct DbConfig : public IListener {
 	cval<std::string> &driver, &server, &name, &account, &password, &salt;

@@ -1,5 +1,5 @@
 #include "BenchmarkAuthSession.h"
-#include "EventLoop.h"
+#include "Core/EventLoop.h"
 
 BenchmarkAuthSession::BenchmarkAuthSession(BenchmarkConfig* config) : ClientAuthSession(nullptr)
 {

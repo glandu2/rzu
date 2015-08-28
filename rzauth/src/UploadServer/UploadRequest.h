@@ -1,7 +1,7 @@
 #ifndef UPLOADSERVER_UPLOADREQUEST_H
 #define UPLOADSERVER_UPLOADREQUEST_H
 
-#include "Object.h"
+#include "Core/Object.h"
 #include <unordered_map>
 #include <string>
 #include <stdint.h>

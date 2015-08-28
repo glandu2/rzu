@@ -1,7 +1,7 @@
 #ifndef AUTHSERVER_CLIENTDATA_H
 #define AUTHSERVER_CLIENTDATA_H
 
-#include "Object.h"
+#include "Core/Object.h"
 #include <string>
 #include <unordered_map>
 #include <stdint.h>

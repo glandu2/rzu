@@ -1,9 +1,9 @@
 #ifndef AUTHSERVER_LOGSERVERCLIENT_H
 #define AUTHSERVER_LOGSERVERCLIENT_H
 
-#include "SocketSession.h"
-#include "StartableObject.h"
-#include "ConfigParamVal.h"
+#include "NetSession/SocketSession.h"
+#include "NetSession/StartableObject.h"
+#include "Config/ConfigParamVal.h"
 
 namespace AuthServer {
 

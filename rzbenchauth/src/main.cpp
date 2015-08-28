@@ -1,15 +1,15 @@
 #include "uv.h"
 #include "BenchmarkAuthSession.h"
 #include <string.h>
-#include "EventLoop.h"
+#include "Core/EventLoop.h"
 #include "LibRzuInit.h"
 #include <stdio.h>
-#include "ConfigInfo.h"
-#include "GlobalCoreConfig.h"
+#include "Config/ConfigInfo.h"
+#include "Config/GlobalCoreConfig.h"
 #include "TimingFunctions.h"
-#include "PrintfFormats.h"
-#include "Socket.h"
-#include "Utils.h"
+#include "Core/PrintfFormats.h"
+#include "Stream/Socket.h"
+#include "Core/Utils.h"
 
 void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState, bool causedByRemote);
 

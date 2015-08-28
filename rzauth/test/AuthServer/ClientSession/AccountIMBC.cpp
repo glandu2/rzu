@@ -6,7 +6,7 @@
 #include "PacketEnums.h"
 #include "Common.h"
 
-#include "DesPasswordCipher.h"
+#include "Cipher/DesPasswordCipher.h"
 
 /*
  * Double login

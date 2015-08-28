@@ -1,8 +1,6 @@
 #include "GlobalConfig.h"
-#include "GlobalCoreConfig.h"
+#include "Config/GlobalCoreConfig.h"
 #include "rzlogGitVersion.h"
-#include "DbPasswordCipher.h"
-#include "Utils.h"
 
 GlobalConfig* GlobalConfig::get() {
 	static GlobalConfig config;

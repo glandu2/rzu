@@ -1,12 +1,12 @@
 #include "AdminInterface.h"
-#include "ServersManager.h"
-#include "ConfigInfo.h"
+#include "NetSession/ServersManager.h"
+#include "Config/ConfigInfo.h"
 #include <stdlib.h>
 #include "ClassCounter.h"
-#include "DbConnectionPool.h"
-#include "CrashHandler.h"
+#include "Database/DbConnectionPool.h"
+#include "Core/CrashHandler.h"
 #include <string.h>
-#include "Utils.h"
+#include "Core/Utils.h"
 
 static const char MSG_WELCOME[] = "Log server - Administration server - Type \"help\" for a list of available commands\r\n> ";
 

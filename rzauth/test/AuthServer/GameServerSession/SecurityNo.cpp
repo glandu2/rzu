@@ -6,7 +6,7 @@
 #include "AuthGame/TS_GA_SECURITY_NO_CHECK.h"
 #include "Common.h"
 
-#include "DesPasswordCipher.h"
+#include "Cipher/DesPasswordCipher.h"
 
 namespace AuthServer {
 
