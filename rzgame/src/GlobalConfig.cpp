@@ -1,7 +1,7 @@
 #include "GlobalConfig.h"
-#include "GlobalCoreConfig.h"
+#include "Config/GlobalCoreConfig.h"
 #include "rzgameGitVersion.h"
-#include "Utils.h"
+#include "Core/Utils.h"
 
 GlobalConfig* GlobalConfig::get() {
 	static GlobalConfig config;

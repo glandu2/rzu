@@ -1,9 +1,9 @@
 #ifndef LOBBYHANDLER_H
 #define LOBBYHANDLER_H
 
-#include "Object.h"
+#include "Core/Object.h"
 #include "ConnectionHandler.h"
-#include "DbQueryJobCallback.h"
+#include "Database/DbQueryJobCallback.h"
 #include "../Database/CharacterList.h"
 
 #include "GameClient/TS_CS_CHARACTER_LIST.h"

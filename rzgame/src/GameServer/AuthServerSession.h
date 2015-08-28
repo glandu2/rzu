@@ -1,8 +1,8 @@
 #ifndef GAMESERVER_AUTHSERVERSESSION_H
 #define GAMESERVER_AUTHSERVERSESSION_H
 
-#include "PacketSession.h"
-#include "StartableObject.h"
+#include "NetSession/PacketSession.h"
+#include "NetSession/StartableObject.h"
 #include "AuthGame/TS_AG_LOGIN_RESULT.h"
 #include "AuthGame/TS_AG_CLIENT_LOGIN.h"
 

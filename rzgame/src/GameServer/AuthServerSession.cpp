@@ -1,8 +1,8 @@
 #define __STDC_LIMIT_MACROS
 #include "AuthServerSession.h"
 #include <string.h>
-#include "ConfigInfo.h"
-#include "Utils.h"
+#include "Config/ConfigInfo.h"
+#include "Core/Utils.h"
 #include "ClientSession.h"
 
 #include "PacketEnums.h"

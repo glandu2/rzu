@@ -1,8 +1,8 @@
 #ifndef GAMESERVER_CLIENTSESSION_H
 #define GAMESERVER_CLIENTSESSION_H
 
-#include "PacketSession.h"
-#include "EncryptedSession.h"
+#include "NetSession/PacketSession.h"
+#include "NetSession/EncryptedSession.h"
 #include <unordered_map>
 
 #include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"

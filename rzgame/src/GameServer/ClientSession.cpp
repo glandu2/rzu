@@ -3,7 +3,7 @@
 #include <string.h>
 #include "AuthServerSession.h"
 #include "../GlobalConfig.h"
-#include "DbQueryJobCallback.h"
+#include "Database/DbQueryJobCallback.h"
 
 #include "ConnectionHandler/ConnectionHandler.h"
 #include "ConnectionHandler/LobbyHandler.h"
