@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include <unordered_map>
 #include <string>
+#include <vector>
+#include <time.h>
+
+class IWritableConsole;
 
 namespace AuthServer {
 
@@ -16,7 +20,7 @@ class GameData : public Object
 	DECLARE_CLASS(AuthServer::GameData)
 
 public:
-	//multithread concurrency when GS is disconnected while new players connect to it
+	static void init();
 	static const std::unordered_map<uint16_t, GameData*>& getServerList() { return servers; }
 
 	static GameData* tryAdd(GameServerSession* gameServerSession,
@@ -48,9 +52,12 @@ public:
 	void incPlayerCount() { playerCount++; }
 	void decPlayerCount() { playerCount--; }
 	uint32_t getPlayerCount() { return playerCount; }
+	time_t getCreationTime() { return creationTime; }
 
 protected:
 	void updateObjectName();
+
+	static void commandList(IWritableConsole* console, const std::vector<std::string>& args);
 
 private:
 	GameData(GameServerSession* gameServerSession,
@@ -72,7 +79,9 @@ private:
 	int32_t serverPort;
 	std::string serverScreenshotUrl;
 	bool isAdultServer;
+
 	uint32_t playerCount;
+	time_t creationTime;
 
 	bool ready;
 };

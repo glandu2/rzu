@@ -2,10 +2,18 @@
 #include "GameServerSession.h"
 #include "ClientData.h"
 #include "LogServerClient.h"
+#include "Console/ConsoleCommands.h"
+#include "Core/Utils.h"
 
 namespace AuthServer {
 
 std::unordered_map<uint16_t, GameData*> GameData::servers;
+
+void GameData::init() {
+	ConsoleCommands::get()->addCommand("gameserver.list", "list", 0, &commandList,
+									   "List all game servers",
+									   "list : list all game servers");
+}
 
 GameData::GameData(GameServerSession *gameServerSession,
 				   uint16_t serverIdx,
@@ -22,6 +30,7 @@ GameData::GameData(GameServerSession *gameServerSession,
 	  serverScreenshotUrl(serverScreenshotUrl),
 	  isAdultServer(isAdultServer),
 	  playerCount(0),
+	  creationTime(time(nullptr)),
 	  ready(false)
 {
 	setDirtyObjectName();
@@ -106,6 +115,30 @@ void GameData::sendNotifyItemPurchased(ClientData* client) {
 
 void GameData::updateObjectName() {
 	setObjectName(10 + (int)serverName.size(), "GameData[%s]", serverName.c_str());
+}
+
+void GameData::commandList(IWritableConsole* console, const std::vector<std::string>& args) {
+	const std::unordered_map<uint16_t, AuthServer::GameData*>& serverList = AuthServer::GameData::getServerList();
+	std::unordered_map<uint16_t, AuthServer::GameData*>::const_iterator it, itEnd;
+
+	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
+		AuthServer::GameData* server = it->second;
+
+		struct tm upTime;
+		Utils::getGmTime(time(nullptr) - server->getCreationTime(), &upTime);
+
+		console->writef("index: %2d, name: %s, address: %s:%d, players count: %u, uptime: %d:%02d:%02d:%02d, screenshot url: %s\r\n",
+						server->getServerIdx(),
+						server->getServerName().c_str(),
+						server->getServerIp().c_str(),
+						server->getServerPort(),
+						server->getPlayerCount(),
+						(upTime.tm_year - 1970) * 365 + upTime.tm_yday,
+						upTime.tm_hour,
+						upTime.tm_min,
+						upTime.tm_sec,
+						server->getServerScreenshotUrl().c_str());
+	}
 }
 
 } // namespace AuthServer

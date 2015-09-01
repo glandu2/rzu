@@ -14,12 +14,13 @@
 #include "AuthServer/DB_Account.h"
 #include "AuthServer/DB_UpdateLastServerIdx.h"
 #include "AuthServer/DB_SecurityNoCheck.h"
+#include "AuthServer/GameData.h"
 
 #include "UploadServer/ClientSession.h"
 #include "UploadServer/GameServerSession.h"
 #include "UploadServer/IconServerSession.h"
 
-#include "AdminServer/AdminInterface.h"
+#include "Console/ConsoleSession.h"
 #include "AuthServer/BillingInterface.h"
 
 #include "AuthServer/LogServerClient.h"
@@ -87,6 +88,7 @@ int main(int argc, char **argv) {
 		return 1;
 	if(!AuthServer::DB_SecurityNoCheck::init())
 		return 1;
+	AuthServer::GameData::init();
 
 	ConfigInfo::get()->init(argc, argv);
 
@@ -166,7 +168,7 @@ void runServers(Log *trafficLogger) {
 				&CONFIG_GET()->upload.game.listener.idleTimeout,
 				trafficLogger);
 
-	SessionServer<AdminServer::AdminInterface> adminTelnetServer(
+	SessionServer<ConsoleSession> adminTelnetServer(
 				CONFIG_GET()->admin.listener.listenIp,
 				CONFIG_GET()->admin.listener.port,
 				&CONFIG_GET()->admin.listener.idleTimeout);
@@ -185,7 +187,7 @@ void runServers(Log *trafficLogger) {
 	serverManager.addServer("upload.iconserver", &uploadIconServer, CONFIG_GET()->upload.icons.listener.autoStart);
 	serverManager.addServer("upload.gameserver", &uploadGameServer, CONFIG_GET()->upload.game.listener.autoStart);
 
-	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart);
+	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart, true);
 
 
 	serverManager.start();
