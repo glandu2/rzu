@@ -21,7 +21,7 @@ void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
 
 	if(serverManager)
-		serverManager->stop();
+		serverManager->forceStop();
 
 	uv_loop_close(EventLoop::getLoop());
 }
