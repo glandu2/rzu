@@ -65,8 +65,9 @@ void runServers(Log* trafficLogger);
 void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
 
-	if(serverManager)
-		serverManager->stop();
+	if(serverManager) {
+		serverManager->forceStop();
+	}
 }
 
 int main(int argc, char **argv) {
