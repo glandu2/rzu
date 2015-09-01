@@ -19,7 +19,7 @@ void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
 
 	if(serverManager)
-		serverManager->stop();
+		serverManager->forceStop();
 }
 
 int main(int argc, char **argv) {
