@@ -10,9 +10,6 @@ DesPasswordCipher
 ServerInfo
 */
 
-#include "AdminServer/AdminInterface.h"
-DECLARE_CLASSCOUNT_STATIC(AdminServer::AdminInterface)
-
 #include "AuthServer/BillingInterface.h"
 DECLARE_CLASSCOUNT_STATIC(AuthServer::BillingInterface)
 
