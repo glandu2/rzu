@@ -8,7 +8,7 @@
 #include "NetSession/ServersManager.h"
 #include "NetSession/BanManager.h"
 #include "NetSession/SessionServer.h"
-#include "AdminInterface.h"
+#include "Console/ConsoleSession.h"
 
 #include "ClientSession.h"
 
@@ -62,14 +62,14 @@ void runServers(Log *trafficLogger) {
 				&CONFIG_GET()->client.listener.idleTimeout,
 				trafficLogger);
 
-	SessionServer<AdminInterface> adminTelnetServer(
+	SessionServer<ConsoleSession> adminTelnetServer(
 				CONFIG_GET()->admin.listener.ip,
 				CONFIG_GET()->admin.listener.port,
 				&CONFIG_GET()->admin.listener.idleTimeout);
 
 
 	serverManager.addServer("clients", &clientSessionServer, CONFIG_GET()->client.listener.autoStart);
-	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart);
+	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart, true);
 
 	serverManager.start();
 
