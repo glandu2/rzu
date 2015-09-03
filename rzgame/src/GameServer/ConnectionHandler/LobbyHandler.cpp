@@ -87,7 +87,7 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<Database::CharacterList> *qu
 	}
 
 	characterList.current_server_time = 0;
-	characterList.last_character_idx = 1;
+	characterList.last_character_idx = 0;
 
 	session->sendPacket(characterList, CONFIG_GET()->game.clients.epic.get());
 
