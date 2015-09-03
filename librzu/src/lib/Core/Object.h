@@ -2,6 +2,7 @@
 #define OBJECT_H
 
 #include <stddef.h>
+#include <stdarg.h>
 
 #include "../Extern.h"
 
@@ -50,6 +51,7 @@ public:
 	void warn(const char *message, ...) PRINTFCHECK(2, 3);
 	void error(const char *message, ...) PRINTFCHECK(2, 3);
 	void fatal(const char *message, ...) PRINTFCHECK(2, 3);
+	void log(int level, const char *message, va_list args);
 
 	virtual void deleteLater();
 	bool isScheduledForDelete() { return scheduledForDelete; }

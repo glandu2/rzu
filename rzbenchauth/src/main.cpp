@@ -121,7 +121,6 @@ int main(int argc, char *argv[])
 	LibRzuInit();
 	init();
 	ConfigInfo::get()->init(argc, argv);
-	ConfigInfo::get()->dump();
 
 	uint64_t startTime;
 	Log mainLogger(GlobalCoreConfig::get()->log.enable,
@@ -131,6 +130,8 @@ int main(int argc, char *argv[])
 				   GlobalCoreConfig::get()->log.file,
 				   GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
+
+	ConfigInfo::get()->dump();
 
 	int usecBetweenConnection = CFG_GET("usecperconnection")->getInt();
 

@@ -9,9 +9,10 @@
 #include "NetSession/BanManager.h"
 #include "NetSession/SessionServer.h"
 
+#include "AuthServer/AuthSession.h"
 #include "AuthServer/GameServerSession.h"
 
-#include "AdminServer/AdminInterface.h"
+#include "Console/ConsoleSession.h"
 
 void runServers(Log* trafficLogger);
 
@@ -19,7 +20,7 @@ void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
 
 	if(serverManager)
-		serverManager->stop();
+		serverManager->forceStop();
 }
 
 int main(int argc, char **argv) {
@@ -27,6 +28,7 @@ int main(int argc, char **argv) {
 	GlobalConfig::init();
 
 	ConfigInfo::get()->init(argc, argv);
+	AuthServer::AuthSession::init();
 
 	Log mainLogger(GlobalCoreConfig::get()->log.enable,
 				   GlobalCoreConfig::get()->log.level,
@@ -65,14 +67,14 @@ void runServers(Log *trafficLogger) {
 				&CONFIG_GET()->game.listener.idleTimeout,
 				trafficLogger);
 
-	SessionServer<AdminServer::AdminInterface> adminTelnetServer(
+	SessionServer<ConsoleSession> adminTelnetServer(
 				CONFIG_GET()->admin.listener.ip,
 				CONFIG_GET()->admin.listener.port,
 				&CONFIG_GET()->admin.listener.idleTimeout);
 
 
 	serverManager.addServer("auth.gameserver", &authGameServer, CONFIG_GET()->game.listener.autoStart);
-	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart);
+	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart, true);
 
 	serverManager.start();
 

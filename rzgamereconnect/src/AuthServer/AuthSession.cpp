@@ -2,6 +2,8 @@
 #include "GameServerSession.h"
 #include "../GlobalConfig.h"
 #include "Core/EventLoop.h"
+#include "Console/ConsoleCommands.h"
+#include "Core/Utils.h"
 #include <stdlib.h>
 
 #include "AuthGame/TS_GA_LOGOUT.h"
@@ -12,6 +14,12 @@
 namespace AuthServer {
 
 std::unordered_map<uint16_t, AuthSession*> AuthSession::servers;
+
+void AuthSession::init() {
+	ConsoleCommands::get()->addCommand("gameserver.list", "list", 0, 1, &commandList,
+									   "List all game servers",
+									   "list : list all game servers");
+}
 
 AuthSession::AuthSession(GameServerSession *gameServerSession,
 						 uint16_t serverIdx,
@@ -27,6 +35,7 @@ AuthSession::AuthSession(GameServerSession *gameServerSession,
 	  serverPort(serverPort),
 	  serverScreenshotUrl(serverScreenshotUrl),
 	  isAdultServer(isAdultServer),
+	  creationTime(time(nullptr)),
 	  sentLoginPacket(false),
 	  pendingLogin(false),
 	  synchronizedWithAuth(false)
@@ -284,9 +293,68 @@ void AuthSession::sendPacketToNetwork(const TS_MESSAGE* message) {
 	else if(message->id == TS_GA_LOGOUT::packetID)
 		closeSession();
 }
-/*
-void AuthSession::updateObjectName() {
-	setObjectName(13 + getServerName().size(), "AuthSession[%s]", getServerName().c_str());
-}*/
+
+void AuthSession::commandList(IWritableConsole* console, const std::vector<std::string>& args) {
+	auto& serverList = getServerList();
+
+	if(args.size() < 1) {
+		auto it = serverList.begin();
+		auto itEnd = serverList.end();
+		for(; it != itEnd; ++it) {
+			AuthSession* server = it->second;
+
+			struct tm upTime;
+			Utils::getGmTime(time(nullptr) - server->getCreationTime(), &upTime);
+
+			console->writef("index: %2d, name: %s, address: %s:%d, players count: %u, uptime: %d:%02d:%02d:%02d, screenshot url: %s\r\n",
+							server->getServerIdx(),
+							server->getServerName().c_str(),
+							server->getServerIp().c_str(),
+							server->getServerPort(),
+							(int)server->getAccountList().size(),
+							(upTime.tm_year - 1970) * 365 + upTime.tm_yday,
+							upTime.tm_hour,
+							upTime.tm_min,
+							upTime.tm_sec,
+							server->getServerScreenshotUrl().c_str());
+		}
+	} else {
+		int serverIdx = atoi(args[0].c_str());
+		auto authSessionIt = serverList.find(serverIdx);
+
+		if(authSessionIt == serverList.end()) {
+			console->writef("No such server index: %d\r\n", serverIdx);
+			return;
+		}
+
+		AuthSession* authSession = authSessionIt->second;
+		auto& accountList = authSession->getAccountList();
+
+		console->writef("Gameserver %s[%d]: %d account(s)\r\n",
+						authSession->getServerName().c_str(), authSession->getServerIdx(), (int)accountList.size());
+
+		auto it = accountList.begin();
+		auto itEnd = accountList.end();
+		for(; it != itEnd; ++it) {
+			const TS_GA_ACCOUNT_LIST::AccountInfo& accountInfo = *it;
+			char ipStr[16];
+			struct tm loginTimeTm;
+
+			uv_inet_ntop(AF_INET, &accountInfo.ip, ipStr, sizeof(ipStr));
+			Utils::getGmTime(accountInfo.loginTime, &loginTimeTm);
+
+			console->writef("Account id: %d, name: %s, ip: %s, login time: %d-%02d-%02d %02d:%02d:%02d\r\n",
+							accountInfo.nAccountID,
+							accountInfo.account,
+							ipStr,
+							loginTimeTm.tm_year,
+							loginTimeTm.tm_mon,
+							loginTimeTm.tm_mday,
+							loginTimeTm.tm_hour,
+							loginTimeTm.tm_min,
+							loginTimeTm.tm_sec);
+		}
+	}
+}
 
 } // namespace AuthServer

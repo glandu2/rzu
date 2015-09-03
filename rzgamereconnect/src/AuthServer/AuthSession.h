@@ -3,9 +3,13 @@
 
 #include "NetSession/PacketSession.h"
 #include "AuthGame/TS_GA_ACCOUNT_LIST.h"
+#include <time.h>
+#include <string>
+#include <vector>
 
 struct TS_AG_LOGIN_RESULT;
 struct TS_AG_CLIENT_LOGIN_EXTENDED;
+class IWritableConsole;
 
 namespace AuthServer {
 
@@ -15,6 +19,8 @@ class AuthSession : public PacketSession
 {
 	DECLARE_CLASS(AuthServer::AuthSession)
 public:
+	static void init();
+
 	AuthSession(GameServerSession* gameServerSession,
 				uint16_t serverIdx,
 				std::string serverName,
@@ -48,6 +54,7 @@ public:
 	int32_t getServerPort() { return serverPort; }
 	std::string getServerScreenshotUrl() { return serverScreenshotUrl; }
 	bool getIsAdultServer() { return isAdultServer; }
+	time_t getCreationTime() { return creationTime; }
 
 protected:
 	void sendLogin();
@@ -61,6 +68,8 @@ protected:
 	void onClientLoginResult(const TS_AG_CLIENT_LOGIN_EXTENDED *packet);
 
 	void sendPendingMessages();
+	
+	static void commandList(IWritableConsole* console, const std::vector<std::string>& args);
 
 private:
 	using SocketSession::connect;
@@ -75,6 +84,7 @@ private:
 	int32_t serverPort;
 	std::string serverScreenshotUrl;
 	bool isAdultServer;
+	time_t creationTime;
 
 	bool sentLoginPacket;
 	bool pendingLogin;
