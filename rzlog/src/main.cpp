@@ -11,7 +11,7 @@
 
 #include "LogServer/ClientSession.h"
 
-#include "AdminServer/AdminInterface.h"
+#include "Console/ConsoleSession.h"
 
 void runServers(Log* trafficLogger);
 
@@ -68,14 +68,14 @@ void runServers(Log *trafficLogger) {
 				trafficLogger,
 				&banManager);
 
-	SessionServer<AdminServer::AdminInterface> adminTelnetServer(
+	SessionServer<ConsoleSession> adminTelnetServer(
 				CONFIG_GET()->admin.listener.listenIp,
 				CONFIG_GET()->admin.listener.port,
 				&CONFIG_GET()->admin.listener.idleTimeout);
 
 
 	serverManager.addServer("log.clients", &logClientServer, CONFIG_GET()->log.client.listener.autoStart);
-	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart);
+	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart, true);
 
 	serverManager.start();
 
