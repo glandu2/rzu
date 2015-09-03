@@ -13,7 +13,7 @@
 #include "GameServer/ClientSession.h"
 #include "GameServer/Database/CharacterList.h"
 
-#include "AdminServer/AdminInterface.h"
+#include "Console/ConsoleSession.h"
 
 void runServers(Log* trafficLogger);
 
@@ -77,7 +77,7 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	SessionServer<AdminServer::AdminInterface> adminTelnetServer(
+	SessionServer<ConsoleSession> adminTelnetServer(
 				CONFIG_GET()->admin.telnet.listenIp,
 				CONFIG_GET()->admin.telnet.port);
 	SessionServer<GameServer::ClientSession> clientsServer(
@@ -90,7 +90,7 @@ void runServers(Log *trafficLogger) {
 	banManager.loadFile();
 
 	serverManager.addServer("admin.telnet", &adminTelnetServer,
-							CONFIG_GET()->admin.telnet.autoStart);
+							CONFIG_GET()->admin.telnet.autoStart, true);
 
 	serverManager.addServer("game.clients", &clientsServer,
 							CONFIG_GET()->game.clients.autoStart);
