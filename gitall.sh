@@ -1,6 +1,5 @@
 #!/bin/sh
 
-echo ----rzu-parent: && git $*
 
 echo ----libuv: && cd libuv && git $*
 echo ----librzu: && cd ../librzu && git $*
@@ -15,6 +14,6 @@ echo ----rzchatgateway: && cd ../rzchatgateway && git $*
 echo ----rzplayercount: && cd ../rzplayercount && git $*
 echo ----rzlog: && cd ../rzlog && git $*
 echo ----rzfilter: && cd ../rzfilter && git $*
-#echo ----VStructGen: && cd ../VStructGen && git $*
-#echo RappelzClient: && cd ../RappelzClient && git $*
+
+echo ----rzu-parent: && git $*
 
