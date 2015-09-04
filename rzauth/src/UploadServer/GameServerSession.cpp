@@ -21,6 +21,7 @@ GameServerSession::~GameServerSession() {
 	if(this->serverName.empty() == false) {
 		servers.erase(this->serverName);
 		info("Server Logout\n");
+		UploadRequest::removeServer(this);
 	}
 }
 
