@@ -15,5 +15,5 @@ echo ----rzplayercount: && cd ../rzplayercount && git $*
 echo ----rzlog: && cd ../rzlog && git $*
 echo ----rzfilter: && cd ../rzfilter && git $*
 
-echo ----rzu-parent: && git $*
+echo ----rzu-parent: && cd .. && git $*
 
