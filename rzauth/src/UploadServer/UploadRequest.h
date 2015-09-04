@@ -27,6 +27,7 @@ public:
 
 	static UploadRequest* pushRequest(GameServerSession *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password);
 	static UploadRequest* popRequest(uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password, const std::string& gameServerName);
+	static void removeServer(GameServerSession* server); //remove all requests from this server
 	static unsigned int getClientCount() { return (int)pendingRequests.size(); }
 
 private:

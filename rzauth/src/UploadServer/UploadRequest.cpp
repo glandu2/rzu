@@ -68,4 +68,20 @@ UploadRequest* UploadRequest::popRequest(uint32_t client_id, uint32_t account_id
 	return ret;
 }
 
+void UploadRequest::removeServer(GameServerSession* server) {
+	std::unordered_map<uint32_t, UploadRequest*>::const_iterator it, itEnd;
+
+	uv_mutex_lock(&mapLock);
+	for(it = pendingRequests.begin(), itEnd = pendingRequests.end(); it != itEnd;) {
+		UploadRequest* client = it->second;
+		if(client->getGameServer() == server) {
+			it = pendingRequests.erase(it);
+			delete client;
+		} else {
+			++it;
+		}
+	}
+	uv_mutex_unlock(&mapLock);
+}
+
 } // namespace UploadServer
