@@ -21,10 +21,12 @@ struct GlobalConfig {
 	struct AuthConfig {
 		cval<std::string> &ip;
 		cval<int> &port;
+		cval<int> &reconnectDelay;
 
 		AuthConfig() :
 			ip(CFG_CREATE("auth.ip", "127.0.0.1")),
-			port(CFG_CREATE("auth.port", 4502)) {}
+			port(CFG_CREATE("auth.port", 4502)),
+			reconnectDelay(CFG_CREATE("auth.reconnectdelay", 5000)) {}
 	} auth;
 
 	struct GameConfig {
