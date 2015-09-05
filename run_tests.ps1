@@ -19,7 +19,7 @@ Function Send-StringOverTcp ($DataToSend, $hostname, $port) {
 
 try {
 	Start-Process .\rzauth -ArgumentList  '/configfile:auth-test.opt'
-	.\rzauth_test --gtest_repeat=2
+	.\rzauth_test
 	if(-not $?) {
 		throw "rzauth test failed"
 	}
