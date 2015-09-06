@@ -135,8 +135,9 @@ void TestConnectionChannel::registerSession(PacketSession *session) {
 	this->session = session;
 }
 
-void TestConnectionChannel::unregisterSession() {
-	session = nullptr;
+void TestConnectionChannel::unregisterSession(PacketSession *session) {
+	if(this->session == session)
+		this->session = nullptr;
 }
 
 TS_MESSAGE *TestConnectionChannel::copyMessage(const TS_MESSAGE *packet) {

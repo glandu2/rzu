@@ -79,7 +79,7 @@ public:
 	void closeSession();
 
 	void registerSession(PacketSession* session);
-	void unregisterSession();
+	void unregisterSession(PacketSession *session);
 
 protected:
 	void callEventCallback(Event event, PacketSession* session);
