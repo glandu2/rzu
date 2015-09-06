@@ -18,20 +18,20 @@ Function Send-StringOverTcp ($DataToSend, $hostname, $port) {
 }
 
 try {
-	Start-Process .\rzauth -ArgumentList  '/configfile:auth-test.opt'
-	.\rzauth_test
-	if(-not $?) {
-		throw "rzauth test failed"
+	Start-Process .\rzauth -ArgumentList '/configfile:auth-test.opt'
+	.\rzauth_test /core.log.level:trace /core.log.consolelevel:info
+	if($LastExitCode -ne 0) {
+		throw "rzauth test failed: $lastexitcode"
 	}
-	Start-Process .\rzgamereconnect
-	.\rzauth_test /game.port:4802 --gtest_filter=-TS_GA_LOGIN_WITH_LOGOUT.*
-	if(-not $?) {
-		throw "rzauth reconnect test failed"
+	Start-Process .\rzgamereconnect -ArgumentList '/auth.reconnectdelay:100'
+	.\rzauth_test /core.log.level:trace /core.log.consolelevel:info /auth.game.port:4802 --gtest_filter=-TS_GA_LOGIN_WITH_LOGOUT.*
+	if($LastExitCode -ne 0) {
+		throw "rzauth reconnect test failed: $lastexitcode"
 	}
 	Send-StringOverTcp "terminate`n" "127.0.0.1" "4501"
-	.\rzgamereconnect_test
-	if(-not $?) {
-		throw "rzgamereconnect test failed"
+	.\rzgamereconnect_test /core.log.level:trace /core.log.consolelevel:info
+	if($LastExitCode -ne 0) {
+		throw "rzgamereconnect test failed: $lastexitcode"
 	}
 } finally {
 	Send-StringOverTcp "terminate`n" "127.0.0.1" "4501"
