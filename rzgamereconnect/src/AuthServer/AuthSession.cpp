@@ -245,7 +245,7 @@ void AuthSession::onDisconnected(bool causedByRemote) {
 	pendingLogin = false;
 	if(causedByRemote && (gameServerSession != nullptr || pendingMessages.size() > 0)) {
 		int delay = CONFIG_GET()->auth.reconnectDelay.get();
-		warn("Disconnected from auth server, reconnecting in %d seconds\n", delay);
+		warn("Disconnected from auth server, reconnecting in %d seconds\n", delay/1000);
 		uv_timer_start(recoTimer, &onTimerReconnect, delay, 0);
 	} else {
 		info("Disconnected from auth server\n");
