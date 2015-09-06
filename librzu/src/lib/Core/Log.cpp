@@ -54,9 +54,9 @@ void Log::construct(cval<bool>& enabled, cval<std::string>& dir, cval<std::strin
 }
 
 Log::~Log() {
+	stopWriter();
 	if(defaultLogger == this)
 		defaultLogger = nullptr;
-	stopWriter();
 	uv_mutex_destroy(&messageListMutex);
 }
 
@@ -213,7 +213,7 @@ void Log::logv(Level level, const char *objectName, size_t objectNameSize, const
 	msg->writeToConsole = level <= consoleMaxLevel;
 	msg->writeToFile = level <= fileMaxLevel;
 	msg->objectName = std::string(objectName, objectName + objectNameSize);
-	Utils::stringFormat(msg->message, message, args);
+	Utils::stringFormatv(msg->message, message, args);
 
 	uv_mutex_lock(&this->messageListMutex);
 	if((int)this->messageQueue.size() < maxQueueSize.get())
@@ -339,7 +339,7 @@ void Log::logWritterThread() {
 				if(newfile == logFile) {
 					if(logFile)
 						fprintf(logFile, "Failed to change log file to %s\n", this->fileName.get().c_str());
-					fprintf(stderr, "Failed to change log file to %s\n", this->fileName.get().c_str());
+					fprintf(stdout, "Failed to change log file to %s\n", this->fileName.get().c_str());
 				}
 				logFile = newfile;
 				if(logFile)
@@ -357,15 +357,15 @@ void Log::logWritterThread() {
 			size_t strLen = snprintf(&logHeader[0], logHeader.size(), "%4d-%02d-%02d %02d:%02d:%02d %-5s %s: ", localtm.tm_year, localtm.tm_mon, localtm.tm_mday, localtm.tm_hour, localtm.tm_min, localtm.tm_sec, LEVELSTRINGS[msg->level], msg->objectName.c_str());
 			if(strLen >= logHeader.size()) {
 				uv_mutex_lock(&consoleMutex);
-					fprintf(stderr, "------------------- ERROR Log::logWritterThread: Log buffer was too small, next log message might be truncated\n");
+					fprintf(stdout, "------------------- ERROR Log::logWritterThread: Log buffer was too small, next log message might be truncated\n");
 				uv_mutex_unlock(&consoleMutex);
 				strLen = logHeader.size()-1; //do not write the \0
 			}
 
 			if(msg->writeToConsole) {
 				uv_mutex_lock(&consoleMutex);
-					fwrite(&logHeader[0], 1, strLen, stderr);
-					fwrite(msg->message.c_str(), 1, msg->message.size(), stderr);
+					fwrite(&logHeader[0], 1, strLen, stdout);
+					fwrite(msg->message.c_str(), 1, msg->message.size(), stdout);
 				uv_mutex_unlock(&consoleMutex);
 			}
 

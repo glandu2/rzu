@@ -33,7 +33,7 @@ TestPacketSession<T>::TestPacketSession(TestConnectionChannel *channel)
 
 template<class T>
 TestPacketSession<T>::~TestPacketSession() {
-	channel->unregisterSession();
+	channel->unregisterSession(this);
 }
 
 template<class T>

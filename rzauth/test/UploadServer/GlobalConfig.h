@@ -22,8 +22,8 @@ struct GlobalConfig {
 	
 
 	GlobalConfig() :
-		upload("upload", 4617),
-		game("game", 4616)
+		upload("upload.clients", 4617),
+		game("upload.game", 4616)
 	{}
 
 	static GlobalConfig* get();
