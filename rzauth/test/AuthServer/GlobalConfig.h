@@ -22,9 +22,9 @@ struct GlobalConfig {
 	ConnectionConfig billing;
 
 	GlobalConfig() :
-		auth("auth", 4500),
-		game("game", 4502),
-		billing("billing", 4503)
+		auth("auth.clients", 4500),
+		game("auth.game", 4502),
+		billing("auth.billing", 4503)
 	{}
 
 	static GlobalConfig* get();
