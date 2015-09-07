@@ -28,6 +28,10 @@ if(MSVC)
 
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+
+  # Add PDB files
+  file(GLOB PDB_FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/*.pdb)
+  install(FILES ${PDB_FILES} DESTINATION ./)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
