@@ -111,7 +111,7 @@ void RzuTestPrinter::OnTestEnd(const testing::TestInfo& test_info) {
 		comment = PrintFullTestCommentIfPresent(test_info);
 
 	if (testing::GTEST_FLAG(print_time)) {
-		info("%s%s.%s%s (%d ms)\n", result, test_info.test_case_name(), test_info.name(), comment.c_str(), test_info.result()->elapsed_time());
+		info("%s%s.%s%s (%d ms)\n", result, test_info.test_case_name(), test_info.name(), comment.c_str(), (int)test_info.result()->elapsed_time());
 	} else {
 		info("%s%s.%s%s\n", result, test_info.test_case_name(), test_info.name(), comment.c_str());
 	}
@@ -123,7 +123,7 @@ void RzuTestPrinter::OnTestCaseEnd(const testing::TestCase& test_case) {
 	info("[----------] %d tests from %s (%d ms total)\n",
 		 test_case.test_to_run_count(),
 		 test_case.name(),
-		 test_case.elapsed_time());
+		 (int)test_case.elapsed_time());
 }
 
 void RzuTestPrinter::OnEnvironmentsTearDownStart(
@@ -162,7 +162,7 @@ void RzuTestPrinter::OnTestIterationEnd(const testing::UnitTest& unit_test,
 		info("[==========] %d tests from %d test cases ran. (%d ms total)\n",
 			 unit_test.test_to_run_count(),
 			 unit_test.test_case_to_run_count(),
-			 unit_test.elapsed_time());
+			 (int)unit_test.elapsed_time());
 	} else {
 		info("[==========] %d tests from %d test cases ran.", unit_test.test_to_run_count(), unit_test.test_case_to_run_count());
 	}
