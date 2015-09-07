@@ -143,10 +143,7 @@ void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 		return;
 	}
 
-	authSession->logoutClient(static_cast<const TS_GA_CLIENT_LOGOUT*>(packet)->account);
-	if(authSession->isSynchronizedWithAuth()) {
-		authSession->sendPacket(packet);
-	}
+	authSession->logoutClient(static_cast<const TS_GA_CLIENT_LOGOUT*>(packet));
 }
 /*
 void GameServerSession::updateObjectName() {

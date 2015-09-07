@@ -197,14 +197,19 @@ void AuthSession::onClientLoginResult(const TS_AG_CLIENT_LOGIN_EXTENDED* packet)
 	gameServerSession->sendPacket(&clientLoginOut);
 }
 
-void AuthSession::logoutClient(const char* account) {
+void AuthSession::logoutClient(const TS_GA_CLIENT_LOGOUT* packet) {
 	auto it = accountList.rbegin();
 	for(; it != accountList.rend(); ++it) {
-		if(strcmp(it->account, account) == 0) {
-			debug("Logout client %s\n", account);
+		const TS_GA_ACCOUNT_LIST::AccountInfo& accountInfo = *it;
+		if(strcmp(accountInfo.account, packet->account) == 0) {
+			debug("Logout client %s\n", packet->account);
 			accountList.erase(--(it.base()));
 			break;
 		}
+	}
+
+	if(isConnected() && synchronizedWithAuth) {
+		sendPacket(packet);
 	}
 }
 
@@ -215,9 +220,8 @@ void AuthSession::disconnect() {
 	if(sentLoginPacket == false) {
 		info("Fast auth disconnect: login message wasn't send\n");
 		uv_timer_stop(recoTimer);
-		if(isConnected())
-			closeSession();
-		else
+		closeSession();
+		if(!isConnected())
 			deleteLater();
 	} else {
 		TS_GA_LOGOUT logoutPacket;
@@ -236,6 +240,7 @@ void AuthSession::forceClose() {
 		TS_MESSAGE::initMessage<TS_GA_LOGOUT>(&logoutPacket);
 		sendPacket(&logoutPacket);
 	} else {
+		closeSession();
 		deleteLater();
 	}
 }
@@ -296,13 +301,12 @@ void AuthSession::sendPacketToNetwork(const TS_MESSAGE* message) {
 }
 
 void AuthSession::commandList(IWritableConsole* console, const std::vector<std::string>& args) {
-	auto& serverList = getServerList();
-
 	if(args.size() < 1) {
-		auto it = serverList.begin();
-		auto itEnd = serverList.end();
+		auto it = servers.begin();
+		auto itEnd = servers.end();
 		for(; it != itEnd; ++it) {
-			AuthSession* server = it->second;
+			const std::pair<uint16_t, AuthSession*>& serverElement = *it;
+			AuthSession* server = serverElement.second;
 
 			struct tm upTime;
 			Utils::getGmTime(time(nullptr) - server->getCreationTime(), &upTime);
@@ -321,14 +325,15 @@ void AuthSession::commandList(IWritableConsole* console, const std::vector<std::
 		}
 	} else {
 		int serverIdx = atoi(args[0].c_str());
-		auto authSessionIt = serverList.find(serverIdx);
+		auto authSessionIt = servers.find(serverIdx);
 
-		if(authSessionIt == serverList.end()) {
+		if(authSessionIt == servers.end()) {
 			console->writef("No such server index: %d\r\n", serverIdx);
 			return;
 		}
 
-		AuthSession* authSession = authSessionIt->second;
+		const std::pair<uint16_t, AuthSession*>& serverElement = *authSessionIt;
+		AuthSession* authSession = serverElement.second;
 		auto& accountList = authSession->getAccountList();
 
 		console->writef("Gameserver %s[%d]: %d account(s)\r\n",

@@ -8,6 +8,7 @@
 #include <vector>
 
 struct TS_AG_LOGIN_RESULT;
+struct TS_GA_CLIENT_LOGOUT;
 struct TS_AG_CLIENT_LOGIN_EXTENDED;
 class IWritableConsole;
 
@@ -44,7 +45,7 @@ public:
 	void onDisconnected(bool causedByRemote);
 
 	bool loginServer();
-	void logoutClient(const char* account);
+	void logoutClient(const TS_GA_CLIENT_LOGOUT *packet);
 
 	void sendPacket(const TS_MESSAGE* message);
 
