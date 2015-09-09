@@ -127,7 +127,7 @@ void GameData::commandList(IWritableConsole* console, const std::vector<std::str
 		struct tm upTime;
 		Utils::getGmTime(time(nullptr) - server->getCreationTime(), &upTime);
 
-		console->writef("index: %2d, name: %s, address: %s:%d, players count: %u, uptime: %d:%02d:%02d:%02d, screenshot url: %s\r\n",
+		console->writef("index: %d, name: %s, address: %s:%d, players count: %u, uptime: %d:%02d:%02d:%02d, screenshot url: %s\r\n",
 						server->getServerIdx(),
 						server->getServerName().c_str(),
 						server->getServerIp().c_str(),
