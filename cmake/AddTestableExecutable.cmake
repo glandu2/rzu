@@ -18,6 +18,9 @@ function(add_exe name sources)
   foreach(lib "${ARGN}")
     target_link_libraries(${name} ${lib})
   endforeach()
+
+  install(TARGETS ${name} RUNTIME DESTINATION ./ COMPONENT "binaries")
+  install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols")
 endfunction()
 
 function(add_lib name sources)
@@ -27,6 +30,11 @@ function(add_lib name sources)
   foreach(lib "${ARGN}")
     target_link_libraries(${name} ${lib})
   endforeach()
+
+  if(BUILD_SHARED_LIBS)
+    install(TARGETS ${name} RUNTIME LIBRARY DESTINATION ./ COMPONENT "binaries")
+    install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols")
+  endif()
 endfunction()
 
 function(add_rztest name sources)
