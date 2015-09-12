@@ -34,7 +34,7 @@ void PlayerCountMonitor::updatePlayerNumber() {
 		connect(host.c_str(), port);
 	} else if(getStream()->getState() == Stream::ConnectingState) {
 		getStream()->close();
-		error("Server connection timeout\n");
+		log(LL_Error, "Server connection timeout\n");
 	} else {
 		if(getStream()->getState() == Stream::ConnectedState) {
 			connectedTimes++;
@@ -45,7 +45,7 @@ void PlayerCountMonitor::updatePlayerNumber() {
 			abortSession();
 			connectedTimes = 0;
 		}
-		error("Timer tick but server is not unconnected, timer is too fast ?\n");
+		log(LL_Error, "Timer tick but server is not unconnected, timer is too fast ?\n");
 	}
 }
 
@@ -62,7 +62,7 @@ void PlayerCountMonitor::onConnected() {
 
 void PlayerCountMonitor::onDisconnected(bool causedByRemote) {
 	if(causedByRemote) {
-		error("Disconnected by server !\n");
+		log(LL_Error, "Disconnected by server !\n");
 	}
 }
 
