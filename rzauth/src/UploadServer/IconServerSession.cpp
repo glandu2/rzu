@@ -107,7 +107,7 @@ void IconServerSession::parseUrl(std::string urlString) {
 		if(checkName(filename.c_str(), filename.size())) {
 			sendIcon(filename);
 		} else {
-			warn("Request to a invalid filename: \"%s\"\n", filename.c_str());
+			log(LL_Warning, "Request to a invalid filename: \"%s\"\n", filename.c_str());
 			getStream()->write(htmlNotFound, htmlNotFoundSize);
 		}
 	}

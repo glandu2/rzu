@@ -39,10 +39,10 @@ void GameServerSession::sendNotifyItemPurchased(ClientData* client) {
 GameServerSession::~GameServerSession() {
 	if(gameData && gameData->getGameServer() == this) {
 		if(useAutoReconnectFeature) {
-			warn("Game server disconnected without logout\n");
+			log(LL_Warning, "Game server disconnected without logout\n");
 			setGameData(nullptr);
 		} else {
-			info("Server %d Logout\n", gameData->getServerIdx());
+			log(LL_Info, "Server %d Logout\n", gameData->getServerIdx());
 			GameData::remove(gameData);
 		}
 	}
@@ -63,7 +63,7 @@ void GameServerSession::setGameData(GameData* gameData) {
 			oldGameData->setGameServer(nullptr);
 		if(gameData) {
 			gameData->setGameServer(this);
-			debug("Set game data to %s\n", gameData->getObjectName());
+			log(LL_Debug, "Set game data to %s\n", gameData->getObjectName());
 		}
 	}
 }
@@ -105,7 +105,7 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		default:
-			debug("Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
+			log(LL_Debug, "Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
 			break;
 	}
 }
@@ -121,12 +121,12 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip)-1);
 	localScreenshotUrl = Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url)-1);
 
-	info("Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
+	log(LL_Info, "Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
 
 	if(this->gameData) {
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 		sendPacket(&result);
-		error("Game server %s already sent login message\n", this->gameData->getServerName().c_str());
+		log(LL_Error, "Game server %s already sent login message\n", this->gameData->getServerName().c_str());
 		return;
 	}
 
@@ -136,7 +136,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	GameData* gameData = GameData::tryAdd(this, packet->server_idx, localServerName, localServerIp, packet->server_port, localScreenshotUrl, packet->is_adult_server, &oldGameData);
 	if(gameData) {
 		result.result = TS_RESULT_SUCCESS;
-		debug("Success\n");
+		log(LL_Debug, "Success\n");
 		setGameData(gameData);
 		if(!useAutoReconnectFeature)
 			gameData->setReady(true);
@@ -158,15 +158,15 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 			oldGameData->setReady(false);
 
 			if(gameServer) {
-				info("Received same game info for server %s[%d] but from different connection, dropping the old one (maybe halfopen ?)\n",
+				log(LL_Info, "Received same game info for server %s[%d] but from different connection, dropping the old one (maybe halfopen ?)\n",
 					 localServerName.c_str(), packet->server_idx);
 				gameServer->closeSession();
 			} else {
-				info("Game server %s[%d] reconnected\n", localServerName.c_str(), packet->server_idx);
+				log(LL_Info, "Game server %s[%d] reconnected\n", localServerName.c_str(), packet->server_idx);
 			}
 		} else {
 			result.result = TS_RESULT_ALREADY_EXIST;
-			error("Failed, server index already used\n");
+			log(LL_Error, "Failed, server index already used\n");
 		}
 	}
 
@@ -175,13 +175,13 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 
 void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST *packet) {
 	if(!gameData) {
-		error("Received account list but game server is not logged on\n");
+		log(LL_Error, "Received account list but game server is not logged on\n");
 		return;
 	}
 
 	const uint32_t expectedSize = packet->count * sizeof(TS_GA_ACCOUNT_LIST::AccountInfo) + sizeof(TS_GA_ACCOUNT_LIST);
 	if(expectedSize != packet->size) {
-		error("Wrong account list packet size, expected %d but got %d\n", expectedSize, packet->size);
+		log(LL_Error, "Wrong account list packet size, expected %d but got %d\n", expectedSize, packet->size);
 		return;
 	}
 
@@ -190,7 +190,7 @@ void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST *packet) {
 		accountInfo.account[sizeof(((TS_GA_ACCOUNT_LIST::AccountInfo*)0)->account) - 1] = '\0';
 		alreadyConnectedAccounts.push_back(accountInfo);
 	}
-	debug("Added %d accounts\n", packet->count);
+	log(LL_Debug, "Added %d accounts\n", packet->count);
 
 	if(packet->final_packet) {
 		//Remove all account connected on this server (they will be recreated after that using the list)
@@ -200,7 +200,7 @@ void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST *packet) {
 			const TS_GA_ACCOUNT_LIST::AccountInfo& accountInfo = alreadyConnectedAccounts[i];
 			std::string account = Utils::convertToString(accountInfo.account, sizeof(accountInfo.account)-1);
 
-			debug("Adding already connected account %s\n", account.c_str());
+			log(LL_Debug, "Adding already connected account %s\n", account.c_str());
 
 			ClientData* clientData = ClientData::tryAddClient(nullptr,
 															  account.c_str(),
@@ -221,23 +221,23 @@ void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST *packet) {
 				strcpy(msg.account, account.c_str());
 				msg.kick_type = TS_AG_KICK_CLIENT::KICK_TYPE_DUPLICATED_LOGIN;
 
-				info("Kicked client %s while synchronizing account list\n", account.c_str());
+				log(LL_Info, "Kicked client %s while synchronizing account list\n", account.c_str());
 				sendPacket(&msg);
 			}
 		}
 		gameData->setReady(true);
-		info("Synchronized account list with %d accounts\n", (int)alreadyConnectedAccounts.size());
+		log(LL_Info, "Synchronized account list with %d accounts\n", (int)alreadyConnectedAccounts.size());
 		alreadyConnectedAccounts.clear();
 	}
 }
 
 void GameServerSession::onServerLogout(const TS_GA_LOGOUT* packet) {
 	if(gameData) {
-		info("Server %d Logout\n", gameData->getServerIdx());
+		log(LL_Info, "Server %d Logout\n", gameData->getServerIdx());
 		GameData::remove(gameData);
 		gameData = nullptr;
 	} else {
-		error("Received logout but game server was not logged in\n");
+		log(LL_Error, "Received logout but game server was not logged in\n");
 	}
 }
 
@@ -250,22 +250,22 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	TS_ResultCode result = TS_RESULT_ACCESS_DENIED;
 
 	if(!gameData) {
-		error("Received client login for account %s but game server is not logged on\n", account.c_str());
+		log(LL_Error, "Received client login for account %s but game server is not logged on\n", account.c_str());
 	} else if(account.size() >= sizeof(packet->account)) {
-		error("Account name too long:  \"%s\" (max %d characters)\n", account.c_str(), (int)sizeof(packet->account)-1);
+		log(LL_Error, "Account name too long:  \"%s\" (max %d characters)\n", account.c_str(), (int)sizeof(packet->account)-1);
 	} else if(client == nullptr || client->getGameServer() == nullptr) {
-		warn("Client %s login on gameserver but not in client list\n", account.c_str());
+		log(LL_Warning, "Client %s login on gameserver but not in client list\n", account.c_str());
 	} else if(client->getGameServer() != gameData) {
-		warn("Client %s login on wrong gameserver %s, expected %s\n", account.c_str(), gameData->getServerName().c_str(), client->getGameServer() ? client->getGameServer()->getServerName().c_str() : "none");
+		log(LL_Warning, "Client %s login on wrong gameserver %s, expected %s\n", account.c_str(), gameData->getServerName().c_str(), client->getGameServer() ? client->getGameServer()->getServerName().c_str() : "none");
 	} else if(gameData->isReady() == false) {
-		warn("Client %s login on a not ready gameserver\n", account.c_str());
+		log(LL_Warning, "Client %s login on a not ready gameserver\n", account.c_str());
 	} else if(client->oneTimePassword != packet->one_time_key) {
-		warn("Client %s login on gameserver but wrong one time password: expected %" PRIu64 " but received %" PRIu64 "\n", account.c_str(), client->oneTimePassword, packet->one_time_key);
+		log(LL_Warning, "Client %s login on gameserver but wrong one time password: expected %" PRIu64 " but received %" PRIu64 "\n", account.c_str(), client->oneTimePassword, packet->one_time_key);
 	} else if(client->isConnectedToGame()) {
-		info("Client %s login on gameserver but already connected\n", account.c_str());
+		log(LL_Info, "Client %s login on gameserver but already connected\n", account.c_str());
 	} else {
 		//To complete
-		debug("Client %s now on gameserver\n", account.c_str());
+		log(LL_Debug, "Client %s now on gameserver\n", account.c_str());
 		result = TS_RESULT_SUCCESS;
 
 		client->connectedToGame();
@@ -284,13 +284,13 @@ void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
 
 	if(!gameData) {
-		error("Received client logout for account %s but game server is not logged on\n", account.c_str());
+		log(LL_Error, "Received client logout for account %s but game server is not logged on\n", account.c_str());
 		return;
 	}
 
 	ClientData* clientData = ClientData::getClient(account);
 
-	debug("Client %s has been disconnected from gameserver%s\n", account.c_str(), clientData ? "" : " (not a known client)");
+	log(LL_Debug, "Client %s has been disconnected from gameserver%s\n", account.c_str(), clientData ? "" : " (not a known client)");
 
 	if(!clientData)
 		return;
@@ -323,13 +323,13 @@ void GameServerSession::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packe
 	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
 
 	if(!gameData) {
-		error("Received client kick failed for account %s but game server is not logged on\n", account.c_str());
+		log(LL_Error, "Received client kick failed for account %s but game server is not logged on\n", account.c_str());
 		return;
 	}
 
 	ClientData* clientData = ClientData::getClient(account);
 
-	warn("Client %s kick failed%s\n", account.c_str(), clientData ? " (removing from client list)" : "");
+	log(LL_Warning, "Client %s kick failed%s\n", account.c_str(), clientData ? " (removing from client list)" : "");
 
 	if(!clientData)
 		return;
@@ -359,9 +359,9 @@ void GameServerSession::onSecurityNoCheckResult(DB_SecurityNoCheck *query) {
 	DB_SecurityNoCheckData::Input* input = query->getInput();
 
 	if(ok)
-		debug("Security no check for account %s: ok\n", input->account.c_str());
+		log(LL_Debug, "Security no check for account %s: ok\n", input->account.c_str());
 	else
-		debug("Security no check for account %s: wrong\n", input->account.c_str());
+		log(LL_Debug, "Security no check for account %s: wrong\n", input->account.c_str());
 
 	if(securityNoSendMode == true) {
 		TS_AG_SECURITY_NO_CHECK securityNoCheckPacket;

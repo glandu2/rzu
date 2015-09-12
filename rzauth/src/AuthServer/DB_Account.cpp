@@ -74,11 +74,11 @@ bool DB_Account::decryptPassword() {
 		int bytesWritten, totalLength;
 		unsigned int bytesRead;
 
-		debug("Client login using AES\n");
+		log(LL_Debug, "Client login using AES\n");
 
 		// if crypted size is > max size - 128 bits, then the decrypted password will overflow in the destination variable
 		if(input->cryptedPassword.size() > sizeof(password) - 16) {
-			warn("RSA: invalid password length: %d\n", (int)input->cryptedPassword.size());
+			log(LL_Warning, "RSA: invalid password length: %d\n", (int)input->cryptedPassword.size());
 			return false;
 		}
 
@@ -101,7 +101,7 @@ bool DB_Account::decryptPassword() {
 		totalLength += bytesWritten;
 
 		if(totalLength >= (int)sizeof(password)) {
-			error("Password length overflow: %d >= %d\n", totalLength, (int)sizeof(password));
+			log(LL_Error, "Password length overflow: %d >= %d\n", totalLength, (int)sizeof(password));
 			goto cleanup_aes;
 		}
 
@@ -111,26 +111,26 @@ bool DB_Account::decryptPassword() {
 	cleanup_aes:
 		unsigned long errorCode = ERR_get_error();
 		if(errorCode)
-			warn("AES: error while processing password for account %s: %s\n", input->account.c_str(), ERR_error_string(errorCode, nullptr));
+			log(LL_Warning, "AES: error while processing password for account %s: %s\n", input->account.c_str(), ERR_error_string(errorCode, nullptr));
 		EVP_CIPHER_CTX_cleanup(&d_ctx);
 	} else if(input->cryptMode == DB_AccountData::EM_None) {
 		if(input->cryptedPassword.size() >= sizeof(password)) {
-			error("Password length overflow: %d >= %d\n", (int)input->cryptedPassword.size(), (int)sizeof(password));
+			log(LL_Error, "Password length overflow: %d >= %d\n", (int)input->cryptedPassword.size(), (int)sizeof(password));
 		} else {
 			memcpy(password, (char*)&input->cryptedPassword[0], input->cryptedPassword.size());
 			password[input->cryptedPassword.size()] = 0;
 
-			debug("Client login using clear text\n");
+			log(LL_Debug, "Client login using clear text\n");
 
 			ok = true;
 		}
 	} else {
 		if(input->cryptedPassword.size() >= sizeof(password)) {
-			error("Password length overflow: %d >= %d\n", (int)input->cryptedPassword.size(), (int)sizeof(password));
+			log(LL_Error, "Password length overflow: %d >= %d\n", (int)input->cryptedPassword.size(), (int)sizeof(password));
 		} else {
 			memcpy(password, (char*)&input->cryptedPassword[0], input->cryptedPassword.size());
 
-			debug("Client login using DES\n");
+			log(LL_Debug, "Client login using DES\n");
 			desCipher->decrypt(password, (int)input->cryptedPassword.size());
 			password[input->cryptedPassword.size()] = 0;
 
@@ -190,14 +190,14 @@ bool DB_Account::onPreProcess() {
 
 	//Accounts with invalid names are refused
 	if(restrictCharacters && restrictCharacters->get() && !isAccountNameValid(input->account)) {
-		debug("Account name has invalid character: %s\n", input->account.c_str());
+		log(LL_Debug, "Account name has invalid character: %s\n", input->account.c_str());
 		return false;
 	}
 
 	if(decryptPassword() == false)
 		return false;
 
-	trace("Querying for account \"%s\" and password MD5 \"%s\"\n", input->account.c_str(), input->password);
+	log(LL_Trace, "Querying for account \"%s\" and password MD5 \"%s\"\n", input->account.c_str(), input->password);
 
 	return true;
 }
@@ -207,7 +207,7 @@ bool DB_Account::onRowDone() {
 	DB_AccountData::Output* output = &getResults().back();
 
 	if(output->account_id == 0xFFFFFFFF) {
-		trace("Account %s not found in database\n", input->account.c_str());
+		log(LL_Trace, "Account %s not found in database\n", input->account.c_str());
 		return false;
 	}
 
@@ -216,7 +216,7 @@ bool DB_Account::onRowDone() {
 	} else if(!strcmp(input->password, output->password)){
 		output->ok = true;
 	} else {
-		trace("Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", input->account.c_str(), input->password, output->password);
+		log(LL_Trace, "Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", input->account.c_str(), input->password, output->password);
 	}
 
 	return false;

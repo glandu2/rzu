@@ -32,7 +32,7 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		default:
-			debug("Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
+			log(LL_Debug, "Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
 			break;
 	}
 }
@@ -43,7 +43,7 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 
 	std::string serverName = Utils::convertToString(packet->raw_server_name, sizeof(packet->raw_server_name)-1);
 
-	debug("Upload from client %s:%d, client id %u with account id %u for guild id %u on server %s\n",
+	log(LL_Debug, "Upload from client %s:%d, client id %u with account id %u for guild id %u on server %s\n",
 		  getStream()->getRemoteIpStr(),
 		  getStream()->getRemotePort(),
 		  packet->client_id,
@@ -56,7 +56,7 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 	if(currentRequest) {
 		result.result = TS_RESULT_SUCCESS;
 	} else {
-		debug("Invalid client, otp given is %u\n", packet->one_time_password);
+		log(LL_Debug, "Invalid client, otp given is %u\n", packet->one_time_password);
 		result.result = TS_RESULT_NOT_EXIST;
 	}
 
@@ -68,19 +68,19 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	TS_MESSAGE::initMessage<TS_UC_UPLOAD>(&result);
 
 
-	debug("Upload from client %s:%d\n", getStream()->getRemoteIpStr(), getStream()->getRemotePort());
+	log(LL_Debug, "Upload from client %s:%d\n", getStream()->getRemoteIpStr(), getStream()->getRemotePort());
 
 	if(currentRequest == nullptr) {
-		warn("Upload attempt without a request from %s:%d\n", getStream()->getRemoteIpStr(), getStream()->getRemotePort());
+		log(LL_Warning, "Upload attempt without a request from %s:%d\n", getStream()->getRemoteIpStr(), getStream()->getRemotePort());
 		result.result = TS_RESULT_NOT_EXIST;
 	} else if(packet->file_length != packet->size - sizeof(TS_CU_UPLOAD)) {
-		warn("Upload packet size invalid, received %d bytes but the packet say %u bytes\n", int(packet->size - sizeof(TS_CU_UPLOAD)), packet->file_length);
+		log(LL_Warning, "Upload packet size invalid, received %d bytes but the packet say %u bytes\n", int(packet->size - sizeof(TS_CU_UPLOAD)), packet->file_length);
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 	} else if(packet->file_length > 64000) {
-		debug("Upload file is too large: %d bytes. Max 64000 bytes\n", packet->file_length);
+		log(LL_Debug, "Upload file is too large: %d bytes. Max 64000 bytes\n", packet->file_length);
 		result.result = TS_RESULT_LIMIT_MAX;
 	} else if(!checkJpegImage(packet->file_length, packet->file_contents)) {
-		debug("Upload file is not a jpeg file\n");
+		log(LL_Debug, "Upload file is not a jpeg file\n");
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 	} else {
 		size_t filenameSize = currentRequest->getGameServer()->getName().size() + 1 + 10 + 1 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 4 + 1;
@@ -99,7 +99,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 				 timeinfo.tm_min,
 				 timeinfo.tm_sec);
 
-		debug("Uploading image %s for client id %u with account id %u for guild %u\n", filename, currentRequest->getClientId(), currentRequest->getAccountId(), currentRequest->getGuildId());
+		log(LL_Debug, "Uploading image %s for client id %u with account id %u for guild %u\n", filename, currentRequest->getClientId(), currentRequest->getAccountId(), currentRequest->getGuildId());
 
 		std::string absoluteDir = CONFIG_GET()->upload.client.uploadDir.get();
 		std::string fullFileName = absoluteDir + "/" + filename;
@@ -107,7 +107,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 		Utils::mkdir(absoluteDir.c_str());
 		FILE* file = fopen(fullFileName.c_str(), "wb");
 		if(!file) {
-			warn("Cant open upload target file %s\n", fullFileName.c_str());
+			log(LL_Warning, "Cant open upload target file %s\n", fullFileName.c_str());
 			result.result = TS_RESULT_ACCESS_DENIED;
 		} else {
 			size_t dataWritten = fwrite(&packet->file_contents, packet->file_length, 1, file);
@@ -117,7 +117,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 				result.result = TS_RESULT_SUCCESS;
 				currentRequest->getGameServer()->sendUploadResult(currentRequest->getGuildId(), packet->file_length, filename);
 			} else {
-				warn("Cant write upload target file %s, disk full ?\n", fullFileName.c_str());
+				log(LL_Warning, "Cant write upload target file %s, disk full ?\n", fullFileName.c_str());
 				result.result = TS_RESULT_ACCESS_DENIED;
 			}
 		}

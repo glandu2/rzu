@@ -68,7 +68,7 @@ ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::strin
 		newClient->ip = ip;
 		resultForName = connectedClientsByName.insert(std::pair<std::string, ClientData*>(toLower(account), newClient));
 		if(resultForName.second == false) {
-			newClient->error("Duplicated account name with different ID: %s\n", account.c_str());
+			newClient->log(LL_Error, "Duplicated account name with different ID: %s\n", account.c_str());
 			if(oldClientPtr)
 				*oldClientPtr = resultForName.first->second;
 			connectedClients.erase(result.first);
@@ -95,7 +95,7 @@ bool ClientData::removeClient(const std::string& account) {
 		delete clientData;
 		ret = true;
 	} else {
-		Log::get()->log(Log::LL_Error, "ClientData", 10, "Trying to remove a not connected account : %s\n", account.c_str());
+		logStatic(LL_Error, ClientData::getStaticClassName(), "Trying to remove a not connected account : %s\n", account.c_str());
 	}
 	uv_mutex_unlock(&mapLock);
 
@@ -115,7 +115,7 @@ bool ClientData::removeClient(uint32_t accountId) {
 		delete clientData;
 		ret = true;
 	} else {
-		Log::get()->log(Log::LL_Error, "ClientData", 10, "Trying to remove a not connected account : %d\n", accountId);
+		logStatic(LL_Error, ClientData::getStaticClassName(), "Trying to remove a not connected account : %d\n", accountId);
 	}
 	uv_mutex_unlock(&mapLock);
 
@@ -134,7 +134,7 @@ void ClientData::switchClientToServer(GameData* server, uint64_t oneTimePassword
 
 void ClientData::connectedToGame() {
 	if(!getGameServer())
-		error("Connected to unknown game server ! Code logic error\n");
+		log(LL_Error, "Connected to unknown game server ! Code logic error\n");
 	else
 		getGameServer()->incPlayerCount();
 	inGame = true;
