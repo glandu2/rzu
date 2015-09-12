@@ -58,11 +58,11 @@ void AuthServerSession::loginClient(ClientSession* clientSession, const std::str
 	TS_GA_CLIENT_LOGIN loginMsg;
 
 	if(pendingClients.find(account) != pendingClients.end()) {
-		warn("Client %s already logging in\n", account.c_str());
+		log(LL_Warning, "Client %s already logging in\n", account.c_str());
 		return;
 	}
 
-	debug("Login request for account %s\n", account.c_str());
+	log(LL_Debug, "Login request for account %s\n", account.c_str());
 
 	TS_MESSAGE::initMessage(&loginMsg);
 
@@ -117,9 +117,9 @@ void AuthServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 
 void AuthServerSession::onLoginResult(const TS_AG_LOGIN_RESULT* packet) {
 	if(packet->result != TS_RESULT_SUCCESS)
-		error("Login to auth failed, result: %d\n", packet->result);
+		log(LL_Error, "Login to auth failed, result: %d\n", packet->result);
 	else
-		info("Registered with auth successfully\n");
+		log(LL_Info, "Registered with auth successfully\n");
 }
 
 void AuthServerSession::onClientLoginResult(const TS_AG_CLIENT_LOGIN* packet) {

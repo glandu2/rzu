@@ -91,7 +91,7 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<Database::CharacterList> *qu
 
 	session->sendPacket(characterList, CONFIG_GET()->game.clients.epic.get());
 
-	debug("Account %s has %d characters\n", session->getAccount().c_str(), characterList.characters.size());
+	log(LL_Debug, "Account %s has %d characters\n", session->getAccount().c_str(), characterList.characters.size());
 }
 
 void LobbyHandler::onCharacterLogin(const TS_CS_LOGIN *packet) {

@@ -35,26 +35,6 @@ struct DbConfig : public IListener {
 };
 
 struct GlobalConfig {
-	struct AdminConfig {
-		struct TelnetConfig {
-			cval<std::string> &listenIp;
-			cval<int> &port;
-			cval<bool> &autoStart;
-
-			TelnetConfig() :
-				listenIp(CFG_CREATE("admin.telnet.ip", "127.0.0.1")),
-				port(CFG_CREATE("admin.telnet.port", 4515)),
-				autoStart(CFG_CREATE("admin.telnet.autostart", true))
-			{}
-		} telnet;
-
-		cval<int> &dumpMode;
-
-		AdminConfig() :
-			dumpMode(CFG_CREATE("admin.dump_mode", 0)) //1: no dump, anything else: create dump on crash
-		{}
-	} admin;
-
 	struct GameConfig {
 		DbConfig db;
 

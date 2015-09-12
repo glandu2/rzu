@@ -28,7 +28,7 @@ ClientSession::ClientSession() : authReceived(false), accountId(UINT32_MAX), con
 }
 
 ClientSession::~ClientSession() {
-	info("Account %s disconnected\n", account.c_str());
+	log(LL_Info, "Account %s disconnected\n", account.c_str());
 
 	AuthServerSession::get()->logoutClient(account.c_str(), 0);
 	if(connectionHandler)
@@ -51,9 +51,9 @@ void ClientSession::onAccountLoginResult(uint16_t result, std::string account, u
 	sendPacket(&loginResult);
 
 	if(result != TS_RESULT_SUCCESS) {
-		warn("Login failed for account %s: %d\n", account.c_str(), result);
+		log(LL_Warning, "Login failed for account %s: %d\n", account.c_str(), result);
 	} else {
-		debug("Login success for account %s\n", account.c_str());
+		log(LL_Debug, "Login success for account %s\n", account.c_str());
 		this->accountId = accountId;
 		this->account = account;
 		setConnectionHandler(new LobbyHandler(this));
@@ -70,7 +70,7 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	} else if(connectionHandler) {
 		connectionHandler->onPacketReceived(packet);
 	} else {
-		warn("Account %s authenticated but no connection handler !\n", account.c_str());
+		log(LL_Warning, "Account %s authenticated but no connection handler !\n", account.c_str());
 	}
 }
 
@@ -81,7 +81,7 @@ void ClientSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH* packet) {
 		authReceived = true;
 		AuthServerSession::get()->loginClient(this, account, packet->one_time_key);
 	} else {
-		warn("Client already sent a auth packet, closing connection\n");
+		log(LL_Warning, "Client already sent a auth packet, closing connection\n");
 		abortSession();
 	}
 }

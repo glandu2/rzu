@@ -61,8 +61,6 @@ int main(int argc, char **argv) {
 
 		dbConnectionPool.checkConnection(CONFIG_GET()->game.db.connectionString.get().c_str());
 
-		CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
-
 		runServers(&trafficLogger);
 
 		//Make valgrind happy
@@ -77,9 +75,6 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	SessionServer<ConsoleSession> adminTelnetServer(
-				CONFIG_GET()->admin.telnet.listenIp,
-				CONFIG_GET()->admin.telnet.port);
 	SessionServer<GameServer::ClientSession> clientsServer(
 				CONFIG_GET()->game.clients.listenIp,
 				CONFIG_GET()->game.clients.port,
@@ -89,8 +84,7 @@ void runServers(Log *trafficLogger) {
 
 	banManager.loadFile();
 
-	serverManager.addServer("admin.telnet", &adminTelnetServer,
-							CONFIG_GET()->admin.telnet.autoStart, true);
+	ConsoleSession::start(&serverManager);
 
 	serverManager.addServer("game.clients", &clientsServer,
 							CONFIG_GET()->game.clients.autoStart);
