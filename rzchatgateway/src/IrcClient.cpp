@@ -61,7 +61,7 @@ void IrcClient::onIrcLine(const std::string& line) {
 	std::string parameters;
 	std::string trailing;
 
-	trace("IRC line received: %s\n", line.c_str());
+	log(LL_Trace, "IRC line received: %s\n", line.c_str());
 
 	parseIrcMessage(line, prefix, command, parameters, trailing);
 
@@ -70,7 +70,7 @@ void IrcClient::onIrcLine(const std::string& line) {
 		sprintf(login, "JOIN %s\r\n", channelName.c_str());
 		write(login, strlen(login));
 		joined = true;
-		info("Joined IRC channel %s at %s:%d as user %s\n", channelName.c_str(), ip.c_str(), port, nickname.c_str());
+		log(LL_Info, "Joined IRC channel %s at %s:%d as user %s\n", channelName.c_str(), ip.c_str(), port, nickname.c_str());
 	} else if(command == "PING") {
 		std::string pong = "PONG :" + trailing + "\r\n";
 		write(pong.c_str(), pong.size());
@@ -162,7 +162,7 @@ void IrcClient::sendMsgToIRC(int type, const char* sender, std::string msg) {
 
 	const char* color = getChatColor(type);
 
-	debug("[GS] Msg %d: %s: %s\n", type, sender, msg.c_str());
+	log(LL_Debug, "[GS] Msg %d: %s: %s\n", type, sender, msg.c_str());
 
 	if(sender[0] == '@')
 		return;

@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 	int serverIdx = CFG_GET("game.gsindex")->getInt();
 	std::string playername = CFG_GET("game.playername")->getString();
 
-	mainLogger.info("Starting chat gateway\n");
+	Object::logStatic(Object::LL_Info, "main", "Starting chat gateway\n");
 
 	GameSession* gameSession = new GameSession(playername, enableGateway, &trafficLogger);
 	IrcClient* ircClient = new IrcClient(ircIp, ircPort, ircHost, ircChannel, ircNick, &trafficLogger);

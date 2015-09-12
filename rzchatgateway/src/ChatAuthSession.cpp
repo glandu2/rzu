@@ -17,7 +17,7 @@ void ChatAuthSession::connect() {
 
 void ChatAuthSession::delayedConnect() {
 	if(delayTime > 0) {
-		info("Will connect to auth in %dms\n", delayTime);
+		log(LL_Info, "Will connect to auth in %dms\n", delayTime);
 		uv_timer_start(&delayRecoTimer, &onDelayRecoExpired, delayTime, 0);
 	} else {
 		connect();
@@ -27,7 +27,7 @@ void ChatAuthSession::delayedConnect() {
 void ChatAuthSession::onDelayRecoExpired(uv_timer_t *timer) {
 	ChatAuthSession* thisInstance = (ChatAuthSession*)timer->data;
 
-	thisInstance->info("End of delay connect timer, connecting to auth now\n");
+	thisInstance->log(LL_Info, "End of delay connect timer, connecting to auth now\n");
 	thisInstance->connect();
 }
 
@@ -37,10 +37,10 @@ void ChatAuthSession::onAuthDisconnected() {
 
 void ChatAuthSession::onAuthResult(TS_ResultCode result, const std::string& resultString) {
 	if(result != TS_RESULT_SUCCESS) {
-		error("%s: Auth failed result: %d (%s)\n", account.c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
+		log(LL_Error, "%s: Auth failed result: %d (%s)\n", account.c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
 		abortSession();
 	} else {
-		info("Retrieving server list\n");
+		log(LL_Info, "Retrieving server list\n");
 		retreiveServerList();
 	}
 }
@@ -48,10 +48,10 @@ void ChatAuthSession::onAuthResult(TS_ResultCode result, const std::string& resu
 void ChatAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t lastSelectedServerId) {
 	bool serverFound = false;
 
-	debug("Server list (last id: %d)\n", lastSelectedServerId);
+	log(LL_Debug, "Server list (last id: %d)\n", lastSelectedServerId);
 	for(size_t i = 0; i < servers.size(); i++) {
 		const ServerInfo& serverInfo = servers.at(i);
-		debug("%d: %20s at %16s:%d %d%% user ratio\n",
+		log(LL_Debug, "%d: %20s at %16s:%d %d%% user ratio\n",
 				serverInfo.serverId,
 				serverInfo.serverName.c_str(),
 				serverInfo.serverIp.c_str(),
@@ -65,11 +65,11 @@ void ChatAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 	}
 
 	if(!serverFound) {
-		error("Server with index %d not found\n", serverIdx);
-		info("Server list (last id: %d)\n", lastSelectedServerId);
+		log(LL_Error, "Server with index %d not found\n", serverIdx);
+		log(LL_Info, "Server list (last id: %d)\n", lastSelectedServerId);
 		for(size_t i = 0; i < servers.size(); i++) {
 			const ServerInfo& serverInfo = servers.at(i);
-			info("%d: %20s at %16s:%d %d%% user ratio\n",
+			log(LL_Info, "%d: %20s at %16s:%d %d%% user ratio\n",
 					serverInfo.serverId,
 					serverInfo.serverName.c_str(),
 					serverInfo.serverIp.c_str(),
@@ -78,11 +78,11 @@ void ChatAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 		}
 	}
 
-	info("Connecting to GS with index %d\n", serverIdx);
+	log(LL_Info, "Connecting to GS with index %d\n", serverIdx);
 	selectServer(serverIdx);
 
 	if(ggRecoTime > 0) {
-		debug("Starting GG timer: %ds\n", ggRecoTime);
+		log(LL_Debug, "Starting GG timer: %ds\n", ggRecoTime);
 		uv_timer_start(&ggRecoTimer, &onGGTimerExpired, ggRecoTime*1000, 0);
 	}
 }
@@ -93,15 +93,15 @@ void ChatAuthSession::onGameDisconnected() {
 
 void ChatAuthSession::onGGTimerExpired(uv_timer_t *timer) {
 	ChatAuthSession* thisInstance = (ChatAuthSession*)timer->data;
-	thisInstance->info("GG timeout, reconnecting\n");
+	thisInstance->log(LL_Info, "GG timeout, reconnecting\n");
 	thisInstance->gameSession->abortSession();
 }
 
 void ChatAuthSession::onGameResult(TS_ResultCode result) {
 	if(result != TS_RESULT_SUCCESS) {
-		error("GS returned an error while authenticating: %d\n", result);
+		log(LL_Error, "GS returned an error while authenticating: %d\n", result);
 		abortSession();
 	} else {
-		info("Connected to GS\n");
+		log(LL_Info, "Connected to GS\n");
 	}
 }
