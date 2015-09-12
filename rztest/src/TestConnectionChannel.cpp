@@ -49,7 +49,7 @@ void TestConnectionChannel::start() {
 
 void TestConnectionChannel::startClient() {
 	if(session && session->getState() != Stream::UnconnectedState) {
-		error("Client session to %s:%d already started\n", host.get().c_str(), port.get());
+		log(LL_Error, "Client session to %s:%d already started\n", host.get().c_str(), port.get());
 		return;
 	}
 
@@ -63,7 +63,7 @@ void TestConnectionChannel::startClient() {
 
 void TestConnectionChannel::startServer() {
 	if(session && session->getState() != Stream::UnconnectedState) {
-		error("Server session on %s:%d already started\n", host.get().c_str(), port.get());
+		log(LL_Error, "Server session on %s:%d already started\n", host.get().c_str(), port.get());
 		return;
 	}
 
@@ -73,13 +73,13 @@ void TestConnectionChannel::startServer() {
 }
 
 void TestConnectionChannel::sendPacket(const TS_MESSAGE *packet) {
-	debug("[%s:%d] Sending packet id %d\n", host.get().c_str(), port.get(), packet->id);
+	log(LL_Debug, "[%s:%d] Sending packet id %d\n", host.get().c_str(), port.get(), packet->id);
 	if(session)
 		session->sendPacket(packet);
 }
 
 void TestConnectionChannel::closeSession() {
-	debug("[%s:%d] Closing session\n", host.get().c_str(), port.get());
+	log(LL_Debug, "[%s:%d] Closing session\n", host.get().c_str(), port.get());
 	if(session)
 		session->closeSession();
 	if(server)
@@ -104,23 +104,23 @@ void TestConnectionChannel::callEventCallback(Event event, PacketSession* sessio
 	if(eventCallbacks.size() > 0) {
 		switch(event.type) {
 			case Event::Packet:
-				debug("[%s:%d] Received event type Packet, packet id %d\n", host.get().c_str(), port.get(), event.packet->id);
+				log(LL_Debug, "[%s:%d] Received event type Packet, packet id %d\n", host.get().c_str(), port.get(), event.packet->id);
 				break;
 			case Event::Connection:
-				debug("[%s:%d] Received event type connection\n", host.get().c_str(), port.get());
+				log(LL_Debug, "[%s:%d] Received event type connection\n", host.get().c_str(), port.get());
 				break;
 			case Event::Disconnection:
-				debug("[%s:%d] Received event type disconnection\n", host.get().c_str(), port.get());
+				log(LL_Debug, "[%s:%d] Received event type disconnection\n", host.get().c_str(), port.get());
 				break;
 		}
 		(eventCallbacks.front())(this, event);
 		eventCallbacks.pop_front();
 	} else if(eventCallbacks.size() == 0) {
-		debug("No more callbacks, closing connection\n");
+		log(LL_Debug, "No more callbacks, closing connection\n");
 		closeSession();
 	}
 	if(::testing::Test::HasFatalFailure()) {
-		debug("Got fatal error, aborting test\n");
+		log(LL_Debug, "Got fatal error, aborting test\n");
 		eventCallbacks.clear();
 		closeSession();
 		if(test)
@@ -130,7 +130,7 @@ void TestConnectionChannel::callEventCallback(Event event, PacketSession* sessio
 
 void TestConnectionChannel::registerSession(PacketSession *session) {
 	if(this->session != nullptr) {
-		error("Multiple register\n");
+		log(LL_Error, "Multiple register\n");
 	}
 	this->session = session;
 }
