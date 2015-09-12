@@ -14,17 +14,17 @@ ServerSession::~ServerSession() {
 void ServerSession::connect() {
 	std::string ip = CONFIG_GET()->server.ip.get();
 	uint16_t port = CONFIG_GET()->server.port.get();
-	debug("Connecting to server %s:%d\n", ip.c_str(), port);
+	log(LL_Debug, "Connecting to server %s:%d\n", ip.c_str(), port);
 	SocketSession::connect(ip.c_str(), port);
 }
 
 void ServerSession::onConnected() {
-	info("Connected to server\n");
+	log(LL_Info, "Connected to server\n");
 	getStream()->setNoDelay(true);
 
 	for(size_t i = 0; i < pendingMessages.size(); i++) {
 		TS_MESSAGE* message = pendingMessages.at(i);
-		info("Sending defered message id %d\n", message->id);
+		log(LL_Info, "Sending defered message id %d\n", message->id);
 		PacketSession::sendPacket(message);
 		free(message);
 	}
@@ -32,7 +32,7 @@ void ServerSession::onConnected() {
 }
 
 void ServerSession::onDisconnected(bool causedByRemote) {
-	warn("Disconnected from server\n");
+	log(LL_Warning, "Disconnected from server\n");
 	clientSession->closeSession();
 }
 
@@ -47,6 +47,6 @@ void ServerSession::sendPacket(const TS_MESSAGE* message) {
 }
 
 void ServerSession::onPacketReceived(const TS_MESSAGE* packet) {
-	debug("Received packet id %d from server, forwarding to client\n", packet->id);
+	log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 	clientSession->onServerPacketReceived(packet);
 }

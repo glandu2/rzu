@@ -21,24 +21,24 @@ ClientSession::~ClientSession() {
 }
 
 void ClientSession::onConnected() {
-	info("Client connected, connecting server session\n");
+	log(LL_Info, "Client connected, connecting server session\n");
 	serverSession.connect();
 	setDirtyObjectName();
 	getStream()->setNoDelay(true);
 }
 
 void ClientSession::onDisconnected(bool causedByRemote) {
-	info("Client disconnected, disconnecting server session\n");
+	log(LL_Info, "Client disconnected, disconnecting server session\n");
 	serverSession.closeSession();
 }
 
 void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
-	trace("%s packet id: %5d, size: %d\n",
+	log(LL_Trace, "%s packet id: %5d, size: %d\n",
 		  (outgoing)? "SERV->CLI" : "CLI->SERV",
 		  msg->id,
 		  int(msg->size - sizeof(TS_MESSAGE)));
 
-	getStream()->packetLog(Log::LL_Debug, reinterpret_cast<const unsigned char*>(msg) + sizeof(TS_MESSAGE), (int)msg->size - sizeof(TS_MESSAGE),
+	getStream()->packetLog(Object::LL_Debug, reinterpret_cast<const unsigned char*>(msg) + sizeof(TS_MESSAGE), (int)msg->size - sizeof(TS_MESSAGE),
 			  "%s packet id: %5d, size: %d\n",
 			  (outgoing)? "SERV->CLI" : "CLI->SERV",
 			  msg->id,
@@ -46,7 +46,7 @@ void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 }
 
 void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
-	debug("Received packet id %d from client, forwarding to server\n", packet->id);
+	log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
 	if(packetFilter->onClientPacket(this, &serverSession, packet))
 		serverSession.sendPacket(packet);
 }
@@ -74,7 +74,7 @@ void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 		}
 		PacketSession::sendPacket(serverList, EPIC_9_1);
 	} else {
-		debug("Received packet id %d from server, forwarding to client\n", packet->id);
+		log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 		if(packetFilter->onServerPacket(this, &serverSession, packet))
 			sendPacket(packet);
 	}

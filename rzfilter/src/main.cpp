@@ -57,19 +57,13 @@ void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 
 	SessionServer<ClientSession> clientSessionServer(
-				CONFIG_GET()->client.listener.ip,
+				CONFIG_GET()->client.listener.listenIp,
 				CONFIG_GET()->client.listener.port,
 				&CONFIG_GET()->client.listener.idleTimeout,
 				trafficLogger);
 
-	SessionServer<ConsoleSession> adminTelnetServer(
-				CONFIG_GET()->admin.listener.ip,
-				CONFIG_GET()->admin.listener.port,
-				&CONFIG_GET()->admin.listener.idleTimeout);
-
-
 	serverManager.addServer("clients", &clientSessionServer, CONFIG_GET()->client.listener.autoStart);
-	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart, true);
+	ConsoleSession::start(&serverManager);
 
 	serverManager.start();
 

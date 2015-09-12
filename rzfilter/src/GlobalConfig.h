@@ -3,19 +3,7 @@
 
 #include "Config/ConfigInfo.h"
 #include "Core/Utils.h"
-
-struct ListenerConfig {
-	cval<std::string> &ip;
-	cval<int> &port, &idleTimeout;
-	cval<bool> &autoStart;
-
-	ListenerConfig(const std::string& prefix, const char* defaultIp, int defaultPort, bool autoStart = true, int idleTimeout = 0) :
-		ip(CFG_CREATE(prefix + ".ip", defaultIp)),
-		port(CFG_CREATE(prefix + ".port", defaultPort)),
-		idleTimeout(CFG_CREATE(prefix + ".idletimeout", idleTimeout)),
-		autoStart(CFG_CREATE(prefix + ".autostart", autoStart))
-	{}
-};
+#include "Config/GlobalCoreConfig.h"
 
 struct GlobalConfig {
 	struct AuthConfig {
@@ -40,14 +28,6 @@ struct GlobalConfig {
 			gameFilterPort(CFG_CREATE("client.gamefilter.port", -1))
 		{}
 	} client;
-
-	struct AdminConfig {
-		ListenerConfig listener;
-
-		AdminConfig() :
-			listener("admin.telnet", "127.0.0.1", 4901, true, 0)
-		{}
-	} admin;
 
 	struct TrafficDump {
 		cval<bool> &enable;

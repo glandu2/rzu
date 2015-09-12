@@ -12,5 +12,6 @@ void GlobalConfig::init() {
 	CFG_CREATE("global.version", rzfilterVersion);
 	GlobalCoreConfig::get()->app.appName.setDefault("rzfilter");
 	GlobalCoreConfig::get()->app.configfile.setDefault("rzfilter.opt");
+	GlobalCoreConfig::get()->admin.listener.port.setDefault(4803);
 	GlobalCoreConfig::get()->log.file.setDefault("rzfilter.log");
 }
