@@ -53,7 +53,7 @@ DB_SecurityNoCheck::DB_SecurityNoCheck(GameServerSession* clientInfo, DbCallback
 
 bool DB_SecurityNoCheck::onPreProcess() {
 	if(!securityNoSalt) {
-		warn("Security No config not bound ! Can\'t check security no\n");
+		log(LL_Warning, "Security No config not bound ! Can\'t check security no\n");
 		return false;
 	}
 

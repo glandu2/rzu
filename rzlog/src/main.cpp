@@ -47,8 +47,6 @@ int main(int argc, char **argv) {
 
 	ConfigInfo::get()->dump();
 
-	CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
-
 	runServers(&trafficLogger);
 
 	//Make valgrind happy
@@ -68,14 +66,9 @@ void runServers(Log *trafficLogger) {
 				trafficLogger,
 				&banManager);
 
-	SessionServer<ConsoleSession> adminTelnetServer(
-				CONFIG_GET()->admin.listener.listenIp,
-				CONFIG_GET()->admin.listener.port,
-				&CONFIG_GET()->admin.listener.idleTimeout);
-
 
 	serverManager.addServer("log.clients", &logClientServer, CONFIG_GET()->log.client.listener.autoStart);
-	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart, true);
+	ConsoleSession::start(&serverManager);
 
 	serverManager.start();
 

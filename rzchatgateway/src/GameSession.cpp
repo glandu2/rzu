@@ -115,17 +115,17 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	TS_MESSAGE::initMessage<TS_CS_LOGIN>(&loginPkt);
 	TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
 
-	debug("Character list: \n");
+	log(LL_Debug, "Character list: \n");
 	for(size_t i = 0; i < packet->characters.size(); i++) {
-		debug(" - %s\n", packet->characters[i].name);
+		log(LL_Debug, " - %s\n", packet->characters[i].name);
 		if(!strcmp(playername.c_str(), packet->characters[i].name))
 			characterInList = true;
 	}
 
 	if(!characterInList) {
-		warn("Character \"%s\" not in character list: \n", playername.c_str());
+		log(LL_Warning, "Character \"%s\" not in character list: \n", playername.c_str());
 		for(size_t i = 0; i < packet->characters.size(); i++) {
-			warn(" - %s\n", packet->characters[i].name);
+			log(LL_Warning, " - %s\n", packet->characters[i].name);
 		}
 	}
 
@@ -142,7 +142,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT *packet) {
 	handle = packet->handle;
 	connectedInGame = true;
-	info("Connected with character %s\n", playername.c_str());
+	log(LL_Info, "Connected with character %s\n", playername.c_str());
 
 	for(size_t i = 0; i < messageQueue.size(); i++) {
 		TS_CS_CHAT_REQUEST* chatRqst = messageQueue.at(i);
@@ -166,7 +166,7 @@ void GameSession::sendMsgToGS(int type, const char* sender, const char* target, 
 	else
 		sprintf(messageFull, "%s", msg.c_str());
 
-	debug("[IRC] Msg %d: %s\n", type, messageFull);
+	log(LL_Debug, "[IRC] Msg %d: %s\n", type, messageFull);
 
 	if(sender && sender[0] == '@')
 		return;

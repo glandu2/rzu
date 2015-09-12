@@ -9,41 +9,23 @@
 #include "Core/Utils.h"
 #include "Config/GlobalCoreConfig.h"
 #include "ConsoleCommands.h"
+#include "../NetSession/SessionServer.h"
+#include "Config/GlobalCoreConfig.h"
 
-
-static const char MSG_HELP[] =
-		"Available commands:\r\n"
-		"- start <server_name>     Start the server <server_name>. Servers names are listed when starting. If <server_name> is \"all\", all server with autostart on are started.\r\n"
-		"- stop <server_name>      Same as start <server_name> but stop the server. \"stop all\" will stop all servers and exit.\r\n"
-		"- set <variable> <value>  Set config variable <variable> to <value>. Double-quotes are allowed for values with spaces. Use \"\" for a escaped double quote character.\r\n"
-		"- get <variable>          Get config variable value.\r\n"
-		"- list                    List all connected gameservers and information about them.\r\n"
-		"- mem                     List object counts.\r\n"
-		"- closedb                 Close all idle database connections (use this to bring a database offline).\r\n"
-		"\r\n";
-
-
-#ifdef __GLIBC__
-#include <malloc.h>
-#include <unistd.h>
-#endif
-
-#ifdef _WIN32
-#include <crtdbg.h>
-#include <malloc.h>
-#endif
-
-static const char MSG_UNKNOWN_SERVER_NAME[] = "Unknown server name\r\n";
-static const char MSG_START_OK[] = "Server started\r\n";
-static const char MSG_STOP_OK[] = "Server stopped\r\n";
-static const char MSG_UNKNOWN_VARIABLE[] = "Unknown variable name\r\n";
+void ConsoleSession::start(ServersManager* serverManager) {
+	static SessionServer<ConsoleSession> adminConsoleServer(
+				GlobalCoreConfig::get()->admin.listener.listenIp,
+				GlobalCoreConfig::get()->admin.listener.port,
+				&GlobalCoreConfig::get()->admin.listener.idleTimeout);
+	serverManager->addServer("admin.console", &adminConsoleServer, GlobalCoreConfig::get()->admin.listener.autoStart, true);
+}
 
 ConsoleSession::ConsoleSession() : consoleCommands(ConsoleCommands::get()) {
-	Object::info("New console session\n");
+	Object::log(LL_Info, "New console session\n");
 }
 
 ConsoleSession::~ConsoleSession() {
-	Object::info("Console session closed\n");
+	Object::log(LL_Info, "Console session closed\n");
 }
 
 void ConsoleSession::write(const char *message) {
@@ -64,13 +46,13 @@ void ConsoleSession::writef(const char *format, ...) {
 void ConsoleSession::log(const char *message, ...) {
 	va_list args;
 	va_start(args, message);
-	Object::log(Log::LL_Info, message, args);
+	Object::logv(LL_Info, message, args);
 	va_end(args);
 }
 
 void ConsoleSession::onConnected() {
 	writef("%s - Administration console - Type \"help\" for a list of available commands\r\n",
-		   CONFIG_GET()->app.appName.get().c_str());
+		   GlobalCoreConfig::get()->app.appName.get().c_str());
 	printPrompt();
 }
 

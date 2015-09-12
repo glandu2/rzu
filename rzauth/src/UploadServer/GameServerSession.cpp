@@ -20,7 +20,7 @@ GameServerSession::GameServerSession() {
 GameServerSession::~GameServerSession() {
 	if(this->serverName.empty() == false) {
 		servers.erase(this->serverName);
-		info("Server Logout\n");
+		log(LL_Info, "Server Logout\n");
 		UploadRequest::removeServer(this);
 	}
 }
@@ -36,7 +36,7 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		default:
-			debug("Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
+			log(LL_Debug, "Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
 			break;
 	}
 }
@@ -48,11 +48,11 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 
 	std::string serverName = Utils::convertToString(packet->server_name, sizeof(packet->server_name)-1);
 
-	info("Server Login: %s from %s:%d\n", serverName.c_str(), getStream()->getRemoteIpStr(), getStream()->getRemotePort());
+	log(LL_Info, "Server Login: %s from %s:%d\n", serverName.c_str(), getStream()->getRemoteIpStr(), getStream()->getRemotePort());
 
 	if(!IconServerSession::checkName(serverName.c_str(), serverName.size())) {
 		//Forbidden character used in servername
-		error("Server name (app.name in gameserver.opt) has invalid characters, only these are allowed: %s\n", IconServerSession::getAllowedCharsForName());
+		log(LL_Error, "Server name (app.name in gameserver.opt) has invalid characters, only these are allowed: %s\n", IconServerSession::getAllowedCharsForName());
 		result.result = TS_RESULT_INVALID_TEXT;
 	} else {
 		std::pair<ServerIterator, bool> insertResult = servers.insert(std::pair<std::string, GameServerSession*>(serverName, this));
@@ -62,10 +62,10 @@ void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 
 			result.result = TS_RESULT_SUCCESS;
 			setDirtyObjectName();
-			debug("Success\n");
+			log(LL_Debug, "Success\n");
 		} else {
 			result.result = TS_RESULT_ALREADY_EXIST;
-			error("Failed, server \"%s\" already registered\n", serverName.c_str());
+			log(LL_Error, "Failed, server \"%s\" already registered\n", serverName.c_str());
 		}
 	}
 
@@ -76,7 +76,7 @@ void GameServerSession::onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet) {
 	TS_US_REQUEST_UPLOAD result;
 	TS_MESSAGE::initMessage<TS_US_REQUEST_UPLOAD>(&result);
 
-	debug("Upload request for client %u with account id %u for guild %u\n", packet->client_id, packet->account_id, packet->guild_sid);
+	log(LL_Debug, "Upload request for client %u with account id %u for guild %u\n", packet->client_id, packet->account_id, packet->guild_sid);
 
 	UploadRequest::pushRequest(this, packet->client_id, packet->account_id, packet->guild_sid, packet->one_time_password);
 

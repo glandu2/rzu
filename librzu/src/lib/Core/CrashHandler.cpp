@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <map>
 #include "ClassCounter.h"
+#include "Config/GlobalCoreConfig.h"
 
 #ifdef __GLIBC__
 #include <malloc.h>
@@ -41,10 +42,12 @@ void CrashHandler::init() {
 										   "List objects count");
 	}
 	setThreadExceptionHandlers();
+	GlobalCoreConfig::get()->admin.dumpMode.addListener(nullptr, &setDumpMode);
+	setDumpMode(nullptr, &GlobalCoreConfig::get()->admin.dumpMode);
 }
 
-void CrashHandler::setDumpMode(int _dumpMode) {
-	dumpMode = _dumpMode;
+void CrashHandler::setDumpMode(IListener*, cval<int>*) {
+	dumpMode = GlobalCoreConfig::get()->admin.dumpMode.get();
 }
 
 void CrashHandler::setTerminateCallback(TerminateCallback callback, void* instance) {

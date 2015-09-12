@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 	else
 		benchmarkAuthentication();
 
-	mainLogger.log(Log::LL_Info, "main", 4, "Starting benchmark\n");
+	mainLogger.log(Object::LL_Info, "main", 4, "Starting benchmark\n");
 
 	if(usecBetweenConnection == 0)
 		startTime = uv_hrtime();
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 		startBenchAuth(usecBetweenConnection);
 
 	if(usecBetweenConnection != 0) {
-		mainLogger.log(Log::LL_Info, "main", 4, "Connected %d connections at limited speed, continuing benchmark at full-speed (time counter begin now)\n", config.connectionsStarted);
+		mainLogger.log(Object::LL_Info, "main", 4, "Connected %d connections at limited speed, continuing benchmark at full-speed (time counter begin now)\n", config.connectionsStarted);
 		startTime = uv_hrtime();
 	}
 
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 
 	uint64_t duration = (uv_hrtime() - startTime)/1000; //nanosec to usec
 
-	mainLogger.log(Log::LL_Info, "main", 4, "%d connections in %" PRIu64 " usec => %f auth/sec\n", config.connectionsDone, duration, config.connectionsDone/((float)duration/1000000.0f));
+	mainLogger.log(Object::LL_Info, "main", 4, "%d connections in %" PRIu64 " usec => %f auth/sec\n", config.connectionsDone, duration, config.connectionsDone/((float)duration/1000000.0f));
 }
 
 //conn bench

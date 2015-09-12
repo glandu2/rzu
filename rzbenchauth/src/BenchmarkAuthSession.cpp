@@ -32,7 +32,7 @@ void BenchmarkAuthSession::onAuthDisconnected() {
 
 void BenchmarkAuthSession::onAuthResult(TS_ResultCode result, const std::string& resultString) {
 	if(result != TS_RESULT_SUCCESS) {
-		warn("%s: Auth failed result: %d (%s)\n", account.c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
+		log(LL_Warning, "%s: Auth failed result: %d (%s)\n", account.c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
 		abortSession();
 	} else {
 		if(config->delay <= 0)
@@ -48,9 +48,9 @@ void BenchmarkAuthSession::onAuthDelayExpired(uv_timer_t *timer) {
 }
 
 void BenchmarkAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t lastSelectedServerId) {
-	debug("%s: Server list (last id: %d)\n", account.c_str(), lastSelectedServerId);
+	log(LL_Debug, "%s: Server list (last id: %d)\n", account.c_str(), lastSelectedServerId);
 	for(size_t i = 0; i < servers.size(); i++) {
-		debug("%d: %20s at %16s:%d %d%% user ratio\n",
+		log(LL_Debug, "%d: %20s at %16s:%d %d%% user ratio\n",
 				servers.at(i).serverId,
 				servers.at(i).serverName.c_str(),
 				servers.at(i).serverIp.c_str(),

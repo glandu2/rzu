@@ -101,7 +101,7 @@ void GameData::kickClient(ClientData *client) {
 	if(gameServerSession) {
 		gameServerSession->kickClient(client);
 	} else {
-		info("Game server %s not reachable, not kicking account %s\n", serverName.c_str(), client->account.c_str());
+		log(LL_Info, "Game server %s not reachable, not kicking account %s\n", serverName.c_str(), client->account.c_str());
 	}
 }
 
@@ -109,7 +109,7 @@ void GameData::sendNotifyItemPurchased(ClientData* client) {
 	if(gameServerSession) {
 		gameServerSession->sendNotifyItemPurchased(client);
 	} else {
-		info("Game server %s not reachable, not notifying account %s\n", serverName.c_str(), client->account.c_str());
+		log(LL_Info, "Game server %s not reachable, not notifying account %s\n", serverName.c_str(), client->account.c_str());
 	}
 }
 

@@ -62,7 +62,7 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		default:
-			debug("Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
+			log(LL_Debug, "Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
 			break;
 	}
 }
@@ -93,7 +93,7 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		sendPacket(&result);
 	} else if(!memcmp(packet->szVersion, "200609280", 9) || !memcmp(packet->szVersion, "Creer", 5)) {
 		isEpic2 = true;
-		debug("Client is epic 2\n");
+		log(LL_Debug, "Client is epic 2\n");
 	}
 }
 
@@ -109,7 +109,7 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	const int expectedKeySize = packet->size - sizeof(TS_CA_RSA_PUBLIC_KEY);
 
 	if(packet->key_size != expectedKeySize) {
-		warn("RSA: key_size is invalid: %d, expected (from msg size): %d\n", packet->key_size, expectedKeySize);
+		log(LL_Warning, "RSA: key_size is invalid: %d, expected (from msg size): %d\n", packet->key_size, expectedKeySize);
 		abortSession();
 		goto cleanup;
 	}
@@ -120,7 +120,7 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	rsaCipher = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 	if(rsaCipher == nullptr) {
 		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
-		warn("RSA: invalid certificate: %s\n", errorString);
+		log(LL_Warning, "RSA: invalid certificate: %s\n", errorString);
 		abortSession();
 		goto cleanup;
 	}
@@ -130,7 +130,7 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	blockSize = RSA_public_encrypt(32, aesKey, aesKeyMessage->rsa_encrypted_data, rsaCipher, RSA_PKCS1_PADDING);
 	if(blockSize < 0) {
 		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
-		warn("RSA: encrypt error: %s\n", errorString);
+		log(LL_Warning, "RSA: encrypt error: %s\n", errorString);
 		abortSession();
 		goto cleanup;
 	}
@@ -160,7 +160,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 		result.result = TS_RESULT_CLIENT_SIDE_ERROR;
 		result.login_flag = 0;
 		sendPacket(&result);
-		info("Client connection with a auth request already in progress\n");
+		log(LL_Info, "Client connection with a auth request already in progress\n");
 		return;
 	}
 
@@ -175,7 +175,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 
 			// If not already logged, log client epic <= 4
 			if(!isEpic2)
-				debug("Client is epic 4 or older\n");
+				log(LL_Debug, "Client is epic 4 or older\n");
 
 			account = Utils::convertToString(accountE4->account, sizeof(accountE4->account)-1);
 			cryptedPassword = Utils::convertToDataArray(accountE4->password, sizeof(accountE4->password));
@@ -185,7 +185,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 		}
 	}
 
-	debug("Login request for account %s\n", account.c_str());
+	log(LL_Debug, "Login request for account %s\n", account.c_str());
 
 	DB_AccountData::Input input(account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_DES, cryptedPassword, aesKey);
 	dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
@@ -202,7 +202,7 @@ void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
 		result.result = TS_RESULT_CLIENT_SIDE_ERROR;
 		result.login_flag = 0;
 		sendPacket(&result);
-		info("Client IMBC connection with a auth request already in progress\n");
+		log(LL_Info, "Client IMBC connection with a auth request already in progress\n");
 		return;
 	}
 
@@ -223,9 +223,9 @@ void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
 		result.result = TS_RESULT_ACCESS_DENIED;
 		result.login_flag = 0;
 		sendPacket(&result);
-		debug("Refused IMBC connection (IMBC is disabled) for account %s\n", account.c_str());
+		log(LL_Debug, "Refused IMBC connection (IMBC is disabled) for account %s\n", account.c_str());
 	} else {
-		debug("IMBC Login request for account %s\n", account.c_str());
+		log(LL_Debug, "IMBC Login request for account %s\n", account.c_str());
 
 		DB_AccountData::Input input(account, getStream()->getRemoteIpStr(), useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_None, cryptedPassword, aesKey);
 		dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
@@ -258,14 +258,14 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 	} else if(clientData != nullptr) { //already connected
 		result.result = TS_RESULT_CLIENT_SIDE_ERROR;
 		result.login_flag = 0;
-		info("Client connection already authenticated with account %s\n", clientData->account.c_str());
+		log(LL_Info, "Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
 		ClientData* oldClient;
 		clientData = ClientData::tryAddClient(this, input->account, output.account_id, output.age, output.event_code, output.pcbang, getStream()->getRemoteIp(), &oldClient);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
-			info("Client %s already connected\n", input->account.c_str());
+			log(LL_Info, "Client %s already connected\n", input->account.c_str());
 
 			char ipStr[INET_ADDRSTRLEN];
 			GameData* oldCientGameData = oldClient->getGameServer();
@@ -365,7 +365,7 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 		clientData->switchClientToServer(server, oneTimePassword);
 		clientData = nullptr;
 
-		debug("Client choose server idx %d\n", packet->server_idx);
+		log(LL_Debug, "Client choose server idx %d\n", packet->server_idx);
 
 		if(useRsaAuth) {
 			TS_AC_SELECT_SERVER_RSA result;
@@ -411,7 +411,7 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 		}
 	} else {
 		abortSession();
-		warn("Attempt to connect to an invalid server idx: %d\n", packet->server_idx);
+		log(LL_Warning, "Attempt to connect to an invalid server idx: %d\n", packet->server_idx);
 	}
 }
 

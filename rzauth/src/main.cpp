@@ -115,8 +115,6 @@ int main(int argc, char **argv) {
 			return 2;
 	}
 
-	CrashHandler::setDumpMode(CONFIG_GET()->admin.dumpMode);
-
 	runServers(&trafficLogger);
 
 	//Make valgrind happy
@@ -168,11 +166,6 @@ void runServers(Log *trafficLogger) {
 				&CONFIG_GET()->upload.game.listener.idleTimeout,
 				trafficLogger);
 
-	SessionServer<ConsoleSession> adminTelnetServer(
-				CONFIG_GET()->admin.listener.listenIp,
-				CONFIG_GET()->admin.listener.port,
-				&CONFIG_GET()->admin.listener.idleTimeout);
-
 	AuthServer::LogServerClient logServerClient(
 				CONFIG_GET()->logclient.ip,
 				CONFIG_GET()->logclient.port);
@@ -187,8 +180,7 @@ void runServers(Log *trafficLogger) {
 	serverManager.addServer("upload.iconserver", &uploadIconServer, CONFIG_GET()->upload.icons.listener.autoStart);
 	serverManager.addServer("upload.gameserver", &uploadGameServer, CONFIG_GET()->upload.game.listener.autoStart);
 
-	serverManager.addServer("admin.telnet", &adminTelnetServer, CONFIG_GET()->admin.listener.autoStart, true);
-
+	ConsoleSession::start(&serverManager);
 
 	serverManager.start();
 

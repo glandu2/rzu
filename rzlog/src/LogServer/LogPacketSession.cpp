@@ -30,12 +30,12 @@ void LogPacketSession::dispatchPacket(const LS_11N4S* packetData) {
 }
 
 void LogPacketSession::logPacket(bool outgoing, const LS_11N4S* msg) {
-	trace("Packet %s id: %5d, size: %d\n",
+	log(LL_Trace, "Packet %s id: %5d, size: %d\n",
 		  (outgoing)? "out" : " in",
 		  msg->id,
 		  int(msg->size));
 
-	getStream()->packetLog(Log::LL_Debug, reinterpret_cast<const unsigned char*>(msg), (int)msg->size,
+	getStream()->packetLog(LL_Debug, reinterpret_cast<const unsigned char*>(msg), (int)msg->size,
 			  "Packet %s id: %5d, size: %d\n",
 			  (outgoing)? "out" : "in ",
 			  msg->id,

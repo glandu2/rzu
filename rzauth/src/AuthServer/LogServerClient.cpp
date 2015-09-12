@@ -31,10 +31,10 @@ LogServerClient::LogServerClient(cval<std::string>& ip, cval<int>& port) :
 }
 
 void LogServerClient::onConnected() {
-	info("Connected to Log server %s:%d\n", ip.get().c_str(), port.get());
+	log(LL_Info, "Connected to Log server %s:%d\n", ip.get().c_str(), port.get());
 
 	sendLog(LM_SERVER_LOGIN, 0, 0, 0, Utils::getPid(), 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, "Main", NTS, CONFIG_GET()->app.appName.get().c_str(), NTS);
+			0, 0, 0, 0, "Main", NTS, GlobalCoreConfig::get()->app.appName.get().c_str(), NTS);
 
 	sendLog(LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, "START", -1);
@@ -53,7 +53,7 @@ void LogServerClient::stop() {
 }
 
 void LogServerClient::onDisconnected(bool causedByRemote) {
-	info("Disconnected from Log server %s:%d\n", ip.get().c_str(), port.get());
+	log(LL_Info, "Disconnected from Log server %s:%d\n", ip.get().c_str(), port.get());
 }
 
 void LogServerClient::sendLog(const Message& message) {
