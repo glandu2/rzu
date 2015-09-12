@@ -74,12 +74,12 @@ bool ClientSession::checkName(std::string name) {
 }
 
 void ClientSession::onPacketReceived(const LS_11N4S* packet) {
-	debug("Received log packet id %d, size %d\n", packet->id, packet->size);
+	log(LL_Debug, "Received log packet id %d, size %d\n", packet->id, packet->size);
 	LogData logData;
 
 	const int expectedSize = sizeof(*packet) + packet->len1 + packet->len2 + packet->len3 + packet->len4;
 	if(expectedSize > packet->size) {
-		error("Invalid packet size, got %d, expected %d\n", packet->size, expectedSize);
+		log(LL_Error, "Invalid packet size, got %d, expected %d\n", packet->size, expectedSize);
 		return;
 	}
 
@@ -122,9 +122,9 @@ void ClientSession::onPacketReceived(const LS_11N4S* packet) {
 
 	if(logData.id == 101) {
 		if(!serverName.empty()) {
-			warn("Already received login message for server %s. Received new name is %s (ignored)\n", serverName.c_str(), logData.s4.c_str());
+			log(LL_Warning, "Already received login message for server %s. Received new name is %s (ignored)\n", serverName.c_str(), logData.s4.c_str());
 		} else if(!checkName(logData.s4)) {
-			error("Received login message with invalid characters in server name: %s\n", logData.s4.c_str());
+			log(LL_Error, "Received login message with invalid characters in server name: %s\n", logData.s4.c_str());
 		} else {
 			serverName = logData.s4;
 		}
