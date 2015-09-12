@@ -12,5 +12,6 @@ void GlobalConfig::init() {
 	CFG_CREATE("global.version", rzgamereconnectVersion);
 	GlobalCoreConfig::get()->app.appName.setDefault("rzgamereconnect");
 	GlobalCoreConfig::get()->app.configfile.setDefault("rzgamereconnect.opt");
+	GlobalCoreConfig::get()->admin.listener.port.setDefault(4801);
 	GlobalCoreConfig::get()->log.file.setDefault("rzgamereconnect.log");
 }

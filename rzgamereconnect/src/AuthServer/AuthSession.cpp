@@ -59,7 +59,7 @@ AuthSession::~AuthSession() {
 void AuthSession::connect() {
 	std::string ip = CONFIG_GET()->auth.ip.get();
 	uint16_t port = CONFIG_GET()->auth.port.get();
-	debug("Connecting to auth %s:%d\n", ip.c_str(), port);
+	log(LL_Debug, "Connecting to auth %s:%d\n", ip.c_str(), port);
 
 	SocketSession::connect(ip.c_str(), port);
 }
@@ -67,13 +67,13 @@ void AuthSession::connect() {
 void AuthSession::onConnected() {
 	getStream()->setKeepAlive(31);
 
-	info("Connected to auth server\n");
+	log(LL_Info, "Connected to auth server\n");
 	sendLogin();
 }
 
 void AuthSession::sendLogin() {
 	if(pendingLogin) {
-		warn("Already pending GS login to auth, ignore login request\n");
+		log(LL_Warning, "Already pending GS login to auth, ignore login request\n");
 		return;
 	}
 
@@ -89,13 +89,13 @@ void AuthSession::sendLogin() {
 	strcpy(loginPacket.server_ip, serverIp.c_str());
 	loginPacket.server_port = serverPort;
 
-	info("Sending informations for GS %s[%d]\n", loginPacket.server_name, loginPacket.server_idx);
+	log(LL_Info, "Sending informations for GS %s[%d]\n", loginPacket.server_name, loginPacket.server_idx);
 	sendPacketToNetwork(&loginPacket);
 }
 
 void AuthSession::onLoginResult(const TS_AG_LOGIN_RESULT* packet) {
 	if(!pendingLogin) {
-		warn("Received GS login result from auth without pending login, ignore message\n");
+		log(LL_Warning, "Received GS login result from auth without pending login, ignore message\n");
 		return;
 	}
 	pendingLogin = false;
@@ -106,7 +106,7 @@ void AuthSession::onLoginResult(const TS_AG_LOGIN_RESULT* packet) {
 	if(packet->result == TS_RESULT_SUCCESS) {
 		sendAccountList();
 	} else {
-		warn("Login with auth failed: %d\n", packet->result);
+		log(LL_Warning, "Login with auth failed: %d\n", packet->result);
 		sentLoginPacket = false;
 		if(gameServerSession == nullptr)
 			disconnect();
@@ -125,7 +125,7 @@ void AuthSession::sendAccountList() {
 	const int maxCount = (int)(accountList.size() <= MAX_COUNT_PER_PACKET ? accountList.size() : MAX_COUNT_PER_PACKET);
 	accountListPacket = TS_MESSAGE_WNA::create<TS_GA_ACCOUNT_LIST, TS_GA_ACCOUNT_LIST::AccountInfo>(maxCount);
 
-	debug("Sending %d accounts\n", (int)accountList.size());
+	log(LL_Debug, "Sending %d accounts\n", (int)accountList.size());
 
 	auto it = accountList.begin();
 	do {
@@ -155,7 +155,7 @@ void AuthSession::sendAccountList() {
 void AuthSession::sendPendingMessages() {
 	for(size_t i = 0; i < pendingMessages.size(); i++) {
 		TS_MESSAGE* message = pendingMessages.at(i);
-		debug("Sending defered message id %d\n", message->id);
+		log(LL_Debug, "Sending defered message id %d\n", message->id);
 		sendPacketToNetwork(message);
 		free(message);
 	}
@@ -166,7 +166,7 @@ void AuthSession::onClientLoginResult(const TS_AG_CLIENT_LOGIN_EXTENDED* packet)
 	if(!gameServerSession)
 		return;
 
-	debug("Login client %s\n", packet->account);
+	log(LL_Debug, "Login client %s\n", packet->account);
 
 	if(packet->result == TS_RESULT_SUCCESS) {
 		TS_GA_ACCOUNT_LIST::AccountInfo accountInfo;
@@ -202,7 +202,7 @@ void AuthSession::logoutClient(const TS_GA_CLIENT_LOGOUT* packet) {
 	for(; it != accountList.rend(); ++it) {
 		const TS_GA_ACCOUNT_LIST::AccountInfo& accountInfo = *it;
 		if(strcmp(accountInfo.account, packet->account) == 0) {
-			debug("Logout client %s\n", packet->account);
+			log(LL_Debug, "Logout client %s\n", packet->account);
 			accountList.erase(--(it.base()));
 			break;
 		}
@@ -218,7 +218,7 @@ void AuthSession::disconnect() {
 	pendingMessages.clear(); //pending messages don't matter anymore (GS has disconnected)
 
 	if(sentLoginPacket == false) {
-		info("Fast auth disconnect: login message wasn't send\n");
+		log(LL_Info, "Fast auth disconnect: login message wasn't send\n");
 		uv_timer_stop(recoTimer);
 		closeSession();
 		if(!isConnected())
@@ -250,10 +250,10 @@ void AuthSession::onDisconnected(bool causedByRemote) {
 	pendingLogin = false;
 	if(causedByRemote && (gameServerSession != nullptr || pendingMessages.size() > 0)) {
 		int delay = CONFIG_GET()->auth.reconnectDelay.get();
-		warn("Disconnected from auth server, reconnecting in %d seconds\n", delay/1000);
+		log(LL_Warning, "Disconnected from auth server, reconnecting in %d seconds\n", delay/1000);
 		uv_timer_start(recoTimer, &onTimerReconnect, delay, 0);
 	} else {
-		info("Disconnected from auth server\n");
+		log(LL_Info, "Disconnected from auth server\n");
 		if(gameServerSession == nullptr)
 			this->deleteLater();
 	}
@@ -276,7 +276,7 @@ void AuthSession::onPacketReceived(const TS_MESSAGE* packet) {
 
 		default:
 			if(gameServerSession) {
-				debug("Received packet id %d from auth, forwarding to GS\n", packet->id);
+				log(LL_Debug, "Received packet id %d from auth, forwarding to GS\n", packet->id);
 				gameServerSession->sendPacket(packet);
 			}
 	}

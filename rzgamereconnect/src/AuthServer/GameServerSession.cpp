@@ -29,7 +29,7 @@ void GameServerSession::onConnected() {
 void GameServerSession::onDisconnected(bool causedByRemote) {
 	if(authSession) {
 		if(causedByRemote) {
-			info("GS disconnected, disconnecting auth session\n");
+			log(LL_Info, "GS disconnected, disconnecting auth session\n");
 			authSession->disconnect();
 		} else if(authSession) {
 			authSession->forceClose();
@@ -62,7 +62,7 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 
 		default:
 			if(authSession) {
-				debug("Received packet id %d from GS, forwarding to auth\n", packet->id);
+				log(LL_Debug, "Received packet id %d from GS, forwarding to auth\n", packet->id);
 				authSession->sendPacket(packet);
 			}
 			break;
@@ -77,10 +77,10 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip)-1);
 	localScreenshotUrl = Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url)-1);
 
-	info("Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
+	log(LL_Info, "Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
 
 	if(authSession != nullptr) {
-		error("Server %s[%d] already logged on\n",
+		log(LL_Error, "Server %s[%d] already logged on\n",
 			  authSession->getServerName().c_str(), authSession->getServerIdx());
 
 		TS_AG_LOGIN_RESULT result;
@@ -106,7 +106,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 
 void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	if(!authSession) {
-		warn("Received client login but GS not logged on\n");
+		log(LL_Warning, "Received client login but GS not logged on\n");
 		return;
 	}
 
@@ -126,9 +126,9 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		result.nContinuousLogoutTime = 0;
 
 		if(!authSession->isConnected()) {
-			warn("Rejecting client %s as auth connection is down\n", result.account);
+			log(LL_Warning, "Rejecting client %s as auth connection is down\n", result.account);
 		} else {
-			warn("Client %s login but GS not synchronized with auth\n", result.account);
+			log(LL_Warning, "Client %s login but GS not synchronized with auth\n", result.account);
 		}
 
 		sendPacket(&result);
@@ -139,7 +139,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 
 void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 	if(!authSession) {
-		warn("Received client logout but GS not logged on\n");
+		log(LL_Warning, "Received client logout but GS not logged on\n");
 		return;
 	}
 
