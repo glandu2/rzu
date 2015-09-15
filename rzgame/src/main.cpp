@@ -11,7 +11,7 @@
 
 #include "GameServer/AuthServerSession.h"
 #include "GameServer/ClientSession.h"
-#include "GameServer/Database/CharacterList.h"
+#include "GameServer/Model/CharacterLight.h"
 
 #include "Console/ConsoleSession.h"
 
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 
 	DbConnectionPool dbConnectionPool;
 
-	if(DbQueryJob<Database::CharacterList>::init(&dbConnectionPool) == false)
+	if(DbQueryJob<CharacterLightBinding>::init(&dbConnectionPool) == false)
 		return 1;
 
 	ConfigInfo::get()->init(argc, argv);
