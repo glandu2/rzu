@@ -82,6 +82,10 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
 endif()
 
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libiconv/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libiconv" libiconv)
+endif()
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/zlib" zlib)
 endif()

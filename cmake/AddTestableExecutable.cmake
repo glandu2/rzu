@@ -32,7 +32,11 @@ function(add_lib name sources)
   endforeach()
 
   if(BUILD_SHARED_LIBS)
-    install(TARGETS ${name} RUNTIME LIBRARY DESTINATION ./ COMPONENT "binaries")
+    install(TARGETS ${name}
+      RUNTIME DESTINATION ./
+      LIBRARY DESTINATION ./
+      COMPONENT "binaries"
+    )
     install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols")
   endif()
 endfunction()
