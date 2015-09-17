@@ -19,7 +19,7 @@ bool DbQueryJob<AuthServer::DB_AccountData>::init(DbConnectionPool* dbConnection
 	ADD_PARAM(params, "db_account", ip, 0, 3);
 
 	ADD_COLUMN(cols, "db_account", account_id, 0);
-	ADD_COLUMN_WITH_INFO(cols, "db_account", password, sizeof(((AuthServer::DB_AccountData::Output*)(0))->password), nullPassword);
+	ADD_COLUMN_WITH_INFO(cols, "db_account", password, 0, nullPassword);
 	ADD_COLUMN(cols, "db_account", auth_ok, 0);
 	ADD_COLUMN(cols, "db_account", age, 0);
 	ADD_COLUMN(cols, "db_account", last_login_server_idx, 0);
@@ -211,12 +211,12 @@ bool DB_Account::onRowDone() {
 		return false;
 	}
 
-	if(output->nullPassword == true && output->password[0] == '\0') {
+	if(output->nullPassword == true && output->password.empty()) {
 		output->ok = true;
-	} else if(!strcmp(input->password, output->password)){
+	} else if(!strcmp(input->password, output->password.c_str())){
 		output->ok = true;
 	} else {
-		log(LL_Trace, "Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", input->account.c_str(), input->password, output->password);
+		log(LL_Trace, "Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", input->account.c_str(), input->password, output->password.c_str());
 	}
 
 	return false;
