@@ -1,12 +1,12 @@
-#include "CharacterList.h"
+#include "CharacterLight.h"
 #include "../../GlobalConfig.h"
 #include "../ClientSession.h"
 
 template<>
-DbQueryBinding* DbQueryJob<Database::CharacterList>::dbBinding = nullptr;
+DbQueryBinding* DbQueryJob<CharacterLightBinding>::dbBinding = nullptr;
 
 template<>
-bool DbQueryJob<Database::CharacterList>::init(DbConnectionPool* dbConnectionPool) {
+bool DbQueryJob<CharacterLightBinding>::init(DbConnectionPool* dbConnectionPool) {
 	std::vector<DbQueryBinding::ParameterBinding> params;
 	std::vector<DbQueryBinding::ColumnBinding> cols;
 

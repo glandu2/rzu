@@ -4,7 +4,7 @@
 #include "Core/Object.h"
 #include "ConnectionHandler.h"
 #include "Database/DbQueryJobCallback.h"
-#include "../Database/CharacterList.h"
+#include "../Model/CharacterLight.h"
 
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
 #include "GameClient/TS_CS_LOGIN.h"
@@ -21,7 +21,7 @@ public:
 
 protected:
 	void onCharacterListQuery(const TS_CS_CHARACTER_LIST* packet);
-	void onCharacterListResult(DbQueryJob<Database::CharacterList>* query);
+	void onCharacterListResult(DbQueryJob<CharacterLightBinding>* query);
 
 	void onCharacterLogin(const TS_CS_LOGIN* packet);
 

@@ -19,6 +19,8 @@ ClientSession::ClientSession() {
 }
 
 ClientSession::~ClientSession() {
+	if(currentRequest)
+		delete currentRequest;
 }
 
 void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
@@ -121,6 +123,9 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 				result.result = TS_RESULT_ACCESS_DENIED;
 			}
 		}
+
+		delete currentRequest;
+		currentRequest = nullptr;
 	}
 
 	sendPacket(&result);

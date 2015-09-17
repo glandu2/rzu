@@ -20,13 +20,13 @@ void LobbyHandler::onPacketReceived(const TS_MESSAGE *packet) {
 }
 
 void LobbyHandler::onCharacterListQuery(const TS_CS_CHARACTER_LIST*) {
-	Database::CharacterList::Input input;
+	CharacterLightBinding::Input input;
 	input.account_id = session->getAccountId();
 
-	characterListQuery.executeDbQuery<Database::CharacterList>(this, &LobbyHandler::onCharacterListResult, input);
+	characterListQuery.executeDbQuery<CharacterLightBinding>(this, &LobbyHandler::onCharacterListResult, input);
 }
 
-void LobbyHandler::onCharacterListResult(DbQueryJob<Database::CharacterList> *query) {
+void LobbyHandler::onCharacterListResult(DbQueryJob<CharacterLightBinding> *query) {
 	TS_SC_CHARACTER_LIST characterList;
 
 	auto results = query->getResults();
@@ -39,7 +39,7 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<Database::CharacterList> *qu
 	auto itEnd = results.end();
 	for(; it != itEnd; ++it) {
 		LOBBY_CHARACTER_INFO characterInfo;
-		const Database::CharacterList::Output& dbLine = *it;
+		const CharacterLightBinding::Output& dbLine = *it;
 
 		characterInfo.sex = dbLine.sex;
 		characterInfo.race = dbLine.race;
@@ -91,7 +91,7 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<Database::CharacterList> *qu
 
 	session->sendPacket(characterList, CONFIG_GET()->game.clients.epic.get());
 
-	log(LL_Debug, "Account %s has %d characters\n", session->getAccount().c_str(), characterList.characters.size());
+	log(LL_Debug, "Account %s has %d characters\n", session->getAccount().c_str(), (int)characterList.characters.size());
 }
 
 void LobbyHandler::onCharacterLogin(const TS_CS_LOGIN *packet) {
@@ -108,11 +108,12 @@ void LobbyHandler::onCharacterLogin(const TS_CS_LOGIN *packet) {
 		}
 	}
 
-	//if(sid == UINT32_MAX) {
+	if(sid == UINT32_MAX) {
 		TS_SC_LOGIN_RESULT loginResult = {0};
 		loginResult.result = TS_RESULT_NOT_EXIST;
 		session->sendPacket(loginResult, session->getVersion());
-	//}
+		session->abortSession();
+	}
 }
 
 }
