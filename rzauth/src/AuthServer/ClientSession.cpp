@@ -330,7 +330,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		if(!serverInfo->isReady())
 			continue;
 
-		TS_SERVER_INFO serverData;
+		TS_SERVER_INFO serverData = {0};
 		serverData.server_idx = serverInfo->getServerIdx();
 		serverData.server_port = serverInfo->getServerPort();
 		serverData.is_adult_server = serverInfo->getIsAdultServer();
