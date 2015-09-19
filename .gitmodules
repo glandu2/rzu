@@ -22,3 +22,6 @@
 [submodule "gtest"]
 	path = gtest
 	url = ../gtest.git
+[submodule "libiconv"]
+	path = libiconv
+	url = ../libiconv.git
