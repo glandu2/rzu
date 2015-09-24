@@ -9,6 +9,17 @@ set(CMAKE_VERBOSE_MAKEFILE false CACHE BOOL "Print compilation commands")
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (one of Debug, Release, RelWithDebInfo, MinSizeRel)")
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs instead of static")
 
+# Packaging
+
+set(CPACK_COMPONENT_ALL "binaries" "symbols")
+set(CPACK_NSIS_DISPLAY_NAME "Rappelz Emu - Glandu2")
+set(CPACK_PACKAGE_NAME "rzemu")
+set(CPACK_PACKAGE_VENDOR "Glandu2")
+set(CPACK_PACKAGE_VERSION "4.1" CACHE STRING "Version string")
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_STRIP_FILES ON)
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+
 message("Using ${CMAKE_BUILD_TYPE} mode")
 message("Using shared libs: ${BUILD_SHARED_LIBS}")
 
@@ -138,14 +149,4 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzfilter/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzfilter" rzfilter)
 endif()
 
-# Packaging
-
-SET(CPACK_COMPONENT_ALL "binaries" "symbols")
-SET(CPACK_NSIS_DISPLAY_NAME "Rappelz Emu - Glandu2")
-SET(CPACK_PACKAGE_NAME "rzemu")
-SET(CPACK_PACKAGE_VENDOR "Glandu2")
-SET(CPACK_PACKAGE_VERSION "4.1" CACHE STRING "Version string")
-SET(CPACK_GENERATOR "ZIP")
-SET(CPACK_STRIP_FILES ON)
-SET(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 include(cpack OPTIONAL)
