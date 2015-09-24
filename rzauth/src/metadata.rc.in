@@ -1,8 +1,8 @@
-ID_ICON ICON "@WORKINGDIR@/../res/rzauth.ico"
+ID_ICON ICON "@WORKINGDIR@/../res/icon.ico"
 
 1 VERSIONINFO
-FILEVERSION     1,0,0,0
-PRODUCTVERSION  1,0,0,0
+FILEVERSION     @TARGET_FILEVERSION@
+PRODUCTVERSION  @TARGET_FILEVERSION@
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -14,7 +14,7 @@ BEGIN
       VALUE "InternalName", "@TARGET_NAME@"
       VALUE "OriginalFilename", "@TARGET_NAME@.exe"
       VALUE "ProductName", "rzu emu"
-      VALUE "ProductVersion", "@GIT_VERSION@"
+      VALUE "ProductVersion", "@TARGET_VERSION@"
     END
   END
 
