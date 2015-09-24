@@ -15,12 +15,15 @@ template<>
 DbQueryBinding* DbQueryJob<AuthServer::DB_SecurityNoCheckData>::dbBinding = nullptr;
 
 template<>
+const char* DbQueryJob<AuthServer::DB_SecurityNoCheckData>::SQL_CONFIG_NAME = "db_securitynocheck";
+
+template<>
 bool DbQueryJob<AuthServer::DB_SecurityNoCheckData>::init(DbConnectionPool* dbConnectionPool) {
 	std::vector<DbQueryBinding::ParameterBinding> params;
 	std::vector<DbQueryBinding::ColumnBinding> cols;
 
-	ADD_PARAM(params, "db_securitynocheck", account, 0, 1);
-	ADD_PARAM(params, "db_securitynocheck", securityNoMd5String, 32, 2);
+	addParam(params, "account", &InputType::account);
+	addParam(params, "securityNoMd5String", &InputType::securityNoMd5String);
 
 	dbBinding = new DbQueryBinding(dbConnectionPool,
 								   CFG_CREATE("sql.db_securitynocheck.enable", true),

@@ -10,23 +10,26 @@ template<>
 DbQueryBinding* DbQueryJob<AuthServer::DB_AccountData>::dbBinding = nullptr;
 
 template<>
+const char* DbQueryJob<AuthServer::DB_AccountData>::SQL_CONFIG_NAME = "db_account";
+
+template<>
 bool DbQueryJob<AuthServer::DB_AccountData>::init(DbConnectionPool* dbConnectionPool) {
 	std::vector<DbQueryBinding::ParameterBinding> params;
 	std::vector<DbQueryBinding::ColumnBinding> cols;
 
-	ADD_PARAM(params, "db_account", account, 0, 1);
-	ADD_PARAM(params, "db_account", password, 32, 2);
-	ADD_PARAM(params, "db_account", ip, 0, 3);
+	addParam(params, "account", &InputType::account);
+	addParam(params, "password", &InputType::password);
+	addParam(params, "ip", &InputType::ip);
 
-	ADD_COLUMN(cols, "db_account", account_id, 0);
-	ADD_COLUMN_WITH_INFO(cols, "db_account", password, 0, nullPassword);
-	ADD_COLUMN(cols, "db_account", auth_ok, 0);
-	ADD_COLUMN(cols, "db_account", age, 0);
-	ADD_COLUMN(cols, "db_account", last_login_server_idx, 0);
-	ADD_COLUMN(cols, "db_account", event_code, 0);
-	ADD_COLUMN(cols, "db_account", pcbang, 0);
-	ADD_COLUMN(cols, "db_account", server_idx_offset, 0);
-	ADD_COLUMN(cols, "db_account", block, 0);
+	addColumn(cols, "account_id", &OutputType::account_id);
+	addColumn(cols, "password", &OutputType::password, &OutputType::nullPassword);
+	addColumn(cols, "auth_ok", &OutputType::auth_ok);
+	addColumn(cols, "age", &OutputType::age);
+	addColumn(cols, "last_login_server_idx", &OutputType::last_login_server_idx);
+	addColumn(cols, "event_code", &OutputType::event_code);
+	addColumn(cols, "pcbang", &OutputType::pcbang);
+	addColumn(cols, "server_idx_offset", &OutputType::server_idx_offset);
+	addColumn(cols, "block", &OutputType::block);
 
 	dbBinding = new DbQueryBinding(dbConnectionPool,
 								   CFG_CREATE("sql.db_account.enable", true),
