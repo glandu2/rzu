@@ -32,8 +32,7 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<CharacterLightBinding> *quer
 	auto results = query->getResults();
 
 	characterList.characters.reserve(results.size());
-	characters.clear();
-	characters.reserve(results.size());
+	characters = results;
 
 	auto it = results.begin();
 	auto itEnd = results.end();
@@ -43,11 +42,7 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<CharacterLightBinding> *quer
 
 		characterInfo.sex = dbLine.sex;
 		characterInfo.race = dbLine.race;
-		characterInfo.model_id[0] = dbLine.model_00;
-		characterInfo.model_id[1] = dbLine.model_01;
-		characterInfo.model_id[2] = dbLine.model_02;
-		characterInfo.model_id[3] = dbLine.model_03;
-		characterInfo.model_id[4] = dbLine.model_04;
+		memcpy(characterInfo.model_id, dbLine.model, sizeof(characterInfo.model_id));
 		characterInfo.hair_color_index = dbLine.hair_color_index;
 		characterInfo.hair_color_rgb = dbLine.hair_color_rgb;
 		characterInfo.hide_equip_flag = dbLine.hide_equip_flag;
@@ -81,9 +76,6 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<CharacterLightBinding> *quer
 		memset(&characterInfo.wear_appearance_code, 0, sizeof(characterInfo.wear_appearance_code));
 
 		characterList.characters.push_back(characterInfo);
-
-		CharacterId characterId = { dbLine.sid, std::string(dbLine.name) };
-		characters.push_back(characterId);
 	}
 
 	characterList.current_server_time = 0;
@@ -96,23 +88,25 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<CharacterLightBinding> *quer
 
 void LobbyHandler::onCharacterLogin(const TS_CS_LOGIN *packet) {
 	std::string charName = Utils::convertToString(packet->szName, sizeof(packet->szName) - 1);
-	uint32_t sid = UINT32_MAX;
+	const CharacterLight* selectCharacter = nullptr;
 
 	auto it = characters.begin();
 	auto itEnd = characters.end();
 	for(; it != itEnd; ++it) {
-		const CharacterId& characterId = *it;
-		if(characterId.name == charName) {
-			sid = characterId.sid;
+		const CharacterLight& character = *it;
+		if(charName == Utils::convertToString(character.name, sizeof(character.name)-1)) {
+			selectCharacter = &character;
 			break;
 		}
 	}
 
-	if(sid == UINT32_MAX) {
+	if(selectCharacter == nullptr) {
 		TS_SC_LOGIN_RESULT loginResult = {0};
 		loginResult.result = TS_RESULT_NOT_EXIST;
 		session->sendPacket(loginResult, session->getVersion());
 		session->abortSession();
+	} else {
+		//session->initCharacter(*selectCharacter);
 	}
 }
 

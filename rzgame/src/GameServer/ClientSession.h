@@ -9,6 +9,8 @@
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
 #include "GameClient/TS_SC_RESULT.h"
 
+class CharacterLight;
+
 namespace GameServer {
 
 class ConnectionHandler;
@@ -27,6 +29,7 @@ public:
 	int getVersion() { return version; }
 
 	void onAccountLoginResult(uint16_t result, std::string account, uint32_t accountId, char nPCBangUser, uint32_t nEventCode, uint32_t nAge, uint32_t nContinuousPlayTime, uint32_t nContinuousLogoutTime);
+	void initCharacter(const CharacterLight& characterData);
 
 	template<class T>
 	void sendResult(uint16_t result, int32_t value) {
