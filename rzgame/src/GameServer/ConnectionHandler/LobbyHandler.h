@@ -28,11 +28,7 @@ protected:
 private:
 	DbQueryJobRef characterListQuery;
 
-	struct CharacterId {
-		uint32_t sid;
-		std::string name;
-	};
-	std::vector<CharacterId> characters;
+	std::vector<CharacterLight> characters;
 };
 
 } // namespace GameServer

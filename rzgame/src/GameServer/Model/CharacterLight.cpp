@@ -1,44 +1,46 @@
 #include "CharacterLight.h"
 #include "../../GlobalConfig.h"
-#include "../ClientSession.h"
 
 template<>
 DbQueryBinding* DbQueryJob<CharacterLightBinding>::dbBinding = nullptr;
+
+template<>
+const char* DbQueryJob<CharacterLightBinding>::SQL_CONFIG_NAME = "character_list";
 
 template<>
 bool DbQueryJob<CharacterLightBinding>::init(DbConnectionPool* dbConnectionPool) {
 	std::vector<DbQueryBinding::ParameterBinding> params;
 	std::vector<DbQueryBinding::ColumnBinding> cols;
 
-	ADD_PARAM(params, "character_list", account_id, 0, 1);
+	addParam(params, "account_id", &InputType::account_id);
 
-	ADD_COLUMN(cols, "character_list", sid, 0);
-	ADD_COLUMN(cols, "character_list", name, 61);
-	ADD_COLUMN(cols, "character_list", race, 0);
-	ADD_COLUMN(cols, "character_list", sex, 0);
-	ADD_COLUMN(cols, "character_list", lv, 0);
-	ADD_COLUMN(cols, "character_list", jlv, 0);
-	ADD_COLUMN(cols, "character_list", exp, 0);
-	ADD_COLUMN(cols, "character_list", hp, 0);
-	ADD_COLUMN(cols, "character_list", mp, 0);
-	ADD_COLUMN(cols, "character_list", job, 0);
-	ADD_COLUMN(cols, "character_list", permission, 0);
-	ADD_COLUMN(cols, "character_list", skin_color, 0);
-	ADD_COLUMN(cols, "character_list", model_00, 0);
-	ADD_COLUMN(cols, "character_list", model_01, 0);
-	ADD_COLUMN(cols, "character_list", model_02, 0);
-	ADD_COLUMN(cols, "character_list", model_03, 0);
-	ADD_COLUMN(cols, "character_list", model_04, 0);
-	ADD_COLUMN(cols, "character_list", hair_color_index, 0);
-	ADD_COLUMN(cols, "character_list", hair_color_rgb, 0);
-	ADD_COLUMN(cols, "character_list", hide_equip_flag, 0);
-	ADD_COLUMN(cols, "character_list", texture_id, 0);
-	ADD_COLUMN(cols, "character_list", permission, 0);
-	ADD_COLUMN(cols, "character_list", create_time, 0);
-	ADD_COLUMN(cols, "character_list", login_time, 0);
-	ADD_COLUMN(cols, "character_list", login_count, 0);
-	ADD_COLUMN(cols, "character_list", logout_time, 0);
-	ADD_COLUMN(cols, "character_list", play_time, 0);
+	addColumn(cols, "sid", &OutputType::sid);
+	addColumn(cols, "name", &OutputType::name);
+	addColumn(cols, "race", &OutputType::race);
+	addColumn(cols, "sex", &OutputType::sex);
+	addColumn(cols, "lv", &OutputType::lv);
+	addColumn(cols, "jlv", &OutputType::jlv);
+	addColumn(cols, "exp", &OutputType::exp);
+	addColumn(cols, "hp", &OutputType::hp);
+	addColumn(cols, "mp", &OutputType::mp);
+	addColumn(cols, "job", &OutputType::job);
+	addColumn(cols, "permission", &OutputType::permission);
+	addColumn(cols, "skin_color", &OutputType::skin_color);
+	addColumn(cols, "model_00", &OutputType::model, 0);
+	addColumn(cols, "model_01", &OutputType::model, 1);
+	addColumn(cols, "model_02", &OutputType::model, 2);
+	addColumn(cols, "model_03", &OutputType::model, 3);
+	addColumn(cols, "model_04", &OutputType::model, 4);
+	addColumn(cols, "hair_color_index", &OutputType::hair_color_index);
+	addColumn(cols, "hair_color_rgb", &OutputType::hair_color_rgb);
+	addColumn(cols, "hide_equip_flag", &OutputType::hide_equip_flag);
+	addColumn(cols, "texture_id", &OutputType::texture_id);
+	addColumn(cols, "permission", &OutputType::permission);
+	addColumn(cols, "create_time", &OutputType::create_time);
+	addColumn(cols, "login_time", &OutputType::login_time);
+	addColumn(cols, "login_count", &OutputType::login_count);
+	addColumn(cols, "logout_time", &OutputType::logout_time);
+	addColumn(cols, "play_time", &OutputType::play_time);
 
 	dbBinding = new DbQueryBinding(dbConnectionPool,
 								   CFG_CREATE("sql.character_list.enable", true),

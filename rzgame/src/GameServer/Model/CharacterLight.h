@@ -4,9 +4,8 @@
 #include "Database/DbQueryJob.h"
 #include <stdint.h>
 
-class CharacterLight
+struct CharacterLight
 {
-public:
 	uint32_t sid;
 	char name[61];
 	uint32_t race;
@@ -19,11 +18,7 @@ public:
 	uint32_t job;
 	uint32_t permission;
 	uint32_t skin_color;
-	uint32_t model_00;
-	uint32_t model_01;
-	uint32_t model_02;
-	uint32_t model_03;
-	uint32_t model_04;
+	uint32_t model[5];
 	uint32_t hair_color_index;
 	uint32_t hair_color_rgb;
 	uint32_t hide_equip_flag;
@@ -40,7 +35,7 @@ struct CharacterLightBinding {
 		uint32_t account_id;
 	};
 
-	struct Output : public CharacterLight {};
+	typedef CharacterLight Output;
 };
 
 #endif // AUTHSERVER_CHARACTER_LIGHT_H

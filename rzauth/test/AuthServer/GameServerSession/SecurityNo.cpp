@@ -170,7 +170,7 @@ TEST(TS_GA_SECURITY_NO_CHECK, double_query) {
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	uint32_t modeDone = 0;
 
-	addGameLoginScenario(game, 20, "Server name 20", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	addGameLoginScenario(game, 25, "Server name 25", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		TS_GA_SECURITY_NO_CHECK securityNoPacket;
 		TS_MESSAGE::initMessage(&securityNoPacket);
 
@@ -234,7 +234,7 @@ TEST(TS_GA_SECURITY_NO_CHECK, query_and_close) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 
-	addGameLoginScenario(game, 20, "Server name 20", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	addGameLoginScenario(game, 26, "Server name 26", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		TS_GA_SECURITY_NO_CHECK securityNoPacket;
 		TS_MESSAGE::initMessage(&securityNoPacket);
 
@@ -260,7 +260,7 @@ TEST(TS_GA_SECURITY_NO_CHECK, valid_epic5) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 
-	addGameLoginScenario(game, 24, "Server name 24", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	addGameLoginScenario(game, 27, "Server name 27", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		TS_GA_SECURITY_NO_CHECK_EPIC5 securityNoPacket;
 		TS_MESSAGE::initMessage(&securityNoPacket);
 
@@ -289,7 +289,7 @@ TEST(TS_GA_SECURITY_NO_CHECK, garbage_data_epic5) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 
-	addGameLoginScenario(game, 24, "Server name 24", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	addGameLoginScenario(game, 28, "Server name 28", "http://www.example.com/index10.html", true, "127.0.0.1", 4517, [](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		TS_GA_SECURITY_NO_CHECK_EPIC5 securityNoPacket;
 		TS_MESSAGE::initMessage(&securityNoPacket);
 

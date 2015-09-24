@@ -1,0 +1,25 @@
+ID_ICON ICON "@WORKINGDIR@/../res/icon.ico"
+
+1 VERSIONINFO
+FILEVERSION     @TARGET_FILEVERSION@
+PRODUCTVERSION  @TARGET_FILEVERSION@
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "080904E4"
+    BEGIN
+      VALUE "CompanyName", "glandu2"
+      VALUE "FileDescription", "Log Server Emu"
+      VALUE "FileVersion", "@GIT_VERSION@"
+      VALUE "InternalName", "@TARGET_NAME@"
+      VALUE "OriginalFilename", "@TARGET_NAME@.exe"
+      VALUE "ProductName", "rzu emu"
+      VALUE "ProductVersion", "@TARGET_VERSION@"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x809, 1252
+  END
+END
