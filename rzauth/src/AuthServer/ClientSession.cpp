@@ -239,20 +239,20 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
 	result.login_flag = 0;
 
-	auto results = query->getResults();
+	auto& results = query->getResults();
 	if(results.size() == 0 || results.size() > 1) {
 		result.result = TS_RESULT_NOT_EXIST;
 		sendPacket(&result);
 		return;
 	}
 
-	const DB_AccountData::Output& output = results[0];
+	const DB_AccountData::Output* output = results.front().get();
 	const DB_AccountData::Input* input = query->getInput();
 
-	if(output.ok == false || output.auth_ok == false) {
+	if(output->ok == false || output->auth_ok == false) {
 		result.result = TS_RESULT_NOT_EXIST;
 		result.login_flag = 0;
-	} else if(output.block == true) {
+	} else if(output->block == true) {
 		result.result = TS_RESULT_ACCESS_DENIED;
 		result.login_flag = 0;
 	} else if(clientData != nullptr) { //already connected
@@ -261,7 +261,7 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 		log(LL_Info, "Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
 		ClientData* oldClient;
-		clientData = ClientData::tryAddClient(this, input->account, output.account_id, output.age, output.event_code, output.pcbang, getStream()->getRemoteIp(), &oldClient);
+		clientData = ClientData::tryAddClient(this, input->account, output->account_id, output->age, output->event_code, output->pcbang, getStream()->getRemoteIp(), &oldClient);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
@@ -273,12 +273,12 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 			uv_inet_ntop(AF_INET, &oldClient->ip, ipStr, sizeof(ipStr));
 
 			if(!oldCientGameData) {
-				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_AUTH_LOGIN, output.account_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_AUTH_LOGIN, output->account_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 										 input->account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
 
 				oldClient->getClientSession()->abortSession();
 			} else {
-				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_GAME_LOGIN, output.account_id, 0, 0, oldCientGameData->getServerIdx(), 0, 0, 0, 0, 0, 0, 0,
+				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_GAME_LOGIN, output->account_id, 0, 0, oldCientGameData->getServerIdx(), 0, 0, 0, 0, 0, 0, 0,
 										 input->account.c_str(), -1, getStream()->getRemoteIpStr(), -1, ipStr, -1, 0, 0);
 
 				if(oldClient->isConnectedToGame())
@@ -290,8 +290,8 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 		} else {
 			result.result = 0;
 			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
-			this->lastLoginServerId = output.last_login_server_idx;
-			this->serverIdxOffset = output.server_idx_offset;
+			this->lastLoginServerId = output->last_login_server_idx;
+			this->serverIdxOffset = output->server_idx_offset;
 		}
 	}
 
@@ -314,6 +314,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 	unsigned int maxPlayers = CONFIG_GET()->auth.game.maxPlayers;
 
+	serverListPacket.servers.reserve(serverList.size());
 	serverListPacket.last_login_server_idx = lastLoginServerId;
 
 	for(it = serverList.cbegin(), itEnd = serverList.cend(); it != itEnd; ++it) {
@@ -330,7 +331,9 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		if(!serverInfo->isReady())
 			continue;
 
-		TS_SERVER_INFO serverData = {0};
+		serverListPacket.servers.push_back(TS_SERVER_INFO());
+		TS_SERVER_INFO& serverData = serverListPacket.servers.back();
+
 		serverData.server_idx = serverInfo->getServerIdx();
 		serverData.server_port = serverInfo->getServerPort();
 		serverData.is_adult_server = serverInfo->getIsAdultServer();
@@ -340,8 +343,6 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 
 		uint32_t userRatio = serverInfo->getPlayerCount() * 100 / maxPlayers;
 		serverData.user_ratio = (userRatio > 100)? 100 : userRatio;
-
-		serverListPacket.servers.push_back(serverData);
 	}
 
 	sendPacket(serverListPacket, isEpic2 ? EPIC_2 : EPIC_9_1);
