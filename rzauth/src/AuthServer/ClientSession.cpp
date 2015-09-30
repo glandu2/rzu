@@ -99,54 +99,45 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 
 void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	TS_AC_AES_KEY_IV* aesKeyMessage = nullptr;
-	RSA* rsaCipher = nullptr;
-	BIO* bio = nullptr;
-	int blockSize;
-
-	for(int i = 0; i < 32; i++)
-		aesKey[i] = rand() & 0xFF;
+	std::unique_ptr<RSA, void(*)(RSA*)> rsaCipher(nullptr, &RSA_free);
+	std::unique_ptr<BIO, int(*)(BIO*)> bio(nullptr, &BIO_free);
 
 	const int expectedKeySize = packet->size - sizeof(TS_CA_RSA_PUBLIC_KEY);
 
 	if(packet->key_size != expectedKeySize) {
 		log(LL_Warning, "RSA: key_size is invalid: %d, expected (from msg size): %d\n", packet->key_size, expectedKeySize);
 		abortSession();
-		goto cleanup;
+		return;
 	}
 
 	ERR_clear_error();
 
-	bio = BIO_new_mem_buf((void*)packet->key, packet->key_size);
-	rsaCipher = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
-	if(rsaCipher == nullptr) {
-		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
-		log(LL_Warning, "RSA: invalid certificate: %s\n", errorString);
+	bio.reset(BIO_new_mem_buf((void*)packet->key, packet->key_size));
+	rsaCipher.reset(PEM_read_bio_RSA_PUBKEY(bio.get(), NULL, NULL, NULL));
+	if(!rsaCipher) {
+		log(LL_Warning, "RSA: invalid certificate: %s\n", ERR_error_string(ERR_get_error(), nullptr));
 		abortSession();
-		goto cleanup;
+		return;
 	}
 
 	aesKeyMessage = TS_MESSAGE_WNA::create<TS_AC_AES_KEY_IV, unsigned char>(RSA_size(rsaCipher));
 
-	blockSize = RSA_public_encrypt(32, aesKey, aesKeyMessage->rsa_encrypted_data, rsaCipher, RSA_PKCS1_PADDING);
+	for(int i = 0; i < 32; i++)
+		aesKey[i] = rand() & 0xFF;
+
+	int blockSize = RSA_public_encrypt(32, aesKey, aesKeyMessage->rsa_encrypted_data, rsaCipher.get(), RSA_PKCS1_PADDING);
 	if(blockSize < 0) {
-		const char* errorString = ERR_error_string(ERR_get_error(), nullptr);
-		log(LL_Warning, "RSA: encrypt error: %s\n", errorString);
+		log(LL_Warning, "RSA: encrypt error: %s\n", ERR_error_string(ERR_get_error(), nullptr));
 		abortSession();
-		goto cleanup;
+		return;
 	}
 
 	aesKeyMessage->data_size = blockSize;
 
 	useRsaAuth = true;
 	sendPacket(aesKeyMessage);
-
-cleanup:
 	if(aesKeyMessage)
 		TS_MESSAGE_WNA::destroy(aesKeyMessage);
-	if(bio)
-		BIO_free(bio);
-	if(rsaCipher)
-		RSA_free(rsaCipher);
 }
 
 void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
