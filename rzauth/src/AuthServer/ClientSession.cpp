@@ -120,7 +120,7 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 		return;
 	}
 
-	aesKeyMessage = TS_MESSAGE_WNA::create<TS_AC_AES_KEY_IV, unsigned char>(RSA_size(rsaCipher));
+	aesKeyMessage = TS_MESSAGE_WNA::create<TS_AC_AES_KEY_IV, unsigned char>(RSA_size(rsaCipher.get()));
 
 	for(int i = 0; i < 32; i++)
 		aesKey[i] = rand() & 0xFF;
