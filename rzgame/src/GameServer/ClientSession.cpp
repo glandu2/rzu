@@ -7,11 +7,13 @@
 
 #include "ConnectionHandler/ConnectionHandler.h"
 #include "ConnectionHandler/LobbyHandler.h"
+#include "ConnectionHandler/PlayerLoadingHandler.h"
 
 #include "PacketEnums.h"
 #include "GameClient/TS_SC_RESULT.h"
 #include "AuthGame/TS_GA_CLIENT_LOGIN.h"
 #include "GameClient/TS_SC_CHARACTER_LIST.h"
+#include "GameClient/TS_SC_LOGIN_RESULT.h"
 
 #include "GameClient/TS_CS_VERSION.h"
 
@@ -23,7 +25,7 @@ void ClientSession::init() {
 void ClientSession::deinit() {
 }
 
-ClientSession::ClientSession() : authReceived(false), accountId(UINT32_MAX), connectionHandler(nullptr) {
+ClientSession::ClientSession() : authReceived(false), accountId(UINT32_MAX) {
 	version = CONFIG_GET()->game.clients.epic.get();
 }
 
@@ -31,14 +33,11 @@ ClientSession::~ClientSession() {
 	log(LL_Info, "Account %s disconnected\n", account.c_str());
 
 	AuthServerSession::get()->logoutClient(account.c_str(), 0);
-	if(connectionHandler)
-		delete connectionHandler;
 }
 
-void ClientSession::setConnectionHandler(ConnectionHandler* handler) {
-	if(connectionHandler)
-		delete connectionHandler;
-	connectionHandler = handler;
+void ClientSession::setConnectionHandler(ConnectionHandler* newConnectionHandler) {
+	oldConnectionHandler = std::move(connectionHandler);
+	connectionHandler.reset(newConnectionHandler);
 }
 
 void ClientSession::onAccountLoginResult(uint16_t result, std::string account, uint32_t accountId, char nPCBangUser, uint32_t nEventCode, uint32_t nAge, uint32_t nContinuousPlayTime, uint32_t nContinuousLogoutTime) {
@@ -69,6 +68,7 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 		}
 	} else if(connectionHandler) {
 		connectionHandler->onPacketReceived(packet);
+		oldConnectionHandler.reset(); // free old connection handler if it has changed
 	} else {
 		log(LL_Warning, "Account %s authenticated but no connection handler !\n", account.c_str());
 	}
@@ -76,13 +76,34 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 
 void ClientSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH* packet) {
 	if(authReceived == false) {
-		std::string account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
-
 		authReceived = true;
-		AuthServerSession::get()->loginClient(this, account, packet->one_time_key);
+		AuthServerSession::get()->loginClient(this, packet->account, packet->one_time_key);
 	} else {
 		log(LL_Warning, "Client already sent a auth packet, closing connection\n");
 		abortSession();
+	}
+}
+
+void ClientSession::lobbyExitResult(std::unique_ptr<CharacterLight> characterData) {
+	if(!characterData) {
+		TS_SC_LOGIN_RESULT loginResult = {0};
+		loginResult.result = TS_RESULT_NOT_EXIST;
+		sendPacket(loginResult, getVersion());
+		abortSession();
+	} else {
+		setConnectionHandler(new PlayerLoadingHandler(this, std::move(characterData)));
+	}
+}
+
+void ClientSession::playerLoadingResult(TS_ResultCode result) {
+	TS_SC_LOGIN_RESULT loginResult = {0};
+	if(result != TS_RESULT_SUCCESS) {
+		loginResult.result = TS_RESULT_DB_ERROR;
+		sendPacket(loginResult, getVersion());
+		abortSession();
+	} else {
+		loginResult.result = TS_RESULT_SUCCESS;
+		sendPacket(loginResult, getVersion());
 	}
 }
 

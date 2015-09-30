@@ -4,6 +4,8 @@
 #include "NetSession/PacketSession.h"
 #include "NetSession/EncryptedSession.h"
 #include <unordered_map>
+#include <memory>
+#include "ConnectionHandler/ConnectionHandler.h"
 
 #include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
@@ -12,8 +14,6 @@
 class CharacterLight;
 
 namespace GameServer {
-
-class ConnectionHandler;
 
 class ClientSession : public EncryptedSession<PacketSession>
 {
@@ -29,7 +29,8 @@ public:
 	int getVersion() { return version; }
 
 	void onAccountLoginResult(uint16_t result, std::string account, uint32_t accountId, char nPCBangUser, uint32_t nEventCode, uint32_t nAge, uint32_t nContinuousPlayTime, uint32_t nContinuousLogoutTime);
-	void initCharacter(const CharacterLight& characterData);
+	void lobbyExitResult(std::unique_ptr<CharacterLight> characterData);
+	void playerLoadingResult(TS_ResultCode result);
 
 	template<class T>
 	void sendResult(uint16_t result, int32_t value) {
@@ -48,14 +49,15 @@ protected:
 
 	void onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH *packet);
 
-	void setConnectionHandler(ConnectionHandler* handler);
+	void setConnectionHandler(ConnectionHandler* newConnectionHandler);
 
 private:
 	int version;
 	bool authReceived;
 	std::string account;
 	uint32_t accountId;
-	ConnectionHandler* connectionHandler;
+	std::unique_ptr<ConnectionHandler> connectionHandler;
+	std::unique_ptr<ConnectionHandler> oldConnectionHandler;
 };
 
 }

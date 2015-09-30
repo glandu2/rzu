@@ -8,11 +8,15 @@
 
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
 #include "GameClient/TS_CS_LOGIN.h"
+#include "GameClient/TS_CS_CHECK_CHARACTER_NAME.h"
+#include "GameClient/TS_CS_CREATE_CHARACTER.h"
+#include "GameClient/TS_CS_DELETE_CHARACTER.h"
 
 namespace GameServer {
 
 class LobbyHandler : public ConnectionHandler
 {
+	DECLARE_CLASS(GameServer::LobbyHandler)
 public:
 	LobbyHandler(ClientSession* session) : ConnectionHandler(session) {}
 
@@ -23,12 +27,16 @@ protected:
 	void onCharacterListQuery(const TS_CS_CHARACTER_LIST* packet);
 	void onCharacterListResult(DbQueryJob<CharacterLightBinding>* query);
 
+	void onCheckCharacterName(const TS_CS_CHECK_CHARACTER_NAME* packet);
+	void onCreateCharacter(const TS_CS_CREATE_CHARACTER* packet);
+	void onDeleteCharacter(const TS_CS_DELETE_CHARACTER* packet);
+
 	void onCharacterLogin(const TS_CS_LOGIN* packet);
 
 private:
 	DbQueryJobRef characterListQuery;
 
-	std::vector<CharacterLight> characters;
+	std::vector<std::unique_ptr<CharacterLight>> characters;
 };
 
 } // namespace GameServer

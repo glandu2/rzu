@@ -4,10 +4,10 @@
 #include "Database/DbQueryJob.h"
 #include <stdint.h>
 
-struct CharacterLight
-{
+class CharacterLight {
+public:
 	uint32_t sid;
-	char name[61];
+	std::string name;
 	uint32_t race;
 	uint32_t sex;
 	uint32_t lv;

@@ -4,13 +4,15 @@
 #include "ConnectionHandler.h"
 #include "../Model/Character.h"
 #include "Database/DbQueryJobCallback.h"
+#include <memory>
 
 namespace GameServer {
 
-class GameHandler : public ConnectionHandler
+class PlayerLoadingHandler : public ConnectionHandler
 {
+	DECLARE_CLASS(GameServer::PlayerLoadingHandler)
 public:
-	GameHandler(ClientSession* session, const CharacterLight& characterLight);
+	PlayerLoadingHandler(ClientSession* session, std::unique_ptr<CharacterLight> characterLight);
 
 	void onPacketReceived(const TS_MESSAGE* packet) override;
 
@@ -18,8 +20,8 @@ protected:
 	void onCharacterResult(DbQueryJob<CharacterDetailsBinding>* query);
 
 private:
-	CharacterLight characterData;
-	CharacterDetails characterDetails;
+	std::unique_ptr<CharacterLight> characterData;
+	std::unique_ptr<CharacterDetails> characterDetails;
 	DbQueryJobRef characterQuery;
 };
 
