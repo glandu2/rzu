@@ -153,12 +153,12 @@ TEST(TS_CA_SERVER_LIST, two_epic2_gs_list) {
 
 	game1.start();
 
-	addGameLoginScenario(game1, 10, "Server 10", "http://www.example.com/index10.html", true, "127.0.0.10", 4710,
+	addGameLoginScenario(game1, 13, "Server 10", "http://www.example.com/index10.html", true, "127.0.0.10", 4710,
 						 [&game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		game2.start();
 	});
 
-	addGameLoginScenario(game2, 1, "Server 1", "http://www.example.com/index1.html", false, "127.0.0.1", 4610,
+	addGameLoginScenario(game2, 3, "Server 1", "http://www.example.com/index1.html", false, "127.0.0.1", 4610,
 						 [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		auth.start();
 	});
@@ -171,26 +171,26 @@ TEST(TS_CA_SERVER_LIST, two_epic2_gs_list) {
 		ASSERT_EQ(2, packet->count);
 		const TS_AC_SERVER_LIST_EPIC2::TS_SERVER_INFO* serverInfo;
 
-		EXPECT_TRUE(packet->servers[0].server_idx == 10 || packet->servers[0].server_idx == 1);
-		EXPECT_TRUE(packet->servers[1].server_idx == 10 || packet->servers[1].server_idx == 1);
+		EXPECT_TRUE(packet->servers[0].server_idx == 13 || packet->servers[0].server_idx == 3);
+		EXPECT_TRUE(packet->servers[1].server_idx == 13 || packet->servers[1].server_idx == 3);
 
-		if(packet->servers[0].server_idx == 10)
+		if(packet->servers[0].server_idx == 13)
 			serverInfo = &packet->servers[0];
 		else
 			serverInfo = &packet->servers[1];
 
-		EXPECT_EQ(10, serverInfo->server_idx);
+		EXPECT_EQ(13, serverInfo->server_idx);
 		EXPECT_STREQ("Server 10", serverInfo->server_name);
 		EXPECT_STREQ("127.0.0.10", serverInfo->server_ip);
 		EXPECT_EQ(4710, serverInfo->server_port);
 		EXPECT_EQ(0, serverInfo->user_ratio);
 
-		if(packet->servers[0].server_idx == 1)
+		if(packet->servers[0].server_idx == 3)
 			serverInfo = &packet->servers[0];
 		else
 			serverInfo = &packet->servers[1];
 
-		EXPECT_EQ(1, serverInfo->server_idx);
+		EXPECT_EQ(3, serverInfo->server_idx);
 		EXPECT_STREQ("Server 1", serverInfo->server_name);
 		EXPECT_STREQ("127.0.0.1", serverInfo->server_ip);
 		EXPECT_EQ(4610, serverInfo->server_port);
