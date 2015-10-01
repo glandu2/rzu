@@ -117,7 +117,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 
 	log(LL_Debug, "Character list: \n");
 	for(size_t i = 0; i < packet->characters.size(); i++) {
-		log(LL_Debug, " - %s\n", packet->characters[i].name);
+		log(LL_Debug, " - %s\n", packet->characters[i].name.c_str());
 		if(playername == packet->characters[i].name)
 			characterInList = true;
 	}
@@ -125,7 +125,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	if(!characterInList) {
 		log(LL_Warning, "Character \"%s\" not in character list: \n", playername.c_str());
 		for(size_t i = 0; i < packet->characters.size(); i++) {
-			log(LL_Warning, " - %s\n", packet->characters[i].name);
+			log(LL_Warning, " - %s\n", packet->characters[i].name.c_str());
 		}
 	}
 
