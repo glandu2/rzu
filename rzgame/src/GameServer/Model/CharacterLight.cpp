@@ -2,13 +2,13 @@
 #include "../../GlobalConfig.h"
 
 template<>
-DbQueryBinding* DbQueryJob<CharacterLightBinding>::dbBinding = nullptr;
+DbQueryBinding* DbQueryJob<GameServer::CharacterLightBinding>::dbBinding = nullptr;
 
 template<>
-const char* DbQueryJob<CharacterLightBinding>::SQL_CONFIG_NAME = "character_list";
+const char* DbQueryJob<GameServer::CharacterLightBinding>::SQL_CONFIG_NAME = "character_list";
 
 template<>
-bool DbQueryJob<CharacterLightBinding>::init(DbConnectionPool* dbConnectionPool) {
+bool DbQueryJob<GameServer::CharacterLightBinding>::init(DbConnectionPool* dbConnectionPool) {
 	std::vector<DbQueryBinding::ParameterBinding> params;
 	std::vector<DbQueryBinding::ColumnBinding> cols;
 
@@ -42,13 +42,12 @@ bool DbQueryJob<CharacterLightBinding>::init(DbConnectionPool* dbConnectionPool)
 	addColumn(cols, "logout_time", &OutputType::logout_time);
 	addColumn(cols, "play_time", &OutputType::play_time);
 
-	dbBinding = new DbQueryBinding(dbConnectionPool,
-								   CFG_CREATE("sql.character_list.enable", true),
-								   CONFIG_GET()->game.db.connectionString,
-								   CFG_CREATE("sql.character_list.query", "{CALL smp_read_character_list(?)}"),
-								   params,
-								   cols,
-								   DbQueryBinding::EM_OneRow);
+	createBinding(dbConnectionPool,
+				  CONFIG_GET()->game.telecaster.connectionString,
+				  "{CALL smp_read_character_list(?)}",
+				  params,
+				  cols,
+				  DbQueryBinding::EM_OneRow);
 
 	return true;
 }

@@ -3,6 +3,8 @@
 
 #include "CharacterLight.h"
 
+namespace GameServer {
+
 class CharacterDetails {
 public:
 	int32_t party_id;
@@ -67,5 +69,7 @@ struct CharacterDetailsBinding {
 
 	typedef CharacterDetails Output;
 };
+
+}
 
 #endif // CHARACTER_H

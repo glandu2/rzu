@@ -4,10 +4,12 @@
 #include "Database/DbQueryJob.h"
 #include <stdint.h>
 
-struct CharacterLight
-{
+namespace GameServer {
+
+class CharacterLight {
+public:
 	uint32_t sid;
-	char name[61];
+	std::string name;
 	uint32_t race;
 	uint32_t sex;
 	uint32_t lv;
@@ -37,5 +39,7 @@ struct CharacterLightBinding {
 
 	typedef CharacterLight Output;
 };
+
+}
 
 #endif // AUTHSERVER_CHARACTER_LIGHT_H

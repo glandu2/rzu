@@ -206,20 +206,20 @@ bool DB_Account::onPreProcess() {
 }
 
 bool DB_Account::onRowDone() {
-	DB_AccountData::Input* input = getInput();
-	DB_AccountData::Output* output = &getResults().back();
+	const DB_AccountData::Input* input = getInput();
+	DB_AccountData::Output* output = getResults().back().get();
 
 	if(output->account_id == 0xFFFFFFFF) {
 		log(LL_Trace, "Account %s not found in database\n", input->account.c_str());
 		return false;
 	}
 
-	if(output->nullPassword == true && output->password.empty()) {
+	if(output->nullPassword == true && output->password[0] == '\0') {
 		output->ok = true;
-	} else if(!strcmp(input->password, output->password.c_str())){
+	} else if(!strcmp(input->password, output->password)){
 		output->ok = true;
 	} else {
-		log(LL_Trace, "Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", input->account.c_str(), input->password, output->password.c_str());
+		log(LL_Trace, "Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", input->account.c_str(), input->password, output->password);
 	}
 
 	return false;

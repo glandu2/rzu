@@ -118,7 +118,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	log(LL_Debug, "Character list: \n");
 	for(size_t i = 0; i < packet->characters.size(); i++) {
 		log(LL_Debug, " - %s\n", packet->characters[i].name);
-		if(!strcmp(playername.c_str(), packet->characters[i].name))
+		if(playername == packet->characters[i].name)
 			characterInList = true;
 	}
 
@@ -129,7 +129,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 		}
 	}
 
-	strcpy(loginPkt.szName, playername.c_str());
+	strcpy(loginPkt.name, playername.c_str());
 	loginPkt.race = 0;
 	sendPacket(&loginPkt);
 

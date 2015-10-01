@@ -47,7 +47,7 @@ struct DB_AccountData
 	{
 		bool ok;
 		uint32_t account_id;
-		std::string password;
+		char password[34];
 		bool nullPassword;
 		bool auth_ok;
 		uint32_t age;
@@ -58,6 +58,7 @@ struct DB_AccountData
 		bool block;
 
 		Output() {
+			password[0] = '\0';
 			ok = false;
 			account_id = 0xFFFFFFFF;
 			nullPassword = true;

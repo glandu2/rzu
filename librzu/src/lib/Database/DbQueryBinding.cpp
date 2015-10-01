@@ -154,7 +154,7 @@ bool DbQueryBinding::process(IDbQueryJob* queryJob, void* inputInstance) {
 }
 
 void DbQueryBinding::setString(DbConnection* connection, const ParameterBinding& paramBinding, SQLLEN* StrLen_or_Ind, const std::string& str, std::string &outStr) {
-	CharsetConverter localToUtf16(GlobalCoreConfig::get()->app.encoding.get().c_str(), "UTF-16LE");
+	CharsetConverter localToUtf16(CharsetConverter::getEncoding().c_str(), "UTF-16LE");
 	localToUtf16.convert(str, outStr, 2);
 
 	// If the string is empty, put a size of 1 else SQL server complains about invalid precision
@@ -183,11 +183,13 @@ std::string DbQueryBinding::getString(DbConnection* connection, int columnIndex)
 		bytesRead = unicodeBuffer.size()-2; //dont keep null terminator
 		unicodeBuffer.resize(unicodeBuffer.size()*2);
 	}
-	if(ret == SQL_SUCCESS)
+	if(ret == SQL_SUCCESS) {
 		bytesRead += isDataNull;
+		unicodeBuffer.resize(bytesRead);
+	}
 
 	if(isDataNull != SQL_NULL_DATA && bytesRead != 0) {
-		CharsetConverter utf16ToLocal("UTF-16LE", GlobalCoreConfig::get()->app.encoding.get().c_str());
+		CharsetConverter utf16ToLocal("UTF-16LE", CharsetConverter::getEncoding().c_str());
 		std::string result;
 		utf16ToLocal.convert(unicodeBuffer, result, 0.5);
 		return result;
