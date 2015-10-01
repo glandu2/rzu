@@ -5,7 +5,7 @@
 #include "NetSession/EncryptedSession.h"
 #include <unordered_map>
 #include <memory>
-#include "ConnectionHandler/ConnectionHandler.h"
+#include "ConnectionHandler.h"
 
 #include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
 #include "GameClient/TS_CS_CHARACTER_LIST.h"

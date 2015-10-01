@@ -2,7 +2,7 @@
 #define LOBBYHANDLER_H
 
 #include "Core/Object.h"
-#include "ConnectionHandler.h"
+#include "../ConnectionHandler.h"
 #include "Database/DbQueryJobCallback.h"
 #include "../Model/CharacterLight.h"
 

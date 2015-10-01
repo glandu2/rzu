@@ -1,7 +1,7 @@
 #ifndef GAMEHANDLER_H
 #define GAMEHANDLER_H
 
-#include "ConnectionHandler.h"
+#include "../ConnectionHandler.h"
 #include "../Model/Character.h"
 #include "Database/DbQueryJobCallback.h"
 #include <memory>

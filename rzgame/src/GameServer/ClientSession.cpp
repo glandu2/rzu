@@ -5,9 +5,9 @@
 #include "../GlobalConfig.h"
 #include "Database/DbQueryJobCallback.h"
 
-#include "ConnectionHandler/ConnectionHandler.h"
-#include "ConnectionHandler/LobbyHandler.h"
-#include "ConnectionHandler/PlayerLoadingHandler.h"
+#include "ConnectionHandler.h"
+#include "LobbyHandler/LobbyHandler.h"
+#include "PlayerLoadingHandler/PlayerLoadingHandler.h"
 
 #include "PacketEnums.h"
 #include "GameClient/TS_SC_RESULT.h"

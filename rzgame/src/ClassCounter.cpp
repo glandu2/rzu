@@ -6,8 +6,8 @@ DECLARE_CLASSCOUNT_STATIC(GameServer::AuthServerSession)
 #include "GameServer/ClientSession.h"
 DECLARE_CLASSCOUNT_STATIC(GameServer::ClientSession)
 
-#include "GameServer/ConnectionHandler/LobbyHandler.h"
+#include "GameServer/LobbyHandler/LobbyHandler.h"
 DECLARE_CLASSCOUNT_STATIC(GameServer::LobbyHandler)
 
-#include "GameServer/ConnectionHandler/PlayerLoadingHandler.h"
+#include "GameServer/PlayerLoadingHandler/PlayerLoadingHandler.h"
 DECLARE_CLASSCOUNT_STATIC(GameServer::PlayerLoadingHandler)
