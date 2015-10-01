@@ -33,6 +33,9 @@ protected:
 
 	void onCharacterLogin(const TS_CS_LOGIN* packet);
 
+protected:
+	static bool checkTextAgainstEncoding(const std::string &text);
+
 private:
 	DbQueryJobRef characterListQuery;
 

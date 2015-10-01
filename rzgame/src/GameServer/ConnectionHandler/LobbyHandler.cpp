@@ -1,6 +1,7 @@
 #include "LobbyHandler.h"
 #include "../ClientSession.h"
 #include "../../GlobalConfig.h"
+#include "Core/CharsetConverter.h"
 
 #include "GameClient/TS_SC_CHARACTER_LIST.h"
 
@@ -99,7 +100,17 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<CharacterLightBinding> *quer
 }
 
 void LobbyHandler::onCheckCharacterName(const TS_CS_CHECK_CHARACTER_NAME *packet) {
+	std::string name = Utils::convertToString(packet->name, sizeof(packet->name));
 
+	if(name.size() > 18 || name.size() < 4) { //TODO || isBanned(name)
+		log(LL_Info, "Character name too long or too short: \"%s\"\n", name.c_str());
+		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
+	} else if(!checkTextAgainstEncoding(name)) {
+		log(LL_Info, "Character name contains invalid characters for encoding %s: \"%s\"\n", CharsetConverter::getEncoding().c_str(), name.c_str());
+		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
+	} else {
+		session->sendResult(packet, TS_RESULT_SUCCESS, 0);
+	}
 }
 
 void LobbyHandler::onCreateCharacter(const TS_CS_CREATE_CHARACTER *packet) {
@@ -124,6 +135,16 @@ void LobbyHandler::onCharacterLogin(const TS_CS_LOGIN *packet) {
 	}
 
 	session->lobbyExitResult(std::move(selectCharacter));
+}
+
+bool LobbyHandler::checkTextAgainstEncoding(const std::string& text) {
+	std::string checkEncoding = CharsetConverter::getEncoding() + "//IGNORE";
+	CharsetConverter keepOnlyValid(checkEncoding.c_str(), checkEncoding.c_str());
+
+	std::string convertedText;
+	keepOnlyValid.convert(text, convertedText, 1.0f);
+
+	return convertedText == text;
 }
 
 }

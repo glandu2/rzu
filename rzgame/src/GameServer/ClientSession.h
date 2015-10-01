@@ -32,15 +32,7 @@ public:
 	void lobbyExitResult(std::unique_ptr<CharacterLight> characterData);
 	void playerLoadingResult(TS_ResultCode result);
 
-	template<class T>
-	void sendResult(uint16_t result, int32_t value) {
-		TS_SC_RESULT resultPacket;
-		TS_MESSAGE::initMessage(&resultPacket);
-		resultPacket.request_msg_id = T::packetId;
-		resultPacket.result = result;
-		resultPacket.value = value;
-		sendPacket(&resultPacket);
-	}
+	void sendResult(const TS_MESSAGE* originalPacket, uint16_t result, int32_t value);
 
 protected:
 	~ClientSession();
