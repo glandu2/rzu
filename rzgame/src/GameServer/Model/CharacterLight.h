@@ -4,6 +4,8 @@
 #include "Database/DbQueryJob.h"
 #include <stdint.h>
 
+namespace GameServer {
+
 class CharacterLight {
 public:
 	uint32_t sid;
@@ -37,5 +39,7 @@ struct CharacterLightBinding {
 
 	typedef CharacterLight Output;
 };
+
+}
 
 #endif // AUTHSERVER_CHARACTER_LIGHT_H

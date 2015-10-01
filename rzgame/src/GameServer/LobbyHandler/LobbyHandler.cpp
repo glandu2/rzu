@@ -2,6 +2,7 @@
 #include "../ClientSession.h"
 #include "../../GlobalConfig.h"
 #include "Core/CharsetConverter.h"
+#include "../ReferenceData/ReferenceDataMgr.h"
 
 #include "GameClient/TS_SC_CHARACTER_LIST.h"
 
@@ -107,6 +108,9 @@ void LobbyHandler::onCheckCharacterName(const TS_CS_CHECK_CHARACTER_NAME *packet
 		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
 	} else if(!checkTextAgainstEncoding(name)) {
 		log(LL_Info, "Character name contains invalid characters for encoding %s: \"%s\"\n", CharsetConverter::getEncoding().c_str(), name.c_str());
+		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
+	} else if(ReferenceDataMgr::get()->isWordBanned(name)) {
+		log(LL_Info, "Character name is banned: \"%s\"\n", name.c_str());
 		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
 	} else {
 		session->sendResult(packet, TS_RESULT_SUCCESS, 0);

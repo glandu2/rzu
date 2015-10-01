@@ -15,12 +15,6 @@ void GlobalConfig::init() {
 	GlobalCoreConfig::get()->app.configfile.setDefault("game.opt");
 	GlobalCoreConfig::get()->admin.listener.port.setDefault(4513);
 	GlobalCoreConfig::get()->log.file.setDefault("game.log");
-
-#ifdef _WIN32
-	GlobalConfig::get()->game.db.driver.setDefault("SQL Server");
-#else
-	GlobalConfig::get()->game.db.driver.setDefault("FreeTDS");
-#endif
 }
 
 void DbConfig::updateConnectionString(IListener* instance) {

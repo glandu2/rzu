@@ -2,13 +2,13 @@
 #include "../../GlobalConfig.h"
 
 template<>
-DbQueryBinding* DbQueryJob<CharacterDetailsBinding>::dbBinding = nullptr;
+DbQueryBinding* DbQueryJob<GameServer::CharacterDetailsBinding>::dbBinding = nullptr;
 
 template<>
-const char* DbQueryJob<CharacterDetailsBinding>::SQL_CONFIG_NAME = "character_data";
+const char* DbQueryJob<GameServer::CharacterDetailsBinding>::SQL_CONFIG_NAME = "character_data";
 
 template<>
-bool DbQueryJob<CharacterDetailsBinding>::init(DbConnectionPool* dbConnectionPool) {
+bool DbQueryJob<GameServer::CharacterDetailsBinding>::init(DbConnectionPool* dbConnectionPool) {
 	std::vector<DbQueryBinding::ParameterBinding> params;
 	std::vector<DbQueryBinding::ColumnBinding> cols;
 
@@ -90,13 +90,12 @@ bool DbQueryJob<CharacterDetailsBinding>::init(DbConnectionPool* dbConnectionPoo
 	addColumn(cols, "flag_list", &OutputType::flag_list);
 	addColumn(cols, "client_info", &OutputType::client_info);
 
-	dbBinding = new DbQueryBinding(dbConnectionPool,
-								   CFG_CREATE("sql.character_data.enable", true),
-								   CONFIG_GET()->game.db.connectionString,
-								   CFG_CREATE("sql.character_data.query", "select * from character where sid = ?"),
-								   params,
-								   cols,
-								   DbQueryBinding::EM_OneRow);
+	createBinding(dbConnectionPool,
+				  CONFIG_GET()->game.telecaster.connectionString,
+				  "select * from character where sid = ?",
+				  params,
+				  cols,
+				  DbQueryBinding::EM_OneRow);
 
 	return true;
 }

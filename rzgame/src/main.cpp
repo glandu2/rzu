@@ -9,13 +9,17 @@
 #include "NetSession/BanManager.h"
 #include "NetSession/SessionServer.h"
 
+#include "GameServer/ReferenceData/ReferenceDataMgr.h"
 #include "GameServer/AuthServerSession.h"
 #include "GameServer/ClientSession.h"
 #include "GameServer/Model/CharacterLight.h"
+#include "GameServer/Model/Character.h"
+#include "GameServer/ReferenceData/BannedWords.h"
 
 #include "Console/ConsoleSession.h"
 
-void runServers(Log* trafficLogger);
+static void runServers(Log* trafficLogger);
+static void onReferenceDataLoaded(void* data);
 
 void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
@@ -35,7 +39,11 @@ int main(int argc, char **argv) {
 
 	DbConnectionPool dbConnectionPool;
 
-	if(DbQueryJob<CharacterLightBinding>::init(&dbConnectionPool) == false)
+	if(DbQueryJob<GameServer::CharacterLightBinding>::init(&dbConnectionPool) == false)
+		return 1;
+	if(DbQueryJob<GameServer::CharacterDetailsBinding>::init(&dbConnectionPool) == false)
+		return 1;
+	if(DbQueryJob<GameServer::BannedWordsBinding>::init(&dbConnectionPool) == false)
 		return 1;
 
 	ConfigInfo::get()->init(argc, argv);
@@ -59,7 +67,7 @@ int main(int argc, char **argv) {
 
 		ConfigInfo::get()->dump();
 
-		dbConnectionPool.checkConnection(CONFIG_GET()->game.db.connectionString.get().c_str());
+		dbConnectionPool.checkConnection(CONFIG_GET()->game.telecaster.connectionString.get().c_str());
 
 		runServers(&trafficLogger);
 
@@ -71,7 +79,7 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-void runServers(Log *trafficLogger) {
+static void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
@@ -92,11 +100,15 @@ void runServers(Log *trafficLogger) {
 	serverManager.addServer("game.auth", &authConnection,
 							authConnection.getAutoStartConfig());
 
-	serverManager.start();
-
 	CrashHandler::setTerminateCallback(&onTerminate, &serverManager);
 
+	GameServer::ReferenceDataMgr::load(&onReferenceDataLoaded, &serverManager);
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
 	CrashHandler::setTerminateCallback(nullptr, nullptr);
+}
+
+static void onReferenceDataLoaded(void* data) {
+	ServersManager* serverManager = (ServersManager*) data;
+	serverManager->start();
 }

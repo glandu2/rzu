@@ -11,9 +11,9 @@
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
 #include "GameClient/TS_SC_RESULT.h"
 
-class CharacterLight;
-
 namespace GameServer {
+
+class CharacterLight;
 
 class ClientSession : public EncryptedSession<PacketSession>
 {
