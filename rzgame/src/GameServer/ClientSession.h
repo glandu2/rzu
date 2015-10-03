@@ -32,6 +32,8 @@ public:
 	void lobbyExitResult(std::unique_ptr<CharacterLight> characterData);
 	void playerLoadingResult(TS_ResultCode result);
 
+
+	void sendResult(uint16_t id, uint16_t result, int32_t value);
 	void sendResult(const TS_MESSAGE* originalPacket, uint16_t result, int32_t value);
 
 protected:

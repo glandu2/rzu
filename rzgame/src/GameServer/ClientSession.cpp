@@ -107,13 +107,17 @@ void ClientSession::playerLoadingResult(TS_ResultCode result) {
 	}
 }
 
-void ClientSession::sendResult(const TS_MESSAGE *originalPacket, uint16_t result, int32_t value) {
+void ClientSession::sendResult(uint16_t id, uint16_t result, int32_t value) {
 	TS_SC_RESULT resultPacket;
 	TS_MESSAGE::initMessage(&resultPacket);
-	resultPacket.request_msg_id = originalPacket->id;
+	resultPacket.request_msg_id = id;
 	resultPacket.result = result;
 	resultPacket.value = value;
 	sendPacket(&resultPacket);
+}
+
+void ClientSession::sendResult(const TS_MESSAGE *originalPacket, uint16_t result, int32_t value) {
+	sendResult(originalPacket->id, result, value);
 }
 
 } //namespace UploadServer
