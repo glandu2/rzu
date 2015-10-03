@@ -9,28 +9,13 @@
 #include "../GlobalConfig.h"
 #include "Database/DbConnectionPool.h"
 
+DECLARE_DB_BINDING(AuthServer::DB_UpdateLastServerIdx, "db_updatelastserveridx");
+template<> void DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::init(DbConnectionPool* dbConnectionPool) {
+	createBinding(dbConnectionPool,
+				  CONFIG_GET()->auth.db.connectionString,
+				  "UPDATE account SET last_login_server_idx = ? WHERE account_id = ?;",
+				  DbQueryBinding::EM_NoRow);
 
-template<>
-DbQueryBinding* DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::dbBinding = nullptr;
-
-template<>
-const char* DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::SQL_CONFIG_NAME = "db_updatelastserveridx";
-
-template<>
-bool DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::init(DbConnectionPool* dbConnectionPool) {
-	std::vector<DbQueryBinding::ParameterBinding> params;
-	std::vector<DbQueryBinding::ColumnBinding> cols;
-
-	addParam(params, "last_login_server_idx", &InputType::lastLoginServerIdx);
-	addParam(params, "account_id", &InputType::accountId);
-
-	dbBinding = new DbQueryBinding(dbConnectionPool,
-								   CFG_CREATE("sql.db_updatelastserveridx.enable", true),
-								   CONFIG_GET()->auth.db.connectionString,
-								   CFG_CREATE("sql.db_updatelastserveridx.query", "UPDATE account SET last_login_server_idx = ? WHERE account_id = ?;"),
-								   params,
-								   cols,
-								   DbQueryBinding::EM_NoRow);
-
-	return true;
+	addParam("last_login_server_idx", &InputType::lastLoginServerIdx);
+	addParam("account_id", &InputType::accountId);
 }

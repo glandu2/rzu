@@ -78,12 +78,7 @@ int main(int argc, char **argv) {
 
 	DbConnectionPool dbConnectionPool;
 
-	if(!DbQueryJob<AuthServer::DB_AccountData>::init(&dbConnectionPool))
-		return 1;
-	if(!DbQueryJob<AuthServer::DB_SecurityNoCheckData>::init(&dbConnectionPool))
-		return 1;
-	if(!DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::init(&dbConnectionPool))
-		return 1;
+	DbBindingLoader::get()->initAll(&dbConnectionPool);
 	if(!AuthServer::DB_Account::init(CONFIG_GET()->auth.client.desKey))
 		return 1;
 	if(!AuthServer::DB_SecurityNoCheck::init())
