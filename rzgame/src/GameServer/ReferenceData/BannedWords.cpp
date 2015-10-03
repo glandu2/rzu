@@ -2,27 +2,14 @@
 #include "../../GlobalConfig.h"
 #include <iterator>
 
-template<>
-DbQueryBinding* DbQueryJob<GameServer::BannedWordsBinding>::dbBinding = nullptr;
-
-template<>
-const char* DbQueryJob<GameServer::BannedWordsBinding>::SQL_CONFIG_NAME = "banwords";
-
-template<>
-bool DbQueryJob<GameServer::BannedWordsBinding>::init(DbConnectionPool* dbConnectionPool) {
-	std::vector<DbQueryBinding::ParameterBinding> params;
-	std::vector<DbQueryBinding::ColumnBinding> cols;
-
-	addColumn(cols, "string", &OutputType::word);
-
+DECLARE_DB_BINDING(GameServer::BannedWordsBinding, "banwords");
+template<> void DbQueryJob<GameServer::BannedWordsBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.arcadia.connectionString,
 				  "select * from BanWordResource",
-				  params,
-				  cols,
 				  DbQueryBinding::EM_MultiRows);
 
-	return true;
+	addColumn("string", &OutputType::word);
 }
 
 namespace GameServer {
@@ -42,8 +29,6 @@ void BannedWordsBinding::onDataLoaded(DbQueryJob<BannedWordsBinding>* query) {
 		auto insertResult = data.insert(bannedWord.get()->word);
 		if(insertResult.second == false) {
 			log(LL_Warning, "duplicate word \"%s\"\n", insertResult.first->c_str());
-		} else {
-			log(LL_Debug, "Loaded banned word \"%s\"\n", insertResult.first->c_str());
 		}
 	}
 

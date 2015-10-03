@@ -39,12 +39,7 @@ int main(int argc, char **argv) {
 
 	DbConnectionPool dbConnectionPool;
 
-	if(DbQueryJob<GameServer::CharacterLightBinding>::init(&dbConnectionPool) == false)
-		return 1;
-	if(DbQueryJob<GameServer::CharacterDetailsBinding>::init(&dbConnectionPool) == false)
-		return 1;
-	if(DbQueryJob<GameServer::BannedWordsBinding>::init(&dbConnectionPool) == false)
-		return 1;
+	DbBindingLoader::get()->initAll(&dbConnectionPool);
 
 	ConfigInfo::get()->init(argc, argv);
 
@@ -67,6 +62,7 @@ int main(int argc, char **argv) {
 
 		ConfigInfo::get()->dump();
 
+		dbConnectionPool.checkConnection(CONFIG_GET()->game.arcadia.connectionString.get().c_str());
 		dbConnectionPool.checkConnection(CONFIG_GET()->game.telecaster.connectionString.get().c_str());
 
 		runServers(&trafficLogger);

@@ -6,40 +6,26 @@
 #include <openssl/err.h>
 #include "Cipher/DesPasswordCipher.h"
 
-template<>
-DbQueryBinding* DbQueryJob<AuthServer::DB_AccountData>::dbBinding = nullptr;
+DECLARE_DB_BINDING(AuthServer::DB_AccountData, "db_account");
+template<> void DbQueryJob<AuthServer::DB_AccountData>::init(DbConnectionPool* dbConnectionPool) {
+	createBinding(dbConnectionPool,
+				  CONFIG_GET()->auth.db.connectionString,
+				  "SELECT * FROM account WHERE account = ? AND password = ?;",
+				  DbQueryBinding::EM_OneRow);
 
-template<>
-const char* DbQueryJob<AuthServer::DB_AccountData>::SQL_CONFIG_NAME = "db_account";
+	addParam("account", &InputType::account);
+	addParam("password", &InputType::password);
+	addParam("ip", &InputType::ip);
 
-template<>
-bool DbQueryJob<AuthServer::DB_AccountData>::init(DbConnectionPool* dbConnectionPool) {
-	std::vector<DbQueryBinding::ParameterBinding> params;
-	std::vector<DbQueryBinding::ColumnBinding> cols;
-
-	addParam(params, "account", &InputType::account);
-	addParam(params, "password", &InputType::password);
-	addParam(params, "ip", &InputType::ip);
-
-	addColumn(cols, "account_id", &OutputType::account_id);
-	addColumn(cols, "password", &OutputType::password, &OutputType::nullPassword);
-	addColumn(cols, "auth_ok", &OutputType::auth_ok);
-	addColumn(cols, "age", &OutputType::age);
-	addColumn(cols, "last_login_server_idx", &OutputType::last_login_server_idx);
-	addColumn(cols, "event_code", &OutputType::event_code);
-	addColumn(cols, "pcbang", &OutputType::pcbang);
-	addColumn(cols, "server_idx_offset", &OutputType::server_idx_offset);
-	addColumn(cols, "block", &OutputType::block);
-
-	dbBinding = new DbQueryBinding(dbConnectionPool,
-								   CFG_CREATE("sql.db_account.enable", true),
-								   CONFIG_GET()->auth.db.connectionString,
-								   CFG_CREATE("sql.db_account.query", "SELECT * FROM account WHERE account = ? AND password = ?;"),
-								   params,
-								   cols,
-								   DbQueryBinding::EM_OneRow);
-
-	return true;
+	addColumn("account_id", &OutputType::account_id);
+	addColumn("password", &OutputType::password, &OutputType::nullPassword);
+	addColumn("auth_ok", &OutputType::auth_ok);
+	addColumn("age", &OutputType::age);
+	addColumn("last_login_server_idx", &OutputType::last_login_server_idx);
+	addColumn("event_code", &OutputType::event_code);
+	addColumn("pcbang", &OutputType::pcbang);
+	addColumn("server_idx_offset", &OutputType::server_idx_offset);
+	addColumn("block", &OutputType::block);
 }
 
 namespace AuthServer {

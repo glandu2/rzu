@@ -10,30 +10,15 @@
 #include "Database/DbConnectionPool.h"
 #include "GameServerSession.h"
 
+DECLARE_DB_BINDING(AuthServer::DB_SecurityNoCheckData, "db_securitynocheck");
+template<> void DbQueryJob<AuthServer::DB_SecurityNoCheckData>::init(DbConnectionPool* dbConnectionPool) {
+	createBinding(dbConnectionPool,
+				  CONFIG_GET()->auth.db.connectionString,
+				  "SELECT account FROM account WHERE account = ? AND password = ?",
+				  DbQueryBinding::EM_OneRow);
 
-template<>
-DbQueryBinding* DbQueryJob<AuthServer::DB_SecurityNoCheckData>::dbBinding = nullptr;
-
-template<>
-const char* DbQueryJob<AuthServer::DB_SecurityNoCheckData>::SQL_CONFIG_NAME = "db_securitynocheck";
-
-template<>
-bool DbQueryJob<AuthServer::DB_SecurityNoCheckData>::init(DbConnectionPool* dbConnectionPool) {
-	std::vector<DbQueryBinding::ParameterBinding> params;
-	std::vector<DbQueryBinding::ColumnBinding> cols;
-
-	addParam(params, "account", &InputType::account);
-	addParam(params, "securityNoMd5String", &InputType::securityNoMd5String);
-
-	dbBinding = new DbQueryBinding(dbConnectionPool,
-								   CFG_CREATE("sql.db_securitynocheck.enable", true),
-								   CONFIG_GET()->auth.db.connectionString,
-								   CFG_CREATE("sql.db_securitynocheck.query", "SELECT account FROM account WHERE account = ? AND password = ?"),
-								   params,
-								   cols,
-								   DbQueryBinding::EM_OneRow);
-
-	return true;
+	addParam("account", &InputType::account);
+	addParam("securityNoMd5String", &InputType::securityNoMd5String);
 }
 
 namespace AuthServer {

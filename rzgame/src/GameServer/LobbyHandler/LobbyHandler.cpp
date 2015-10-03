@@ -113,7 +113,20 @@ void LobbyHandler::onCheckCharacterName(const TS_CS_CHECK_CHARACTER_NAME *packet
 		log(LL_Info, "Character name is banned: \"%s\"\n", name.c_str());
 		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
 	} else {
-		session->sendResult(packet, TS_RESULT_SUCCESS, 0);
+		CheckCharacterNameBinding::Input input;
+		input.character_name = name;
+
+		characterListQuery.executeDbQuery<CheckCharacterNameBinding>(this, &LobbyHandler::onCheckCharacterNameExistsResult, input);
+	}
+}
+
+void LobbyHandler::onCheckCharacterNameExistsResult(DbQueryJob<CheckCharacterNameBinding> *query) {
+	if(query->getResults().size() == 0) {
+		session->sendResult(TS_CS_CHECK_CHARACTER_NAME::packetID, TS_RESULT_SUCCESS, 0);
+		log(LL_Info, "Character name \"%s\" is free\n", query->getInput()->character_name.c_str());
+	} else {
+		session->sendResult(TS_CS_CHECK_CHARACTER_NAME::packetID, TS_RESULT_ALREADY_EXIST, 0);
+		log(LL_Info, "Character name \"%s\" is already used\n", query->getInput()->character_name.c_str());
 	}
 }
 
