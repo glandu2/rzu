@@ -19,11 +19,13 @@ Function Send-StringOverTcp ($DataToSend, $hostname, $port) {
 
 try {
 	Start-Process .\rzauth -ArgumentList '/configfile:auth-test.opt'
+	Start-Sleep -s 1
 	.\rzauth_test /core.log.level:trace /core.log.consolelevel:info
 	if($LastExitCode -ne 0) {
 		throw "rzauth test failed: $lastexitcode"
 	}
 	Start-Process .\rzgamereconnect -ArgumentList '/auth.reconnectdelay:100'
+	Start-Sleep -s 1
 	.\rzauth_test /core.log.level:trace /core.log.consolelevel:info /auth.game.port:4802 --gtest_filter=-TS_GA_LOGIN_WITH_LOGOUT.*
 	if($LastExitCode -ne 0) {
 		throw "rzauth reconnect test failed: $lastexitcode"
