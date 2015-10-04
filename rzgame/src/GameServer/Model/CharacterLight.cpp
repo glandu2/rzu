@@ -6,7 +6,7 @@ template<> void DbQueryJob<GameServer::CharacterLightBinding>::init(DbConnection
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.telecaster.connectionString,
 				  "{CALL smp_read_character_list(?)}",
-				  DbQueryBinding::EM_OneRow);
+				  DbQueryBinding::EM_MultiRows);
 
 	addParam("account_id", &InputType::account_id);
 
