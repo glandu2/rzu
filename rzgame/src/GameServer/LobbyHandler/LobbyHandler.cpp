@@ -251,7 +251,7 @@ void LobbyHandler::onDeleteCharacter(const TS_CS_DELETE_CHARACTER *packet) {
 		log(LL_Info, "Account %s tried to delete non existing character %s\n", session->getAccount().c_str(), name.c_str());
 	} else {
 		DeleteCharacterBinding::Input input;
-		input.character_name = ;
+		input.character_name = name;
 
 		lobbyQueries.executeDbQuery<DeleteCharacterBinding>(this, &LobbyHandler::onDeleteCharacterResult, input);
 	}
