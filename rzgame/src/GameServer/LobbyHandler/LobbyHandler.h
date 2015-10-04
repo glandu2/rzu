@@ -5,6 +5,7 @@
 #include "../ConnectionHandler.h"
 #include "Database/DbQueryJobCallback.h"
 #include "../Model/CharacterLight.h"
+#include "../Model/CharacterWearInfo.h"
 #include "CheckCharacterName.h"
 
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
@@ -27,6 +28,7 @@ public:
 protected:
 	void onCharacterListQuery(const TS_CS_CHARACTER_LIST* packet);
 	void onCharacterListResult(DbQueryJob<CharacterLightBinding>* query);
+	void onCharacterWearInfoResult(DbQueryJob<CharacterWearInfoBinding>* query);
 
 	void onCheckCharacterName(const TS_CS_CHECK_CHARACTER_NAME* packet);
 	void onCheckCharacterNameExistsResult(DbQueryJob<CheckCharacterNameBinding>* query);

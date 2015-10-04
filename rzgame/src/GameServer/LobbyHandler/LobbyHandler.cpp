@@ -38,54 +38,67 @@ void LobbyHandler::onCharacterListQuery(const TS_CS_CHARACTER_LIST*) {
 
 	characterListQuery.executeDbQuery<CharacterLightBinding>(this, &LobbyHandler::onCharacterListResult, input);
 }
-
 void LobbyHandler::onCharacterListResult(DbQueryJob<CharacterLightBinding> *query) {
-	TS_SC_CHARACTER_LIST characterList;
-
 	auto& results = query->getResults();
+	characters = std::move(results);
 
-	characterList.characters.reserve(results.size());
+	CharacterWearInfoBinding::Input input;
+	input.account_id = session->getAccountId();
+	characterListQuery.executeDbQuery<CharacterWearInfoBinding>(this, &LobbyHandler::onCharacterWearInfoResult, input);
+}
 
-	auto it = results.begin();
-	auto itEnd = results.end();
+void LobbyHandler::onCharacterWearInfoResult(DbQueryJob<CharacterWearInfoBinding>* query) {
+	TS_SC_CHARACTER_LIST characterList;
+	characterList.characters.reserve(characters.size());
+
+	auto& wearInfoResults = query->getResults();
+
+	auto it = characters.begin();
+	auto itEnd = characters.end();
 	for(; it != itEnd; ++it) {
-		LOBBY_CHARACTER_INFO characterInfo;
-		const CharacterLightBinding::Output* dbLine = it->get();
+		LOBBY_CHARACTER_INFO characterInfo = {0};
+		const CharacterLight* dbCharacterInfo = it->get();
 
-		characterInfo.sex = dbLine->sex;
-		characterInfo.race = dbLine->race;
-		memcpy(characterInfo.model_id, dbLine->model, sizeof(characterInfo.model_id));
-		characterInfo.hair_color_index = dbLine->hair_color_index;
-		characterInfo.hair_color_rgb = dbLine->hair_color_rgb;
-		characterInfo.hide_equip_flag = dbLine->hide_equip_flag;
-		characterInfo.texture_id = dbLine->texture_id;
-		characterInfo.level = dbLine->lv;
-		characterInfo.job = dbLine->job;
-		characterInfo.job_level = dbLine->jlv;
-		characterInfo.exp_percentage = dbLine->exp;
-		characterInfo.hp = dbLine->hp;
-		characterInfo.mp = dbLine->mp;
-		characterInfo.permission = dbLine->permission;
+		characterInfo.sex = dbCharacterInfo->sex;
+		characterInfo.race = dbCharacterInfo->race;
+		memcpy(characterInfo.model_id, dbCharacterInfo->model, sizeof(characterInfo.model_id));
+		characterInfo.hair_color_index = dbCharacterInfo->hair_color_index;
+		characterInfo.hair_color_rgb = dbCharacterInfo->hair_color_rgb;
+		characterInfo.hide_equip_flag = dbCharacterInfo->hide_equip_flag;
+		characterInfo.texture_id = dbCharacterInfo->texture_id;
+		characterInfo.level = dbCharacterInfo->lv;
+		characterInfo.job = dbCharacterInfo->job;
+		characterInfo.job_level = dbCharacterInfo->jlv;
+		characterInfo.exp_percentage = dbCharacterInfo->exp;
+		characterInfo.hp = dbCharacterInfo->hp;
+		characterInfo.mp = dbCharacterInfo->mp;
+		characterInfo.permission = dbCharacterInfo->permission;
 		characterInfo.is_banned = false;
-		characterInfo.name = dbLine->name;
-		characterInfo.skin_color = dbLine->skin_color;
+		characterInfo.name = dbCharacterInfo->name;
+		characterInfo.skin_color = dbCharacterInfo->skin_color;
 		sprintf(characterInfo.szCreateTime, "%04d-%02d-%02d %02d:%02d:%02d",
-				dbLine->create_time.year,
-				dbLine->create_time.month,
-				dbLine->create_time.day,
-				dbLine->create_time.hour,
-				dbLine->create_time.minute,
-				dbLine->create_time.second);
+				dbCharacterInfo->create_time.year,
+				dbCharacterInfo->create_time.month,
+				dbCharacterInfo->create_time.day,
+				dbCharacterInfo->create_time.hour,
+				dbCharacterInfo->create_time.minute,
+				dbCharacterInfo->create_time.second);
 		strcpy(characterInfo.szDeleteTime, "9999-12-31 00:00:00");
 
-		memset(&characterInfo.wear_info, 0, sizeof(characterInfo.wear_info));
-		memset(&characterInfo.wear_info_2, 0, sizeof(characterInfo.wear_info_2));
-		memset(&characterInfo.wear_item_enhance_info, 0, sizeof(characterInfo.wear_item_enhance_info));
-		memset(&characterInfo.wear_item_enhance_info_2, 0, sizeof(characterInfo.wear_item_enhance_info_2));
-		memset(&characterInfo.wear_item_level_info, 0, sizeof(characterInfo.wear_item_level_info));
-		memset(&characterInfo.wear_item_level_info_2, 0, sizeof(characterInfo.wear_item_level_info_2));
-		memset(&characterInfo.wear_item_elemental_type, 0, sizeof(characterInfo.wear_item_elemental_type));
-		memset(&characterInfo.wear_appearance_code, 0, sizeof(characterInfo.wear_appearance_code));
+
+		auto it = wearInfoResults.begin();
+		auto itEnd = wearInfoResults.end();
+		for(; it != itEnd; ++it) {
+			const CharacterWearInfo* dbWearInfo = it->get();
+
+			if(dbCharacterInfo->sid == dbWearInfo->character_sid && dbWearInfo->wear_info < sizeof(characterInfo.wear_info) / sizeof(characterInfo.wear_info[0])) {
+				characterInfo.wear_info[dbWearInfo->wear_info] = dbWearInfo->code;
+				characterInfo.wear_item_level_info[dbWearInfo->wear_info] = dbWearInfo->level;
+				characterInfo.wear_item_enhance_info[dbWearInfo->wear_info] = dbWearInfo->enhance;
+				characterInfo.wear_item_elemental_type[dbWearInfo->wear_info] = dbWearInfo->elemental_effect_type;
+				characterInfo.wear_appearance_code[dbWearInfo->wear_info] = dbWearInfo->appearance_code;
+			}
+		}
 
 		characterList.characters.push_back(characterInfo);
 	}
@@ -97,7 +110,6 @@ void LobbyHandler::onCharacterListResult(DbQueryJob<CharacterLightBinding> *quer
 
 	log(LL_Debug, "Account %s has %d characters\n", session->getAccount().c_str(), (int)characterList.characters.size());
 
-	characters = std::move(results);
 }
 
 void LobbyHandler::onCheckCharacterName(const TS_CS_CHECK_CHARACTER_NAME *packet) {
