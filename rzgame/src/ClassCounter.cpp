@@ -17,3 +17,13 @@ DECLARE_CLASSCOUNT_STATIC(GameServer::ReferenceDataMgr)
 
 #include "GameServer/ReferenceData/BannedWords.h"
 DECLARE_CLASSCOUNT_STATIC(GameServer::BannedWordsBinding)
+
+#include "GameServer/ReferenceData/ObjectSidState.h"
+DECLARE_CLASSCOUNT_STATIC(GameServer::AwakenOptionSidBinding)
+DECLARE_CLASSCOUNT_STATIC(GameServer::FarmSidBinding)
+DECLARE_CLASSCOUNT_STATIC(GameServer::ItemSidBinding)
+DECLARE_CLASSCOUNT_STATIC(GameServer::PetSidBinding)
+DECLARE_CLASSCOUNT_STATIC(GameServer::SkillSidBinding)
+DECLARE_CLASSCOUNT_STATIC(GameServer::SummonSidBinding)
+DECLARE_CLASSCOUNT_STATIC(GameServer::TitleSidBinding)
+DECLARE_CLASSCOUNT_STATIC(GameServer::TitleConditionSidBinding)

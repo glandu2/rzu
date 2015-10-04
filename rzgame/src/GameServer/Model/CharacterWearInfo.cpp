@@ -5,7 +5,7 @@ DECLARE_DB_BINDING(GameServer::CharacterWearInfoBinding, "character_wear_info");
 template<> void DbQueryJob<GameServer::CharacterWearInfoBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.telecaster.connectionString,
-				  "SELECT i.owner_id, i.wear_info, i.code, i.enhance, i.level, i.elemental_effect_type, i.appearance_code "
+				  "SELECT owner_id, wear_info, code, enhance, level, elemental_effect_type, appearance_code "
 				  "FROM Item i INNER JOIN Character c ON c.sid = i.owner_id "
 				  "WHERE c.account_id = ? AND i.account_id = 0 AND i.summon_id = 0 AND i.auction_id = 0 AND i.keeping_id = 0 AND i.wear_info >= 0",
 				  DbQueryBinding::EM_MultiRows);

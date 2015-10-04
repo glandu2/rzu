@@ -8,13 +8,15 @@ namespace GameServer {
 
 class CharacterWearInfo {
 public:
-	 uint32_t character_sid;
-	 uint32_t wear_info;
+	 uint64_t character_sid;
+	 int32_t wear_info;
 	 uint32_t code;
 	 uint32_t enhance;
 	 uint32_t level;
 	 uint8_t elemental_effect_type;
 	 uint32_t appearance_code;
+
+	 CharacterWearInfo() { wear_info = -1; }
 };
 
 struct CharacterWearInfoBinding {

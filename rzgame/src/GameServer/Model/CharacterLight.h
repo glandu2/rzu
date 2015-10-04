@@ -8,7 +8,7 @@ namespace GameServer {
 
 class CharacterLight {
 public:
-	uint32_t sid;
+	uint64_t sid;
 	std::string name;
 	uint32_t race;
 	uint32_t sex;
@@ -25,10 +25,10 @@ public:
 	uint32_t hair_color_rgb;
 	uint32_t hide_equip_flag;
 	uint32_t texture_id;
-	SQL_TIMESTAMP_STRUCT create_time;
-	SQL_TIMESTAMP_STRUCT login_time;
+	char create_time[30];
+	char login_time[30];
 	uint32_t login_count;
-	SQL_TIMESTAMP_STRUCT logout_time;
+	char logout_time[30];
 	uint32_t play_time;
 };
 
