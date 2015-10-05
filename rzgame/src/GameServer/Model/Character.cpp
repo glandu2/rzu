@@ -1,7 +1,6 @@
 #include "Character.h"
 #include "../../GlobalConfig.h"
 
-DECLARE_DB_BINDING(GameServer::CharacterDetailsBinding, "character_data");
 template<> void DbQueryJob<GameServer::CharacterDetailsBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.telecaster.connectionString,
@@ -86,3 +85,4 @@ template<> void DbQueryJob<GameServer::CharacterDetailsBinding>::init(DbConnecti
 	addColumn("flag_list", &OutputType::flag_list);
 	addColumn("client_info", &OutputType::client_info);
 }
+DECLARE_DB_BINDING(GameServer::CharacterDetailsBinding, "character_data");

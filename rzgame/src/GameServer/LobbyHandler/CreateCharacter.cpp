@@ -2,7 +2,6 @@
 #include "../../GlobalConfig.h"
 #include "Database/DbQueryJob.h"
 
-DECLARE_DB_BINDING(GameServer::CreateCharacterBinding, "check_character_name");
 template<> void DbQueryJob<GameServer::CreateCharacterBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.telecaster.connectionString,
@@ -43,3 +42,4 @@ template<> void DbQueryJob<GameServer::CreateCharacterBinding>::init(DbConnectio
 	addParam("default_bag_sid", &InputType::default_bag_sid);
 	addParam("default_bag_code", &InputType::default_bag_code);
 }
+DECLARE_DB_BINDING(GameServer::CreateCharacterBinding, "check_character_name");
