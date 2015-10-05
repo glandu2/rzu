@@ -20,6 +20,7 @@ void BannedWordsBinding::load() {
 
 void BannedWordsBinding::onDataLoaded(DbQueryJob<BannedWordsBinding>* query) {
 	auto& results = query->getResults();
+	data.clear();
 	data.rehash(results.size());
 
 	auto it = results.begin();

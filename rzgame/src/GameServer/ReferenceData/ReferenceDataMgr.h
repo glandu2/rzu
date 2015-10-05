@@ -17,6 +17,8 @@ public:
 	static ReferenceDataMgr* get();
 	static void load(OnReferenceDataLoaded callback, void* data);
 
+	ReferenceDataMgr();
+
 	bool isWordBanned(const std::string& word);
 	uint64_t allocateAwakenOptionSid();
 	uint64_t allocateFarmSid();
@@ -32,11 +34,19 @@ protected:
 	void signalDataLoaded(RefDataLoader* loader);
 
 	void declareLoaderAndLoad(RefDataLoader& loader);
-private:
-	OnReferenceDataLoaded loadedCallback;
-	void* data;
 
-	std::vector<RefDataLoader*> pendingLoaders;
+	static void commandReload(IWritableConsole* console, const std::vector<std::string>& args);
+
+private:
+	struct LoadingState {
+		bool inProgress;
+		OnReferenceDataLoaded loadedCallback;
+		void* data;
+		size_t remaining;
+	};
+	LoadingState state;
+
+	std::vector<RefDataLoader*> loaders;
 
 	BannedWordsBinding banWordResource;
 	AwakenOptionSidBinding awakenOptionSidBinding;

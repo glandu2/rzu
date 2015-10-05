@@ -17,6 +17,8 @@ public:
 		uint64_t max_sid;
 	};
 
+	ObjectSidStateBinding() : loaded(false), next_sid(0) {}
+
 	void load();
 	uint64_t getNextSid() { return next_sid++; }
 
@@ -25,12 +27,18 @@ protected:
 
 private:
 	DbQueryJobRef dbQuery;
+	bool loaded;
 	uint64_t next_sid;
 };
 
 template<class T>
 void ObjectSidStateBinding<T>::load() {
-	dbQuery.executeDbQuery<T>(this, &ObjectSidStateBinding::onDataLoaded, ObjectSidStateBinding::Input());
+	if(loaded == false) {
+		loaded = true;
+		dbQuery.executeDbQuery<T>(this, &ObjectSidStateBinding::onDataLoaded, ObjectSidStateBinding::Input());
+	} else {
+		dataLoaded();
+	}
 }
 
 template<class T>
