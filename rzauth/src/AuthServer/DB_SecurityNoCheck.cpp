@@ -10,7 +10,6 @@
 #include "Database/DbConnectionPool.h"
 #include "GameServerSession.h"
 
-DECLARE_DB_BINDING(AuthServer::DB_SecurityNoCheckData, "db_securitynocheck");
 template<> void DbQueryJob<AuthServer::DB_SecurityNoCheckData>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->auth.db.connectionString,
@@ -20,6 +19,7 @@ template<> void DbQueryJob<AuthServer::DB_SecurityNoCheckData>::init(DbConnectio
 	addParam("account", &InputType::account);
 	addParam("securityNoMd5String", &InputType::securityNoMd5String);
 }
+DECLARE_DB_BINDING(AuthServer::DB_SecurityNoCheckData, "db_securitynocheck");
 
 namespace AuthServer {
 

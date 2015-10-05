@@ -6,7 +6,6 @@
 #include <openssl/err.h>
 #include "Cipher/DesPasswordCipher.h"
 
-DECLARE_DB_BINDING(AuthServer::DB_AccountData, "db_account");
 template<> void DbQueryJob<AuthServer::DB_AccountData>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->auth.db.connectionString,
@@ -27,6 +26,7 @@ template<> void DbQueryJob<AuthServer::DB_AccountData>::init(DbConnectionPool* d
 	addColumn("server_idx_offset", &OutputType::server_idx_offset);
 	addColumn("block", &OutputType::block);
 }
+DECLARE_DB_BINDING(AuthServer::DB_AccountData, "db_account");
 
 namespace AuthServer {
 
