@@ -63,11 +63,11 @@ void GameSession::onUpdatePacketExpired(uv_timer_t *timer) {
 void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 	switch(packet->id) {
 		case TS_SC_CHARACTER_LIST::packetID:
-			packet->process(this, &GameSession::onCharacterList, EPIC_9_1);
+			packet->process(this, &GameSession::onCharacterList, EPIC_LATEST);
 			break;
 
 		case TS_SC_LOGIN_RESULT::packetID:
-			packet->process(this, &GameSession::onCharacterLoginResult, EPIC_9_1);
+			packet->process(this, &GameSession::onCharacterLoginResult, EPIC_LATEST);
 			break;
 
 		case TS_SC_ENTER::packetID: {
@@ -112,7 +112,6 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	TS_TIMESYNC timeSyncPkt;
 	bool characterInList = false;
 
-	TS_MESSAGE::initMessage<TS_CS_LOGIN>(&loginPkt);
 	TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
 
 	log(LL_Debug, "Character list: \n");
@@ -129,9 +128,9 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 		}
 	}
 
-	strcpy(loginPkt.name, playername.c_str());
+	loginPkt.name = playername;
 	loginPkt.race = 0;
-	sendPacket(&loginPkt);
+	sendPacket(loginPkt, EPIC_LATEST);
 
 	timeSyncPkt.time = 0;
 	sendPacket(&timeSyncPkt);
