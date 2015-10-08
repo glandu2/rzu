@@ -1,7 +1,6 @@
 #include "CharacterWearInfo.h"
 #include "../../GlobalConfig.h"
 
-DECLARE_DB_BINDING(GameServer::CharacterWearInfoBinding, "character_wear_info");
 template<> void DbQueryJob<GameServer::CharacterWearInfoBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.telecaster.connectionString,
@@ -20,3 +19,4 @@ template<> void DbQueryJob<GameServer::CharacterWearInfoBinding>::init(DbConnect
 	addColumn("elemental_effect_type", &OutputType::elemental_effect_type);
 	addColumn("appearance_code", &OutputType::appearance_code);
 }
+DECLARE_DB_BINDING(GameServer::CharacterWearInfoBinding, "character_wear_info");

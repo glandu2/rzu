@@ -2,7 +2,6 @@
 #include "../../GlobalConfig.h"
 #include "Database/DbQueryJob.h"
 
-DECLARE_DB_BINDING(GameServer::CheckCharacterNameBinding, "check_character_name");
 template<> void DbQueryJob<GameServer::CheckCharacterNameBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.telecaster.connectionString,
@@ -11,3 +10,4 @@ template<> void DbQueryJob<GameServer::CheckCharacterNameBinding>::init(DbConnec
 
 	addParam("name", &InputType::character_name);
 }
+DECLARE_DB_BINDING(GameServer::CheckCharacterNameBinding, "check_character_name");

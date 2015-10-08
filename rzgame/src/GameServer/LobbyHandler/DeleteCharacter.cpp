@@ -2,7 +2,6 @@
 #include "../../GlobalConfig.h"
 #include "Database/DbQueryJob.h"
 
-DECLARE_DB_BINDING(GameServer::DeleteCharacterBinding, "delete_character");
 template<> void DbQueryJob<GameServer::DeleteCharacterBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.telecaster.connectionString,
@@ -12,3 +11,4 @@ template<> void DbQueryJob<GameServer::DeleteCharacterBinding>::init(DbConnectio
 	addParam("name", &InputType::character_name);
 	addOutputParam("sid", &InputType::out_character_sid);
 }
+DECLARE_DB_BINDING(GameServer::DeleteCharacterBinding, "delete_character");

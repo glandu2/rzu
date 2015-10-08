@@ -1,6 +1,7 @@
 #include "ReferenceDataMgr.h"
 #include "RefDataLoader.h"
 #include <algorithm>
+#include "Console/ConsoleCommands.h"
 
 namespace GameServer {
 
@@ -9,20 +10,40 @@ ReferenceDataMgr *ReferenceDataMgr::get() {
 	return &referenceData;
 }
 
+ReferenceDataMgr::ReferenceDataMgr() {
+	loaders.push_back(&banWordResource);
+	loaders.push_back(&awakenOptionSidBinding);
+	loaders.push_back(&farmSidBinding);
+	loaders.push_back(&itemSidBinding);
+	loaders.push_back(&petSidBinding);
+	loaders.push_back(&skillSidBinding);
+	loaders.push_back(&summonSidBinding);
+	loaders.push_back(&titleSidBinding);
+	loaders.push_back(&titleConditionSidBinding);
+
+	ConsoleCommands::get()->addCommand("game.reload", "reload", 0, &commandReload,
+									   "Reload Arcadia",
+									   "reload : reload reference data from arcadia");
+}
+
 void ReferenceDataMgr::load(OnReferenceDataLoaded callback, void* data) {
 	ReferenceDataMgr* ref = get();
-	ref->loadedCallback = callback;
-	ref->data = data;
 
-	ref->declareLoaderAndLoad(ref->banWordResource);
-	ref->declareLoaderAndLoad(ref->awakenOptionSidBinding);
-	ref->declareLoaderAndLoad(ref->farmSidBinding);
-	ref->declareLoaderAndLoad(ref->itemSidBinding);
-	ref->declareLoaderAndLoad(ref->petSidBinding);
-	ref->declareLoaderAndLoad(ref->skillSidBinding);
-	ref->declareLoaderAndLoad(ref->summonSidBinding);
-	ref->declareLoaderAndLoad(ref->titleSidBinding);
-	ref->declareLoaderAndLoad(ref->titleConditionSidBinding);
+	if(ref->state.inProgress) {
+		ref->log(LL_Error, "Load request while already loading data\n");
+	} else {
+		ref->state.inProgress = true;
+		ref->state.loadedCallback = callback;
+		ref->state.data = data;
+		ref->state.remaining = ref->loaders.size();
+
+		auto it = ref->loaders.begin();
+		auto itEnd = ref->loaders.end();
+		for(; it != itEnd; ++it) {
+			RefDataLoader* loaderCallback = *it;
+			loaderCallback->loadData(ref);
+		}
+	}
 }
 
 bool ReferenceDataMgr::isWordBanned(const std::string &word) {
@@ -63,20 +84,17 @@ uint64_t ReferenceDataMgr::allocateTitleConditionSid() {
 }
 
 void ReferenceDataMgr::signalDataLoaded(RefDataLoader *loader) {
-	auto it = std::find(pendingLoaders.begin(), pendingLoaders.end(), loader);
-	if(it == pendingLoaders.end()) {
-		log(LL_Fatal, "Can't find loader %s in pending loaders\n", loader->getObjectName());
-	} else {
-		pendingLoaders.erase(it);
-	}
+	state.remaining--;
 
-	if(pendingLoaders.empty())
-		(*loadedCallback)(data);
+	if(state.remaining <= 0) {
+		state.inProgress = false;
+		if(state.loadedCallback)
+			(*state.loadedCallback)(state.data);
+	}
 }
 
-void ReferenceDataMgr::declareLoaderAndLoad(RefDataLoader& loader) {
-	pendingLoaders.push_back(&loader);
-	loader.loadData(this);
+void ReferenceDataMgr::commandReload(IWritableConsole *console, const std::vector<std::string> &args) {
+	ReferenceDataMgr::get()->load(nullptr, nullptr);
 }
 
 }

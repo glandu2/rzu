@@ -4,6 +4,8 @@
 #include "Core/CharsetConverter.h"
 #include "../ReferenceData/ReferenceDataMgr.h"
 
+#include "../Model/Character.h"
+
 #include "GameClient/TS_SC_CHARACTER_LIST.h"
 
 namespace GameServer {
@@ -16,8 +18,8 @@ void LobbyHandler::onPacketReceived(const TS_MESSAGE *packet) {
 			onCharacterListQuery(static_cast<const TS_CS_CHARACTER_LIST*>(packet));
 			break;
 
-		case TS_CS_LOGIN::packetID:
-			onCharacterLogin(static_cast<const TS_CS_LOGIN*>(packet));
+		case_packet_is(TS_CS_LOGIN)
+			packet->process(this, &LobbyHandler::onCharacterLogin, session->getVersion());
 			break;
 
 		case TS_CS_CHECK_CHARACTER_NAME::packetID:
@@ -274,7 +276,12 @@ void LobbyHandler::onCharacterLogin(const TS_CS_LOGIN *packet) {
 		}
 	}
 
-	session->lobbyExitResult(std::move(selectCharacter));
+	if(Character::getCharacterBySid(selectCharacter.get()->sid) == nullptr) {
+		session->lobbyExitResult(TS_RESULT_SUCCESS, std::move(selectCharacter));
+	} else {
+		log(LL_Warning, "Character %s of account %s is already logged in\n", selectCharacter.get()->name.c_str(), session->getAccount().c_str());
+		session->lobbyExitResult(TS_RESULT_ALREADY_EXIST, std::unique_ptr<CharacterLight>());
+	}
 }
 
 bool LobbyHandler::checkTextAgainstEncoding(const std::string& text) {

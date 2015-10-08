@@ -2,7 +2,6 @@
 #include "../../GlobalConfig.h"
 #include <iterator>
 
-DECLARE_DB_BINDING(GameServer::BannedWordsBinding, "banwords");
 template<> void DbQueryJob<GameServer::BannedWordsBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.arcadia.connectionString,
@@ -11,6 +10,7 @@ template<> void DbQueryJob<GameServer::BannedWordsBinding>::init(DbConnectionPoo
 
 	addColumn("string", &OutputType::word);
 }
+DECLARE_DB_BINDING(GameServer::BannedWordsBinding, "banwords");
 
 namespace GameServer {
 
@@ -20,6 +20,7 @@ void BannedWordsBinding::load() {
 
 void BannedWordsBinding::onDataLoaded(DbQueryJob<BannedWordsBinding>* query) {
 	auto& results = query->getResults();
+	data.clear();
 	data.rehash(results.size());
 
 	auto it = results.begin();

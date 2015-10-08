@@ -9,7 +9,6 @@
 #include "../GlobalConfig.h"
 #include "Database/DbConnectionPool.h"
 
-DECLARE_DB_BINDING(AuthServer::DB_UpdateLastServerIdx, "db_updatelastserveridx");
 template<> void DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->auth.db.connectionString,
@@ -19,3 +18,4 @@ template<> void DbQueryJob<AuthServer::DB_UpdateLastServerIdx>::init(DbConnectio
 	addParam("last_login_server_idx", &InputType::lastLoginServerIdx);
 	addParam("account_id", &InputType::accountId);
 }
+DECLARE_DB_BINDING(AuthServer::DB_UpdateLastServerIdx, "db_updatelastserveridx");

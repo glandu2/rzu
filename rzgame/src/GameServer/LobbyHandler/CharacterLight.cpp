@@ -1,7 +1,6 @@
 #include "CharacterLight.h"
 #include "../../GlobalConfig.h"
 
-DECLARE_DB_BINDING(GameServer::CharacterLightBinding, "character_list");
 template<> void DbQueryJob<GameServer::CharacterLightBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.telecaster.connectionString,
@@ -38,3 +37,4 @@ template<> void DbQueryJob<GameServer::CharacterLightBinding>::init(DbConnection
 	addColumn("logout_time", &OutputType::logout_time);
 	addColumn("play_time", &OutputType::play_time);
 }
+DECLARE_DB_BINDING(GameServer::CharacterLightBinding, "character_list");

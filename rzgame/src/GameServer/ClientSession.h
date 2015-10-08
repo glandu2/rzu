@@ -29,7 +29,7 @@ public:
 	int getVersion() { return version; }
 
 	void onAccountLoginResult(uint16_t result, std::string account, uint32_t accountId, char nPCBangUser, uint32_t nEventCode, uint32_t nAge, uint32_t nContinuousPlayTime, uint32_t nContinuousLogoutTime);
-	void lobbyExitResult(std::unique_ptr<CharacterLight> characterData);
+	void lobbyExitResult(TS_ResultCode result, std::unique_ptr<CharacterLight> characterData);
 	void playerLoadingResult(TS_ResultCode result);
 
 

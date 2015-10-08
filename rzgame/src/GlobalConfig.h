@@ -50,6 +50,7 @@ struct GlobalConfig {
 	struct GameConfig {
 		DbConfig arcadia; // Reference data
 		DbConfig telecaster; // Player data
+		cval<std::string> &urlList;
 
 		struct ClientsConfig {
 			cval<std::string> &listenIp;
@@ -68,7 +69,8 @@ struct GlobalConfig {
 
 		GameConfig() :
 			arcadia("game.db.arcadia", "Arcadia"),
-			telecaster("game.db.telecaster", "Telecaster")
+			telecaster("game.db.telecaster", "Telecaster"),
+			urlList(CFG_CREATE("game.url_list", "guild_icon_upload.ip|127.0.0.1|guild_icon_upload.port|4617|guild_test_download.url|upload/|web_download|127.0.0.1:80"))
 		{}
 	} game;
 
