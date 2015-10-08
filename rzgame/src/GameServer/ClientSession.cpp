@@ -84,14 +84,14 @@ void ClientSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH* packet) {
 	}
 }
 
-void ClientSession::lobbyExitResult(std::unique_ptr<CharacterLight> characterData) {
-	if(!characterData) {
+void ClientSession::lobbyExitResult(TS_ResultCode result, std::unique_ptr<CharacterLight> characterData) {
+	if(!characterData || result != TS_RESULT_SUCCESS) {
 		TS_SC_LOGIN_RESULT loginResult = {0};
-		loginResult.result = TS_RESULT_NOT_EXIST;
+		loginResult.result = result;
 		sendPacket(loginResult, getVersion());
 		abortSession();
 	} else {
-		setConnectionHandler(new PlayerLoadingHandler(this, std::move(characterData)));
+		setConnectionHandler(new PlayerLoadingHandler(this, characterData->sid));
 	}
 }
 

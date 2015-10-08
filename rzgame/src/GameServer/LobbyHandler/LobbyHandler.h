@@ -4,8 +4,8 @@
 #include "Core/Object.h"
 #include "../ConnectionHandler.h"
 #include "Database/DbQueryJobCallback.h"
-#include "../Model/CharacterLight.h"
-#include "../Model/CharacterWearInfo.h"
+#include "CharacterLight.h"
+#include "CharacterWearInfo.h"
 
 #include "CheckCharacterName.h"
 #include "CreateCharacter.h"

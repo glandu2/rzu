@@ -1,13 +1,55 @@
 #include "Character.h"
 #include "../../GlobalConfig.h"
 
-template<> void DbQueryJob<GameServer::CharacterDetailsBinding>::init(DbConnectionPool* dbConnectionPool) {
+namespace GameServer {
+
+std::unordered_map<uint64_t, std::unique_ptr<Character>> Character::characters;
+
+Character *Character::getCharacterBySid(uint64_t sid) {
+	auto it = characters.find(sid);
+	if(it == characters.end())
+		return nullptr;
+	else
+		return it->second.get();
+}
+
+}
+
+template<> void DbQueryJob<GameServer::CharacterBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
 				  CONFIG_GET()->game.telecaster.connectionString,
 				  "select * from character where sid = ?",
 				  DbQueryBinding::EM_OneRow);
 
 	addParam("sid", &InputType::sid);
+
+	addColumn("sid", &OutputType::sid);
+	addColumn("name", &OutputType::name);
+	addColumn("race", &OutputType::race);
+	addColumn("sex", &OutputType::sex);
+	addColumn("lv", &OutputType::lv);
+	addColumn("jlv", &OutputType::jlv);
+	addColumn("exp", &OutputType::exp);
+	addColumn("hp", &OutputType::hp);
+	addColumn("mp", &OutputType::mp);
+	addColumn("job", &OutputType::job);
+	addColumn("permission", &OutputType::permission);
+	addColumn("skin_color", &OutputType::skin_color);
+	addColumn("model_00", &OutputType::model, 0);
+	addColumn("model_01", &OutputType::model, 1);
+	addColumn("model_02", &OutputType::model, 2);
+	addColumn("model_03", &OutputType::model, 3);
+	addColumn("model_04", &OutputType::model, 4);
+	addColumn("hair_color_index", &OutputType::hair_color_index);
+	addColumn("hair_color_rgb", &OutputType::hair_color_rgb);
+	addColumn("hide_equip_flag", &OutputType::hide_equip_flag);
+	addColumn("texture_id", &OutputType::texture_id);
+	addColumn("permission", &OutputType::permission);
+	addColumn("create_time", &OutputType::create_time);
+	addColumn("login_time", &OutputType::login_time);
+	addColumn("login_count", &OutputType::login_count);
+	addColumn("logout_time", &OutputType::logout_time);
+	addColumn("play_time", &OutputType::play_time);
 
 	addColumn("party_id", &OutputType::party_id);
 	addColumn("slot", &OutputType::slot);
@@ -25,12 +67,12 @@ template<> void DbQueryJob<GameServer::CharacterDetailsBinding>::init(DbConnecti
 	addColumn("jp", &OutputType::jp);
 	addColumn("total_jp", &OutputType::total_jp);
 	addColumn("talent_point", &OutputType::talent_point);
-	addColumn("job_0", &OutputType::job, 0);
-	addColumn("job_1", &OutputType::job, 1);
-	addColumn("job_2", &OutputType::job, 2);
-	addColumn("jlv_0", &OutputType::jlv, 0);
-	addColumn("jlv_1", &OutputType::jlv, 1);
-	addColumn("jlv_2", &OutputType::jlv, 2);
+	addColumn("job_0", &OutputType::job_array, 0);
+	addColumn("job_1", &OutputType::job_array, 1);
+	addColumn("job_2", &OutputType::job_array, 2);
+	addColumn("jlv_0", &OutputType::jlv_array, 0);
+	addColumn("jlv_1", &OutputType::jlv_array, 1);
+	addColumn("jlv_2", &OutputType::jlv_array, 2);
 	addColumn("immoral_point", &OutputType::immoral_point);
 	addColumn("cha", &OutputType::cha);
 	addColumn("pkc", &OutputType::pkc);
@@ -85,4 +127,4 @@ template<> void DbQueryJob<GameServer::CharacterDetailsBinding>::init(DbConnecti
 	addColumn("flag_list", &OutputType::flag_list);
 	addColumn("client_info", &OutputType::client_info);
 }
-DECLARE_DB_BINDING(GameServer::CharacterDetailsBinding, "character_data");
+DECLARE_DB_BINDING(GameServer::CharacterBinding, "character_data");

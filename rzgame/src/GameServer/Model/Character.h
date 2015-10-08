@@ -1,15 +1,44 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include "CharacterLight.h"
+#include "Database/DbQueryJob.h"
+#include <unordered_map>
 
 namespace GameServer {
 
-class CharacterDetails {
+class Character {
+private:
+	static std::unordered_map<uint64_t, std::unique_ptr<Character>> characters;
+
 public:
+	static Character* getCharacterBySid(uint64_t sid);
+
+public:
+	uint64_t sid;
+	std::string name;
+	uint32_t race;
+	uint32_t sex;
+	uint32_t lv;
+	uint32_t jlv;
+	uint64_t exp;
+	uint32_t hp;
+	uint32_t mp;
+	uint32_t job;
+	uint32_t permission;
+	uint32_t skin_color;
+	uint32_t model[5];
+	uint32_t hair_color_index;
+	uint32_t hair_color_rgb;
+	uint32_t hide_equip_flag;
+	uint32_t texture_id;
+	char create_time[30];
+	char login_time[30];
+	uint32_t login_count;
+	char logout_time[30];
+	uint32_t play_time;
+
 	int32_t party_id;
 	int32_t slot;
-	int32_t permission;
 	int32_t x;
 	int32_t y;
 	int32_t z;
@@ -23,8 +52,8 @@ public:
 	int64_t jp;
 	int64_t total_jp;
 	int32_t talent_point;
-	int32_t job[3];
-	int32_t jlv[3];
+	int32_t job_array[3];
+	int32_t jlv_array[3];
 	float immoral_point;
 	int32_t cha;
 	int32_t pkc;
@@ -62,12 +91,12 @@ public:
 };
 
 // binding with character table
-struct CharacterDetailsBinding {
+struct CharacterBinding {
 	struct Input {
-		uint32_t sid;
+		uint64_t sid;
 	};
 
-	typedef CharacterDetails Output;
+	typedef Character Output;
 };
 
 }

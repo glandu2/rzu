@@ -12,9 +12,6 @@
 #include "GameServer/ReferenceData/ReferenceDataMgr.h"
 #include "GameServer/AuthServerSession.h"
 #include "GameServer/ClientSession.h"
-#include "GameServer/Model/CharacterLight.h"
-#include "GameServer/Model/Character.h"
-#include "GameServer/ReferenceData/BannedWords.h"
 
 #include "Console/ConsoleSession.h"
 
