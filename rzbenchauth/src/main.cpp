@@ -60,7 +60,7 @@ void benchmarkAuthentication() {
 	config.connectionTargetCount = CFG_GET("targetcount")->getInt();
 	config.delay = CFG_GET("delay")->getInt();
 	config.method = CFG_GET("use_rsa")->getBool()? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES;
-	config.version = "200701120";
+	config.version = "205001120";
 
 	if(count > config.connectionTargetCount)
 		count = config.connectionTargetCount;
