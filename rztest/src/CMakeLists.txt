@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.12)
 
 file(GLOB_RECURSE SOURCE_FILES *.cpp *.h)
 
@@ -7,5 +7,12 @@ if( versioncmakefound )
     add_git_version_info(${TARGET_NAME}_GitVersion SOURCE_FILES)
 endif()
 
-set(LIBS rzu gtest)
-add_lib(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")
+add_lib(${TARGET_NAME} "${SOURCE_FILES}" rzu gtest)
+target_include_directories(${TARGET_NAME} PUBLIC .)
+
+if(BUILD_SHARED_LIBS)
+  target_compile_definitions(${TARGET_NAME}
+    PRIVATE BUILDING_LIBRZTEST
+    INTERFACE USING_RZTEST_SHARED
+  )
+endif()
