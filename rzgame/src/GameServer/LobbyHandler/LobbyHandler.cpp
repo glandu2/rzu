@@ -100,7 +100,7 @@ void LobbyHandler::onCharacterWearInfoResult(DbQueryJob<CharacterWearInfoBinding
 		for(; wearIt != wearItEnd; ++wearIt) {
 			const CharacterWearInfo* dbWearInfo = wearIt->get();
 
-			if(dbCharacterInfo->sid == dbWearInfo->character_sid && dbWearInfo->wear_info < sizeof(characterInfo.wear_info) / sizeof(characterInfo.wear_info[0])) {
+			if(dbCharacterInfo->sid == dbWearInfo->character_sid && dbWearInfo->wear_info >= 0 && (size_t)dbWearInfo->wear_info < sizeof(characterInfo.wear_info) / sizeof(characterInfo.wear_info[0])) {
 				characterInfo.wear_info[dbWearInfo->wear_info] = dbWearInfo->code;
 				characterInfo.wear_item_level_info[dbWearInfo->wear_info] = dbWearInfo->level;
 				characterInfo.wear_item_enhance_info[dbWearInfo->wear_info] = dbWearInfo->enhance;
