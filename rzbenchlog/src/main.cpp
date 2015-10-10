@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
 	session.connect(ip.c_str(), port);
 
-	mainLogger.log(Log::LL_Info, "main", 4, "Starting benchmark\n");
+	mainLogger.log(Object::LL_Info, "main", 4, "Starting benchmark\n");
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
