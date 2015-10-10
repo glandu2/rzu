@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 file(GLOB SOURCE_FILES *.cpp *.h)
 
@@ -7,5 +7,4 @@ if( versioncmakefound )
     add_git_version_info(${TARGET_NAME}_GitVersion SOURCE_FILES)
 endif()
 
-set(LIBS rzu)
-add_exe(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")
+add_exe(${TARGET_NAME} "${SOURCE_FILES}" rzu)
