@@ -229,7 +229,7 @@ void LobbyHandler::onCreateCharacterResult(DbQueryJob<CreateCharacterBinding> *q
 		log(LL_Warning, "Create character \"%s\" failed for account %s\n", query->getInput()->name.c_str(), query->getInput()->account_name);
 		session->sendResult(TS_CS_CREATE_CHARACTER::packetID, TS_RESULT_DB_ERROR, 0);
 	} else {
-		log(LL_Debug, "Created character \"%s\" for account %s with sid %u\n", query->getInput()->name.c_str(), query->getInput()->account_name, query->getInput()->out_character_sid);
+		log(LL_Debug, "Created character \"%s\" for account %s with sid %llu\n", query->getInput()->name.c_str(), query->getInput()->account_name, query->getInput()->out_character_sid);
 		session->sendResult(TS_CS_CREATE_CHARACTER::packetID, TS_RESULT_SUCCESS, 0);
 	}
 }
