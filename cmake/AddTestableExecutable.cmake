@@ -17,8 +17,8 @@ function(add_exe name sources)
 
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/metadata.rc"
-        COMMAND ${CMAKE_COMMAND} -D SRC="${CMAKE_CURRENT_SOURCE_DIR}/metadata.rc.in"
-            -D DST="${CMAKE_CURRENT_BINARY_DIR}/metadata.rc"
+        COMMAND ${CMAKE_COMMAND} -D SRC=${CMAKE_CURRENT_SOURCE_DIR}/metadata.rc.in
+            -D DST=${CMAKE_CURRENT_BINARY_DIR}/metadata.rc
             -D TARGET_NAME=${TARGET_NAME}
             -D WORKINGDIR=${CMAKE_CURRENT_SOURCE_DIR}
             -D TARGET_FILEVERSION=${METADATA_VERSION}
@@ -58,13 +58,6 @@ function(add_lib name sources)
 endfunction()
 
 function(add_rztest name sources)
-  if(BUILD_SHARED_LIBS)
-    add_definitions(-DUSING_RZTEST_SHARED)
-    add_definitions(-DGTEST_LINKED_AS_SHARED_LIBRARY=1)
-  endif()
-  include_directories("${GTEST_INCLUDE}")
-  include_directories("${RZTEST_INCLUDE}")
-
   add_executable("${name}_test" ${sources})
   target_link_libraries("${name}_test" rztest)
   add_test("${name}_test" "${EXECUTABLE_OUTPUT_PATH}/${name}_test")
