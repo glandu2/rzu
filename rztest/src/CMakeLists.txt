@@ -8,7 +8,7 @@ if( versioncmakefound )
 endif()
 
 add_lib(${TARGET_NAME} "${SOURCE_FILES}" rzu gtest)
-target_include_directories(${TARGET_NAME} PUBLIC .)
+target_include_directories(${TARGET_NAME} PUBLIC ".")
 
 if(BUILD_SHARED_LIBS)
   target_compile_definitions(${TARGET_NAME}
