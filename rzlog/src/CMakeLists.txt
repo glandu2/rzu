@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 file(GLOB_RECURSE SOURCE_FILES *.cpp *.h)
 
@@ -7,11 +7,7 @@ if( versioncmakefound )
     add_git_version_info(${TARGET_NAME}_GitVersion SOURCE_FILES)
 endif()
 
-find_package(ODBC REQUIRED)
-include_directories(${ODBC_INCLUDE_DIR})
-set(LIBS rzu)
-
-add_exe(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")
+add_exe(${TARGET_NAME} "${SOURCE_FILES}" rzu)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
   SETUP_TARGET_FOR_COVERAGE(${TARGET_NAME}_lcov "${TARGET_NAME}" "${EXECUTABLE_OUTPUT_PATH}/${TARGET_NAME}_coverage")

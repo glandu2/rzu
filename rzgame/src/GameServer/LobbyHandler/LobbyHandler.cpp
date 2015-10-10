@@ -100,7 +100,7 @@ void LobbyHandler::onCharacterWearInfoResult(DbQueryJob<CharacterWearInfoBinding
 		for(; wearIt != wearItEnd; ++wearIt) {
 			const CharacterWearInfo* dbWearInfo = wearIt->get();
 
-			if(dbCharacterInfo->sid == dbWearInfo->character_sid && dbWearInfo->wear_info < sizeof(characterInfo.wear_info) / sizeof(characterInfo.wear_info[0])) {
+			if(dbCharacterInfo->sid == dbWearInfo->character_sid && dbWearInfo->wear_info >= 0 && (size_t)dbWearInfo->wear_info < sizeof(characterInfo.wear_info) / sizeof(characterInfo.wear_info[0])) {
 				characterInfo.wear_info[dbWearInfo->wear_info] = dbWearInfo->code;
 				characterInfo.wear_item_level_info[dbWearInfo->wear_info] = dbWearInfo->level;
 				characterInfo.wear_item_enhance_info[dbWearInfo->wear_info] = dbWearInfo->enhance;
@@ -229,7 +229,7 @@ void LobbyHandler::onCreateCharacterResult(DbQueryJob<CreateCharacterBinding> *q
 		log(LL_Warning, "Create character \"%s\" failed for account %s\n", query->getInput()->name.c_str(), query->getInput()->account_name);
 		session->sendResult(TS_CS_CREATE_CHARACTER::packetID, TS_RESULT_DB_ERROR, 0);
 	} else {
-		log(LL_Debug, "Created character \"%s\" for account %s with sid %u\n", query->getInput()->name.c_str(), query->getInput()->account_name, query->getInput()->out_character_sid);
+		log(LL_Debug, "Created character \"%s\" for account %s with sid %llu\n", query->getInput()->name.c_str(), query->getInput()->account_name, query->getInput()->out_character_sid);
 		session->sendResult(TS_CS_CREATE_CHARACTER::packetID, TS_RESULT_SUCCESS, 0);
 	}
 }

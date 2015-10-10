@@ -1,10 +1,22 @@
 #include "ConfigValue.h"
 #include "Core/Utils.h"
 #include <stdlib.h>
+#include <string.h>
 
 ConfigValue::ConfigValue(Type type)
 	: keyName(nullptr), type(type), hidden(false)
 {
+}
+
+char ConfigValue::getTypeLetter() {
+	switch(type) {
+		case ConfigValue::Bool: return 'B';
+		case ConfigValue::Integer: return 'N';
+		case ConfigValue::Float: return 'F';
+		case ConfigValue::String: return 'S';
+	}
+
+	return 'd';
 }
 
 
@@ -68,23 +80,39 @@ std::string ConfigValue::getString(const std::string& def) {
 }
 
 
-void ConfigValue::setBool(bool def) {
+void ConfigValue::setBool(bool val) {
 	wrongType(Bool);
 }
 
-void ConfigValue::setInt(int def) {
+void ConfigValue::setInt(int val) {
 	wrongType(Integer);
 }
 
-void ConfigValue::setFloat(float def) {
+void ConfigValue::setFloat(float val) {
 	wrongType(Float);
 }
 
-void ConfigValue::setString(const char* def) {
-	wrongType(String);
+void ConfigValue::setString(const char* val) {
+	switch(type) {
+		case ConfigValue::Bool:
+			setBool(!strcmp(val, "true") || !strcmp(val, "1"));
+			break;
+
+		case ConfigValue::Integer:
+			setInt(atoi(val));
+			break;
+
+		case ConfigValue::Float:
+			setFloat((float)atof(val));
+			break;
+
+		case ConfigValue::String:
+			setString(std::string(val));
+			break;
+	}
 }
 
-void ConfigValue::setString(const std::string& def) {
+void ConfigValue::setString(const std::string& val) {
 	wrongType(String);
 }
 
