@@ -1,29 +1,33 @@
-#ifndef GAMEHANDLER_H
-#define GAMEHANDLER_H
+#ifndef PLAYERLOADINGHANDLER_H
+#define PLAYERLOADINGHANDLER_H
 
 #include "../ConnectionHandler.h"
-#include "../Model/Character.h"
+#include "../Database/DB_Character.h"
+#include "../Database/DB_Item.h"
 #include "Database/DbQueryJobCallback.h"
 #include <memory>
 
 namespace GameServer {
 
+class Character;
+
 class PlayerLoadingHandler : public ConnectionHandler
 {
 	DECLARE_CLASS(GameServer::PlayerLoadingHandler)
 public:
-	PlayerLoadingHandler(ClientSession* session, uint64_t sid);
+	PlayerLoadingHandler(ClientSession* session, game_sid_t sid);
 
 	void onPacketReceived(const TS_MESSAGE* packet) override;
 
 protected:
-	void onCharacterResult(DbQueryJob<CharacterBinding>* query);
+	void onCharacterResult(DbQueryJob<DB_CharacterBinding>* query);
+	void onItemListResult(DbQueryJob<DB_ItemBinding>* query);
 
 private:
-	std::unique_ptr<Character> characterData;
 	DbQueryJobRef characterQuery;
+	std::unique_ptr<Character> character;
 };
 
 } // namespace GameServer
 
-#endif // GAMEHANDLER_H
+#endif // PLAYERLOADINGHANDLER_H

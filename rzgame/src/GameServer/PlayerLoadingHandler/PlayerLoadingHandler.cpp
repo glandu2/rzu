@@ -1,36 +1,85 @@
 #include "PlayerLoadingHandler.h"
-#include "GameClient/TS_SC_LOGIN_RESULT.h"
 #include "../ClientSession.h"
-#include "GameClient/TS_SC_URL_LIST.h"
 #include "../../GlobalConfig.h"
+#include "../Model/Character.h"
+#include "../Model/Item.h"
+
+#include "GameClient/TS_SC_LOGIN_RESULT.h"
+#include "GameClient/TS_SC_URL_LIST.h"
+#include "GameClient/TS_SC_STAT_INFO.h"
+#include "GameClient/TS_SC_PROPERTY.h"
 
 namespace GameServer {
 
-PlayerLoadingHandler::PlayerLoadingHandler(ClientSession *session, uint64_t sid)
+PlayerLoadingHandler::PlayerLoadingHandler(ClientSession *session, game_sid_t sid)
 	: ConnectionHandler(session)
 {
-	CharacterBinding::Input input;
+	DB_CharacterBinding::Input input;
 	input.sid = sid;
-	characterQuery.executeDbQuery<CharacterBinding>(this, &PlayerLoadingHandler::onCharacterResult, input);
+	characterQuery.executeDbQuery<DB_CharacterBinding>(this, &PlayerLoadingHandler::onCharacterResult, input);
 
 	TS_SC_URL_LIST urlListPacket;
 	urlListPacket.url_list = CONFIG_GET()->game.urlList.get();
-	session->sendPacket(urlListPacket, session->getVersion());
+	session->sendPacket(urlListPacket);
 }
 
 void PlayerLoadingHandler::onPacketReceived(const TS_MESSAGE *packet) {
 
 }
 
-void PlayerLoadingHandler::onCharacterResult(DbQueryJob<CharacterBinding> *query) {
+void PlayerLoadingHandler::onCharacterResult(DbQueryJob<DB_CharacterBinding> *query) {
 	auto& results = query->getResults();
+	TS_SC_LOGIN_RESULT loginResult = {0};
 
 	if(!results.empty()) {
-		characterData = std::move(query->getResults().front());
-		session->playerLoadingResult(TS_RESULT_SUCCESS);
+		character.reset(new Character(session, query->getInput()->sid, session->getAccount(), results[0].get()));
+
+		loginResult.result = TS_RESULT_SUCCESS;
+		loginResult.handle = character->handle;
+		loginResult.x = character->x;
+		loginResult.y = character->y;
+		loginResult.z = character->z;
+		loginResult.layer = character->layer;
+		loginResult.face_direction = character->face_direction;
+		loginResult.region_size = 180;
+		loginResult.hp = character->hp;
+		loginResult.mp = character->mp;
+		loginResult.max_hp = character->maxHp;
+		loginResult.max_mp = character->maxMp;
+		loginResult.havoc = 0;
+		loginResult.max_havoc = 1000;
+		loginResult.sex = character->sex;
+		loginResult.race = character->race;
+		loginResult.skin_color = character->skinColor;
+		loginResult.faceId = character->faceId;
+		loginResult.hairId = character->hairId;
+		loginResult.name = character->name;
+		loginResult.cell_size = 6;
+		loginResult.guild_id = 0;
+		session->sendPacket(loginResult);
+
+		DB_ItemBinding::Input input;
+		input.owner_id = character->sid;
+		characterQuery.executeDbQuery<DB_ItemBinding>(this, &PlayerLoadingHandler::onItemListResult, input);
 	} else {
-		session->playerLoadingResult(TS_RESULT_DB_ERROR);
+		loginResult.result = TS_RESULT_DB_ERROR;
+		session->sendPacket(loginResult);
+		session->playerLoadingResult(TS_RESULT_DB_ERROR, std::unique_ptr<Character>());
 	}
+}
+
+void PlayerLoadingHandler::onItemListResult(DbQueryJob<DB_ItemBinding> *query) {
+	const std::vector<std::unique_ptr<DB_Item>>& results = query->getResults();
+	character->items.reserve(results.size());
+
+	auto it = results.begin();
+	for(; it != results.end(); ++it) {
+		character->items.push_back(std::unique_ptr<Item>(new Item(it->get())));
+	}
+
+	character->synchronizeWithClient();
+
+	session->playerLoadingResult(TS_RESULT_SUCCESS, std::move(character));
 }
 
 } // namespace GameServer

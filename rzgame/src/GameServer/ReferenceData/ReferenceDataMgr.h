@@ -2,8 +2,13 @@
 #define REFERENCEDATAMGR_H
 
 #include "Core/Object.h"
-#include "BannedWords.h"
 #include "ObjectSidState.h"
+#include "BannedWords.h"
+#include "JobResource.h"
+#include "StatResource.h"
+#include "JobLevelBonus.h"
+#include "ItemResource.h"
+#include "../Model/StatBase.h"
 
 namespace GameServer {
 
@@ -19,15 +24,20 @@ public:
 
 	ReferenceDataMgr();
 
-	bool isWordBanned(const std::string& word);
-	uint64_t allocateAwakenOptionSid();
-	uint64_t allocateFarmSid();
-	uint64_t allocateItemSid();
-	uint64_t allocatePetSid();
-	uint64_t allocateSkillSid();
-	uint64_t allocateSummonSid();
-	uint64_t allocateTitleSid();
-	uint64_t allocateTitleConditionSid();
+	bool isWordBanned(const std::string& word) { return banWordResource.isWordBanned(word); }
+	const JobResource* getJob(int32_t id) { return jobResource.getData(id); }
+	const StatResource* getStat(int32_t id) { return statResource.getData(id); }
+	const ItemResource* getItem(int32_t id) { return itemResource.getData(id); }
+	void applyJobLevelBonus(const int32_t* jobs, const int32_t* jobLevels, size_t size, StatBase* statBase) { jobLevelBonus.applyJobLevelBonus(jobs, jobLevels, size, statBase); }
+
+	game_sid_t allocateAwakenOptionSid();
+	game_sid_t allocateFarmSid();
+	game_sid_t allocateItemSid();
+	game_sid_t allocatePetSid();
+	game_sid_t allocateSkillSid();
+	game_sid_t allocateSummonSid();
+	game_sid_t allocateTitleSid();
+	game_sid_t allocateTitleConditionSid();
 
 protected:
 	friend class RefDataLoader;
@@ -49,6 +59,11 @@ private:
 	std::vector<RefDataLoader*> loaders;
 
 	BannedWordsBinding banWordResource;
+	JobResourceBinding jobResource;
+	StatResourceBinding statResource;
+	JobLevelBonusBinding jobLevelBonus;
+	ItemResourceBinding itemResource;
+
 	AwakenOptionSidBinding awakenOptionSidBinding;
 	FarmSidBinding farmSidBinding;
 	ItemSidBinding itemSidBinding;

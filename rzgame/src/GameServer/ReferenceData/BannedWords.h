@@ -22,7 +22,7 @@ public:
 	typedef BannedWords Output;
 
 	void load();
-	const std::unordered_set<std::string>& getData() { return data; }
+	bool isWordBanned(const std::string& word);
 
 protected:
 	void onDataLoaded(DbQueryJob<BannedWordsBinding>* query);

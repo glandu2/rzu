@@ -104,4 +104,7 @@ static void runServers(Log *trafficLogger) {
 static void onReferenceDataLoaded(void* data) {
 	ServersManager* serverManager = (ServersManager*) data;
 	serverManager->start();
+
+	int epic = CONFIG_GET()->game.clients.epic;
+	Object::logStatic(Object::LL_Info, "main", "Target epic: %x.%x.%x\n", epic >> 16, (epic >> 8) & 0xFF, epic & 0xFF);
 }

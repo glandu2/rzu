@@ -18,6 +18,10 @@ void BannedWordsBinding::load() {
 	dbQuery.executeDbQuery<BannedWordsBinding>(this, &BannedWordsBinding::onDataLoaded, BannedWordsBinding::Input());
 }
 
+bool BannedWordsBinding::isWordBanned(const std::string &word) {
+	return data.find(word) != data.end();
+}
+
 void BannedWordsBinding::onDataLoaded(DbQueryJob<BannedWordsBinding>* query) {
 	auto& results = query->getResults();
 	data.clear();

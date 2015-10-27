@@ -2,13 +2,13 @@
 #define AUTHSERVER_CHARACTER_LIGHT_H
 
 #include "Database/DbQueryJob.h"
-#include <stdint.h>
+#include "../GameTypes.h"
 
 namespace GameServer {
 
 class CharacterLight {
 public:
-	uint64_t sid;
+	game_sid_t sid;
 	std::string name;
 	uint32_t race;
 	uint32_t sex;

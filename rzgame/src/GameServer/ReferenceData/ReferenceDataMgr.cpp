@@ -12,6 +12,11 @@ ReferenceDataMgr *ReferenceDataMgr::get() {
 
 ReferenceDataMgr::ReferenceDataMgr() {
 	loaders.push_back(&banWordResource);
+	loaders.push_back(&jobResource);
+	loaders.push_back(&statResource);
+	loaders.push_back(&jobLevelBonus);
+	loaders.push_back(&itemResource);
+
 	loaders.push_back(&awakenOptionSidBinding);
 	loaders.push_back(&farmSidBinding);
 	loaders.push_back(&itemSidBinding);
@@ -46,40 +51,35 @@ void ReferenceDataMgr::load(OnReferenceDataLoaded callback, void* data) {
 	}
 }
 
-bool ReferenceDataMgr::isWordBanned(const std::string &word) {
-	auto& bannedWords = banWordResource.getData();
-	return bannedWords.find(word) != bannedWords.end();
-}
-
-uint64_t ReferenceDataMgr::allocateAwakenOptionSid() {
+game_sid_t ReferenceDataMgr::allocateAwakenOptionSid() {
 	return awakenOptionSidBinding.getNextSid();
 }
 
-uint64_t ReferenceDataMgr::allocateFarmSid() {
+game_sid_t ReferenceDataMgr::allocateFarmSid() {
 	return farmSidBinding.getNextSid();
 }
 
-uint64_t ReferenceDataMgr::allocateItemSid() {
+game_sid_t ReferenceDataMgr::allocateItemSid() {
 	return itemSidBinding.getNextSid();
 }
 
-uint64_t ReferenceDataMgr::allocatePetSid() {
+game_sid_t ReferenceDataMgr::allocatePetSid() {
 	return petSidBinding.getNextSid();
 }
 
-uint64_t ReferenceDataMgr::allocateSkillSid() {
+game_sid_t ReferenceDataMgr::allocateSkillSid() {
 	return skillSidBinding.getNextSid();
 }
 
-uint64_t ReferenceDataMgr::allocateSummonSid() {
+game_sid_t ReferenceDataMgr::allocateSummonSid() {
 	return summonSidBinding.getNextSid();
 }
 
-uint64_t ReferenceDataMgr::allocateTitleSid() {
+game_sid_t ReferenceDataMgr::allocateTitleSid() {
 	return titleSidBinding.getNextSid();
 }
 
-uint64_t ReferenceDataMgr::allocateTitleConditionSid() {
+game_sid_t ReferenceDataMgr::allocateTitleConditionSid() {
 	return titleConditionSidBinding.getNextSid();
 }
 

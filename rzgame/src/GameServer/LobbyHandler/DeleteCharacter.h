@@ -2,14 +2,14 @@
 #define AUTHSERVER_DELETE_CHARACTER_H
 
 #include "Database/DbQueryJob.h"
-#include <stdint.h>
+#include "../GameTypes.h"
 
 namespace GameServer {
 
 struct DeleteCharacterBinding {
 	struct Input {
 		std::string character_name;
-		uint64_t out_character_sid;
+		game_sid_t out_character_sid;
 	};
 
 	struct Output {};

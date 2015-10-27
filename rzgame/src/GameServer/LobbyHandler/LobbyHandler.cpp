@@ -117,7 +117,7 @@ void LobbyHandler::onCharacterWearInfoResult(DbQueryJob<CharacterWearInfoBinding
 		characterList.characters.push_back(characterInfo);
 	}
 
-	session->sendPacket(characterList, CONFIG_GET()->game.clients.epic.get());
+	session->sendPacket(characterList);
 
 	log(LL_Debug, "Account %s has %d characters\n", session->getAccount().c_str(), (int)characterList.characters.size());
 
@@ -128,7 +128,7 @@ void LobbyHandler::onCheckCharacterName(const TS_CS_CHECK_CHARACTER_NAME *packet
 
 	lastValidatedCharacterName.clear();
 
-	if(name.size() > 18 || name.size() < 4) { //TODO || isBanned(name)
+	if(name.size() > 18 || name.size() < 4) {
 		log(LL_Info, "Character name too long or too short: \"%s\"\n", name.c_str());
 		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
 	} else if(!checkTextAgainstEncoding(name)) {
@@ -276,7 +276,7 @@ void LobbyHandler::onCharacterLogin(const TS_CS_LOGIN *packet) {
 		}
 	}
 
-	if(Character::getCharacterBySid(selectCharacter.get()->sid) == nullptr) {
+	if(Character::getObjectBySid(selectCharacter.get()->sid) == nullptr) {
 		session->lobbyExitResult(TS_RESULT_SUCCESS, std::move(selectCharacter));
 	} else {
 		log(LL_Warning, "Character %s of account %s is already logged in\n", selectCharacter.get()->name.c_str(), session->getAccount().c_str());
