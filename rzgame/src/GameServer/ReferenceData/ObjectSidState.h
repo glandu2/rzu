@@ -4,7 +4,7 @@
 #include "RefDataLoader.h"
 #include "Database/DbQueryJobCallback.h"
 #include "Database/DbQueryJob.h"
-#include <stdint.h>
+#include "../GameTypes.h"
 
 namespace GameServer {
 
@@ -14,13 +14,13 @@ public:
 	struct Input {};
 
 	struct Output {
-		uint64_t max_sid;
+		game_sid_t max_sid;
 	};
 
 	ObjectSidStateBinding() : loaded(false), next_sid(0) {}
 
 	void load();
-	uint64_t getNextSid() { return next_sid++; }
+	game_sid_t getNextSid() { return next_sid++; }
 
 protected:
 	void onDataLoaded(DbQueryJob<T>* query);
@@ -28,7 +28,7 @@ protected:
 private:
 	DbQueryJobRef dbQuery;
 	bool loaded;
-	uint64_t next_sid;
+	game_sid_t next_sid;
 };
 
 template<class T>

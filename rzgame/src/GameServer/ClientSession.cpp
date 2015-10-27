@@ -8,12 +8,15 @@
 #include "ConnectionHandler.h"
 #include "LobbyHandler/LobbyHandler.h"
 #include "PlayerLoadingHandler/PlayerLoadingHandler.h"
+#include "GameHandler/GameHandler.h"
+#include "Model/Character.h"
 
 #include "PacketEnums.h"
 #include "GameClient/TS_SC_RESULT.h"
 #include "AuthGame/TS_GA_CLIENT_LOGIN.h"
 #include "GameClient/TS_SC_CHARACTER_LIST.h"
 #include "GameClient/TS_SC_LOGIN_RESULT.h"
+#include "GameClient/TS_SC_PROPERTY.h"
 
 #include "GameClient/TS_CS_VERSION.h"
 
@@ -88,22 +91,18 @@ void ClientSession::lobbyExitResult(TS_ResultCode result, std::unique_ptr<Charac
 	if(!characterData || result != TS_RESULT_SUCCESS) {
 		TS_SC_LOGIN_RESULT loginResult = {0};
 		loginResult.result = result;
-		sendPacket(loginResult, getVersion());
+		sendPacket(loginResult);
 		abortSession();
 	} else {
 		setConnectionHandler(new PlayerLoadingHandler(this, characterData->sid));
 	}
 }
 
-void ClientSession::playerLoadingResult(TS_ResultCode result) {
-	TS_SC_LOGIN_RESULT loginResult = {0};
+void ClientSession::playerLoadingResult(TS_ResultCode result, std::unique_ptr<Character> character) {
 	if(result != TS_RESULT_SUCCESS) {
-		loginResult.result = TS_RESULT_DB_ERROR;
-		sendPacket(loginResult, getVersion());
 		abortSession();
 	} else {
-		loginResult.result = TS_RESULT_SUCCESS;
-		sendPacket(loginResult, getVersion());
+		setConnectionHandler(new GameHandler(this, std::move(character)));
 	}
 }
 
@@ -118,6 +117,24 @@ void ClientSession::sendResult(uint16_t id, uint16_t result, int32_t value) {
 
 void ClientSession::sendResult(const TS_MESSAGE *originalPacket, uint16_t result, int32_t value) {
 	sendResult(originalPacket->id, result, value);
+}
+
+void ClientSession::sendProperty(game_handle_t handle, const char *name, int64_t value) {
+	TS_SC_PROPERTY property;
+	property.handle = handle;
+	property.name = name;
+	property.is_number = true;
+	property.value = value;
+	sendPacket(property);
+}
+
+void ClientSession::sendProperty(game_handle_t handle, const char *name, const std::string &value) {
+	TS_SC_PROPERTY property;
+	property.handle = handle;
+	property.name = name;
+	property.is_number = false;
+	property.string_value = value;
+	sendPacket(property);
 }
 
 } //namespace UploadServer

@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <memory>
 #include "ConnectionHandler.h"
+#include "GameTypes.h"
 
 #include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
@@ -14,6 +15,7 @@
 namespace GameServer {
 
 class CharacterLight;
+class Character;
 
 class ClientSession : public EncryptedSession<PacketSession>
 {
@@ -30,11 +32,17 @@ public:
 
 	void onAccountLoginResult(uint16_t result, std::string account, uint32_t accountId, char nPCBangUser, uint32_t nEventCode, uint32_t nAge, uint32_t nContinuousPlayTime, uint32_t nContinuousLogoutTime);
 	void lobbyExitResult(TS_ResultCode result, std::unique_ptr<CharacterLight> characterData);
-	void playerLoadingResult(TS_ResultCode result);
+	void playerLoadingResult(TS_ResultCode result, std::unique_ptr<Character> character);
 
 
+	template<typename T> typename std::enable_if<!std::is_pointer<T>::value, void>::type
+	sendPacket(const T& packet) { PacketSession::sendPacket(packet, version); }
+
+	void sendPacket(const TS_MESSAGE* packet) { PacketSession::sendPacket(packet); }
 	void sendResult(uint16_t id, uint16_t result, int32_t value);
 	void sendResult(const TS_MESSAGE* originalPacket, uint16_t result, int32_t value);
+	void sendProperty(game_handle_t handle, const char* name, int64_t value);
+	void sendProperty(game_handle_t handle, const char* name, const std::string& value);
 
 protected:
 	~ClientSession();

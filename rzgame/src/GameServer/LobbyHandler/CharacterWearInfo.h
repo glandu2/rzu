@@ -2,13 +2,13 @@
 #define AUTHSERVER_CHARACTER_WEAR_INFO_H
 
 #include "Database/DbQueryJob.h"
-#include <stdint.h>
+#include "../GameTypes.h"
 
 namespace GameServer {
 
 class CharacterWearInfo {
 public:
-	 uint64_t character_sid;
+	 game_sid_t character_sid;
 	 int32_t wear_info;
 	 uint32_t code;
 	 uint32_t enhance;

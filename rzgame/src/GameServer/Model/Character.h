@@ -1,102 +1,82 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
+#include "ModelObject.h"
+#include "../GameTypes.h"
 #include "Database/DbQueryJob.h"
 #include <unordered_map>
+#include "StatBase.h"
+#include "ChangeListener.h"
+#include "Item.h"
 
 namespace GameServer {
 
-class Character {
-private:
-	static std::unordered_map<uint64_t, std::unique_ptr<Character>> characters;
+class DB_Character;
+class ClientSession;
+
+class Character : public ModelObject<Character, 0x8> {
+	DECLARE_CLASS(GameServer::Character)
+public:
+	Character(ClientSession* session, game_sid_t sid, const std::string& account, DB_Character* databaseData);
+
+	void updateStats();
+	void sendPacketStats();
+	void synchronizeWithClient();
 
 public:
-	static Character* getCharacterBySid(uint64_t sid);
-
-public:
-	uint64_t sid;
+	game_sid_t sid;
 	std::string name;
-	uint32_t race;
-	uint32_t sex;
-	uint32_t lv;
-	uint32_t jlv;
-	uint64_t exp;
-	uint32_t hp;
-	uint32_t mp;
-	uint32_t job;
-	uint32_t permission;
-	uint32_t skin_color;
-	uint32_t model[5];
-	uint32_t hair_color_index;
-	uint32_t hair_color_rgb;
-	uint32_t hide_equip_flag;
-	uint32_t texture_id;
-	char create_time[30];
-	char login_time[30];
-	uint32_t login_count;
-	char logout_time[30];
-	uint32_t play_time;
-
-	int32_t party_id;
-	int32_t slot;
-	int32_t x;
-	int32_t y;
-	int32_t z;
-	int32_t layer;
-	int32_t max_reached_level;
-	int64_t last_decreased_exp;
-	int32_t stamina;
-	int32_t havoc;
-	int8_t job_depth;
-	int32_t current_jlv;
+	float x;
+	float y;
+	float z;
+	int8_t layer;
+	float face_direction;
+	int32_t hp;
+	int32_t mp;
+	int32_t maxHp;
+	int32_t maxMp;
+	int32_t level;
+	int32_t jobLevel;
+	int64_t exp;
 	int64_t jp;
-	int64_t total_jp;
-	int32_t talent_point;
-	int32_t job_array[3];
-	int32_t jlv_array[3];
-	float immoral_point;
-	int32_t cha;
-	int32_t pkc;
-	int32_t dkc;
-	int32_t huntaholic_point;
-	int32_t huntaholic_enter_count;
-	int32_t ethereal_stone_durability;
-	int64_t gold;
+	int32_t sex;
+	int32_t race;
+	uint32_t skinColor;
+	int32_t faceId;
+	int32_t hairId;
+	int32_t job;
+	int32_t stamina;
+	int32_t maxStamina;
+	int32_t staminaRegen;
 	int32_t chaos;
-	int64_t belt[6];
-	int32_t summon[6];
-	int32_t main_summon;
-	int32_t sub_summon;
-	int32_t remain_summon_time;
-	int32_t pet;
-	int32_t main_title;
-	int32_t sub_title[5];
-	int32_t remain_title_time;
+	int32_t maxChaos;
+	int32_t prevJobId[3];
+	int32_t prevJobLevel[3];
+	int32_t tp;
+	int32_t huntaholicPoint;
+	int32_t huntaholicEntries;
+	std::string alias;
 	int32_t arena_point;
-	SQL_TIMESTAMP_STRUCT arena_block_time;
-	int32_t arena_penalty_count;
-	SQL_TIMESTAMP_STRUCT arena_penalty_dec_time;
-	int32_t arena_mvp_count;
-	int32_t arena_record[3][2];
-	char alias[61];
-	int32_t chat_block_time;
-	int32_t adv_chat_count;
-	int32_t name_changed;
-	int32_t auto_used;
-	int8_t pkmode;
-	int32_t otp_value;
-	SQL_TIMESTAMP_STRUCT otp_date;
-	std::string flag_list;
-	std::string client_info;
-};
+	int32_t etherealStone;
+	int32_t dkCount;
+	int32_t pkCount;
+	int32_t immoral;
+	int32_t permission;
+	int32_t channel;
+	int32_t status;
+	std::string clientInfo;
+	std::string quickSlot;
+	int64_t gold;
 
-// binding with character table
-struct CharacterBinding {
-	struct Input {
-		uint64_t sid;
-	};
+	game_handle_t handle;
+	std::string account;
 
-	typedef Character Output;
+	StatBase statBase;
+	StatBase statBuffs;
+
+	std::vector<std::unique_ptr<Item>> items;
+
+	ClientSession* session;
 };
 
 }
