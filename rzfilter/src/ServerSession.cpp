@@ -47,6 +47,6 @@ void ServerSession::sendPacket(const TS_MESSAGE* message) {
 }
 
 void ServerSession::onPacketReceived(const TS_MESSAGE* packet) {
-	log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
+	//log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 	clientSession->onServerPacketReceived(packet);
 }

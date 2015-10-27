@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "GlobalConfig.h"
 #include "Core/PrintfFormats.h"
+#include "PacketStructsName.h"
 
 #include "PacketEnums.h"
 #include "AuthClient/TS_AC_SERVER_LIST.h"
@@ -33,20 +34,24 @@ void ClientSession::onDisconnected(bool causedByRemote) {
 }
 
 void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
-	log(LL_Trace, "%s packet id: %5d, size: %d\n",
-		  (outgoing)? "SERV->CLI" : "CLI->SERV",
-		  msg->id,
-		  int(msg->size - sizeof(TS_MESSAGE)));
+	const char* packetName = getPacketName(msg->id, CONFIG_GET()->client.authMode.get());
+
+	log(LL_Debug, "%s packet id: %5d, name %s, size: %d\n",
+		(outgoing)? "SERV->CLI" : "CLI->SERV",
+		msg->id,
+		packetName,
+		int(msg->size - sizeof(TS_MESSAGE)));
 
 	getStream()->packetLog(Object::LL_Debug, reinterpret_cast<const unsigned char*>(msg) + sizeof(TS_MESSAGE), (int)msg->size - sizeof(TS_MESSAGE),
-			  "%s packet id: %5d, size: %d\n",
-			  (outgoing)? "SERV->CLI" : "CLI->SERV",
-			  msg->id,
-			  int(msg->size - sizeof(TS_MESSAGE)));
+						   "%s packet id: %5d, name %s, size: %d\n",
+						   (outgoing)? "SERV->CLI" : "CLI->SERV",
+						   msg->id,
+						   packetName,
+						   int(msg->size - sizeof(TS_MESSAGE)));
 }
 
 void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
-	log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
+	//log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
 	if(packetFilter->onClientPacket(this, &serverSession, packet))
 		serverSession.sendPacket(packet);
 }
@@ -74,7 +79,7 @@ void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 		}
 		PacketSession::sendPacket(serverList, EPIC_9_1);
 	} else {
-		log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
+		//log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 		if(packetFilter->onServerPacket(this, &serverSession, packet))
 			sendPacket(packet);
 	}
