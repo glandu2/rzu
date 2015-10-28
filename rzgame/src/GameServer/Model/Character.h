@@ -24,7 +24,6 @@ public:
 	void synchronizeWithClient();
 
 public:
-	game_sid_t sid;
 	std::string name;
 	float x;
 	float y;
@@ -67,8 +66,8 @@ public:
 	std::string clientInfo;
 	std::string quickSlot;
 	int64_t gold;
+	int32_t baseModel[5];
 
-	game_handle_t handle;
 	std::string account;
 
 	StatBase statBase;

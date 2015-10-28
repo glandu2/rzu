@@ -70,6 +70,9 @@ Character::Character(ClientSession* session, game_sid_t sid, const std::string& 
 	this->quickSlot = databaseData->flag_list;
 	this->gold = databaseData->gold;
 
+	static_assert(sizeof(baseModel) == sizeof(databaseData->model), "Models array size mismatch");
+	memcpy(this->baseModel, databaseData->model, sizeof(this->baseModel));
+
 	static_assert(sizeof(prevJobId) == sizeof(databaseData->jobs), "Previous jobs array size mismatch");
 	static_assert(sizeof(prevJobLevel) == sizeof(databaseData->jlvs), "Previous jobs level array size mismatch");
 	memcpy(this->prevJobId, databaseData->jobs, sizeof(this->prevJobId));
@@ -171,7 +174,7 @@ void Character::synchronizeWithClient() {
 
 	TS_SC_INVENTORY inventory;
 	for(size_t i = 0; i < items.size(); i++) {
-		TS_ITEM_INFO itemInfo;
+		TS_ITEM_INFO itemInfo = {0};
 		items[i]->fillInventoryItem(itemInfo);
 		inventory.items.push_back(itemInfo);
 		if(inventory.items.size() >= 45) {
@@ -187,6 +190,25 @@ void Character::synchronizeWithClient() {
 
 	TS_SC_WEAR_INFO wearInfo = {0};
 	wearInfo.handle = handle;
+	for(size_t i = 0; i < items.size(); i++) {
+		const Item* item = items[i].get();
+		if(item->wear_info < 0)
+			continue;
+
+		if((size_t)item->wear_info < sizeof(wearInfo.wear_info) / sizeof(wearInfo.wear_info[0])) {
+			wearInfo.wear_info[item->wear_info] = item->code;
+			wearInfo.wear_item_level_info[item->wear_info] = item->level;
+			wearInfo.wear_item_enhance_info[item->wear_info] = item->enhance;
+			wearInfo.wear_item_elemental_type[item->wear_info] = item->elemental_effect_type;
+			wearInfo.wear_appearance_code[item->wear_info] = item->appearance_code;
+		}
+	}
+	if(!wearInfo.wear_info[Item::WEAR_ARMOR])
+		wearInfo.wear_info[Item::WEAR_ARMOR] = baseModel[2];
+	if(!wearInfo.wear_info[Item::WEAR_GLOVE])
+		wearInfo.wear_info[Item::WEAR_GLOVE] = baseModel[3];
+	if(!wearInfo.wear_info[Item::WEAR_BOOTS])
+		wearInfo.wear_info[Item::WEAR_BOOTS] = baseModel[4];
 	session->sendPacket(wearInfo);
 
 	TS_SC_GOLD_UPDATE goldUpdate;

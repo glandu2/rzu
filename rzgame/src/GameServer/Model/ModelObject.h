@@ -54,12 +54,12 @@ public:
 
 		return nullptr;
 	}
+	game_sid_t sid;
+	game_handle_t handle;
 
 protected:
 	ModelObject() : sid(0), handle(allocHandle()) {}
 
-	game_sid_t sid;
-	game_handle_t handle;
 
 private:
 
