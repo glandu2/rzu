@@ -7,12 +7,13 @@
 #include <unordered_map>
 #include "StatBase.h"
 #include "ChangeListener.h"
-#include "Item.h"
+#include "Inventory.h"
 
 namespace GameServer {
 
 class DB_Character;
 class ClientSession;
+class Item;
 
 class Character : public ModelObject<Character, 0x8> {
 	DECLARE_CLASS(GameServer::Character)
@@ -41,8 +42,15 @@ public:
 	int32_t sex;
 	int32_t race;
 	uint32_t skinColor;
-	int32_t faceId;
-	int32_t hairId;
+
+	struct ModelInfo {
+		int32_t faceId;
+		int32_t hairId;
+		int32_t armorId;
+		int32_t glovesId;
+		int32_t bootsId;
+	} baseModel;
+
 	int32_t job;
 	int32_t stamina;
 	int32_t maxStamina;
@@ -66,14 +74,13 @@ public:
 	std::string clientInfo;
 	std::string quickSlot;
 	int64_t gold;
-	int32_t baseModel[5];
 
 	std::string account;
 
 	StatBase statBase;
 	StatBase statBuffs;
 
-	std::vector<std::unique_ptr<Item>> items;
+	Inventory inventory;
 
 	ClientSession* session;
 };

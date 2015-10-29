@@ -51,8 +51,8 @@ void PlayerLoadingHandler::onCharacterResult(DbQueryJob<DB_CharacterBinding> *qu
 		loginResult.sex = character->sex;
 		loginResult.race = character->race;
 		loginResult.skin_color = character->skinColor;
-		loginResult.faceId = character->faceId;
-		loginResult.hairId = character->hairId;
+		loginResult.faceId = character->baseModel.faceId;
+		loginResult.hairId = character->baseModel.hairId;
 		loginResult.name = character->name;
 		loginResult.cell_size = 6;
 		loginResult.guild_id = 0;
@@ -69,13 +69,10 @@ void PlayerLoadingHandler::onCharacterResult(DbQueryJob<DB_CharacterBinding> *qu
 }
 
 void PlayerLoadingHandler::onItemListResult(DbQueryJob<DB_ItemBinding> *query) {
-	const std::vector<std::unique_ptr<DB_Item>>& results = query->getResults();
-	character->items.reserve(results.size());
+	std::vector<std::unique_ptr<DB_Item>>& results = query->getResults();
 
-	auto it = results.begin();
-	for(; it != results.end(); ++it) {
-		character->items.push_back(std::unique_ptr<Item>(new Item(it->get())));
-	}
+	Inventory& inventory = character->inventory;
+	inventory.addItem(results);
 
 	character->synchronizeWithClient();
 

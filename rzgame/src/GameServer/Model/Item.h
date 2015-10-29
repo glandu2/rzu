@@ -15,44 +15,6 @@ public:
 	Item(DB_Item* dbItem);
 	void fillInventoryItem(TS_ITEM_INFO& item);
 
-	enum ItemWearType {
-		WEAR_CANTWEAR = 0xFFFFFFFF,
-		WEAR_NONE = 0xFFFFFFFF,
-		WEAR_RIGHTHAND = 0,
-		WEAR_LEFTHAND = 1,
-		WEAR_ARMOR = 2,
-		WEAR_HELM = 3,
-		WEAR_GLOVE = 4,
-		WEAR_BOOTS = 5,
-		WEAR_BELT = 6,
-		WEAR_MANTLE = 7,
-		WEAR_ARMULET = 8,
-		WEAR_RING = 9,
-		WEAR_SECOND_RING = 10,
-		WEAR_EAR = 11,
-		WEAR_FACE = 12,
-		WEAR_HAIR = 13,
-		WEAR_DECO_WEAPON = 14,
-		WEAR_DECO_SHIELD = 15,
-		WEAR_DECO_ARMOR = 16,
-		WEAR_DECO_HELM = 17,
-		WEAR_DECO_GLOVE = 18,
-		WEAR_DECO_BOOTS = 19,
-		WEAR_DECO_MANTLE = 20,
-		WEAR_DECO_SHOULDER = 21,
-		WEAR_RIDE_ITEM = 22,
-		WEAR_BAG_SLOT = 23,
-		WEAR_SPARE_RIGHTHAND = 24,
-		WEAR_SPARE_LEFTHAND = 25,
-		WEAR_SPARE_DECO_WEAPON = 26,
-		WEAR_SPARE_DECO_SHIELD = 27,
-		WEAR_TWOFINGER_RING = 94,
-		WEAR_TWOHAND = 99,
-		WEAR_SKILL = 100,
-		WEAR_SUMMON_ONLY = 200,
-	};
-
-
 public:
 	int32_t summon_id;
 	int32_t idx;
@@ -64,7 +26,6 @@ public:
 	int32_t endurance;
 	int32_t flag;
 	int32_t gcode;
-	int32_t wear_info;
 	int32_t socket[4];
 	int32_t awaken_sid;
 	int32_t remain_time;
