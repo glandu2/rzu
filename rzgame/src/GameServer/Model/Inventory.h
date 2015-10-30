@@ -10,6 +10,7 @@
 namespace GameServer {
 
 class ClientSession;
+class Character;
 
 class Inventory
 {
@@ -48,20 +49,25 @@ public:
 		WEAR_MAX = 28
 	};
 public:
-	Inventory();
+	Inventory(ClientSession* session, Character* character);
 
-	void addItem(std::vector<std::unique_ptr<DB_Item> > &dbItems);
+	void initializeItems(std::vector<std::unique_ptr<DB_Item> > &dbItems);
 	void addItem(std::unique_ptr<Item> item);
 	void equipItem(game_handle_t itemHandle, ItemWearType pos);
 	void unequipItem(ItemWearType pos);
 	Item* getEquipedItem(ItemWearType pos);
 	ItemWearType getEquipPosition(Item* item);
 
-	void sendInventory(ClientSession* session);
+	void sendInventory();
+	void sendInventoryForItems(Item** items, size_t count);
+	void sendItemWearInfo(Item* item, ItemWearType pos);
 
 private:
 	std::unordered_map<game_handle_t, const std::unique_ptr<Item>> items;
 	std::array<Item*, WEAR_MAX> equippedItem;
+
+	ClientSession* session;
+	Character* character;
 };
 
 }

@@ -72,7 +72,7 @@ void PlayerLoadingHandler::onItemListResult(DbQueryJob<DB_ItemBinding> *query) {
 	std::vector<std::unique_ptr<DB_Item>>& results = query->getResults();
 
 	Inventory& inventory = character->inventory;
-	inventory.addItem(results);
+	inventory.initializeItems(results);
 
 	character->synchronizeWithClient();
 

@@ -24,7 +24,7 @@
 namespace GameServer {
 
 Character::Character(ClientSession* session, game_sid_t sid, const std::string& account, DB_Character *databaseData)
-	: statBase(), statBuffs()
+	: statBase(), statBuffs(), inventory(session, this)
 {
 	this->account = account;
 	this->session = session;
@@ -168,14 +168,7 @@ void Character::sendPacketStats() {
 	session->sendProperty(handle, "max_stamina", maxStamina);
 }
 
-void Character::synchronizeWithClient() {
-	sendPacketStats();
-
-	inventory.sendInventory(session);
-
-	TS_SC_EQUIP_SUMMON equipSummon = {0};
-	session->sendPacket(equipSummon);
-
+void Character::sendEquip() {
 	TS_SC_WEAR_INFO wearInfo = {0};
 	wearInfo.handle = handle;
 	for(size_t i = 0; i < Utils_countOf(wearInfo.wear_info); i++) {
@@ -196,6 +189,17 @@ void Character::synchronizeWithClient() {
 		}
 	}
 	session->sendPacket(wearInfo);
+}
+
+void Character::synchronizeWithClient() {
+	sendPacketStats();
+
+	inventory.sendInventory();
+
+	TS_SC_EQUIP_SUMMON equipSummon = {0};
+	session->sendPacket(equipSummon);
+
+	sendEquip();
 
 	TS_SC_GOLD_UPDATE goldUpdate;
 	goldUpdate.chaos = chaos;

@@ -23,6 +23,7 @@ public:
 	void updateStats();
 	void sendPacketStats();
 	void synchronizeWithClient();
+	void sendEquip();
 
 public:
 	std::string name;
