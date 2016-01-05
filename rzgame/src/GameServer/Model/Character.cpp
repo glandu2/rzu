@@ -110,34 +110,30 @@ void Character::updateStats() {
 
 	ReferenceDataMgr::get()->applyJobLevelBonus(jobs, jobLevels, i+1, &stats);
 
-	if(true) {
-		stats.nAttackPointRight = 2.8f * stats.strength + level;
-	} else {
-		stats.nAttackPointRight = 1.2f * stats.agility + 2.2f * stats.dexterity + level;
-	}
+	stats.nAttackPointRight = level;
 	stats.nAttackPointLeft = 0;
-	stats.nAccuracyRight = 0.5f * stats.dexterity + level;
+	stats.nAccuracyRight = level;
 	stats.nAccuracyLeft = stats.nAccuracyRight;
-	stats.nMagicPoint = 2 * stats.intelligence + level;
-	stats.nDefence = 1.6f * stats.vitality + level;
-	stats.nAvoid = 0.5f * stats.agility + level;
-	stats.nAttackSpeed = 0.1f * stats.agility + 100;
-	stats.nMagicAccuracy = 0.4f * stats.wisdom + level;
-	stats.nMagicDefence = 2 * stats.wisdom + level;
-	stats.nMagicAvoid = 0.5f * stats.wisdom + level;
+	stats.nMagicPoint = level;
+	stats.nDefence = level;
+	stats.nAvoid = level;
+	stats.nAttackSpeed = 100;
+	stats.nMagicAccuracy = level;
+	stats.nMagicDefence = level;
+	stats.nMagicAvoid = level;
 	stats.nMoveSpeed = 120;
 	stats.nHPRegenPercentage = 5;
 	stats.nMPRegenPercentage = 5;
 	stats.nBlockChance = 0;
 	stats.nBlockDefence = 0;
-	stats.nCritical = 3 + stats.luck / 5;
+	stats.nCritical = 3;
 	stats.nCastingSpeed = 100;
 	stats.nHPRegenPoint = 48 + 2 * level;
-	stats.nMPRegenPoint = 48 + 2 * level + 4.1f * stats.wisdom;
+	stats.nMPRegenPoint = 48 + 2 * level;
 	stats.nCriticalPower = 80;
 	stats.nCoolTimeSpeed = 100;
-	stats.nMaxWeight = 10 * (stats.strength + level);
-	stats.nItemChance = stats.luck / 5;
+	stats.nMaxWeight = 10 * level;
+	stats.nItemChance = 0;
 	stats.nPerfectBlock = 20;
 	stats.nAttackRange = 50;
 	stats.nMagicalDefIgnore = 0;
@@ -148,13 +144,34 @@ void Character::updateStats() {
 	stats.nMagicalPenetrationRatio = 0;
 	stats.nPhysicalPenetration = 0;
 	stats.nPhysicalPenetrationRatio = 0;
-
-	maxHp = 33 * stats.vitality + 20 * level;
-	maxMp = 30 * stats.intelligence + 20 * level;
-	maxStamina = 500000;
-	maxChaos = 500;
+	stats.maxHp = 20 * level;
+	stats.maxMp = 20 * level;
+	stats.maxStamina = 500000;
+	stats.maxChaos = 500;
 
 	statBase = stats;
+
+	if(true) {
+		stats.nAttackPointRight += 2.8f * statBase.strength;
+	} else {
+		stats.nAttackPointRight += 1.2f * statBase.agility + 2.2f * statBase.dexterity;
+	}
+	stats.nAccuracyRight += 0.5f * statBase.dexterity;
+	stats.nAccuracyLeft += statBase.nAccuracyRight;
+	stats.nMagicPoint += 2 * statBase.intelligence;
+	stats.nDefence += 1.6f * statBase.vitality;
+	stats.nAvoid += 0.5f * statBase.agility;
+	stats.nAttackSpeed += 0.1f * statBase.agility;
+	stats.nMagicAccuracy += 0.4f * statBase.wisdom;
+	stats.nMagicDefence += 2 * statBase.wisdom;
+	stats.nMagicAvoid += 0.5f * statBase.wisdom;
+	stats.nCritical += statBase.luck / 5;
+	stats.nMPRegenPoint += 4.1f * statBase.wisdom;
+	stats.nMaxWeight += 10 * statBase.strength;
+	stats.nItemChance += statBase.luck / 5;
+	stats.maxHp += 33 * statBase.vitality;
+	stats.maxMp += 30 * statBase.intelligence;
+
 	memset(&statBuffs, 0, sizeof(statBuffs));
 
 	sendPacketStats();
