@@ -64,6 +64,11 @@ public:
 	float nMagicalPenetrationRatio;
 	float nPhysicalPenetration;
 	float nPhysicalPenetrationRatio;
+
+	float maxHp;
+	float maxMp;
+	float maxStamina;
+	float maxChaos;
 };
 
 }

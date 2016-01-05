@@ -7,14 +7,16 @@
 #include <unordered_map>
 #include "StatBase.h"
 #include "ChangeListener.h"
-#include "Item.h"
+#include "Inventory.h"
+#include "../GameHandler/PositionManager.h"
 
 namespace GameServer {
 
 class DB_Character;
 class ClientSession;
+class Item;
 
-class Character : public ModelObject<Character, 0x8> {
+class Character : public ModelObject<Character, 0x8>, public Movable {
 	DECLARE_CLASS(GameServer::Character)
 public:
 	Character(ClientSession* session, game_sid_t sid, const std::string& account, DB_Character* databaseData);
@@ -22,9 +24,9 @@ public:
 	void updateStats();
 	void sendPacketStats();
 	void synchronizeWithClient();
+	void sendEquip();
 
 public:
-	game_sid_t sid;
 	std::string name;
 	float x;
 	float y;
@@ -42,8 +44,15 @@ public:
 	int32_t sex;
 	int32_t race;
 	uint32_t skinColor;
-	int32_t faceId;
-	int32_t hairId;
+
+	struct ModelInfo {
+		int32_t faceId;
+		int32_t hairId;
+		int32_t armorId;
+		int32_t glovesId;
+		int32_t bootsId;
+	} baseModel;
+
 	int32_t job;
 	int32_t stamina;
 	int32_t maxStamina;
@@ -68,13 +77,12 @@ public:
 	std::string quickSlot;
 	int64_t gold;
 
-	game_handle_t handle;
 	std::string account;
 
 	StatBase statBase;
 	StatBase statBuffs;
 
-	std::vector<std::unique_ptr<Item>> items;
+	Inventory inventory;
 
 	ClientSession* session;
 };

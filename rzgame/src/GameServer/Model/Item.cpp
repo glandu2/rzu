@@ -15,7 +15,6 @@ Item::Item(DB_Item *dbItem) {
 	endurance = dbItem->endurance;
 	flag = dbItem->flag;
 	gcode = dbItem->gcode;
-	wear_info = dbItem->wear_info;
 	memcpy(socket, dbItem->socket, sizeof(socket));
 	awaken_sid = dbItem->awaken_sid;
 	remain_time = dbItem->remain_time;
@@ -28,7 +27,6 @@ Item::Item(DB_Item *dbItem) {
 }
 
 void Item::fillInventoryItem(TS_ITEM_INFO &item) {
-	item.wear_position = wear_info;
 	item.own_summon_handle = summon_id;
 	item.index = idx;
 	item.base_info.code = code;

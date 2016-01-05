@@ -16,9 +16,6 @@ public:
 	void fillInventoryItem(TS_ITEM_INFO& item);
 
 public:
-	game_handle_t handle;
-
-	game_sid_t sid;
 	int32_t summon_id;
 	int32_t idx;
 	int32_t code;
@@ -29,7 +26,6 @@ public:
 	int32_t endurance;
 	int32_t flag;
 	int32_t gcode;
-	int32_t wear_info;
 	int32_t socket[4];
 	int32_t awaken_sid;
 	int32_t remain_time;
@@ -38,8 +34,8 @@ public:
 	int32_t elemental_effect_magic_point;
 	int32_t appearance_code;
 
-	Timer elemental_effect_timer;
-	Timer expire_timer;
+	TimerStatic elemental_effect_timer;
+	TimerStatic expire_timer;
 };
 
 }

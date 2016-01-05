@@ -4,6 +4,7 @@
 #include "../GameTypes.h"
 #include <unordered_map>
 #include "Core/Object.h"
+#include <vector>
 
 namespace GameServer {
 
@@ -23,7 +24,7 @@ public:
 	static bool addObject(game_sid_t sid, ModelType* model) {
 		ModelObject* object = model;
 
-		std::pair<std::unordered_map<game_sid_t, ModelType*>::iterator, bool> idResult = dataObjectsBySid.insert(std::pair<game_sid_t, ModelType*>(sid, model));
+		auto idResult = dataObjectsBySid.insert(std::pair<game_sid_t, ModelType*>(sid, model));
 		if(!idResult.second)
 			return false;
 
@@ -54,12 +55,12 @@ public:
 
 		return nullptr;
 	}
+	game_sid_t sid;
+	game_handle_t handle;
 
 protected:
 	ModelObject() : sid(0), handle(allocHandle()) {}
 
-	game_sid_t sid;
-	game_handle_t handle;
 
 private:
 
