@@ -34,7 +34,7 @@ void PlayerLoadingHandler::onCharacterResult(DbQueryJob<DB_CharacterBinding> *qu
 	if(!results.empty()) {
 		character.reset(new Character(session, query->getInput()->sid, session->getAccount(), results[0].get()));
 
-		loginResult.result = TS_RESULT_SUCCESS;
+		loginResult.result = (session->getVersion() >= EPIC_7_1) ? TS_RESULT_SUCCESS : true;
 		loginResult.handle = character->handle;
 		loginResult.x = character->x;
 		loginResult.y = character->y;

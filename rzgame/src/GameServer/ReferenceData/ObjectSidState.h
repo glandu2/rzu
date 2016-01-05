@@ -5,6 +5,7 @@
 #include "Database/DbQueryJobCallback.h"
 #include "Database/DbQueryJob.h"
 #include "../GameTypes.h"
+#include "Core/PrintfFormats.h"
 
 namespace GameServer {
 
@@ -49,7 +50,7 @@ void ObjectSidStateBinding<T>::onDataLoaded(DbQueryJob<T> *query) {
 	else
 		next_sid = 0;
 
-	log(LL_Info, "Next SID: %llu\n", next_sid);
+	log(LL_Info, "Next SID: %" PRIuS "\n", next_sid);
 
 	dataLoaded();
 }

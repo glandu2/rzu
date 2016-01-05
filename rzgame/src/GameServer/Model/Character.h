@@ -8,6 +8,7 @@
 #include "StatBase.h"
 #include "ChangeListener.h"
 #include "Inventory.h"
+#include "../GameHandler/PositionManager.h"
 
 namespace GameServer {
 
@@ -15,7 +16,7 @@ class DB_Character;
 class ClientSession;
 class Item;
 
-class Character : public ModelObject<Character, 0x8> {
+class Character : public ModelObject<Character, 0x8>, public Movable {
 	DECLARE_CLASS(GameServer::Character)
 public:
 	Character(ClientSession* session, game_sid_t sid, const std::string& account, DB_Character* databaseData);

@@ -4,6 +4,7 @@
 
 #include "GameClient/TS_TIMESYNC.h"
 #include "GameClient/TS_CS_GAME_TIME.h"
+#include "GameClient/TS_SC_MOVE.h"
 
 namespace GameServer {
 
@@ -32,6 +33,10 @@ void GameHandler::onPacketReceived(const TS_MESSAGE *packet) {
 		case TS_CS_PUTOFF_ITEM::packetID:
 			packet->process(this, &GameHandler::onPutoffItem, session->getVersion());
 			break;
+
+		case_packet_is(TS_CS_MOVE_REQUEST)
+			packet->process(this, &GameHandler::onMoveRequest, session->getVersion());
+			break;
 	}
 }
 
@@ -43,6 +48,25 @@ void GameHandler::onPutonItem(const TS_CS_PUTON_ITEM *packet) {
 void GameHandler::onPutoffItem(const TS_CS_PUTOFF_ITEM *packet) {
 	character->inventory.unequipItem((Inventory::ItemWearType)packet->position);
 	character->sendEquip();
+}
+
+void GameHandler::onMoveRequest(const TS_CS_MOVE_REQUEST *packet) {
+	TS_SC_MOVE movePkt;
+	movePkt.start_time = TimeManager::getRzTime();
+	movePkt.handle = character->handle;
+	movePkt.tlayer = 0;
+	movePkt.speed = -128;
+
+	movePkt.move_infos.reserve(packet->move_infos.size());
+	for(size_t i = 0; i < packet->move_infos.size(); i++) {
+		MOVE_INFO moveInfo;
+		const MOVE_REQUEST_INFO& moveRequestInfo = packet->move_infos[i];
+		moveInfo.tx = moveRequestInfo.tx;
+		moveInfo.ty = moveRequestInfo.ty;
+		movePkt.move_infos.push_back(moveInfo);
+	}
+
+	session->sendPacket(movePkt);
 }
 
 } // namespace GameServer

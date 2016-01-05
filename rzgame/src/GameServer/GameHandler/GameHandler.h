@@ -6,6 +6,7 @@
 #include <memory>
 #include "GameClient/TS_CS_PUTON_ITEM.h"
 #include "GameClient/TS_CS_PUTOFF_ITEM.h"
+#include "GameClient/TS_CS_MOVE_REQUEST.h"
 
 namespace GameServer {
 
@@ -22,6 +23,7 @@ public:
 protected:
 	void onPutonItem(const TS_CS_PUTON_ITEM* packet);
 	void onPutoffItem(const TS_CS_PUTOFF_ITEM* packet);
+	void onMoveRequest(const TS_CS_MOVE_REQUEST* packet);
 
 private:
 	std::unique_ptr<Character> character;

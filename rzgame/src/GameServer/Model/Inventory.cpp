@@ -20,7 +20,7 @@ void Inventory::initializeItems(std::vector<std::unique_ptr<DB_Item>>& dbItems) 
 		std::unique_ptr<DB_Item>& dbItem = dbItems[i];
 		Item* item = new Item(dbItem.get());
 		items.insert(std::make_pair(item->handle, std::unique_ptr<Item>(item)));
-		if(dbItem->wear_info >= 0 && dbItem->wear_info < equippedItem.size()) {
+		if(dbItem->wear_info >= 0 && dbItem->wear_info < (int)equippedItem.size()) {
 			equippedItem[dbItem->wear_info] = item;
 		}
 	}

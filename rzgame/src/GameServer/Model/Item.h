@@ -34,8 +34,8 @@ public:
 	int32_t elemental_effect_magic_point;
 	int32_t appearance_code;
 
-	Timer elemental_effect_timer;
-	Timer expire_timer;
+	TimerStatic elemental_effect_timer;
+	TimerStatic expire_timer;
 };
 
 }
