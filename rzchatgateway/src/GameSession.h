@@ -5,6 +5,7 @@
 #include "NetSession/ClientGameSession.h"
 #include <vector>
 #include <unordered_map>
+#include "Core/Timer.h"
 
 class IrcClient;
 struct TS_CS_CHAT_REQUEST;
@@ -25,10 +26,12 @@ public:
 	void sendMsgToGS(int type, const char* sender, const char* target, std::string msg);
 
 protected:
-	static void onUpdatePacketExpired(uv_timer_t *timer);
+	void onUpdatePacketExpired();
 
 	void onCharacterList(const TS_SC_CHARACTER_LIST* packet);
 	void onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet);
+
+	uint32_t getRappelzTime();
 
 private:
 	std::string playername;
@@ -36,9 +39,11 @@ private:
 	bool enableGateway;
 	bool connectedInGame;
 
-	uv_timer_t updateTimer;
+	uint32_t handle;
+	int32_t rappelzTimeOffset;
+	int32_t epochTimeOffset;
 
-	unsigned int handle;
+	Timer<GameSession> updateTimer;
 
 	std::vector<TS_CS_CHAT_REQUEST*> messageQueue;
 	std::unordered_map<unsigned int, std::string> playerNames;
