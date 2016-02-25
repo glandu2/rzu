@@ -35,6 +35,13 @@ ClientSession::~ClientSession() {
 		ClientData::removeClient(clientData);
 }
 
+void ClientSession::onDisconnected(bool causedByRemote) {
+	if(clientData) {
+		ClientData::removeClient(clientData);
+		clientData = nullptr;
+	}
+}
+
 void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_CA_VERSION::packetID:
