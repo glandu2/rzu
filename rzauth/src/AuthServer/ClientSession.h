@@ -33,6 +33,7 @@ public:
 
 protected:
 	void onPacketReceived(const TS_MESSAGE* packet);
+	void onDisconnected(bool causedByRemote);
 
 	void onVersion(const TS_CA_VERSION* packet);
 	void onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet);

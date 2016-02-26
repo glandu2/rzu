@@ -1,8 +1,8 @@
 #include "GameSession.h"
 #include "ChatAuthSession.h"
 #include "IrcClient.h"
-#include "Core/EventLoop.h"
 #include <algorithm>
+#include <time.h>
 
 #include "GameClient/TS_SC_CHAT.h"
 #include "GameClient/TS_SC_CHAT_LOCAL.h"
@@ -15,19 +15,23 @@
 #include "GameClient/TS_SC_ENTER.h"
 #include "GameClient/TS_SC_DISCONNECT_DESC.h"
 #include "GameClient/TS_CS_UPDATE.h"
+#include "GameClient/TS_CS_GAME_TIME.h"
+#include "GameClient/TS_SC_GAME_TIME.h"
 
 GameSession::GameSession(const std::string& playername, bool enableGateway, Log *packetLog)
-	: playername(playername), enableGateway(enableGateway)
+	: playername(playername),
+	  ircClient(nullptr),
+	  enableGateway(enableGateway),
+	  connectedInGame(false),
+	  handle(0),
+	  rappelzTimeOffset(0),
+	  epochTimeOffset(0)
 {
-	ircClient = nullptr;
-	handle = 0;
-	uv_timer_init(EventLoop::getLoop(), &updateTimer);
-	updateTimer.data = this;
-	connectedInGame = false;
 }
 
 void GameSession::onGameConnected() {
-	uv_timer_start(&updateTimer, &onUpdatePacketExpired, 5000, 5000);
+	updateTimer.start(this, &GameSession::onUpdatePacketExpired, 5000, 5000);
+	epochTimeOffset = rappelzTimeOffset = 0;
 
 	TS_CS_CHARACTER_LIST charlistPkt;
 	TS_MESSAGE::initMessage<TS_CS_CHARACTER_LIST>(&charlistPkt);
@@ -41,23 +45,27 @@ void GameSession::setGameServerName(std::string name) {
 }
 
 void GameSession::onGameDisconnected() {
-	uv_timer_stop(&updateTimer);
+	updateTimer.stop();
 	connectedInGame = false;
 	ircClient->sendMessage("", "\001ACTION disconnected from the game server\001");
 }
 
-void GameSession::onUpdatePacketExpired(uv_timer_t *timer) {
-	GameSession* thisInstance = (GameSession*)timer->data;
-
-	if(!thisInstance->connectedInGame)
+void GameSession::onUpdatePacketExpired() {
+	if(!connectedInGame)
 		return;
 
 	TS_CS_UPDATE updatPkt;
-	TS_MESSAGE::initMessage<TS_CS_UPDATE>(&updatPkt);
 
-	updatPkt.handle = thisInstance->handle;
+	updatPkt.handle = handle;
+	updatPkt.time = getRappelzTime() + rappelzTimeOffset;
+	updatPkt.epoch_time = uint32_t(time(NULL) + epochTimeOffset);
 
-	thisInstance->sendPacket(&updatPkt);
+	sendPacket(updatPkt, EPIC_LATEST);
+}
+
+uint32_t GameSession::getRappelzTime()
+{
+	return uint32_t(uv_hrtime() / (10 * 1000 * 1000));
 }
 
 void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
@@ -66,7 +74,7 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 			packet->process(this, &GameSession::onCharacterList, EPIC_LATEST);
 			break;
 
-		case TS_SC_LOGIN_RESULT::packetID:
+		case_packet_is(TS_SC_LOGIN_RESULT)
 			packet->process(this, &GameSession::onCharacterLoginResult, EPIC_LATEST);
 			break;
 
@@ -104,6 +112,30 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 			connectedInGame = false;
 			abortSession();
 			break;
+
+		case TS_TIMESYNC::packetID: {
+			const TS_TIMESYNC* serverTime = (const TS_TIMESYNC*)packet;
+			rappelzTimeOffset = serverTime->time - getRappelzTime();
+
+			TS_TIMESYNC timeSyncPkt;
+
+			TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
+			timeSyncPkt.time = serverTime->time;
+			sendPacket(&timeSyncPkt);
+
+			if(epochTimeOffset == 0) {
+				TS_CS_GAME_TIME gameTimePkt;
+				sendPacket(gameTimePkt, EPIC_LATEST);
+			}
+			break;
+		}
+
+		case TS_SC_GAME_TIME::packetID: {
+			const TS_SC_GAME_TIME* serverTime = (const TS_SC_GAME_TIME*)packet;
+			rappelzTimeOffset = serverTime->t - getRappelzTime();
+			epochTimeOffset = int32_t(serverTime->game_time - time(NULL));
+			break;
+		}
 	}
 }
 
