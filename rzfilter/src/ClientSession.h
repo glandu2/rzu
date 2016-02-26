@@ -18,7 +18,17 @@ class ClientSession : public EncryptedSession<PacketSession>, public IFilterEndp
 public:
 	ClientSession();
 
+	void sendPacket(MessageBuffer& buffer) {
+		if(buffer.checkFinalSize() == false) {
+			log(LL_Error, "Wrong packet buffer size, id: %d, size: %d, field: %s\n", buffer.getMessageId(), buffer.getSize(), buffer.getFieldInOverflow().c_str());
+		} else {
+			logPacket(true, (const TS_MESSAGE*)buffer.getData());
+			write(buffer.getWriteRequest());
+		}
+	}
 	void sendPacket(const TS_MESSAGE *data) { PacketSession::sendPacket(data); }
+	int getPacketVersion() { return version; }
+
 	void onServerPacketReceived(const TS_MESSAGE* packet);
 
 protected:
@@ -34,6 +44,7 @@ private:
 
 	ServerSession serverSession;
 	IFilter* packetFilter;
+	int version;
 };
 
 #endif // CLIENTSESSION_H

@@ -4,7 +4,7 @@
 #include "Core/EventLoop.h"
 
 ServerSession::ServerSession(ClientSession *clientSession)
-	: clientSession(clientSession)
+	: clientSession(clientSession), version(CONFIG_GET()->server.epic.get())
 {
 }
 

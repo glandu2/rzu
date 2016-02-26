@@ -8,12 +8,13 @@
 
 #include "PacketEnums.h"
 #include "AuthClient/TS_AC_SERVER_LIST.h"
+#include "AuthClient/TS_AC_SELECT_SERVER.h"
 #include "Packet/PacketEpics.h"
 
-#include "PacketFilter.h"
+#include "FilterManager.h"
 
 ClientSession::ClientSession()
-  : serverSession(this), packetFilter(new PacketFilter)
+  : serverSession(this), packetFilter(new FilterManager), version(CONFIG_GET()->client.epic.get())
 {
 }
 
@@ -58,7 +59,7 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == TS_AC_SERVER_LIST::packetID && CONFIG_GET()->client.authMode.get() == true) {
-		MessageBuffer buffer(packet, packet->size, EPIC_9_1);
+		MessageBuffer buffer(packet, packet->size, version);
 		TS_AC_SERVER_LIST serverList;
 
 		serverList.deserialize(&buffer);
@@ -77,7 +78,7 @@ void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 			if(filterPort > 0)
 				currentServerInfo.server_port = filterPort;
 		}
-		PacketSession::sendPacket(serverList, EPIC_9_1);
+		PacketSession::sendPacket(serverList, version);
 	} else {
 		//log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 		if(packetFilter->onServerPacket(this, &serverSession, packet))
