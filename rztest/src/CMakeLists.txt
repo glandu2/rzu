@@ -7,7 +7,8 @@ if( versioncmakefound )
     add_git_version_info(${TARGET_NAME}_GitVersion SOURCE_FILES)
 endif()
 
-add_lib(${TARGET_NAME} "${SOURCE_FILES}" rzu gtest)
+add_library(${TARGET_NAME} "${SOURCE_FILES}")
+target_link_libraries(${TARGET_NAME}  rzu gtest)
 target_include_directories(${TARGET_NAME} PUBLIC ".")
 
 if(BUILD_SHARED_LIBS)
