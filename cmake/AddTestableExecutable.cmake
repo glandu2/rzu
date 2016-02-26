@@ -35,8 +35,8 @@ function(add_exe name sources)
     target_link_libraries(${name} ${lib})
   endforeach()
 
-  install(TARGETS ${name} RUNTIME DESTINATION ./ COMPONENT "binaries")
-  install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols")
+  install(TARGETS ${name} RUNTIME DESTINATION ./)
+  install(FILES $<TARGET_FILE_DIR:${name}>/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols" OPTIONAL)
 endfunction()
 
 function(add_lib name sources)
@@ -51,9 +51,8 @@ function(add_lib name sources)
     install(TARGETS ${name}
       RUNTIME DESTINATION ./
       LIBRARY DESTINATION ./
-      COMPONENT "binaries"
     )
-    install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols")
+    install(FILES $<TARGET_FILE_DIR:${name}>/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols" OPTIONAL)
   endif()
 endfunction()
 
