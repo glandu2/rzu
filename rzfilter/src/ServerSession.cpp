@@ -18,7 +18,7 @@ void ServerSession::connect() {
 	SocketSession::connect(ip.c_str(), port);
 }
 
-void ServerSession::onConnected() {
+EventChain<SocketSession> ServerSession::onConnected() {
 	log(LL_Info, "Connected to server\n");
 	getStream()->setNoDelay(true);
 
@@ -29,11 +29,15 @@ void ServerSession::onConnected() {
 		free(message);
 	}
 	pendingMessages.clear();
+
+	return PacketSession::onConnected();
 }
 
-void ServerSession::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> ServerSession::onDisconnected(bool causedByRemote) {
 	log(LL_Warning, "Disconnected from server\n");
 	clientSession->closeSession();
+
+	return PacketSession::onDisconnected(causedByRemote);
 }
 
 void ServerSession::sendPacket(const TS_MESSAGE* message) {
@@ -46,7 +50,9 @@ void ServerSession::sendPacket(const TS_MESSAGE* message) {
 	}
 }
 
-void ServerSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> ServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	//log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 	clientSession->onServerPacketReceived(packet);
+
+	return PacketSession::onPacketReceived(packet);
 }

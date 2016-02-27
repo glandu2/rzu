@@ -22,16 +22,20 @@ ClientSession::~ClientSession() {
 	delete packetFilter;
 }
 
-void ClientSession::onConnected() {
+EventChain<SocketSession> ClientSession::onConnected() {
 	log(LL_Info, "Client connected, connecting server session\n");
 	serverSession.connect();
 	setDirtyObjectName();
 	getStream()->setNoDelay(true);
+
+	return PacketSession::onConnected();
 }
 
-void ClientSession::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 	log(LL_Info, "Client disconnected, disconnecting server session\n");
 	serverSession.closeSession();
+
+	return PacketSession::onDisconnected(causedByRemote);
 }
 
 void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
@@ -51,10 +55,12 @@ void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 						   int(msg->size - sizeof(TS_MESSAGE)));
 }
 
-void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	//log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
 	if(packetFilter->onClientPacket(this, &serverSession, packet))
 		serverSession.sendPacket(packet);
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {

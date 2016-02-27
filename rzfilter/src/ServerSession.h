@@ -16,9 +16,6 @@ public:
 
 	void connect();
 
-	void onConnected();
-	void onDisconnected(bool causedByRemote);
-
 	void sendPacket(const TS_MESSAGE* message);
 
 	void sendPacket(MessageBuffer& buffer) {
@@ -31,7 +28,9 @@ public:
 	int getPacketVersion() { return version; }
 
 protected:
-	void onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<SocketSession> onConnected();
+	EventChain<SocketSession> onDisconnected(bool causedByRemote);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 
 private:
 	using SocketSession::connect;

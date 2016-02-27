@@ -33,9 +33,9 @@ public:
 
 protected:
 	void logPacket(bool outgoing, const TS_MESSAGE* msg);
-	void onPacketReceived(const TS_MESSAGE* packet);
-	void onConnected();
-	void onDisconnected(bool causedByRemote);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<SocketSession> onConnected();
+	EventChain<SocketSession> onDisconnected(bool causedByRemote);
 
 	virtual void updateObjectName();
 
