@@ -44,8 +44,8 @@ public:
 	void stop();
 	bool isStarted() { return getStream() && getStream()->getState() == Stream::ConnectedState; }
 
-	void onConnected();
-	void onDisconnected(bool causedByRemote);
+	EventChain<SocketSession> onConnected();
+	EventChain<SocketSession> onDisconnected(bool causedByRemote);
 
 	void sendLog(const Message& message);
 

@@ -11,7 +11,7 @@ class BillingInterface : public TelnetSession
 {
 	DECLARE_CLASS(AuthServer::BillingInterface)
 protected:
-	void onConnected();
+	EventChain<SocketSession> onConnected();
 	void onCommand(const std::vector<std::string>& args);
 
 	void billingNotice(const std::string& cmd, const std::string& accountIdStr);

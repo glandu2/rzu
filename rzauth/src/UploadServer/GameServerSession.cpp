@@ -25,7 +25,7 @@ GameServerSession::~GameServerSession() {
 	}
 }
 
-void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_SU_LOGIN::packetID:
 			onLogin(static_cast<const TS_SU_LOGIN*>(packet));
@@ -39,6 +39,8 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			log(LL_Debug, "Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
 			break;
 	}
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {

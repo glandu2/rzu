@@ -23,7 +23,7 @@ ClientSession::~ClientSession() {
 		delete currentRequest;
 }
 
-void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_CU_LOGIN::packetID:
 			onLogin(static_cast<const TS_CU_LOGIN*>(packet));
@@ -37,6 +37,8 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 			log(LL_Debug, "Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
 			break;
 	}
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void ClientSession::onLogin(const TS_CU_LOGIN* packet) {

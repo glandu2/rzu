@@ -17,7 +17,7 @@ public:
 	static const char* getAllowedCharsForName();
 
 protected:
-	void onDataReceived();
+	EventChain<SocketSession> onDataReceived();
 
 	void parseData(const std::vector<char>& data);
 	void parseUrl(std::string urlString);
