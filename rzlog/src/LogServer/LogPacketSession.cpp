@@ -42,14 +42,14 @@ void LogPacketSession::logPacket(bool outgoing, const LS_11N4S* msg) {
 			  int(msg->size));
 }
 
-void LogPacketSession::onDataReceived() {
+EventChain<SocketSession> LogPacketSession::onDataReceived() {
 	Stream* inputStream = getStream();
 	InputBuffer* buffer = &inputBuffer;
 
 	do {
 		// if buffer->currentMessage.size == 0 => waiting for a new message
 		if(buffer->currentMessage.size == 0 && inputStream->getAvailableBytes() < 4) {
-			return;
+			break;
 		} else if(buffer->currentMessage.size == 0) {
 			read(&buffer->currentMessage, 4);
 			if(buffer->currentMessage.size <= 4)
@@ -76,6 +76,8 @@ void LogPacketSession::onDataReceived() {
 			buffer->currentMessage.size = 0;
 		}
 	} while((buffer->currentMessage.size == 0 && inputStream->getAvailableBytes() >= 4) || (buffer->currentMessage.size != 0 && inputStream->getAvailableBytes() >= buffer->currentMessage.size));
+
+	return SocketSession::onDataReceived();
 }
 
 } // namespace LogServer
