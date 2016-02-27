@@ -26,9 +26,8 @@ public:
 	void disconnectAuth();
 
 protected:
-	void onPacketReceived(const TS_MESSAGE* packet);
-	void onConnected();
-	void onDisconnected(bool causedByRemote);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<SocketSession> onDisconnected(bool causedByRemote);
 
 	void onServerLogin(const TS_GA_LOGIN* packet);
 	void onClientLogin(const TS_GA_CLIENT_LOGIN* packet);

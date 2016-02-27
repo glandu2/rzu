@@ -23,10 +23,7 @@ GameServerSession::~GameServerSession() {
 		authSession->forceClose();
 }
 
-void GameServerSession::onConnected() {
-}
-
-void GameServerSession::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> GameServerSession::onDisconnected(bool causedByRemote) {
 	if(authSession) {
 		if(causedByRemote) {
 			log(LL_Info, "GS disconnected, disconnecting auth session\n");
@@ -37,6 +34,8 @@ void GameServerSession::onDisconnected(bool causedByRemote) {
 	}
 
 	authSession = nullptr;
+
+	return PacketSession::onDisconnected(causedByRemote);
 }
 
 void GameServerSession::disconnectAuth() {
@@ -46,7 +45,7 @@ void GameServerSession::disconnectAuth() {
 	}
 }
 
-void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_GA_LOGIN::packetID:
 			onServerLogin(static_cast<const TS_GA_LOGIN*>(packet));
@@ -67,6 +66,8 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			}
 			break;
 	}
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {

@@ -64,11 +64,13 @@ void AuthSession::connect() {
 	SocketSession::connect(ip.c_str(), port);
 }
 
-void AuthSession::onConnected() {
+EventChain<SocketSession> AuthSession::onConnected() {
 	getStream()->setKeepAlive(31);
 
 	log(LL_Info, "Connected to auth server\n");
 	sendLogin();
+
+	return PacketSession::onConnected();
 }
 
 void AuthSession::sendLogin() {
@@ -245,7 +247,7 @@ void AuthSession::forceClose() {
 	}
 }
 
-void AuthSession::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> AuthSession::onDisconnected(bool causedByRemote) {
 	synchronizedWithAuth = false;
 	pendingLogin = false;
 	if(causedByRemote && (gameServerSession != nullptr || pendingMessages.size() > 0)) {
@@ -257,6 +259,8 @@ void AuthSession::onDisconnected(bool causedByRemote) {
 		if(gameServerSession == nullptr)
 			this->deleteLater();
 	}
+
+	return PacketSession::onDisconnected(causedByRemote);
 }
 
 void AuthSession::onTimerReconnect(uv_timer_t* timer) {
@@ -264,7 +268,7 @@ void AuthSession::onTimerReconnect(uv_timer_t* timer) {
 	session->connect();
 }
 
-void AuthSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> AuthSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_AG_LOGIN_RESULT::packetID:
 			onLoginResult(static_cast<const TS_AG_LOGIN_RESULT*>(packet));
@@ -280,6 +284,8 @@ void AuthSession::onPacketReceived(const TS_MESSAGE* packet) {
 				gameServerSession->sendPacket(packet);
 			}
 	}
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void AuthSession::sendPacket(const TS_MESSAGE* message) {
