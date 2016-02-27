@@ -14,11 +14,9 @@ public:
 	TestPacketSession(TestConnectionChannel* channel);
 	~TestPacketSession();
 
-	void onConnected();
-
-	void onDisconnected(bool causedByRemote);
-
-	void onPacketReceived(const TS_MESSAGE *packet);
+	EventChain<SocketSession> onConnected();
+	EventChain<SocketSession> onDisconnected(bool causedByRemote);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE *packet);
 
 private:
 	TestConnectionChannel* channel;
@@ -37,18 +35,21 @@ TestPacketSession<T>::~TestPacketSession() {
 }
 
 template<class T>
-void TestPacketSession<T>::onConnected() {
+EventChain<SocketSession> TestPacketSession<T>::onConnected() {
 	channel->onEventReceived(this, TestConnectionChannel::Event::Connection);
+	return T::onConnected();
 }
 
 template<class T>
-void TestPacketSession<T>::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> TestPacketSession<T>::onDisconnected(bool causedByRemote) {
 	channel->onEventReceived(this, TestConnectionChannel::Event::Disconnection);
+	return T::onDisconnected(causedByRemote);
 }
 
 template<class T>
-void TestPacketSession<T>::onPacketReceived(const TS_MESSAGE *packet) {
+EventChain<PacketSession> TestPacketSession<T>::onPacketReceived(const TS_MESSAGE *packet) {
 	channel->onPacketReceived(this, packet);
+	return T::onPacketReceived(packet);
 }
 
 #endif // TESTPACKETSESSION_H
