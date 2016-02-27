@@ -14,7 +14,7 @@ void IrcClient::connect(std::string servername) {
 	SocketSession::connect(ip.c_str(), port);
 }
 
-void IrcClient::onStateChanged(Stream::State oldState, Stream::State newState, bool causedByRemote) {
+EventChain<SocketSession> IrcClient::onStateChanged(Stream::State oldState, Stream::State newState, bool causedByRemote) {
 	if(newState == Stream::ConnectedState) {
 		char loginText[128];
 		std::string lowerCaseServerName;
@@ -40,9 +40,11 @@ void IrcClient::onStateChanged(Stream::State oldState, Stream::State newState, b
 		joined = false;
 		connect(servername);
 	}
+
+	return SocketSession::onStateChanged(oldState, newState, causedByRemote);
 }
 
-void IrcClient::onDataReceived() {
+EventChain<SocketSession> IrcClient::onDataReceived() {
 	std::vector<char> dataRecv;
 	getStream()->readAll(&dataRecv);
 	char *p;
@@ -53,6 +55,8 @@ void IrcClient::onDataReceived() {
 		buffer.erase(buffer.begin(), buffer.begin() + (p - &buffer[0]) + 2);
 		onIrcLine(line);
 	}
+
+	return SocketSession::onDataReceived();
 }
 
 void IrcClient::onIrcLine(const std::string& line) {
