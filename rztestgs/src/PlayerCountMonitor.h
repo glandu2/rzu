@@ -18,9 +18,9 @@ class PlayerCountMonitor : public EncryptedSession<PacketSession>
 		static void updatePlayerNumberStatic(uv_timer_t* handle);
 
 	protected:
-		void onConnected();
-		void onDisconnected(bool causedByRemote);
-		void onPacketReceived(const TS_MESSAGE* packet);
+		EventChain<SocketSession> onConnected();
+		EventChain<SocketSession> onDisconnected(bool causedByRemote);
+		EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 		void updatePlayerNumber();
 
 	private:

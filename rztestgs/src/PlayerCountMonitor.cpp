@@ -49,7 +49,7 @@ void PlayerCountMonitor::updatePlayerNumber() {
 	}
 }
 
-void PlayerCountMonitor::onConnected() {
+EventChain<SocketSession> PlayerCountMonitor::onConnected() {
 	TS_CA_VERSION versionMsg;
 	TS_MESSAGE::initMessage<TS_CA_VERSION>(&versionMsg);
 #ifndef NDEBUG
@@ -58,19 +58,23 @@ void PlayerCountMonitor::onConnected() {
 	strcpy(versionMsg.szVersion, reqStr.c_str());
 
 	sendPacket(&versionMsg);
+
+	return PacketSession::onConnected();
 }
 
-void PlayerCountMonitor::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> PlayerCountMonitor::onDisconnected(bool causedByRemote) {
 	if(causedByRemote) {
 		log(LL_Error, "Disconnected by server !\n");
 	}
+
+	return PacketSession::onDisconnected(causedByRemote);
 }
 
-void PlayerCountMonitor::onPacketReceived(const TS_MESSAGE* packetData) {
-	switch(packetData->id) {
+EventChain<PacketSession> PlayerCountMonitor::onPacketReceived(const TS_MESSAGE* packet) {
+	switch(packet->id) {
 		case TS_SC_RESULT::packetID:
 		{
-			const TS_SC_RESULT* result = reinterpret_cast<const TS_SC_RESULT*>(packetData);
+			const TS_SC_RESULT* result = reinterpret_cast<const TS_SC_RESULT*>(packet);
 			switch(result->request_msg_id) {
 				case TS_CA_VERSION::packetID: {
 					if(reqStr == "INFO")
@@ -86,4 +90,5 @@ void PlayerCountMonitor::onPacketReceived(const TS_MESSAGE* packetData) {
 		}
 	}
 
+	return PacketSession::onPacketReceived(packet);
 }
