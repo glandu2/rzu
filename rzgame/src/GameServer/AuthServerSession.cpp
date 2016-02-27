@@ -89,7 +89,7 @@ cval<bool>& AuthServerSession::getAutoStartConfig() {
 	return config->authAutoConnect;
 }
 
-void AuthServerSession::onConnected() {
+EventChain<SocketSession> AuthServerSession::onConnected() {
 	TS_GA_LOGIN loginMsg;
 
 	TS_MESSAGE::initMessage(&loginMsg);
@@ -101,9 +101,11 @@ void AuthServerSession::onConnected() {
 	loginMsg.is_adult_server = config->isAdultServer;
 
 	sendPacket(&loginMsg);
+
+	return PacketSession::onConnected();
 }
 
-void AuthServerSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> AuthServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_AG_LOGIN_RESULT::packetID:
 			onLoginResult(static_cast<const TS_AG_LOGIN_RESULT*>(packet));
@@ -113,6 +115,8 @@ void AuthServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			onClientLoginResult(static_cast<const TS_AG_CLIENT_LOGIN*>(packet));
 			break;
 	}
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void AuthServerSession::onLoginResult(const TS_AG_LOGIN_RESULT* packet) {

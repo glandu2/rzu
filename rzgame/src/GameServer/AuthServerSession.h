@@ -33,9 +33,9 @@ public:
 
 protected:
 
-	void onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<SocketSession> onConnected();
 
-	void onConnected();
 	void onLoginResult(const TS_AG_LOGIN_RESULT* packet);
 	void onClientLoginResult(const TS_AG_CLIENT_LOGIN* packet);
 

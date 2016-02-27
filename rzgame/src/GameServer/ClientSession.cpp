@@ -62,7 +62,7 @@ void ClientSession::onAccountLoginResult(uint16_t result, std::string account, u
 	}
 }
 
-void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	if(accountId == UINT32_MAX) {
 		switch(packet->id) {
 			case TS_CS_ACCOUNT_WITH_AUTH::packetID:
@@ -75,6 +75,8 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	} else {
 		log(LL_Warning, "Account %s authenticated but no connection handler !\n", account.c_str());
 	}
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void ClientSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH* packet) {

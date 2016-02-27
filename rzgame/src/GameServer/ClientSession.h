@@ -47,7 +47,7 @@ public:
 protected:
 	~ClientSession();
 
-	void onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 
 	void onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH *packet);
 
