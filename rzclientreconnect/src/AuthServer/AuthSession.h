@@ -41,9 +41,6 @@ public:
 	bool isServerLoggedOn() { return synchronizedWithAuth; }
 	bool isSynchronizedWithAuth() { return synchronizedWithAuth; }
 
-	void onConnected();
-	void onDisconnected(bool causedByRemote);
-
 	bool loginServer();
 	void logoutClient(const TS_GA_CLIENT_LOGOUT *packet);
 
@@ -60,7 +57,11 @@ public:
 protected:
 	void sendLogin();
 	void sendAccountList();
-	void onPacketReceived(const TS_MESSAGE* packet);
+
+	EventChain<SocketSession> onConnected();
+	EventChain<SocketSession> onDisconnected(bool causedByRemote);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
+
 	static void onTimerReconnect(uv_timer_t* timer);
 	void sendPacketToNetwork(const TS_MESSAGE* message);
 	//void updateObjectName();
