@@ -42,6 +42,8 @@ void AuctionManager::start()
 			continue;
 		}
 		account = std::string(line, p - line);
+		if(account.size() == 0 || account[0] == '#')
+			continue;
 
 		lastP = p+1;
 		p = strchr(lastP, '\t');
