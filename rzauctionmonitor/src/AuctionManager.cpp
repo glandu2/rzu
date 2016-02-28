@@ -130,7 +130,29 @@ void AuctionManager::addRequest(int category, int page)
 
 void AuctionManager::addAuctionInfo(const AuctionWorker::AuctionRequest *request, uint32_t uid, const char *data, int len)
 {
-	auctionInfos.push_back(AuctionInfo(uid, request->category, request->page, data, len));
+	auto it = auctionsState.find(uid);
+	if(it != auctionsState.end()) {
+		AuctionInfo& auctionInfo = it->second;
+		if(auctionInfo.data.size() != (size_t)len ||
+		   memcmp(auctionInfo.data.data(), data, len) != 0)
+		{
+			if(auctionInfo.flag != AuctionInfo::AIF_Added)
+				auctionInfo.flag = AuctionInfo::AIF_Updated;
+
+			auctionInfo.time = ::time(nullptr);
+			auctionInfo.category = request->category;
+			auctionInfo.page = request->page;
+			auctionInfo.data = std::vector<uint8_t>(data, data + len);
+			log(LL_Debug, "Auction info modified: %d\n", uid);
+		} else if(auctionInfo.flag == AuctionInfo::AIF_NotProcessed) {
+			auctionInfo.flag = AuctionInfo::AIF_Unmodifed;
+		}
+	} else {
+		auctionsState.insert(std::make_pair(uid, AuctionInfo(uid, AuctionInfo::AIF_Added, request->category, request->page, data, len)));
+		log(LL_Debug, "Auction info added: %d\n", uid);
+	}
+
+	auctionActives.push_back(AuctionInfo(uid, AuctionInfo::AIF_Added, request->category, request->page, data, len));
 }
 
 void AuctionManager::onAuctionSearchCompleted(bool success, int pageTotal, std::unique_ptr<AuctionWorker::AuctionRequest> request)
@@ -187,22 +209,90 @@ bool AuctionManager::isAllRequestProcessed()
 
 void AuctionManager::onAllRequestProcessed()
 {
-	log(LL_Info, "Auction results: category %d, %d pages, %d items\n", currentCategory, totalPages, (int)auctionInfos.size());
-	dumpAuctions();
+	currentCategory++;
+	if(currentCategory > CATEGORY_MAX_INDEX) {
+		dumpAuctions();
 
-	auctionInfos.clear();
-	if(currentCategory < 18)
-		currentCategory++;
-	else
 		currentCategory = 0;
+	}
 
 	totalPages = 1;
 	addRequest(currentCategory, 1);
 }
 
-bool AuctionManager::dumpAuctions()
+void AuctionManager::dumpAuctions()
 {
-	bool success = true;
+	processRemovedAuctions(auctionsState);
+
+	fileData.clear();
+	serializeAuctionInfos(auctionsState, false, fileData);
+	writeAuctionDataToFile(fileData, "_diff");
+
+	postProcessAuctionInfos(auctionsState);
+
+	fileData.clear();
+	serializeAuctionInfos(auctionActives, true, fileData);
+	writeAuctionDataToFile(fileData, "_full");
+	auctionActives.clear();
+}
+
+void AuctionManager::processRemovedAuctions(std::unordered_map<uint32_t, AuctionInfo> &auctionInfos) {
+	auto it = auctionInfos.begin();
+	for(; it != auctionInfos.end(); ++it) {
+		AuctionInfo& auctionInfo = it->second;
+		if(auctionInfo.flag == AuctionInfo::AIF_NotProcessed) {
+			auctionInfo.time = ::time(nullptr);
+			log(LL_Debug, "Auction info removed: %d\n", auctionInfo.uid);
+		}
+	}
+}
+
+void AuctionManager::postProcessAuctionInfos(std::unordered_map<uint32_t, AuctionInfo> &auctionInfos) {
+	auto it = auctionInfos.begin();
+	for(; it != auctionInfos.end();) {
+		AuctionInfo& auctionInfo = it->second;
+		if(auctionInfo.flag == AuctionInfo::AIF_NotProcessed) {
+			it = auctionInfos.erase(it);
+		} else {
+			auctionInfo.flag = AuctionInfo::AIF_NotProcessed;
+			++it;
+		}
+	}
+}
+
+template<class Container>
+void AuctionManager::serializeAuctionInfos(const Container &auctionInfos, bool includeUnmodified, std::vector<uint8_t> &output)
+{
+	bool memoryReserved = false;
+
+	auto it = auctionInfos.begin();
+	for(; it != auctionInfos.end(); ++it) {
+		const AuctionInfo& auctionInfo = getAuctionInfoFromValue(*it);
+		int diffType = getAuctionDiffType(auctionInfo.flag);
+
+		if(!includeUnmodified && diffType == D_Unmodified)
+			continue;
+
+		Header header = {0};
+		header.size = sizeof(header) + auctionInfo.data.size();
+		header.version = 1;
+		header.flag = (int16_t) diffType;
+		header.time = auctionInfo.time;
+		header.category = (int16_t) auctionInfo.category;
+
+		if(!memoryReserved) {
+			output.reserve(output.size() + header.size*auctionInfos.size());
+			memoryReserved = true;
+		}
+
+		const char* p = (const char*)&header;
+		output.insert(output.end(), p, p + sizeof(header));
+		output.insert(output.end(), auctionInfo.data.begin(), auctionInfo.data.end());
+	}
+}
+
+void AuctionManager::writeAuctionDataToFile(const std::vector<uint8_t> &data, const char* suffix)
+{
 	std::string auctionsDir = CONFIG_GET()->client.auctionListDir.get();
 	std::string auctionsFile = CONFIG_GET()->client.auctionListFile.get();
 	char filenameSuffix[256];
@@ -210,9 +300,9 @@ bool AuctionManager::dumpAuctions()
 
 	Utils::getGmTime(time(NULL), &localtm);
 
-	sprintf(filenameSuffix, "_%02d_%04d%02d%02d_%02d%02d%02d", currentCategory,
+	sprintf(filenameSuffix, "_%04d%02d%02d_%02d%02d%02d%s",
 			localtm.tm_year, localtm.tm_mon, localtm.tm_mday,
-			localtm.tm_hour, localtm.tm_min, localtm.tm_sec);
+			localtm.tm_hour, localtm.tm_min, localtm.tm_sec, suffix ? suffix : "");
 	auctionsFile.insert(auctionsFile.find_first_of('.'), filenameSuffix);
 
 	Utils::mkdir(auctionsDir.c_str());
@@ -221,78 +311,41 @@ bool AuctionManager::dumpAuctions()
 	FILE* file = fopen(auctionsFilename.c_str(), "wb");
 	if(!file) {
 		log(LL_Error, "Cannot open auction file %s\n", auctionsFilename.c_str());
-		return false;
-	}
-
-	std::vector<uint8_t> fileData;
-	auto it = auctionInfos.begin();
-	for(; it != auctionInfos.end(); ++it) {
-		const AuctionInfo& auctionInfo = *it;
-
-		uint32_t size = uint32_t(sizeof(auctionInfo.time) +
-								 sizeof(auctionInfo.category) +
-								 sizeof(auctionInfo.page) +
-								 auctionInfo.data.size());
-
-		if(fileData.empty())
-			fileData.reserve(size*auctionInfos.size());
-
-		static_assert(sizeof(size) == 4, "sizeof(size) must be 4");
-		static_assert(sizeof(auctionInfo.time) == 8, "sizeof(auctionInfo.time) must be 8");
-		static_assert(sizeof(auctionInfo.category) == 4, "sizeof(auctionInfo.category) must be 4");
-		static_assert(sizeof(auctionInfo.page) == 4, "sizeof(auctionInfo.page) must be 4");
-
-		fileData.push_back(size & 0xFF);
-		fileData.push_back((size >> 8) & 0xFF);
-		fileData.push_back((size >> 16) & 0xFF);
-		fileData.push_back((size >> 24) & 0xFF);
-
-		fileData.push_back(auctionInfo.time & 0xFF);
-		fileData.push_back((auctionInfo.time >> 8) & 0xFF);
-		fileData.push_back((auctionInfo.time >> 16) & 0xFF);
-		fileData.push_back((auctionInfo.time >> 24) & 0xFF);
-		fileData.push_back((auctionInfo.time >> 32) & 0xFF);
-		fileData.push_back((auctionInfo.time >> 40) & 0xFF);
-		fileData.push_back((auctionInfo.time >> 48) & 0xFF);
-		fileData.push_back((auctionInfo.time >> 56) & 0xFF);
-
-		fileData.push_back(auctionInfo.category & 0xFF);
-		fileData.push_back((auctionInfo.category >> 8) & 0xFF);
-		fileData.push_back((auctionInfo.category >> 16) & 0xFF);
-		fileData.push_back((auctionInfo.category >> 24) & 0xFF);
-
-		fileData.push_back(auctionInfo.page & 0xFF);
-		fileData.push_back((auctionInfo.page >> 8) & 0xFF);
-		fileData.push_back((auctionInfo.page >> 16) & 0xFF);
-		fileData.push_back((auctionInfo.page >> 24) & 0xFF);
-
-
-		fileData.insert(fileData.end(), auctionInfo.data.begin(), auctionInfo.data.end());
+		return;
 	}
 
 	size_t pos = auctionsFile.find_last_of(".gz");
 	if(pos == (auctionsFile.size() - 1)) {
 		log(LL_Info, "Writting compressed data to file %s\n", auctionsFile.c_str());
 
-		std::vector<uint8_t> compressedData(compressBound((uLong)fileData.size()));
+		std::vector<uint8_t> compressedData(compressBound((uLong)data.size()));
 		uLongf compressedDataSize = (uLongf)compressedData.size();
-		int result = compressGzip(&compressedData[0], &compressedDataSize, &fileData[0], (uLong)fileData.size(), Z_BEST_COMPRESSION);
+		int result = compressGzip(&compressedData[0], &compressedDataSize, &data[0], (uLong)data.size(), Z_BEST_COMPRESSION);
 		if(result == Z_OK) {
 			if(fwrite(&compressedData[0], sizeof(uint8_t), compressedDataSize, file) != compressedDataSize) {
 				log(LL_Error, "Failed to write data to file %s: error %d\n", auctionsFilename.c_str(), errno);
 			}
 		} else {
-			log(LL_Error, "Failed to compress %d bytes\n", (int)fileData.size());
+			log(LL_Error, "Failed to compress %d bytes\n", (int)data.size());
 		}
 	} else {
 		log(LL_Info, "Writting data to file %s\n", auctionsFile.c_str());
-		if(fwrite(&fileData[0], sizeof(uint8_t), fileData.size(), file) != fileData.size()) {
+		if(fwrite(&data[0], sizeof(uint8_t), data.size(), file) != data.size()) {
 			log(LL_Error, "Failed to write data to file %s: error %d\n", auctionsFilename.c_str(), errno);
 		}
 	}
 
 	fclose(file);
-	return success;
+}
+
+int AuctionManager::getAuctionDiffType(AuctionManager::AuctionInfo::Flag flag) {
+	switch(flag) {
+		case AuctionInfo::AIF_NotProcessed: return D_Deleted;
+		case AuctionInfo::AIF_Added: return D_Added;
+		case AuctionInfo::AIF_Updated: return D_Updated;
+		case AuctionInfo::AIF_Unmodifed: return D_Unmodified;
+	}
+	return D_Unrecognized + flag;
 }
 
 static int compressGzip(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen, int level) {
