@@ -1,8 +1,16 @@
 #include "AuthSession.h"
 #include "GameSession.h"
 #include "Core/EventLoop.h"
+#include "Config/ConfigParamVal.h"
 
-AuthSession::AuthSession(GameSession* gameSession, const std::string& ip, uint16_t port, const std::string& account, const std::string& password, int serverIdx, int delayTime, AuthCipherMethod method)
+AuthSession::AuthSession(GameSession* gameSession,
+						 cval<std::string>& ip,
+						 cval<int>& port,
+						 cval<int>& serverIdx,
+						 cval<int>& delayTime,
+						 cval<bool>& useRsa,
+						 const std::string& account,
+						 const std::string& password)
 	: ClientAuthSession(gameSession),
 	  gameSession(gameSession),
 	  ip(ip),
@@ -10,21 +18,22 @@ AuthSession::AuthSession(GameSession* gameSession, const std::string& ip, uint16
 	  account(account),
 	  password(password),
 	  serverIdx(serverIdx),
-	  method(method),
-	  disconnectRequested(false),
-	  delayTime(delayTime)
+	  delayTime(delayTime),
+	  useRsa(useRsa),
+	  disconnectRequested(false)
 {
 }
 
 void AuthSession::connect() {
 	disconnectRequested = false;
-	ClientAuthSession::connect(ip, port, account, password, method);
+	ClientAuthSession::connect(ip, port, account, password, useRsa.get() ? ACM_RSA_AES : ACM_DES);
 }
 
 void AuthSession::delayedConnect() {
-	if(delayTime > 0) {
-		log(LL_Info, "Will connect to auth in %dms\n", delayTime);
-		delayRecoTimer.start(this, &AuthSession::onDelayRecoExpired, delayTime, 0);
+	int delay = delayTime.get();
+	if(delay > 0) {
+		log(LL_Info, "Will connect to auth in %dms\n", delay);
+		delayRecoTimer.start(this, &AuthSession::onDelayRecoExpired, delay, 0);
 	} else {
 		connect();
 	}
@@ -56,7 +65,7 @@ void AuthSession::onAuthDisconnected() {
 
 void AuthSession::onAuthResult(TS_ResultCode result, const std::string& resultString) {
 	if(result != TS_RESULT_SUCCESS) {
-		log(LL_Error, "%s: Auth failed result: %d (%s)\n", account.c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
+		log(LL_Error, "%s: Auth failed result: %d (%s)\n", getAccountName().c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
 		abortSession();
 	} else {
 		log(LL_Debug, "Retrieving server list\n");
@@ -66,6 +75,7 @@ void AuthSession::onAuthResult(TS_ResultCode result, const std::string& resultSt
 
 void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t lastSelectedServerId) {
 	bool serverFound = false;
+	int serverIdxToSelect = serverIdx.get();
 
 	log(LL_Debug, "Server list (last id: %d)\n", lastSelectedServerId);
 	for(size_t i = 0; i < servers.size(); i++) {
@@ -77,13 +87,13 @@ void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t 
 				serverInfo.serverPort,
 				serverInfo.userRatio);
 
-		if(serverInfo.serverId == serverIdx && !serverFound) {
+		if(serverInfo.serverId == serverIdxToSelect && !serverFound) {
 			serverFound = true;
 		}
 	}
 
 	if(!serverFound) {
-		log(LL_Error, "Server with index %d not found\n", serverIdx);
+		log(LL_Error, "Server with index %d not found\n", serverIdxToSelect);
 		log(LL_Info, "Server list (last id: %d)\n", lastSelectedServerId);
 		for(size_t i = 0; i < servers.size(); i++) {
 			const ServerInfo& serverInfo = servers.at(i);
@@ -96,8 +106,8 @@ void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t 
 		}
 	}
 
-	log(LL_Info, "Connecting to GS with index %d\n", serverIdx);
-	selectServer(serverIdx);
+	log(LL_Info, "Connecting to GS with index %d\n", serverIdxToSelect);
+	selectServer(serverIdxToSelect);
 }
 
 void AuthSession::onGameDisconnected() {

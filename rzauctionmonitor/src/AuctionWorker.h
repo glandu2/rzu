@@ -11,7 +11,7 @@
 class AuctionManager;
 struct TS_SC_AUCTION_SEARCH;
 
-class AuctionWorker : public Object {
+class AuctionWorker : public Object, public IListener {
 	DECLARE_CLASS(AuctionWorker)
 public:
 	struct AuctionRequest {
@@ -21,18 +21,18 @@ public:
 
 		AuctionRequest(int category, int page) : category(category), page(page), failureNumber(0) {}
 	};
-	typedef void (*StoppedCallback)(IListener* instance);
+	typedef void (*StoppedCallback)(IListener* instance, AuctionWorker* worker);
 public:
 	AuctionWorker(AuctionManager* auctionManager,
-				  const std::string& playername,
-				  const std::string& ip,
-				  uint16_t port,
+				  cval<std::string>& ip,
+				  cval<int>& port,
+				  cval<int>& serverIdx,
+				  cval<int>& delayTime,
+				  cval<bool>& useRsa,
+				  cval<int>& autoRecoDelay,
 				  const std::string& account,
 				  const std::string& password,
-				  int serverIdx,
-				  int recoDelay,
-				  int autoRecoDelay,
-				  bool useRsa);
+				  const std::string& playername);
 
 	void start();
 	void stop(Callback<StoppedCallback> callback);
@@ -51,15 +51,19 @@ protected:
 	void onAuctionTimer();
 	void onReconnectTimer();
 
+	static void onClosed(IListener* instance);
+
 private:
 	AuctionManager* auctionManager;
 	GameSession gameSession;
 	AuthSession authSession;
 
 	bool isConnected;
-	Timer<AuctionWorker> auctionDelayTimer, auctionSearchTimer, reconnectTimer;
 	bool idle;
+	Timer<AuctionWorker> auctionDelayTimer, auctionSearchTimer, reconnectTimer;
 	std::unique_ptr<AuctionRequest> request;
+
+	Callback<StoppedCallback> stopCallback;
 };
 
 

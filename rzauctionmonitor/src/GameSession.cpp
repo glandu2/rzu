@@ -4,11 +4,13 @@
 #include <algorithm>
 #include "AuctionWorker.h"
 #include <time.h>
+#include "Config/ConfigParamVal.h"
 
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
 #include "GameClient/TS_SC_CHARACTER_LIST.h"
 #include "GameClient/TS_CS_LOGIN.h"
 #include "GameClient/TS_SC_LOGIN_RESULT.h"
+#include "GameClient/TS_CS_LOGOUT.h"
 #include "GameClient/TS_TIMESYNC.h"
 #include "GameClient/TS_SC_DISCONNECT_DESC.h"
 #include "GameClient/TS_CS_UPDATE.h"
@@ -18,7 +20,7 @@
 #include "TS_SC_AUCTION_SEARCH.h"
 #include "GameClient/TS_SC_RESULT.h"
 
-GameSession::GameSession(AuctionWorker *auctionWorker, const std::string& playername, int ggRecoTime)
+GameSession::GameSession(AuctionWorker *auctionWorker, const std::string& playername, cval<int>& ggRecoTime)
 	: auctionWorker(auctionWorker),
 	  playername(playername),
 	  connectedInGame(false),
@@ -30,11 +32,12 @@ GameSession::GameSession(AuctionWorker *auctionWorker, const std::string& player
 }
 
 void GameSession::onGameConnected() {
-	if(ggRecoTime > 10)
-		ggPreventionRecoTimer.start(this, &GameSession::onGGPreventionTimerExpired, (ggRecoTime - 10)*1000, 0);
-	if(ggRecoTime > 0) {
-		log(LL_Debug, "Starting GG timer: %ds\n", ggRecoTime);
-		ggRecoTimer.start(this, &GameSession::onGGTimerExpired, ggRecoTime*1000, 0);
+	int ggRecoTimeValue = ggRecoTime.get();
+	if(ggRecoTimeValue > 10)
+		ggPreventionRecoTimer.start(this, &GameSession::onGGPreventionTimerExpired, (ggRecoTimeValue - 10)*1000, 0);
+	if(ggRecoTimeValue > 0) {
+		log(LL_Debug, "Starting GG timer: %ds\n", ggRecoTimeValue);
+		ggRecoTimer.start(this, &GameSession::onGGTimerExpired, ggRecoTimeValue*1000, 0);
 	}
 	shouldReconnect = false;
 
@@ -44,6 +47,12 @@ void GameSession::onGameConnected() {
 	TS_MESSAGE::initMessage<TS_CS_CHARACTER_LIST>(&charlistPkt);
 	strcpy(charlistPkt.account, auth->getAccountName().c_str());
 	sendPacket(&charlistPkt);
+}
+
+void GameSession::close() {
+	TS_CS_LOGOUT logoutPkt;
+	sendPacket(logoutPkt, EPIC_LATEST);
+	closeSession();
 }
 
 void GameSession::onGameDisconnected() {
@@ -60,7 +69,7 @@ void GameSession::onGGPreventionTimerExpired() {
 
 void GameSession::onGGTimerExpired() {
 	log(LL_Info, "GG timeout, reconnecting\n");
-	abortSession();
+	close();
 }
 
 void GameSession::onUpdatePacketExpired() {

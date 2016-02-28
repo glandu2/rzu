@@ -3,23 +3,76 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "zlib.h"
+#include "Console/ConsoleCommands.h"
 
 static int compressGzip(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen, int level);
 
-AuctionManager::AuctionManager() : totalPages(0)
-{
+AuctionManager* AuctionManager::instance = nullptr;
 
+void AuctionManager::onReloadAccounts(IWritableConsole* console, const std::vector<std::string>&) {
+	if(!instance) {
+		console->write("No auction manager instance !\r\n");
+	} else if(!instance->stoppingClients.empty() || instance->reloadingAccounts) {
+		console->write("Account reload already in progress\r\n");
+	} else {
+		instance->reloadAccounts();
+		console->write("Reloading accounts\r\n");
+	}
+}
+
+AuctionManager::AuctionManager() : totalPages(0), reloadingAccounts(false)
+{
+	if(!instance) {
+		ConsoleCommands::get()->addCommand("client.reload_accounts", "reload", 0, &AuctionManager::onReloadAccounts,
+										   "Restart clients and reload accounts from accounts file");
+		instance = this;
+	} else {
+		log(LL_Error, "Multiples instance of AuctionManager started, reload command will not apply to this instance\n");
+	}
 }
 
 void AuctionManager::start()
 {
+	loadAccounts();
+
+	totalPages = 1;
+	currentCategory = 0;
+	addRequest(currentCategory, 1);
+}
+
+void AuctionManager::stop()
+{
+	log(LL_Info, "Stopping %d clients\n", (int)clients.size());
+
+	stoppingClients.insert(stoppingClients.end(), std::make_move_iterator(clients.begin()), std::make_move_iterator(clients.end()));
+	clients.clear();
+
+	auto it = stoppingClients.begin();
+	for(; it != stoppingClients.end(); ++it) {
+		(*it)->stop(Callback<AuctionWorker::StoppedCallback>(this, &AuctionManager::onClientStoppedStatic));
+	}
+}
+
+void AuctionManager::reloadAccounts() {
+	if(stoppingClients.empty()) {
+		reloadingAccounts = true;
+		stop();
+		if(stoppingClients.empty()) {
+			loadAccounts();
+		}
+	} else {
+		log(LL_Error, "Attempt to reload clients but %d clients are still stopping\n", (int)stoppingClients.size());
+	}
+}
+
+void AuctionManager::loadAccounts() {
 	std::string accountFile = CONFIG_GET()->client.accountFile.get();
-	std::string ip = CONFIG_GET()->client.ip.get();
-	uint16_t port = (uint16_t) CONFIG_GET()->client.port.get();
-	int serverIdx = CONFIG_GET()->client.gsindex.get();
-	int recoDelay = CONFIG_GET()->client.recoDelay.get();
-	int autoRecoDelay = CONFIG_GET()->client.autoRecoDelay.get();
-	bool useRsa = CONFIG_GET()->client.useRsa.get();
+	cval<std::string>& ip = CONFIG_GET()->client.ip;
+	cval<int>& port = CONFIG_GET()->client.port;
+	cval<int>& serverIdx = CONFIG_GET()->client.gsindex;
+	cval<int>& recoDelay = CONFIG_GET()->client.recoDelay;
+	cval<int>& autoRecoDelay = CONFIG_GET()->client.autoRecoDelay;
+	cval<bool>& useRsa = CONFIG_GET()->client.useRsa;
 
 	char line[1024];
 	char *p, *lastP;
@@ -62,41 +115,25 @@ void AuctionManager::start()
 		}
 
 		AuctionWorker* auctionWorker = new AuctionWorker(this,
-														 playerName,
 														 ip,
 														 port,
-														 account,
-														 password,
 														 serverIdx,
 														 recoDelay,
+														 useRsa,
 														 autoRecoDelay,
-														 useRsa);
+														 account,
+														 password,
+														 playerName);
 		auctionWorker->start();
 		clients.push_back(std::unique_ptr<AuctionWorker>(auctionWorker));
 
 		log(LL_Info, "Added account %s:%s:%s\n", account.c_str(), password.c_str(), playerName.c_str());
 	}
 	log(LL_Info, "Loaded %d accounts\n", (int)clients.size());
-
-	totalPages = 1;
-	currentCategory = 0;
-	addRequest(currentCategory, 1);
 }
 
-void AuctionManager::stop()
-{
-//	for(int i = 0; i < clients.size(); i++) {
-//		clients[i]->stop();
-//	}
-	pendingRequests.clear();
-}
-
-void AuctionManager::reloadAccounts() {
-
-}
-
-void AuctionManager::onClientStopped(IListener* instance) {
-	AuctionWorker* worker = (AuctionWorker*) instance;
+void AuctionManager::onClientStoppedStatic(IListener* instance, AuctionWorker* worker) { ((AuctionManager*) instance)->onClientStopped(worker); }
+void AuctionManager::onClientStopped(AuctionWorker* worker) {
 	bool foundWorker = false;
 
 	log(LL_Info, "Worker stopped: %s\n", worker->getObjectName());
@@ -105,6 +142,8 @@ void AuctionManager::onClientStopped(IListener* instance) {
 	for(; it != stoppingClients.end(); ++it) {
 		std::unique_ptr<AuctionWorker>& currentWorker = *it;
 		if(currentWorker.get() == worker) {
+			AuctionWorker* workerPtr = currentWorker.release();
+			workerPtr->deleteLater();
 			stoppingClients.erase(it);
 			foundWorker = true;
 			break;
@@ -113,6 +152,14 @@ void AuctionManager::onClientStopped(IListener* instance) {
 
 	if(!foundWorker)
 		log(LL_Warning, "Worker %s stopped but not found in currently stopping workers, %d worker left to stop\n", worker->getObjectName(), (int)stoppingClients.size());
+
+	if(stoppingClients.empty())
+		accountReloadTimer.start(this, &AuctionManager::onAccountReloadTimer, CONFIG_GET()->client.recoDelay.get(), 0);
+}
+
+void AuctionManager::onAccountReloadTimer() {
+	loadAccounts();
+	reloadingAccounts = false;
 }
 
 void AuctionManager::addRequest(int category, int page)
@@ -230,9 +277,11 @@ void AuctionManager::dumpAuctions()
 
 	postProcessAuctionInfos(auctionsState);
 
-	fileData.clear();
-	serializeAuctionInfos(auctionActives, true, fileData);
-	writeAuctionDataToFile(fileData, "_full");
+	if(CONFIG_GET()->client.doFullAuctionDump.get()) {
+		fileData.clear();
+		serializeAuctionInfos(auctionActives, true, fileData);
+		writeAuctionDataToFile(fileData, "_full");
+	}
 	auctionActives.clear();
 }
 

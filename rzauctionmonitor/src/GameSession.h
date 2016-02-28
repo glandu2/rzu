@@ -14,7 +14,9 @@ class AuctionWorker;
 class GameSession : public ClientGameSession {
 	DECLARE_CLASS(GameSession)
 public:
-	GameSession(AuctionWorker* auctionWorker, const std::string& playername, int ggRecoTime);
+	GameSession(AuctionWorker* auctionWorker, const std::string& playername, cval<int>& ggRecoTime);
+
+	void close();
 
 	void onGameConnected();
 	void onGamePacketReceived(const TS_MESSAGE *packet);
@@ -45,7 +47,7 @@ private:
 
 	Timer<GameSession> updateTimer;
 
-	int ggRecoTime;
+	cval<int>& ggRecoTime;
 	Timer<GameSession> ggPreventionRecoTimer; //allow graceful reconnect when no auction search is in progress
 	Timer<GameSession> ggRecoTimer;
 };

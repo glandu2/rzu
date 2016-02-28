@@ -3,14 +3,23 @@
 #include "GlobalConfig.h"
 #include "TS_SC_AUCTION_SEARCH.h"
 
-AuctionWorker::AuctionWorker(AuctionManager *auctionManager, const std::string &playername, const std::string &ip, uint16_t port, const std::string &account, const std::string &password, int serverIdx, int recoDelay, int autoRecoDelay, bool useRsa)
+AuctionWorker::AuctionWorker(AuctionManager *auctionManager,
+							 cval<std::string> &ip,
+							 cval<int> &port,
+							 cval<int> &serverIdx,
+							 cval<int> &delayTime,
+							 cval<bool> &useRsa,
+							 cval<int> &autoRecoDelay,
+							 const std::string &account,
+							 const std::string &password,
+							 const std::string &playername)
 	: auctionManager(auctionManager),
 	  gameSession(this, playername, autoRecoDelay),
-	  authSession(&gameSession, ip, port, account, password, serverIdx, recoDelay, useRsa ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES),
+	  authSession(&gameSession, ip, port, serverIdx, delayTime, useRsa, account, password),
 	  isConnected(false),
 	  idle(true)
 {
-	log(LL_Info, "Initialized worker using character %s on GS %d@%s:%d\n", playername.c_str(), serverIdx, ip.c_str(), port);
+	log(LL_Info, "Initialized worker using character %s on GS %d@%s:%d\n", playername.c_str(), serverIdx.get(), ip.get().c_str(), port.get());
 }
 
 void AuctionWorker::start()
@@ -24,7 +33,14 @@ void AuctionWorker::start()
 
 void AuctionWorker::stop(Callback<AuctionWorker::StoppedCallback> callback)
 {
-	authSession.disconnect(callback);
+	stopCallback = callback;
+	authSession.disconnect(Callback<AuthSession::DisconnectedCallback>(this, &AuctionWorker::onClosed));
+}
+
+void AuctionWorker::onClosed(IListener *instance) {
+	AuctionWorker* thisInstance = (AuctionWorker*) instance;
+
+	CALLBACK_CALL(thisInstance->stopCallback, thisInstance);
 }
 
 void AuctionWorker::onConnected()

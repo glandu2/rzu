@@ -13,13 +13,13 @@ public:
 	typedef void (*DisconnectedCallback)(IListener* instance);
 public:
 	AuthSession(GameSession* gameSession,
-					const std::string& ip,
-					uint16_t port,
-					const std::string& account,
-					const std::string& password,
-					int serverIdx,
-					int delayTime,
-					AuthCipherMethod method = ACM_DES);
+				cval<std::string>& ip,
+				cval<int>& port,
+				cval<int>& serverIdx,
+				cval<int>& delayTime,
+				cval<bool>& useRsa,
+				const std::string& account,
+				const std::string& password);
 
 	void connect();
 	void disconnect(Callback<DisconnectedCallback> callback);
@@ -41,15 +41,16 @@ private:
 
 private:
 	GameSession* gameSession;
-	std::string ip;
-	uint16_t port;
+
+	cval<std::string>& ip;
+	cval<int>& port;
 	std::string account;
 	std::string password;
-	int serverIdx;
-	AuthCipherMethod method;
+	cval<int>& serverIdx;
+	cval<int>& delayTime;
+	cval<bool>& useRsa;
 
 	bool disconnectRequested;
-	int delayTime;
 
 	Timer<AuthSession> delayRecoTimer;
 	Callback<DisconnectedCallback> disconnectedCallback;
