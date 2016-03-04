@@ -33,6 +33,7 @@ static void init() {
 	CFG_CREATE("password", "admin");
 	CFG_CREATE("use_rsa", false);
 	CFG_CREATE("delay", 0);
+	CFG_CREATE("recodelay", 0);
 	CFG_CREATE("idxoffset", 0);
 	CFG_CREATE("usecperconnection", 0);
 	CFG_CREATE("benchconnection", false);
@@ -59,6 +60,7 @@ void benchmarkAuthentication() {
 	config.port = CFG_GET("port")->getInt();
 	config.connectionTargetCount = CFG_GET("targetcount")->getInt();
 	config.delay = CFG_GET("delay")->getInt();
+	config.recoDelay = CFG_GET("recodelay")->getInt();
 	config.method = CFG_GET("use_rsa")->getBool()? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES;
 	config.version = "205001120";
 

@@ -6,6 +6,8 @@ BenchmarkAuthSession::BenchmarkAuthSession(BenchmarkConfig* config) : ClientAuth
 	delayTimer.data = this;
 	this->config = config;
 	uv_timer_init(EventLoop::getLoop(), &delayTimer);
+	recoDelayTimer.data = this;
+	uv_timer_init(EventLoop::getLoop(), &recoDelayTimer);
 }
 
 void BenchmarkAuthSession::connect(const std::string& ip, const std::string& account, const std::string& password) {
@@ -25,9 +27,23 @@ void BenchmarkAuthSession::onAuthDisconnected() {
 		config->connectionsDone++;
 		if(config->connectionsStarted < config->connectionTargetCount) {
 			config->connectionsStarted++;
-			ClientAuthSession::connect(ip, config->port, account, password, config->method, config->version);
+			if(config->recoDelay > 0) {
+				uv_timer_start(&recoDelayTimer, &onAuthRecoDelayExpired, config->recoDelay, 0);
+			} else {
+				ClientAuthSession::connect(ip, config->port, account, password, config->method, config->version);
+			}
 		}
 	}
+}
+
+void BenchmarkAuthSession::onAuthRecoDelayExpired(uv_timer_t *timer) {
+	BenchmarkAuthSession* thisInstance = (BenchmarkAuthSession*) timer->data;
+	thisInstance->ClientAuthSession::connect(thisInstance->ip,
+											 thisInstance->config->port,
+											 thisInstance->account,
+											 thisInstance->password,
+											 thisInstance->config->method,
+											 thisInstance->config->version);
 }
 
 void BenchmarkAuthSession::onAuthResult(TS_ResultCode result, const std::string& resultString) {
