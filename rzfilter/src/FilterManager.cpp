@@ -3,7 +3,7 @@
 #include "Core/EventLoop.h"
 #include <time.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 	static const char* newModuleName = "rzfilter_module.dll";
 	static const char* usedModuleName = "rzfilter_module_used.dll";
 #elif defined(__APPLE__)
