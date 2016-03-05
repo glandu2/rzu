@@ -1,7 +1,7 @@
 #include "PositionManager.h"
 #include "Core/Utils.h"
 #include <array>
-#include <cmath>
+#include <stdlib.h>
 #include <algorithm>
 
 namespace GameServer {
@@ -22,7 +22,7 @@ bool Region::isVisibleRegion(const Region &other) {
 	if(other.layer != layer)
 		return false;
 
-	int32_t distance = std::abs(rx - other.rx) + std::abs(ry - other.ry);
+	int32_t distance = ::abs(rx - other.rx) + ::abs(ry - other.ry);
 	return distance <= VISIBILITY_RADIUS;
 }
 
@@ -94,8 +94,8 @@ void PositionManager::updateRegion(Movable *movable, float oldX, float oldY, uin
 	movable->onRegionChange(&oldRegion, &newRegion);
 
 	for(int32_t rx = oldRegion.rx - Region::VISIBILITY_RADIUS; rx <= oldRegion.rx + Region::VISIBILITY_RADIUS; rx++) {
-		int32_t ryStart = oldRegion.ry - Region::VISIBILITY_RADIUS + std::abs(rx - oldRegion.rx);
-		int32_t ryEnd = oldRegion.ry + Region::VISIBILITY_RADIUS - std::abs(rx - oldRegion.rx);
+		int32_t ryStart = oldRegion.ry - Region::VISIBILITY_RADIUS + ::abs(rx - oldRegion.rx);
+		int32_t ryEnd = oldRegion.ry + Region::VISIBILITY_RADIUS - ::abs(rx - oldRegion.rx);
 
 		for(int32_t ry = ryStart; ry <= ryEnd; ry++) {
 			Region testRegion(rx, ry, oldRegion.layer);
@@ -107,8 +107,8 @@ void PositionManager::updateRegion(Movable *movable, float oldX, float oldY, uin
 	}
 
 	for(int32_t rx = newRegion.rx - Region::VISIBILITY_RADIUS; rx <= newRegion.rx + Region::VISIBILITY_RADIUS; rx++) {
-		int32_t ryStart = newRegion.ry - Region::VISIBILITY_RADIUS + std::abs(rx - newRegion.rx);
-		int32_t ryEnd = newRegion.ry + Region::VISIBILITY_RADIUS - std::abs(rx - newRegion.rx);
+		int32_t ryStart = newRegion.ry - Region::VISIBILITY_RADIUS + ::abs(rx - newRegion.rx);
+		int32_t ryEnd = newRegion.ry + Region::VISIBILITY_RADIUS - ::abs(rx - newRegion.rx);
 
 		for(int32_t ry = ryStart; ry <= ryEnd; ry++) {
 			Region testRegion(rx, ry, newRegion.layer);
