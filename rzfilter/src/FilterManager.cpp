@@ -7,6 +7,7 @@
 	static const char* newModuleName = "rzfilter_module.dll";
 	static const char* usedModuleName = "rzfilter_module_used.dll";
 #elif defined(__APPLE__)
+	#include <unistd.h>
 	static const char* newModuleName = "rzfilter_module.dylib";
 	static const char* usedModuleName = "rzfilter_module_used.dylib";
 #else
