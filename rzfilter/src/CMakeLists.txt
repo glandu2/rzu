@@ -7,4 +7,4 @@ if( versioncmakefound )
     add_git_version_info(${TARGET_NAME}_GitVersion SOURCE_FILES)
 endif()
 
-add_exe(${TARGET_NAME} "${SOURCE_FILES}" rzu)
+add_exe(${TARGET_NAME} "${SOURCE_FILES}" rzu rzfilter_interface)

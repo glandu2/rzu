@@ -32,8 +32,8 @@ public:
 	void clientAuthResult(DB_Account *query);
 
 protected:
-	void onPacketReceived(const TS_MESSAGE* packet);
-	void onDisconnected(bool causedByRemote);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<SocketSession> onDisconnected(bool causedByRemote);
 
 	void onVersion(const TS_CA_VERSION* packet);
 	void onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet);

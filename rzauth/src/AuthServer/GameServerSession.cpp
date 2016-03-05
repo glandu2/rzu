@@ -49,8 +49,9 @@ GameServerSession::~GameServerSession() {
 	// else the server connection changed (this one was maybe halfopen)
 }
 
-void GameServerSession::onConnected() {
+EventChain<SocketSession> GameServerSession::onConnected() {
 	getStream()->setKeepAlive(30);
+	return PacketSession::onConnected();
 }
 
 void GameServerSession::setGameData(GameData* gameData) {
@@ -68,7 +69,7 @@ void GameServerSession::setGameData(GameData* gameData) {
 	}
 }
 
-void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_GA_LOGIN_WITH_LOGOUT::packetID:
 			useAutoReconnectFeature = true;
@@ -108,6 +109,8 @@ void GameServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 			log(LL_Debug, "Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
 			break;
 	}
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {

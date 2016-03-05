@@ -39,14 +39,13 @@ public:
 	static bool hasCustomPacketLoggerStatic() { return true; }
 
 protected:
-
-	virtual void onPacketReceived(const LS_11N4S* packet) {}
+	virtual EventChain<LogPacketSession> onPacketReceived(const LS_11N4S* packet) { return EventChain<LogPacketSession>(); }
 
 	void dispatchPacket(const LS_11N4S* packetData);
 	virtual void logPacket(bool outgoing, const LS_11N4S* msg);
 
 private:
-	void onDataReceived();
+	EventChain<SocketSession> onDataReceived();
 
 private:
 	InputBuffer inputBuffer;

@@ -9,6 +9,7 @@ struct BenchmarkConfig {
 	ClientAuthSession::AuthCipherMethod method;
 	std::string version;
 	int delay;
+	int recoDelay;
 	int connectionsDone;
 	int connectionsStarted;
 	int connectionTargetCount;
@@ -32,6 +33,7 @@ private:
 	virtual void onGameResult(TS_ResultCode result);
 
 	static void onAuthDelayExpired(uv_timer_t* timer);
+	static void onAuthRecoDelayExpired(uv_timer_t* timer);
 
 private:
 	BenchmarkConfig* config;
@@ -41,7 +43,7 @@ private:
 
 	bool doReconnect;
 	uv_timer_t delayTimer;
-
+	uv_timer_t recoDelayTimer;
 };
 
 #endif // BENCHMARKAUTHSESSION_H

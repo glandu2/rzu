@@ -18,14 +18,24 @@ class ClientSession : public EncryptedSession<PacketSession>, public IFilterEndp
 public:
 	ClientSession();
 
+	void sendPacket(MessageBuffer& buffer) {
+		if(buffer.checkFinalSize() == false) {
+			log(LL_Error, "Wrong packet buffer size, id: %d, size: %d, field: %s\n", buffer.getMessageId(), buffer.getSize(), buffer.getFieldInOverflow().c_str());
+		} else {
+			logPacket(true, (const TS_MESSAGE*)buffer.getData());
+			write(buffer.getWriteRequest());
+		}
+	}
 	void sendPacket(const TS_MESSAGE *data) { PacketSession::sendPacket(data); }
+	int getPacketVersion() { return version; }
+
 	void onServerPacketReceived(const TS_MESSAGE* packet);
 
 protected:
 	void logPacket(bool outgoing, const TS_MESSAGE* msg);
-	void onPacketReceived(const TS_MESSAGE* packet);
-	void onConnected();
-	void onDisconnected(bool causedByRemote);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<SocketSession> onConnected();
+	EventChain<SocketSession> onDisconnected(bool causedByRemote);
 
 	virtual void updateObjectName();
 
@@ -34,6 +44,7 @@ private:
 
 	ServerSession serverSession;
 	IFilter* packetFilter;
+	int version;
 };
 
 #endif // CLIENTSESSION_H

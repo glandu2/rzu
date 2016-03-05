@@ -19,7 +19,7 @@ public:
 	ClientSession();
 
 protected:
-	void onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 
 	void onLogin(const TS_CU_LOGIN* packet);
 	void onUpload(const TS_CU_UPLOAD* packet);

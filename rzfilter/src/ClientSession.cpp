@@ -8,12 +8,13 @@
 
 #include "PacketEnums.h"
 #include "AuthClient/TS_AC_SERVER_LIST.h"
+#include "AuthClient/TS_AC_SELECT_SERVER.h"
 #include "Packet/PacketEpics.h"
 
-#include "PacketFilter.h"
+#include "FilterManager.h"
 
 ClientSession::ClientSession()
-  : serverSession(this), packetFilter(new PacketFilter)
+  : serverSession(this), packetFilter(new FilterManager), version(CONFIG_GET()->client.epic.get())
 {
 }
 
@@ -21,16 +22,20 @@ ClientSession::~ClientSession() {
 	delete packetFilter;
 }
 
-void ClientSession::onConnected() {
+EventChain<SocketSession> ClientSession::onConnected() {
 	log(LL_Info, "Client connected, connecting server session\n");
 	serverSession.connect();
 	setDirtyObjectName();
 	getStream()->setNoDelay(true);
+
+	return PacketSession::onConnected();
 }
 
-void ClientSession::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 	log(LL_Info, "Client disconnected, disconnecting server session\n");
 	serverSession.closeSession();
+
+	return PacketSession::onDisconnected(causedByRemote);
 }
 
 void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
@@ -50,15 +55,17 @@ void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 						   int(msg->size - sizeof(TS_MESSAGE)));
 }
 
-void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	//log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
 	if(packetFilter->onClientPacket(this, &serverSession, packet))
 		serverSession.sendPacket(packet);
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == TS_AC_SERVER_LIST::packetID && CONFIG_GET()->client.authMode.get() == true) {
-		MessageBuffer buffer(packet, packet->size, EPIC_9_1);
+		MessageBuffer buffer(packet, packet->size, version);
 		TS_AC_SERVER_LIST serverList;
 
 		serverList.deserialize(&buffer);
@@ -77,7 +84,7 @@ void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 			if(filterPort > 0)
 				currentServerInfo.server_port = filterPort;
 		}
-		PacketSession::sendPacket(serverList, EPIC_9_1);
+		PacketSession::sendPacket(serverList, version);
 	} else {
 		//log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 		if(packetFilter->onServerPacket(this, &serverSession, packet))

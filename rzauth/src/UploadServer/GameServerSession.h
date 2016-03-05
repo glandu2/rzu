@@ -21,7 +21,7 @@ public:
 protected:
 	~GameServerSession();
 
-	void onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 
 	void onLogin(const TS_SU_LOGIN* packet);
 	void onRequestUpload(const TS_SU_REQUEST_UPLOAD* packet);

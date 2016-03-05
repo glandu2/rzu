@@ -35,14 +35,16 @@ ClientSession::~ClientSession() {
 		ClientData::removeClient(clientData);
 }
 
-void ClientSession::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 	if(clientData) {
 		ClientData::removeClient(clientData);
 		clientData = nullptr;
 	}
+
+	return PacketSession::onDisconnected(causedByRemote);
 }
 
-void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_CA_VERSION::packetID:
 			onVersion(static_cast<const TS_CA_VERSION*>(packet));
@@ -75,6 +77,8 @@ void ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 			log(LL_Debug, "Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
 			break;
 	}
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void ClientSession::onVersion(const TS_CA_VERSION* packet) {

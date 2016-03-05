@@ -27,7 +27,7 @@ public:
 	};
 
 protected:
-	void onPacketReceived(const LS_11N4S* packet);
+	EventChain<LogPacketSession> onPacketReceived(const LS_11N4S* packet);
 
 	bool isDateNeedNewFile(const struct tm& date);
 	bool checkName(std::string name);

@@ -44,9 +44,9 @@ bool ClientAuthSession::connect(const std::string& ip, uint16_t port, const std:
 }
 
 void ClientAuthSession::close() {
-	getStream()->close();
+	closeSession();
 	if(gameSession)
-		gameSession->getStream()->close();
+		gameSession->close();
 }
 
 void ClientAuthSession::retreiveServerList() {
@@ -78,23 +78,25 @@ bool ClientAuthSession::selectServer(uint16_t serverId) {
 	return true;
 }
 
-void ClientAuthSession::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> ClientAuthSession::onDisconnected(bool causedByRemote) {
 	if(normalDisconnect == false) {
 		onAuthDisconnected();
 	} else {
 		normalDisconnect = false;
 	}
+
+	return PacketSession::onDisconnected(causedByRemote);
 }
 
-void ClientAuthSession::onPacketReceived(const TS_MESSAGE* packetData) {
-	switch(packetData->id) {
+EventChain<PacketSession> ClientAuthSession::onPacketReceived(const TS_MESSAGE* packet) {
+	switch(packet->id) {
 		case TS_AC_AES_KEY_IV::packetID:
-			onPacketAuthPasswordKey(reinterpret_cast<const TS_AC_AES_KEY_IV*>(packetData));
+			onPacketAuthPasswordKey(reinterpret_cast<const TS_AC_AES_KEY_IV*>(packet));
 			break;
 
 		case TS_AC_RESULT::packetID:
 		{
-			const TS_AC_RESULT* resultMsg = reinterpret_cast<const TS_AC_RESULT*>(packetData);
+			const TS_AC_RESULT* resultMsg = reinterpret_cast<const TS_AC_RESULT*>(packet);
 			if(resultMsg->request_msg_id == TS_CA_ACCOUNT::packetID) {
 				onAuthResult((TS_ResultCode)resultMsg->result, std::string());
 			}
@@ -103,7 +105,7 @@ void ClientAuthSession::onPacketReceived(const TS_MESSAGE* packetData) {
 
 		case TS_AC_RESULT_WITH_STRING::packetID:
 		{
-			const TS_AC_RESULT_WITH_STRING* resultMsg = reinterpret_cast<const TS_AC_RESULT_WITH_STRING*>(packetData);
+			const TS_AC_RESULT_WITH_STRING* resultMsg = reinterpret_cast<const TS_AC_RESULT_WITH_STRING*>(packet);
 			if(resultMsg->request_msg_id == TS_CA_ACCOUNT::packetID) {
 				onAuthResult((TS_ResultCode)resultMsg->result, std::string(resultMsg->string, resultMsg->strSize));
 			}
@@ -111,20 +113,22 @@ void ClientAuthSession::onPacketReceived(const TS_MESSAGE* packetData) {
 		}
 
 		case TS_AC_SERVER_LIST::packetID: {
-			packetData->process(this, &ClientAuthSession::onPacketServerList, EPIC_LATEST);
+			packet->process(this, &ClientAuthSession::onPacketServerList, EPIC_LATEST);
 			break;
 		}
 
 		case TS_AC_SELECT_SERVER::packetID:
-			onPacketSelectServerResult(reinterpret_cast<const TS_AC_SELECT_SERVER*>(packetData));
+			onPacketSelectServerResult(reinterpret_cast<const TS_AC_SELECT_SERVER*>(packet));
 			break;
 	}
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 ////////////////////////////////////////////////////////
 
 void* ClientAuthSession::rsaCipher = nullptr;
-void ClientAuthSession::onConnected() {
+EventChain<SocketSession> ClientAuthSession::onConnected() {
 	TS_CA_VERSION versionMsg;
 
 	TS_MESSAGE::initMessage<TS_CA_VERSION>(&versionMsg);
@@ -178,6 +182,8 @@ void ClientAuthSession::onConnected() {
 		sendPacket(keyMsg);
 		TS_MESSAGE_WNA::destroy(keyMsg);
 	}
+
+	return PacketSession::onConnected();
 }
 
 void ClientAuthSession::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) {
@@ -200,7 +206,7 @@ void ClientAuthSession::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) 
 //	rsaCipher = 0;
 	if(data_size != 32) {
 		log(LL_Warning, "onPacketAuthPasswordKey: invalid decrypted data size: %d\n", data_size);
-		getStream()->close();
+		closeSession();
 		return;
 	}
 
@@ -225,7 +231,7 @@ end:
 
 	if(ok == false) {
 		log(LL_Warning, "onPacketAuthPasswordKey: could not encrypt password !\n");
-		getStream()->close();
+		closeSession();
 		return;
 	}
 
@@ -304,7 +310,7 @@ end:
 
 		if(ok == false) {
 			log(LL_Warning, "onPacketSelectServerResult: Could not decrypt TS_AC_SELECT_SERVER\n");
-			getStream()->close();
+			closeSession();
 			return;
 		}
 
@@ -316,7 +322,7 @@ end:
 	if(gameSession)
 		gameSession->connect(selectedServerInfo.ip.c_str(), selectedServerInfo.port);
 	normalDisconnect = true;
-	getStream()->close();
+	closeSession();
 
 	std::vector<ServerConnectionInfo> empty;
 	serverList.swap(empty);

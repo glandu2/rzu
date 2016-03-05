@@ -27,13 +27,15 @@ IconServerSession::IconServerSession() {
 	this->urlLength = 0;
 }
 
-void IconServerSession::onDataReceived() {
+EventChain<SocketSession> IconServerSession::onDataReceived() {
 	std::vector<char> buffer;
 
 	if(getStream()->getAvailableBytes() > 0) {
 		getStream()->readAll(&buffer);
 		parseData(buffer);
 	}
+
+	return SocketSession::onDataReceived();
 }
 
 void IconServerSession::parseData(const std::vector<char>& data) {

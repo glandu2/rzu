@@ -3,8 +3,20 @@
 #include "GameClient/TS_SC_CHAT.h"
 #include <sstream>
 
-PacketFilter::PacketFilter()
+PacketFilter::PacketFilter(PacketFilter *oldFilter)
 {
+	if(oldFilter) {
+		data = oldFilter->data;
+		oldFilter->data = nullptr;
+	} else {
+		data = new Data;
+	}
+}
+
+PacketFilter::~PacketFilter()
+{
+	if(data)
+		delete data;
 }
 
 void PacketFilter::sendChatMessage(IFilterEndpoint* client, const char* msg) {
@@ -27,9 +39,11 @@ void PacketFilter::sendChatMessage(IFilterEndpoint* client, const char* msg) {
 }
 
 bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet) {
+	clientp = client;
+
 	switch(packet->id) {
 		case TS_SC_SKILL::packetID: {
-			const TS_SC_SKILL* skillPacket = reinterpret_cast<const TS_SC_SKILL*>(packet);
+			/*const TS_SC_SKILL* skillPacket = reinterpret_cast<const TS_SC_SKILL*>(packet);
 			char buffer[1024];
 			char *p = buffer;
 			buffer[0] = 0;
@@ -128,7 +142,7 @@ bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* serv
 				default:
 					p += sprintf(p, "unknown (%d)", skillPacket->type);
 					sendChatMessage(client, buffer);
-			}
+			}*/
 			break;
 		}
 
@@ -149,6 +163,14 @@ bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* serv
 			sendChatMessage(client, buffer);
 			break;
 		}
+
+		case TS_SC_INVENTORY::packetID:
+			packet->process(this, &PacketFilter::onInventory, server->getPacketVersion());
+			break;
+
+		case TS_SC_ATTACK_EVENT::packetID:
+			packet->process(this, &PacketFilter::onAttack, server->getPacketVersion());
+			break;
 	}
 
 	return true;
@@ -156,4 +178,68 @@ bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* serv
 
 bool PacketFilter::onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet) {
 	return true;
+}
+
+void PacketFilter::onInventory(const TS_SC_INVENTORY *packet) {
+	int i;
+	for(i = 0; i < packet->items.size(); i++) {
+		const TS_ITEM_INFO& inventoryItem = packet->items[i];
+		Item item;
+		item.handle = inventoryItem.base_info.handle;
+		item.code = inventoryItem.base_info.code;
+		item.uid = inventoryItem.base_info.uid;
+		item.count = inventoryItem.base_info.count;
+		data->items.insert(std::pair<uint32_t, Item>(item.handle, item));
+	}
+}
+
+void PacketFilter::onAttack(const TS_SC_ATTACK_EVENT *packet) {
+/*	char buffer[512];
+
+	sprintf(buffer,
+			"Attack evt: 0x%08X > 0x%08X, %dspd, %ddl, act: %d, flg: %d",
+			packet->attacker_handle,
+			packet->target_handle,
+			packet->attack_speed,
+			packet->attack_delay,
+			packet->attack_action,
+			packet->attack_flag);
+	sendChatMessage(clientp, buffer);
+
+	for(int i = 0; i < packet->attack.size(); i++) {
+		const ATTACK_INFO& attackInfo = packet->attack[i];
+
+		sprintf(buffer,
+				" - Atk: %dhp, %dmp, flg: %d", attackInfo.damage, attackInfo.mp_damage,
+				attackInfo.flag);
+		sendChatMessage(clientp, buffer);
+
+		sprintf(buffer,
+				"   - %d, %d, %d, %d, %d, %d, %d",
+				attackInfo.elemental_damage[0],
+				attackInfo.elemental_damage[1],
+				attackInfo.elemental_damage[2],
+				attackInfo.elemental_damage[3],
+				attackInfo.elemental_damage[4],
+				attackInfo.elemental_damage[5],
+				attackInfo.elemental_damage[6]);
+		sendChatMessage(clientp, buffer);
+
+		sprintf(buffer,
+				"   - tgt: %dhp, %dmp",
+				attackInfo.target_hp,
+				attackInfo.target_mp);
+		sendChatMessage(clientp, buffer);
+	}*/
+}
+
+IFilter *createFilter(IFilter *oldFilter)
+{
+	Object::logStatic(Object::LL_Info, "rzfilter_module", "Loaded filter from data: %p\n", oldFilter);
+	return new PacketFilter((PacketFilter*)oldFilter);
+}
+
+void destroyFilter(IFilter *filter)
+{
+	delete filter;
 }

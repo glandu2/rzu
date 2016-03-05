@@ -7,8 +7,10 @@ namespace AuthServer {
 
 static const char MSG_CONNECTED[] = "Connected to billing telnet server\r\n";
 
-void BillingInterface::onConnected() {
+EventChain<SocketSession> BillingInterface::onConnected() {
 	write(MSG_CONNECTED, sizeof(MSG_CONNECTED));
+
+	return TelnetSession::onConnected();
 }
 
 void BillingInterface::onCommand(const std::vector<std::string>& args) {

@@ -30,7 +30,7 @@ LogServerClient::LogServerClient(cval<std::string>& ip, cval<int>& port) :
 	instance = this;
 }
 
-void LogServerClient::onConnected() {
+EventChain<SocketSession> LogServerClient::onConnected() {
 	log(LL_Info, "Connected to Log server %s:%d\n", ip.get().c_str(), port.get());
 
 	sendLog(LM_SERVER_LOGIN, 0, 0, 0, Utils::getPid(), 0, 0, 0, 0, 0, 0, 0,
@@ -43,6 +43,8 @@ void LogServerClient::onConnected() {
 		sendLog(pendingMessages[i]);
 	}
 	pendingMessages.clear();
+
+	return SocketSession::onConnected();
 }
 
 void LogServerClient::stop() {
@@ -52,8 +54,9 @@ void LogServerClient::stop() {
 	closeSession();
 }
 
-void LogServerClient::onDisconnected(bool causedByRemote) {
+EventChain<SocketSession> LogServerClient::onDisconnected(bool causedByRemote) {
 	log(LL_Info, "Disconnected from Log server %s:%d\n", ip.get().c_str(), port.get());
+	return SocketSession::onDisconnected(causedByRemote);
 }
 
 void LogServerClient::sendLog(const Message& message) {

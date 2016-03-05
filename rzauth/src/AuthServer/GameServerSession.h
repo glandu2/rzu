@@ -41,8 +41,8 @@ public:
 	void onSecurityNoCheckResult(DB_SecurityNoCheck *query);
 
 protected:
-	void onConnected();
-	void onPacketReceived(const TS_MESSAGE* packet);
+	EventChain<SocketSession> onConnected();
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 
 	void onServerLogin(const TS_GA_LOGIN* packet);
 	void onAccountList(const TS_GA_ACCOUNT_LIST *packet);

@@ -73,14 +73,14 @@ bool ClientSession::checkName(std::string name) {
 	return true;
 }
 
-void ClientSession::onPacketReceived(const LS_11N4S* packet) {
+EventChain<LogPacketSession> ClientSession::onPacketReceived(const LS_11N4S* packet) {
 	log(LL_Debug, "Received log packet id %d, size %d\n", packet->id, packet->size);
 	LogData logData;
 
 	const int expectedSize = sizeof(*packet) + packet->len1 + packet->len2 + packet->len3 + packet->len4;
 	if(expectedSize > packet->size) {
 		log(LL_Error, "Invalid packet size, got %d, expected %d\n", packet->size, expectedSize);
-		return;
+		return LogPacketSession::onPacketReceived(packet);
 	}
 
 	struct tm date;
@@ -167,6 +167,8 @@ void ClientSession::onPacketReceived(const LS_11N4S* packet) {
 
 		fwrite(lineBuffer, len, 1, file);
 	}
+
+	return LogPacketSession::onPacketReceived(packet);
 }
 
 } // namespace LogServer
