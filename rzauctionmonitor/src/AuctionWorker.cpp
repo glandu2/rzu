@@ -96,7 +96,7 @@ void AuctionWorker::onAuctionSearchResult(const TS_SC_AUCTION_SEARCH *packet)
 		const int auctionInfoSize = (packet->size - sizeof(TS_SC_AUCTION_SEARCH)) / 40;
 		for(int i = 0; i < packet->auction_info_count; i++) {
 			const TS_AUCTION_INFO* auctionInfo = (const TS_AUCTION_INFO*) &packet->auctionInfos[auctionInfoSize*i];
-			auctionManager->addAuctionInfo(request.get(), auctionInfo->uid, (const char*)auctionInfo, auctionInfoSize);
+			auctionManager->addAuctionInfo(request.get(), auctionInfo->uid, (const uint8_t*)auctionInfo, auctionInfoSize);
 		}
 		log(LL_Info, "Auction search of category %d, page %d/%d found %d results\n", request->category, request->page, packet->total_page_count, packet->auction_info_count);
 		auctionManager->onAuctionSearchCompleted(true, packet->total_page_count, std::move(request));
