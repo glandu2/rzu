@@ -69,7 +69,7 @@ void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 		TS_AC_SERVER_LIST serverList;
 
 		serverList.deserialize(&buffer);
-		if(!buffer.checkFinalSize()) {
+		if(!buffer.checkPacketFinalSize()) {
 			return;
 		}
 
