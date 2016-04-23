@@ -2,7 +2,7 @@
 #define JOBLEVELBONUS_H
 
 #include "RefDataLoader.h"
-#include "Database/DbQueryJobCallback.h"
+#include "Database/DbQueryJobRef.h"
 #include <unordered_map>
 #include <stdint.h>
 #include "../Model/StatBase.h"

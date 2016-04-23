@@ -4,7 +4,7 @@
 #include "../ConnectionHandler.h"
 #include "../Database/DB_Character.h"
 #include "../Database/DB_Item.h"
-#include "Database/DbQueryJobCallback.h"
+#include "Database/DbQueryJobRef.h"
 #include <memory>
 
 namespace GameServer {

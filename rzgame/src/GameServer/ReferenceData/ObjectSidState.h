@@ -2,7 +2,7 @@
 #define OBJECTSIDSTATE_H
 
 #include "RefDataLoader.h"
-#include "Database/DbQueryJobCallback.h"
+#include "Database/DbQueryJobRef.h"
 #include "Database/DbQueryJob.h"
 #include "../GameTypes.h"
 #include "Core/PrintfFormats.h"

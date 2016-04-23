@@ -2,7 +2,7 @@
 #define ITEMRESOURCE_H
 
 #include "RefDataLoader.h"
-#include "Database/DbQueryJobCallback.h"
+#include "Database/DbQueryJobRef.h"
 #include <stdint.h>
 
 namespace GameServer {

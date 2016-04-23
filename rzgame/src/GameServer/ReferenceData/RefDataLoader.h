@@ -2,7 +2,7 @@
 #define REFDATALOADER_H
 
 #include "Core/Object.h"
-#include "Database/DbQueryJobCallback.h"
+#include "Database/DbQueryJobRef.h"
 
 namespace GameServer {
 

@@ -2,7 +2,7 @@
 #define BANNEDWORDS_H
 
 #include "RefDataLoader.h"
-#include "Database/DbQueryJobCallback.h"
+#include "Database/DbQueryJobRef.h"
 #include "Database/DbQueryJob.h"
 #include <unordered_set>
 #include <stdint.h>
