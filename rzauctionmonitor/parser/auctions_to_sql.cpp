@@ -4,11 +4,12 @@
 #include <map>
 #include <vector>
 #include "Core/CharsetConverter.h"
-#include "Database/DbQueryJobCallback.h"
+#include "Database/DbQueryJobRef.h"
 #include "Core/Log.h"
 #include "Core/EventLoop.h"
 #include "Config/GlobalCoreConfig.h"
 #include "Database/DbConnectionPool.h"
+#include "Database/DbConnection.h"
 #include "LibRzuInit.h"
 #include "AuctionFile.h"
 
@@ -19,8 +20,9 @@ struct DB_Item
 	struct Input {
 		int32_t uid;
 		int16_t diff_flag;
-		int64_t previous_time;
-		int64_t time;
+		DbDateTime previous_time;
+		DbDateTime time;
+		DbDateTime estimatedEnd;
 		int16_t category;
 		int8_t duration_type;
 		int64_t bid_price;
@@ -59,6 +61,7 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 				  "\"diff_flag\", "
 				  "\"previous_time\", "
 				  "\"time\", "
+				  "\"estimated_end\", "
 				  "\"category\", "
 				  "\"duration_type\", "
 				  "\"bid_price\", "
@@ -94,13 +97,14 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 				  "\"elemental_effect_attack_point\", "
 				  "\"elemental_effect_magic_point\", "
 				  "\"appearance_code\") "
-				  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+				  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 				  DbQueryBinding::EM_NoRow);
 
 	addParam("uid", &InputType::uid);
 	addParam("diff_flag", &InputType::diff_flag);
 	addParam("previous_time", &InputType::previous_time);
 	addParam("time", &InputType::time);
+	addParam("estimated_end", &InputType::estimatedEnd);
 	addParam("category", &InputType::category);
 	addParam("duration_type", &InputType::duration_type);
 	addParam("bid_price", &InputType::bid_price);
@@ -187,12 +191,6 @@ int main(int argc, char* argv[]) {
 	const int totalRecognizedSize = sizeof(struct AuctionInfo) + sizeof(struct ItemData) + sizeof(struct AuctionDataEnd);
 	std::map<uint32_t, std::vector<uint8_t>> auctions;
 
-	if(argc < 2) {
-		printf("Record size is %d(0x%08X)\n", totalRecognizedSize, totalRecognizedSize);
-		printf("Usage: %s auctions.bin\n", argv[0]);
-		return 0;
-	}
-
 	LibRzuInit();
 	DbConnectionPool dbConnectionPool;
 	DbBindingLoader::get()->initAll(&dbConnectionPool);
@@ -209,21 +207,24 @@ int main(int argc, char* argv[]) {
 
 	ConfigInfo::get()->dump();
 
+	if(argc < 2) {
+		Object::logStatic(Object::LL_Info, "main", "Record size is %d(0x%08X)\n", totalRecognizedSize, totalRecognizedSize);
+		Object::logStatic(Object::LL_Info, "main", "Usage: %s auctions.bin\n", argv[0]);
+		return 0;
+	}
+
 	std::vector<DB_Item::Input> inputs;
 
 	int i;
 	for(i = 1; i < argc; i++) {
 		const char* filename = argv[i];
-		char outputFilename[512];
 
 		if(filename[0] == '/')
 			continue;
 
-		sprintf(outputFilename, "%s.txt", filename);
-
 		FILE* file = fopen(filename, "rb");
 		if(!file) {
-			printf("Cant open file %s\n", filename);
+			Object::logStatic(Object::LL_Error, "main", "Cant open file %s\n", filename);
 			return 1;
 		}
 
@@ -234,18 +235,23 @@ int main(int argc, char* argv[]) {
 		char* buffer = (char*)malloc(fileSize);
 		size_t readDataSize = fread(buffer, 1, fileSize, file);
 		if(readDataSize != fileSize) {
-			printf("Coulnd't read file data, size: %ld, read: %ld\n", (long int)fileSize, (long int)readDataSize);
+			Object::logStatic(Object::LL_Error, "main", "Coulnd't read file data, size: %ld, read: %ld\n", (long int)fileSize, (long int)readDataSize);
 			fclose(file);
 			return 2;
 		}
 		fclose(file);
 
 		AUCTION_FILE auctionFile;
-		MessageBuffer structBuffer(buffer, fileSize, 3);
+		AuctionFileHeader* auctionHeader = reinterpret_cast<AuctionFileHeader*>(buffer);
+		if(strncmp(auctionHeader->signature, "RAH", 3) != 0) {
+			Object::logStatic(Object::LL_Error, "main", "Invalid file, unrecognized header signature\n");
+			return 3;
+		}
+		MessageBuffer structBuffer(buffer, fileSize, auctionHeader->file_version);
 
 		auctionFile.deserialize(&structBuffer);
 		if(!structBuffer.checkFinalSize()) {
-			printf("Invalid file\n");
+			Object::logStatic(Object::LL_Error, "main", "Invalid file\n");
 			return 3;
 		}
 
@@ -255,8 +261,9 @@ int main(int argc, char* argv[]) {
 
 			input.uid = auctionInfo.uid;
 			input.diff_flag = auctionInfo.diffType;
-			input.previous_time = auctionInfo.previousTime;
-			input.time = auctionInfo.time;
+			input.previous_time.setUnixTime(auctionInfo.previousTime);
+			input.time.setUnixTime(auctionInfo.time);
+			input.estimatedEnd.setUnixTime(auctionInfo.estimatedEndTime);
 			input.category = auctionInfo.category;
 
 			ItemData* item = (ItemData*) auctionInfo.data.data();
@@ -294,7 +301,7 @@ int main(int argc, char* argv[]) {
 	DbQueryJob<DB_Item>::executeNoResult(inputs);
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
-	fprintf(stderr, "Processed %d files\n", i-1);
+	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", i-1);
 
 	return 0;
 }

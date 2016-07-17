@@ -52,13 +52,12 @@ private:
 		uint32_t uid;
 		Flag flag;
 		int32_t category;
-		std::vector<uint8_t> data;
 
 		AuctionInfo(uint32_t uid, Flag flag, uint64_t time, uint64_t previousTime, int32_t category, const uint8_t* data, int len)
-			: uid(uid), flag(flag), category(category), time(time), previousTime(previousTime)
+			: uid(uid), flag(flag), category(category), time(time), previousTime(previousTime), estimatedEnd(0)
 		{
 			if(data && len > 0)
-				 this->data = std::vector<uint8_t>(data, data + len);
+				updateData(data, len);
 		}
 
 		AuctionInfo& operator=(const AuctionInfo& other) {
@@ -81,12 +80,49 @@ private:
 			this->time = newTime;
 		}
 
+		void updateData(const uint8_t* newData, int len) {
+#pragma pack(push, 1)
+			struct AuctionDataEnd {
+				int8_t duration_type;
+				int64_t bid_price;
+				int64_t price;
+				char seller[31];
+				int8_t flag;
+			};
+#pragma pack(pop)
+
+			time_t end = 0;
+			AuctionDataEnd* dataOld = nullptr;
+			std::vector<uint8_t> oldData(newData, newData + len);
+			oldData.swap(data);
+
+			if(oldData.size() > sizeof(AuctionDataEnd))
+				dataOld = (AuctionDataEnd*) (oldData.data() + oldData.size() - sizeof(AuctionDataEnd));
+
+			AuctionDataEnd* dataNew = (AuctionDataEnd*) (newData + len - sizeof(AuctionDataEnd));
+
+			if((dataOld && dataOld->duration_type == dataNew->duration_type) || previousTime == 0)
+				return;
+
+			switch(dataNew->duration_type) {
+				case 3: end = previousTime + 72*3600; break;
+				case 2: end = previousTime + 24*3600; break;
+				case 1: end = previousTime + 6*3600; break;
+			}
+			if(end && (end > estimatedEnd || estimatedEnd == 0))
+				estimatedEnd = end;
+		}
+
 		uint64_t getTime() const { return time; }
 		uint64_t getPreviousTime() const { return previousTime; }
+		const std::vector<uint8_t>& getData() const { return data; }
+		uint64_t getEstimatedEnd() const { return estimatedEnd; }
 
 	private:
 		uint64_t time;
 		uint64_t previousTime;
+		std::vector<uint8_t> data;
+		time_t estimatedEnd;
 	};
 
 private:
@@ -95,7 +131,7 @@ private:
 
 	template<class Container> void serializeAuctionInfos(const Container& auctionInfos, bool doFullDump, std::vector<uint8_t>& output);
 	void writeAuctionDataToFile(std::string auctionsDir, std::string auctionsFile, const std::vector<uint8_t>& data, time_t fileTimeStamp, const char* suffix);
-	static int getAuctionDiffType(AuctionInfo::Flag flag);
+	static DiffType getAuctionDiffType(AuctionInfo::Flag flag);
 
 	template<typename T> static const AuctionInfo& getAuctionInfoFromValue(const std::pair<T, AuctionInfo>& val) { return val.second; }
 	static const AuctionInfo& getAuctionInfoFromValue(const AuctionInfo& val) { return val; }

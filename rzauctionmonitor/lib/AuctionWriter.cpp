@@ -44,14 +44,14 @@ void AuctionWriter::addAuctionInfo(uint32_t uid, uint64_t time, uint16_t categor
 		if(auctionInfo.flag == AuctionInfo::AIF_NotProcessed)
 			auctionInfo.updateTime(time);
 
-		if(auctionInfo.data.size() != (size_t)len ||
-		   memcmp(auctionInfo.data.data(), data, len) != 0)
+		if(auctionInfo.getData().size() != (size_t)len ||
+		   memcmp(auctionInfo.getData().data(), data, len) != 0)
 		{
 			if(auctionInfo.flag != AuctionInfo::AIF_Added)
 				auctionInfo.flag = AuctionInfo::AIF_Updated;
 
 			auctionInfo.category = category;
-			auctionInfo.data = std::vector<uint8_t>(data, data + len);
+			auctionInfo.updateData(data, len);
 			log(LL_Debug, "Auction info modified: 0x%08X\n", uid);
 		} else if(auctionInfo.flag == AuctionInfo::AIF_NotProcessed) {
 			auctionInfo.flag = AuctionInfo::AIF_Unmodifed;
@@ -129,7 +129,7 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 
 				auctionInfo.flag = AuctionInfo::AIF_Updated;
 				auctionInfo.category = category;
-				auctionInfo.data.assign(data, data + len);
+				auctionInfo.updateData(data, len);
 			}
 			break;
 		}
@@ -169,7 +169,7 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 		case D_Unmodified: {
 			auto it = auctionsState.find(uid);
 			if(it == auctionsState.end()) {
-				fprintf(stderr, "Error: unmodified auction not found: 0x%08X\n", uid);
+				log(LL_Error, "Error: unmodified auction not found: 0x%08X\n", uid);
 			} else {
 				AuctionInfo& auctionInfo = it->second;
 				auctionInfo.flag = AuctionInfo::AIF_Unmodifed;
@@ -186,7 +186,7 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 			break;
 		}
 		default:
-			fprintf(stderr, "Error: unsupported flag %d for auction 0x%08X\n", diffType, uid);
+			log(LL_Error, "Error: unsupported flag %d for auction 0x%08X\n", diffType, uid);
 			break;
 	}
 
@@ -267,7 +267,7 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 
 	AUCTION_FILE auctionFile;
 	strcpy(auctionFile.signature, "RAH");
-	auctionFile.file_version = 3;
+	auctionFile.file_version = AUCTION_V4;
 	auctionFile.dumpType = doFullDump ? DT_Full : DT_Diff;
 
 	auctionFile.categories.reserve(categoryTime.size());
@@ -283,7 +283,7 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 	auto it = auctionInfos.begin();
 	for(; it != auctionInfos.end(); ++it) {
 		const AuctionInfo& auctionInfo = getAuctionInfoFromValue(*it);
-		int diffType = doFullDump ? AuctionInfo::AIF_Base : getAuctionDiffType(auctionInfo.flag);
+		DiffType diffType = doFullDump ? D_Base : getAuctionDiffType(auctionInfo.flag);
 
 		if(diffType >= D_Invalid)
 			logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d for auction 0x%08X\n", auctionInfo.flag, auctionInfo.uid);
@@ -294,10 +294,39 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 		AUCTION_INFO auctionItem;
 		auctionItem.uid = auctionInfo.uid;
 		auctionItem.category = (uint16_t)auctionInfo.category;
-		auctionItem.diffType = diffType;
+		auctionItem.diffType = (uint16_t)diffType;
 		auctionItem.time = auctionInfo.getTime();
 		auctionItem.previousTime = auctionInfo.getPreviousTime();
-		auctionItem.data = auctionInfo.data;
+		auctionItem.estimatedEndTime = auctionInfo.getEstimatedEnd();
+
+		const std::vector<uint8_t>& data = auctionInfo.getData();
+
+#pragma pack(push, 1)
+		struct AuctionDataEnd {
+			int8_t duration_type;
+			int64_t bid_price;
+			int64_t price;
+			char seller[31];
+			int8_t flag;
+		};
+#pragma pack(pop)
+
+		if(data.size() >= sizeof(AuctionDataEnd)) {
+			const AuctionDataEnd* auctionDataEnd = reinterpret_cast<const AuctionDataEnd*>(data.data() + data.size() - sizeof(AuctionDataEnd));
+			auctionItem.duration_type = auctionDataEnd->duration_type;
+			auctionItem.bid_price = auctionDataEnd->bid_price;
+			auctionItem.price = auctionDataEnd->price;
+			auctionItem.seller = Utils::convertToString(auctionDataEnd->seller, sizeof(auctionDataEnd->seller) - 1);
+			auctionItem.flag = auctionDataEnd->flag;
+
+			auctionItem.data = std::vector<uint8_t>(data.data(), data.data() + data.size() - sizeof(AuctionDataEnd));
+		} else {
+			auctionItem.data = data;
+			auctionItem.duration_type = 0;
+			auctionItem.bid_price = 0;
+			auctionItem.price = 0;
+			auctionItem.flag = 0;
+		}
 
 		auctionFile.auctions.push_back(auctionItem);
 	}
@@ -364,7 +393,7 @@ void AuctionWriter::writeAuctionDataToFile(std::string auctionsDir, std::string 
 	fclose(file);
 }
 
-int AuctionWriter::getAuctionDiffType(AuctionInfo::Flag flag) {
+DiffType AuctionWriter::getAuctionDiffType(AuctionInfo::Flag flag) {
 	switch(flag) {
 		case AuctionInfo::AIF_Deleted: return D_Deleted;
 		case AuctionInfo::AIF_Added: return D_Added;

@@ -17,29 +17,45 @@ enum DumpType {
 	DT_Full
 };
 
-#define AUCTION_CATEGORY_INFO_DEF(simple_, array_, dynarray_, count_, string_, dynstring_) \
-	simple_(int64_t, beginTime) \
-	simple_(int64_t, endTime)
+struct AuctionFileHeader {
+	char signature[4];
+	uint32_t file_version;
+};
+
+enum AuctionFileVersion {
+	AUCTION_V3 = 3,
+	AUCTION_V4 = 4  // add auction meta data in struct format (like prices, seller)
+};
+
+#define AUCTION_CATEGORY_INFO_DEF(_) \
+	_(simple)(int64_t, beginTime) \
+	_(simple)(int64_t, endTime)
 CREATE_STRUCT(AUCTION_CATEGORY_INFO);
 
-#define AUCTION_INFO_DEF(simple_, array_, dynarray_, count_, string_, dynstring_) \
-	simple_  (uint32_t, uid) \
-	simple_  (int64_t, time) \
-	simple_  (int64_t, previousTime) \
-	simple_  (uint16_t, diffType) \
-	simple_  (uint16_t, category) \
-	count_   (uint16_t, dataSize, data) \
-	dynarray_(uint8_t, data)
+#define AUCTION_INFO_DEF(_) \
+	_(simple)  (uint32_t, uid) \
+	_(simple)  (int64_t, time) \
+	_(simple)  (int64_t, previousTime) \
+	_(simple)  (int64_t, estimatedEndTime) \
+	_(simple)  (uint16_t, diffType) \
+	_(simple)  (uint16_t, category) \
+	_(count)   (uint16_t, dataSize, data) \
+	_(dynarray)(uint8_t, data) \
+	_(simple)  (int8_t, duration_type, version >= AUCTION_V4) \
+	_(simple)  (int64_t, bid_price, version >= AUCTION_V4) \
+	_(simple)  (int64_t, price, version >= AUCTION_V4) \
+	_(string)  (seller, 31, version >= AUCTION_V4) \
+	_(simple)  (int8_t, flag, version >= AUCTION_V4)
 CREATE_STRUCT(AUCTION_INFO);
 
-#define AUCTION_FILE_DEF(simple_, array_, dynarray_, count_, string_, dynstring_) \
-	array_   (char, signature, 4) \
-	simple_  (uint32_t, file_version) \
-	simple_  (int8_t, dumpType) \
-	count_   (uint16_t, categoryNumber, categories) \
-	dynarray_(AUCTION_CATEGORY_INFO, categories) \
-	count_   (uint32_t, auctionNumber, auctions) \
-	dynarray_(AUCTION_INFO, auctions)
+#define AUCTION_FILE_DEF(_) \
+	_(array)   (char, signature, 4) \
+	_(simple)  (uint32_t, file_version) \
+	_(simple)  (int8_t, dumpType) \
+	_(count)   (uint16_t, categoryNumber, categories) \
+	_(dynarray)(AUCTION_CATEGORY_INFO, categories) \
+	_(count)   (uint32_t, auctionNumber, auctions) \
+	_(dynarray)(AUCTION_INFO, auctions)
 CREATE_STRUCT(AUCTION_FILE);
 
 #endif // AUCTIONFILE_H

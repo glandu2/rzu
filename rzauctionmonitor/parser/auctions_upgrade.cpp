@@ -78,7 +78,7 @@ int main() {
 
 		FILE* file = fopen(filename, "rb");
 		if(!file) {
-			printf("Cant open file %s\n", filename);
+			Object::logStatic(Object::LL_Error, "main", "Cant open file %s\n", filename);
 			return 1;
 		}
 
@@ -100,7 +100,7 @@ int main() {
 
 			int dataSize = header.getSize();
 			if(dataSize > sizeof(data.buffer)) {
-				fprintf(stdout, "Error: data size too large: %d at offset %d\n", dataSize, (int)(ftell(file) - sizeof(header)));
+				Object::logStatic(Object::LL_Error, "main", "Error: data size too large: %d at offset %d\n", dataSize, (int)(ftell(file) - sizeof(header)));
 				break;
 			}
 
@@ -122,7 +122,7 @@ int main() {
 		if(alreadyExistingAuctions == 0)
 			auctionFile.isFull = false;
 
-		fprintf(stdout, "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d\n",
+		Object::logStatic(Object::LL_Info, "main", "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d\n",
 				filename,
 				auctionFile.isFull ? "full" : "diff",
 				alreadyExistingAuctions,
@@ -156,9 +156,9 @@ int main() {
 	}
 
 	//dump last file with full
-	auctionWriter.dumpAuctions("output", "auctions.bin", true, false);
+	auctionWriter.dumpAuctions("output", "auctions.bin", true, true);
 
-	fprintf(stdout, "Processed %d files\n", fileNumber);
+	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", fileNumber);
 
 	return 0;
 }
