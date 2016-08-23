@@ -22,7 +22,8 @@ struct DB_Item
 		int16_t diff_flag;
 		DbDateTime previous_time;
 		DbDateTime time;
-		DbDateTime estimatedEnd;
+		DbDateTime estimatedEndMin;
+		DbDateTime estimatedEndMax;
 		int16_t category;
 		int8_t duration_type;
 		int64_t bid_price;
@@ -61,7 +62,8 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 				  "\"diff_flag\", "
 				  "\"previous_time\", "
 				  "\"time\", "
-				  "\"estimated_end\", "
+	              "\"estimated_end_min\", "
+	              "\"estimated_end_max\", "
 				  "\"category\", "
 				  "\"duration_type\", "
 				  "\"bid_price\", "
@@ -97,14 +99,15 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 				  "\"elemental_effect_attack_point\", "
 				  "\"elemental_effect_magic_point\", "
 				  "\"appearance_code\") "
-				  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+	              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 				  DbQueryBinding::EM_NoRow);
 
 	addParam("uid", &InputType::uid);
 	addParam("diff_flag", &InputType::diff_flag);
 	addParam("previous_time", &InputType::previous_time);
 	addParam("time", &InputType::time);
-	addParam("estimated_end", &InputType::estimatedEnd);
+	addParam("estimated_end_min", &InputType::estimatedEndMin);
+	addParam("estimated_end_max", &InputType::estimatedEndMax);
 	addParam("category", &InputType::category);
 	addParam("duration_type", &InputType::duration_type);
 	addParam("bid_price", &InputType::bid_price);
@@ -215,8 +218,8 @@ int main(int argc, char* argv[]) {
 
 	std::vector<DB_Item::Input> inputs;
 
-	int i;
-	for(i = 1; i < argc; i++) {
+	size_t processedFiles = 0;
+	for(int i = 1; i < argc; i++) {
 		const char* filename = argv[i];
 
 		if(filename[0] == '/')
@@ -237,6 +240,7 @@ int main(int argc, char* argv[]) {
 		if(readDataSize != fileSize) {
 			Object::logStatic(Object::LL_Error, "main", "Coulnd't read file data, size: %ld, read: %ld\n", (long int)fileSize, (long int)readDataSize);
 			fclose(file);
+			free(buffer);
 			return 2;
 		}
 		fclose(file);
@@ -263,7 +267,8 @@ int main(int argc, char* argv[]) {
 			input.diff_flag = auctionInfo.diffType;
 			input.previous_time.setUnixTime(auctionInfo.previousTime);
 			input.time.setUnixTime(auctionInfo.time);
-			input.estimatedEnd.setUnixTime(auctionInfo.estimatedEndTime);
+			input.estimatedEndMin.setUnixTime(auctionInfo.estimatedEndTimeMin);
+			input.estimatedEndMax.setUnixTime(auctionInfo.estimatedEndTimeMax);
 			input.category = auctionInfo.category;
 
 			ItemData* item = (ItemData*) auctionInfo.data.data();
@@ -296,57 +301,65 @@ int main(int argc, char* argv[]) {
 
 			inputs.push_back(input);
 		}
+
+		processedFiles++;
 	}
 
 	DbQueryJob<DB_Item>::executeNoResult(inputs);
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
-	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", i-1);
+	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", processedFiles);
 
 	return 0;
 }
 
 /*
-CREATE TABLE "auctions" (
-	"uid"	integer NOT NULL,
-	"diff_flag"	smallint NOT NULL,
-	"previous_time"	INTEGER NOT NULL,
-	"time"	INTEGER NOT NULL,
-	"category"	smallint NOT NULL,
-	"duration_type"	smallint NOT NULL,
-	"bid_price"	bigint NOT NULL,
-	"price"	bigint NOT NULL,
-	"seller"	varchar NOT NULL,
-	"bid_flag"	smallint NOT NULL,
-	"handle"	integer NOT NULL,
-	"code"	integer NOT NULL,
-	"item_uid"	bigint NOT NULL,
-	"count"	bigint NOT NULL,
-	"ethereal_durability"	integer NOT NULL,
-	"endurance"	integer NOT NULL,
-	"enhance"	smallint NOT NULL,
-	"level"	smallint NOT NULL,
-	"flag"	integer NOT NULL,
-	"socket_0"	integer NOT NULL,
-	"socket_1"	integer NOT NULL,
-	"socket_2"	integer NOT NULL,
-	"socket_3"	integer NOT NULL,
-	"awaken_option_value_0"	integer NOT NULL,
-	"awaken_option_value_1"	integer NOT NULL,
-	"awaken_option_value_2"	integer NOT NULL,
-	"awaken_option_value_3"	integer NOT NULL,
-	"awaken_option_value_4"	integer NOT NULL,
-	"awaken_option_data_0"	integer NOT NULL,
-	"awaken_option_data_1"	integer NOT NULL,
-	"awaken_option_data_2"	integer NOT NULL,
-	"awaken_option_data_3"	integer NOT NULL,
-	"awaken_option_data_4"	integer NOT NULL,
-	"remain_time"	integer NOT NULL,
-	"elemental_effect_type"	smallint NOT NULL,
-	"elemental_effect_remain_time"	integer NOT NULL,
-	"elemental_effect_attack_point"	integer NOT NULL,
-	"elemental_effect_magic_point"	integer NOT NULL,
-	"appearance_code"	integer NOT NULL,
-	PRIMARY KEY(uid,time)
+CREATE TABLE [auctions](
+	[uid] [int] NOT NULL,
+	[diff_flag] [smallint] NOT NULL,
+	[previous_time] [datetime] NOT NULL,
+	[time] [datetime] NOT NULL,
+	[estimated_end_min] [datetime] NOT NULL,
+	[estimated_end_max] [datetime] NOT NULL,
+	[category] [smallint] NOT NULL,
+	[duration_type] [smallint] NOT NULL,
+	[bid_price] [bigint] NOT NULL,
+	[price] [bigint] NOT NULL,
+	[seller] [varchar](32) NOT NULL,
+	[bid_flag] [smallint] NOT NULL,
+	[handle] [int] NOT NULL,
+	[code] [int] NOT NULL,
+	[item_uid] [bigint] NOT NULL,
+	[count] [bigint] NOT NULL,
+	[ethereal_durability] [int] NOT NULL,
+	[endurance] [int] NOT NULL,
+	[enhance] [smallint] NOT NULL,
+	[level] [smallint] NOT NULL,
+	[flag] [int] NOT NULL,
+	[socket_0] [int] NOT NULL,
+	[socket_1] [int] NOT NULL,
+	[socket_2] [int] NOT NULL,
+	[socket_3] [int] NOT NULL,
+	[awaken_option_value_0] [int] NOT NULL,
+	[awaken_option_value_1] [int] NOT NULL,
+	[awaken_option_value_2] [int] NOT NULL,
+	[awaken_option_value_3] [int] NOT NULL,
+	[awaken_option_value_4] [int] NOT NULL,
+	[awaken_option_data_0] [int] NOT NULL,
+	[awaken_option_data_1] [int] NOT NULL,
+	[awaken_option_data_2] [int] NOT NULL,
+	[awaken_option_data_3] [int] NOT NULL,
+	[awaken_option_data_4] [int] NOT NULL,
+	[remain_time] [int] NOT NULL,
+	[elemental_effect_type] [smallint] NOT NULL,
+	[elemental_effect_remain_time] [int] NOT NULL,
+	[elemental_effect_attack_point] [int] NOT NULL,
+	[elemental_effect_magic_point] [int] NOT NULL,
+	[appearance_code] [int] NOT NULL,
+	PRIMARY KEY (
+		[uid] ASC,
+		[time] ASC
+	)
 );
+
 */

@@ -159,7 +159,7 @@ int main(int argc, char* argv[]) {
 				}
 
 				it->second.push_back(summary);
-			} else if(auctionInfo.diffType == D_Deleted && (auctionInfo.time + 60) < auctionInfo.estimatedEndTime && auctionInfo.price) {
+			} else if(auctionInfo.diffType == D_Deleted && (auctionInfo.time + 60) < auctionInfo.estimatedEndTimeMin && auctionInfo.price) {
 				AuctionSummary summary;
 				summary.isSold = true;
 				summary.price = auctionInfo.price;

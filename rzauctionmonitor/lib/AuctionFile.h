@@ -9,6 +9,7 @@ enum DiffType {
 	D_Deleted = 2,
 	D_Unmodified = 3,
 	D_Base = 4,
+	D_MaybeDeleted = 5,
 	D_Invalid = 0xFFFF
 };
 
@@ -28,6 +29,7 @@ enum AuctionFileVersion {
 };
 
 #define AUCTION_CATEGORY_INFO_DEF(_) \
+	_(simple)(int64_t, previousBegin) \
 	_(simple)(int64_t, beginTime) \
 	_(simple)(int64_t, endTime)
 CREATE_STRUCT(AUCTION_CATEGORY_INFO);
@@ -36,7 +38,9 @@ CREATE_STRUCT(AUCTION_CATEGORY_INFO);
 	_(simple)  (uint32_t, uid) \
 	_(simple)  (int64_t, time) \
 	_(simple)  (int64_t, previousTime) \
-	_(simple)  (int64_t, estimatedEndTime) \
+	_(simple)  (bool, estimatedEndTimeFromAdded) \
+	_(simple)  (int64_t, estimatedEndTimeMin) \
+	_(simple)  (int64_t, estimatedEndTimeMax) \
 	_(simple)  (uint16_t, diffType) \
 	_(simple)  (uint16_t, category) \
 	_(count)   (uint16_t, dataSize, data) \
@@ -45,7 +49,9 @@ CREATE_STRUCT(AUCTION_CATEGORY_INFO);
 	_(simple)  (int64_t, bid_price, version >= AUCTION_V4) \
 	_(simple)  (int64_t, price, version >= AUCTION_V4) \
 	_(string)  (seller, 31, version >= AUCTION_V4) \
-	_(simple)  (int8_t, flag, version >= AUCTION_V4)
+	_(simple)  (int8_t, bid_flag, version >= AUCTION_V4) \
+	_(simple)  (bool, deleted, version >= AUCTION_V4) \
+	_(simple)  (uint8_t, deletedCount, version >= AUCTION_V4 && deleted, 0)
 CREATE_STRUCT(AUCTION_INFO);
 
 #define AUCTION_FILE_DEF(_) \

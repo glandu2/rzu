@@ -19,19 +19,9 @@ AuctionWriter::AuctionWriter(size_t categoryCount) : firstAuctions(true), diffMo
 void AuctionWriter::setDiffInputMode(bool diffMode)
 {
 	this->diffMode = diffMode;
-	if(diffMode) {
-		auto it = auctionsState.begin();
-		for(; it != auctionsState.end(); ++it) {
-			AuctionInfo& auctionInfo = it->second;
-			if(auctionInfo.flag != AuctionInfo::AIF_NotProcessed) {
-				log(LL_Error, "Switching to diff mode but auction %d is not in AIF_NotProcessed state, setting anyway\n", auctionInfo.uid);
-			}
-			auctionInfo.flag = AuctionInfo::AIF_Unmodifed;
-		}
-	}
 }
 
-void AuctionWriter::addAuctionInfo(uint32_t uid, uint64_t time, uint16_t category, const uint8_t* data, int len)
+void AuctionWriter::addAuctionInfo(uint32_t uid, uint64_t time, uint16_t category, const uint8_t* data, size_t len)
 {
 	if(diffMode) {
 		log(LL_Error, "Called addAuctionInfo while in diff mode ! uid: 0x%08X\n", uid);
@@ -41,36 +31,38 @@ void AuctionWriter::addAuctionInfo(uint32_t uid, uint64_t time, uint16_t categor
 	if(it != auctionsState.end()) {
 		AuctionInfo& auctionInfo = it->second;
 
-		if(auctionInfo.flag == AuctionInfo::AIF_NotProcessed)
-			auctionInfo.updateTime(time);
-
-		if(auctionInfo.getData().size() != (size_t)len ||
-		   memcmp(auctionInfo.getData().data(), data, len) != 0)
-		{
-			if(auctionInfo.flag != AuctionInfo::AIF_Added)
-				auctionInfo.flag = AuctionInfo::AIF_Updated;
-
-			auctionInfo.category = category;
-			auctionInfo.updateData(data, len);
+		if(auctionInfo.update(time, data, len))
 			log(LL_Debug, "Auction info modified: 0x%08X\n", uid);
-		} else if(auctionInfo.flag == AuctionInfo::AIF_NotProcessed) {
-			auctionInfo.flag = AuctionInfo::AIF_Unmodifed;
-		}
 	} else {
 		auctionsState.insert(std::make_pair(uid,
-											AuctionInfo(uid,
-														AuctionInfo::AIF_Added,
-														time,
-														getEstimatedPreviousCategoryBeginTime(category),
+		                                    AuctionInfo(uid,
+		                                                getEstimatedPreviousCategoryBeginTime(category),
+		                                                time,
 														category,
-														data, len)));
+		                                                data, len)));
 		log(LL_Debug, "Auction info added: %d\n", uid);
 	}
 
 	adjustCategoryTimeRange(category, time);
 }
 
-void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t previousTime, DiffType diffType, uint16_t category, const uint8_t *data, int len)
+void AuctionWriter::addMaybeDeletedAuctionInfo(uint32_t uid, uint64_t time, uint64_t previousTime, uint32_t deletedCount, uint16_t category, const uint8_t* data, size_t len)
+{
+	addAuctionInfo(uid, time, category, data, len);
+
+	auto it = auctionsState.find(uid);
+	if(it != auctionsState.end()) {
+		AuctionInfo& auctionInfo = it->second;
+
+		auctionInfo.setPreviousUpdateTime(previousTime);
+		auctionInfo.remove(time);
+		auctionInfo.deletedCount = (deletedCount > 0) ? (deletedCount - 1) : 0;
+	} else {
+		log(LL_Error, "Couln't add maybe deleted auction: uid: 0x%08X\n", uid);
+	}
+}
+
+void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t previousTime, DiffType diffType, uint16_t category, const uint8_t *data, size_t len)
 {
 	if(!diffMode) {
 		log(LL_Error, "Called addAuctionInfo while not in diff mode ! uid: 0x%08X\n", uid);
@@ -84,52 +76,42 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 
 	adjustCategoryTimeRange(category, time);
 
+	if(diffType == D_Base)
+		diffType = D_Added;
+
 	switch(diffType) {
-		case D_Added: {
+		case D_Added:
+		case D_Updated:
+		{
 			auto it = auctionsState.find(uid);
 			if(it != auctionsState.end()) {
-				log(LL_Error, "Added auction already exists: 0x%08X\n", uid);
+				AuctionInfo& auctionInfo = it->second;
+
+				if(diffType == D_Added && auctionInfo.processStatus != AuctionInfo::PS_MaybeDeleted) {
+					log(LL_Error, "Added auction already exists: 0x%08X, with state: %d\n", uid, auctionInfo.processStatus);
+				}
+
+				if(previousTime) {
+					auctionInfo.setPreviousUpdateTime(previousTime);
+				} else if((time_t)auctionInfo.getPreviousUpdateTime() <= getEstimatedPreviousCategoryBeginTime(category)) {
+					// auction previous time before category begin time, don't trust it and set previous time
+					auctionInfo.setPreviousUpdateTime(getEstimatedPreviousCategoryBeginTime(category));
+				}
+
+				auctionInfo.update(time, data, len);
 			} else {
-				if(previousTime && previousTime != getEstimatedPreviousCategoryBeginTime(category)) {
+				if(diffType == D_Updated) {
+					log(LL_Error, "Updated auction not found: 0x%08X\n", uid);
+				} else if(previousTime && previousTime != getEstimatedPreviousCategoryBeginTime(category)) {
 					log(LL_Info, "Added auction previous time mismatch: category previous begin time: %" PRIu64 ", new auction previous time: %" PRIu64 "\n",
 						getEstimatedPreviousCategoryBeginTime(category), previousTime);
 				}
 
 				uint64_t previousTimeToUse = previousTime ? previousTime : getEstimatedPreviousCategoryBeginTime(category);
-				auto insertIt = auctionsState.insert(std::make_pair(uid, AuctionInfo(uid, AuctionInfo::AIF_Added, time, previousTimeToUse, category, data, len)));
+				auto insertIt = auctionsState.insert(std::make_pair(uid, AuctionInfo(uid, previousTimeToUse, time, category, data, len)));
 				if(insertIt.second == false) {
 					log(LL_Error, "Coulnd't insert added auction: 0x%08X\n", uid);
 				}
-			}
-			break;
-		}
-		case D_Updated: {
-			auto it = auctionsState.find(uid);
-			if(it == auctionsState.end()) {
-				log(LL_Error, "Updated auction not found: 0x%08X\n", uid);
-
-				uint64_t previousTimeToUse = previousTime ? previousTime : getEstimatedPreviousCategoryBeginTime(category);
-				auto insertIt = auctionsState.insert(std::make_pair(uid, AuctionInfo(uid, AuctionInfo::AIF_Added, time, previousTimeToUse, category, data, len)));
-				if(insertIt.second == false) {
-					log(LL_Error, "Coulnd't insert updated auction: 0x%08X\n", uid);
-				}
-			} else {
-				AuctionInfo& auctionInfo = it->second;
-				if(previousTime && auctionInfo.getTime() != previousTime) {
-					log(LL_Info, "Updated auction previous time mismatch: auction time: %" PRIu64 ", update previous time: %" PRIu64 "\n",
-						it->second.getTime(), previousTime);
-				}
-
-				if(previousTime)
-					auctionInfo.updateTimes(time, previousTime); //set both times
-				else if((time_t)auctionInfo.getTime() > getEstimatedPreviousCategoryBeginTime(category))
-					auctionInfo.updateTime(time); // auction time after category begin time, trust it and only set current time
-				else
-					auctionInfo.updateTimes(time, getEstimatedPreviousCategoryBeginTime(category)); // else don't trust it and set both
-
-				auctionInfo.flag = AuctionInfo::AIF_Updated;
-				auctionInfo.category = category;
-				auctionInfo.updateData(data, len);
 			}
 			break;
 		}
@@ -139,8 +121,8 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 				log(LL_Error, "Deleted auction not found: 0x%08X\n", uid);
 			} else {
 				AuctionInfo& auctionInfo = it->second;
-				if(auctionInfo.flag != AuctionInfo::AIF_Unmodifed) {
-					log(LL_Error, "Deleted auction is not in AIF_Unmodifed flag: uid: 0x%08X, flag: %d\n", uid, auctionInfo.flag);
+				if(auctionInfo.processStatus != AuctionInfo::PS_NotProcessed) {
+					log(LL_Error, "Deleted auction is not in PS_NotProcessed flag: uid: 0x%08X, flag: %d\n", uid, auctionInfo.processStatus);
 				}
 
 				if(getCategoryTime(category).end == 0) {
@@ -150,38 +132,15 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 					log(LL_Warning, "Deleted auction time is not category end time: uid: 0x%08X, time: %" PRIu64 ", category: %d, category end time: %" PRIu64 "\n",
 						uid, time, category, getCategoryTime(category).end);
 				}
-				if(previousTime && auctionInfo.getTime() != previousTime) {
-					log(LL_Info, "Deleted auction previousTime is not last auction time: uid: 0x%08X, previousTime: %" PRIu64 ", last auction time: %" PRIu64 "\n",
-						uid, previousTime, auctionInfo.getTime());
+
+				if(previousTime) {
+					auctionInfo.setPreviousUpdateTime(previousTime);
+				} else if((time_t)auctionInfo.getPreviousUpdateTime() <= getEstimatedPreviousCategoryBeginTime(category)) {
+					// auction previous time before category begin time, don't trust it and set previous time
+					auctionInfo.setPreviousUpdateTime(getEstimatedPreviousCategoryBeginTime(category));
 				}
 
-				auctionInfo.flag = AuctionInfo::AIF_Deleted;
-
-				if(previousTime)
-					auctionInfo.updateTimes(time, previousTime);
-				else if((time_t)auctionInfo.getTime() > getEstimatedPreviousCategoryBeginTime(category))
-					auctionInfo.updateTime(time);
-				else
-					auctionInfo.updateTimes(time, getEstimatedPreviousCategoryBeginTime(category));
-			}
-			break;
-		}
-		case D_Unmodified: {
-			auto it = auctionsState.find(uid);
-			if(it == auctionsState.end()) {
-				log(LL_Error, "Error: unmodified auction not found: 0x%08X\n", uid);
-			} else {
-				AuctionInfo& auctionInfo = it->second;
-				auctionInfo.flag = AuctionInfo::AIF_Unmodifed;
-				if(previousTime && auctionInfo.getTime() != previousTime) {
-					log(LL_Info, "Unmodified auction previous time mismatch: auction time: %" PRIu64 ", previous time: %" PRIu64 "\n",
-						auctionInfo.getTime(), previousTime);
-				}
-
-				if(previousTime)
-					auctionInfo.updateTimes(time, previousTime);
-				else
-					auctionInfo.updateTime(time);
+				auctionInfo.remove(time);
 			}
 			break;
 		}
@@ -200,7 +159,7 @@ void AuctionWriter::dumpAuctions(const std::string& auctionDir, const std::strin
 		dumpTimeStamp = ::time(nullptr);
 	}
 
-	processRemovedAuctions(auctionsState);
+	processRemainingAuctions(auctionsState);
 
 	if(dumpDiff && !firstAuctions) {
 		serializeAuctionInfos(auctionsState, false, fileData);
@@ -223,18 +182,23 @@ bool AuctionWriter::hasAuction(uint32_t uid)
 	return true;
 }
 
-void AuctionWriter::processRemovedAuctions(std::unordered_map<uint32_t, AuctionInfo> &auctionInfos) {
+void AuctionWriter::processRemainingAuctions(std::unordered_map<uint32_t, AuctionInfo> &auctionInfos) {
 	auto it = auctionInfos.begin();
 	for(; it != auctionInfos.end(); ++it) {
 		AuctionInfo& auctionInfo = it->second;
-		if(auctionInfo.flag == AuctionInfo::AIF_NotProcessed) {
-			time_t endCategory = getCategoryTime(auctionInfo.category).end;
-			if(endCategory == 0)
-				log(LL_Warning, "End of category %d is time 0\n", auctionInfo.category);
+		if(auctionInfo.processStatus == AuctionInfo::PS_NotProcessed) {
+			if(diffMode == false) {
+				time_t endCategory = getCategoryTime(auctionInfo.category).end;
+				if(endCategory == 0)
+					log(LL_Warning, "End of category %d is time 0\n", auctionInfo.category);
 
-			auctionInfo.updateTime(endCategory);
-			auctionInfo.flag = AuctionInfo::AIF_Deleted;
-			log(LL_Debug, "Auction info removed: 0x%08X\n", auctionInfo.uid);
+				auctionInfo.remove(endCategory);
+				log(LL_Debug, "Auction info removed: 0x%08X\n", auctionInfo.uid);
+			} else if(!auctionInfo.deleted) {
+				auctionInfo.unmodified(getLastEndCategoryTime());
+			}
+
+			auctionInfo.maybeStillDeleted();
 		}
 	}
 }
@@ -243,13 +207,13 @@ void AuctionWriter::postProcessAuctionInfos(std::unordered_map<uint32_t, Auction
 	auto it = auctionInfos.begin();
 	for(; it != auctionInfos.end();) {
 		AuctionInfo& auctionInfo = it->second;
-		if(auctionInfo.flag == AuctionInfo::AIF_NotProcessed) {
-			log(LL_Error, "Post process auction: found auction in AIF_NotProcessed state, should have been set to AIF_Deleted, uid: 0x%08X\n", auctionInfo.uid);
+		if(auctionInfo.processStatus == AuctionInfo::PS_NotProcessed) {
+			log(LL_Error, "Post process auction: found auction in PS_NotProcessed state, should have been set to PS_Deleted, uid: 0x%08X\n", auctionInfo.uid);
 			++it;
-		} else if(auctionInfo.flag == AuctionInfo::AIF_Deleted) {
+		} else if(auctionInfo.processStatus == AuctionInfo::PS_Deleted) {
 			it = auctionInfos.erase(it);
 		} else {
-			auctionInfo.flag = AuctionInfo::AIF_NotProcessed;
+			auctionInfo.resetProcess();
 			++it;
 		}
 	}
@@ -273,6 +237,7 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 	auctionFile.categories.reserve(categoryTime.size());
 	for(size_t i = 0; i < categoryTime.size(); i++) {
 		AUCTION_CATEGORY_INFO categoryInfo;
+		categoryInfo.previousBegin = categoryTime[i].previousBegin;
 		categoryInfo.beginTime = categoryTime[i].begin;
 		categoryInfo.endTime = categoryTime[i].end;
 		auctionFile.categories.push_back(categoryInfo);
@@ -283,50 +248,16 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 	auto it = auctionInfos.begin();
 	for(; it != auctionInfos.end(); ++it) {
 		const AuctionInfo& auctionInfo = getAuctionInfoFromValue(*it);
-		DiffType diffType = doFullDump ? D_Base : getAuctionDiffType(auctionInfo.flag);
+		DiffType diffType = doFullDump ? D_Base : auctionInfo.getAuctionDiffType();
 
 		if(diffType >= D_Invalid)
-			logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d for auction 0x%08X\n", auctionInfo.flag, auctionInfo.uid);
+			logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d for auction 0x%08X\n", auctionInfo.processStatus, auctionInfo.uid);
 
-		if(diffType == D_Unmodified && !doFullDump)
+		if((diffType == D_MaybeDeleted || diffType == D_Unmodified) && !doFullDump)
 			continue;
 
 		AUCTION_INFO auctionItem;
-		auctionItem.uid = auctionInfo.uid;
-		auctionItem.category = (uint16_t)auctionInfo.category;
-		auctionItem.diffType = (uint16_t)diffType;
-		auctionItem.time = auctionInfo.getTime();
-		auctionItem.previousTime = auctionInfo.getPreviousTime();
-		auctionItem.estimatedEndTime = auctionInfo.getEstimatedEnd();
-
-		const std::vector<uint8_t>& data = auctionInfo.getData();
-
-#pragma pack(push, 1)
-		struct AuctionDataEnd {
-			int8_t duration_type;
-			int64_t bid_price;
-			int64_t price;
-			char seller[31];
-			int8_t flag;
-		};
-#pragma pack(pop)
-
-		if(data.size() >= sizeof(AuctionDataEnd)) {
-			const AuctionDataEnd* auctionDataEnd = reinterpret_cast<const AuctionDataEnd*>(data.data() + data.size() - sizeof(AuctionDataEnd));
-			auctionItem.duration_type = auctionDataEnd->duration_type;
-			auctionItem.bid_price = auctionDataEnd->bid_price;
-			auctionItem.price = auctionDataEnd->price;
-			auctionItem.seller = Utils::convertToString(auctionDataEnd->seller, sizeof(auctionDataEnd->seller) - 1);
-			auctionItem.flag = auctionDataEnd->flag;
-
-			auctionItem.data = std::vector<uint8_t>(data.data(), data.data() + data.size() - sizeof(AuctionDataEnd));
-		} else {
-			auctionItem.data = data;
-			auctionItem.duration_type = 0;
-			auctionItem.bid_price = 0;
-			auctionItem.price = 0;
-			auctionItem.flag = 0;
-		}
+		auctionInfo.serialize(&auctionItem);
 
 		auctionFile.auctions.push_back(auctionItem);
 	}
@@ -393,17 +324,6 @@ void AuctionWriter::writeAuctionDataToFile(std::string auctionsDir, std::string 
 	fclose(file);
 }
 
-DiffType AuctionWriter::getAuctionDiffType(AuctionInfo::Flag flag) {
-	switch(flag) {
-		case AuctionInfo::AIF_Deleted: return D_Deleted;
-		case AuctionInfo::AIF_Added: return D_Added;
-		case AuctionInfo::AIF_Updated: return D_Updated;
-		case AuctionInfo::AIF_Unmodifed: return D_Unmodified;
-		case AuctionInfo::AIF_Base: return D_Base;
-	}
-	return D_Invalid;
-}
-
 void AuctionWriter::adjustCategoryTimeRange(size_t category, time_t time)
 {
 	time_t begin = getCategoryTime(category).begin;
@@ -452,6 +372,7 @@ AuctionWriter::CategoryTime& AuctionWriter::getCategoryTime(size_t category)
 time_t AuctionWriter::getEstimatedPreviousCategoryBeginTime(size_t category)
 {
 	time_t maxTime = 0;
+	//get maximum previous time of all categories preceding "category"
 	for(ssize_t i = category; i >= 0; i--) {
 		if(getCategoryTime(i).previousBegin > maxTime)
 			maxTime = getCategoryTime(i).previousBegin;
@@ -468,6 +389,27 @@ time_t AuctionWriter::getLastEndCategoryTime()
 			lastTime = categoryTime[i].end;
 	}
 	return lastTime;
+}
+
+void AuctionWriter::importDump(AUCTION_FILE *auctionFile)
+{
+	categoryTime.clear();
+	for(size_t i = 0; i < auctionFile->categories.size(); i++) {
+		AUCTION_CATEGORY_INFO& categoryInfo = auctionFile->categories[i];
+		CategoryTime category;
+
+		category.previousBegin = categoryInfo.previousBegin;
+		category.begin = categoryInfo.beginTime;
+		category.end = categoryInfo.endTime;
+
+		categoryTime.push_back(category);
+	}
+
+	auctionsState.clear();
+	for(size_t i = 0; i < auctionFile->auctions.size(); i++) {
+		AUCTION_INFO& auctionInfo = auctionFile->auctions[i];
+		auctionsState.insert(std::make_pair(auctionInfo.uid, AuctionInfo::createFromDump(&auctionInfo)));
+	}
 }
 
 static int compressGzip(std::vector<uint8_t>& compressedData, const Bytef *source, uLong sourceLen, int level) {
