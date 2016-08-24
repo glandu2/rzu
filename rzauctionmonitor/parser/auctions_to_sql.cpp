@@ -171,14 +171,6 @@ struct ItemData {
 	int16_t unknown2;
 };
 
-struct AuctionDataEnd {
-	int8_t duration_type;
-	int64_t bid_price;
-	int64_t price;
-	char seller[31];
-	int8_t flag;
-};
-
 struct AuctionInfo {
 	int32_t size;
 	int16_t version;
@@ -191,9 +183,6 @@ struct AuctionInfo {
 #pragma pack(pop)
 
 int main(int argc, char* argv[]) {
-	const int totalRecognizedSize = sizeof(struct AuctionInfo) + sizeof(struct ItemData) + sizeof(struct AuctionDataEnd);
-	std::map<uint32_t, std::vector<uint8_t>> auctions;
-
 	LibRzuInit();
 	DbConnectionPool dbConnectionPool;
 	DbBindingLoader::get()->initAll(&dbConnectionPool);
@@ -211,7 +200,6 @@ int main(int argc, char* argv[]) {
 	ConfigInfo::get()->dump();
 
 	if(argc < 2) {
-		Object::logStatic(Object::LL_Info, "main", "Record size is %d(0x%08X)\n", totalRecognizedSize, totalRecognizedSize);
 		Object::logStatic(Object::LL_Info, "main", "Usage: %s auctions.bin\n", argv[0]);
 		return 0;
 	}
@@ -272,13 +260,12 @@ int main(int argc, char* argv[]) {
 			input.category = auctionInfo.category;
 
 			ItemData* item = (ItemData*) auctionInfo.data.data();
-			AuctionDataEnd* dataEnd = (AuctionDataEnd*) (auctionInfo.data.data() + auctionInfo.data.size() - sizeof(AuctionDataEnd));
 
-			input.duration_type = dataEnd->duration_type;
-			input.bid_price = dataEnd->bid_price;
-			input.price = dataEnd->price;
-			input.seller = dataEnd->seller;
-			input.bid_flag = dataEnd->flag;
+			input.duration_type = auctionInfo.duration_type;
+			input.bid_price = auctionInfo.bid_price;
+			input.price = auctionInfo.price;
+			input.seller = auctionInfo.seller;
+			input.bid_flag = auctionInfo.bid_flag;
 
 			input.handle = item->handle;
 			input.code = item->code;

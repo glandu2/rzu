@@ -50,6 +50,7 @@ private:
 	int totalPages;
 	static const size_t CATEGORY_MAX_INDEX = 18;
 	size_t currentCategory;
+	bool firstDump;
 
 	bool reloadingAccounts;
 	Timer<AuctionManager> accountReloadTimer;

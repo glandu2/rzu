@@ -11,7 +11,7 @@
 
 static int compressGzip(std::vector<uint8_t>& compressedData, const Bytef *source, uLong sourceLen, int level);
 
-AuctionWriter::AuctionWriter(size_t categoryCount) : firstAuctions(true), diffMode(false), fileNumber(0)
+AuctionWriter::AuctionWriter(size_t categoryCount) : diffMode(false), fileNumber(0)
 {
 	categoryTime.resize(categoryCount, CategoryTime());
 }
@@ -151,6 +151,16 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 
 }
 
+void AuctionWriter::beginProcess()
+{
+	resetAuctionProcess(auctionsState);
+}
+
+void AuctionWriter::endProcess()
+{
+	processRemainingAuctions(auctionsState);
+}
+
 void AuctionWriter::dumpAuctions(const std::string& auctionDir, const std::string& auctionFile, bool dumpDiff, bool dumpFull)
 {
 	time_t dumpTimeStamp = getLastEndCategoryTime();
@@ -159,19 +169,15 @@ void AuctionWriter::dumpAuctions(const std::string& auctionDir, const std::strin
 		dumpTimeStamp = ::time(nullptr);
 	}
 
-	processRemainingAuctions(auctionsState);
-
-	if(dumpDiff && !firstAuctions) {
+	if(dumpDiff) {
 		serializeAuctionInfos(auctionsState, false, fileData);
 		writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_diff");
 	}
 
-	if(dumpFull || firstAuctions) {
+	if(dumpFull) {
 		serializeAuctionInfos(auctionsState, true, fileData);
 		writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_full");
 	}
-
-	postProcessAuctionInfos(auctionsState);
 }
 
 bool AuctionWriter::hasAuction(uint32_t uid)
@@ -195,7 +201,8 @@ void AuctionWriter::processRemainingAuctions(std::unordered_map<uint32_t, Auctio
 				auctionInfo.remove(endCategory);
 				log(LL_Debug, "Auction info removed: 0x%08X\n", auctionInfo.uid);
 			} else if(!auctionInfo.deleted) {
-				auctionInfo.unmodified(getLastEndCategoryTime());
+				time_t beginCategory = getEstimatedCategoryBeginTime(auctionInfo.category);
+				auctionInfo.unmodified(beginCategory);
 			}
 
 			auctionInfo.maybeStillDeleted();
@@ -203,7 +210,7 @@ void AuctionWriter::processRemainingAuctions(std::unordered_map<uint32_t, Auctio
 	}
 }
 
-void AuctionWriter::postProcessAuctionInfos(std::unordered_map<uint32_t, AuctionInfo> &auctionInfos) {
+void AuctionWriter::resetAuctionProcess(std::unordered_map<uint32_t, AuctionInfo> &auctionInfos) {
 	auto it = auctionInfos.begin();
 	for(; it != auctionInfos.end();) {
 		AuctionInfo& auctionInfo = it->second;
@@ -220,8 +227,6 @@ void AuctionWriter::postProcessAuctionInfos(std::unordered_map<uint32_t, Auction
 
 	for(size_t i = 0; i < categoryTime.size(); i++)
 		categoryTime[i].resetTimes();
-
-	firstAuctions = false;
 }
 
 template<class Container>
@@ -376,6 +381,18 @@ time_t AuctionWriter::getEstimatedPreviousCategoryBeginTime(size_t category)
 	for(ssize_t i = category; i >= 0; i--) {
 		if(getCategoryTime(i).previousBegin > maxTime)
 			maxTime = getCategoryTime(i).previousBegin;
+	}
+
+	return maxTime;
+}
+
+time_t AuctionWriter::getEstimatedCategoryBeginTime(size_t category)
+{
+	time_t maxTime = 0;
+	//get maximum previous time of all categories preceding "category"
+	for(ssize_t i = category; i >= 0; i--) {
+		if(getCategoryTime(i).begin > maxTime)
+			maxTime = getCategoryTime(i).begin;
 	}
 
 	return maxTime;

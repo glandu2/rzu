@@ -18,7 +18,7 @@ void AuctionManager::onReloadAccounts(IWritableConsole* console, const std::vect
 	}
 }
 
-AuctionManager::AuctionManager() : auctionWriter(CATEGORY_MAX_INDEX), totalPages(0), reloadingAccounts(false)
+AuctionManager::AuctionManager() : auctionWriter(CATEGORY_MAX_INDEX), totalPages(0), firstDump(true), reloadingAccounts(false)
 {
 	if(!instance) {
 		ConsoleCommands::get()->addCommand("client.reload_accounts", "reload", 0, &AuctionManager::onReloadAccounts,
@@ -242,9 +242,16 @@ void AuctionManager::onAllRequestProcessed()
 
 	currentCategory++;
 	if(currentCategory > CATEGORY_MAX_INDEX) {
-		auctionWriter.dumpAuctions(CONFIG_GET()->client.auctionListDir.get(), CONFIG_GET()->client.auctionListFile.get(), true, CONFIG_GET()->client.doFullAuctionDump.get());
+		auctionWriter.endProcess();
 
+		auctionWriter.dumpAuctions(CONFIG_GET()->client.auctionListDir.get(),
+		                           CONFIG_GET()->client.auctionListFile.get(),
+		                           !firstDump,
+		                           firstDump || CONFIG_GET()->client.doFullAuctionDump.get());
+
+		auctionWriter.beginProcess();
 		currentCategory = 0;
+		firstDump = false;
 	}
 
 	totalPages = 1;

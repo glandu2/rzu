@@ -38,14 +38,6 @@ struct ItemData {
 	int32_t unknown1[51];
 	int16_t unknown2;
 };
-
-struct AuctionDataEnd {
-	int8_t duration_type;
-	int64_t bid_price;
-	int64_t price;
-	char seller[31];
-	int8_t flag;
-};
 #pragma pack(pop)
 
 #define AUCTION_INFO_PER_DAY_DEF(_) \
@@ -231,7 +223,6 @@ int main(int argc, char* argv[]) {
 		jsonWriter.finalize();
 		fprintf(stderr, "%s\r\n", jsonWriter.toString().c_str());
 	}
-
 
 	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", i-1);
 

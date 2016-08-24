@@ -3,6 +3,16 @@
 
 #include "Packet/PacketDeclaration.h"
 
+#pragma pack(push, 1)
+    struct AuctionDataEnd {
+		int8_t duration_type;
+		int64_t bid_price;
+		int64_t price;
+		char seller[31];
+		int8_t bid_flag;
+	};
+#pragma pack(pop)
+
 enum DiffType {
 	D_Added = 0,
 	D_Updated = 1,

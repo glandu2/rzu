@@ -40,14 +40,6 @@ struct ItemData {
 	int32_t unknown1[51];
 	int16_t unknown2;
 };
-
-struct AuctionDataEnd {
-	int8_t duration_type;
-	int64_t bid_price;
-	int64_t price;
-	char seller[31];
-	int8_t flag;
-};
 #pragma pack(pop)
 
 int main(int argc, char* argv[]) {

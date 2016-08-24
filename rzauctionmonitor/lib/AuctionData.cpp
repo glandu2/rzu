@@ -146,18 +146,7 @@ void AuctionInfo::setStatus(ProcessStatus status, uint64_t time)
 
 bool AuctionInfo::parseData(const uint8_t *data, size_t len)
 {
-#pragma pack(push, 1)
-	struct AuctionDataEnd {
-		int8_t duration_type;
-		int64_t bid_price;
-		int64_t price;
-		char seller[31];
-		int8_t bid_flag;
-	};
-#pragma pack(pop)
-
 	bool hasChanged;
-
 
 	const AuctionDataEnd* auctionDataEnd = reinterpret_cast<const AuctionDataEnd*>(data + len - sizeof(AuctionDataEnd));
 

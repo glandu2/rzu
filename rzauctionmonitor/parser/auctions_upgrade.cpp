@@ -130,11 +130,11 @@ bool readData(FILE* file, AuctionFile::AuctionData* auctionData) {
 		char buffer[1024];
 	} data;
 
-	int ret = fread(&header, sizeof(header), 1, file);
+	size_t ret = fread(&header, sizeof(header), 1, file);
 	if(ret != 1)
 		return false;
 
-	int dataSize = header.getSize();
+	size_t dataSize = header.getSize();
 	if(dataSize > sizeof(data.buffer)) {
 		Object::logStatic(Object::LL_Error, "main", "Error: data size too large: %d at offset %d\n", dataSize, (int)(ftell(file) - sizeof(header)));
 		return false;
@@ -271,8 +271,6 @@ int main(int argc, char* argv[]) {
 
 		auctionWriter.importDump(&auctionFileData);
 		fclose(file);
-
-		auctionWriter.dumpAuctions("output", "auctions.bin", false, true);
 	}
 
 	while(fgets(filename, sizeof(filename), stdin)) {
@@ -290,8 +288,6 @@ int main(int argc, char* argv[]) {
 			return 1;
 		}
 
-		typedef AuctionHeaderV2 AuctionHeader;
-
 		AuctionFile auctionFile;
 
 		if(!readFile(file, &auctionFile, &auctionWriter)) {
@@ -307,6 +303,7 @@ int main(int argc, char* argv[]) {
 				auctionWriter.getAuctionCount());
 
 		auctionWriter.setDiffInputMode(!auctionFile.isFull);
+		auctionWriter.beginProcess();
 
 		for(size_t auction = 0; auction < auctionFile.auctions.size(); auction++) {
 			AuctionFile::AuctionData& auctionData = auctionFile.auctions[auction];
@@ -338,6 +335,7 @@ int main(int argc, char* argv[]) {
 												 auctionData.data.size());
 			}
 		}
+		auctionWriter.endProcess();
 
 		fclose(file);
 
