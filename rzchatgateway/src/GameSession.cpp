@@ -78,14 +78,10 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 			packet->process(this, &GameSession::onCharacterLoginResult, EPIC_LATEST);
 			break;
 
-		case TS_SC_ENTER::packetID: {
-			TS_SC_ENTER* enterPkt = (TS_SC_ENTER*) packet;
-			if(enterPkt->type == 0 && enterPkt->ObjType == 0) {
-				TS_SC_ENTER::PlayerInfo* playerInfo = (TS_SC_ENTER::PlayerInfo*) (((char*)enterPkt) + sizeof(TS_SC_ENTER));
-				playerNames[enterPkt->handle] = std::string(playerInfo->szName);
-			}
+		case_packet_is(TS_SC_ENTER)
+			packet->process(this, &GameSession::onEnter, EPIC_LATEST);
 			break;
-		}
+
 		case TS_SC_CHAT_LOCAL::packetID: {
 			TS_SC_CHAT_LOCAL* chatPkt = (TS_SC_CHAT_LOCAL*) packet;
 			std::string msg = std::string(chatPkt->message, chatPkt->len);
@@ -181,6 +177,12 @@ void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT *packet) {
 		TS_MESSAGE_WNA::destroy(chatRqst);
 	}
 	messageQueue.clear();
+}
+
+void GameSession::onEnter(const TS_SC_ENTER *packet) {
+	if(packet->objType == EOT_Player) {
+		playerNames[packet->handle] = packet->playerInfo.szName;
+	}
 }
 
 void GameSession::sendMsgToGS(int type, const char* sender, const char* target, std::string msg) {

@@ -8,6 +8,9 @@
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
 #include <unordered_map>
 
+struct TS_SC_ENTER;
+struct TS_SC_SKILL;
+
 class PacketFilter : public IFilter
 {
 public:
@@ -22,6 +25,8 @@ public:
 private:
 	void onInventory(const TS_SC_INVENTORY *packet);
 	void onAttack(const TS_SC_ATTACK_EVENT *packet);
+	void onEnter(const TS_SC_ENTER *packet);
+	void onSkill(const TS_SC_SKILL *packet);
 
 private:
 	struct Item {

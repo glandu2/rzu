@@ -11,6 +11,7 @@ class IrcClient;
 struct TS_CS_CHAT_REQUEST;
 struct TS_SC_CHARACTER_LIST;
 struct TS_SC_LOGIN_RESULT;
+struct TS_SC_ENTER;
 
 class GameSession : public ClientGameSession {
 public:
@@ -30,6 +31,7 @@ protected:
 
 	void onCharacterList(const TS_SC_CHARACTER_LIST* packet);
 	void onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet);
+	void onEnter(const TS_SC_ENTER* packet);
 
 	uint32_t getRappelzTime();
 

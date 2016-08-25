@@ -1,117 +1,130 @@
 #ifndef PACKETS_TS_SC_ENTER_H
 #define PACKETS_TS_SC_ENTER_H
 
-#include "Packet/PacketBaseMessage.h"
-#include "PacketEnums.h"
+#include "Packet/PacketDeclaration.h"
+#include "Packet/EncodedInt.h"
+#include "Packet/EncodingRandomized.h"
+#include "Packet/EncodingScrambled.h"
 
-#pragma pack(push, 1)
-struct TS_SC_ENTER : public TS_MESSAGE
-{
-	char type;
-	unsigned int handle;
-	float x;
-	float y;
-	float z;
-	char layer;
-	char ObjType;
-
-	struct TS_ITEM_PICK_UP_ORDER
-	{
-		unsigned int drop_time;
-		unsigned int hPlayer[3];
-		int nPartyID[3];
-	};
-/*
-	struct ItemInfo             //ObjType = 2, type = 2
-	{
-		int code;
-		long long int cnt;
-		TS_ENTER::TS_ITEM_PICK_UP_ORDER pick_up_order;
-	};
-
-	struct SkillInfo            //ObjType  = 5, type = 2
-	{
-		unsigned int caster;
-		unsigned int start_time;
-		int skill_num;
-	};
-
-	struct FieldPropInfo        //ObjType = 6, type = 2
-	{
-		int prop_id;
-		float fZOffset;
-		float fRotateX;
-		float fRotateY;
-		float fRotateZ;
-		float fScaleX;
-		float fScaleY;
-		float fScaleZ;
-		bool bLockHeight;
-		float fLockHeight;
-	};
-*/
-	struct CreatureInfo         //interm size = 38
-	{
-		unsigned int status;
-		float face_direction;
-		int hp;
-		int max_hp;
-		int mp;
-		int max_mp;
-		int level;
-		char race;
-		unsigned int skin_color;
-		bool is_first_enter;
-		int energy;
-	};
-/*
-	struct MonsterInfo         //ObjType = 3, type = 1
-	{
-		TS_ENTER::CreatureInfo baseclass_0;
-		RandomizedInt monster_id;
-		bool is_tamed;
-	};
-
-	struct SummonInfo          //ObjType = 4, type = 1
-	{
-		TS_ENTER::CreatureInfo baseclass_0;
-		unsigned int master_handle;
-		RandomizedInt summon_code;
-		char szName[19];
-		char enhance;
-	};
-
-	struct NPCInfo            //ObjType = 1, type = 1
-	{
-		TS_ENTER::CreatureInfo baseclass_0;
-		RandomizedInt npc_id;
-	};
-*/
-	struct PlayerInfo         //ObjType = 0, type = 0
-	{
-		CreatureInfo baseclass_0;
-		char sex;
-		int faceId;
-		int faceTextureId;
-		int hairId;
-		int hairColorIndex;
-		unsigned int hairColorRGB;
-		unsigned int hideEquipFlag;
-		char szName[19];
-		unsigned short job_id;
-		unsigned int ride_handle;
-		int guild_id;
-	};
-/*
-	struct PetInfo             //ObjType = 7, type = 1
-	{
-		TS_ENTER::CreatureInfo baseclass_0;
-		unsigned int master_handle;
-		RandomizedInt pet_code;
-		char szName[19];
-	};*/
-	static const int packetID = 3;
+enum TS_SC_ENTER__OBJ_TYPE : uint8_t {
+	EOT_Player,
+	EOT_NPC,
+	EOT_Item,
+	EOT_Monster,
+	EOT_Summon,
+	EOT_Skill,
+	EOT_FieldProp,
+	EOT_Pet
 };
-#pragma pack(pop)
+
+#define TS_SC_ENTER__ITEM_PICK_UP_ORDER_DEF(_) \
+	_(simple) (uint32_t, drop_time) \
+	_(array)  (uint32_t, hPlayer, 3) \
+	_(array)  (int32_t, nPartyID, 3)
+CREATE_STRUCT(TS_SC_ENTER__ITEM_PICK_UP_ORDER);
+
+#define TS_SC_ENTER__ITEM_INFO_DEF(_) \
+	_(simple) (EncodedInt<EncodingRandomized>, code) \
+	_(simple) (uint64_t, count) \
+	_(simple) (TS_SC_ENTER__ITEM_PICK_UP_ORDER, pick_up_order)
+CREATE_STRUCT(TS_SC_ENTER__ITEM_INFO);
+
+#define TS_SC_ENTER__SKILL_INFO_DEF(_) \
+	_(simple) (uint32_t, casterHandle) \
+	_(simple) (uint32_t, startTime) \
+	_(simple) (uint32_t, skillId)
+CREATE_STRUCT(TS_SC_ENTER__SKILL_INFO);
+
+#define TS_SC_ENTER__FIELD_PROP_INFO_DEF(_) \
+	_(simple) (uint32_t, prop_id) \
+	_(simple) (float, fZOffset) \
+	_(simple) (float, fRotateX) \
+	_(simple) (float, fRotateY) \
+	_(simple) (float, fRotateZ) \
+	_(simple) (float, fScaleX) \
+	_(simple) (float, fScaleY) \
+	_(simple) (float, fScaleZ) \
+	_(simple) (bool, bLockHeight) \
+	_(simple) (float, fLockHeight)
+CREATE_STRUCT(TS_SC_ENTER__FIELD_PROP_INFO);
+
+#define TS_SC_ENTER__CREATURE_INFO_DEF(_) \
+	_(simple) (uint32_t, status) \
+	_(simple) (float, face_direction) \
+	_(simple) (int32_t, hp) \
+	_(simple) (int32_t, max_hp) \
+	_(simple) (int32_t, mp) \
+	_(simple) (int32_t, max_mp) \
+	_(simple) (int32_t, level) \
+	_(simple) (uint8_t, race) \
+	_(simple) (uint32_t, skin_color) \
+	_(simple) (bool, is_first_enter) \
+	_(simple) (int32_t, energy)
+CREATE_STRUCT(TS_SC_ENTER__CREATURE_INFO);
+
+#define TS_SC_ENTER__MONSTER_INFO_DEF(_) \
+	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
+	_(simple) (EncodedInt<EncodingScrambled>, monster_id) \
+	_(simple) (bool, is_tamed)
+CREATE_STRUCT(TS_SC_ENTER__MONSTER_INFO);
+
+#define TS_SC_ENTER__SUMMON_INFO_DEF(_) \
+	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
+	_(simple) (uint32_t, master_handle) \
+	_(simple) (EncodedInt<EncodingRandomized>, summon_code) \
+	_(string) (szName, 19) \
+	_(simple) (uint8_t, enhance)
+CREATE_STRUCT(TS_SC_ENTER__SUMMON_INFO);
+
+#define TS_SC_ENTER__NPC_INFO_DEF(_) \
+	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
+	_(simple) (EncodedInt<EncodingRandomized>, npc_id)
+CREATE_STRUCT(TS_SC_ENTER__NPC_INFO);
+
+#define TS_SC_ENTER__PLAYER_INFO_DEF(_) \
+	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
+	_(simple) (uint8_t, sex) \
+	_(simple) (uint32_t, faceId) \
+	_(simple) (uint32_t, faceTextureId) \
+	_(simple) (uint32_t, hairId) \
+	_(simple) (uint32_t, hairColorIndex) \
+	_(simple) (uint32_t, hairColorRGB) \
+	_(simple) (uint32_t, hideEquipFlag) \
+	_(string) (szName, 19) \
+	_(simple) (uint16_t, job_id) \
+	_(simple) (uint32_t, ride_handle) \
+	_(simple) (uint32_t, guild_id) \
+	_(simple) (uint64_t, unknown, version >= EPIC_9_2)
+CREATE_STRUCT(TS_SC_ENTER__PLAYER_INFO);
+
+#define TS_SC_ENTER__PET_INFO_DEF(_) \
+	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
+	_(simple) (uint32_t, master_handle) \
+	_(simple) (EncodedInt<EncodingRandomized>, pet_code) \
+	_(string) (szName, 19)
+CREATE_STRUCT(TS_SC_ENTER__PET_INFO);
+
+#define TS_SC_ENTER_DEF(_) \
+	_(simple) (uint8_t, type) /* 0 = static object, 1 = movable object, 2 = client object (ArObject::ObjectType) */ \
+	_(simple) (uint32_t, handle) \
+	_(simple) (float, x) \
+	_(simple) (float, y) \
+	_(simple) (float, z) \
+	_(simple) (uint8_t, layer) \
+	_(simple) (TS_SC_ENTER__OBJ_TYPE, objType) \
+	_(simple) (TS_SC_ENTER__PLAYER_INFO    , playerInfo   , objType == EOT_Player) \
+	_(simple) (TS_SC_ENTER__NPC_INFO       , npcInfo      , objType == EOT_NPC) \
+	_(simple) (TS_SC_ENTER__ITEM_INFO      , itemInfo     , objType == EOT_Item) \
+	_(simple) (TS_SC_ENTER__MONSTER_INFO   , monsterInfo  , objType == EOT_Monster) \
+	_(simple) (TS_SC_ENTER__SUMMON_INFO    , summonInfo   , objType == EOT_Summon) \
+	_(simple) (TS_SC_ENTER__SKILL_INFO     , skillInfo    , objType == EOT_Skill) \
+	_(simple) (TS_SC_ENTER__FIELD_PROP_INFO, fieldPropInfo, objType == EOT_FieldProp) \
+	_(simple) (TS_SC_ENTER__PET_INFO       , petInfo      , objType == EOT_Pet)
+
+#define TS_SC_ENTER_ID(X) \
+	X(3, version < EPIC_9_2) \
+	X(63, version >= EPIC_9_2)
+
+CREATE_PACKET_VER_ID(TS_SC_ENTER);
 
 #endif // PACKETS_TS_SC_ENTER_H

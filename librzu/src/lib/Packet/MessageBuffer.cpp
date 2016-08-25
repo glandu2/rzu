@@ -2,17 +2,15 @@
 #include <algorithm>
 #include "Core/Utils.h"
 
-MessageBuffer::MessageBuffer(size_t size, int version) {
+MessageBuffer::MessageBuffer(size_t size, int version) : StructSerializer(version) {
 	buffer = Stream::WriteRequest::create(size);
 	p = buffer->buffer.base;
-	this->version = version;
 	bufferOverflow = false;
 }
 
-MessageBuffer::MessageBuffer(const void *data, size_t size, int version) {
+MessageBuffer::MessageBuffer(const void *data, size_t size, int version) : StructSerializer(version) {
 	buffer = Stream::WriteRequest::createFromExisting(const_cast<char*>(static_cast<const char*>(data)), size);
 	p = buffer->buffer.base;
-	this->version = version;
 	bufferOverflow = false;
 }
 
@@ -29,6 +27,14 @@ Stream::WriteRequest *MessageBuffer::getWriteRequest() {
 }
 
 bool MessageBuffer::checkFinalSize() {
+	if(bufferOverflow) {
+		log(LL_Error, "Serialization overflow: version: %d, buffer size: %d, offset: %d, field: %s\n",
+		    getVersion(), getSize(), uint32_t(p - buffer->buffer.base), getFieldInOverflow().c_str());
+	}
+	return !bufferOverflow;
+}
+
+bool MessageBuffer::checkPacketFinalSize() {
 	uint32_t msgSize = *reinterpret_cast<const uint32_t*>(buffer->buffer.base);
 	bool ok = !bufferOverflow && msgSize == getSize() && uint32_t(p - buffer->buffer.base) == msgSize;
 	if(!ok) {

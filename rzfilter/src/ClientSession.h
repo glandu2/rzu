@@ -19,7 +19,7 @@ public:
 	ClientSession();
 
 	void sendPacket(MessageBuffer& buffer) {
-		if(buffer.checkFinalSize() == false) {
+		if(buffer.checkPacketFinalSize() == false) {
 			log(LL_Error, "Wrong packet buffer size, id: %d, size: %d, field: %s\n", buffer.getMessageId(), buffer.getSize(), buffer.getFieldInOverflow().c_str());
 		} else {
 			logPacket(true, (const TS_MESSAGE*)buffer.getData());

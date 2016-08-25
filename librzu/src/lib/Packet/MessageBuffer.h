@@ -1,17 +1,17 @@
 #ifndef MESSAGEBUFFER_H
 #define MESSAGEBUFFER_H
 
+#include "StructSerializer.h"
 #include "Core/Object.h"
 #include "Stream/Stream.h"
 #include <vector>
 #include <string.h>
 #include <type_traits>
 
-class RZU_EXTERN MessageBuffer : public Object {
+class RZU_EXTERN MessageBuffer : public StructSerializer, public Object {
 private:
 	Stream::WriteRequest* buffer;
 	char *p;
-	int version;
 	bool bufferOverflow;
 	std::string fieldInOverflow;
 
@@ -29,9 +29,9 @@ public:
 	uint32_t getSize() const { return buffer->buffer.len; }
 	uint16_t getMessageId() const  { return *reinterpret_cast<const uint16_t*>(buffer->buffer.base + 4); }
 	std::string getFieldInOverflow() const  { return fieldInOverflow; }
-	int getVersion() const { return version; }
 
 	bool checkFinalSize();
+	bool checkPacketFinalSize();
 
 	bool checkAvailableBuffer(const char* fieldName, size_t size) {
 		if(bufferOverflow == false) {
@@ -50,7 +50,7 @@ public:
 
 	//Primitives
 	template<typename T>
-	typename std::enable_if<std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<is_primitive<T>::value, void>::type
 	write(const char* fieldName, T val) {
 		if(checkAvailableBuffer(fieldName, sizeof(T))) {
 			*reinterpret_cast<T*>(p) = val;
@@ -60,11 +60,9 @@ public:
 
 	//Objects
 	template<typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<!is_primitive<T>::value, void>::type
 	write(const char* fieldName, const T& val) {
-		if(checkAvailableBuffer(fieldName, 1)) {
-			val.serialize(this);
-		}
+		val.serialize(this);
 	}
 
 	//String
@@ -73,7 +71,7 @@ public:
 
 	//Fixed array of primitive
 	template<typename T>
-	typename std::enable_if<std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<is_primitive<T>::value, void>::type
 	writeArray(const char* fieldName, const T* val, size_t size) {
 		if(checkAvailableBuffer(fieldName, sizeof(T) * size)) {
 			memcpy(p, val, sizeof(T) * size);
@@ -83,7 +81,7 @@ public:
 
 	//Fixed array of primitive with cast
 	template<typename T, typename U>
-	typename std::enable_if<std::is_fundamental<T>::value && std::is_fundamental<T>::value && !std::is_same<T, U>::value, void>::type
+	typename std::enable_if<is_castable_primitive<T, U>::value, void>::type
 	writeArray(const char* fieldName, const U* val, size_t size) {
 		if(checkAvailableBuffer(fieldName, sizeof(T) * size)) {
 			for(size_t i = 0; i < size; ++i) {
@@ -95,7 +93,7 @@ public:
 
 	//Fixed array of object
 	template<typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<!is_primitive<T>::value, void>::type
 	writeArray(const char* fieldName, const T* val, size_t size) {
 		for(size_t i = 0; i < size; i++) {
 			write<T>(fieldName, val[i]);
@@ -104,10 +102,10 @@ public:
 
 	//Dynamic array of primitive
 	template<typename T>
-	typename std::enable_if<std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<is_primitive<T>::value, void>::type
 	writeDynArray(const char* fieldName, const std::vector<T>& val) {
 		size_t size = sizeof(T) * val.size();
-		if(checkAvailableBuffer(fieldName, size)) {
+		if(size && checkAvailableBuffer(fieldName, size)) {
 			memcpy(p, &val[0], size);
 			p += size;
 		}
@@ -115,10 +113,10 @@ public:
 
 	//Dynamic array of primitive with cast
 	template<typename T, typename U>
-	typename std::enable_if<std::is_fundamental<T>::value && std::is_fundamental<T>::value && !std::is_same<T, U>::value, void>::type
+	typename std::enable_if<is_castable_primitive<T, U>::value, void>::type
 	writeDynArray(const char* fieldName, const std::vector<U>& val) {
 		size_t size = val.size();
-		if(checkAvailableBuffer(fieldName, sizeof(T) * size)) {
+		if(size && checkAvailableBuffer(fieldName, sizeof(T) * size)) {
 			for(size_t i = 0; i < size; ++i) {
 				*reinterpret_cast<T*>(p) = val[i];
 				p += sizeof(T);
@@ -128,7 +126,7 @@ public:
 
 	//Dynamic array of object or primitive with cast
 	template<typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<!is_primitive<T>::value, void>::type
 	writeDynArray(const char* fieldName, const std::vector<T>& val) {
 		auto it = val.begin();
 		auto itEnd = val.end();
@@ -136,11 +134,18 @@ public:
 			write<T>(fieldName, *it);
 	}
 
+	void pad(const char* fieldName, size_t size) {
+		if(checkAvailableBuffer(fieldName, size)) {
+			memset(p, 0, size);
+			p += size;
+		}
+	}
+
 	// Read functions /////////////////////////
 
 	//Primitives via arg
 	template<typename T, typename U>
-	typename std::enable_if<std::is_fundamental<U>::value, void>::type
+	typename std::enable_if<is_primitive<U>::value, void>::type
 	read(const char* fieldName, U& val) {
 		if(checkAvailableBuffer(fieldName, sizeof(T))) {
 			val = (U)*reinterpret_cast<T*>(p);
@@ -150,11 +155,9 @@ public:
 
 	//Objects
 	template<typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<!is_primitive<T>::value, void>::type
 	read(const char* fieldName, T& val) {
-		if(checkAvailableBuffer(fieldName, 1)) {
-			val.deserialize(this);
-		}
+		val.deserialize(this);
 	}
 
 	//String
@@ -163,7 +166,7 @@ public:
 
 	//Fixed array of primitive
 	template<typename T>
-	typename std::enable_if<std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<is_primitive<T>::value, void>::type
 	readArray(const char* fieldName, T* val, size_t size) {
 		if(checkAvailableBuffer(fieldName, sizeof(T) * size)) {
 			memcpy(val, p, sizeof(T) * size);
@@ -173,7 +176,7 @@ public:
 
 	//Fixed array of primitive with cast
 	template<typename T, typename U>
-	typename std::enable_if<std::is_fundamental<T>::value && std::is_fundamental<U>::value && !std::is_same<T, U>::value, void>::type
+	typename std::enable_if<is_castable_primitive<T, U>::value, void>::type
 	readArray(const char* fieldName, U* val, size_t size) {
 		if(checkAvailableBuffer(fieldName, sizeof(T) * size)) {
 			for(size_t i = 0; i < size; i++) {
@@ -185,7 +188,7 @@ public:
 
 	//Fixed array of objects
 	template<typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<!is_primitive<T>::value, void>::type
 	readArray(const char* fieldName, T* val, size_t size) {
 		for(size_t i = 0; i < size; i++) {
 			read<T>(fieldName, val[i]);
@@ -194,10 +197,10 @@ public:
 
 	//Dynamic array of primitive
 	template<typename T>
-	typename std::enable_if<std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<is_primitive<T>::value, void>::type
 	readDynArray(const char* fieldName, std::vector<T>& val) {
 		size_t size = sizeof(T) * val.size();
-		if(checkAvailableBuffer(fieldName, size)) {
+		if(size && checkAvailableBuffer(fieldName, size)) {
 			memcpy(&val[0], p, size);
 			p += size;
 		}
@@ -205,10 +208,10 @@ public:
 
 	//Dynamic array of primitive with cast
 	template<typename T, typename U>
-	typename std::enable_if<std::is_fundamental<T>::value && std::is_fundamental<U>::value && !std::is_same<T, U>::value, void>::type
+	typename std::enable_if<is_castable_primitive<T, U>::value, void>::type
 	readDynArray(const char* fieldName, std::vector<U>& val) {
 		size_t size = val.size();
-		if(checkAvailableBuffer(fieldName, sizeof(T) * size)) {
+		if(size && checkAvailableBuffer(fieldName, sizeof(T) * size)) {
 			for(size_t i = 0; i < size; i++) {
 					val[i] = (U)*reinterpret_cast<T*>(p);
 					p += sizeof(T);
@@ -218,7 +221,7 @@ public:
 
 	//Dynamic array of object
 	template<typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value, void>::type
+	typename std::enable_if<!is_primitive<T>::value, void>::type
 	readDynArray(const char* fieldName, std::vector<T>& val) {
 		auto it = val.begin();
 		auto itEnd = val.end();

@@ -48,6 +48,16 @@ void DbConnection::releaseAndClose() {
 	delete this;
 }
 
+void DbConnection::setAutoCommit(bool enable)
+{
+	checkResult(SQLSetConnectAttr(hdbc, SQL_ATTR_AUTOCOMMIT,(SQLPOINTER) (enable ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_IS_UINTEGER), "SQL_ATTR_AUTOCOMMIT");
+}
+
+void DbConnection::endTransaction(bool commit)
+{
+	checkResult(SQLEndTran(SQL_HANDLE_DBC, hdbc, commit ? SQL_COMMIT : SQL_ROLLBACK), commit ? "commit" : "rollback");
+}
+
 bool DbConnection::bindParameter(SQLUSMALLINT ipar, SQLSMALLINT fParamType, SQLSMALLINT fCType, SQLSMALLINT fSqlType, SQLULEN cbColDef, SQLSMALLINT ibScale, SQLPOINTER rgbValue, SQLLEN cbValueMax, SQLLEN *pcbValue) {
 	assert(isUsed);
 	return checkResult(SQLBindParameter(hstmt, ipar, fParamType, fCType, fSqlType, cbColDef, ibScale, rgbValue, cbValueMax, pcbValue), "SQLBindParameter");

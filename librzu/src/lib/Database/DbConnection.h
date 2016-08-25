@@ -24,6 +24,8 @@ public:
 	//Will delete this
 	void releaseWithError();
 	void releaseAndClose();
+	void setAutoCommit(bool enable);
+	void endTransaction(bool commit);
 
 	bool bindParameter(SQLUSMALLINT       ipar,
 					  SQLSMALLINT        fParamType,
