@@ -180,6 +180,11 @@ void AuctionWriter::dumpAuctions(const std::string& auctionDir, const std::strin
 	}
 }
 
+void AuctionWriter::dumpAuctions(std::vector<uint8_t> &auctionData, bool doFulldump)
+{
+	serializeAuctionInfos(auctionsState, doFulldump, auctionData);
+}
+
 bool AuctionWriter::hasAuction(uint32_t uid)
 {
 	auto it = auctionsState.find(uid);
@@ -236,7 +241,7 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 
 	AUCTION_FILE auctionFile;
 	strcpy(auctionFile.signature, "RAH");
-	auctionFile.file_version = AUCTION_V4;
+	auctionFile.file_version = AUCTION_LATEST;
 	auctionFile.dumpType = doFullDump ? DT_Full : DT_Diff;
 
 	auctionFile.categories.reserve(categoryTime.size());

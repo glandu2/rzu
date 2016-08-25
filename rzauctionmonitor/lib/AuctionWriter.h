@@ -26,7 +26,7 @@ public:
 	void beginCategory(size_t category, time_t time);
 	void endCategory(size_t category, time_t time);
 	void dumpAuctions(const std::string &auctionDir, const std::string &auctionFile, bool dumpDiff, bool dumpFull);
-	const std::unordered_map<uint32_t, AuctionInfo>& getAuctions() { return auctionsState; }
+	void dumpAuctions(std::vector<uint8_t> &auctionData, bool doFulldump);
 
 	bool hasAuction(uint32_t uid);
 	size_t getAuctionCount() { return auctionsState.size(); }
