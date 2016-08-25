@@ -15,6 +15,7 @@ echo ----rzchatgateway: && cd ../rzchatgateway && git $*
 echo ----rzplayercount: && cd ../rzplayercount && git $*
 echo ----rzlog: && cd ../rzlog && git $*
 echo ----rzfilter: && cd ../rzfilter && git $*
+echo ----rzauctionmonitor: && cd ../rzauctionmonitor && git $*
 
 echo ----rzu-parent: && cd .. && git $*
 

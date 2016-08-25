@@ -25,3 +25,15 @@
 [submodule "libiconv"]
 	path = libiconv
 	url = ../libiconv.git
+[submodule "libuv"]
+	path = libuv
+	url = ../libuv
+[submodule "zlib"]
+	path = zlib
+	url = ../zlib
+[submodule "gtest"]
+	path = gtest
+	url = ../gtest
+[submodule "libiconv"]
+	path = libiconv
+	url = ../libiconv

@@ -38,15 +38,16 @@ if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
   if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
+	add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
   endif()
+  add_compile_options(/wd4251 /wd4275)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -Wall")
 
   if(NOT CMAKE_SYSTEM_NAME MATCHES "AIX")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
 	if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
 	  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
@@ -85,19 +86,25 @@ endif()
 
 # Compile subprojects if existing
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv EXCLUDE_FROM_ALL)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libiconv/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libiconv" libiconv)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libiconv" libiconv EXCLUDE_FROM_ALL)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/zlib" zlib)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/zlib" zlib EXCLUDE_FROM_ALL)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/googletest" gtest EXCLUDE_FROM_ALL)
+  if(BUILD_SHARED_LIBS)
+	target_compile_definitions(gtest
+	  PRIVATE GTEST_CREATE_SHARED_LIBRARY
+	  INTERFACE GTEST_LINKED_AS_SHARED_LIBRARY
+	)
+  endif()
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/librzu/CMakeLists.txt")
