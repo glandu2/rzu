@@ -98,13 +98,7 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/googletest" gtest EXCLUDE_FROM_ALL)
-  if(BUILD_SHARED_LIBS)
-	target_compile_definitions(gtest
-	  PRIVATE GTEST_CREATE_SHARED_LIBRARY
-	  INTERFACE GTEST_LINKED_AS_SHARED_LIBRARY
-	)
-  endif()
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest EXCLUDE_FROM_ALL)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/librzu/CMakeLists.txt")
