@@ -37,3 +37,19 @@
 [submodule "libiconv"]
 	path = libiconv
 	url = ../libiconv
+[submodule "libuv"]
+	path = libuv
+	url = ../libuv
+	branch = feature/cmake_support
+[submodule "zlib"]
+	path = zlib
+	url = ../zlib
+	branch = minimal
+[submodule "gtest"]
+	path = gtest
+	url = ../gtest
+	branch = master
+[submodule "libiconv"]
+	path = libiconv
+	url = ../libiconv
+	branch = master
