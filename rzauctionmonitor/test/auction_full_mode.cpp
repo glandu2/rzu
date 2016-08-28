@@ -109,9 +109,30 @@ static void expectAuction(AUCTION_FILE* auctionFile,
 	EXPECT_TRUE(auctionFound) << "Auction " << auctionOutput.uid << " not found";
 }
 
-TEST(auction_full_mode, added_auction) {
+TEST(auction_full_mode, no_auction) {
 	AuctionWriter auctionWriter(18);
 	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AUCTION_FILE auctionFile;
+
+	auctionWriter.beginProcess();
+	auctionWriter.beginCategory(auctionData.category, auctionData.time - rand()%1000);
+	auctionWriter.endCategory(auctionData.category, auctionData.time + rand()%1000);
+	auctionWriter.endProcess();
+
+	dumpAuctions(&auctionWriter, &auctionFile);
+
+	EXPECT_EQ(0, memcmp("RAH", auctionFile.signature, 4));
+	EXPECT_EQ(AUCTION_LATEST, auctionFile.file_version);
+	EXPECT_EQ(DT_Full, auctionFile.dumpType);
+	EXPECT_EQ(18, auctionFile.categories.size());
+	EXPECT_EQ(0, auctionFile.auctions.size());
+}
+
+TEST(auction_full_mode, added_2_auction) {
+	AuctionWriter auctionWriter(18);
+	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AuctionOuputTestData auctionData2(AuctionInfo::BF_MyBid, AuctionInfo::DT_Long);
+	AuctionOuputTestData auctionData3(AuctionInfo::BF_Bidded, AuctionInfo::DT_Short);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -122,51 +143,36 @@ TEST(auction_full_mode, added_auction) {
 	auctionData.estimatedEndTimeMin = 24*3600;
 	auctionData.estimatedEndTimeMax = auctionData.time + 24*3600;
 
-	auctionWriter.beginProcess();
-	auctionWriter.beginCategory(auctionData.category, auctionData.time - rand()%1000);
-	addAuction(&auctionWriter, auctionData);
-	auctionWriter.endCategory(auctionData.category, auctionData.time + rand()%1000);
-	auctionWriter.endProcess();
-
-	dumpAuctions(&auctionWriter, &auctionFile);
-
-	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData);
-}
-
-TEST(auction_full_mode, added_2_auction) {
-	AuctionWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Long);
-	AuctionOuputTestData auctionData2(AuctionInfo::BF_NoBid, AuctionInfo::DT_Short);
-	AUCTION_FILE auctionFile;
-
-	auctionData.diffType = D_Added;
-	auctionData.deleted = false;
-	auctionData.deletedCount = 0;
-	auctionData.previousTime = 0;
-	auctionData.estimatedEndTimeFromAdded = true;
-	auctionData.estimatedEndTimeMin = 72*3600;
-	auctionData.estimatedEndTimeMax = auctionData.time + 72*3600;
-
 	auctionData2.uid = auctionData.uid + 5454; // be sure they are differents
 	auctionData2.diffType = D_Added;
 	auctionData2.deleted = false;
 	auctionData2.deletedCount = 0;
 	auctionData2.previousTime = 0;
 	auctionData2.estimatedEndTimeFromAdded = true;
-	auctionData2.estimatedEndTimeMin = 6*3600;
-	auctionData2.estimatedEndTimeMax = auctionData2.time + 6*3600;
+	auctionData2.estimatedEndTimeMin = 72*3600;
+	auctionData2.estimatedEndTimeMax = auctionData2.time + 72*3600;
+
+	auctionData3.uid = auctionData2.uid + 5454; // be sure they are differents
+	auctionData3.diffType = D_Added;
+	auctionData3.deleted = false;
+	auctionData3.deletedCount = 0;
+	auctionData3.previousTime = 0;
+	auctionData3.estimatedEndTimeFromAdded = true;
+	auctionData3.estimatedEndTimeMin = 6*3600;
+	auctionData3.estimatedEndTimeMax = auctionData3.time + 6*3600;
 
 	auctionWriter.beginProcess();
-	auctionWriter.beginCategory(auctionData.category, std::min(auctionData2.time, auctionData.time) - rand()%1000);
+	auctionWriter.beginCategory(auctionData.category, std::min(std::min(auctionData3.time, auctionData2.time), auctionData.time) - rand()%1000);
 	addAuction(&auctionWriter, auctionData);
 	addAuction(&auctionWriter, auctionData2);
-	auctionWriter.endCategory(auctionData.category, std::max(auctionData2.time, auctionData.time) + rand()%1000);
+	addAuction(&auctionWriter, auctionData3);
+	auctionWriter.endCategory(auctionData.category, std::max(std::max(auctionData3.time, auctionData2.time), auctionData.time) + rand()%1000);
 	auctionWriter.endProcess();
 
 	dumpAuctions(&auctionWriter, &auctionFile);
 
-	ASSERT_EQ(2, auctionFile.auctions.size());
+	ASSERT_EQ(3, auctionFile.auctions.size());
 	expectAuction(&auctionFile, auctionData);
 	expectAuction(&auctionFile, auctionData2);
+	expectAuction(&auctionFile, auctionData3);
 }
