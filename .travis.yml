@@ -1,0 +1,20 @@
+language: cpp
+sudo: required
+dist: trusty
+compiler:
+- clang
+os:
+- linux
+- osx
+before_install:
+- echo $LANG
+- echo $LC_ALL
+- if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update && sudo apt-get install libssl-dev unixodbc-dev; fi
+- if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install openssl unixodbc; fi
+before_script:
+- mkdir build
+- cd build
+script:
+- if [ $TRAVIS_OS_NAME == osx ]; then export CMAKE_OPTS="-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl/"; fi
+- cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=FALSE $CMAKE_OPTS
+- cmake --build . --target package --config RelWithDebInfo
