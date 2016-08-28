@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
 		dayAggregation.maxEstimatedSoldPrice = max;
 		dayAggregation.avgEstimatedSoldPrice = num ? sum/num : -1;
 
-		JSONWriter jsonWriter(0, true);
+		JSONWriter jsonWriter(0, compactJson.get());
 		dayAggregation.serialize(&jsonWriter);
 		jsonWriter.finalize();
 		fprintf(stderr, "%s\r\n", jsonWriter.toString().c_str());

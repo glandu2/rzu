@@ -59,7 +59,7 @@ bool DB_Account::decryptPassword() {
 	DB_AccountData::Input* input = getInput();
 
 	if(input->cryptMode == DB_AccountData::EM_AES) {
-		EVP_CIPHER_CTX d_ctx;
+		EVP_CIPHER_CTX* d_ctx;
 		int bytesWritten, totalLength;
 		unsigned int bytesRead;
 
@@ -71,20 +71,20 @@ bool DB_Account::decryptPassword() {
 			return false;
 		}
 
-		EVP_CIPHER_CTX_init(&d_ctx);
-
-		if(EVP_DecryptInit_ex(&d_ctx, EVP_aes_128_cbc(), NULL, input->aesKey, input->aesKey + 16) <= 0)
+		d_ctx = EVP_CIPHER_CTX_new();
+		if(!d_ctx)
 			goto cleanup_aes;
-		if(EVP_DecryptInit_ex(&d_ctx, NULL, NULL, NULL, NULL) <= 0)
+
+		if(EVP_DecryptInit_ex(d_ctx, EVP_aes_128_cbc(), NULL, input->aesKey, input->aesKey + 16) <= 0)
 			goto cleanup_aes;
 
 		for(totalLength = bytesRead = 0; bytesRead + 15 < input->cryptedPassword.size(); bytesRead += 16) {
-			if(EVP_DecryptUpdate(&d_ctx, (unsigned char*)password + totalLength, &bytesWritten, &input->cryptedPassword[0] + bytesRead, 16) <= 0)
+			if(EVP_DecryptUpdate(d_ctx, (unsigned char*)password + totalLength, &bytesWritten, &input->cryptedPassword[0] + bytesRead, 16) <= 0)
 				goto cleanup_aes;
 			totalLength += bytesWritten;
 		}
 
-		if(EVP_DecryptFinal_ex(&d_ctx, (unsigned char*)password + totalLength, &bytesWritten) <= 0)
+		if(EVP_DecryptFinal_ex(d_ctx, (unsigned char*)password + totalLength, &bytesWritten) <= 0)
 			goto cleanup_aes;
 
 		totalLength += bytesWritten;
@@ -101,7 +101,8 @@ bool DB_Account::decryptPassword() {
 		unsigned long errorCode = ERR_get_error();
 		if(errorCode)
 			log(LL_Warning, "AES: error while processing password for account %s: %s\n", input->account.c_str(), ERR_error_string(errorCode, nullptr));
-		EVP_CIPHER_CTX_cleanup(&d_ctx);
+		if(d_ctx)
+			EVP_CIPHER_CTX_free(d_ctx);
 	} else if(input->cryptMode == DB_AccountData::EM_None) {
 		if(input->cryptedPassword.size() >= sizeof(password)) {
 			log(LL_Error, "Password length overflow: %d >= %d\n", (int)input->cryptedPassword.size(), (int)sizeof(password));
