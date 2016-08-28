@@ -4,9 +4,7 @@
 #include <stdint.h>
 #include <vector>
 #include "Extern.h"
-
-struct AUCTION_INFO;
-enum DiffType;
+#include "AuctionFile.h"
 
 class RZAUCTION_EXTERN AuctionInfo {
 public:
