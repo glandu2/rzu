@@ -1,7 +1,6 @@
 #include "AuctionData.h"
 #include "Core/Utils.h"
 #include "Core/Object.h"
-#include "AuctionFile.h"
 
 AuctionInfo::AuctionInfo(uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len)
     : processStatus(PS_Added),

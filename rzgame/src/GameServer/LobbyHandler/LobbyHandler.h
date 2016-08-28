@@ -3,7 +3,7 @@
 
 #include "Core/Object.h"
 #include "../ConnectionHandler.h"
-#include "Database/DbQueryJobCallback.h"
+#include "Database/DbQueryJobRef.h"
 #include "CharacterLight.h"
 #include "CharacterWearInfo.h"
 

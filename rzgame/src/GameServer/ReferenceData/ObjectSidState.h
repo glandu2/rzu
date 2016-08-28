@@ -2,7 +2,7 @@
 #define OBJECTSIDSTATE_H
 
 #include "RefDataLoader.h"
-#include "Database/DbQueryJobCallback.h"
+#include "Database/DbQueryJobRef.h"
 #include "Database/DbQueryJob.h"
 #include "../GameTypes.h"
 #include "Core/PrintfFormats.h"
@@ -50,7 +50,7 @@ void ObjectSidStateBinding<T>::onDataLoaded(DbQueryJob<T> *query) {
 	else
 		next_sid = 0;
 
-	log(LL_Info, "Next SID: %" PRIuS "\n", next_sid);
+	log(LL_Info, "Next SID: %" PRIu64 "\n", next_sid);
 
 	dataLoaded();
 }
