@@ -3,6 +3,7 @@
 #include <array>
 #include <stdlib.h>
 #include <algorithm>
+#include <math.h>
 
 namespace GameServer {
 
