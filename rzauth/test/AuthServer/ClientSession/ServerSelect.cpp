@@ -43,7 +43,7 @@ TEST(TS_CA_SELECT_SERVER, valid_aes) {
 	});
 
 	auth.addCallback([&game, &aesKey](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		EVP_CIPHER_CTX d_ctx;
+		EVP_CIPHER_CTX* d_ctx;
 		int bytesWritten;
 
 		const TS_AC_SELECT_SERVER_RSA* packet = AGET_PACKET(TS_AC_SELECT_SERVER_RSA);
@@ -56,12 +56,12 @@ TEST(TS_CA_SELECT_SERVER, valid_aes) {
 		} otp;
 		//pendingTime ignored here
 
-		EVP_CIPHER_CTX_init(&d_ctx);
-		ASSERT_NE(0, EVP_DecryptInit_ex(&d_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16));
-		ASSERT_NE(0, EVP_DecryptInit_ex(&d_ctx, NULL, NULL, NULL, NULL));
-		ASSERT_NE(0, EVP_DecryptUpdate(&d_ctx, otp.raw, &bytesWritten, packet->encrypted_data, sizeof(packet->encrypted_data)));
-		ASSERT_NE(0, EVP_DecryptFinal_ex(&d_ctx, otp.raw + bytesWritten, &bytesWritten));
-		EVP_CIPHER_CTX_cleanup(&d_ctx);
+		d_ctx = EVP_CIPHER_CTX_new();
+		ASSERT_NE(nullptr, d_ctx);
+		ASSERT_NE(0, EVP_DecryptInit_ex(d_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16));
+		ASSERT_NE(0, EVP_DecryptUpdate(d_ctx, otp.raw, &bytesWritten, packet->encrypted_data, sizeof(packet->encrypted_data)));
+		ASSERT_NE(0, EVP_DecryptFinal_ex(d_ctx, otp.raw + bytesWritten, &bytesWritten));
+		EVP_CIPHER_CTX_free(d_ctx);
 
 		channel->closeSession();
 		sendClientLogin(&game, "test5", otp.oneTimePassword);

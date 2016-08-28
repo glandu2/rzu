@@ -382,26 +382,27 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 			result.unknown = 0;
 			result.unknown2 = 0;
 
-			EVP_CIPHER_CTX e_ctx;
+			EVP_CIPHER_CTX *e_ctx = nullptr;
 			int bytesWritten;
 			bool ok = false;
 
-			EVP_CIPHER_CTX_init(&e_ctx);
-			if(EVP_EncryptInit_ex(&e_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) < 0)
+			e_ctx = EVP_CIPHER_CTX_new();
+			if(!e_ctx)
 				goto cleanup;
 
-			if(EVP_EncryptInit_ex(&e_ctx, NULL, NULL, NULL, NULL) < 0)
+			if(EVP_EncryptInit_ex(e_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) < 0)
 				goto cleanup;
-			if(EVP_EncryptUpdate(&e_ctx, result.encrypted_data, &bytesWritten, (const unsigned char*)&oneTimePassword, sizeof(uint64_t)) < 0)
+			if(EVP_EncryptUpdate(e_ctx, result.encrypted_data, &bytesWritten, (const unsigned char*)&oneTimePassword, sizeof(uint64_t)) < 0)
 				goto cleanup;
-			if(EVP_EncryptFinal_ex(&e_ctx, result.encrypted_data + bytesWritten, &bytesWritten) < 0)
+			if(EVP_EncryptFinal_ex(e_ctx, result.encrypted_data + bytesWritten, &bytesWritten) < 0)
 				goto cleanup;
 
 			sendPacket(&result);
 			ok = true;
 
 		cleanup:
-			EVP_CIPHER_CTX_cleanup(&e_ctx);
+			if(e_ctx)
+				EVP_CIPHER_CTX_free(e_ctx);
 
 			if(!ok)
 				abortSession();

@@ -79,7 +79,7 @@ void parseAESKey(RSA* rsaCipher, const TS_AC_AES_KEY_IV* packet, unsigned char a
 
 template<typename PacketType>
 void prepareAccountRSAPacket(unsigned char aes_key_iv[32], PacketType *accountMsg, const char* account, const char* password) {
-	EVP_CIPHER_CTX e_ctx;
+	EVP_CIPHER_CTX* e_ctx;
 	const unsigned char *key_data = aes_key_iv;
 	const unsigned char *iv_data = aes_key_iv + 16;
 
@@ -90,14 +90,14 @@ void prepareAccountRSAPacket(unsigned char aes_key_iv[32], PacketType *accountMs
 	strcpy(accountMsg->account, account);
 	memset(accountMsg->password, 0, sizeof(accountMsg->password));
 
-	EVP_CIPHER_CTX_init(&e_ctx);
+	e_ctx = EVP_CIPHER_CTX_new();
+	ASSERT_NE(nullptr, e_ctx);
 
-	ASSERT_NE(0, EVP_EncryptInit_ex(&e_ctx, EVP_aes_128_cbc(), NULL, key_data, iv_data));
-	ASSERT_NE(0, EVP_EncryptInit_ex(&e_ctx, NULL, NULL, NULL, NULL));
-	ASSERT_NE(0, EVP_EncryptUpdate(&e_ctx, accountMsg->password, &p_len, (const unsigned char*)password, len));
-	ASSERT_NE(0, EVP_EncryptFinal_ex(&e_ctx, accountMsg->password+p_len, &f_len));
+	ASSERT_NE(0, EVP_EncryptInit_ex(e_ctx, EVP_aes_128_cbc(), NULL, key_data, iv_data));
+	ASSERT_NE(0, EVP_EncryptUpdate(e_ctx, accountMsg->password, &p_len, (const unsigned char*)password, len));
+	ASSERT_NE(0, EVP_EncryptFinal_ex(e_ctx, accountMsg->password+p_len, &f_len));
 
-	EVP_CIPHER_CTX_cleanup(&e_ctx);
+	EVP_CIPHER_CTX_free(e_ctx);
 
 	accountMsg->password_size = p_len + f_len;
 }
