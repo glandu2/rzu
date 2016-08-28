@@ -86,19 +86,19 @@ endif()
 
 # Compile subprojects if existing
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv EXCLUDE_FROM_ALL)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libiconv/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libiconv" libiconv EXCLUDE_FROM_ALL)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libiconv" libiconv)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/zlib" zlib EXCLUDE_FROM_ALL)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/zlib" zlib)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest EXCLUDE_FROM_ALL)
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/librzu/CMakeLists.txt")
