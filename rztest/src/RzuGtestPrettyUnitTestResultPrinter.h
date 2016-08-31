@@ -26,6 +26,7 @@ public:
 private:
 	void PrintFailedTests(const testing::UnitTest& unit_test);
 	std::string PrintFullTestCommentIfPresent(const testing::TestInfo& test_info);
+	void printStack();
 
 	DECLARE_CLASS(RzuTestPrinter)
 };
