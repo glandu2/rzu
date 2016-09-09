@@ -205,7 +205,7 @@ TEST(auction_full_mode, added_update_removed) {
 	auctionData3.previousTime = auctionData3.time;
 	auctionData3.time = auctionData2.time + 5000;
 
-	Object::logStatic(Object::LL_Info, "added_update_removed", "Added auction\n");
+	// Added auction
 	auctionWriter.beginProcess();
 	auctionWriter.beginCategory(auctionData.category, auctionData.time - rand()%1000);
 	addAuction(&auctionWriter, auctionData);
@@ -218,7 +218,6 @@ TEST(auction_full_mode, added_update_removed) {
 	expectAuction(&auctionFile, auctionData);
 
 	// Updated auction
-	Object::logStatic(Object::LL_Info, "added_update_removed", "Updated auction\n");
 	auctionWriter.beginProcess();
 	auctionWriter.beginCategory(auctionData.category, auctionData2.time - rand()%1000);
 	addAuction(&auctionWriter, auctionData2);
@@ -235,7 +234,6 @@ TEST(auction_full_mode, added_update_removed) {
 
 	for(int i = 0; i < 3; i++) {
 		// MaybeDeleted auction
-		Object::logStatic(Object::LL_Info, "added_update_removed", "Deleted auction\n");
 		auctionWriter.beginProcess();
 		auctionWriter.beginCategory(auctionData.category, auctionData2.time + 4000*(i+1));
 		auctionWriter.endCategory(auctionData.category, auctionData2.time + 5000*(i+1));
@@ -250,7 +248,6 @@ TEST(auction_full_mode, added_update_removed) {
 	}
 
 	// Deleted auction
-	Object::logStatic(Object::LL_Info, "added_update_removed", "Deleted auction\n");
 	auctionWriter.beginProcess();
 	auctionWriter.beginCategory(auctionData.category, auctionData2.time + 4000);
 	auctionWriter.endCategory(auctionData.category, auctionData2.time + 5000);

@@ -6,5 +6,6 @@ static void initConfigs() {
 }
 
 int main(int argc, char **argv) {
-	return runTests(argc, argv, &initConfigs);
+	TestRunner testRunner(argc, argv, &initConfigs);
+	return testRunner.runTests();
 }
