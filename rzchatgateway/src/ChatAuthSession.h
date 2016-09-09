@@ -2,6 +2,7 @@
 #define CHATAUTHSESSION_H
 
 #include "NetSession/ClientAuthSession.h"
+#include "Core/Timer.h"
 #include <string>
 
 class GameSession;
@@ -32,8 +33,8 @@ private:
 	virtual void onGameDisconnected();
 	virtual void onGameResult(TS_ResultCode result);
 
-	static void onDelayRecoExpired(uv_timer_t* timer);
-	static void onGGTimerExpired(uv_timer_t* timer);
+	void onDelayRecoExpired();
+	void onGGTimerExpired();
 
 private:
 	GameSession* gameSession;
@@ -47,8 +48,8 @@ private:
 	int delayTime;
 	int ggRecoTime;
 
-	uv_timer_t delayRecoTimer;
-	uv_timer_t ggRecoTimer;
+	Timer<ChatAuthSession> delayRecoTimer;
+	Timer<ChatAuthSession> ggRecoTimer;
 };
 
 #endif // CHATAUTHSESSION_H

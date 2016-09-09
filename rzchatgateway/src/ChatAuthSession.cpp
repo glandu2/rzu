@@ -5,10 +5,6 @@
 ChatAuthSession::ChatAuthSession(GameSession* gameSession, const std::string& ip, uint16_t port, const std::string& account, const std::string& password, int serverIdx, int delayTime, int ggRecoTime, AuthCipherMethod method)
 	: ClientAuthSession(gameSession), gameSession(gameSession), ip(ip), port(port), account(account), password(password), serverIdx(serverIdx), method(method), delayTime(delayTime), ggRecoTime(ggRecoTime)
 {
-	uv_timer_init(EventLoop::getLoop(), &delayRecoTimer);
-	uv_timer_init(EventLoop::getLoop(), &ggRecoTimer);
-	delayRecoTimer.data = this;
-	ggRecoTimer.data = this;
 }
 
 void ChatAuthSession::connect() {
@@ -18,17 +14,15 @@ void ChatAuthSession::connect() {
 void ChatAuthSession::delayedConnect() {
 	if(delayTime > 0) {
 		log(LL_Info, "Will connect to auth in %dms\n", delayTime);
-		uv_timer_start(&delayRecoTimer, &onDelayRecoExpired, delayTime, 0);
+		delayRecoTimer.start(this, &ChatAuthSession::onDelayRecoExpired, delayTime, 0);
 	} else {
 		connect();
 	}
 }
 
-void ChatAuthSession::onDelayRecoExpired(uv_timer_t *timer) {
-	ChatAuthSession* thisInstance = (ChatAuthSession*)timer->data;
-
-	thisInstance->log(LL_Info, "End of delay connect timer, connecting to auth now\n");
-	thisInstance->connect();
+void ChatAuthSession::onDelayRecoExpired() {
+	log(LL_Info, "End of delay connect timer, connecting to auth now\n");
+	connect();
 }
 
 void ChatAuthSession::onAuthDisconnected() {
@@ -83,7 +77,7 @@ void ChatAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 
 	if(ggRecoTime > 0) {
 		log(LL_Debug, "Starting GG timer: %ds\n", ggRecoTime);
-		uv_timer_start(&ggRecoTimer, &onGGTimerExpired, ggRecoTime*1000, 0);
+		ggRecoTimer.start(this, &ChatAuthSession::onGGTimerExpired, ggRecoTime*1000, 0);
 	}
 }
 
@@ -91,10 +85,9 @@ void ChatAuthSession::onGameDisconnected() {
 	delayedConnect();
 }
 
-void ChatAuthSession::onGGTimerExpired(uv_timer_t *timer) {
-	ChatAuthSession* thisInstance = (ChatAuthSession*)timer->data;
-	thisInstance->log(LL_Info, "GG timeout, reconnecting\n");
-	thisInstance->gameSession->abortSession();
+void ChatAuthSession::onGGTimerExpired() {
+	log(LL_Info, "GG timeout, reconnecting\n");
+	gameSession->abortSession();
 }
 
 void ChatAuthSession::onGameResult(TS_ResultCode result) {
