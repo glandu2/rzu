@@ -90,7 +90,7 @@ void RzuTestPrinter::printStack()
 {
 #ifdef _WIN32
 	 unsigned int   i;
-	 void         * stack[ 20 ];
+	 void         * stack[ 50 ];
 	 unsigned short frames;
 	 SYMBOL_INFO  * symbol;
 	 HANDLE         process;
