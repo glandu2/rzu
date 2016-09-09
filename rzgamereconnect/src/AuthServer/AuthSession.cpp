@@ -40,19 +40,11 @@ AuthSession::AuthSession(GameServerSession *gameServerSession,
 	  pendingLogin(false),
 	  synchronizedWithAuth(false)
 {
-	recoTimer = new uv_timer_t;
-	uv_timer_init(EventLoop::getLoop(), recoTimer);
-	recoTimer->data = this;
 	servers.insert(std::pair<uint16_t, AuthSession*>(serverIdx, this));
 }
 
-static void close_timer(uv_handle_t* timer) {
-	delete (uv_timer_t*)timer;
-}
-
 AuthSession::~AuthSession() {
-	uv_timer_stop(recoTimer);
-	uv_close((uv_handle_t*)recoTimer, &close_timer);
+	recoTimer.stop();
 	servers.erase(serverIdx);
 }
 
@@ -221,7 +213,7 @@ void AuthSession::disconnect() {
 
 	if(sentLoginPacket == false) {
 		log(LL_Info, "Fast auth disconnect: login message wasn't send\n");
-		uv_timer_stop(recoTimer);
+		recoTimer.stop();
 		closeSession();
 		if(!isConnected())
 			deleteLater();
@@ -235,7 +227,7 @@ void AuthSession::disconnect() {
 void AuthSession::forceClose() {
 	gameServerSession = nullptr;
 	pendingMessages.clear();
-	uv_timer_stop(recoTimer);
+	recoTimer.stop();
 
 	if(isConnected()) {
 		TS_GA_LOGOUT logoutPacket;
@@ -253,7 +245,7 @@ EventChain<SocketSession> AuthSession::onDisconnected(bool causedByRemote) {
 	if(causedByRemote && (gameServerSession != nullptr || pendingMessages.size() > 0)) {
 		int delay = CONFIG_GET()->auth.reconnectDelay.get();
 		log(LL_Warning, "Disconnected from auth server, reconnecting in %d seconds\n", delay/1000);
-		uv_timer_start(recoTimer, &onTimerReconnect, delay, 0);
+		recoTimer.start(this, &AuthSession::onTimerReconnect, delay, 0);
 	} else {
 		log(LL_Info, "Disconnected from auth server\n");
 		if(gameServerSession == nullptr)
@@ -263,9 +255,8 @@ EventChain<SocketSession> AuthSession::onDisconnected(bool causedByRemote) {
 	return PacketSession::onDisconnected(causedByRemote);
 }
 
-void AuthSession::onTimerReconnect(uv_timer_t* timer) {
-	AuthSession* session = (AuthSession*) timer->data;
-	session->connect();
+void AuthSession::onTimerReconnect() {
+	connect();
 }
 
 EventChain<PacketSession> AuthSession::onPacketReceived(const TS_MESSAGE* packet) {

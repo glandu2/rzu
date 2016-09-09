@@ -19,10 +19,12 @@ struct GlobalConfig {
 
 	ConnectionConfig auth;
 	ConnectionConfig game;
+	cval<std::string>& gameReconnectExec;
 
 	GlobalConfig() :
 		auth("auth", 4502, "0.0.0.0"),
-		game("game", 4802)
+	    game("game", 4802),
+	    gameReconnectExec(CFG_CREATE("gamereconnect.exec", "./rzgamereconnect"))
 	{}
 
 	static GlobalConfig* get();
