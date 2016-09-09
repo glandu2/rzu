@@ -6,34 +6,41 @@
 #include "RzTest.h"
 #include "Core/EventLoop.h"
 
+TestConnectionChannel::TestConnectionChannel(TestConnectionChannel::Type type, cval<std::string> &host, cval<int> &port, bool encrypted)
+    : type(type), host(host), port(port), encrypted(encrypted), session(nullptr), server(nullptr), test(nullptr)
+{
+	switch(type) {
+		case Client:
+			if(encrypted)
+				session = new TestPacketSession<EncryptedSession<PacketSession>>(this);
+			else
+				session = new TestPacketSession<PacketSession>(this);
+			break;
+		case Server:
+			server = new TestPacketServer(this, host, port, encrypted);
+			break;
+	}
+
+}
+
 TestConnectionChannel::~TestConnectionChannel() {
 	if(session && type == Client)
 		delete session;
+	if(server)
+		delete server;
 }
 
-void TestConnectionChannel::executeTimerForYield(uv_timer_t* timer) {
-	YieldData* instance = (YieldData*) timer->data;
-
-	instance->callback(instance->instance);
-
-	uv_close((uv_handle_t*)timer, &closeTimerForYield);
-}
-
-void TestConnectionChannel::closeTimerForYield(uv_handle_t* timer) {
-	YieldData* instance = (YieldData*) timer->data;
-	delete instance;
+void TestConnectionChannel::YieldData::executeTimerForYield() {
+	callback(instance);
 }
 
 void TestConnectionChannel::addYield(YieldCallback callback, int time) {
 	YieldData *yieldData = new YieldData;
 
-	uv_timer_init(EventLoop::getLoop(), &yieldData->timer);
-
 	yieldData->callback = callback;
-	yieldData->timer.data = yieldData;
 	yieldData->instance = this;
 
-	uv_timer_start(&yieldData->timer, &executeTimerForYield, time, 0);
+	yieldData->timer.start(yieldData, &YieldData::executeTimerForYield, time, 0);
 }
 
 int TestConnectionChannel::getPort() {
@@ -51,12 +58,10 @@ void TestConnectionChannel::startClient() {
 	if(session && session->getState() != Stream::UnconnectedState) {
 		log(LL_Error, "Client session to %s:%d already started\n", host.get().c_str(), port.get());
 		return;
+	} else if(!session) {
+		log(LL_Error, "Attempt to start client for %s:%d but there is no session\n", host.get().c_str(), port.get());
+		return;
 	}
-
-	if(encrypted)
-		session = new TestPacketSession<EncryptedSession<PacketSession>>(this);
-	else
-		session = new TestPacketSession<PacketSession>(this);
 
 	session->connect(host.get().c_str(), port);
 }
@@ -65,9 +70,13 @@ void TestConnectionChannel::startServer() {
 	if(session && session->getState() != Stream::UnconnectedState) {
 		log(LL_Error, "Server session on %s:%d already started\n", host.get().c_str(), port.get());
 		return;
+	} else if(!server) {
+		log(LL_Error, "Attempt to start server for %s:%d but there is no server instance\n", host.get().c_str(), port.get());
+		return;
+	} else if(server->isStarted()) {
+		log(LL_Error, "Attempt to start server for %s:%d but already started\n", host.get().c_str(), port.get());
+		return;
 	}
-
-	server = new TestPacketServer(this, host, port, encrypted);
 
 	server->start();
 }
