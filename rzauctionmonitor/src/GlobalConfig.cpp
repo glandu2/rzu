@@ -8,7 +8,4 @@ GlobalConfig* GlobalConfig::get() {
 
 void GlobalConfig::init() {
 	GlobalConfig::get();
-	GlobalCoreConfig::get()->app.appName.setDefault("rzauctionmonitor");
-	GlobalCoreConfig::get()->app.configfile.setDefault("auctionmonitor.opt");
-	GlobalCoreConfig::get()->log.file.setDefault("auctionmonitor.log");
 }
