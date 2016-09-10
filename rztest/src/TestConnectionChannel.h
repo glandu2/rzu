@@ -5,14 +5,17 @@
 #include <list>
 
 #include "Extern.h"
-#include "NetSession/PacketSession.h"
 #include "Core/Timer.h"
+#include "Core/Object.h"
 
 #include <functional>
 #include "gtest/gtest.h"
 
 class RzTest;
 class TestPacketServer;
+class PacketSession;
+struct TS_MESSAGE;
+template<typename T> class cval;
 
 #define AGET_PACKET(type_) \
 	event.getPacket<type_>(); \

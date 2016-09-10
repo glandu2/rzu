@@ -1,11 +1,14 @@
 #ifndef TESTPACKETSESSION_H
 #define TESTPACKETSESSION_H
 
-#include "NetSession/PacketSession.h"
+//#include "NetSession/PacketSession.h"
 #include "TestConnectionChannel.h"
 #include "Extern.h"
+#include "Core/EventChain.h"
 
 class TestPacketServer;
+class PacketSession;
+class SocketSession;
 
 template<class T>
 class RZTEST_EXTERN TestPacketSession : public T

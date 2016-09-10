@@ -1,10 +1,10 @@
 #include "TestConnectionChannel.h"
 #include "TestPacketServer.h"
 #include "TestPacketSession.h"
+#include "NetSession/PacketSession.h"
 #include "NetSession/EncryptedSession.h"
 #include "Config/ConfigParamVal.h"
 #include "RzTest.h"
-#include "Core/EventLoop.h"
 
 TestConnectionChannel::TestConnectionChannel(TestConnectionChannel::Type type, cval<std::string> &host, cval<int> &port, bool encrypted)
     : type(type), host(host), port(port), encrypted(encrypted), session(nullptr), server(nullptr), test(nullptr)
