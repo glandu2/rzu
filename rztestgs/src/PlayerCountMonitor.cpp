@@ -14,20 +14,17 @@ PlayerCountMonitor::PlayerCountMonitor(std::string host, uint16_t port, const st
 
 	printf("#msec since epoch, players connected number, process load\n");
 
-	uv_timer_init(EventLoop::getLoop(), &timer);
 	timeout = intervalms;
 }
 
 void PlayerCountMonitor::start() {
-	uv_timer_start(&timer, &updatePlayerNumberStatic, 0, timeout);
-	timer.data = this;
+	timer.start(this, &PlayerCountMonitor::updatePlayerNumber, 0, timeout);
 }
 
 void PlayerCountMonitor::stop() {
-	uv_timer_stop(&timer);
+	timer.stop();
 }
 
-void PlayerCountMonitor::updatePlayerNumberStatic(uv_timer_t* handle) { static_cast<PlayerCountMonitor*>(handle->data)->updatePlayerNumber(); }
 void PlayerCountMonitor::updatePlayerNumber() {
 	if(getStream() == nullptr || getStream()->getState() == Stream::UnconnectedState) {
 		connectedTimes = 0;

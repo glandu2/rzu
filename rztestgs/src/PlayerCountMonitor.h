@@ -4,6 +4,7 @@
 #include "NetSession/PacketSession.h"
 #include "NetSession/EncryptedSession.h"
 #include "Core/IListener.h"
+#include "Core/Timer.h"
 #include "uv.h"
 
 class PlayerCountMonitor : public EncryptedSession<PacketSession>
@@ -15,16 +16,13 @@ class PlayerCountMonitor : public EncryptedSession<PacketSession>
 		void stop();
 
 	protected:
-		static void updatePlayerNumberStatic(uv_timer_t* handle);
-
-	protected:
 		EventChain<SocketSession> onConnected();
 		EventChain<SocketSession> onDisconnected(bool causedByRemote);
 		EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 		void updatePlayerNumber();
 
 	private:
-		uv_timer_t timer;
+		Timer<PlayerCountMonitor> timer;
 		std::string host;
 		uint16_t port;
 		int timeout;
