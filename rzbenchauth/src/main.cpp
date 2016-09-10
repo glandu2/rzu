@@ -37,11 +37,8 @@ static void init() {
 	CFG_CREATE("idxoffset", 0);
 	CFG_CREATE("usecperconnection", 0);
 	CFG_CREATE("benchconnection", false);
-	GlobalCoreConfig::get()->app.appName.setDefault("rzbenchauth");
-	GlobalCoreConfig::get()->app.configfile.setDefault("benchmarkauth.opt");
 	GlobalCoreConfig::get()->log.level.setDefault("fatal");
 	GlobalCoreConfig::get()->log.consoleLevel.setDefault("info");
-	GlobalCoreConfig::get()->log.file.setDefault("benchmarkauth.log");
 }
 
 static std::string getIpForConnection(const std::string& originalIp, bool useLocalHost, int connection) {
