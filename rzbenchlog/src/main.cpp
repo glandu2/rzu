@@ -1,17 +1,13 @@
-#include "uv.h"
+#include <string>
+
 #include "BenchmarkLogSession.h"
-#include <string.h>
-#include "Core/EventLoop.h"
-#include "LibRzuInit.h"
-#include <stdio.h>
 #include "Config/ConfigInfo.h"
 #include "Config/GlobalCoreConfig.h"
-#include "TimingFunctions.h"
-#include "Core/PrintfFormats.h"
-#include "Stream/Socket.h"
-#include "Core/Utils.h"
+#include "Core/EventLoop.h"
+#include "Core/Log.h"
+#include "LibRzuInit.h"
 
-void onSocketStateChange(IListener* instance, Stream *socket, Stream::State oldState, Stream::State newState, bool causedByRemote);
+class IListener;
 
 static void init() {
 	CFG_CREATE("ip", "127.0.0.1");
@@ -19,9 +15,6 @@ static void init() {
 	CFG_CREATE("count", 40);
 	CFG_CREATE("targetcount", 3000);
 	CFG_CREATE("delay", 1);
-	GlobalCoreConfig::get()->app.appName.setDefault("rzbenchlog");
-	GlobalCoreConfig::get()->app.configfile.setDefault("rzbenchlog.opt");
-	GlobalCoreConfig::get()->log.file.setDefault("rzbenchlog.log");
 }
 
 int main(int argc, char *argv[])

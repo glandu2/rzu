@@ -1,9 +1,11 @@
 #ifndef BenchmarkLogSession_H
 #define BenchmarkLogSession_H
 
-#include "NetSession/SocketSession.h"
-#include "LS_11N4S.h"
 #include <string>
+
+#include "Core/EventChain.h"
+#include "Core/Timer.h"
+#include "NetSession/SocketSession.h"
 
 struct BenchmarkConfig {
 	int delay;
@@ -18,17 +20,15 @@ public:
 	BenchmarkLogSession(BenchmarkConfig* config);
 
 private:
-	void onConnected();
-	void onDisconnected(bool causedByRemote);
+	EventChain<SocketSession> onConnected();
 
 	void sendPackets();
-	static void sendPacketsStatic(uv_timer_t* timer);
 
 private:
 	BenchmarkConfig* config;
 	char buffer[1024];
 
-	uv_timer_t delayTimer;
+	Timer<BenchmarkLogSession> delayTimer;
 };
 
 #endif // BenchmarkLogSession_H

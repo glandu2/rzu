@@ -1,12 +1,12 @@
 #include "BenchmarkLogSession.h"
-#include "Core/EventLoop.h"
+
 #include <string.h>
+
+#include "LS_11N4S.h"
 
 BenchmarkLogSession::BenchmarkLogSession(BenchmarkConfig* config)
 {
-	delayTimer.data = this;
 	this->config = config;
-	uv_timer_init(EventLoop::getLoop(), &delayTimer);
 
 	LS_11N4S* packet = reinterpret_cast<LS_11N4S*>(buffer);
 	packet->thread_id = 3628;
@@ -35,15 +35,12 @@ BenchmarkLogSession::BenchmarkLogSession(BenchmarkConfig* config)
 	strcpy(p, "test1Testungame001");
 }
 
-void BenchmarkLogSession::onConnected() {
+EventChain<SocketSession> BenchmarkLogSession::onConnected() {
 	sendPackets();
-	uv_timer_start(&delayTimer, &sendPacketsStatic, config->delay, config->delay);
+	delayTimer.start(this, &BenchmarkLogSession::sendPackets, config->delay, config->delay);
+	return SocketSession::onConnected();
 }
 
-void BenchmarkLogSession::onDisconnected(bool causedByRemote) {
-}
-
-void BenchmarkLogSession::sendPacketsStatic(uv_timer_t* timer) { ((BenchmarkLogSession*)timer->data)->sendPackets(); }
 void BenchmarkLogSession::sendPackets() {
 	for(int i = 0; i < config->packetPerSalve && config->packetSent < config->packetTargetCount; i++) {
 		config->packetSent++;
