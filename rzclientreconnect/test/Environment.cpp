@@ -4,7 +4,7 @@
 void Environment::beforeTests() {
 	std::string gameReconnectExec = CONFIG_GET()->gameReconnectExec.get();
 
-	spawnProcess(4802, gameReconnectExec.c_str(), 1, "/auth.reconnectdelay:100");
+	spawnProcess(4802, gameReconnectExec.c_str(), 1, "/configfile:./rzgamereconnect-test.opt");
 }
 
 void Environment::afterTests() {

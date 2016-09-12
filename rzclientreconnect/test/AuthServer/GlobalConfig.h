@@ -2,6 +2,7 @@
 #define GLOBALCONFIG_H
 
 #include "Config/ConfigInfo.h"
+#include "Core/Utils.h"
 
 namespace AuthServer {
 
@@ -24,8 +25,10 @@ struct GlobalConfig {
 	GlobalConfig() :
 		auth("auth", 4502, "0.0.0.0"),
 	    game("game", 4802),
-	    gameReconnectExec(CFG_CREATE("gamereconnect.exec", "./rzgamereconnect"))
-	{}
+	    gameReconnectExec(CFG_CREATE("gamereconnect.exec", "rzgamereconnect"))
+	{
+		Utils::autoSetAbsoluteDir(gameReconnectExec);
+	}
 
 	static GlobalConfig* get();
 	static void init();
