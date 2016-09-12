@@ -3,10 +3,12 @@
 #include "LibRzuInit.h"
 #include "Core/Log.h"
 #include "Config/GlobalCoreConfig.h"
+#include "TestGlobalConfig.h"
 #include "RzuGtestPrettyUnitTestResultPrinter.h"
 
 TestRunner::TestRunner(int argc, char **argv, ConfigInitCallback configInit) {
 	LibRzuInit();
+	TestGlobalConfig::init();
 	if(configInit)
 		configInit();
 

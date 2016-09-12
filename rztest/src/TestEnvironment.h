@@ -8,6 +8,7 @@
 
 class RZTEST_EXTERN TestEnvironment : public ::testing::Environment, public Object
 {
+	DECLARE_CLASS(TestEnvironment)
 public:
 	virtual ~TestEnvironment();
 	// Override this to define how to set up the environment.

@@ -4,6 +4,7 @@
 #include "Core/EventLoop.h"
 #include "Terminator.h"
 #include "WaitConnectionOpen.h"
+#include "TestGlobalConfig.h"
 
 TestEnvironment::~TestEnvironment()
 {
@@ -22,33 +23,35 @@ void TestEnvironment::TearDown()
 	Timer<TestEnvironment> timer;
 
 	afterTests();
-	for(size_t i = 0; i < processes.size(); i++) {
-		if(doKillAll)
-			uv_process_kill(processes[i], SIGKILL);
-		uv_ref((uv_handle_t*)processes[i]);
-	}
 
-	if(!doKillAll) {
-		timer.start(this, &TestEnvironment::tearDownTimeout, 5000, 0);
-		uv_unref((uv_handle_t*)&timer);
-	}
-	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
-	if(!doKillAll) {
-		timer.stop();
-	}
+	if(TestGlobalConfig::get()->enableExecutableSpawn.get()) {
+		for(size_t i = 0; i < processes.size(); i++) {
+			if(doKillAll)
+				uv_process_kill(processes[i], SIGKILL);
+			uv_ref((uv_handle_t*)processes[i]);
+		}
 
-	for(size_t i = 0; i < processes.size(); i++) {
-		processes[i]->data = nullptr;
-	}
-}
+		if(!doKillAll) {
+			timer.start(this, &TestEnvironment::tearDownTimeout, 5000, 0);
+			uv_unref((uv_handle_t*)&timer);
+		}
+		EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+		if(!doKillAll) {
+			timer.stop();
+		}
 
-void TestEnvironment::tearDownTimeout() {
-	for(size_t i = 0; i < processes.size(); i++) {
-		uv_process_kill(processes[i], SIGKILL);
+		for(size_t i = 0; i < processes.size(); i++) {
+			processes[i]->data = nullptr;
+		}
 	}
 }
 
 void TestEnvironment::spawnProcess(int portCheck, const char* exeFile, int argNumber, ...) {
+	if(TestGlobalConfig::get()->enableExecutableSpawn.get() == false) {
+		log(LL_Info, "Ignoring spawn process request: config disabled process spawning\n");
+		return;
+	}
+
 	uv_process_options_t options = {0};
 	std::vector<char*> args;
 	uv_stdio_container_t stdioInherit[3];
@@ -96,6 +99,20 @@ void TestEnvironment::spawnProcess(int portCheck, const char* exeFile, int argNu
 	ASSERT_EQ(true, checkConnection.isOpen()) << "Error while waiting process " << exeFile << " : waiting timeout\n";
 }
 
+void TestEnvironment::stop(int port)
+{
+	if(TestGlobalConfig::get()->enableExecutableSpawn.get() == false) {
+		log(LL_Debug, "Ignoring stop process request: config disabled process spawning\n");
+		return;
+	}
+
+	doKillAll = false;
+
+	Terminator terminator;
+	terminator.start("127.0.0.1", port);
+	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+}
+
 void TestEnvironment::executableExited(uv_process_t* process, int64_t exit_status, int) {
 	TestEnvironment* thisInstance = (TestEnvironment*)process->data;
 	Object::Level level = Object::LL_Error;
@@ -106,11 +123,8 @@ void TestEnvironment::executableExited(uv_process_t* process, int64_t exit_statu
 	uv_close((uv_handle_t*)process, nullptr);
 }
 
-void TestEnvironment::stop(int port)
-{
-	doKillAll = false;
-
-	Terminator terminator;
-	terminator.start("127.0.0.1", port);
-	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+void TestEnvironment::tearDownTimeout() {
+	for(size_t i = 0; i < processes.size(); i++) {
+		uv_process_kill(processes[i], SIGKILL);
+	}
 }

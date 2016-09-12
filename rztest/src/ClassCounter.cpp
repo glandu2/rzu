@@ -15,5 +15,8 @@ DECLARE_CLASSCOUNT_STATIC(TestPacketServer)
 #include "Terminator.h"
 DECLARE_CLASSCOUNT_STATIC(Terminator)
 
+#include "TestEnvironment.h"
+DECLARE_CLASSCOUNT_STATIC(TestEnvironment)
+
 #include "WaitConnectionOpen.h"
 DECLARE_CLASSCOUNT_STATIC(WaitConnectionOpen)
