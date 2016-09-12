@@ -1,0 +1,6 @@
+auth.reconnectdelay:100
+core.log.level:trace
+core.log.consolelevel:info
+trafficdump.enable:true
+core.log.dir=./log
+trafficdump.dir=./traffic_log
