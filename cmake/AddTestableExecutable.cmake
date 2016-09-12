@@ -63,5 +63,5 @@ function(add_rztest name sources)
   endforeach()
 
   target_link_libraries("${name}_test" rztest)
-  add_test("${name}_test" "${EXECUTABLE_OUTPUT_PATH}/${name}_test")
+  add_test(NAME "${name}_test" COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}_test" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endfunction()
