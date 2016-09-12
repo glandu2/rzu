@@ -9,8 +9,8 @@ os:
 before_install:
 - echo $LANG
 - echo $LC_ALL
-- if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update && sudo apt-get install libssl-dev unixodbc-dev; fi
-- if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install openssl unixodbc; fi
+- if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update && sudo apt-get install libssl-dev unixodbc-dev libsqliteodbc; fi
+- if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install openssl unixodbc sqliteodbc; fi
 before_script:
 - mkdir build
 - cd build
