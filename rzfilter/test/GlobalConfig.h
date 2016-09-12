@@ -2,6 +2,7 @@
 #define GLOBALCONFIG_H
 
 #include "Config/ConfigInfo.h"
+#include "Core/Utils.h"
 
 struct ConnectionConfig {
 	cval<std::string>& ip;
@@ -23,8 +24,10 @@ struct GlobalConfig {
 	    input("input", 4500),
 	    output("output", 4800),
 	    count(CFG_CREATE("count", 10000)),
-	    rzfilterExec(CFG_CREATE("rzfilter.exec", "./rzfilter"))
-	{}
+	    rzfilterExec(CFG_CREATE("rzfilter.exec", "rzfilter"))
+	{
+		Utils::autoSetAbsoluteDir(rzfilterExec);
+	}
 
 	static GlobalConfig* get();
 	static void init();
