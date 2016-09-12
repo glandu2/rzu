@@ -1,0 +1,12 @@
+auth.db.connectionstring:Driver={SQLite3 ODBC Driver};Database=RappelzAuthDatabase.db;
+sql.db_securitynocheck.query:SELECT security_no FROM account WHERE account = ? AND security_no = ?;
+
+core.log.level:trace
+core.log.consolelevel:info
+trafficdump.enable:true
+core.log.dir=./log
+trafficdump.dir=./traffic_log
+gamereconnect.enabletest=@AUTH_TEST_HAS_RZGAMERECONNECT@
+
+#The password is in plain text if you have one
+auth.db.salt:2011

@@ -18,6 +18,10 @@ int main(int argc, char **argv) {
 	if(result)
 		return result;
 
-	env->testGameReconnect = true;
-	return testRunner.runTests();
+	if(CONFIG_GET()->doGameReconnectTest.get()) {
+		env->testGameReconnect = true;
+		return testRunner.runTests();
+	} else {
+		return result;
+	}
 }
