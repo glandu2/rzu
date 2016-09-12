@@ -2,6 +2,7 @@
 #define BENCHMARKAUTHSESSION_H
 
 #include "NetSession/ClientAuthSession.h"
+#include "Core/Timer.h"
 #include <string>
 
 struct BenchmarkConfig {
@@ -32,8 +33,8 @@ private:
 	virtual void onGameDisconnected();
 	virtual void onGameResult(TS_ResultCode result);
 
-	static void onAuthDelayExpired(uv_timer_t* timer);
-	static void onAuthRecoDelayExpired(uv_timer_t* timer);
+	void onAuthDelayExpired();
+	void onAuthRecoDelayExpired();
 
 private:
 	BenchmarkConfig* config;
@@ -42,8 +43,8 @@ private:
 	std::string password;
 
 	bool doReconnect;
-	uv_timer_t delayTimer;
-	uv_timer_t recoDelayTimer;
+	Timer<BenchmarkAuthSession> delayTimer;
+	Timer<BenchmarkAuthSession> recoDelayTimer;
 };
 
 #endif // BENCHMARKAUTHSESSION_H

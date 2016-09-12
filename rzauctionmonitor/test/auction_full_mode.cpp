@@ -128,7 +128,7 @@ TEST(auction_full_mode, no_auction) {
 	EXPECT_EQ(0, auctionFile.auctions.size());
 }
 
-TEST(auction_full_mode, added_2_auction) {
+TEST(auction_full_mode, added_3_auction) {
 	AuctionWriter auctionWriter(18);
 	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
 	AuctionOuputTestData auctionData2(AuctionInfo::BF_MyBid, AuctionInfo::DT_Long);
@@ -174,5 +174,90 @@ TEST(auction_full_mode, added_2_auction) {
 	ASSERT_EQ(3, auctionFile.auctions.size());
 	expectAuction(&auctionFile, auctionData);
 	expectAuction(&auctionFile, auctionData2);
+	expectAuction(&auctionFile, auctionData3);
+}
+
+TEST(auction_full_mode, added_update_removed) {
+	AuctionWriter auctionWriter(18);
+	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AuctionOuputTestData auctionData2(AuctionInfo::BF_MyBid, AuctionInfo::DT_Long);
+	AuctionOuputTestData auctionData3(AuctionInfo::BF_Bidded, AuctionInfo::DT_Short);
+	AUCTION_FILE auctionFile;
+
+	auctionData.diffType = D_Added;
+	auctionData.deleted = false;
+	auctionData.deletedCount = 0;
+	auctionData.previousTime = 0;
+	auctionData.estimatedEndTimeFromAdded = true;
+	auctionData.estimatedEndTimeMin = 24*3600;
+	auctionData.estimatedEndTimeMax = auctionData.time + 24*3600;
+
+	auctionData2 = auctionData;
+	auctionData2.diffType = D_Updated;
+	auctionData2.bid_flag = AuctionInfo::BF_MyBid;
+	auctionData2.previousTime = auctionData2.time;
+	auctionData2.time += 5000;
+
+	auctionData3 = auctionData2;
+	auctionData3.diffType = D_MaybeDeleted;
+	auctionData3.deleted = true;
+	auctionData3.deletedCount = 1;
+	auctionData3.previousTime = auctionData3.time;
+	auctionData3.time = auctionData2.time + 5000;
+
+	// Added auction
+	auctionWriter.beginProcess();
+	auctionWriter.beginCategory(auctionData.category, auctionData.time - rand()%1000);
+	addAuction(&auctionWriter, auctionData);
+	auctionWriter.endCategory(auctionData.category, auctionData.time + rand()%1000);
+	auctionWriter.endProcess();
+
+	dumpAuctions(&auctionWriter, &auctionFile);
+
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData);
+
+	// Updated auction
+	auctionWriter.beginProcess();
+	auctionWriter.beginCategory(auctionData.category, auctionData2.time - rand()%1000);
+	addAuction(&auctionWriter, auctionData2);
+	auctionWriter.endCategory(auctionData.category, auctionData2.time + rand()%1000);
+	auctionWriter.endProcess();
+
+	dumpAuctions(&auctionWriter, &auctionFile);
+
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData2);
+
+
+	auctionData3.rawData = auctionData2.rawData;
+
+	for(int i = 0; i < 3; i++) {
+		// MaybeDeleted auction
+		auctionWriter.beginProcess();
+		auctionWriter.beginCategory(auctionData.category, auctionData2.time + 4000*(i+1));
+		auctionWriter.endCategory(auctionData.category, auctionData2.time + 5000*(i+1));
+		auctionWriter.endProcess();
+
+		auctionData3.deletedCount = i+1;
+
+		dumpAuctions(&auctionWriter, &auctionFile);
+
+		ASSERT_EQ(1, auctionFile.auctions.size());
+		expectAuction(&auctionFile, auctionData3);
+	}
+
+	// Deleted auction
+	auctionWriter.beginProcess();
+	auctionWriter.beginCategory(auctionData.category, auctionData2.time + 4000);
+	auctionWriter.endCategory(auctionData.category, auctionData2.time + 5000);
+	auctionWriter.endProcess();
+
+	auctionData3.diffType = D_Deleted;
+	auctionData3.deletedCount = 4;
+
+	dumpAuctions(&auctionWriter, &auctionFile);
+
+	ASSERT_EQ(1, auctionFile.auctions.size());
 	expectAuction(&auctionFile, auctionData3);
 }

@@ -2,6 +2,11 @@
 #include "Core/Utils.h"
 #include <string.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <Dbghelp.h>
+#endif
+
 // Text printed in Google Test's text output and --gunit_list_tests
 // output to label the type parameter and value parameter for a test.
 static const char kTypeParamLabel[] = "TypeParam";
@@ -81,11 +86,71 @@ static const char* getResultTypeName(testing::TestPartResult::Type type) {
 	return "Unknown result type";
 }
 
+void RzuTestPrinter::printStack()
+{
+#ifdef _WIN32
+	 unsigned int   i;
+	 void         * stack[ 50 ];
+	 unsigned short frames;
+	 SYMBOL_INFO  * symbol;
+	 HANDLE         process;
+	 IMAGEHLP_LINE64 line;
+	 DWORD line_displacement;
+	 bool showedStacktrace = false;
+
+	 process = GetCurrentProcess();
+
+	 SymInitialize( process, NULL, TRUE );
+
+	 frames               = CaptureStackBackTrace(0, Utils_countOf(stack), stack, NULL);
+	 symbol               = (SYMBOL_INFO *) calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+	 symbol->MaxNameLen   = 255;
+	 symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
+
+	 log(LL_Info, "Stacktrace:\n");
+
+	 for( i = 0; i < frames; i++ )
+	 {
+		 BOOL has_sym = SymFromAddr(process, (DWORD64) (stack[i]), 0, symbol);
+
+		 // Show only after gtest frames and before gtest runner frames (ie, only test implementation frames)
+		 if(showedStacktrace == false && has_sym &&
+		         (strncmp(symbol->Name, "testing::", 9) == 0 ||
+		          strncmp(symbol->Name, "RzuTestPrinter::", 16) == 0)) {
+			 continue;
+		 }
+
+		 if(showedStacktrace == true && has_sym && strncmp(symbol->Name, "testing::", 9) == 0)
+			 break;
+
+		 showedStacktrace = true;
+
+		 line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+		 BOOL has_line = SymGetLineFromAddr64(process, (DWORD64) (stack[i]), &line_displacement, &line);
+		 char* fileName = line.FileName;
+		 size_t fileNameSize = strlen(fileName);
+		 if(fileNameSize > 30)
+			 fileName = fileName + fileNameSize - 30;
+
+		 log(LL_Info, "  %s (%s%s:%d)\n",
+		     has_sym ? symbol->Name : "unknown",
+		     fileName == line.FileName ? "" : "...",
+		     has_line ? fileName : "?",
+		     has_line ? line.LineNumber : 0);
+	 }
+
+	 free(symbol);
+#endif
+}
+
 // Called after an assertion failure.
 void RzuTestPrinter::OnTestPartResult(const testing::TestPartResult& result) {
 	// If the test part succeeded, we don't need to do anything.
 	if (result.type() == testing::TestPartResult::kSuccess)
 		return;
+
+	printStack();
 
 	// Print failure message from the assertion (e.g. expected this and got that).
 	if(result.file_name()) {

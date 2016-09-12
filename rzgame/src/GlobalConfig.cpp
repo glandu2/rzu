@@ -11,10 +11,7 @@ GlobalConfig* GlobalConfig::get() {
 void GlobalConfig::init() {
 	GlobalConfig::get();
 	CFG_CREATE("global.version", rzgameVersion);
-	GlobalCoreConfig::get()->app.appName.setDefault("rzgame");
-	GlobalCoreConfig::get()->app.configfile.setDefault("game.opt");
 	GlobalCoreConfig::get()->admin.listener.port.setDefault(4513);
-	GlobalCoreConfig::get()->log.file.setDefault("game.log");
 }
 
 void DbConfig::updateConnectionString(IListener* instance) {

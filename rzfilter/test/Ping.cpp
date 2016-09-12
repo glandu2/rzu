@@ -26,7 +26,11 @@ public:
 	}
 
 	virtual void TearDown() {
+#ifdef _WIN32
+		fprintf(stderr, "last errno: %d\n", WSAGetLastError());
+#else
 		perror("last errno");
+#endif
 
 		if(inputSocket)
 			closesocket(inputSocket);

@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "RzTest.h"
+#include "../../Environment.h"
 #include "../GlobalConfig.h"
 #include "PacketEnums.h"
 #include "AuthGame/TS_GA_LOGIN.h"
@@ -15,6 +16,9 @@
 namespace AuthServer {
 
 TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_not_ready_hidden) {
+	if(Environment::isGameReconnectBeingTested())
+		return;
+
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
@@ -51,6 +55,9 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_not_ready_hidden) {
 }
 
 TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_empty_ready) {
+	if(Environment::isGameReconnectBeingTested())
+		return;
+
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
@@ -89,6 +96,9 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_empty_ready) {
 }
 
 TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_1) {
+	if(Environment::isGameReconnectBeingTested())
+		return;
+
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
@@ -161,6 +171,9 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_1) {
 }
 
 TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_4) {
+	if(Environment::isGameReconnectBeingTested())
+		return;
+
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
@@ -248,6 +261,9 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_4) {
 }
 
 TEST(TS_GA_LOGIN_WITH_LOGOUT, valid_account_list_1_kick) {
+	if(Environment::isGameReconnectBeingTested())
+		return;
+
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);

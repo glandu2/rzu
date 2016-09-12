@@ -4,23 +4,19 @@
 #include "NetSession/PacketSession.h"
 #include "NetSession/EncryptedSession.h"
 #include <stdint.h>
-#include <unordered_map>
-#include <string>
-#include "ClientData.h"
 #include "DB_Account.h"
 #include "DB_UpdateLastServerIdx.h"
 
-#include "AuthClient/TS_CA_VERSION.h"
-#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
-#include "AuthClient/TS_CA_ACCOUNT.h"
-#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
-#include "AuthClient/TS_CA_SERVER_LIST.h"
-#include "AuthClient/TS_CA_SELECT_SERVER.h"
-
-class IDbQueryJob;
-class DesPasswordCipher;
+struct TS_CA_VERSION;
+struct TS_CA_RSA_PUBLIC_KEY;
+struct TS_CA_ACCOUNT;
+struct TS_CA_IMBC_ACCOUNT;
+struct TS_CA_SERVER_LIST;
+struct TS_CA_SELECT_SERVER;
 
 namespace AuthServer {
+
+class ClientData;
 
 class ClientSession : public EncryptedSession<PacketSession>
 {

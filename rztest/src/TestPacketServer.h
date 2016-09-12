@@ -2,7 +2,6 @@
 #define TESTPACKETSERVER_H
 
 #include "NetSession/SessionServer.h"
-#include "TestPacketSession.h"
 #include "Extern.h"
 
 class TestConnectionChannel;
@@ -16,7 +15,7 @@ public:
 	void updateObjectName();
 
 protected:
-	virtual PacketSession* createSession();
+	virtual SocketSession* createSession();
 	virtual bool hasCustomPacketLogger();
 
 private:

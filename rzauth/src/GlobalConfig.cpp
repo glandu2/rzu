@@ -12,10 +12,8 @@ GlobalConfig* GlobalConfig::get() {
 void GlobalConfig::init() {
 	GlobalConfig::get();
 	CFG_CREATE("global.version", rzauthVersion);
-	GlobalCoreConfig::get()->app.appName.setDefault("rzauth");
 	GlobalCoreConfig::get()->app.configfile.setDefault("auth.opt");
 	GlobalCoreConfig::get()->admin.listener.port.setDefault(4501);
-	GlobalCoreConfig::get()->log.file.setDefault("auth.log");
 
 #ifdef _WIN32
 	GlobalConfig::get()->auth.db.driver.setDefault("SQL Server");

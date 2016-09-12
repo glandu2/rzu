@@ -50,10 +50,6 @@ static void init() {
 	CFG_CREATE("recodelay", 5000);
 
 	trafficDump = new TrafficDump;
-
-	GlobalCoreConfig::get()->app.appName.setDefault("rzchatgateway");
-	GlobalCoreConfig::get()->app.configfile.setDefault("chatgateway.opt");
-	GlobalCoreConfig::get()->log.file.setDefault("chatgateway.log");
 }
 
 

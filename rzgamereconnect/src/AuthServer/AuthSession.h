@@ -3,6 +3,7 @@
 
 #include "NetSession/PacketSession.h"
 #include "AuthGame/TS_GA_ACCOUNT_LIST.h"
+#include "Core/Timer.h"
 #include <time.h>
 #include <string>
 #include <vector>
@@ -62,7 +63,7 @@ protected:
 	EventChain<SocketSession> onDisconnected(bool causedByRemote);
 	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 
-	static void onTimerReconnect(uv_timer_t* timer);
+	void onTimerReconnect();
 	void sendPacketToNetwork(const TS_MESSAGE* message);
 	//void updateObjectName();
 
@@ -91,7 +92,7 @@ private:
 	bool sentLoginPacket;
 	bool pendingLogin;
 	bool synchronizedWithAuth;
-	uv_timer_t* recoTimer;
+	Timer<AuthSession> recoTimer;
 
 	std::vector<TS_MESSAGE*> pendingMessages;
 	std::list<TS_GA_ACCOUNT_LIST::AccountInfo> accountList;

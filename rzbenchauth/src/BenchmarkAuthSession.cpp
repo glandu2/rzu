@@ -3,11 +3,7 @@
 
 BenchmarkAuthSession::BenchmarkAuthSession(BenchmarkConfig* config) : ClientAuthSession(nullptr)
 {
-	delayTimer.data = this;
 	this->config = config;
-	uv_timer_init(EventLoop::getLoop(), &delayTimer);
-	recoDelayTimer.data = this;
-	uv_timer_init(EventLoop::getLoop(), &recoDelayTimer);
 }
 
 void BenchmarkAuthSession::connect(const std::string& ip, const std::string& account, const std::string& password) {
@@ -28,7 +24,7 @@ void BenchmarkAuthSession::onAuthDisconnected() {
 		if(config->connectionsStarted < config->connectionTargetCount) {
 			config->connectionsStarted++;
 			if(config->recoDelay > 0) {
-				uv_timer_start(&recoDelayTimer, &onAuthRecoDelayExpired, config->recoDelay, 0);
+				recoDelayTimer.start(this, &BenchmarkAuthSession::onAuthRecoDelayExpired, config->recoDelay, 0);
 			} else {
 				ClientAuthSession::connect(ip, config->port, account, password, config->method, config->version);
 			}
@@ -36,14 +32,13 @@ void BenchmarkAuthSession::onAuthDisconnected() {
 	}
 }
 
-void BenchmarkAuthSession::onAuthRecoDelayExpired(uv_timer_t *timer) {
-	BenchmarkAuthSession* thisInstance = (BenchmarkAuthSession*) timer->data;
-	thisInstance->ClientAuthSession::connect(thisInstance->ip,
-											 thisInstance->config->port,
-											 thisInstance->account,
-											 thisInstance->password,
-											 thisInstance->config->method,
-											 thisInstance->config->version);
+void BenchmarkAuthSession::onAuthRecoDelayExpired() {
+	ClientAuthSession::connect(ip,
+	                           config->port,
+	                           account,
+	                           password,
+	                           config->method,
+	                           config->version);
 }
 
 void BenchmarkAuthSession::onAuthResult(TS_ResultCode result, const std::string& resultString) {
@@ -54,13 +49,12 @@ void BenchmarkAuthSession::onAuthResult(TS_ResultCode result, const std::string&
 		if(config->delay <= 0)
 			retreiveServerList();
 		else
-			uv_timer_start(&delayTimer, &onAuthDelayExpired, config->delay, 0);
+			delayTimer.start(this, &BenchmarkAuthSession::onAuthDelayExpired, config->delay, 0);
 	}
 }
 
-void BenchmarkAuthSession::onAuthDelayExpired(uv_timer_t *timer) {
-	BenchmarkAuthSession* thisInstance = (BenchmarkAuthSession*) timer->data;
-	thisInstance->retreiveServerList();
+void BenchmarkAuthSession::onAuthDelayExpired() {
+	retreiveServerList();
 }
 
 void BenchmarkAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t lastSelectedServerId) {
