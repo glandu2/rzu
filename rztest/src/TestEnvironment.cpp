@@ -33,7 +33,7 @@ void TestEnvironment::TearDown()
 
 		if(!doKillAll) {
 			timer.start(this, &TestEnvironment::tearDownTimeout, 5000, 0);
-			uv_unref((uv_handle_t*)&timer);
+			timer.unref();
 		}
 		EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 		if(!doKillAll) {
