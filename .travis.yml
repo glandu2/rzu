@@ -18,3 +18,4 @@ script:
 - if [ $TRAVIS_OS_NAME == osx ]; then export CMAKE_OPTS="-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl/"; fi
 - cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=FALSE $CMAKE_OPTS
 - cmake --build . --target package --config RelWithDebInfo
+- ctest -VV
