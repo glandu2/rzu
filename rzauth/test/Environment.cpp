@@ -50,7 +50,10 @@ void Environment::beforeTests() {
 	connection->endTransaction(true);
 	connection->releaseAndClose();
 
-	spawnProcess(4500, authExec.c_str(), 1, "/configfile:./auth-test.opt");
+	std::string connectionStringArg = "/auth.db.connectionstring:";
+	connectionStringArg += connectionString;
+
+	spawnProcess(4500, authExec.c_str(), 2, "/configfile:./auth-test.opt", connectionStringArg.c_str());
 	if(testGameReconnect)
 		spawnProcess(4802, gameReconnectExec.c_str(), 1, "/configfile:./rzgamereconnect-test.opt");
 }

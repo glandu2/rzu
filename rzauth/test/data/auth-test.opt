@@ -1,4 +1,3 @@
-auth.db.connectionstring:Driver={SQLite3 ODBC Driver};Database=RappelzAuthDatabase.db;
 sql.db_securitynocheck.query:SELECT security_no FROM account WHERE account = ? AND security_no = ?;
 
 core.log.level:trace
