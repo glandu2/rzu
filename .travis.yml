@@ -17,7 +17,8 @@ before_install:
 - if [[ -f /etc/odbcinst.ini ]]; then cat /etc/odbcinst.ini; fi
 - if [[ -f /usr/local/etc/odbcinst.ini ]]; then cat /usr/local/etc/odbcinst.ini; fi
 - odbcinst -j || true
-- odbcinst -j | grep -E '(DRIVERS)|(DATA SOURCES)' | sed 's/.*: //' | xargs -t cat || true
+- >-
+  odbcinst -j | grep -E '(DRIVERS)|(DATA SOURCES)' | sed 's/.*: //' | xargs -t cat || true
 before_script:
 - mkdir build
 - cd build
