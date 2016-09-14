@@ -11,6 +11,13 @@ before_install:
 - echo $LC_ALL
 - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update && sudo apt-get install libssl-dev unixodbc-dev libsqliteodbc; fi
 - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install openssl unixodbc sqliteodbc; fi
+- if [[ -f /etc/odbc.ini ]]; then cat /etc/odbc.ini; fi
+- if [[ -f /etc/odbc.ini ]]; then cat /etc/odbc.ini; fi
+- if [[ -f /usr/local/etc/odbc.ini ]]; then cat /usr/local/etc/odbc.ini; fi
+- if [[ -f /etc/odbcinst.ini ]]; then cat /etc/odbcinst.ini; fi
+- if [[ -f /usr/local/etc/odbcinst.ini ]]; then cat /usr/local/etc/odbcinst.ini; fi
+- odbcinst -j || true
+- odbcinst -j | grep -E '(DRIVERS)|(DATA SOURCES)' | sed 's/.*: //' | xargs -t cat || true
 before_script:
 - mkdir build
 - cd build
