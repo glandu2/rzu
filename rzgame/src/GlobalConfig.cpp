@@ -18,11 +18,11 @@ void DbConfig::updateConnectionString(IListener* instance) {
 	DbConfig* thisInstance = (DbConfig*)instance;
 
 	thisInstance->connectionString.setDefault(
-				"driver=" + thisInstance->driver.get() +
-				";Server=" + thisInstance->server.get() +
-				"," + Utils::convertToString(thisInstance->port.get()) +
-				";Database=" + thisInstance->name.get() +
-				";UID=" + thisInstance->account.get() +
-				";PWD=" + thisInstance->password.get() +
-				";");
+	            "DRIVER=" + thisInstance->driver.get() +
+	            ";Server=" + thisInstance->server.get() +
+	            "," + Utils::convertToString(thisInstance->port.get()) +
+	            ";Database=" + thisInstance->name.get() +
+	            ";UID=" + thisInstance->account.get() +
+	            ";PWD=" + thisInstance->password.get() +
+	            ";");
 }
