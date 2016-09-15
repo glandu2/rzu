@@ -25,7 +25,7 @@ before_install:
 - cat /proc/sys/kernel/core_pattern
 install:
 - ulimit -c unlimited -S
-- if [ $TRAVIS_OS_NAME == linux ]; then sudo sh -c 'echo "core.%e.%p.%s.%t" > /proc/sys/kernel/core_pattern'
+- if [ $TRAVIS_OS_NAME == linux ]; then sudo sh -c 'echo "core.%e.%p.%s.%t" > /proc/sys/kernel/core_pattern'; fi
 - ulimit -c
 - ulimit -a -S
 - ulimit -a -H
