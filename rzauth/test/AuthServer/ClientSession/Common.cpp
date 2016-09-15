@@ -31,6 +31,18 @@ void sendAccountDES(TestConnectionChannel* channel, const char* account, const c
 	channel->sendPacket(&accountPacket);
 }
 
+void sendAccountDESDouble(TestConnectionChannel* channel, const char* account, const char* password) {
+	TS_CA_ACCOUNT accountPacket;
+	TS_MESSAGE::initMessage(&accountPacket);
+
+	strcpy(accountPacket.account, account);
+	strcpy(reinterpret_cast<char*>(accountPacket.password), password);
+	DesPasswordCipher("MERONG").encrypt(accountPacket.password, sizeof(accountPacket.password));
+
+	channel->sendPacket(&accountPacket);
+	channel->sendPacket(&accountPacket);
+}
+
 void sendAccountIMBC(TestConnectionChannel* channel, const char* account, const char* password) {
 	TS_CA_IMBC_ACCOUNT accountPacket;
 	TS_MESSAGE::initMessage(&accountPacket);
@@ -38,6 +50,17 @@ void sendAccountIMBC(TestConnectionChannel* channel, const char* account, const 
 	strcpy(accountPacket.account, account);
 	strcpy(reinterpret_cast<char*>(accountPacket.password), password);
 
+	channel->sendPacket(&accountPacket);
+}
+
+void sendAccountIMBCDouble(TestConnectionChannel* channel, const char* account, const char* password) {
+	TS_CA_IMBC_ACCOUNT accountPacket;
+	TS_MESSAGE::initMessage(&accountPacket);
+
+	strcpy(accountPacket.account, account);
+	strcpy(reinterpret_cast<char*>(accountPacket.password), password);
+
+	channel->sendPacket(&accountPacket);
 	channel->sendPacket(&accountPacket);
 }
 
