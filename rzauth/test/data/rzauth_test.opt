@@ -1,0 +1,1 @@
+auth.db.connectionstring=DRIVER=@AUTH_TEST_ODBC_SQLITE_DRIVER@;Database=RappelzAuthDatabase.db;
