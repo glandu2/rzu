@@ -3,8 +3,11 @@
 #include "../GlobalConfig.h"
 #include "AuthClient/TS_CA_ACCOUNT.h"
 #include "AuthClient/TS_AC_RESULT.h"
+#include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
 #include "PacketEnums.h"
 #include "Common.h"
+#include "Database/DbQueryJobRef.h"
+#include "Database/DbConnectionPool.h"
 
 #include "Cipher/DesPasswordCipher.h"
 
@@ -12,6 +15,28 @@
  * Double login
  * Duplicate account (kick)
  */
+
+struct SqlTest
+{
+	struct Input {
+		int32_t account_id;
+	};
+
+	struct Output {
+		std::string account_name;
+	};
+};
+
+template<> void DbQueryJob<SqlTest>::init(DbConnectionPool* dbConnectionPool) {
+	createBinding(dbConnectionPool,
+	              CONFIG_GET()->connectionString,
+	              "select account from account where account_id = ?;",
+	              DbQueryBinding::EM_OneRow);
+
+	addParam("account_id", &InputType::account_id);
+	addColumn("account", &OutputType::account_name);
+}
+DECLARE_DB_BINDING(SqlTest, "sql_test");
 
 namespace AuthServer {
 
@@ -35,24 +60,121 @@ TEST(TS_CA_ACCOUNT_DES, valid) {
 	test.run();
 }
 
+
+TEST(TS_CA_ACCOUNT_DES, db_accent_utf8) {
+	SqlTest::Input testInput;
+	bool ok = false;
+
+	testInput.account_id = 21;
+
+	DbConnectionPool dbConnectionPool;
+	DbBindingLoader::get()->initAll(&dbConnectionPool);
+
+	class SqlTestQuery : public DbQueryJob<SqlTest> {
+	public:
+		SqlTestQuery(bool& ok) : ok(ok) {}
+		bool& ok;
+		virtual void onDone(Status) {
+			ok = true;
+			auto& results = getResults();
+			ASSERT_EQ(1, results.size());
+			ASSERT_STREQ("test\xE9", results[0].get()->account_name.c_str());
+		}
+	};
+	DbQueryJob<SqlTest>* query = new SqlTestQuery(ok);
+	query->execute(&testInput, 1);
+	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+	ASSERT_EQ(true, ok);
+}
+
 TEST(TS_CA_ACCOUNT_DES, double_account_before_result) {
 	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
+	bool receivedFirst = false;
+	bool firstIsOk;
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		AuthServer::sendVersion(channel);
-		AuthServer::sendAccountDES(channel, "test1", "admin");
-		AuthServer::sendAccountDES(channel, "test1", "admin");
+		AuthServer::sendAccountDESDouble(channel, "test1", "admin");
 	});
 
-	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		AuthServer::expectAuthResult(event, TS_RESULT_CLIENT_SIDE_ERROR, 0);
+	auth.addCallback([&receivedFirst, &firstIsOk](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+		ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type);
+		EXPECT_TRUE(event.packet->id == TS_AC_RESULT::packetID || event.packet->id == TS_AC_RESULT_WITH_STRING::packetID);
+
+		if(event.packet->id == TS_AC_RESULT::packetID) {
+			const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
+
+			if((receivedFirst && firstIsOk) || (!receivedFirst && packet->result == TS_RESULT_CLIENT_SIDE_ERROR)) {
+				ASSERT_EQ(TS_RESULT_CLIENT_SIDE_ERROR, packet->result);
+				EXPECT_EQ(0, packet->login_flag);
+				if(!receivedFirst)
+					firstIsOk = false;
+			} else {
+				ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
+				EXPECT_EQ(TS_AC_RESULT::LSF_EULA_ACCEPTED, packet->login_flag);
+				if(!receivedFirst)
+					firstIsOk = true;
+			}
+		} else if(event.packet->id == TS_AC_RESULT_WITH_STRING::packetID) {
+			const TS_AC_RESULT_WITH_STRING* packet = AGET_PACKET(TS_AC_RESULT_WITH_STRING);
+
+			if((receivedFirst && firstIsOk) || (!receivedFirst && packet->result == TS_RESULT_CLIENT_SIDE_ERROR)) {
+				ASSERT_EQ(TS_RESULT_MISC, packet->result);
+				EXPECT_EQ(0, packet->login_flag);
+				if(!receivedFirst)
+					firstIsOk = false;
+			} else {
+				ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
+				EXPECT_EQ(TS_AC_RESULT::LSF_EULA_ACCEPTED, packet->login_flag);
+				if(!receivedFirst)
+					firstIsOk = true;
+			}
+		}
+		if(receivedFirst)
+			channel->closeSession();
+		else
+			receivedFirst = true;
 	});
 
-	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		AuthServer::expectAuthResult(event, TS_RESULT_SUCCESS, TS_AC_RESULT::LSF_EULA_ACCEPTED);
-		channel->closeSession();
+	auth.addCallback([&receivedFirst, &firstIsOk](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+		ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type);
+		EXPECT_TRUE(event.packet->id == TS_AC_RESULT::packetID || event.packet->id == TS_AC_RESULT_WITH_STRING::packetID);
+
+		if(event.packet->id == TS_AC_RESULT::packetID) {
+			const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
+
+			if((receivedFirst && firstIsOk) || (!receivedFirst && packet->result == TS_RESULT_CLIENT_SIDE_ERROR)) {
+				ASSERT_EQ(TS_RESULT_CLIENT_SIDE_ERROR, packet->result);
+				EXPECT_EQ(0, packet->login_flag);
+				if(!receivedFirst)
+					firstIsOk = false;
+			} else {
+				ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
+				EXPECT_EQ(TS_AC_RESULT::LSF_EULA_ACCEPTED, packet->login_flag);
+				if(!receivedFirst)
+					firstIsOk = true;
+			}
+		} else if(event.packet->id == TS_AC_RESULT_WITH_STRING::packetID) {
+			const TS_AC_RESULT_WITH_STRING* packet = AGET_PACKET(TS_AC_RESULT_WITH_STRING);
+
+			if((receivedFirst && firstIsOk) || (!receivedFirst && packet->result == TS_RESULT_CLIENT_SIDE_ERROR)) {
+				ASSERT_EQ(TS_RESULT_MISC, packet->result);
+				EXPECT_EQ(0, packet->login_flag);
+				if(!receivedFirst)
+					firstIsOk = false;
+			} else {
+				ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
+				EXPECT_EQ(TS_AC_RESULT::LSF_EULA_ACCEPTED, packet->login_flag);
+				if(!receivedFirst)
+					firstIsOk = true;
+			}
+		}
+		if(receivedFirst)
+			channel->closeSession();
+		else
+			receivedFirst = true;
 	});
 
 	auth.start();

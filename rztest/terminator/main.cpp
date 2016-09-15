@@ -2,7 +2,6 @@
 #include <string.h>
 #include "LibRzuInit.h"
 #include "Config/ConfigInfo.h"
-#include "rztestGitVersion.h"
 #include "Core/EventLoop.h"
 #include "Config/GlobalCoreConfig.h"
 
@@ -21,12 +20,7 @@ int main(int argc, char *argv[])
 }
 
 static void init() {
-	CFG_CREATE("global.version", rztestVersion);
 	CFG_CREATE("ip", "127.0.0.1");
 	CFG_CREATE("port", 4501);
 	CFG_CREATE("command", "terminate");
-
-	GlobalCoreConfig::get()->app.appName.setDefault("rzterminator");
-	GlobalCoreConfig::get()->app.configfile.setDefault("rzterminator.opt");
-	GlobalCoreConfig::get()->log.file.setDefault("rzterminator.log");
 }
