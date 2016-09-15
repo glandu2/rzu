@@ -63,5 +63,5 @@ function(add_rztest name sources)
   endforeach()
 
   target_link_libraries("${name}_test" rztest)
-  add_test(NAME "${name}_test" COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}_test" /core.log.dir=./log /trafficdump.dir=./traffic_log WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  add_test(NAME "${name}_test" COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${name}_test" /configfile:./${name}_test.opt  /core.log.dir=./log /trafficdump.dir=./traffic_log WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 endfunction()

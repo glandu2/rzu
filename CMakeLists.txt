@@ -74,7 +74,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
 
   set(CMAKE_MACOSX_RPATH ON)
-  set(CMAKE_INSTALL_RPATH "@executable_path")
+  set(CMAKE_INSTALL_RPATH "@loader_path/")
 else()
   set(CMAKE_INSTALL_RPATH "$ORIGIN/")
 endif()
