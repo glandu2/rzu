@@ -7,7 +7,7 @@
 #include "RzTest.h"
 
 TestConnectionChannel::TestConnectionChannel(TestConnectionChannel::Type type, cval<std::string> &host, cval<int> &port, bool encrypted)
-    : type(type), host(host), port(port), encrypted(encrypted), session(nullptr), server(nullptr), test(nullptr)
+    : type(type), host(host), port(port), session(nullptr), server(nullptr), test(nullptr)
 {
 	switch(type) {
 		case Client:

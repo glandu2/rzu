@@ -175,7 +175,6 @@ private:
 	Type type;
 	cval<std::string>& host;
 	cval<int>& port;
-	const bool encrypted;
 	PacketSession* session;
 	TestPacketServer* server;
 	std::list<EventCallback> eventCallbacks;
