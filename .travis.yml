@@ -40,5 +40,5 @@ script:
 - if [ $TRAVIS_OS_NAME == linux ]; then valgrind ctest -VV || true ; else ctest -VV ; fi
 - ls -l
 - tail -n +1 log/* || true
-- if [ $TRAVIS_OS_NAME == linux ]; then for i in $(find ./ -maxdepth 1 -name 'core*' -print); do echo "Core $i" && gdb "$(file "$i" | awk -F \' '{print $2}')" "$i" -ex "thread apply all bt" -ex "set pagination 0" -batch; done; fi
+- if [ $TRAVIS_OS_NAME == linux ]; then for i in $(find ./ -maxdepth 1 -name 'core*' -print); do echo "Core $i" && file "$i" && gdb "$(file "$i" | awk -F \' '{print $4}')" "$i" -ex "thread apply all bt" -ex "set pagination 0" -batch; done; fi
 
