@@ -23,14 +23,14 @@ before_install:
 - ulimit -c
 - ulimit -a -S
 - ulimit -a -H
-- if [ $TRAVIS_OS_NAME == linux ]; cat /proc/sys/kernel/core_pattern; fi
+- if [ $TRAVIS_OS_NAME == linux ]; then cat /proc/sys/kernel/core_pattern; fi
 install:
 - ulimit -c unlimited -S
 - if [ $TRAVIS_OS_NAME == linux ]; then sudo sh -c 'echo "core.%e.%p.%s.%t" > /proc/sys/kernel/core_pattern'; fi
 - ulimit -c
 - ulimit -a -S
 - ulimit -a -H
-- if [ $TRAVIS_OS_NAME == linux ]; cat /proc/sys/kernel/core_pattern; fi
+- if [ $TRAVIS_OS_NAME == linux ]; then cat /proc/sys/kernel/core_pattern; fi
 before_script:
 - mkdir build
 - cd build
