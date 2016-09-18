@@ -6,6 +6,7 @@
 #include "AuthGame/TS_GA_LOGOUT.h"
 #include "AuthGame/TS_GA_ACCOUNT_LIST.h"
 #include "PacketEnums.h"
+#include <string.h>
 
 namespace AuthServer {
 
@@ -14,10 +15,10 @@ void sendGameLogin(TestConnectionChannel* channel, uint16_t index, const char* n
 	TS_MESSAGE::initMessage(&packet);
 
 	packet.server_idx = index;
-	strcpy(packet.server_name, name);
-	strcpy(packet.server_screenshot_url, screenshot);
+	memcpy(packet.server_name, name, strlen(name));
+	memcpy(packet.server_screenshot_url, screenshot, strlen(screenshot));
 	packet.is_adult_server = isAdult;
-	strcpy(packet.server_ip, ip);
+	memcpy(packet.server_ip, ip, strlen(ip));
 	packet.server_port = port;
 
 	channel->sendPacket(&packet);
@@ -28,10 +29,10 @@ void sendGameLoginEx(TestConnectionChannel* channel, uint16_t index, const char*
 	TS_MESSAGE::initMessage(&packet);
 
 	packet.server_idx = index;
-	strcpy(packet.server_name, name);
-	strcpy(packet.server_screenshot_url, screenshot);
+	memcpy(packet.server_name, name, strlen(name));
+	memcpy(packet.server_screenshot_url, screenshot, strlen(screenshot));
 	packet.is_adult_server = isAdult;
-	strcpy(packet.server_ip, ip);
+	memcpy(packet.server_ip, ip, strlen(ip));
 	packet.server_port = port;
 
 	channel->sendPacket(&packet);
@@ -48,7 +49,8 @@ void sendClientLogin(TestConnectionChannel *channel, const char* account, uint64
 	TS_GA_CLIENT_LOGIN packet;
 	TS_MESSAGE::initMessage(&packet);
 
-	strcpy(packet.account, account);
+	memset(packet.account, 0, sizeof(packet.account));
+	memcpy(packet.account, account, strlen(account));
 	packet.one_time_key = oneTimePassword;
 
 	channel->sendPacket(&packet);
@@ -58,7 +60,8 @@ void sendClientLogout(TestConnectionChannel *channel, const char* account) {
 	TS_GA_CLIENT_LOGOUT packet;
 	TS_MESSAGE::initMessage(&packet);
 
-	strcpy(packet.account, account);
+	memset(packet.account, 0, sizeof(packet.account));
+	memcpy(packet.account, account, strlen(account));
 
 	channel->sendPacket(&packet);
 }

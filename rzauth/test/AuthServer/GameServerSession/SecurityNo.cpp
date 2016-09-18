@@ -112,7 +112,7 @@ TEST(TS_GA_SECURITY_NO_CHECK, long_securityno) {
 		TS_MESSAGE::initMessage(&securityNoPacket);
 
 		strcpy(securityNoPacket.account, "test1");
-		strcpy(securityNoPacket.security, "19_chars_long_secur");
+		memcpy(securityNoPacket.security, "19_chars_long_secur", 19);
 		securityNoPacket.mode = 0xFFF5FFFF;
 
 		channel->sendPacket(&securityNoPacket);

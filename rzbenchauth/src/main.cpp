@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 	init();
 	ConfigInfo::get()->init(argc, argv);
 
-	uint64_t startTime;
+	uint64_t startTime = 0;
 	Log mainLogger(GlobalCoreConfig::get()->log.enable,
 				   GlobalCoreConfig::get()->log.level,
 				   GlobalCoreConfig::get()->log.consoleLevel,

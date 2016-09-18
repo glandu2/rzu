@@ -16,7 +16,7 @@ TEST(TS_SU_LOGIN, valid) {
 		TS_SU_LOGIN loginPacket;
 		TS_MESSAGE::initMessage(&loginPacket);
 
-		strcpy(loginPacket.server_name, "game001");
+		strcpy(loginPacket.server_name, "game002");
 		channel->sendPacket(&loginPacket);
 	});
 

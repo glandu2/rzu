@@ -25,6 +25,7 @@ void StatBase::sendPacket(ClientSession* session, game_handle_t handle, Type typ
 	statPacket.handle = handle;
 	statPacket.type = (int8_t)type;
 
+	statPacket.stat.stat_id = stat_id;
 	statPacket.stat.strength = (int16_t)strength;
 	statPacket.stat.vital = (int16_t)vitality;
 	statPacket.stat.dexterity = (int16_t)dexterity;

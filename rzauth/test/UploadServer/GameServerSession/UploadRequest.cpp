@@ -19,7 +19,7 @@ TEST(TS_SU_REQUEST_UPLOAD, valid) {
 		TS_SU_LOGIN loginPacket;
 		TS_MESSAGE::initMessage(&loginPacket);
 
-		strcpy(loginPacket.server_name, "game001");
+		strcpy(loginPacket.server_name, "game003");
 		channel->sendPacket(&loginPacket);
 	});
 
@@ -62,7 +62,7 @@ TEST(TS_SU_REQUEST_UPLOAD, double_request) {
 		TS_SU_LOGIN loginPacket;
 		TS_MESSAGE::initMessage(&loginPacket);
 
-		strcpy(loginPacket.server_name, "game001");
+		strcpy(loginPacket.server_name, "game004");
 		channel->sendPacket(&loginPacket);
 	});
 
