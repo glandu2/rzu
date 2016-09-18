@@ -44,7 +44,7 @@ void Environment::beforeTests() {
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(18,'test18','613b5247e3398350918cb622a3ec19e9',NULL,NULL,NULL);"));
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(19,'test19','613b5247e3398350918cb622a3ec19e9',NULL,NULL,NULL);"));
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(20,'test20','613b5247e3398350918cb622a3ec19e9',NULL,NULL,NULL);"));
-	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(21,'test' || char(0xE9),'613b5247e3398350918cb622a3ec19e9',NULL,NULL,NULL);"));
+	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(21,'test' || char(233),'613b5247e3398350918cb622a3ec19e9',NULL,NULL,NULL);"));
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(1000000001,'testPw47Chars','c8d8079110d491e6d115dc0755c7e5eb',NULL,NULL,NULL);"));
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(1000000002,'testPw60Chars','33410d89b4a115d9ac9c7aaaff255b91',NULL,NULL,NULL);"));
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(1000000003,'testPw64Chars','0504f832c91bc39001f67f4209f7f077',NULL,NULL,NULL);"));
