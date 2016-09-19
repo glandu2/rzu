@@ -48,7 +48,8 @@ deploy:
   api_key:
     secure: WJV1VnKFtrg+rwA26yFxXHxIiol2ITzcOWrXr8PiiRTNyAwjXy3X6vb7XxvE/DGqus73GaES566fQw/iTSZmOgJ+FUig5grbuiMNtTQwkQ23o8+YRoR37yyZtVJPmYBITdNa7ZIOLP6L+4MyLqOikpUhXYpMTgTmiH2jP17AeXyw2j2lp7qd2Nd2Iy/2Vpm8X26gaE4uFsw94HtDOcCwVV/CuDz8MRkampVf7AvFA4VTh8/rS2GWkXeuOeY4AhLgfUDCAkWknBzuWUO90utudHTusdwSyiJ/q9SM3mAyP7LEhZPCb//6QaCdFN40Cg5t8s5mjBhEpw7LSDnyDyEj4Xi2A1SVOIBrFhnKz2sTLOxnS4SxSlSNeQrxTmdFv0WDw4GXFvj30cOF5U+S4jNoCS+1AUO16M6UPp6fjYg64tGCNbgQIH4SwfcgjISurlWOZtLGiSd8QJ74daY1zBVBFbewI8xEtvWbKBerFJQYe5zWI1lxczNrF/nVLtQ3vkTPZdOvljAlC7aRaq81OzsYs5/YYLaFKrhsAzX8wrAcb2opgAFhoip5u9HkRE2O+Q/cQ8IcUSm2SoPV1MYvIfGFH7y1j5pIZTto9xGQaSllGfrFVzFG/n4Vt9Leq164cRito8CUvqgLQUTd8mOy75RUu/9pxh6z/gDeN9NzTWFIk3c=
   file:
-    - build/rzemu-4.1-Linux-x86_64-binaries.zip
-    - build/rzemu-4.1-Linux-x86_64-symbols.zip
+    - rzemu-4.1-Linux-x86_64-binaries.zip
+    - rzemu-4.1-Linux-x86_64-symbols.zip
+  skip_cleanup: true
   on:
-    repo: glandu2/rzu-parent
+    tags: true
