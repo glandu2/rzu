@@ -8,7 +8,3 @@ if( versioncmakefound )
 endif()
 
 add_exe(${TARGET_NAME} "${SOURCE_FILES}" rzu)
-
-if(CMAKE_COMPILER_IS_GNUCXX)
-  SETUP_TARGET_FOR_COVERAGE(${TARGET_NAME}_lcov "${TARGET_NAME}" "${EXECUTABLE_OUTPUT_PATH}/${TARGET_NAME}_coverage")
-endif()
