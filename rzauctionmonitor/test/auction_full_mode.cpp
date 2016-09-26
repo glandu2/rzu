@@ -192,9 +192,9 @@ TEST(auction_full_mode, added_3_auction) {
 TEST(auction_full_mode, added_update_unmodified_removed) {
 	AuctionWriter auctionWriter(18);
 	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
-	AuctionOuputTestData auctionData2(AuctionInfo::BF_MyBid, AuctionInfo::DT_Long);
-	AuctionOuputTestData auctionData3(AuctionInfo::BF_MyBid, AuctionInfo::DT_Long);
-	AuctionOuputTestData auctionData4(AuctionInfo::BF_Bidded, AuctionInfo::DT_Short);
+	AuctionOuputTestData auctionData2(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AuctionOuputTestData auctionData3(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AuctionOuputTestData auctionData4(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -296,9 +296,9 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 TEST(auction_full_mode, added_update_unmodified_removed_diff) {
 	AuctionWriter auctionWriter(18);
 	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
-	AuctionOuputTestData auctionData2(AuctionInfo::BF_MyBid, AuctionInfo::DT_Long);
-	AuctionOuputTestData auctionData3(AuctionInfo::BF_MyBid, AuctionInfo::DT_Long);
-	AuctionOuputTestData auctionData4(AuctionInfo::BF_Bidded, AuctionInfo::DT_Short);
+	AuctionOuputTestData auctionData2(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AuctionOuputTestData auctionData3(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AuctionOuputTestData auctionData4(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -399,4 +399,70 @@ TEST(auction_full_mode, added_update_unmodified_removed_diff) {
 
 	ASSERT_EQ(1, auctionFile.auctions.size());
 	expectAuction(&auctionFile, auctionData4);
+}
+
+TEST(auction_full_mode, estimated_time_adjust) {
+	AuctionWriter auctionWriter(18);
+	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Long);
+	AuctionOuputTestData auctionData2(AuctionInfo::BF_NoBid, AuctionInfo::DT_Long);
+	AuctionOuputTestData auctionData3(AuctionInfo::BF_NoBid, AuctionInfo::DT_Long);
+	AUCTION_FILE auctionFile;
+
+	auctionData.diffType = D_Added;
+	auctionData.deleted = false;
+	auctionData.deletedCount = 0;
+	auctionData.previousTime = 0;
+	auctionData.estimatedEndTimeFromAdded = true;
+	auctionData.estimatedEndTimeMin = 72*3600;
+	auctionData.estimatedEndTimeMax = auctionData.time + 72*3600;
+
+	auctionData2 = auctionData;
+	auctionData2.diffType = D_Updated;
+	auctionData2.duration_type = AuctionInfo::DT_Medium;
+	auctionData2.previousTime = auctionData.time + 72*3600 - 24*3600 - 1000;
+	auctionData2.time = auctionData.time + 72*3600 - 24*3600 + 500;
+	auctionData2.estimatedEndTimeFromAdded = false;
+	auctionData2.estimatedEndTimeMin = auctionData.time + 72*3600 - 1000;
+	auctionData2.estimatedEndTimeMax = auctionData.time + 72*3600;
+
+	auctionData3 = auctionData2;
+	auctionData3.diffType = D_Updated;
+	auctionData3.duration_type = AuctionInfo::DT_Short;
+	auctionData3.previousTime = auctionData.time + 72*3600 - 6*3600 - 1500;
+	auctionData3.time = auctionData.time + 72*3600 - 6*3600 - 500;
+	auctionData3.estimatedEndTimeMin = auctionData.time + 72*3600 - 1000;
+	auctionData3.estimatedEndTimeMax = auctionData.time + 72*3600 - 500;
+
+	// Set diff mode
+	auctionWriter.setDiffInputMode(true);
+
+	// Added auction
+	auctionWriter.beginProcess();
+	addAuctionDiff(&auctionWriter, auctionData);
+	auctionWriter.endProcess();
+
+	dumpAuctions(&auctionWriter, &auctionFile);
+
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData);
+
+	// Updated auction
+	auctionWriter.beginProcess();
+	addAuctionDiff(&auctionWriter, auctionData2);
+	auctionWriter.endProcess();
+
+	dumpAuctions(&auctionWriter, &auctionFile);
+
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData2);
+
+	// Updated auction
+	auctionWriter.beginProcess();
+	addAuctionDiff(&auctionWriter, auctionData3);
+	auctionWriter.endProcess();
+
+	dumpAuctions(&auctionWriter, &auctionFile);
+
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData3);
 }

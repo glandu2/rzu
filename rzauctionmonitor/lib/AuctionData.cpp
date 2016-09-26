@@ -214,6 +214,8 @@ uint32_t AuctionInfo::durationTypeToSecond(DurationType durationType)
 		case DT_Long: return 72 * 3600;
 		case DT_Medium: return 24 * 3600;
 		case DT_Short: return 6 * 3600;
-		default: return 0;
+		case DT_Unknown: return 0;
 	}
+
+	return 0;
 }
