@@ -122,8 +122,9 @@ DiffType AuctionInfo::getAuctionDiffType() const {
 		case PS_Updated: return D_Updated;
 		case PS_Unmodifed: return D_Unmodified;
 		case PS_MaybeDeleted: return D_MaybeDeleted;
-		default: return D_Invalid;
+		case PS_NotProcessed: return D_Invalid;
 	}
+	return D_Invalid;
 }
 
 void AuctionInfo::setStatus(ProcessStatus status, uint64_t time)
