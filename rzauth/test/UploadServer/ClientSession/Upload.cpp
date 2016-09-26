@@ -21,6 +21,7 @@ TEST(TS_CU_UPLOAD, valid) {
 	RzTest test;
 	TestConnectionChannel upload(TestConnectionChannel::Client, CONFIG_GET()->upload.ip, CONFIG_GET()->upload.port, true);
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
+	struct tm timeinfo;
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -70,7 +71,7 @@ TEST(TS_CU_UPLOAD, valid) {
 		channel->sendPacket(&loginPacket);
 	});
 
-	upload.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	upload.addCallback([&timeinfo](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_UC_LOGIN_RESULT* packet = AGET_PACKET(TS_UC_LOGIN_RESULT);
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
 
@@ -81,15 +82,15 @@ TEST(TS_CU_UPLOAD, valid) {
 		channel->sendPacket(uploadPacket);
 		TS_MESSAGE_WNA::destroy(uploadPacket);
 
+		Utils::getGmTime(time(NULL), &timeinfo);
+
 		channel->closeSession();
 	});
 
 
-	game.addCallback([&upload](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	game.addCallback([&upload, &timeinfo](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_US_UPLOAD* packet = AGET_PACKET(TS_US_UPLOAD);
 
-		struct tm timeinfo;
-		Utils::getGmTime(time(NULL), &timeinfo);
 		char expectedFilename[128];
 		sprintf(expectedFilename, "game001_0000000002_%02d%02d%02d_%02d%02d%02d.jpg",
 				 timeinfo.tm_year % 100,
