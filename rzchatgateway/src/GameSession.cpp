@@ -34,9 +34,8 @@ void GameSession::onGameConnected() {
 	epochTimeOffset = rappelzTimeOffset = 0;
 
 	TS_CS_CHARACTER_LIST charlistPkt;
-	TS_MESSAGE::initMessage<TS_CS_CHARACTER_LIST>(&charlistPkt);
-	strcpy(charlistPkt.account, auth->getAccountName().c_str());
-	sendPacket(&charlistPkt);
+	charlistPkt.account = auth->getAccountName();
+	sendPacket(charlistPkt, EPIC_LATEST);
 }
 
 void GameSession::setGameServerName(std::string name) {
