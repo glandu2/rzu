@@ -51,6 +51,7 @@ private:
 	cval<bool>& useRsa;
 
 	bool disconnectRequested;
+	bool connectedToGS;
 
 	Timer<AuthSession> delayRecoTimer;
 	Callback<DisconnectedCallback> disconnectedCallback;

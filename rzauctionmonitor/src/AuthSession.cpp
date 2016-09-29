@@ -108,6 +108,7 @@ void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t 
 
 	log(LL_Info, "Connecting to GS with index %d\n", serverIdxToSelect);
 	selectServer(serverIdxToSelect);
+	connectedToGS = false;
 }
 
 void AuthSession::onGameDisconnected() {
@@ -121,10 +122,13 @@ void AuthSession::onGameDisconnected() {
 }
 
 void AuthSession::onGameResult(TS_ResultCode result) {
+	if(connectedToGS)
+		return;
 	if(result != TS_RESULT_SUCCESS) {
 		log(LL_Error, "GS returned an error while authenticating: %d\n", result);
 		abortSession();
 	} else {
 		log(LL_Info, "Connected to GS\n");
+		connectedToGS = true;
 	}
 }
