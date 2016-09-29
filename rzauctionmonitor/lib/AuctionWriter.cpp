@@ -141,6 +141,7 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 				}
 
 				auctionInfo.remove(time);
+				auctionInfo.maybeStillDeleted();
 			}
 			break;
 		}

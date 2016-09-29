@@ -27,7 +27,7 @@ void TestEnvironment::TearDown()
 	if(TestGlobalConfig::get()->enableExecutableSpawn.get()) {
 		for(size_t i = 0; i < processes.size(); i++) {
 			if(doKillAll)
-				uv_process_kill(processes[i], SIGKILL);
+				uv_process_kill(processes[i], SIGTERM);
 			uv_ref((uv_handle_t*)processes[i]);
 		}
 

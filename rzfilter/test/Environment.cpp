@@ -8,6 +8,6 @@ void Environment::beforeTests() {
 }
 
 void Environment::afterTests() {
-	//
+	stop(4803);
 }
 

@@ -6,6 +6,7 @@
 #include <time.h>
 #include "Config/ConfigParamVal.h"
 
+#include "GameClient/TS_CS_REPORT.h"
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
 #include "GameClient/TS_SC_CHARACTER_LIST.h"
 #include "GameClient/TS_CS_LOGIN.h"
@@ -43,10 +44,13 @@ void GameSession::onGameConnected() {
 
 	epochTimeOffset = rappelzTimeOffset = 0;
 
+	TS_CS_REPORT reportPkt;
+	reportPkt.report = "";
+	sendPacket(reportPkt, EPIC_LATEST);
+
 	TS_CS_CHARACTER_LIST charlistPkt;
-	TS_MESSAGE::initMessage<TS_CS_CHARACTER_LIST>(&charlistPkt);
-	strcpy(charlistPkt.account, auth->getAccountName().c_str());
-	sendPacket(&charlistPkt);
+	charlistPkt.account = auth->getAccountName();
+	sendPacket(charlistPkt, EPIC_LATEST);
 }
 
 void GameSession::close() {
@@ -150,10 +154,7 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 
 void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	TS_CS_LOGIN loginPkt;
-	TS_TIMESYNC timeSyncPkt;
 	bool characterInList = false;
-
-	TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
 
 	log(LL_Debug, "Character list: \n");
 	for(size_t i = 0; i < packet->characters.size(); i++) {
@@ -172,9 +173,6 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	loginPkt.name = playername;
 	loginPkt.race = 0;
 	sendPacket(loginPkt, EPIC_LATEST);
-
-	timeSyncPkt.time = 0;
-	sendPacket(&timeSyncPkt);
 }
 
 void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT *packet) {

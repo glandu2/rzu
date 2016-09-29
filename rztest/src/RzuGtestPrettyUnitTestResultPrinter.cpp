@@ -128,14 +128,18 @@ void RzuTestPrinter::printStack()
 
 		 line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
 		 BOOL has_line = SymGetLineFromAddr64(process, (DWORD64) (stack[i]), &line_displacement, &line);
-		 char* fileName = line.FileName;
-		 size_t fileNameSize = strlen(fileName);
-		 if(fileNameSize > 30)
-			 fileName = fileName + fileNameSize - 30;
+		 char* fileName;
+
+		 if(has_line) {
+			 fileName = line.FileName;
+			 size_t fileNameSize = strlen(fileName);
+			 if(fileNameSize > 30)
+				 fileName = fileName + fileNameSize - 30;
+		 }
 
 		 log(LL_Info, "  %s (%s%s:%d)\n",
 		     has_sym ? symbol->Name : "unknown",
-		     fileName == line.FileName ? "" : "...",
+		     (!has_line || fileName == line.FileName) ? "" : "...",
 		     has_line ? fileName : "?",
 		     has_line ? line.LineNumber : 0);
 	 }

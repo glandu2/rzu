@@ -122,8 +122,9 @@ DiffType AuctionInfo::getAuctionDiffType() const {
 		case PS_Updated: return D_Updated;
 		case PS_Unmodifed: return D_Unmodified;
 		case PS_MaybeDeleted: return D_MaybeDeleted;
-		default: return D_Invalid;
+		case PS_NotProcessed: return D_Invalid;
 	}
+	return D_Invalid;
 }
 
 void AuctionInfo::setStatus(ProcessStatus status, uint64_t time)
@@ -214,6 +215,8 @@ uint32_t AuctionInfo::durationTypeToSecond(DurationType durationType)
 		case DT_Long: return 72 * 3600;
 		case DT_Medium: return 24 * 3600;
 		case DT_Short: return 6 * 3600;
-		default: return 0;
+		case DT_Unknown: return 0;
 	}
+
+	return 0;
 }
