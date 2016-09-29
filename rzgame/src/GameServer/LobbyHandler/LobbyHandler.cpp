@@ -15,8 +15,8 @@ LobbyHandler::LobbyHandler(ClientSession *session) : ConnectionHandler(session),
 
 void LobbyHandler::onPacketReceived(const TS_MESSAGE *packet) {
 	switch(packet->id) {
-		case TS_CS_CHARACTER_LIST::packetID:
-			onCharacterListQuery(static_cast<const TS_CS_CHARACTER_LIST*>(packet));
+		case_packet_is(TS_CS_CHARACTER_LIST)
+			packet->process(this, &LobbyHandler::onCharacterListQuery, session->getVersion());
 			break;
 
 		case_packet_is(TS_CS_LOGIN)
