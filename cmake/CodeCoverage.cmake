@@ -68,9 +68,13 @@
 #
 
 # Check prereqs
-FIND_PROGRAM( GCOV_PATH gcov )
-FIND_PROGRAM( LCOV_PATH lcov )
-FIND_PROGRAM( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/tests)
+get_filename_component(COMPILER_DIR ${CMAKE_C_COMPILER} DIRECTORY)
+
+FIND_PROGRAM( GCOV_PATH gcov gcov.exe gcov.bat HINTS ${COMPILER_DIR})
+FIND_PROGRAM( LCOV_PATH lcov lcov.bat lcov.perl lcov.pl HINTS ${COMPILER_DIR})
+
+get_filename_component(LCOV_DIR ${LCOV_PATH} DIRECTORY)
+FIND_PROGRAM( GENHTML_PATH genhtml genhtml.bat genhtml.perl genhtml.pl HINTS ${LCOV_DIR})
 
 IF(NOT CMAKE_COMPILER_IS_GNUCXX)
 	# Clang version 3.0.0 and greater now supports gcov as well.
@@ -79,61 +83,54 @@ ENDIF() # NOT CMAKE_COMPILER_IS_GNUCXX
 
 SET(CMAKE_CXX_FLAGS_COVERAGE
     "${CMAKE_CXX_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the C++ compiler during coverage builds."
-    FORCE )
+    CACHE STRING "Flags used by the C++ compiler during coverage builds.")
 SET(CMAKE_C_FLAGS_COVERAGE
     "${CMAKE_C_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the C compiler during coverage builds."
-    FORCE )
+    CACHE STRING "Flags used by the C compiler during coverage builds.")
 SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE
     "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used for linking binaries during coverage builds."
-    FORCE )
+    CACHE STRING "Flags used for linking binaries during coverage builds.")
 SET(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
     "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the shared libraries linker during coverage builds."
-    FORCE )
+    CACHE STRING "Flags used by the shared libraries linker during coverage builds.")
+SET(CMAKE_MODULE_LINKER_FLAGS_COVERAGE
+    "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
+    CACHE STRING "Flags used by the module libraries linker during coverage builds.")
+SET(CMAKE_STATIC_LINKER_FLAGS_COVERAGE
+    "${CMAKE_STATIC_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
+    CACHE STRING "Flags used by the module libraries linker during coverage builds.")
 MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_COVERAGE
     CMAKE_C_FLAGS_COVERAGE
     CMAKE_EXE_LINKER_FLAGS_COVERAGE
-    CMAKE_SHARED_LINKER_FLAGS_COVERAGE )
+	CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+	CMAKE_MODULE_LINKER_FLAGS_COVERAGE
+	CMAKE_STATIC_LINKER_FLAGS_COVERAGE)
 
+if(EXISTS ${LCOV_PATH} AND EXISTS ${GENHTML_PATH})
+	message("Adding coverage target")
+	add_custom_target(coverage
+		# Cleanup lcov
+		#perl.exe   ${LCOV_PATH} --directory . --zerocounters
 
-# Param _targetname     The name of new the custom make target
-# Param _testrunner     The name of the target which runs the tests.
-#						MUST return ZERO always, even on errors.
-#						If not, no coverage report will be created!
-# Param _outputname     lcov output is generated as _outputname.info
-#                       HTML report is generated in _outputname/index.html
-# Optional fourth parameter is passed as arguments to _testrunner
-#   Pass them in list form, e.g.: "-j;2" for -j 2
-macro(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
+		# Capturing lcov counters and generating report
+		COMMAND ${CMAKE_COMMAND} -E remove coverage.info coverage.info.cleaned
+		COMMAND ${LCOV_PATH} --directory . --capture --output-file coverage.info --gcov-tool ${GCOV_PATH} --rc lcov_branch_coverage=1
+		COMMAND ${LCOV_PATH} --remove coverage.info "*/mingw64/*" "*/mingw/*" "/usr/*" "*/zlib/*" "*/libuv/*" "*/gtest/*" "*/libiconv/*" "*/rztest/*" "*/test/*" "lib/aliases.gperf" --output-file coverage.info.cleaned --rc lcov_branch_coverage=1
+		COMMAND ${GENHTML_PATH} -o coverage_html coverage.info.cleaned --rc genhtml_branch_coverage=1
 
-	IF(LCOV_PATH)
-		# Setup target
-		ADD_CUSTOM_TARGET(${_targetname}
-
-			# Cleanup lcov
-			#perl.exe   ${LCOV_PATH} --directory . --zerocounters
-
-			# Run tests
-			COMMAND "${_testrunner}"
-
-			# Capturing lcov counters and generating report
-			COMMAND perl ${LCOV_PATH} --directory . --capture --output-file ${_outputname}.info
-			COMMAND perl ${LCOV_PATH} --remove ${_outputname}.info 'mingw*' '/usr/*' --output-file ${_outputname}.info.cleaned
-			COMMAND perl ${GENHTML_PATH} -o ${_outputname} ${_outputname}.info.cleaned
-			COMMAND ${CMAKE_COMMAND} -E remove ${_outputname}.info ${_outputname}.info.cleaned
-
-			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-			COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage counters and generating report."
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+		COMMENT "Processing code coverage counters and generating report."
+		VERBATIM
 		)
+	add_custom_target(coverage_clean
+		# Cleanup lcov
+		COMMAND ${LCOV_PATH} --directory . --zerocounters
+		COMMAND ${CMAKE_COMMAND} -E remove_directory coverage_html
 
-		# Show info where to find the report
-		ADD_CUSTOM_COMMAND(TARGET ${_targetname} POST_BUILD
-			COMMENT "Open ${_outputname}/index.html in your browser to view the coverage report."
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+		COMMENT "Resetting code coverage counters to zero."
+		VERBATIM
 		)
-	ENDIF() # NOT LCOV_PATH
-endmacro() # SETUP_TARGET_FOR_COVERAGE
+endif()
 
