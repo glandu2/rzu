@@ -264,7 +264,7 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 		if(diffType >= D_Invalid)
 			logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d for auction 0x%08X\n", auctionInfo.processStatus, auctionInfo.uid);
 
-		if((diffType == D_MaybeDeleted || diffType == D_Unmodified) && !doFullDump)
+		if((diffType == D_Unmodified) && !doFullDump)
 			continue;
 
 		AUCTION_INFO auctionItem;
