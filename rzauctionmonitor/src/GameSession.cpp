@@ -44,10 +44,6 @@ void GameSession::onGameConnected() {
 
 	epochTimeOffset = rappelzTimeOffset = 0;
 
-	TS_CS_REPORT reportPkt;
-	reportPkt.report = "\x5A\x76\x3F\xED\xD9\xEDWindows  (6.2.9200)|Intel(R) HD Graphics 4000Drv Version : 10.18.10.4425";
-	sendPacket(reportPkt, EPIC_LATEST);
-
 	TS_CS_CHARACTER_LIST charlistPkt;
 	charlistPkt.account = auth->getAccountName();
 	sendPacket(charlistPkt, EPIC_LATEST);
