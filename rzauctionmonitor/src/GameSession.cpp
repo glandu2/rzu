@@ -44,10 +44,6 @@ void GameSession::onGameConnected() {
 
 	epochTimeOffset = rappelzTimeOffset = 0;
 
-	TS_CS_REPORT reportPkt;
-	reportPkt.report = "";
-	sendPacket(reportPkt, EPIC_LATEST);
-
 	TS_CS_CHARACTER_LIST charlistPkt;
 	charlistPkt.account = auth->getAccountName();
 	sendPacket(charlistPkt, EPIC_LATEST);
