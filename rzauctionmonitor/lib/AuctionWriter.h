@@ -25,8 +25,8 @@ public:
 	void endProcess();
 	void beginCategory(size_t category, time_t time);
 	void endCategory(size_t category, time_t time);
-	void dumpAuctions(const std::string &auctionDir, const std::string &auctionFile, bool dumpDiff, bool dumpFull);
-	void dumpAuctions(std::vector<uint8_t> &auctionData, bool doFulldump);
+	void dumpAuctions(const std::string &auctionDir, const std::string &auctionFile, bool dumpDiff, bool dumpFull, bool alwaysWithData);
+	void dumpAuctions(std::vector<uint8_t> &auctionData, bool doFulldump, bool alwaysWithData);
 
 	bool hasAuction(uint32_t uid);
 	size_t getAuctionCount() { return auctionsState.size(); }
@@ -50,7 +50,7 @@ private:
 	void processRemainingAuctions(std::unordered_map<uint32_t, AuctionInfo>& auctionInfos);
 	void resetAuctionProcess(std::unordered_map<uint32_t, AuctionInfo>& auctionInfos);
 
-	template<class Container> void serializeAuctionInfos(const Container& auctionInfos, bool doFullDump, std::vector<uint8_t>& output);
+	template<class Container> void serializeAuctionInfos(const Container& auctionInfos, bool doFullDump, std::vector<uint8_t>& output, bool alwaysWithData);
 	void writeAuctionDataToFile(std::string auctionsDir, std::string auctionsFile, const std::vector<uint8_t>& data, time_t fileTimeStamp, const char* suffix);
 	static DiffType getAuctionDiffType(AuctionInfo::ProcessStatus flag);
 

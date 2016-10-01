@@ -95,13 +95,13 @@ AuctionInfo AuctionInfo::createFromDump(AUCTION_INFO *auctionInfo)
 	return auction;
 }
 
-void AuctionInfo::serialize(AUCTION_INFO *auctionInfo) const
+void AuctionInfo::serialize(AUCTION_INFO *auctionInfo, bool alwaysWithData) const
 {
 	auctionInfo->uid = uid;
 	auctionInfo->previousTime = previousUpdateTime;
 	auctionInfo->time = updateTime;
+	auctionInfo->diffType = getAuctionDiffType();
 	auctionInfo->category = category;
-	auctionInfo->data = rawData;
 	auctionInfo->deleted = deleted;
 	auctionInfo->deletedCount = deletedCount;
 	auctionInfo->seller = seller;
@@ -112,7 +112,9 @@ void AuctionInfo::serialize(AUCTION_INFO *auctionInfo) const
 	auctionInfo->estimatedEndTimeFromAdded = estimatedEndTimeFromAdded;
 	auctionInfo->estimatedEndTimeMin = estimatedEndTimeMin;
 	auctionInfo->estimatedEndTimeMax = estimatedEndTimeMax;
-	auctionInfo->diffType = getAuctionDiffType();
+
+	if(alwaysWithData || auctionInfo->diffType == D_Added)
+		auctionInfo->data = rawData;
 }
 
 DiffType AuctionInfo::getAuctionDiffType() const {

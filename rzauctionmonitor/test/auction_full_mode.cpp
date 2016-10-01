@@ -27,6 +27,7 @@ struct AuctionInputTestData {
 	AuctionInfo::BidFlag bid_flag;
 
 	std::vector<uint8_t> rawData;
+	std::vector<uint8_t> expectedData;
 
 	void updateRawData() {
 		if(rawData.size() > 0)
@@ -44,6 +45,9 @@ struct AuctionInputTestData {
 			rawData[i] = rand() & 0xFF;
 
 		memcpy(&rawData[rawData.size()-sizeof(auctionData)], &auctionData, sizeof(auctionData));
+
+		if(diffType == D_Added)
+			expectedData = rawData;
 	}
 };
 
@@ -76,7 +80,7 @@ static void addAuctionDiff(AuctionWriter* auctionWriter, AuctionOuputTestData& t
 static void dumpAuctions(AuctionWriter* auctionWriter, AUCTION_FILE* auctionFile) {
 	std::vector<uint8_t> auctionData;
 
-	auctionWriter->dumpAuctions(auctionData, true);
+	auctionWriter->dumpAuctions(auctionData, true, false);
 	MessageBuffer messageBuffer(auctionData.data(), auctionData.size(), AUCTION_LATEST);
 	auctionFile->deserialize(&messageBuffer);
 
@@ -113,9 +117,9 @@ static void expectAuction(AUCTION_FILE* auctionFile,
 		EXPECT_EQ(auctionOutput.price, auction.price);
 		EXPECT_STREQ(auctionOutput.seller.c_str(), auction.seller.c_str());
 
-		EXPECT_EQ(auctionOutput.rawData.size(), auction.data.size());
-		if(auctionOutput.rawData.size() == auction.data.size())
-			EXPECT_EQ(0, memcmp(auction.data.data(), auctionOutput.rawData.data(), auction.data.size())) << "auction.data est différent de l'attendu";
+		EXPECT_EQ(auctionOutput.expectedData.size(), auction.data.size());
+		if(auctionOutput.expectedData.size() == auction.data.size())
+			EXPECT_EQ(0, memcmp(auction.data.data(), auctionOutput.expectedData.data(), auction.data.size())) << "auction.data est différent de l'attendu";
 	}
 
 	EXPECT_TRUE(auctionFound) << "Auction " << auctionOutput.uid << " not found";

@@ -280,7 +280,7 @@ int main(int argc, char* argv[]) {
 
 		//dump last processed file
 		if(fileNumber > 0)
-			auctionWriter.dumpAuctions("output", "auctions.bin", true, false);
+			auctionWriter.dumpAuctions("output", "auctions.bin", true, false, false);
 
 		FILE* file = fopen(filename, "rb");
 		if(!file) {
@@ -343,7 +343,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	//dump last file with full
-	auctionWriter.dumpAuctions("output", "auctions.bin", true, true);
+	auctionWriter.dumpAuctions("output", "auctions.bin", true, true, false);
 
 	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", fileNumber);
 

@@ -55,7 +55,7 @@ public:
 	void setPreviousUpdateTime(uint64_t time);
 
 	static AuctionInfo createFromDump(AUCTION_INFO* auctionInfo);
-	void serialize(AUCTION_INFO* auctionInfo) const;
+	void serialize(AUCTION_INFO* auctionInfo, bool alwaysWithData) const;
 
 	DiffType getAuctionDiffType() const;
 

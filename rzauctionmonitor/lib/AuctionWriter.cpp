@@ -162,7 +162,7 @@ void AuctionWriter::endProcess()
 	processRemainingAuctions(auctionsState);
 }
 
-void AuctionWriter::dumpAuctions(const std::string& auctionDir, const std::string& auctionFile, bool dumpDiff, bool dumpFull)
+void AuctionWriter::dumpAuctions(const std::string& auctionDir, const std::string& auctionFile, bool dumpDiff, bool dumpFull, bool alwaysWithData)
 {
 	time_t dumpTimeStamp = getLastEndCategoryTime();
 	if(dumpTimeStamp == 0) {
@@ -171,19 +171,19 @@ void AuctionWriter::dumpAuctions(const std::string& auctionDir, const std::strin
 	}
 
 	if(dumpDiff) {
-		serializeAuctionInfos(auctionsState, false, fileData);
+		serializeAuctionInfos(auctionsState, false, fileData, alwaysWithData);
 		writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_diff");
 	}
 
 	if(dumpFull) {
-		serializeAuctionInfos(auctionsState, true, fileData);
+		serializeAuctionInfos(auctionsState, true, fileData, alwaysWithData);
 		writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_full");
 	}
 }
 
-void AuctionWriter::dumpAuctions(std::vector<uint8_t> &auctionData, bool doFulldump)
+void AuctionWriter::dumpAuctions(std::vector<uint8_t> &auctionData, bool doFulldump, bool alwaysWithData)
 {
-	serializeAuctionInfos(auctionsState, doFulldump, auctionData);
+	serializeAuctionInfos(auctionsState, doFulldump, auctionData, alwaysWithData);
 }
 
 bool AuctionWriter::hasAuction(uint32_t uid)
@@ -236,7 +236,7 @@ void AuctionWriter::resetAuctionProcess(std::unordered_map<uint32_t, AuctionInfo
 }
 
 template<class Container>
-void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool doFullDump, std::vector<uint8_t> &output)
+void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool doFullDump, std::vector<uint8_t> &output, bool alwaysWithData)
 {
 	output.clear();
 
@@ -268,7 +268,7 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 			continue;
 
 		AUCTION_INFO auctionItem;
-		auctionInfo.serialize(&auctionItem);
+		auctionInfo.serialize(&auctionItem, alwaysWithData);
 
 		auctionFile.auctions.push_back(auctionItem);
 	}

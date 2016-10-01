@@ -247,7 +247,8 @@ void AuctionManager::onAllRequestProcessed()
 		auctionWriter.dumpAuctions(CONFIG_GET()->client.auctionListDir.get(),
 		                           CONFIG_GET()->client.auctionListFile.get(),
 		                           !firstDump,
-		                           firstDump || CONFIG_GET()->client.doFullAuctionDump.get());
+		                           firstDump || CONFIG_GET()->client.doFullAuctionDump.get(),
+		                           CONFIG_GET()->client.alwaysDumpData.get());
 
 		auctionWriter.beginProcess();
 		currentCategory = 0;
