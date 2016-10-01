@@ -1,5 +1,5 @@
 struct PacketNameInfo {
-	unsigned int id;
+	unsigned short id;
 	const char* name;
 };
 
@@ -41,6 +41,7 @@ static const PacketNameInfo gamePacketNames[] = {
 	{59, "TS_CS_XTRAP_CHECK"},
 	{61, "TS_CS_LOGIN_2"},
 	{62, "TS_CS_LOGIN_3"},
+	{63, "TS_SC_ENTER_2"},
 	{64, "TS_SC_LOGIN_RESULT_2"},
 	{65, "TS_CS_MOVE_REQUEST_2"},
 	{67, "TS_CS_REGION_UPDATE_2"},
