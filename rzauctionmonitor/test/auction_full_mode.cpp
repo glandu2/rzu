@@ -80,7 +80,7 @@ static void addAuctionDiff(AuctionWriter* auctionWriter, AuctionOuputTestData& t
 static void dumpAuctions(AuctionWriter* auctionWriter, AUCTION_FILE* auctionFile) {
 	std::vector<uint8_t> auctionData;
 
-	auctionWriter->dumpAuctions(auctionData, true, false);
+	auctionWriter->dumpAuctions(auctionData, true);
 	MessageBuffer messageBuffer(auctionData.data(), auctionData.size(), AUCTION_LATEST);
 	auctionFile->deserialize(&messageBuffer);
 
@@ -137,10 +137,10 @@ TEST(auction_full_mode, no_auction) {
 
 	dumpAuctions(&auctionWriter, &auctionFile);
 
-	EXPECT_EQ(0, memcmp("RAH", auctionFile.signature, 4));
-	EXPECT_EQ(AUCTION_LATEST, auctionFile.file_version);
-	EXPECT_EQ(DT_Full, auctionFile.dumpType);
-	EXPECT_EQ(18, auctionFile.categories.size());
+	EXPECT_EQ(0, memcmp("RAH", auctionFile.header.signature, 4));
+	EXPECT_EQ(AUCTION_LATEST, auctionFile.header.file_version);
+	EXPECT_EQ(DT_Full, auctionFile.header.dumpType);
+	EXPECT_EQ(18, auctionFile.header.categories.size());
 	EXPECT_EQ(0, auctionFile.auctions.size());
 }
 

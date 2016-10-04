@@ -9,11 +9,8 @@
 #include <algorithm>
 #include "Packet/MessageBuffer.h"
 
-static int compressGzip(std::vector<uint8_t>& compressedData, const Bytef *source, uLong sourceLen, int level);
-
-AuctionWriter::AuctionWriter(size_t categoryCount) : diffMode(false), fileNumber(0)
+AuctionWriter::AuctionWriter(size_t categoryCount) : AuctionCommonWriter(categoryCount), diffMode(false)
 {
-	categoryTime.resize(categoryCount, CategoryTime());
 }
 
 void AuctionWriter::setDiffInputMode(bool diffMode)
@@ -68,9 +65,9 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 		log(LL_Error, "Called addAuctionInfo while not in diff mode ! uid: 0x%08X\n", uid);
 	}
 
-	if(category >= categoryTime.size()) {
+	if(category >= getCategoryNumber()) {
 		log(LL_Error, "Auction diff with invalid category: uid: 0x%08X, diffType: %d, category: %d, category number: %d\n",
-			uid, diffType, category, categoryTime.size());
+		    uid, diffType, category, getCategoryNumber());
 		return;
 	}
 
@@ -152,40 +149,6 @@ void AuctionWriter::addAuctionInfoDiff(uint32_t uid, uint64_t time, uint64_t pre
 
 }
 
-void AuctionWriter::beginProcess()
-{
-	resetAuctionProcess(auctionsState);
-}
-
-void AuctionWriter::endProcess()
-{
-	processRemainingAuctions(auctionsState);
-}
-
-void AuctionWriter::dumpAuctions(const std::string& auctionDir, const std::string& auctionFile, bool dumpDiff, bool dumpFull, bool alwaysWithData)
-{
-	time_t dumpTimeStamp = getLastEndCategoryTime();
-	if(dumpTimeStamp == 0) {
-		log(LL_Warning, "Last category end timestamp is 0, using current timestamp\n");
-		dumpTimeStamp = ::time(nullptr);
-	}
-
-	if(dumpDiff) {
-		serializeAuctionInfos(auctionsState, false, fileData, alwaysWithData);
-		writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_diff");
-	}
-
-	if(dumpFull) {
-		serializeAuctionInfos(auctionsState, true, fileData, alwaysWithData);
-		writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_full");
-	}
-}
-
-void AuctionWriter::dumpAuctions(std::vector<uint8_t> &auctionData, bool doFulldump, bool alwaysWithData)
-{
-	serializeAuctionInfos(auctionsState, doFulldump, auctionData, alwaysWithData);
-}
-
 bool AuctionWriter::hasAuction(uint32_t uid)
 {
 	auto it = auctionsState.find(uid);
@@ -194,9 +157,9 @@ bool AuctionWriter::hasAuction(uint32_t uid)
 	return true;
 }
 
-void AuctionWriter::processRemainingAuctions(std::unordered_map<uint32_t, AuctionInfo> &auctionInfos) {
-	auto it = auctionInfos.begin();
-	for(; it != auctionInfos.end(); ++it) {
+void AuctionWriter::processRemainingAuctions() {
+	auto it = auctionsState.begin();
+	for(; it != auctionsState.end(); ++it) {
 		AuctionInfo& auctionInfo = it->second;
 		if(auctionInfo.processStatus == AuctionInfo::PS_NotProcessed) {
 			if(diffMode == false) {
@@ -216,48 +179,35 @@ void AuctionWriter::processRemainingAuctions(std::unordered_map<uint32_t, Auctio
 	}
 }
 
-void AuctionWriter::resetAuctionProcess(std::unordered_map<uint32_t, AuctionInfo> &auctionInfos) {
-	auto it = auctionInfos.begin();
-	for(; it != auctionInfos.end();) {
+void AuctionWriter::resetAuctionProcess() {
+	auto it = auctionsState.begin();
+	for(; it != auctionsState.end();) {
 		AuctionInfo& auctionInfo = it->second;
 		if(auctionInfo.processStatus == AuctionInfo::PS_NotProcessed) {
 			log(LL_Error, "Post process auction: found auction in PS_NotProcessed state, should have been set to PS_Deleted, uid: 0x%08X\n", auctionInfo.uid);
 			++it;
 		} else if(auctionInfo.processStatus == AuctionInfo::PS_Deleted) {
-			it = auctionInfos.erase(it);
+			it = auctionsState.erase(it);
 		} else {
 			auctionInfo.resetProcess();
 			++it;
 		}
 	}
 
-	for(size_t i = 0; i < categoryTime.size(); i++)
-		categoryTime[i].resetTimes();
+	resetCategoryTime();
 }
 
-template<class Container>
-void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool doFullDump, std::vector<uint8_t> &output, bool alwaysWithData)
+void AuctionWriter::serializeAuctionInfos(bool doFullDump, std::vector<uint8_t> &output)
 {
 	output.clear();
 
 	AUCTION_FILE auctionFile;
-	strcpy(auctionFile.signature, "RAH");
-	auctionFile.file_version = AUCTION_LATEST;
-	auctionFile.dumpType = doFullDump ? DT_Full : DT_Diff;
+	serializeHeader(auctionFile.header, doFullDump ? DT_Full : DT_Diff);
 
-	auctionFile.categories.reserve(categoryTime.size());
-	for(size_t i = 0; i < categoryTime.size(); i++) {
-		AUCTION_CATEGORY_INFO categoryInfo;
-		categoryInfo.previousBegin = categoryTime[i].previousBegin;
-		categoryInfo.beginTime = categoryTime[i].begin;
-		categoryInfo.endTime = categoryTime[i].end;
-		auctionFile.categories.push_back(categoryInfo);
-	}
+	auctionFile.auctions.reserve(auctionsState.size());
 
-	auctionFile.auctions.reserve(auctionInfos.size());
-
-	auto it = auctionInfos.begin();
-	for(; it != auctionInfos.end(); ++it) {
+	auto it = auctionsState.begin();
+	for(; it != auctionsState.end(); ++it) {
 		const AuctionInfo& auctionInfo = getAuctionInfoFromValue(*it);
 		DiffType diffType = doFullDump ? D_Base : auctionInfo.getAuctionDiffType();
 
@@ -268,12 +218,12 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 			continue;
 
 		AUCTION_INFO auctionItem;
-		auctionInfo.serialize(&auctionItem, alwaysWithData);
+		auctionInfo.serialize(&auctionItem, false);
 
 		auctionFile.auctions.push_back(auctionItem);
 	}
 
-	MessageBuffer buffer(auctionFile.getSize(auctionFile.file_version), auctionFile.file_version);
+	MessageBuffer buffer(auctionFile.getSize(auctionFile.header.file_version), auctionFile.header.file_version);
 	auctionFile.serialize(&buffer);
 	if(buffer.checkFinalSize() == false) {
 		log(LL_Error, "Wrong buffer size, size: %d, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
@@ -282,185 +232,13 @@ void AuctionWriter::serializeAuctionInfos(const Container &auctionInfos, bool do
 	}
 }
 
-void AuctionWriter::writeAuctionDataToFile(std::string auctionsDir, std::string auctionsFile, const std::vector<uint8_t> &data, time_t fileTimeStamp, const char* suffix)
-{
-	char filenameSuffix[256];
-	struct tm localtm;
-
-	Utils::getGmTime(fileTimeStamp, &localtm);
-
-	sprintf(filenameSuffix, "_%04d%02d%02d_%02d%02d%02d_%04X%s",
-			localtm.tm_year, localtm.tm_mon, localtm.tm_mday,
-			localtm.tm_hour, localtm.tm_min, localtm.tm_sec, fileNumber,
-			suffix ? suffix : "");
-	fileNumber = (fileNumber + 1) & 0xFFFF;
-
-	auctionsFile.insert(auctionsFile.find_first_of('.'), filenameSuffix);
-
-	std::string auctionsFilename = auctionsDir + "/" + auctionsFile;
-
-	if(data.empty()) {
-		log(LL_Warning, "no auction to write to output file %s, skipping write\n", auctionsFilename.c_str());
-		return;
-	}
-
-	Utils::mkdir(auctionsDir.c_str());
-
-	FILE* file = fopen(auctionsFilename.c_str(), "wb");
-	if(!file) {
-		log(LL_Error, "Cannot open auction file %s\n", auctionsFilename.c_str());
-		return;
-	}
-
-	size_t pos = auctionsFile.find_last_of(".gz");
-	if(pos == (auctionsFile.size() - 1)) {
-		log(LL_Info, "Writting compressed data to file %s\n", auctionsFile.c_str());
-
-		std::vector<uint8_t> compressedData;
-		int result = compressGzip(compressedData, &data[0], (uLong)data.size(), Z_BEST_COMPRESSION);
-		if(result == Z_OK) {
-			if(fwrite(&compressedData[0], sizeof(uint8_t), compressedData.size(), file) != compressedData.size()) {
-				log(LL_Error, "Failed to write data to file %s: error %d\n", auctionsFilename.c_str(), errno);
-			}
-		} else {
-			log(LL_Error, "Failed to compress %d bytes: %d\n", (int)data.size(), result);
-		}
-	} else {
-		log(LL_Info, "Writting data to file %s\n", auctionsFile.c_str());
-		if(fwrite(&data[0], sizeof(uint8_t), data.size(), file) != data.size()) {
-			log(LL_Error, "Failed to write data to file %s: error %d\n", auctionsFilename.c_str(), errno);
-		}
-	}
-
-	fclose(file);
-}
-
-void AuctionWriter::adjustCategoryTimeRange(size_t category, time_t time)
-{
-	time_t begin = getCategoryTime(category).begin;
-	if(begin == 0 || begin > time)
-		getCategoryTime(category).begin = time;
-
-	if(getCategoryTime(category).end < time)
-		getCategoryTime(category).end = time;
-}
-
-void AuctionWriter::beginCategory(size_t category, time_t time)
-{
-	time_t lastBeginTime = getCategoryTime(category).begin;
-	if(lastBeginTime != 0)
-		log(LL_Warning, "Begin category %" PRIuS " has already a begin timestamp: %" PRIdS "\n", category, lastBeginTime);
-
-	if(time == 0)
-		log(LL_Warning, "Begin category %" PRIuS " with a 0 timestamp\n", category);
-
-	getCategoryTime(category).begin = time;
-	log(LL_Debug, "Begin category %" PRIuS " at time %" PRIdS "\n", category, time);
-}
-
-void AuctionWriter::endCategory(size_t category, time_t time)
-{
-	time_t lastBeginTime = getCategoryTime(category).begin;
-	if(lastBeginTime == 0)
-		log(LL_Warning, "End category %" PRIuS " but no begin timestamp\n", category);
-
-	if(time == 0)
-		log(LL_Warning, "End category %" PRIuS " with a 0 timestamp\n", category);
-
-	getCategoryTime(category).end = time;
-
-	log(LL_Debug, "End category %" PRIuS " at time %" PRIdS "\n", category, time);
-}
-
-AuctionWriter::CategoryTime& AuctionWriter::getCategoryTime(size_t category)
-{
-	if(categoryTime.size() <= category)
-		categoryTime.resize(category+1, CategoryTime());
-
-	return categoryTime[category];
-}
-
-time_t AuctionWriter::getEstimatedPreviousCategoryBeginTime(size_t category)
-{
-	time_t maxTime = 0;
-	//get maximum previous time of all categories preceding "category"
-	for(ssize_t i = category; i >= 0; i--) {
-		if(getCategoryTime(i).previousBegin > maxTime)
-			maxTime = getCategoryTime(i).previousBegin;
-	}
-
-	return maxTime;
-}
-
-time_t AuctionWriter::getEstimatedCategoryBeginTime(size_t category)
-{
-	time_t maxTime = 0;
-	//get maximum previous time of all categories preceding "category"
-	for(ssize_t i = category; i >= 0; i--) {
-		if(getCategoryTime(i).begin > maxTime)
-			maxTime = getCategoryTime(i).begin;
-	}
-
-	return maxTime;
-}
-
-time_t AuctionWriter::getLastEndCategoryTime()
-{
-	time_t lastTime = 0;
-	for(size_t i = 0; i < categoryTime.size(); i++) {
-		if(categoryTime[i].end > lastTime)
-			lastTime = categoryTime[i].end;
-	}
-	return lastTime;
-}
-
 void AuctionWriter::importDump(AUCTION_FILE *auctionFile)
 {
-	categoryTime.clear();
-	for(size_t i = 0; i < auctionFile->categories.size(); i++) {
-		AUCTION_CATEGORY_INFO& categoryInfo = auctionFile->categories[i];
-		CategoryTime category;
-
-		category.previousBegin = categoryInfo.previousBegin;
-		category.begin = categoryInfo.beginTime;
-		category.end = categoryInfo.endTime;
-
-		categoryTime.push_back(category);
-	}
+	deserializeHeader(auctionFile->header);
 
 	auctionsState.clear();
 	for(size_t i = 0; i < auctionFile->auctions.size(); i++) {
 		AUCTION_INFO& auctionInfo = auctionFile->auctions[i];
 		auctionsState.insert(std::make_pair(auctionInfo.uid, AuctionInfo::createFromDump(&auctionInfo)));
 	}
-}
-
-static int compressGzip(std::vector<uint8_t>& compressedData, const Bytef *source, uLong sourceLen, int level) {
-	z_stream stream;
-	int err;
-
-	memset(&stream, 0, sizeof(stream));
-
-	err = deflateInit2(&stream, level, Z_DEFLATED, MAX_WBITS + 16, 8, Z_DEFAULT_STRATEGY);
-	if (err != Z_OK) return err;
-
-	compressedData.resize(deflateBound(&stream, sourceLen));
-
-	stream.next_in = (z_const Bytef *)source;
-	stream.avail_in = (uInt)sourceLen;
-	stream.next_out = compressedData.data();
-	stream.avail_out = (uInt)compressedData.size();
-	if ((uLong)stream.avail_out != compressedData.size())
-		return Z_BUF_ERROR;
-
-	err = deflate(&stream, Z_FINISH);
-	if (err != Z_STREAM_END) {
-		deflateEnd(&stream);
-		return err == Z_OK ? Z_BUF_ERROR : err;
-	}
-
-	compressedData.resize(stream.total_out);
-
-	err = deflateEnd(&stream);
-	return err;
 }
