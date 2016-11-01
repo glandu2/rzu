@@ -1,15 +1,14 @@
-#include "AuctionData.h"
+#include "AuctionComplexData.h"
 #include "Core/Utils.h"
 #include "Core/Object.h"
+#include "Core/PrintfFormats.h"
+#include "CategoryTimeManager.h"
 
-AuctionInfo::AuctionInfo(uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len)
-    : processStatus(PS_Added),
+AuctionComplexData::AuctionComplexData(uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len)
+    : IAuctionData(AuctionUid(uid), category, timeMin, timeMax),
+      processStatus(PS_Added),
       deleted(false),
       deletedCount(0),
-      uid(uid),
-      updateTime(timeMax),
-      previousUpdateTime(timeMin),
-      category(category),
       price(0),
       estimatedEndTimeFromAdded(true),
       estimatedEndTimeMin(0),
@@ -19,7 +18,7 @@ AuctionInfo::AuctionInfo(uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint1
 	postParseData(true);
 }
 
-bool AuctionInfo::update(uint64_t time, const uint8_t *data, size_t len)
+bool AuctionComplexData::update(uint64_t time, const uint8_t *data, size_t len)
 {
 	bool dataModified = parseData(data, len);
 	if(dataModified && processStatus != PS_Added) {
@@ -28,80 +27,110 @@ bool AuctionInfo::update(uint64_t time, const uint8_t *data, size_t len)
 		setStatus(PS_Unmodifed, time);
 	}
 
-	if(dataModified)
+	if(dataModified) {
 		postParseData(false);
+		log(LL_Debug, "Auction info modified: 0x%08X\n", getUid().get());
+	}
 
 	return dataModified;
 }
 
-void AuctionInfo::unmodified(uint64_t time)
+void AuctionComplexData::unmodified(uint64_t time)
 {
 	if(processStatus != PS_Added && processStatus != PS_Updated) {
 		setStatus(PS_Unmodifed, time);
 	}
 }
 
-void AuctionInfo::remove(uint64_t time)
+void AuctionComplexData::remove(uint64_t time)
 {
 	if(processStatus == PS_NotProcessed) {
 		setStatus(PS_MaybeDeleted, time);
+		maybeStillDeleted();
 	}
 }
 
-void AuctionInfo::maybeStillDeleted()
+void AuctionComplexData::maybeStillDeleted()
 {
 	if(deleted) {
 		deletedCount++;
 
 		if(deletedCount > 3)
-			setStatus(PS_Deleted, updateTime);
+			setStatus(PS_Deleted, getTimeMax());
 		else if(processStatus == PS_NotProcessed)
-			setStatus(PS_MaybeDeleted, updateTime);
+			setStatus(PS_MaybeDeleted, getTimeMax());
 	}
 }
 
-void AuctionInfo::resetProcess()
+void AuctionComplexData::beginProcess()
 {
-	processStatus = PS_NotProcessed;
+	if(processStatus == PS_Deleted) {
+		log(LL_Error, "Start process with previously deleted auction: %d\n", getUid().get());
+	} else {
+		processStatus = PS_NotProcessed;
 
-	if(!deleted) {
-		if(updateTime)
-			previousUpdateTime = updateTime;
-		updateTime = 0;
-		oldDynamicData = dynamicData;
+		if(!deleted) {
+			if(getTimeMax())
+				advanceTime();
+			oldDynamicData = dynamicData;
+		}
 	}
 }
 
-void AuctionInfo::setPreviousUpdateTime(uint64_t time)
+void AuctionComplexData::endProcess(uint64_t categoryBeginTime, uint64_t categoryEndTime, bool diffMode)
 {
-	previousUpdateTime = time;
+	if(processStatus == PS_NotProcessed) {
+		if(!diffMode)
+			remove(categoryEndTime);
+		else if(!deleted)
+			unmodified(categoryBeginTime);
+		else
+			maybeStillDeleted();
+	}
 }
 
-AuctionInfo AuctionInfo::createFromDump(AUCTION_INFO *auctionInfo)
+bool AuctionComplexData::outputInPartialDump()
 {
-	AuctionInfo auction(auctionInfo->uid, auctionInfo->previousTime, auctionInfo->time, auctionInfo->category, auctionInfo->data.data(), auctionInfo->data.size());
+	DiffType diffType = getAuctionDiffType();
 
-	auction.deleted = auctionInfo->deleted;
-	auction.deletedCount = auctionInfo->deletedCount;
-	auction.seller = auctionInfo->seller;
-	auction.price = auctionInfo->price;
-	auction.dynamicData.bidFlag = (BidFlag) auctionInfo->bid_flag;
-	auction.dynamicData.bidPrice = auctionInfo->bid_price;
-	auction.dynamicData.durationType = (DurationType) auctionInfo->duration_type;
-	auction.estimatedEndTimeFromAdded = auctionInfo->estimatedEndTimeFromAdded;
-	auction.estimatedEndTimeMin = auctionInfo->estimatedEndTimeMin;
-	auction.estimatedEndTimeMax = auctionInfo->estimatedEndTimeMax;
+	if(diffType >= D_Invalid)
+		logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d for auction 0x%08X\n", diffType, getUid().get());
+
+	if(diffType == D_Unmodified)
+		return false;
+	return true;
+}
+
+bool AuctionComplexData::isInFinalState() const
+{
+	return processStatus == PS_Deleted;
+}
+
+AuctionComplexData* AuctionComplexData::createFromDump(AUCTION_INFO *auctionInfo)
+{
+	AuctionComplexData* auction = new AuctionComplexData(auctionInfo->uid, auctionInfo->previousTime, auctionInfo->time, auctionInfo->category, auctionInfo->data.data(), auctionInfo->data.size());
+
+	auction->deleted = auctionInfo->deleted;
+	auction->deletedCount = auctionInfo->deletedCount;
+	auction->seller = auctionInfo->seller;
+	auction->price = auctionInfo->price;
+	auction->dynamicData.bidFlag = (BidFlag) auctionInfo->bid_flag;
+	auction->dynamicData.bidPrice = auctionInfo->bid_price;
+	auction->dynamicData.durationType = (DurationType) auctionInfo->duration_type;
+	auction->estimatedEndTimeFromAdded = auctionInfo->estimatedEndTimeFromAdded;
+	auction->estimatedEndTimeMin = auctionInfo->estimatedEndTimeMin;
+	auction->estimatedEndTimeMax = auctionInfo->estimatedEndTimeMax;
 
 	return auction;
 }
 
-void AuctionInfo::serialize(AUCTION_INFO *auctionInfo, bool alwaysWithData) const
+void AuctionComplexData::serialize(AUCTION_INFO *auctionInfo, bool alwaysWithData) const
 {
-	auctionInfo->uid = uid;
-	auctionInfo->previousTime = previousUpdateTime;
-	auctionInfo->time = updateTime;
+	auctionInfo->uid = getUid().get();
+	auctionInfo->previousTime = getTimeMin();
+	auctionInfo->time = getTimeMax();
 	auctionInfo->diffType = getAuctionDiffType();
-	auctionInfo->category = category;
+	auctionInfo->category = getCategory();
 	auctionInfo->deleted = deleted;
 	auctionInfo->deletedCount = deletedCount;
 	auctionInfo->seller = seller;
@@ -117,7 +146,7 @@ void AuctionInfo::serialize(AUCTION_INFO *auctionInfo, bool alwaysWithData) cons
 		auctionInfo->data = rawData;
 }
 
-DiffType AuctionInfo::getAuctionDiffType() const {
+DiffType AuctionComplexData::getAuctionDiffType() const {
 	switch(processStatus) {
 		case PS_Deleted: return D_Deleted;
 		case PS_Added: return D_Added;
@@ -129,24 +158,24 @@ DiffType AuctionInfo::getAuctionDiffType() const {
 	return D_Invalid;
 }
 
-void AuctionInfo::setStatus(ProcessStatus status, uint64_t time)
+void AuctionComplexData::setStatus(ProcessStatus status, uint64_t time)
 {
 	if(status == PS_MaybeDeleted || status == PS_Deleted) {
 		if(!deleted)
-			updateTime = time;
+			updateTime(time);
 
 		deleted = true;
 	} else if(status != PS_NotProcessed) {
 		deleted = false;
 		deletedCount = 0;
 
-		updateTime = time;
+		updateTime(time);
 	}
 
 	processStatus = status;
 }
 
-bool AuctionInfo::parseData(const uint8_t *data, size_t len)
+bool AuctionComplexData::parseData(const uint8_t *data, size_t len)
 {
 	bool hasChanged;
 
@@ -181,7 +210,7 @@ bool AuctionInfo::parseData(const uint8_t *data, size_t len)
 	return hasChanged;
 }
 
-void AuctionInfo::postParseData(bool newData)
+void AuctionComplexData::postParseData(bool newData)
 {
 	DurationType oldDurationType = this->oldDynamicData.durationType;
 	DurationType newDurationType = this->dynamicData.durationType;
@@ -192,8 +221,8 @@ void AuctionInfo::postParseData(bool newData)
 		uint64_t endMax;
 
 		if(durationSecond) {
-			endMin = durationSecond + previousUpdateTime;
-			endMax = durationSecond + updateTime;
+			endMin = durationSecond + getTimeMin();
+			endMax = durationSecond + getTimeMax();
 
 			if(!newData && oldDurationType != DT_Unknown && newDurationType != oldDurationType) {
 				// Override estimation from added time, to prevent issue when item disappear from AH because of pages and item shifting between searches
@@ -211,7 +240,7 @@ void AuctionInfo::postParseData(bool newData)
 	}
 }
 
-uint32_t AuctionInfo::durationTypeToSecond(DurationType durationType)
+uint32_t AuctionComplexData::durationTypeToSecond(DurationType durationType)
 {
 	switch(durationType) {
 		case DT_Long: return 72 * 3600;

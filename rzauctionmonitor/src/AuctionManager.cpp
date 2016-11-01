@@ -196,7 +196,7 @@ std::unique_ptr<AuctionWorker::AuctionRequest> AuctionManager::getNextRequest()
 
 void AuctionManager::addAuctionInfo(const AuctionWorker::AuctionRequest *request, uint32_t uid, const uint8_t *data, int len)
 {
-	auctionWriter.addAuctionInfo(uid, time(nullptr), request->category, data, len);
+	auctionWriter.addAuctionInfo(AuctionUid(uid), time(nullptr), request->category, data, len);
 }
 
 void AuctionManager::onAuctionSearchCompleted(bool success, int pageTotal, std::unique_ptr<AuctionWorker::AuctionRequest> request)

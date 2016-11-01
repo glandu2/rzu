@@ -3,7 +3,7 @@
 
 #include "Core/Object.h"
 #include "AuctionWorker.h"
-#include "AuctionWriter.h"
+#include "AuctionSimpleDiffWriter.h"
 #include <memory>
 #include <deque>
 #include <time.h>
@@ -41,7 +41,7 @@ private:
 	void onAllRequestProcessed();
 
 private:
-	AuctionWriter auctionWriter;
+	AuctionSimpleDiffWriter auctionWriter;
 	std::vector<std::unique_ptr<AuctionWorker>> clients;
 	std::vector<std::unique_ptr<AuctionWorker>> stoppingClients;
 

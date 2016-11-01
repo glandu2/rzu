@@ -5,9 +5,20 @@
 #include <vector>
 #include "Extern.h"
 #include "AuctionFile.h"
+#include "AuctionUid.h"
+#include "IAuctionData.h"
 
-class RZAUCTION_EXTERN AuctionSimpleData {
-public:
+struct AuctionSimpleDataView {
+	AuctionUid uid;
+	uint64_t timeMin;
+	uint64_t timeMax;
+	uint16_t category;
+	const uint8_t* data;
+	size_t dataSize;
+};
+
+class RZAUCTION_EXTERN AuctionSimpleData : public IAuctionData {
+private:
 	enum ProcessStatus {
 		PS_NotProcessed,
 		PS_Unmodifed,
@@ -17,44 +28,25 @@ public:
 	};
 
 public:
-	AuctionSimpleData(uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len);
-	bool update(uint64_t time, const uint8_t *data, size_t len);
-	void unmodified(uint64_t time);
-	void remove(uint64_t time);
-	void resetProcess();
-	void setPreviousUpdateTime(uint64_t time);
+	AuctionSimpleData(AuctionUid uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len);
 
-	static AuctionSimpleData createFromDump(AUCTION_SIMPLE_INFO* auctionInfo);
+	virtual bool doUpdate(uint64_t timeMax, const uint8_t *data, size_t len);
+	virtual void beginProcess();
+	virtual void endProcess(uint64_t categoryEndTime);
+	virtual bool isInFinalState() const;
+
+	virtual bool outputInPartialDump();
+
+	static AuctionSimpleData* createFromDump(AUCTION_SIMPLE_INFO* auctionInfo);
 	void serialize(AUCTION_SIMPLE_INFO* auctionInfo) const;
 
+	void setStatus(ProcessStatus status, uint64_t time);
+private:
+	bool parseData(const uint8_t *data, size_t len);
 	DiffType getAuctionDiffType() const;
 
-	ProcessStatus getProcessStatus() const { return processStatus; }
-	uint32_t getUid() const { return uid; }
-	uint64_t getUpdateTime() const { return updateTime; }
-	uint64_t getPreviousUpdateTime() const { return previousUpdateTime; }
-	int32_t getCategory() const { return category; }
-	std::vector<uint8_t> getRawData() const { return rawData; }
-
-protected:
-	bool parseData(const uint8_t *data, size_t len);
-	void setStatus(ProcessStatus status, uint64_t time);
-
-public:
-	// status in current processing loop
+private:
 	ProcessStatus processStatus;
-
-	// key
-	uint32_t uid;
-
-	// data time validity range
-	uint64_t updateTime;
-	uint64_t previousUpdateTime;
-
-	// fixed data
-	int32_t category;
-
-	//updatable data
 	std::vector<uint8_t> rawData;
 };
 
