@@ -42,6 +42,25 @@ struct ItemData {
 };
 #pragma pack(pop)
 
+template<class AUCTION_FILE>
+int deserialize(void* buffer, size_t fileSize, int version) {
+	AUCTION_FILE auctionFile;
+
+	MessageBuffer structBuffer(buffer, fileSize, version);
+	auctionFile.deserialize(&structBuffer);
+	if(!structBuffer.checkFinalSize()) {
+		Object::logStatic(Object::LL_Error, "main", "Invalid file\n");
+		return 3;
+	}
+
+	JSONWriter jsonWriter(version, compactJson.get());
+	auctionFile.serialize(&jsonWriter);
+	jsonWriter.finalize();
+	Object::logStatic(Object::LL_Fatal, "main", "%s\n", jsonWriter.toString().c_str());
+
+	return 0;
+}
+
 int main(int argc, char* argv[]) {
 	LibRzuInit();
 	DbConnectionPool dbConnectionPool;
@@ -90,24 +109,15 @@ int main(int argc, char* argv[]) {
 		}
 		fclose(file);
 
-		AUCTION_FILE auctionFile;
 		AuctionFileHeader* auctionHeader = reinterpret_cast<AuctionFileHeader*>(buffer);
-		if(strncmp(auctionHeader->signature, "RAH", 3) != 0) {
+		if(strncmp(auctionHeader->signature, "RAH", 3) == 0) {
+			deserialize<AUCTION_FILE>(buffer, fileSize, auctionHeader->file_version);
+		} else if(strncmp(auctionHeader->signature, "RHS", 3) == 0) {
+			deserialize<AUCTION_SIMPLE_FILE>(buffer, fileSize, auctionHeader->file_version);
+		} else {
 			Object::logStatic(Object::LL_Error, "main", "Invalid file, unrecognized header signature\n");
 			return 3;
 		}
-
-		MessageBuffer structBuffer(buffer, fileSize, auctionHeader->file_version);
-		auctionFile.deserialize(&structBuffer);
-		if(!structBuffer.checkFinalSize()) {
-			Object::logStatic(Object::LL_Error, "main", "Invalid file\n");
-			return 3;
-		}
-
-		JSONWriter jsonWriter(auctionHeader->file_version, compactJson.get());
-		auctionFile.serialize(&jsonWriter);
-		jsonWriter.finalize();
-		Object::logStatic(Object::LL_Fatal, "main", "%s\n", jsonWriter.toString().c_str());
 	}
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);

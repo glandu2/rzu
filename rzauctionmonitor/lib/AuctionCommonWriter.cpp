@@ -26,6 +26,11 @@ void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::s
 
 	auctionsFile.insert(auctionsFile.find_first_of('.'), filenameSuffix);
 
+	writeAuctionDataToFile(auctionsDir, auctionsFile, data);
+}
+
+void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::string auctionsFile, const std::vector<uint8_t> &data)
+{
 	std::string auctionsFilename = auctionsDir + "/" + auctionsFile;
 
 	Utils::mkdir(auctionsDir.c_str());

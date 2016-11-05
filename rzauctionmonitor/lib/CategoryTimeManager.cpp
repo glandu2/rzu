@@ -14,10 +14,6 @@ CategoryTimeManager::CategoryTimeManager(size_t categoryCount)
 
 void CategoryTimeManager::beginCategory(size_t category, time_t time)
 {
-	time_t lastBeginTime = getCategoryTime(category).begin;
-	if(lastBeginTime != 0)
-		log(LL_Warning, "Begin category %" PRIuS " has already a begin timestamp: %" PRId64 "\n", category, (int64_t)lastBeginTime);
-
 	if(time == 0)
 		log(LL_Warning, "Begin category %" PRIuS " with a 0 timestamp\n", category);
 
@@ -120,9 +116,8 @@ void CategoryTimeManager::serializeHeader(AUCTION_HEADER &header, DumpType dumpT
 	header.categories.reserve(categoryTime.size());
 	for(size_t i = 0; i < categoryTime.size(); i++) {
 		AUCTION_CATEGORY_INFO categoryInfo;
-		categoryInfo.previousBegin = categoryTime[i].previousBegin;
-		categoryInfo.beginTime = categoryTime[i].begin;
-		categoryInfo.endTime = categoryTime[i].end;
+		categoryInfo.beginTime = categoryTime[i].previousBegin;
+		categoryInfo.endTime = categoryTime[i].previousEnd;
 		header.categories.push_back(categoryInfo);
 	}
 }

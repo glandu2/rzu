@@ -11,7 +11,7 @@
 #include "AuctionSimpleData.h"
 #include "AuctionGenericWriter.h"
 
-class RZAUCTION_EXTERN AuctionSimpleDiffWriter : public AuctionGenericWriter<AuctionSimpleData, AUCTION_SIMPLE_FILE> {
+class RZAUCTION_EXTERN AuctionSimpleDiffWriter : public AuctionGenericWriter<AuctionSimpleData> {
 	DECLARE_CLASSNAME(AuctionSimpleDiffWriter, 0)
 
 public:
@@ -20,6 +20,10 @@ public:
 	void addAuctionInfo(AuctionUid uid, uint64_t time, uint16_t category, const uint8_t *data, size_t len);
 	void beginProcess();
 	void endProcess();
+
+	void dumpAuctions(std::vector<uint8_t> &output, bool doFullDump);
+	AUCTION_SIMPLE_FILE exportDump(bool doFullDump);
+	void importDump(AUCTION_SIMPLE_FILE *auctionFile);
 };
 
 #endif // AUCTIONSIMPLEDIFF_H

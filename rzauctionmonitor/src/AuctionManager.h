@@ -39,6 +39,7 @@ private:
 
 	bool isAllRequestProcessed();
 	void onAllRequestProcessed();
+	void dumpAuctions();
 
 private:
 	AuctionSimpleDiffWriter auctionWriter;
@@ -48,13 +49,15 @@ private:
 	std::deque<std::unique_ptr<AuctionWorker::AuctionRequest>> pendingRequests;
 
 	int totalPages;
-	static const size_t CATEGORY_MAX_INDEX = 18;
+	static const size_t CATEGORY_MAX_INDEX = 19;
 	size_t currentCategory;
 	bool firstDump;
+	time_t firstDumpTime;
 
 	bool reloadingAccounts;
 	Timer<AuctionManager> accountReloadTimer;
 	static AuctionManager* instance;
+	std::vector<uint8_t> fileData; //cache allocated memory
 };
 
 

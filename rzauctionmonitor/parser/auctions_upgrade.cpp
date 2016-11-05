@@ -120,7 +120,7 @@ bool readData(FILE* file, AUCTION_SIMPLE_INFO* auctionData) {
 	AuctionHeader header;
 	union Data {
 		uint32_t uid;
-		char buffer[1024];
+		char buffer[4096];
 	} data;
 
 	size_t ret = fread(&header, sizeof(header), 1, file);
@@ -168,7 +168,7 @@ bool readFile(FILE* file, AuctionFile* auctionFile, AuctionComplexDiffWriter* au
 	auctionFile->isFull = true;
 	auctionFile->alreadyExistingAuctions = 0;
 
-	if(strncmp(fileHeader.newHeader.signature, "RAH", 4) == 0) {
+	if(strncmp(fileHeader.newHeader.signature, "RHS", 4) == 0) {
 		AUCTION_SIMPLE_FILE auctionFileData;
 		std::vector<uint8_t> buffer;
 		if(!readAllFileData(buffer, file))
@@ -177,9 +177,37 @@ bool readFile(FILE* file, AuctionFile* auctionFile, AuctionComplexDiffWriter* au
 		if(!deserializeAuctions(buffer, &auctionFileData))
 			return false;
 
+		for(size_t i = 0; i < auctionFileData.header.categories.size(); i++) {
+			const AUCTION_CATEGORY_INFO& category = auctionFileData.header.categories[i];
+			auctionWriter->beginCategory(i, category.beginTime);
+			auctionWriter->endCategory(i, category.endTime);
+		}
+
 		for(size_t i = 0; i < auctionFileData.auctions.size(); i++) {
 			const AUCTION_SIMPLE_INFO& auctionInfo = auctionFileData.auctions[i];
 			auctionFile->addAuction(auctionInfo, auctionWriter);
+		}
+	} else if(strncmp(fileHeader.newHeader.signature, "RAH", 4) == 0) {
+		AUCTION_FILE auctionFileData;
+		std::vector<uint8_t> buffer;
+		if(!readAllFileData(buffer, file))
+			return false;
+
+		if(!deserializeAuctions(buffer, &auctionFileData))
+			return false;
+
+		for(size_t i = 0; i < auctionFileData.auctions.size(); i++) {
+			const AUCTION_INFO& auctionInfo = auctionFileData.auctions[i];
+			AUCTION_SIMPLE_INFO auctionSimpleInfo;
+
+			auctionSimpleInfo.uid = auctionInfo.uid;
+			auctionSimpleInfo.time = auctionInfo.time;
+			auctionSimpleInfo.previousTime = auctionInfo.previousTime;
+			auctionSimpleInfo.diffType = auctionInfo.diffType;
+			auctionSimpleInfo.category = auctionInfo.category;
+			auctionSimpleInfo.data = auctionInfo.data;
+
+			auctionFile->addAuction(auctionSimpleInfo, auctionWriter);
 		}
 	} else {
 		bool result;
@@ -283,11 +311,14 @@ int main(int argc, char* argv[]) {
 //		if(fileNumber > 0)
 //			auctionWriter.dumpAuctions("output", "auctions.bin", true, false, true);
 
+		Object::logStatic(Object::LL_Info, "main", "Reading file %s\n", filename);
+
 		FILE* file = fopen(filename, "rb");
 		if(!file) {
 			Object::logStatic(Object::LL_Error, "main", "Cant open file %s\n", filename);
 			return 1;
 		}
+
 
 		AuctionFile auctionFile;
 
@@ -298,10 +329,10 @@ int main(int argc, char* argv[]) {
 		}
 
 		Object::logStatic(Object::LL_Info, "main", "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d\n",
-				filename,
-				auctionFile.isFull ? "full" : "diff",
+		        filename,
+		        auctionFile.isFull ? "full" : "diff",
 		        auctionFile.alreadyExistingAuctions,
-				auctionWriter.getAuctionCount());
+		        auctionWriter.getAuctionCount());
 
 		auctionWriter.setDiffInputMode(!auctionFile.isFull);
 		auctionWriter.beginProcess();
@@ -316,8 +347,7 @@ int main(int argc, char* argv[]) {
 
 		fileNumber++;
 
-		AUCTION_FILE auctionFinalFile;
-		auctionWriter.exportDump(false, auctionFinalFile, true);
+		AUCTION_FILE auctionFinalFile = auctionWriter.exportDump(false, true);
 		for(const AUCTION_INFO& auctionInfo : auctionFinalFile.auctions) {
 			DB_Item::addAuction(dbInputs, auctionInfo);
 		}

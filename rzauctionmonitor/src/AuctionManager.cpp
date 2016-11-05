@@ -236,18 +236,42 @@ bool AuctionManager::isAllRequestProcessed()
 	return true;
 }
 
+void AuctionManager::dumpAuctions() {
+	time_t dumpTimeStamp = auctionWriter.getLastEndCategoryTime();
+	if(dumpTimeStamp == 0) {
+		log(LL_Warning, "Last category end timestamp is 0, using current timestamp\n");
+		dumpTimeStamp = ::time(nullptr);
+	}
+
+	if(firstDump)
+		firstDumpTime = dumpTimeStamp;
+
+	const std::string& auctionDir = CONFIG_GET()->client.auctionListDir.get();
+	const std::string& auctionFile = CONFIG_GET()->client.auctionListFile.get();
+
+	if(firstDump || CONFIG_GET()->client.doFullAuctionDump.get()) {
+		auctionWriter.dumpAuctions(fileData, true);
+		auctionWriter.writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_full");
+	} else if(CONFIG_GET()->client.doStateAuctionDump.get()) {
+		auctionWriter.dumpAuctions(fileData, true);
+		auctionWriter.writeAuctionDataToFile(auctionDir, auctionFile, fileData, firstDumpTime, "_state");
+	}
+
+	if(!firstDump) {
+		auctionWriter.dumpAuctions(fileData, false);
+		auctionWriter.writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_diff");
+	}
+}
+
 void AuctionManager::onAllRequestProcessed()
 {
 	auctionWriter.endCategory(currentCategory, ::time(nullptr));
 
 	currentCategory++;
-	if(currentCategory > CATEGORY_MAX_INDEX) {
+	if(currentCategory >= CATEGORY_MAX_INDEX) {
 		auctionWriter.endProcess();
 
-		auctionWriter.dumpAuctions(CONFIG_GET()->client.auctionListDir.get(),
-		                           CONFIG_GET()->client.auctionListFile.get(),
-		                           !firstDump,
-		                           firstDump || CONFIG_GET()->client.doFullAuctionDump.get());
+		dumpAuctions();
 
 		auctionWriter.beginProcess();
 		currentCategory = 0;

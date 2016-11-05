@@ -10,7 +10,7 @@
 
 #include "AuctionCommonWriter.h"
 
-template<class AuctionData, class AUCTION_FILE_TYPE>
+template<class AuctionData>
 class AuctionGenericWriter : public AuctionCommonWriter
 {
 public:
@@ -47,65 +47,16 @@ public:
 		return insertIt.second;
 	}
 
-	template<typename ...Args>
-	void dumpAuctions(const std::string& auctionDir, const std::string& auctionFile, bool dumpDiff, bool dumpFull, Args... args)
-	{
-		time_t dumpTimeStamp = categoryTimeManager.getLastEndCategoryTime();
-		if(dumpTimeStamp == 0) {
-			log(LL_Warning, "Last category end timestamp is 0, using current timestamp\n");
-			dumpTimeStamp = ::time(nullptr);
-		}
-
-		if(dumpDiff) {
-			dumpAuctions(fileData, false, args...);
-			writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_diff");
-		}
-
-		if(dumpFull) {
-			dumpAuctions(fileData, true, args...);
-			writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_full");
-		}
-	}
-
-	template<typename ...Args>
-	void dumpAuctions(std::vector<uint8_t> &output, bool doFullDump, Args... args)
-	{
-		AUCTION_FILE_TYPE file;
-
-		exportDump(doFullDump, file, args...);
-		serialize(file, output);
-	}
-
-	template<typename ...Args>
-	void exportDump(bool doFullDump, AUCTION_FILE_TYPE& auctionFile, Args... args)
-	{
-		categoryTimeManager.serializeHeader(auctionFile.header, doFullDump ? DT_Full : DT_Diff);
-
-		auctionFile.auctions.reserve(auctions.size());
-
-		auto it = auctions.begin();
-		for(; it != auctions.end(); ++it) {
-			AuctionData* auctionInfo = it->second.get();
-			if(!doFullDump && !auctionInfo->outputInPartialDump())
-				continue;
-
-			typename decltype(auctionFile.auctions)::value_type auctionItem;
-			auctionInfo->serialize(&auctionItem, args...);
-
-			auctionFile.auctions.push_back(auctionItem);
-		}
-	}
-
-	void importDump(AUCTION_FILE_TYPE *auctionFile)
-	{
+	void clearAuctions() {
 		auctions.clear();
-		for(size_t i = 0; i < auctionFile->auctions.size(); i++) {
-			auto& auctionInfo = auctionFile->auctions[i];
-			auctions.insert(std::make_pair(auctionInfo.uid, std::move(std::unique_ptr<AuctionData>(AuctionData::createFromDump(&auctionInfo)))));
-		}
 	}
 
-	void serialize(const AUCTION_FILE_TYPE& auctionFile, std::vector<uint8_t> &output)
+	time_t getLastEndCategoryTime() {
+		return categoryTimeManager.getLastEndCategoryTime();
+	}
+
+	template<class Serializable>
+	void serialize(const Serializable& auctionFile, std::vector<uint8_t> &output)
 	{
 		output.clear();
 
@@ -156,7 +107,6 @@ private:
 	void operator=(const AuctionGenericWriter& other) = delete;
 
 	std::unordered_map<uint32_t, const std::unique_ptr<AuctionData>> auctions;
-	std::vector<uint8_t> fileData; //cache allocated memory
 };
 
 #endif // AUCTIONSIMPLEDIFF_H

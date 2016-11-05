@@ -64,6 +64,7 @@ public:
 
 
 	ProcessStatus getProcessStatus() const { return processStatus; }
+	bool isDeleted() const { return deleted; }
 
 protected:
 	bool parseData(const uint8_t *data, size_t len);

@@ -33,7 +33,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 		case D_Updated:
 		{
 			if(auctionInfo) {
-				if(diffType == D_Added && auctionInfo->getProcessStatus() != AuctionComplexData::PS_MaybeDeleted) {
+				if(diffType == D_Added && !auctionInfo->isDeleted()) {
 					log(LL_Error, "Added auction already exists: 0x%08X, with state: %d\n", auction->uid, auctionInfo->getProcessStatus());
 				}
 
@@ -105,4 +105,39 @@ void AuctionComplexDiffWriter::endProcess()
 void AuctionComplexDiffWriter::setDiffInputMode(bool diffMode)
 {
 	this->diffMode = diffMode;
+}
+
+void AuctionComplexDiffWriter::dumpAuctions(std::vector<uint8_t> &output, bool doFullDump, bool alwaysWithData)
+{
+	AUCTION_FILE file = exportDump(doFullDump, alwaysWithData);
+	serialize(file, output);
+}
+
+AUCTION_FILE AuctionComplexDiffWriter::exportDump(bool doFullDump, bool alwaysWithData)
+{
+	AUCTION_FILE auctionFile;
+
+	categoryTimeManager.serializeHeader(auctionFile.header, doFullDump ? DT_Full : DT_Diff);
+
+	auctionFile.auctions.reserve(getAuctionCount());
+	forEachAuction([&auctionFile, doFullDump, alwaysWithData](AuctionComplexData* auctionInfo) {
+		if(!doFullDump && !auctionInfo->outputInPartialDump())
+			return;
+
+		decltype(auctionFile.auctions)::value_type auctionItem;
+		auctionInfo->serialize(&auctionItem, alwaysWithData);
+
+		auctionFile.auctions.push_back(auctionItem);
+	});
+
+	return auctionFile;
+}
+
+void AuctionComplexDiffWriter::importDump(AUCTION_FILE *auctionFile)
+{
+	clearAuctions();
+	for(size_t i = 0; i < auctionFile->auctions.size(); i++) {
+		auto& auctionInfo = auctionFile->auctions[i];
+		addAuction(AuctionComplexData::createFromDump(&auctionInfo));
+	}
 }

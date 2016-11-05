@@ -16,12 +16,14 @@ public:
 private:
 	struct CategoryTime {
 		time_t previousBegin;
+		time_t previousEnd;
 		time_t begin;
 		time_t end;
 
-		CategoryTime() : previousBegin(0), begin(0), end(0) {}
+		CategoryTime() : previousBegin(0), previousEnd(0), begin(0), end(0) {}
 		void resetTimes(time_t minimalBegin) {
 			previousBegin = begin;
+			previousEnd = end;
 			begin = end = minimalBegin;
 		}
 	};

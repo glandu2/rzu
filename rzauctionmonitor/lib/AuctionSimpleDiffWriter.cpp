@@ -35,3 +35,39 @@ void AuctionSimpleDiffWriter::endProcess()
 		data->endProcess(categoryTimeManager.getEstimatedCategoryEndTime(data->getCategory()));
 	});
 }
+
+void AuctionSimpleDiffWriter::dumpAuctions(std::vector<uint8_t> &output, bool doFullDump)
+{
+	AUCTION_SIMPLE_FILE file = exportDump(doFullDump);
+	serialize(file, output);
+}
+
+AUCTION_SIMPLE_FILE AuctionSimpleDiffWriter::exportDump(bool doFullDump)
+{
+	AUCTION_SIMPLE_FILE auctionFile;
+
+	categoryTimeManager.serializeHeader(auctionFile.header, doFullDump ? DT_Full : DT_Diff);
+	strcpy(auctionFile.header.signature, "RHS");
+
+	auctionFile.auctions.reserve(getAuctionCount());
+	forEachAuction([&auctionFile, doFullDump](AuctionSimpleData* auctionInfo) {
+		if(!doFullDump && !auctionInfo->outputInPartialDump())
+			return;
+
+		decltype(auctionFile.auctions)::value_type auctionItem;
+		auctionInfo->serialize(&auctionItem);
+
+		auctionFile.auctions.push_back(auctionItem);
+	});
+
+	return auctionFile;
+}
+
+void AuctionSimpleDiffWriter::importDump(AUCTION_SIMPLE_FILE *auctionFile)
+{
+	clearAuctions();
+	for(size_t i = 0; i < auctionFile->auctions.size(); i++) {
+		auto& auctionInfo = auctionFile->auctions[i];
+		addAuction(AuctionSimpleData::createFromDump(&auctionInfo));
+	}
+}

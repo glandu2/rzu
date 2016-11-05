@@ -36,11 +36,12 @@ struct AuctionFileHeader {
 enum AuctionFileVersion {
 	AUCTION_V3 = 3,
 	AUCTION_V4 = 4,  // add auction meta data in struct format (like prices, seller)
+	AUCTION_V5 = 5,  // fix category time (as serialized after endProcess, must have previous times only)
 	AUCTION_LATEST = AUCTION_V4
 };
 
 #define AUCTION_CATEGORY_INFO_DEF(_) \
-	_(simple)(int64_t, previousBegin) \
+	_(simple)(int64_t, previousBegin, version < AUCTION_V5) \
 	_(simple)(int64_t, beginTime) \
 	_(simple)(int64_t, endTime)
 CREATE_STRUCT(AUCTION_CATEGORY_INFO);

@@ -96,7 +96,7 @@ bool AuctionComplexData::outputInPartialDump()
 	if(diffType >= D_Invalid)
 		logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d for auction 0x%08X\n", diffType, getUid().get());
 
-	if(diffType == D_Unmodified)
+	if(diffType == D_Unmodified || diffType == D_MaybeDeleted)
 		return false;
 	return true;
 }
