@@ -1,10 +1,8 @@
-#ifndef AUCTIONCOMPLEXDIFF_H
-#define AUCTIONCOMPLEXDIFF_H
+#ifndef AUCTIONCOMPLEXDIFFWRITER_H
+#define AUCTIONCOMPLEXDIFFWRITER_H
 
 #include "Core/Object.h"
-#include <unordered_map>
 #include <vector>
-#include <array>
 #include "Extern.h"
 #include <stdint.h>
 #include "AuctionFile.h"
@@ -27,9 +25,7 @@ public:
 	void importDump(AUCTION_FILE *auctionFile);
 
 private:
-	AuctionComplexDiffWriter(const AuctionComplexDiffWriter& other) = delete;
-	void operator=(const AuctionComplexDiffWriter& other) = delete;
 	bool diffMode;
 };
 
-#endif // AUCTIONSIMPLEDIFF_H
+#endif

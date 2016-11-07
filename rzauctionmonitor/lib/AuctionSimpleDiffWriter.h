@@ -2,9 +2,7 @@
 #define AUCTIONSIMPLEDIFF_H
 
 #include "Core/Object.h"
-#include <unordered_map>
 #include <vector>
-#include <array>
 #include "Extern.h"
 #include <stdint.h>
 #include "AuctionFile.h"

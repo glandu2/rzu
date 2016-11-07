@@ -5,7 +5,6 @@
 #include <vector>
 #include <stdint.h>
 #include "AuctionUid.h"
-#include "IAuctionData.h"
 #include <memory>
 
 #include "AuctionCommonWriter.h"
@@ -49,10 +48,6 @@ public:
 
 	void clearAuctions() {
 		auctions.clear();
-	}
-
-	time_t getLastEndCategoryTime() {
-		return categoryTimeManager.getLastEndCategoryTime();
 	}
 
 	template<class Serializable>
