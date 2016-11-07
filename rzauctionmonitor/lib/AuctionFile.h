@@ -37,7 +37,8 @@ enum AuctionFileVersion {
 	AUCTION_V3 = 3,
 	AUCTION_V4 = 4,  // add auction meta data in struct format (like prices, seller)
 	AUCTION_V5 = 5,  // fix category time (as serialized after endProcess, must have previous times only)
-	AUCTION_LATEST = AUCTION_V4
+	AUCTION_VERSION_NUM,
+	AUCTION_LATEST = AUCTION_VERSION_NUM - 1
 };
 
 #define AUCTION_CATEGORY_INFO_DEF(_) \

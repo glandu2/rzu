@@ -162,7 +162,7 @@ TEST(auction_full_mode, no_auction) {
 	dumpAuctions(&auctionWriter, &auctionFile, true, false);
 
 	EXPECT_EQ(0, memcmp("RAH", auctionFile.header.signature, 4));
-	EXPECT_EQ(AUCTION_LATEST, auctionFile.header.file_version);
+	EXPECT_EQ(AUCTION_V5, auctionFile.header.file_version);
 	EXPECT_EQ(DT_Full, auctionFile.header.dumpType);
 	EXPECT_EQ(18, auctionFile.header.categories.size());
 	EXPECT_EQ(categoryBegin, auctionFile.header.categories[auctionData.category].beginTime);
