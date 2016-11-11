@@ -47,7 +47,7 @@ struct DB_AccountData
 	{
 		bool ok;
 		uint32_t account_id;
-		char password[34];
+		char password[35];
 		bool nullPassword;
 		bool auth_ok;
 		uint32_t age;
