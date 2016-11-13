@@ -10,7 +10,7 @@ class DB_Character {
 
 public:
 	std::string name;
-	char account[60];
+	char account[61];
 	game_sid_t party_id;
 	int32_t permission;
 	float x;
