@@ -133,11 +133,12 @@ AUCTION_FILE AuctionComplexDiffWriter::exportDump(bool doFullDump, bool alwaysWi
 	return auctionFile;
 }
 
-void AuctionComplexDiffWriter::importDump(AUCTION_FILE *auctionFile)
+void AuctionComplexDiffWriter::importDump(const AUCTION_FILE* auctionFile)
 {
 	clearAuctions();
+	categoryTimeManager.deserializeHeader(auctionFile->header);
 	for(size_t i = 0; i < auctionFile->auctions.size(); i++) {
-		auto& auctionInfo = auctionFile->auctions[i];
+		const auto& auctionInfo = auctionFile->auctions[i];
 		addAuction(AuctionComplexData::createFromDump(&auctionInfo));
 	}
 }

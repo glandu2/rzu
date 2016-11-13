@@ -41,6 +41,8 @@ private:
 	void onAllRequestProcessed();
 	void dumpAuctions();
 
+	void loadInitialState();
+
 private:
 	AuctionSimpleDiffWriter auctionWriter;
 	std::vector<std::unique_ptr<AuctionWorker>> clients;

@@ -348,7 +348,8 @@ int main(int argc, char* argv[]) {
 		fileNumber++;
 
 		AUCTION_FILE auctionFinalFile = auctionWriter.exportDump(false, true);
-		for(const AUCTION_INFO& auctionInfo : auctionFinalFile.auctions) {
+		for(size_t i = 0; i < auctionFinalFile.auctions.size(); i++) {
+			const AUCTION_INFO& auctionInfo = auctionFinalFile.auctions[i];
 			DB_Item::addAuction(dbInputs, auctionInfo);
 		}
 

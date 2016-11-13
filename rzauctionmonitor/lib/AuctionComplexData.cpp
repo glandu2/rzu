@@ -106,7 +106,7 @@ bool AuctionComplexData::isInFinalState() const
 	return processStatus == PS_Deleted;
 }
 
-AuctionComplexData* AuctionComplexData::createFromDump(AUCTION_INFO *auctionInfo)
+AuctionComplexData* AuctionComplexData::createFromDump(const AUCTION_INFO *auctionInfo)
 {
 	AuctionComplexData* auction = new AuctionComplexData(auctionInfo->uid, auctionInfo->previousTime, auctionInfo->time, auctionInfo->category, auctionInfo->data.data(), auctionInfo->data.size());
 
@@ -120,6 +120,13 @@ AuctionComplexData* AuctionComplexData::createFromDump(AUCTION_INFO *auctionInfo
 	auction->estimatedEndTimeFromAdded = auctionInfo->estimatedEndTimeFromAdded;
 	auction->estimatedEndTimeMin = auctionInfo->estimatedEndTimeMin;
 	auction->estimatedEndTimeMax = auctionInfo->estimatedEndTimeMax;
+
+	ProcessStatus processStatus = getAuctionProcessStatus((DiffType)auctionInfo->diffType);
+	if(processStatus == PS_NotProcessed) {
+		logStatic(LL_Error, getStaticClassName(), "Invalid diffType, can't convert to processStatus: %d, uid: 0x%08X\n", auctionInfo->diffType, auctionInfo->uid);
+	} else {
+		auction->processStatus = processStatus;
+	}
 
 	return auction;
 }
@@ -158,6 +165,20 @@ DiffType AuctionComplexData::getAuctionDiffType() const {
 	return D_Invalid;
 }
 
+AuctionComplexData::ProcessStatus AuctionComplexData::getAuctionProcessStatus(DiffType diffType) {
+	switch(diffType) {
+		case D_Deleted: return PS_Deleted;
+		case D_Added: return PS_Added;
+		case D_Updated: return PS_Updated;
+		case D_Unmodified: return PS_Unmodifed;
+		case D_MaybeDeleted: return PS_MaybeDeleted;
+
+		case D_Base:
+		case D_Invalid: return PS_NotProcessed;
+	}
+	return PS_NotProcessed;
+}
+
 void AuctionComplexData::setStatus(ProcessStatus status, uint64_t time)
 {
 	if(status == PS_MaybeDeleted || status == PS_Deleted) {
@@ -179,11 +200,20 @@ bool AuctionComplexData::parseData(const uint8_t *data, size_t len)
 {
 	bool hasChanged;
 
+	if(data == nullptr || len == 0) {
+		log(LL_Error, "No auction data, uid: 0x%08X\n", getUid().get());
+		return false;
+	}
+
 	const AuctionDataEnd* auctionDataEnd = reinterpret_cast<const AuctionDataEnd*>(data + len - sizeof(AuctionDataEnd));
 
-	if(auctionDataEnd->bid_flag > BF_NoBid || auctionDataEnd->duration_type < DT_Short || auctionDataEnd->duration_type > DT_Long) {
-		Object::logStatic(Object::LL_Error, "AuctionInfo", "Auction data contains invalid values: bid flag = %d, duration_type = %d\n",
-		                  auctionDataEnd->bid_flag, auctionDataEnd->duration_type);
+	if(len < sizeof(AuctionDataEnd) || auctionDataEnd->bid_flag > BF_NoBid || auctionDataEnd->duration_type < DT_Short || auctionDataEnd->duration_type > DT_Long) {
+		if(len < sizeof(AuctionDataEnd)) {
+			log(LL_Error, "Auction data smaller than auction end section, uid: 0x%08X, data size = " PRIdS "\n", getUid().get(), len);
+		} else {
+			log(LL_Error, "Auction data contains invalid values: uid: 0x%08X, bid flag = %d, duration_type = %d\n",
+			              getUid().get(), auctionDataEnd->bid_flag, auctionDataEnd->duration_type);
+		}
 		hasChanged = rawData.size() != len || memcmp(rawData.data(), data, len) != 0;
 
 		rawData.assign(data, data + len);

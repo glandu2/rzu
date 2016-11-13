@@ -63,11 +63,12 @@ AUCTION_SIMPLE_FILE AuctionSimpleDiffWriter::exportDump(bool doFullDump)
 	return auctionFile;
 }
 
-void AuctionSimpleDiffWriter::importDump(AUCTION_SIMPLE_FILE *auctionFile)
+void AuctionSimpleDiffWriter::importDump(const AUCTION_SIMPLE_FILE *auctionFile)
 {
 	clearAuctions();
+	categoryTimeManager.deserializeHeader(auctionFile->header);
 	for(size_t i = 0; i < auctionFile->auctions.size(); i++) {
-		auto& auctionInfo = auctionFile->auctions[i];
+		const auto& auctionInfo = auctionFile->auctions[i];
 		addAuction(AuctionSimpleData::createFromDump(&auctionInfo));
 	}
 }

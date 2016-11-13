@@ -22,7 +22,7 @@ public:
 
 	void dumpAuctions(std::vector<uint8_t> &output, bool doFullDump, bool alwaysWithData);
 	AUCTION_FILE exportDump(bool doFullDump, bool alwaysWithData);
-	void importDump(AUCTION_FILE *auctionFile);
+	void importDump(const AUCTION_FILE *auctionFile);
 
 private:
 	bool diffMode;

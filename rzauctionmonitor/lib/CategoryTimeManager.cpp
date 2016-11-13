@@ -122,17 +122,17 @@ void CategoryTimeManager::serializeHeader(AUCTION_HEADER &header, DumpType dumpT
 	}
 }
 
-void CategoryTimeManager::deserializeHeader(AUCTION_HEADER &header)
+void CategoryTimeManager::deserializeHeader(const AUCTION_HEADER &header)
 {
 	categoryTime.clear();
 	for(size_t i = 0; i < header.categories.size(); i++) {
-		AUCTION_CATEGORY_INFO& categoryInfo = header.categories[i];
+		const AUCTION_CATEGORY_INFO& categoryInfo = header.categories[i];
 		CategoryTime category;
 
-		category.previousBegin = categoryInfo.previousBegin;
 		category.begin = categoryInfo.beginTime;
 		category.end = categoryInfo.endTime;
 
 		categoryTime.push_back(category);
 	}
+	resetCategoryTime();
 }

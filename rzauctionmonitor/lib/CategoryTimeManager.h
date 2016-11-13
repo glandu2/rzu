@@ -42,7 +42,7 @@ public:
 	size_t getCategoryNumber() { return categoryTime.size(); }
 
 	void serializeHeader(AUCTION_HEADER& header, DumpType dumpType);
-	void deserializeHeader(AUCTION_HEADER& header);
+	void deserializeHeader(const AUCTION_HEADER& header);
 
 private:
 	CategoryTime& getCategoryTime(size_t category);

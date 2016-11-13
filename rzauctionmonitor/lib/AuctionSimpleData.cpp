@@ -68,14 +68,24 @@ bool AuctionSimpleData::outputInPartialDump()
 	return true;
 }
 
-AuctionSimpleData *AuctionSimpleData::createFromDump(AUCTION_SIMPLE_INFO *auctionInfo)
+AuctionSimpleData *AuctionSimpleData::createFromDump(const AUCTION_SIMPLE_INFO *auctionInfo)
 {
-	return new AuctionSimpleData(AuctionUid(auctionInfo->uid),
+	AuctionSimpleData* auctionSimpleData;
+
+	auctionSimpleData = new AuctionSimpleData(AuctionUid(auctionInfo->uid),
 	                             auctionInfo->previousTime,
 	                             auctionInfo->time,
 	                             auctionInfo->category,
 	                             auctionInfo->data.data(),
 	                             auctionInfo->data.size());
+	ProcessStatus processStatus = getAuctionProcessStatus((DiffType)auctionInfo->diffType);
+	if(processStatus == PS_NotProcessed) {
+		logStatic(LL_Error, getStaticClassName(), "Invalid diffType, can't convert to processStatus: %d, uid: 0x%08X\n", auctionInfo->diffType, auctionInfo->uid);
+	} else {
+		auctionSimpleData->processStatus = processStatus;
+	}
+
+	return auctionSimpleData;
 }
 
 void AuctionSimpleData::serialize(AUCTION_SIMPLE_INFO *auctionInfo) const
@@ -97,7 +107,22 @@ DiffType AuctionSimpleData::getAuctionDiffType() const {
 		case PS_Unmodifed: return D_Unmodified;
 		case PS_NotProcessed: return D_Invalid;
 	}
+	logStatic(LL_Error, getStaticClassName(), "Invalid processStatus, can't convert to diffType: %d, uid: %d\n", processStatus, getUid().get());
 	return D_Invalid;
+}
+
+AuctionSimpleData::ProcessStatus AuctionSimpleData::getAuctionProcessStatus(DiffType diffType) {
+	switch(diffType) {
+		case D_Deleted: return PS_Deleted;
+		case D_Added: return PS_Added;
+		case D_Updated: return PS_Updated;
+		case D_Unmodified: return PS_Unmodifed;
+
+		case D_Base:
+		case D_MaybeDeleted:
+		case D_Invalid: return PS_NotProcessed;
+	}
+	return PS_NotProcessed;
 }
 
 

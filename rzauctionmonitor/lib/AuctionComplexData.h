@@ -8,6 +8,7 @@
 #include "IAuctionData.h"
 
 class RZAUCTION_EXTERN AuctionComplexData : public IAuctionData {
+	DECLARE_CLASSNAME(AuctionComplexData, 0)
 public:
 	enum ProcessStatus {
 		PS_NotProcessed,
@@ -59,7 +60,7 @@ public:
 	virtual bool isInFinalState() const;
 
 
-	static AuctionComplexData* createFromDump(AUCTION_INFO* auctionInfo);
+	static AuctionComplexData* createFromDump(const AUCTION_INFO* auctionInfo);
 	void serialize(AUCTION_INFO* auctionInfo, bool alwaysWithData) const;
 
 
@@ -74,6 +75,7 @@ protected:
 
 	void maybeStillDeleted();
 	DiffType getAuctionDiffType() const;
+	static ProcessStatus getAuctionProcessStatus(DiffType diffType);
 
 private:
 	// status in current processing loop

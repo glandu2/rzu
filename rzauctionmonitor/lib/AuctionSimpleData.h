@@ -18,6 +18,7 @@ struct AuctionSimpleDataView {
 };
 
 class RZAUCTION_EXTERN AuctionSimpleData : public IAuctionData {
+	DECLARE_CLASSNAME(AuctionSimpleData, 0)
 private:
 	enum ProcessStatus {
 		PS_NotProcessed,
@@ -37,13 +38,14 @@ public:
 
 	virtual bool outputInPartialDump();
 
-	static AuctionSimpleData* createFromDump(AUCTION_SIMPLE_INFO* auctionInfo);
+	static AuctionSimpleData* createFromDump(const AUCTION_SIMPLE_INFO* auctionInfo);
 	void serialize(AUCTION_SIMPLE_INFO* auctionInfo) const;
 
 	void setStatus(ProcessStatus status, uint64_t time);
 private:
 	bool parseData(const uint8_t *data, size_t len);
 	DiffType getAuctionDiffType() const;
+	static ProcessStatus getAuctionProcessStatus(DiffType diffType);
 
 private:
 	ProcessStatus processStatus;

@@ -10,6 +10,7 @@ struct GlobalConfig {
 		cval<std::string> &ip, &accountFile, &auctionListDir, &auctionListFile;
 		cval<int> &port, &gsindex, &autoRecoDelay, &recoDelay, &recoTimeout, &auctionSearchDelay, &auctionSearchTimeout;
 		cval<bool> &doFullAuctionDump, &doStateAuctionDump;
+		cval<std::string> &stateFile;
 
 		ClientConfig() :
 			useRsa(CFG_CREATE("client.use_rsa", true)),
@@ -25,7 +26,8 @@ struct GlobalConfig {
 			auctionSearchDelay(CFG_CREATE("client.auction_search_delay", 3000)),
 			auctionSearchTimeout(CFG_CREATE("client.auction_search_timeout", 5000)),
 		    doFullAuctionDump(CFG_CREATE("client.do_full_auction_dump", false)),
-		    doStateAuctionDump(CFG_CREATE("client.do_state_auction_dump", false))
+		    doStateAuctionDump(CFG_CREATE("client.do_state_auction_dump", false)),
+		    stateFile(CFG_CREATE("client.initial_state_file", ""))
 		{
 			Utils::autoSetAbsoluteDir(auctionListDir);
 		}

@@ -21,7 +21,7 @@ public:
 
 	void dumpAuctions(std::vector<uint8_t> &output, bool doFullDump);
 	AUCTION_SIMPLE_FILE exportDump(bool doFullDump);
-	void importDump(AUCTION_SIMPLE_FILE *auctionFile);
+	void importDump(const AUCTION_SIMPLE_FILE* auctionFile);
 };
 
 #endif // AUCTIONSIMPLEDIFF_H
