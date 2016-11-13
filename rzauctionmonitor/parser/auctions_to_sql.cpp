@@ -171,7 +171,7 @@ struct ItemData {
 	int16_t unknown2;
 };
 
-struct AuctionInfo {
+struct AuctionComplexData {
 	int32_t size;
 	int16_t version;
 	int16_t flag;

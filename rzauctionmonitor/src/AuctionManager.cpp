@@ -2,6 +2,7 @@
 #include "GlobalConfig.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <iterator>
 #include "Console/ConsoleCommands.h"
 #include "Core/PrintfFormats.h"
 
@@ -31,6 +32,7 @@ AuctionManager::AuctionManager() : auctionWriter(CATEGORY_MAX_INDEX), totalPages
 
 void AuctionManager::start()
 {
+	loadInitialState();
 	loadAccounts();
 
 	totalPages = 1;
@@ -196,7 +198,7 @@ std::unique_ptr<AuctionWorker::AuctionRequest> AuctionManager::getNextRequest()
 
 void AuctionManager::addAuctionInfo(const AuctionWorker::AuctionRequest *request, uint32_t uid, const uint8_t *data, int len)
 {
-	auctionWriter.addAuctionInfo(uid, time(nullptr), request->category, data, len);
+	auctionWriter.addAuctionInfo(AuctionUid(uid), time(nullptr), request->category, data, len);
 }
 
 void AuctionManager::onAuctionSearchCompleted(bool success, int pageTotal, std::unique_ptr<AuctionWorker::AuctionRequest> request)
@@ -236,19 +238,102 @@ bool AuctionManager::isAllRequestProcessed()
 	return true;
 }
 
+void AuctionManager::dumpAuctions() {
+	time_t dumpTimeStamp = auctionWriter.getLastEndCategoryTime();
+	if(dumpTimeStamp == 0) {
+		log(LL_Warning, "Last category end timestamp is 0, using current timestamp\n");
+		dumpTimeStamp = ::time(nullptr);
+	}
+
+	if(firstDump)
+		firstDumpTime = dumpTimeStamp;
+
+	const std::string& auctionDir = CONFIG_GET()->client.auctionListDir.get();
+	const std::string& auctionFile = CONFIG_GET()->client.auctionListFile.get();
+
+	if(firstDump || CONFIG_GET()->client.doFullAuctionDump.get()) {
+		auctionWriter.dumpAuctions(fileData, true);
+		auctionWriter.writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_full");
+	} else if(CONFIG_GET()->client.doStateAuctionDump.get()) {
+		auctionWriter.dumpAuctions(fileData, true);
+		auctionWriter.writeAuctionDataToFile(auctionDir, auctionFile, fileData, firstDumpTime, "_state");
+	}
+
+	if(!firstDump) {
+		auctionWriter.dumpAuctions(fileData, false);
+		auctionWriter.writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_diff");
+	}
+}
+
+void AuctionManager::loadInitialState()
+{
+	std::string fileName = CONFIG_GET()->client.stateFile;
+	if(fileName.empty())
+		return;
+
+	struct Header {
+		char sign[4];
+		uint32_t version;
+	};
+	std::vector<uint8_t> buffer;
+
+	std::unique_ptr<FILE, int(*)(FILE*)> file(nullptr, &fclose);
+
+	file.reset(fopen(fileName.c_str(), "rb"));
+	if(!file) {
+		log(LL_Error, "Cant open file %s\n", fileName.c_str());
+		return;
+	}
+
+	fseek(file.get(), 0, SEEK_END);
+	size_t fileSize = ftell(file.get());
+	fseek(file.get(), 0, SEEK_SET);
+
+	if(fileSize > 50*1024*1024) {
+		log(LL_Error, "State file size too large (over 50MB): %d\n", fileSize);
+		return;
+	}
+
+	buffer.resize(fileSize);
+	size_t readDataSize = fread(buffer.data(), 1, fileSize, file.get());
+	if(readDataSize != fileSize) {
+		log(LL_Error, "Coulnd't read file data, size: %ld, read: %ld\n", (long int)fileSize, (long int)readDataSize);
+		return;
+	}
+
+	if(buffer.size() < sizeof(Header)) {
+		log(LL_Error, "State file size too small, can't deserialize\n");
+		return;
+	}
+
+	uint32_t version = ((Header*)buffer.data())->version;
+
+	MessageBuffer structBuffer(buffer.data(), buffer.size(), version);
+
+	AUCTION_SIMPLE_FILE auctionFile;
+	auctionFile.deserialize(&structBuffer);
+	if(!structBuffer.checkFinalSize()) {
+		log(LL_Error, "Invalid file data, can't deserialize\n");
+		return;
+	}
+
+	if(auctionFile.header.dumpType != DT_Full) {
+		log(LL_Error, "Can't import a non full dump\n");
+		return;
+	}
+
+	auctionWriter.importDump(&auctionFile);
+}
+
 void AuctionManager::onAllRequestProcessed()
 {
 	auctionWriter.endCategory(currentCategory, ::time(nullptr));
 
 	currentCategory++;
-	if(currentCategory > CATEGORY_MAX_INDEX) {
+	if(currentCategory >= CATEGORY_MAX_INDEX) {
 		auctionWriter.endProcess();
 
-		auctionWriter.dumpAuctions(CONFIG_GET()->client.auctionListDir.get(),
-		                           CONFIG_GET()->client.auctionListFile.get(),
-		                           !firstDump,
-		                           firstDump || CONFIG_GET()->client.doFullAuctionDump.get(),
-		                           CONFIG_GET()->client.alwaysDumpData.get());
+		dumpAuctions();
 
 		auctionWriter.beginProcess();
 		currentCategory = 0;

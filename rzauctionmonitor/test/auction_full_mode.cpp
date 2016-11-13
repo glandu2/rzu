@@ -1,12 +1,12 @@
 #define NOMINMAX
 #include "gtest/gtest.h"
-#include "AuctionWriter.h"
+#include "AuctionComplexDiffWriter.h"
 #include "AuctionFile.h"
 #include "Core/Utils.h"
 #include <random>
 
 struct AuctionInputTestData {
-	AuctionInputTestData(AuctionInfo::BidFlag bidFlag, AuctionInfo::DurationType durationType) {
+	AuctionInputTestData(AuctionComplexData::BidFlag bidFlag, AuctionComplexData::DurationType durationType) {
 		uid = rand();
 		time = rand();
 		bid_flag = bidFlag;
@@ -18,13 +18,14 @@ struct AuctionInputTestData {
 
 	uint32_t uid;
 	int64_t time;
+	int64_t previousTime;
 	uint16_t diffType;
 	uint16_t category;
-	AuctionInfo::DurationType duration_type;
+	AuctionComplexData::DurationType duration_type;
 	int64_t bid_price;
 	int64_t price;
 	std::string seller;
-	AuctionInfo::BidFlag bid_flag;
+	AuctionComplexData::BidFlag bid_flag;
 
 	std::vector<uint8_t> rawData;
 	std::vector<uint8_t> expectedData;
@@ -33,6 +34,7 @@ struct AuctionInputTestData {
 		if(rawData.size() > 0)
 			return;
 		AuctionDataEnd auctionData;
+		memset(&auctionData, 0, sizeof(auctionData));
 
 		auctionData.bid_flag = (int8_t) bid_flag;
 		auctionData.bid_price = bid_price;
@@ -42,21 +44,19 @@ struct AuctionInputTestData {
 
 		rawData.resize(rand()%1024 + sizeof(auctionData));
 		for(size_t i = 0; i < rawData.size(); i++)
-			rawData[i] = rand() & 0xFF;
+			rawData[i] = i & 0xFF;
 
 		memcpy(&rawData[rawData.size()-sizeof(auctionData)], &auctionData, sizeof(auctionData));
 
-		if(diffType == D_Added)
-			expectedData = rawData;
+		expectedData = rawData;
 	}
 };
 
 struct AuctionOuputTestData : public AuctionInputTestData {
-	AuctionOuputTestData(AuctionInfo::BidFlag bidFlag, AuctionInfo::DurationType durationType)
+	AuctionOuputTestData(AuctionComplexData::BidFlag bidFlag, AuctionComplexData::DurationType durationType)
 	    : AuctionInputTestData(bidFlag, durationType)
 	{}
 
-	int64_t previousTime;
 	bool estimatedEndTimeFromAdded;
 	int64_t estimatedEndTimeMin;
 	int64_t estimatedEndTimeMax;
@@ -64,31 +64,47 @@ struct AuctionOuputTestData : public AuctionInputTestData {
 	uint8_t deletedCount;
 };
 
-static void addAuction(AuctionWriter* auctionWriter, AuctionInputTestData& testData)
+static void addAuction(AuctionComplexDiffWriter* auctionWriter, AuctionInputTestData& testData)
 {
 	testData.updateRawData();
-	auctionWriter->addAuctionInfo(testData.uid, testData.time, testData.category, testData.rawData.data(), testData.rawData.size());
+	AUCTION_SIMPLE_INFO auctionInfo;
+
+	auctionInfo.uid = testData.uid;
+	auctionInfo.time = testData.time;
+	auctionInfo.previousTime = testData.previousTime;
+	auctionInfo.diffType = D_Base;
+	auctionInfo.category = testData.category;
+	auctionInfo.data = testData.rawData;
+
+	auctionWriter->addAuctionInfo(&auctionInfo);
 }
 
-static void addAuctionDiff(AuctionWriter* auctionWriter, AuctionOuputTestData& testData)
+static void addAuctionDiff(AuctionComplexDiffWriter* auctionWriter, AuctionOuputTestData& testData)
 {
 	testData.updateRawData();
+	AUCTION_SIMPLE_INFO auctionInfo;
 
-	auctionWriter->addAuctionInfoDiff(testData.uid, testData.time, testData.previousTime, (DiffType)testData.diffType, testData.category, testData.rawData.data(), testData.rawData.size());
+	auctionInfo.uid = testData.uid;
+	auctionInfo.time = testData.time;
+	auctionInfo.previousTime = testData.previousTime;
+	auctionInfo.diffType = testData.diffType;
+	auctionInfo.category = testData.category;
+	auctionInfo.data = testData.rawData;
+
+	auctionWriter->addAuctionInfo(&auctionInfo);
 }
 
-static void dumpAuctions(AuctionWriter* auctionWriter, AUCTION_FILE* auctionFile) {
+static void dumpAuctions(AuctionComplexDiffWriter* auctionWriter, AUCTION_FILE* auctionFile, bool doFullDump, bool alwaysWithData) {
 	std::vector<uint8_t> auctionData;
 
-	auctionWriter->dumpAuctions(auctionData, true, false);
+	auctionWriter->dumpAuctions(auctionData, doFullDump, alwaysWithData);
 	MessageBuffer messageBuffer(auctionData.data(), auctionData.size(), AUCTION_LATEST);
 	auctionFile->deserialize(&messageBuffer);
 
 	ASSERT_TRUE(messageBuffer.checkFinalSize());
 }
 
-static void expectAuction(AUCTION_FILE* auctionFile,
-                          AuctionOuputTestData& auctionOutput)
+static void expectAuction(AUCTION_FILE* auctionFile, AuctionOuputTestData& auctionOutput, bool expectData)
 {
 	bool auctionFound = false;
 
@@ -117,38 +133,74 @@ static void expectAuction(AUCTION_FILE* auctionFile,
 		EXPECT_EQ(auctionOutput.price, auction.price);
 		EXPECT_STREQ(auctionOutput.seller.c_str(), auction.seller.c_str());
 
-		EXPECT_EQ(auctionOutput.expectedData.size(), auction.data.size());
-		if(auctionOutput.expectedData.size() == auction.data.size())
-			EXPECT_EQ(0, memcmp(auction.data.data(), auctionOutput.expectedData.data(), auction.data.size())) << "auction.data est différent de l'attendu";
+		if(expectData) {
+			EXPECT_EQ(auctionOutput.expectedData.size(), auction.data.size());
+			if(auctionOutput.expectedData.size() == auction.data.size())
+				EXPECT_EQ(0, memcmp(auction.data.data(), auctionOutput.expectedData.data(), auction.data.size())) << "auction.data est différent de l'attendu";
+		} else {
+			EXPECT_EQ(0, auction.data.size());
+		}
 	}
 
 	EXPECT_TRUE(auctionFound) << "Auction " << auctionOutput.uid << " not found";
 }
 
+static void reimportAuctions(std::unique_ptr<AuctionComplexDiffWriter>& auctionWriter) {
+	AUCTION_FILE auctionFile;
+	bool doImport = false;
+
+	if(auctionWriter) {
+		dumpAuctions(auctionWriter.get(), &auctionFile, true, true);
+		doImport = true;
+	}
+	auctionWriter.reset(new AuctionComplexDiffWriter(18));
+	auctionWriter->setDiffInputMode(true);
+	if(doImport) {
+		auctionWriter->importDump(&auctionFile);
+	}
+}
+
 TEST(auction_full_mode, no_auction) {
-	AuctionWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AuctionComplexDiffWriter auctionWriter(18);
+	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
 	AUCTION_FILE auctionFile;
 
+	time_t categoryBegin = auctionData.time - rand()%1000;
+	time_t categoryEnd = auctionData.time + rand()%1000;
+
 	auctionWriter.beginProcess();
-	auctionWriter.beginCategory(auctionData.category, auctionData.time - rand()%1000);
-	auctionWriter.endCategory(auctionData.category, auctionData.time + rand()%1000);
+	auctionWriter.beginCategory(auctionData.category, categoryBegin);
+	auctionWriter.endCategory(auctionData.category, categoryEnd);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, false);
 
-	EXPECT_EQ(0, memcmp("RAH", auctionFile.signature, 4));
-	EXPECT_EQ(AUCTION_LATEST, auctionFile.file_version);
-	EXPECT_EQ(DT_Full, auctionFile.dumpType);
-	EXPECT_EQ(18, auctionFile.categories.size());
+	EXPECT_EQ(0, memcmp("RAH", auctionFile.header.signature, 4));
+	EXPECT_EQ(AUCTION_V5, auctionFile.header.file_version);
+	EXPECT_EQ(DT_Full, auctionFile.header.dumpType);
+	EXPECT_EQ(18, auctionFile.header.categories.size());
+	EXPECT_EQ(categoryBegin, auctionFile.header.categories[auctionData.category].beginTime);
+	EXPECT_EQ(categoryEnd, auctionFile.header.categories[auctionData.category].endTime);
+	EXPECT_EQ(0, auctionFile.auctions.size());
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, true);
+
+	EXPECT_EQ(0, memcmp("RAH", auctionFile.header.signature, 4));
+	EXPECT_EQ(AUCTION_LATEST, auctionFile.header.file_version);
+	EXPECT_EQ(DT_Diff, auctionFile.header.dumpType);
+	EXPECT_EQ(18, auctionFile.header.categories.size());
+	EXPECT_EQ(categoryBegin, auctionFile.header.categories[auctionData.category].beginTime);
+	EXPECT_EQ(categoryEnd, auctionFile.header.categories[auctionData.category].endTime);
 	EXPECT_EQ(0, auctionFile.auctions.size());
 }
 
 TEST(auction_full_mode, added_3_auction) {
-	AuctionWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
-	AuctionOuputTestData auctionData2(AuctionInfo::BF_MyBid, AuctionInfo::DT_Long);
-	AuctionOuputTestData auctionData3(AuctionInfo::BF_Bidded, AuctionInfo::DT_Short);
+	AuctionComplexDiffWriter auctionWriter(18);
+	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData2(AuctionComplexData::BF_MyBid, AuctionComplexData::DT_Long);
+	AuctionOuputTestData auctionData3(AuctionComplexData::BF_Bidded, AuctionComplexData::DT_Short);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -185,20 +237,29 @@ TEST(auction_full_mode, added_3_auction) {
 	auctionWriter.endCategory(auctionData.category, std::max(std::max(auctionData3.time, auctionData2.time), auctionData.time) + rand()%1000);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, false);
 
 	ASSERT_EQ(3, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData);
-	expectAuction(&auctionFile, auctionData2);
-	expectAuction(&auctionFile, auctionData3);
+	expectAuction(&auctionFile, auctionData, true);
+	expectAuction(&auctionFile, auctionData2, true);
+	expectAuction(&auctionFile, auctionData3, true);
+
+	// diff dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, false);
+
+	ASSERT_EQ(3, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData, true);
+	expectAuction(&auctionFile, auctionData2, true);
+	expectAuction(&auctionFile, auctionData3, true);
 }
 
 TEST(auction_full_mode, added_update_unmodified_removed) {
-	AuctionWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
-	AuctionOuputTestData auctionData2(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
-	AuctionOuputTestData auctionData3(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
-	AuctionOuputTestData auctionData4(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AuctionComplexDiffWriter auctionWriter(18);
+	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData2(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData3(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData4(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -211,7 +272,7 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 
 	auctionData2 = auctionData;
 	auctionData2.diffType = D_Updated;
-	auctionData2.bid_flag = AuctionInfo::BF_MyBid;
+	auctionData2.bid_flag = AuctionComplexData::BF_MyBid;
 	auctionData2.previousTime = auctionData2.time;
 	auctionData2.time += 5000;
 
@@ -234,10 +295,15 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 	auctionWriter.endCategory(auctionData.category, auctionData.time + rand()%1000);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, false);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData);
+	expectAuction(&auctionFile, auctionData, true);
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, true);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData, true);
 
 	// Updated auction
 	auctionWriter.beginProcess();
@@ -246,10 +312,15 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 	auctionWriter.endCategory(auctionData.category, auctionData2.time + rand()%1000);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, false);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData2);
+	expectAuction(&auctionFile, auctionData2, false);
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, true);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData2, true);
 
 	// Unmodified auction
 	auctionWriter.beginProcess();
@@ -258,17 +329,27 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 	auctionWriter.endCategory(auctionData.category, auctionData3.time + rand()%1000);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	// full dump without data
+	dumpAuctions(&auctionWriter, &auctionFile, true, false);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData3);
+	expectAuction(&auctionFile, auctionData3, false);
+
+	// full dump with data
+	dumpAuctions(&auctionWriter, &auctionFile, true, true);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData3, true);
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, true);
+	ASSERT_EQ(0, auctionFile.auctions.size());
 
 
+	// MaybeDeleted auction
 	auctionData4.rawData = auctionData3.rawData;
+	auctionData4.expectedData = auctionData3.expectedData;
 
 	int i;
 	for(i = 0; i < 3; i++) {
-		// MaybeDeleted auction
 		auctionWriter.beginProcess();
 		auctionWriter.beginCategory(auctionData.category, auctionData4.time + 5000*i - 1000);
 		auctionWriter.endCategory(auctionData.category, auctionData4.time + 5000*i);
@@ -276,10 +357,14 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 
 		auctionData4.deletedCount = i+1;
 
-		dumpAuctions(&auctionWriter, &auctionFile);
-
+		// full dump
+		dumpAuctions(&auctionWriter, &auctionFile, true, false);
 		ASSERT_EQ(1, auctionFile.auctions.size());
-		expectAuction(&auctionFile, auctionData4);
+		expectAuction(&auctionFile, auctionData4, false);
+
+		// partial dump
+		dumpAuctions(&auctionWriter, &auctionFile, false, true);
+		ASSERT_EQ(0, auctionFile.auctions.size());
 	}
 
 	// Deleted auction
@@ -291,18 +376,23 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 	auctionData4.diffType = D_Deleted;
 	auctionData4.deletedCount = 4;
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, false);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData4);
+	expectAuction(&auctionFile, auctionData4, false);
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, true);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData4, true);
 }
 
 TEST(auction_full_mode, added_update_unmodified_removed_diff) {
-	AuctionWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
-	AuctionOuputTestData auctionData2(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
-	AuctionOuputTestData auctionData3(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
-	AuctionOuputTestData auctionData4(AuctionInfo::BF_NoBid, AuctionInfo::DT_Medium);
+	AuctionComplexDiffWriter auctionWriter(18);
+	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData2(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData3(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData4(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -315,14 +405,14 @@ TEST(auction_full_mode, added_update_unmodified_removed_diff) {
 
 	auctionData2 = auctionData;
 	auctionData2.diffType = D_Updated;
-	auctionData2.bid_flag = AuctionInfo::BF_MyBid;
+	auctionData2.bid_flag = AuctionComplexData::BF_MyBid;
 	auctionData2.previousTime = auctionData2.time;
 	auctionData2.time += 5000;
 
 	auctionData3 = auctionData2;
 	auctionData3.diffType = D_Unmodified;
-	auctionData3.previousTime = auctionData3.time;
-	auctionData3.time = 0;
+	auctionData3.previousTime = auctionData2.time;
+	auctionData3.time = auctionData2.time;
 
 	auctionData4 = auctionData3;
 	auctionData4.diffType = D_Deleted;
@@ -339,45 +429,68 @@ TEST(auction_full_mode, added_update_unmodified_removed_diff) {
 	addAuctionDiff(&auctionWriter, auctionData);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, true);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData);
+	expectAuction(&auctionFile, auctionData, true);
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, false);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData, true);
+
 
 	// Updated auction
 	auctionWriter.beginProcess();
 	addAuctionDiff(&auctionWriter, auctionData2);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, true);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData2);
+	expectAuction(&auctionFile, auctionData2, true);
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, false);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData2, false);
+
 
 	// Unmodified auction
 	auctionData3.rawData = auctionData2.rawData;
+	auctionData3.expectedData = auctionData2.expectedData;
 
 	auctionWriter.beginProcess();
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, true);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData3);
+	expectAuction(&auctionFile, auctionData3, true);
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, false);
+	ASSERT_EQ(0, auctionFile.auctions.size());
 
 
 	// Deleted auction (MaybeDeleted true type)
 	auctionData4.rawData = auctionData3.rawData;
+	auctionData4.expectedData = auctionData3.expectedData;
 
 	auctionWriter.beginProcess();
 	addAuctionDiff(&auctionWriter, auctionData4);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
 	auctionData4.diffType = D_MaybeDeleted;
+
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, true);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData4);
+	expectAuction(&auctionFile, auctionData4, true);
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, false);
+	ASSERT_EQ(0, auctionFile.auctions.size());
 
 	for(int i = 1; i < 3; i++) {
 		// MaybeDeleted auction
@@ -386,10 +499,14 @@ TEST(auction_full_mode, added_update_unmodified_removed_diff) {
 
 		auctionData4.deletedCount = i+1;
 
-		dumpAuctions(&auctionWriter, &auctionFile);
-
+		// full dump
+		dumpAuctions(&auctionWriter, &auctionFile, true, true);
 		ASSERT_EQ(1, auctionFile.auctions.size());
-		expectAuction(&auctionFile, auctionData4);
+		expectAuction(&auctionFile, auctionData4, true);
+
+		// partial dump
+		dumpAuctions(&auctionWriter, &auctionFile, false, false);
+		ASSERT_EQ(0, auctionFile.auctions.size());
 	}
 
 	// Deleted auction
@@ -399,17 +516,165 @@ TEST(auction_full_mode, added_update_unmodified_removed_diff) {
 	auctionData4.diffType = D_Deleted;
 	auctionData4.deletedCount = 4;
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	// full dump
+	dumpAuctions(&auctionWriter, &auctionFile, true, true);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData4);
+	expectAuction(&auctionFile, auctionData4, true);
+
+	// partial dump
+	dumpAuctions(&auctionWriter, &auctionFile, false, false);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData4, false);
+}
+
+TEST(auction_full_mode, import_state) {
+	std::unique_ptr<AuctionComplexDiffWriter> auctionWriter;
+	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData2(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData3(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData4(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AUCTION_FILE auctionFile;
+
+	auctionData.diffType = D_Added;
+	auctionData.deleted = false;
+	auctionData.deletedCount = 0;
+	auctionData.previousTime = 0;
+	auctionData.estimatedEndTimeFromAdded = true;
+	auctionData.estimatedEndTimeMin = 24*3600;
+	auctionData.estimatedEndTimeMax = auctionData.time + 24*3600;
+
+	auctionData2 = auctionData;
+	auctionData2.diffType = D_Updated;
+	auctionData2.bid_flag = AuctionComplexData::BF_MyBid;
+	auctionData2.previousTime = auctionData2.time;
+	auctionData2.time += 5000;
+
+	auctionData3 = auctionData2;
+	auctionData3.diffType = D_Unmodified;
+	auctionData3.previousTime = auctionData2.time;
+	auctionData3.time = auctionData2.time;
+
+	auctionData4 = auctionData3;
+	auctionData4.diffType = D_Deleted;
+	auctionData4.deleted = true;
+	auctionData4.deletedCount = 1;
+	auctionData4.previousTime = auctionData2.time;
+	auctionData4.time = auctionData2.time + 5000;
+
+	// Added auction
+	reimportAuctions(auctionWriter);
+	auctionWriter->beginProcess();
+	addAuctionDiff(auctionWriter.get(), auctionData);
+	auctionWriter->endProcess();
+
+	// full dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, true, true);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData, true);
+
+	// partial dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, false, false);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData, true);
+
+
+	// Updated auction
+	reimportAuctions(auctionWriter);
+	auctionWriter->beginProcess();
+	addAuctionDiff(auctionWriter.get(), auctionData2);
+	auctionWriter->endProcess();
+
+	// full dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, true, true);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData2, true);
+
+	// partial dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, false, false);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData2, false);
+
+
+	// Unmodified auction
+	auctionData3.rawData = auctionData2.rawData;
+	auctionData3.expectedData = auctionData2.expectedData;
+
+	reimportAuctions(auctionWriter);
+	auctionWriter->beginProcess();
+	auctionWriter->endProcess();
+
+	// full dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, true, true);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData3, true);
+
+	// partial dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, false, false);
+	ASSERT_EQ(0, auctionFile.auctions.size());
+
+
+	// Deleted auction (MaybeDeleted true type)
+	auctionData4.rawData = auctionData3.rawData;
+	auctionData4.expectedData = auctionData3.expectedData;
+
+	reimportAuctions(auctionWriter);
+	auctionWriter->beginProcess();
+	addAuctionDiff(auctionWriter.get(), auctionData4);
+	auctionWriter->endProcess();
+
+	auctionData4.diffType = D_MaybeDeleted;
+
+	// full dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, true, true);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData4, true);
+
+	// partial dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, false, false);
+	ASSERT_EQ(0, auctionFile.auctions.size());
+
+	for(int i = 1; i < 3; i++) {
+		// MaybeDeleted auction
+		reimportAuctions(auctionWriter);
+		auctionWriter->beginProcess();
+		auctionWriter->endProcess();
+
+		auctionData4.deletedCount = i+1;
+
+		// full dump
+		dumpAuctions(auctionWriter.get(), &auctionFile, true, true);
+		ASSERT_EQ(1, auctionFile.auctions.size());
+		expectAuction(&auctionFile, auctionData4, true);
+
+		// partial dump
+		dumpAuctions(auctionWriter.get(), &auctionFile, false, false);
+		ASSERT_EQ(0, auctionFile.auctions.size());
+	}
+
+	// Deleted auction
+	reimportAuctions(auctionWriter);
+	auctionWriter->beginProcess();
+	auctionWriter->endProcess();
+
+	auctionData4.diffType = D_Deleted;
+	auctionData4.deletedCount = 4;
+
+	// full dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, true, true);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData4, true);
+
+	// partial dump
+	dumpAuctions(auctionWriter.get(), &auctionFile, false, false);
+	ASSERT_EQ(1, auctionFile.auctions.size());
+	expectAuction(&auctionFile, auctionData4, false);
 }
 
 TEST(auction_full_mode, estimated_time_adjust) {
-	AuctionWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionInfo::BF_NoBid, AuctionInfo::DT_Long);
-	AuctionOuputTestData auctionData2(AuctionInfo::BF_NoBid, AuctionInfo::DT_Long);
-	AuctionOuputTestData auctionData3(AuctionInfo::BF_NoBid, AuctionInfo::DT_Long);
+	AuctionComplexDiffWriter auctionWriter(18);
+	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Long);
+	AuctionOuputTestData auctionData2(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Long);
+	AuctionOuputTestData auctionData3(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Long);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -422,7 +687,7 @@ TEST(auction_full_mode, estimated_time_adjust) {
 
 	auctionData2 = auctionData;
 	auctionData2.diffType = D_Updated;
-	auctionData2.duration_type = AuctionInfo::DT_Medium;
+	auctionData2.duration_type = AuctionComplexData::DT_Medium;
 	auctionData2.previousTime = auctionData.time + 72*3600 - 24*3600 - 1000;
 	auctionData2.time = auctionData.time + 72*3600 - 24*3600 + 500;
 	auctionData2.estimatedEndTimeFromAdded = false;
@@ -431,7 +696,7 @@ TEST(auction_full_mode, estimated_time_adjust) {
 
 	auctionData3 = auctionData2;
 	auctionData3.diffType = D_Updated;
-	auctionData3.duration_type = AuctionInfo::DT_Short;
+	auctionData3.duration_type = AuctionComplexData::DT_Short;
 	auctionData3.previousTime = auctionData.time + 72*3600 - 6*3600 - 1500;
 	auctionData3.time = auctionData.time + 72*3600 - 6*3600 - 500;
 	auctionData3.estimatedEndTimeMin = auctionData.time + 72*3600 - 1000;
@@ -445,28 +710,26 @@ TEST(auction_full_mode, estimated_time_adjust) {
 	addAuctionDiff(&auctionWriter, auctionData);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
+	dumpAuctions(&auctionWriter, &auctionFile, true, false);
 
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData);
+	expectAuction(&auctionFile, auctionData, true);
 
 	// Updated auction
 	auctionWriter.beginProcess();
 	addAuctionDiff(&auctionWriter, auctionData2);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	dumpAuctions(&auctionWriter, &auctionFile, false, true);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData2);
+	expectAuction(&auctionFile, auctionData2, true);
 
 	// Updated auction
 	auctionWriter.beginProcess();
 	addAuctionDiff(&auctionWriter, auctionData3);
 	auctionWriter.endProcess();
 
-	dumpAuctions(&auctionWriter, &auctionFile);
-
+	dumpAuctions(&auctionWriter, &auctionFile, false, false);
 	ASSERT_EQ(1, auctionFile.auctions.size());
-	expectAuction(&auctionFile, auctionData3);
+	expectAuction(&auctionFile, auctionData3, false);
 }
