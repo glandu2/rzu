@@ -54,7 +54,7 @@ AUCTION_SIMPLE_FILE AuctionSimpleDiffWriter::exportDump(bool doFullDump)
 		if(!doFullDump && !auctionInfo->outputInPartialDump())
 			return;
 
-		decltype(auctionFile.auctions)::value_type auctionItem;
+		AUCTION_SIMPLE_INFO auctionItem;
 		auctionInfo->serialize(&auctionItem);
 
 		auctionFile.auctions.push_back(auctionItem);

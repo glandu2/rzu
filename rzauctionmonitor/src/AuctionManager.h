@@ -51,8 +51,8 @@ private:
 	std::deque<std::unique_ptr<AuctionWorker::AuctionRequest>> pendingRequests;
 
 	int totalPages;
-	static const size_t CATEGORY_MAX_INDEX = 19;
-	size_t currentCategory;
+	static const int CATEGORY_MAX_INDEX = 19;
+	int currentCategory;
 	bool firstDump;
 	time_t firstDumpTime;
 

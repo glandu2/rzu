@@ -124,7 +124,7 @@ AUCTION_FILE AuctionComplexDiffWriter::exportDump(bool doFullDump, bool alwaysWi
 		if(!doFullDump && !auctionInfo->outputInPartialDump())
 			return;
 
-		decltype(auctionFile.auctions)::value_type auctionItem;
+		AUCTION_INFO auctionItem;
 		auctionInfo->serialize(&auctionItem, alwaysWithData);
 
 		auctionFile.auctions.push_back(auctionItem);

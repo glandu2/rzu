@@ -98,8 +98,8 @@ protected:
 	}
 
 private:
-	AuctionGenericWriter(const AuctionGenericWriter& other) = delete;
-	void operator=(const AuctionGenericWriter& other) = delete;
+	AuctionGenericWriter(const AuctionGenericWriter& other);
+	void operator=(const AuctionGenericWriter& other);
 
 	std::unordered_map<uint32_t, const std::unique_ptr<AuctionData>> auctions;
 };
