@@ -2,6 +2,7 @@
 #include "ClientSession.h"
 #include "GlobalConfig.h"
 #include "Core/EventLoop.h"
+#include <stdlib.h>
 
 ServerSession::ServerSession(ClientSession *clientSession)
 	: clientSession(clientSession), version(CONFIG_GET()->server.epic.get())
