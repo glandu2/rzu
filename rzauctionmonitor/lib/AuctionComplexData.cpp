@@ -209,7 +209,7 @@ bool AuctionComplexData::parseData(const uint8_t *data, size_t len)
 
 	if(len < sizeof(AuctionDataEnd) || auctionDataEnd->bid_flag > BF_NoBid || auctionDataEnd->duration_type < DT_Short || auctionDataEnd->duration_type > DT_Long) {
 		if(len < sizeof(AuctionDataEnd)) {
-			log(LL_Error, "Auction data smaller than auction end section, uid: 0x%08X, data size = " PRIdS "\n", getUid().get(), len);
+			log(LL_Error, "Auction data smaller than auction end section, uid: 0x%08X, data size = %" PRIdS "\n", getUid().get(), len);
 		} else {
 			log(LL_Error, "Auction data contains invalid values: uid: 0x%08X, bid flag = %d, duration_type = %d\n",
 			              getUid().get(), auctionDataEnd->bid_flag, auctionDataEnd->duration_type);
