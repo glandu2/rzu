@@ -1,12 +1,14 @@
-#ifndef AUCTIONINFO_H
-#define AUCTIONINFO_H
+#ifndef AUCTIONCOMPLEXDATA_H
+#define AUCTIONCOMPLEXDATA_H
 
 #include <stdint.h>
 #include <vector>
 #include "Extern.h"
 #include "AuctionFile.h"
+#include "IAuctionData.h"
 
-class RZAUCTION_EXTERN AuctionInfo {
+class RZAUCTION_EXTERN AuctionComplexData : public IAuctionData {
+	DECLARE_CLASSNAME(AuctionComplexData, 0)
 public:
 	enum ProcessStatus {
 		PS_NotProcessed,
@@ -46,34 +48,24 @@ public:
 	};
 
 public:
-	AuctionInfo(uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len);
+	AuctionComplexData(uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len);
+
 	bool update(uint64_t time, const uint8_t *data, size_t len);
 	void unmodified(uint64_t time);
 	void remove(uint64_t time);
-	void maybeStillDeleted();
-	void resetProcess();
-	void setPreviousUpdateTime(uint64_t time);
 
-	static AuctionInfo createFromDump(AUCTION_INFO* auctionInfo);
-	void serialize(AUCTION_INFO* auctionInfo) const;
+	virtual void beginProcess();
+	virtual void endProcess(uint64_t categoryBeginTime, uint64_t categoryEndTime, bool diffMode);
+	virtual bool outputInPartialDump();
+	virtual bool isInFinalState() const;
 
-	DiffType getAuctionDiffType() const;
+
+	static AuctionComplexData* createFromDump(const AUCTION_INFO* auctionInfo);
+	void serialize(AUCTION_INFO* auctionInfo, bool alwaysWithData) const;
+
 
 	ProcessStatus getProcessStatus() const { return processStatus; }
-	bool getDeleted() const  { return deleted; }
-	uint32_t getDeletedCount() const  { return deletedCount; }
-	uint32_t getUid() const { return uid; }
-	uint64_t getUpdateTime() const { return updateTime; }
-	uint64_t getPreviousUpdateTime() const { return previousUpdateTime; }
-	int32_t getCategory() const { return category; }
-	std::string getSeller() const { return seller; }
-	int64_t getPrice() const { return price; }
-	std::vector<uint8_t> getRawData() const { return rawData; }
-	DurationType getDurationType() const { return dynamicData.durationType; }
-	int64_t getBidPrice() const { return dynamicData.bidPrice; }
-	BidFlag getBidFlag() const { return dynamicData.bidFlag; }
-	uint64_t getEstimatedEndTimeMin() const { return estimatedEndTimeMin; }
-	uint64_t getEstimatedEndTimeMax() const { return estimatedEndTimeMax; }
+	bool isDeleted() const { return deleted; }
 
 protected:
 	bool parseData(const uint8_t *data, size_t len);
@@ -81,22 +73,18 @@ protected:
 	uint32_t durationTypeToSecond(DurationType durationType);
 	void setStatus(ProcessStatus status, uint64_t time);
 
-public:
+	void maybeStillDeleted();
+	DiffType getAuctionDiffType() const;
+	static ProcessStatus getAuctionProcessStatus(DiffType diffType);
+
+private:
 	// status in current processing loop
 	ProcessStatus processStatus;
 
 	bool deleted;
 	int deletedCount;
 
-	// key
-	uint32_t uid;
-
-	// data time validity range
-	uint64_t updateTime;
-	uint64_t previousUpdateTime;
-
 	// fixed data
-	int32_t category;
 	std::string seller;
 	int64_t price;
 

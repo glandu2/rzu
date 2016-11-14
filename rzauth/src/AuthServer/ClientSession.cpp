@@ -389,28 +389,25 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 			result.unknown = 0;
 			result.unknown2 = 0;
 
-			EVP_CIPHER_CTX *e_ctx = nullptr;
+			std::unique_ptr<EVP_CIPHER_CTX, void(*)(EVP_CIPHER_CTX*)> e_ctx(nullptr, &EVP_CIPHER_CTX_free);
 			int bytesWritten;
 			bool ok = false;
 
-			e_ctx = EVP_CIPHER_CTX_new();
+			e_ctx.reset(EVP_CIPHER_CTX_new());
 			if(!e_ctx)
 				goto cleanup;
 
-			if(EVP_EncryptInit_ex(e_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) < 0)
+			if(EVP_EncryptInit_ex(e_ctx.get(), EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16) < 0)
 				goto cleanup;
-			if(EVP_EncryptUpdate(e_ctx, result.encrypted_data, &bytesWritten, (const unsigned char*)&oneTimePassword, sizeof(uint64_t)) < 0)
+			if(EVP_EncryptUpdate(e_ctx.get(), result.encrypted_data, &bytesWritten, (const unsigned char*)&oneTimePassword, sizeof(uint64_t)) < 0)
 				goto cleanup;
-			if(EVP_EncryptFinal_ex(e_ctx, result.encrypted_data + bytesWritten, &bytesWritten) < 0)
+			if(EVP_EncryptFinal_ex(e_ctx.get(), result.encrypted_data + bytesWritten, &bytesWritten) < 0)
 				goto cleanup;
 
 			sendPacket(&result);
 			ok = true;
 
 		cleanup:
-			if(e_ctx)
-				EVP_CIPHER_CTX_free(e_ctx);
-
 			if(!ok)
 				abortSession();
 		} else {

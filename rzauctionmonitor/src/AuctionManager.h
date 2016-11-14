@@ -3,7 +3,7 @@
 
 #include "Core/Object.h"
 #include "AuctionWorker.h"
-#include "AuctionWriter.h"
+#include "AuctionSimpleDiffWriter.h"
 #include <memory>
 #include <deque>
 #include <time.h>
@@ -39,22 +39,27 @@ private:
 
 	bool isAllRequestProcessed();
 	void onAllRequestProcessed();
+	void dumpAuctions();
+
+	void loadInitialState();
 
 private:
-	AuctionWriter auctionWriter;
+	AuctionSimpleDiffWriter auctionWriter;
 	std::vector<std::unique_ptr<AuctionWorker>> clients;
 	std::vector<std::unique_ptr<AuctionWorker>> stoppingClients;
 
 	std::deque<std::unique_ptr<AuctionWorker::AuctionRequest>> pendingRequests;
 
 	int totalPages;
-	static const size_t CATEGORY_MAX_INDEX = 18;
-	size_t currentCategory;
+	static const int CATEGORY_MAX_INDEX = 19;
+	int currentCategory;
 	bool firstDump;
+	time_t firstDumpTime;
 
 	bool reloadingAccounts;
 	Timer<AuctionManager> accountReloadTimer;
 	static AuctionManager* instance;
+	std::vector<uint8_t> fileData; //cache allocated memory
 };
 
 
