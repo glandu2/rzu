@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include "Core/Utils.h"
 
+#if defined(__sun)
+#include <alloca.h>
+#endif
+
 #include "PacketEnums.h"
 #include "UploadClient/TS_UC_LOGIN_RESULT.h"
 #include "UploadClient/TS_UC_UPLOAD.h"
