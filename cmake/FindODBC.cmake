@@ -14,48 +14,40 @@
 # also defined, but not for general use is
 # ODBC_LIBRARY, where to find the ODBC driver manager library.
 
+SET( ODBC_FOUND 0 )
+
 #---For the windows platform ODBC is located automatically
 if(WIN32)
-	find_path(ODBC_INCLUDE_DIR sqlext.h)
-	find_library(ODBC_LIBRARY odbc32)
+  set(ODBC_INCLUDE_DIR "")
+  set(ODBC_LIBRARY odbc32)
+  set(ODBC_FOUND 1)
 else()
-	find_path(ODBC_INCLUDE_DIR
-		NAMES sqlext.h
-		HINTS
-		${ODBC_ROOT_DIR}/include
-		PATHS
-		/usr/include
-		/usr/include/odbc
-		/usr/local/include
-		/usr/local/include/odbc
-		/usr/local/odbc/include
-		DOC "Specify the directory containing sql.h."
-		)
+  find_path(ODBC_INCLUDE_DIR sqlext.h
+    /usr/include
+    /usr/include/odbc
+    /usr/local/include
+    /usr/local/include/odbc
+    /usr/local/odbc/include
+	$ENV{ODBC_DIR}/include
+    DOC "Specify the directory containing sql.h."
+  )
 
-	find_library(ODBC_LIBRARY
-		NAMES odbc odbc32
-		HINTS
-		${ODBC_ROOT_DIR}/lib
-		PATHS
-		/usr/lib
-		/usr/lib/odbc
-		/usr/local/lib
-		/usr/local/lib/odbc
-		/usr/local/odbc/lib
-		DOC "Specify the ODBC driver manager library here."
-		)
+  find_library( ODBC_LIBRARY NAMES odbc odbc32
+    PATHS
+    /usr/lib
+    /usr/lib/odbc
+    /usr/local/lib
+    /usr/local/lib/odbc
+    /usr/local/odbc/lib
+	$ENV{ODBC_DIR}/lib
+    DOC "Specify the ODBC driver manager library here."
+  )
+  if(ODBC_LIBRARY AND ODBC_INCLUDE_DIR)
+    set( ODBC_FOUND 1 )
+  endif()
 endif()
 
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(ODBC DEFAULT_MSG ODBC_INCLUDE_DIR ODBC_LIBRARY)
 
-if(ODBC_FOUND)
-	add_library(ODBC UNKNOWN IMPORTED)
-	set_target_properties(ODBC PROPERTIES
-		INTERFACE_INCLUDE_DIRECTORIES "${ODBC_INCLUDE_DIR}")
-	set_target_properties(ODBC PROPERTIES
-		IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-		IMPORTED_LOCATION "${ODBC_LIBRARY}")
-endif()
+set(ODBC_LIBRARIES ${ODBC_LIBRARY})
 
-MARK_AS_ADVANCED(ODBC_LIBRARY ODBC_INCLUDE_DIR)
+MARK_AS_ADVANCED( ODBC_FOUND ODBC_LIBRARY ODBC_EXTRA_LIBRARIES ODBC_INCLUDE_DIR )
