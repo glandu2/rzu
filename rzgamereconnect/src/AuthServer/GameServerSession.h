@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <unordered_map>
 #include <string>
-#include "ClientData.h"
 
 #include "AuthGame/TS_GA_LOGIN.h"
 #include "AuthGame/TS_GA_CLIENT_LOGIN.h"
