@@ -115,7 +115,7 @@ if(EXISTS ${LCOV_PATH} AND EXISTS ${GENHTML_PATH})
 
 		# Capturing lcov counters and generating report
 		COMMAND ${CMAKE_COMMAND} -E remove coverage.info coverage.info.cleaned
-		COMMAND ${LCOV_PATH} --directory . --capture --output-file coverage.info --gcov-tool ${GCOV_PATH} --rc lcov_branch_coverage=1
+		COMMAND ${LCOV_PATH} --directory . --capture --output-file coverage.info --gcov-tool ${GCOV_PATH}
 		COMMAND ${LCOV_PATH} --remove coverage.info "*/mingw64/*" "*/mingw/*" "/usr/*" "*/zlib/*" "*/libuv/*" "*/gtest/*" "*/libiconv/*" "*/rztest/*" "*/test/*" "lib/aliases.gperf" --output-file coverage.info.cleaned --rc lcov_branch_coverage=1
 		COMMAND ${GENHTML_PATH} -o coverage_html coverage.info.cleaned --rc genhtml_branch_coverage=1
 
