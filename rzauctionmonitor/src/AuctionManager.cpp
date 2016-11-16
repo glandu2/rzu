@@ -267,44 +267,13 @@ void AuctionManager::dumpAuctions() {
 
 void AuctionManager::loadInitialState()
 {
-	std::string fileName = CONFIG_GET()->client.stateFile;
-	if(fileName.empty())
-		return;
-
 	struct Header {
 		char sign[4];
 		uint32_t version;
 	};
 	std::vector<uint8_t> buffer;
 
-	std::unique_ptr<FILE, int(*)(FILE*)> file(nullptr, &fclose);
-
-	file.reset(fopen(fileName.c_str(), "rb"));
-	if(!file) {
-		log(LL_Error, "Cant open file %s\n", fileName.c_str());
-		return;
-	}
-
-	fseek(file.get(), 0, SEEK_END);
-	size_t fileSize = ftell(file.get());
-	fseek(file.get(), 0, SEEK_SET);
-
-	if(fileSize > 50*1024*1024) {
-		log(LL_Error, "State file size too large (over 50MB): %d\n", fileSize);
-		return;
-	}
-
-	buffer.resize(fileSize);
-	size_t readDataSize = fread(buffer.data(), 1, fileSize, file.get());
-	if(readDataSize != fileSize) {
-		log(LL_Error, "Coulnd't read file data, size: %ld, read: %ld\n", (long int)fileSize, (long int)readDataSize);
-		return;
-	}
-
-	if(buffer.size() < sizeof(Header)) {
-		log(LL_Error, "State file size too small, can't deserialize\n");
-		return;
-	}
+	auctionWriter.readAuctionDataFromFile(CONFIG_GET()->client.auctionListDir.get(), CONFIG_GET()->client.stateFile.get(), buffer);
 
 	uint32_t version = ((Header*)buffer.data())->version;
 

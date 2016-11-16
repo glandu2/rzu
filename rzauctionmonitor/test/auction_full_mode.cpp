@@ -733,3 +733,108 @@ TEST(auction_full_mode, estimated_time_adjust) {
 	ASSERT_EQ(1, auctionFile.auctions.size());
 	expectAuction(&auctionFile, auctionData3, false);
 }
+
+
+TEST(auction_full_mode, write_read_auctions_file_empty_gz) {
+	AuctionComplexDiffWriter auctionWriter(19);
+	std::vector<uint8_t> fileData;
+	AUCTION_FILE auctionFile;
+
+	auctionWriter.dumpAuctions(fileData, true, true);
+	auctionWriter.writeAuctionDataToFile("test_auctions", "auction_file_empty.bin.gz", fileData);
+
+	fileData.clear();
+	EXPECT_TRUE(auctionWriter.readAuctionDataFromFile("test_auctions", "auction_file_empty.bin.gz", fileData));
+
+	dumpAuctions(&auctionWriter, &auctionFile, true, true);
+	ASSERT_EQ(0, auctionFile.auctions.size());
+}
+
+static void testWriteReadAuctionsFile(std::string name) {
+	struct Header {
+		char sign[4];
+		uint32_t version;
+	};
+
+	static const size_t AUCTIONS_COUNT = 200;
+
+	AuctionComplexDiffWriter auctionWriter(18);
+	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AUCTION_FILE auctionFile;
+	AUCTION_FILE auctionFile2;
+	std::vector<uint8_t> fileDataBefore;
+	std::vector<uint8_t> fileDataAfter;
+	std::vector<uint8_t> fileDataAfter2;
+
+	auctionData.deleted = false;
+	auctionData.deletedCount = 0;
+	auctionData.previousTime = 0;
+	auctionData.estimatedEndTimeFromAdded = true;
+
+	auctionWriter.beginProcess();
+	for(size_t i = 0; i < AUCTIONS_COUNT; i++) {
+		auctionData.uid = i; // be sure they are differents
+		auctionData.diffType = D_Added;
+		auctionData.previousTime = i*2;
+		auctionData.estimatedEndTimeMin = 24*3600 + auctionData.previousTime;
+		auctionData.estimatedEndTimeMax = auctionData.time + 24*3600;
+		addAuction(&auctionWriter, auctionData);
+	}
+	auctionWriter.endProcess();
+
+	dumpAuctions(&auctionWriter, &auctionFile, true, true);
+	auctionWriter.dumpAuctions(fileDataBefore, true, true);
+	ASSERT_EQ(AUCTIONS_COUNT, auctionFile.auctions.size());
+
+	for(size_t i = 0; i < AUCTIONS_COUNT; i++) {
+		auctionData.uid = i; // be sure they are differents
+		auctionData.diffType = D_Added;
+		auctionData.previousTime = i*2;
+		auctionData.estimatedEndTimeMin = 24*3600 + auctionData.previousTime;
+		auctionData.estimatedEndTimeMax = auctionData.time + 24*3600;
+		expectAuction(&auctionFile, auctionData, true);
+	}
+
+
+	// dump to file
+	auctionWriter.dumpAuctions(fileDataAfter, true, true);
+	auctionWriter.writeAuctionDataToFile("test_auctions", name, fileDataAfter);
+
+	EXPECT_TRUE(auctionWriter.readAuctionDataFromFile("test_auctions", name, fileDataAfter2));
+
+	EXPECT_EQ(fileDataBefore.size(), fileDataAfter2.size());
+	if(fileDataBefore.size() == fileDataAfter2.size()) {
+		EXPECT_EQ(0, memcmp(fileDataBefore.data(), fileDataAfter2.data(), fileDataBefore.size()));
+	}
+
+	uint32_t version = ((Header*)fileDataAfter2.data())->version;
+	MessageBuffer structBuffer(fileDataAfter2.data(), fileDataAfter2.size(), version);
+
+	auctionFile.deserialize(&structBuffer);
+	ASSERT_TRUE(structBuffer.checkFinalSize());
+
+	EXPECT_EQ(DT_Full, auctionFile.header.dumpType);
+
+	auctionWriter.importDump(&auctionFile);
+
+	//check all auctions
+	dumpAuctions(&auctionWriter, &auctionFile2, true, true);
+	ASSERT_EQ(AUCTIONS_COUNT, auctionFile2.auctions.size());
+
+	for(size_t i = 0; i < AUCTIONS_COUNT; i++) {
+		auctionData.uid = i; // be sure they are differents
+		auctionData.diffType = D_Added;
+		auctionData.previousTime = i*2;
+		auctionData.estimatedEndTimeMin = 24*3600 + auctionData.previousTime;
+		auctionData.estimatedEndTimeMax = auctionData.time + 24*3600;
+		expectAuction(&auctionFile2, auctionData, true);
+	}
+}
+
+TEST(auction_full_mode, write_read_auctions_file_big_gz) {
+	testWriteReadAuctionsFile("auction_file_big.bin.gz");
+}
+
+TEST(auction_full_mode, write_read_auctions_file_big_bin) {
+	testWriteReadAuctionsFile("auction_file_big.bin");
+}

@@ -21,8 +21,10 @@ public:
 	void writeAuctionDataToFile(std::string auctionsDir, std::string auctionsFile, const std::vector<uint8_t>& data, time_t fileTimeStamp, const char* suffix);
 	void writeAuctionDataToFile(std::string auctionsDir, std::string auctionsFile, const std::vector<uint8_t>& data);
 
+	bool readAuctionDataFromFile(std::string auctionsDir, std::string auctionsFile, std::vector<uint8_t>& data);
 private:
 	static int compressGzip(std::vector<uint8_t>& compressedData, const std::vector<uint8_t> &sourceData, int level);
+	static int uncompressGzip(std::vector<uint8_t>& uncompressedData, const std::vector<uint8_t>& compressedData);
 
 protected:
 	CategoryTimeManager categoryTimeManager;
