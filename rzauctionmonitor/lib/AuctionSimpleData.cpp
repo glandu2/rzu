@@ -47,9 +47,7 @@ bool AuctionSimpleData::isInFinalState() const
 
 void AuctionSimpleData::setStatus(ProcessStatus status, uint64_t time)
 {
-	if(status == PS_Deleted && processStatus != PS_Deleted) {
-		updateTime(time);
-	} else if(status != PS_NotProcessed) {
+	if((status == PS_Deleted && processStatus != PS_Deleted) || status != PS_NotProcessed) {
 		updateTime(time);
 	}
 
@@ -61,11 +59,9 @@ bool AuctionSimpleData::outputInPartialDump()
 	DiffType diffType = getAuctionDiffType();
 
 	if(diffType >= D_Invalid)
-		logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d for auction 0x%08X\n", diffType, getUid().get());
+		logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d, status: %d for auction 0x%08X\n", diffType, processStatus, getUid().get());
 
-	if(diffType == D_Unmodified)
-		return false;
-	return true;
+	return diffType != D_Unmodified;
 }
 
 AuctionSimpleData *AuctionSimpleData::createFromDump(const AUCTION_SIMPLE_INFO *auctionInfo)
@@ -128,6 +124,11 @@ AuctionSimpleData::ProcessStatus AuctionSimpleData::getAuctionProcessStatus(Diff
 
 bool AuctionSimpleData::parseData(const uint8_t *data, size_t len)
 {
+	if(data == nullptr || len == 0) {
+		log(LL_Error, "No auction data, uid: 0x%08X\n", getUid().get());
+		return false;
+	}
+
 	bool hasChanged = rawData.size() != len || memcmp(rawData.data(), data, len) != 0;
 
 	rawData.assign(data, data + len);

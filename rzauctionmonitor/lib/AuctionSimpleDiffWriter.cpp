@@ -9,9 +9,7 @@ void AuctionSimpleDiffWriter::addAuctionInfo(AuctionUid uid, uint64_t time, uint
 {
 	AuctionSimpleData* auctionData = getAuction(uid);
 	if(auctionData)
-		auctionData->doUpdate(time,
-		                      data,
-		                      len);
+		auctionData->doUpdate(time, data, len);
 	else
 		addAuction(new AuctionSimpleData(uid,
 		                                 categoryTimeManager.getEstimatedPreviousCategoryBeginTime(category),
