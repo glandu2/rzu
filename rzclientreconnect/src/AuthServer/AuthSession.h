@@ -32,7 +32,6 @@ public:
 				bool isAdultServer);
 	~AuthSession();
 
-	static const std::unordered_map<uint16_t, AuthSession*>& getServerList() { return servers; }
 	const std::list<TS_GA_ACCOUNT_LIST::AccountInfo>& getAccountList() { return accountList; }
 
 	void connect();
