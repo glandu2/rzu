@@ -51,7 +51,6 @@ public:
 	AuctionComplexData(uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len);
 
 	bool update(uint64_t time, const uint8_t *data, size_t len);
-	void unmodified(uint64_t time);
 	void remove(uint64_t time);
 
 	virtual void beginProcess();
@@ -68,12 +67,14 @@ public:
 	bool isDeleted() const { return deleted; }
 
 protected:
+	void unmodified(uint64_t time);
+	void maybeStillDeleted();
+
 	bool parseData(const uint8_t *data, size_t len);
 	void postParseData(bool newData);
 	uint32_t durationTypeToSecond(DurationType durationType);
 	void setStatus(ProcessStatus status, uint64_t time);
 
-	void maybeStillDeleted();
 	DiffType getAuctionDiffType() const;
 	static ProcessStatus getAuctionProcessStatus(DiffType diffType);
 

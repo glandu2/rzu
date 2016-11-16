@@ -8,10 +8,6 @@
 #include <stdio.h>
 #include "Core/Utils.h"
 
-#if defined(__sun)
-#include <alloca.h>
-#endif
-
 #include "PacketEnums.h"
 #include "UploadClient/TS_UC_LOGIN_RESULT.h"
 #include "UploadClient/TS_UC_UPLOAD.h"
@@ -73,6 +69,7 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 
 void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	TS_UC_UPLOAD result;
+	char filename[128];
 	TS_MESSAGE::initMessage<TS_UC_UPLOAD>(&result);
 
 
@@ -90,14 +87,15 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	} else if(!checkJpegImage(packet->file_length, packet->file_contents)) {
 		log(LL_Debug, "Upload file is not a jpeg file\n");
 		result.result = TS_RESULT_INVALID_ARGUMENT;
+	} else if(currentRequest->getGameServer()->getName().size() > sizeof(filename) / 2) {
+		log(LL_Debug, "Game server name is too long: %d\n", (int)currentRequest->getGameServer()->getName().size());
+		result.result = TS_RESULT_INVALID_TEXT;
 	} else {
-		size_t filenameSize = currentRequest->getGameServer()->getName().size() + 1 + 10 + 1 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 4 + 1;
-		char *filename = (char*)alloca(filenameSize);
 		struct tm timeinfo;
 
 		Utils::getGmTime(time(NULL), &timeinfo);
 
-		snprintf(filename, filenameSize, "%s_%010d_%02d%02d%02d_%02d%02d%02d.jpg",
+		snprintf(filename, sizeof(filename), "%s_%010d_%02d%02d%02d_%02d%02d%02d.jpg",
 				 currentRequest->getGameServer()->getName().c_str(),
 				 currentRequest->getGuildId(),
 				 timeinfo.tm_year % 100,

@@ -6,6 +6,8 @@
 #include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 #include "Packet/MessageBuffer.h"
+#include <memory>
+#include "Core/ScopeGuard.h"
 
 AuctionCommonWriter::AuctionCommonWriter(size_t categoryCount) : categoryTimeManager(categoryCount), fileNumber(0)
 {
@@ -32,12 +34,13 @@ void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::s
 void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::string auctionsFile, const std::vector<uint8_t> &data)
 {
 	std::string auctionsFilename = auctionsDir + "/" + auctionsFile;
+	std::unique_ptr<FILE, int(*)(FILE*)> file(nullptr, &fclose);
 
 	Utils::mkdir(auctionsDir.c_str());
 
-	FILE* file = fopen(auctionsFilename.c_str(), "wb");
+	file.reset(fopen(auctionsFilename.c_str(), "wb"));
 	if(!file) {
-		log(LL_Error, "Cannot open auction file %s\n", auctionsFilename.c_str());
+		log(LL_Error, "Cannot open auction file for write %s\n", auctionsFilename.c_str());
 		return;
 	}
 
@@ -46,32 +49,92 @@ void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::s
 		log(LL_Info, "Writting compressed data to file %s\n", auctionsFile.c_str());
 
 		std::vector<uint8_t> compressedData;
-		int result = compressGzip(compressedData, data, Z_BEST_COMPRESSION);
+		const char* zlibMessage;
+		int result = compressGzip(compressedData, data, Z_BEST_COMPRESSION, zlibMessage);
 		if(result == Z_OK) {
-			if(fwrite(&compressedData[0], sizeof(uint8_t), compressedData.size(), file) != compressedData.size()) {
+			if(fwrite(&compressedData[0], sizeof(uint8_t), compressedData.size(), file.get()) != compressedData.size()) {
 				log(LL_Error, "Failed to write data to file %s: error %d\n", auctionsFilename.c_str(), errno);
 			}
 		} else {
-			log(LL_Error, "Failed to compress %d bytes: %d\n", (int)data.size(), result);
+			log(LL_Error, "Failed to compress %d bytes: %d: %s\n", (int)data.size(), result, zlibMessage ? zlibMessage : "");
 		}
 	} else {
 		log(LL_Info, "Writting data to file %s\n", auctionsFile.c_str());
-		if(fwrite(&data[0], sizeof(uint8_t), data.size(), file) != data.size()) {
+		if(fwrite(&data[0], sizeof(uint8_t), data.size(), file.get()) != data.size()) {
 			log(LL_Error, "Failed to write data to file %s: error %d\n", auctionsFilename.c_str(), errno);
 		}
 	}
-
-	fclose(file);
 }
 
-int AuctionCommonWriter::compressGzip(std::vector<uint8_t>& compressedData, const std::vector<uint8_t>& sourceData, int level) {
+bool AuctionCommonWriter::readAuctionDataFromFile(std::string auctionsDir, std::string auctionsFile, std::vector<uint8_t>& data)
+{
+	std::unique_ptr<FILE, int(*)(FILE*)> file(nullptr, &fclose);
+	std::string filename = auctionsDir + "/" + auctionsFile;
+
+	data.clear();
+
+	file.reset(fopen(filename.c_str(), "rb"));
+	if(!file) {
+		log(LL_Error, "Cannot open auction file for read %s\n", filename.c_str());
+		return false;
+	}
+
+	fseek(file.get(), 0, SEEK_END);
+	size_t fileSize = ftell(file.get());
+	fseek(file.get(), 0, SEEK_SET);
+
+	if(fileSize > 50*1024*1024) {
+		log(LL_Error, "State file %s size too large (over 50MB): %d\n", filename.c_str(), fileSize);
+		return false;
+	}
+
+	size_t pos = auctionsFile.find_last_of(".gz");
+	if(pos == (auctionsFile.size() - 1)) {
+		log(LL_Info, "Reading compressed data from file %s\n", auctionsFile.c_str());
+
+		std::vector<uint8_t> compressedData;
+		compressedData.resize(fileSize);
+		size_t readDataSize = fread(compressedData.data(), 1, fileSize, file.get());
+		if(readDataSize != fileSize) {
+			log(LL_Error, "Coulnd't read all file data: %s, size: %ld, read: %ld\n", filename.c_str(), (long int)fileSize, (long int)readDataSize);
+			return false;
+		}
+
+		const char* zlibMessage;
+		int result = uncompressGzip(data, compressedData, zlibMessage);
+		if(result != Z_OK) {
+			log(LL_Error, "Failed to uncompress %s: %d: %s\n", filename.c_str(), result, zlibMessage ? zlibMessage : "");
+			data.clear();
+			return false;
+		}
+	} else {
+		log(LL_Info, "Reading data from file %s\n", auctionsFile.c_str());
+		data.resize(fileSize);
+		size_t readDataSize = fread(data.data(), 1, fileSize, file.get());
+		if(readDataSize != fileSize) {
+			log(LL_Error, "Coulnd't read all file data: %s, size: %ld, read: %ld\n", filename.c_str(), (long int)fileSize, (long int)readDataSize);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+int AuctionCommonWriter::compressGzip(std::vector<uint8_t>& compressedData, const std::vector<uint8_t>& sourceData, int level, const char*& msg) {
 	z_stream stream;
 	int err;
+	msg = nullptr;
 
 	memset(&stream, 0, sizeof(stream));
 
+	guard_on_exit(setMsg, [&] {
+		msg = stream.msg;
+	});
+
 	err = deflateInit2(&stream, level, Z_DEFLATED, MAX_WBITS + 16, 8, Z_DEFAULT_STRATEGY);
-	if (err != Z_OK) return err;
+	if(err != Z_OK) {
+		return err;
+	}
 
 	compressedData.resize(deflateBound(&stream, sourceData.size()));
 
@@ -79,11 +142,11 @@ int AuctionCommonWriter::compressGzip(std::vector<uint8_t>& compressedData, cons
 	stream.avail_in = (uInt)sourceData.size();
 	stream.next_out = compressedData.data();
 	stream.avail_out = (uInt)compressedData.size();
-	if ((uLong)stream.avail_out != compressedData.size())
+	if((uLong)stream.avail_out != compressedData.size())
 		return Z_BUF_ERROR;
 
 	err = deflate(&stream, Z_FINISH);
-	if (err != Z_STREAM_END) {
+	if(err != Z_STREAM_END) {
 		deflateEnd(&stream);
 		return err == Z_OK ? Z_BUF_ERROR : err;
 	}
@@ -91,5 +154,48 @@ int AuctionCommonWriter::compressGzip(std::vector<uint8_t>& compressedData, cons
 	compressedData.resize(stream.total_out);
 
 	err = deflateEnd(&stream);
+	return err;
+}
+
+int AuctionCommonWriter::uncompressGzip(std::vector<uint8_t>& uncompressedData, const std::vector<uint8_t>& compressedData, const char*& msg) {
+	z_stream stream;
+	int err;
+	size_t outputIndex = 0;
+
+	memset(&stream, 0, sizeof(stream));
+
+	guard_on_exit(setMsg, [&] {
+		msg = stream.msg;
+	});
+
+	err = inflateInit2(&stream, 16+MAX_WBITS);
+	if(err != Z_OK)
+		return err;
+
+	stream.avail_in = compressedData.size();
+	stream.next_in = compressedData.data();
+
+	/* run inflate() on input until output buffer not full */
+	do {
+		uncompressedData.resize(uncompressedData.size() + 1024*1024);
+		stream.avail_out = uncompressedData.size() - outputIndex;
+		stream.next_out = &uncompressedData[outputIndex];
+		err = inflate(&stream, Z_NO_FLUSH);
+		switch(err) {
+			case Z_NEED_DICT:
+				err = Z_DATA_ERROR;     /* and fall through */
+			case Z_DATA_ERROR:
+			case Z_MEM_ERROR:
+			case Z_STREAM_ERROR:
+				(void)inflateEnd(&stream);
+				return err;
+		}
+		outputIndex = uncompressedData.size() - stream.avail_out;
+	} while(stream.avail_in > 0);
+
+	err = inflateEnd(&stream);
+
+	uncompressedData.resize(stream.total_out);
+
 	return err;
 }

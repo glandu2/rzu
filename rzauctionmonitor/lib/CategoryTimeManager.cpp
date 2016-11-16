@@ -39,6 +39,8 @@ void CategoryTimeManager::resetCategoryTime() {
 	time_t lastEndCategoryTime = getLastEndCategoryTime();
 	for(size_t i = 0; i < categoryTime.size(); i++)
 		categoryTime[i].resetTimes(lastEndCategoryTime);
+
+	log(LL_Debug, "Reset categories time to %" PRId64 "\n", (int64_t)lastEndCategoryTime);
 }
 
 void CategoryTimeManager::adjustCategoryTimeRange(size_t category, time_t time)

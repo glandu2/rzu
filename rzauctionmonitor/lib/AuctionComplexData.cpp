@@ -35,18 +35,22 @@ bool AuctionComplexData::update(uint64_t time, const uint8_t *data, size_t len)
 	return dataModified;
 }
 
-void AuctionComplexData::unmodified(uint64_t time)
-{
-	if(processStatus != PS_Added && processStatus != PS_Updated) {
-		setStatus(PS_Unmodifed, time);
-	}
-}
-
 void AuctionComplexData::remove(uint64_t time)
 {
 	if(processStatus == PS_NotProcessed) {
 		setStatus(PS_MaybeDeleted, time);
 		maybeStillDeleted();
+	} else {
+		log(LL_Warning, "Remove call on processed auction: 0x%08X, status: %d\n", getUid().get(), processStatus);
+	}
+}
+
+void AuctionComplexData::unmodified(uint64_t time)
+{
+	if(processStatus != PS_Added && processStatus != PS_Updated) {
+		setStatus(PS_Unmodifed, time);
+	} else {
+		log(LL_Warning, "Unmodified call on added or updated auction: 0x%08X, status: %d\n", getUid().get(), processStatus);
 	}
 }
 
@@ -72,8 +76,10 @@ void AuctionComplexData::beginProcess()
 		if(!deleted) {
 			if(getTimeMax())
 				advanceTime();
-			oldDynamicData = dynamicData;
 		}
+
+		// Continue diffing even with deleted == true if this auction get readded
+		oldDynamicData = dynamicData;
 	}
 }
 
@@ -94,7 +100,7 @@ bool AuctionComplexData::outputInPartialDump()
 	DiffType diffType = getAuctionDiffType();
 
 	if(diffType >= D_Invalid)
-		logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d for auction 0x%08X\n", diffType, getUid().get());
+		logStatic(LL_Error, getStaticClassName(), "Invalid diff flag: %d, status: %d, for auction 0x%08X\n", diffType, processStatus, getUid().get());
 
 	if(diffType == D_Unmodified || diffType == D_MaybeDeleted)
 		return false;
@@ -207,7 +213,10 @@ bool AuctionComplexData::parseData(const uint8_t *data, size_t len)
 
 	const AuctionDataEnd* auctionDataEnd = reinterpret_cast<const AuctionDataEnd*>(data + len - sizeof(AuctionDataEnd));
 
-	if(len < sizeof(AuctionDataEnd) || auctionDataEnd->bid_flag > BF_NoBid || auctionDataEnd->duration_type < DT_Short || auctionDataEnd->duration_type > DT_Long) {
+	if(len < sizeof(AuctionDataEnd) ||
+	        auctionDataEnd->bid_flag < BF_Bidded || auctionDataEnd->bid_flag > BF_NoBid ||
+	        auctionDataEnd->duration_type < DT_Short || auctionDataEnd->duration_type > DT_Long)
+	{
 		if(len < sizeof(AuctionDataEnd)) {
 			log(LL_Error, "Auction data smaller than auction end section, uid: 0x%08X, data size = %" PRIdS "\n", getUid().get(), len);
 		} else {
