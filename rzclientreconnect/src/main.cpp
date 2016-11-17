@@ -66,7 +66,7 @@ void runServers(Log *trafficLogger) {
 				trafficLogger);
 
 
-	serverManager.addServer("auth.gameserver", &authGameServer, CONFIG_GET()->game.listener.autoStart);
+	serverManager.addServer("auth.gameserver", &authGameServer, &CONFIG_GET()->game.listener.autoStart);
 	ConsoleSession::start(&serverManager);
 
 	serverManager.start();
