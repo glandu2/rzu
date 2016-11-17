@@ -166,14 +166,14 @@ void runServers(Log *trafficLogger) {
 				CONFIG_GET()->logclient.port);
 
 
-	serverManager.addServer("auth.clients", &authClientServer, CONFIG_GET()->auth.client.listener.autoStart);
-	serverManager.addServer("auth.gameserver", &authGameServer, CONFIG_GET()->auth.game.listener.autoStart);
-	serverManager.addServer("auth.billing", &billingTelnetServer, CONFIG_GET()->auth.billing.listener.autoStart);
-	serverManager.addServer("auth.logclient", &logServerClient, CONFIG_GET()->logclient.enable);
+	serverManager.addServer("auth.clients", &authClientServer, &CONFIG_GET()->auth.client.listener.autoStart);
+	serverManager.addServer("auth.gameserver", &authGameServer, &CONFIG_GET()->auth.game.listener.autoStart);
+	serverManager.addServer("auth.billing", &billingTelnetServer, &CONFIG_GET()->auth.billing.listener.autoStart);
+	serverManager.addServer("auth.logclient", &logServerClient, &CONFIG_GET()->logclient.enable);
 
-	serverManager.addServer("upload.clients", &uploadClientServer, CONFIG_GET()->upload.client.listener.autoStart);
-	serverManager.addServer("upload.iconserver", &uploadIconServer, CONFIG_GET()->upload.icons.listener.autoStart);
-	serverManager.addServer("upload.gameserver", &uploadGameServer, CONFIG_GET()->upload.game.listener.autoStart);
+	serverManager.addServer("upload.clients", &uploadClientServer, &CONFIG_GET()->upload.client.listener.autoStart);
+	serverManager.addServer("upload.iconserver", &uploadIconServer, &CONFIG_GET()->upload.icons.listener.autoStart);
+	serverManager.addServer("upload.gameserver", &uploadGameServer, &CONFIG_GET()->upload.game.listener.autoStart);
 
 	ConsoleSession::start(&serverManager);
 
