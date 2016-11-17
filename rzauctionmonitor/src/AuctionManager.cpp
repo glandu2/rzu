@@ -19,7 +19,7 @@ void AuctionManager::onReloadAccounts(IWritableConsole* console, const std::vect
 	}
 }
 
-AuctionManager::AuctionManager() : auctionWriter(CATEGORY_MAX_INDEX), totalPages(0), firstDump(true), reloadingAccounts(false)
+AuctionManager::AuctionManager() : auctionWriter(CATEGORY_MAX_INDEX), stopped(true), totalPages(0), firstDump(true), reloadingAccounts(false)
 {
 	if(!instance) {
 		ConsoleCommands::get()->addCommand("client.reload_accounts", "reload", 0, &AuctionManager::onReloadAccounts,
@@ -30,18 +30,27 @@ AuctionManager::AuctionManager() : auctionWriter(CATEGORY_MAX_INDEX), totalPages
 	}
 }
 
-void AuctionManager::start()
+bool AuctionManager::start()
 {
 	loadInitialState();
 	loadAccounts();
 
+	stopped = false;
+	pendingRequests.clear();
 	totalPages = 1;
 	currentCategory = 0;
 	addRequest(currentCategory, 1);
+
+	return true;
 }
 
 void AuctionManager::stop()
 {
+	stopped = true;
+	stopClients();
+}
+
+void AuctionManager::stopClients() {
 	log(LL_Info, "Stopping %d clients\n", (int)clients.size());
 
 	stoppingClients.insert(stoppingClients.end(), std::make_move_iterator(clients.begin()), std::make_move_iterator(clients.end()));
@@ -53,10 +62,15 @@ void AuctionManager::stop()
 	}
 }
 
+bool AuctionManager::isStarted()
+{
+	return !clients.empty();
+}
+
 void AuctionManager::reloadAccounts() {
 	if(stoppingClients.empty()) {
 		reloadingAccounts = true;
-		stop();
+		stopClients();
 		if(stoppingClients.empty()) {
 			loadAccounts();
 		}
@@ -153,7 +167,7 @@ void AuctionManager::onClientStopped(AuctionWorker* worker) {
 	if(!foundWorker)
 		log(LL_Warning, "Worker %s stopped but not found in currently stopping workers, %d worker left to stop\n", worker->getObjectName(), (int)stoppingClients.size());
 
-	if(stoppingClients.empty())
+	if(stoppingClients.empty() && !stopped)
 		accountReloadTimer.start(this, &AuctionManager::onAccountReloadTimer, CONFIG_GET()->client.recoDelay.get(), 0);
 }
 
@@ -250,13 +264,16 @@ void AuctionManager::dumpAuctions() {
 
 	const std::string& auctionDir = CONFIG_GET()->client.auctionListDir.get();
 	const std::string& auctionFile = CONFIG_GET()->client.auctionListFile.get();
+	const std::string& auctionState = CONFIG_GET()->client.stateFile.get();
 
 	if(firstDump || CONFIG_GET()->client.doFullAuctionDump.get()) {
 		auctionWriter.dumpAuctions(fileData, true);
 		auctionWriter.writeAuctionDataToFile(auctionDir, auctionFile, fileData, dumpTimeStamp, "_full");
-	} else if(CONFIG_GET()->client.doStateAuctionDump.get()) {
+	}
+
+	if(CONFIG_GET()->client.doStateAuctionDump.get()) {
 		auctionWriter.dumpAuctions(fileData, true);
-		auctionWriter.writeAuctionDataToFile(auctionDir, auctionFile, fileData, firstDumpTime, "_state");
+		auctionWriter.writeAuctionDataToFile(auctionDir, auctionState, fileData);
 	}
 
 	if(!firstDump) {
@@ -272,8 +289,14 @@ void AuctionManager::loadInitialState()
 		uint32_t version;
 	};
 	std::vector<uint8_t> buffer;
+	std::string filename = CONFIG_GET()->client.stateFile.get();
 
-	auctionWriter.readAuctionDataFromFile(CONFIG_GET()->client.auctionListDir.get(), CONFIG_GET()->client.stateFile.get(), buffer);
+	if(filename.empty()) {
+		log(LL_Info, "No auction initial state file to load\n");
+		return;
+	}
+
+	auctionWriter.readAuctionDataFromFile(CONFIG_GET()->client.auctionListDir.get(), filename, buffer);
 
 	uint32_t version = ((Header*)buffer.data())->version;
 
