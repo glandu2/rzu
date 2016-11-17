@@ -7,20 +7,23 @@
 #include <memory>
 #include <deque>
 #include <time.h>
+#include "NetSession/StartableObject.h"
 
 struct TS_SC_CHARACTER_LIST;
 struct TS_SC_LOGIN_RESULT;
 struct TS_SC_AUCTION_SEARCH;
 class IWritableConsole;
 
-class AuctionManager : public Object, public IListener {
+class AuctionManager : public Object, public IListener, public StartableObject {
 	DECLARE_CLASS(AuctionManager)
 
 public:
 	AuctionManager();
 
-	void start();
+	bool start();
 	void stop();
+	bool isStarted();
+
 	void reloadAccounts();
 	void loadAccounts();
 
@@ -31,6 +34,7 @@ public:
 	static void onReloadAccounts(IWritableConsole* console, const std::vector<std::string>& args);
 
 private:
+	void stopClients();
 	static void onClientStoppedStatic(IListener* instance, AuctionWorker* worker);
 	void onClientStopped(AuctionWorker* worker);
 	void onAccountReloadTimer();
@@ -50,6 +54,7 @@ private:
 
 	std::deque<std::unique_ptr<AuctionWorker::AuctionRequest>> pendingRequests;
 
+	bool stopped;
 	int totalPages;
 	static const int CATEGORY_MAX_INDEX = 19;
 	int currentCategory;

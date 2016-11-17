@@ -62,7 +62,7 @@ void runServers(Log *trafficLogger) {
 				&CONFIG_GET()->client.listener.idleTimeout,
 				trafficLogger);
 
-	serverManager.addServer("clients", &clientSessionServer, CONFIG_GET()->client.listener.autoStart);
+	serverManager.addServer("clients", &clientSessionServer, &CONFIG_GET()->client.listener.autoStart);
 	ConsoleSession::start(&serverManager);
 
 	serverManager.start();

@@ -46,8 +46,9 @@ int main(int argc, char *argv[])
 	AuctionManager auctionManager;
 	ConsoleSession::start(&serverManager);
 
+	serverManager.addServer("auction.monitor", &auctionManager, nullptr);
+
 	serverManager.start();
-	auctionManager.start();
 
 	CrashHandler::setTerminateCallback(&onTerminate, &serverManager);
 

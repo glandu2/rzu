@@ -202,7 +202,65 @@ int main(int argc, char* argv[]) {
 
 	if(argc < 2) {
 		Object::logStatic(Object::LL_Info, "main", "Usage: %s auctions.bin\n", argv[0]);
-		return 0;
+		return 1;
+	}
+
+	DbConnection* connection = dbConnectionPool.getConnection(connectionString.get().c_str());
+	if(!connection) {
+		Object::logStatic(Object::LL_Error, "main", "Failed to open DB connection\n");
+		return 2;
+	}
+	bool createResult = connection->execute(
+	              "CREATE TABLE IF NOT EXISTS \"auctions\" (\r\n"
+	              "    \"uid\" int NOT NULL,\r\n"
+	              "    \"diff_flag\" smallint NOT NULL,\r\n"
+	              "    \"previous_time\" datetime NOT NULL,\r\n"
+	              "    \"time\" datetime NOT NULL,\r\n"
+	              "    \"estimated_end_min\" datetime NOT NULL,\r\n"
+	              "    \"estimated_end_max\" datetime NOT NULL,\r\n"
+	              "    \"category\" smallint NOT NULL,\r\n"
+	              "    \"duration_type\" smallint NOT NULL,\r\n"
+	              "    \"bid_price\" bigint NOT NULL,\r\n"
+	              "    \"price\" bigint NOT NULL,\r\n"
+	              "    \"seller\" varchar(32) NOT NULL,\r\n"
+	              "    \"bid_flag\" smallint NOT NULL,\r\n"
+	              "    \"handle\" int NOT NULL,\r\n"
+	              "    \"code\" int NOT NULL,\r\n"
+	              "    \"item_uid\" bigint NOT NULL,\r\n"
+	              "    \"count\" bigint NOT NULL,\r\n"
+	              "    \"ethereal_durability\" int NOT NULL,\r\n"
+	              "    \"endurance\" int NOT NULL,\r\n"
+	              "    \"enhance\" smallint NOT NULL,\r\n"
+	              "    \"level\" smallint NOT NULL,\r\n"
+	              "    \"flag\" int NOT NULL,\r\n"
+	              "    \"socket_0\" int NOT NULL,\r\n"
+	              "    \"socket_1\" int NOT NULL,\r\n"
+	              "    \"socket_2\" int NOT NULL,\r\n"
+	              "    \"socket_3\" int NOT NULL,\r\n"
+	              "    \"awaken_option_value_0\" int NOT NULL,\r\n"
+	              "    \"awaken_option_value_1\" int NOT NULL,\r\n"
+	              "    \"awaken_option_value_2\" int NOT NULL,\r\n"
+	              "    \"awaken_option_value_3\" int NOT NULL,\r\n"
+	              "    \"awaken_option_value_4\" int NOT NULL,\r\n"
+	              "    \"awaken_option_data_0\" int NOT NULL,\r\n"
+	              "    \"awaken_option_data_1\" int NOT NULL,\r\n"
+	              "    \"awaken_option_data_2\" int NOT NULL,\r\n"
+	              "    \"awaken_option_data_3\" int NOT NULL,\r\n"
+	              "    \"awaken_option_data_4\" int NOT NULL,\r\n"
+	              "    \"remain_time\" int NOT NULL,\r\n"
+	              "    \"elemental_effect_type\" smallint NOT NULL,\r\n"
+	              "    \"elemental_effect_remain_time\" int NOT NULL,\r\n"
+	              "    \"elemental_effect_attack_point\" int NOT NULL,\r\n"
+	              "    \"elemental_effect_magic_point\" int NOT NULL,\r\n"
+	              "    \"appearance_code\" int NOT NULL,\r\n"
+	              "    PRIMARY KEY (\r\n"
+	              "        \"uid\" ASC,\r\n"
+	              "        \"time\" ASC\r\n"
+	              "    )\r\n"
+	              ");");
+	if(!createResult) {
+		Object::logStatic(Object::LL_Error, "main", "Failed to create table \"auctions\"\n");
+		return 3;
 	}
 
 	std::vector<DB_Item::Input> inputs;
@@ -236,15 +294,39 @@ int main(int argc, char* argv[]) {
 
 		AUCTION_FILE auctionFile;
 		AuctionFileHeader* auctionHeader = reinterpret_cast<AuctionFileHeader*>(buffer);
-		if(strncmp(auctionHeader->signature, "RAH", 3) != 0) {
-			Object::logStatic(Object::LL_Error, "main", "Invalid file, unrecognized header signature\n");
-			return 3;
-		}
-		MessageBuffer structBuffer(buffer, fileSize, auctionHeader->file_version);
 
-		auctionFile.deserialize(&structBuffer);
-		if(!structBuffer.checkFinalSize()) {
-			Object::logStatic(Object::LL_Error, "main", "Invalid file\n");
+		if(strncmp(auctionHeader->signature, "RAH", 3) == 0) {
+			AUCTION_FILE trueFile;
+			MessageBuffer structBuffer(buffer, fileSize, auctionHeader->file_version);
+
+			trueFile.deserialize(&structBuffer);
+			if(!structBuffer.checkFinalSize()) {
+				Object::logStatic(Object::LL_Error, "main", "Invalid file\n");
+				return 3;
+			}
+			auctionFile = trueFile;
+		} else if(strncmp(auctionHeader->signature, "RHS", 3) == 0) {
+			AUCTION_SIMPLE_FILE trueFile;
+			MessageBuffer structBuffer(buffer, fileSize, auctionHeader->file_version);
+
+			trueFile.deserialize(&structBuffer);
+			if(!structBuffer.checkFinalSize()) {
+				Object::logStatic(Object::LL_Error, "main", "Invalid file\n");
+				return 3;
+			}
+			for(size_t i = 0; i < trueFile.auctions.size(); i++) {
+				const AUCTION_SIMPLE_INFO& auctionInfo = trueFile.auctions[i];
+				AUCTION_INFO auctionFullInfo = {0};
+				auctionFullInfo.uid = auctionInfo.uid;
+				auctionFullInfo.time = auctionInfo.time;
+				auctionFullInfo.previousTime = auctionInfo.previousTime;
+				auctionFullInfo.diffType = auctionInfo.diffType;
+				auctionFullInfo.category = auctionInfo.category;
+				auctionFullInfo.data = auctionInfo.data;
+				auctionFile.auctions.push_back(auctionFullInfo);
+			}
+		} else {
+			Object::logStatic(Object::LL_Error, "main", "Invalid file, unrecognized header signature\n");
 			return 3;
 		}
 
@@ -300,54 +382,3 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
-
-/*
-CREATE TABLE [auctions](
-	[uid] [int] NOT NULL,
-	[diff_flag] [smallint] NOT NULL,
-	[previous_time] [datetime] NOT NULL,
-	[time] [datetime] NOT NULL,
-	[estimated_end_min] [datetime] NOT NULL,
-	[estimated_end_max] [datetime] NOT NULL,
-	[category] [smallint] NOT NULL,
-	[duration_type] [smallint] NOT NULL,
-	[bid_price] [bigint] NOT NULL,
-	[price] [bigint] NOT NULL,
-	[seller] [varchar](32) NOT NULL,
-	[bid_flag] [smallint] NOT NULL,
-	[handle] [int] NOT NULL,
-	[code] [int] NOT NULL,
-	[item_uid] [bigint] NOT NULL,
-	[count] [bigint] NOT NULL,
-	[ethereal_durability] [int] NOT NULL,
-	[endurance] [int] NOT NULL,
-	[enhance] [smallint] NOT NULL,
-	[level] [smallint] NOT NULL,
-	[flag] [int] NOT NULL,
-	[socket_0] [int] NOT NULL,
-	[socket_1] [int] NOT NULL,
-	[socket_2] [int] NOT NULL,
-	[socket_3] [int] NOT NULL,
-	[awaken_option_value_0] [int] NOT NULL,
-	[awaken_option_value_1] [int] NOT NULL,
-	[awaken_option_value_2] [int] NOT NULL,
-	[awaken_option_value_3] [int] NOT NULL,
-	[awaken_option_value_4] [int] NOT NULL,
-	[awaken_option_data_0] [int] NOT NULL,
-	[awaken_option_data_1] [int] NOT NULL,
-	[awaken_option_data_2] [int] NOT NULL,
-	[awaken_option_data_3] [int] NOT NULL,
-	[awaken_option_data_4] [int] NOT NULL,
-	[remain_time] [int] NOT NULL,
-	[elemental_effect_type] [smallint] NOT NULL,
-	[elemental_effect_remain_time] [int] NOT NULL,
-	[elemental_effect_attack_point] [int] NOT NULL,
-	[elemental_effect_magic_point] [int] NOT NULL,
-	[appearance_code] [int] NOT NULL,
-	PRIMARY KEY (
-		[uid] ASC,
-		[time] ASC
-	)
-);
-
-*/
