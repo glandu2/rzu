@@ -67,7 +67,7 @@ void runServers(Log *trafficLogger) {
 				&banManager);
 
 
-	serverManager.addServer("log.clients", &logClientServer, CONFIG_GET()->log.client.listener.autoStart);
+	serverManager.addServer("log.clients", &logClientServer, &CONFIG_GET()->log.client.listener.autoStart);
 	ConsoleSession::start(&serverManager);
 
 	serverManager.start();
