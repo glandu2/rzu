@@ -88,10 +88,10 @@ static void runServers(Log *trafficLogger) {
 	ConsoleSession::start(&serverManager);
 
 	serverManager.addServer("game.clients", &clientsServer,
-							CONFIG_GET()->game.clients.autoStart);
+	                        &CONFIG_GET()->game.clients.autoStart);
 
 	serverManager.addServer("game.auth", &authConnection,
-							authConnection.getAutoStartConfig());
+	                        &authConnection.getAutoStartConfig());
 
 	CrashHandler::setTerminateCallback(&onTerminate, &serverManager);
 
