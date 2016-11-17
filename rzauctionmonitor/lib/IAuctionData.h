@@ -7,6 +7,7 @@
 #include "Core/Object.h"
 
 class RZAUCTION_EXTERN IAuctionData : public Object {
+	DECLARE_CLASS(IAuctionData)
 public:
 	IAuctionData(AuctionUid uid, int32_t category, uint64_t timeMin, uint64_t timeMax)
 	    : uid(uid), category(category), timeMin(timeMin), timeMax(timeMax) {}
