@@ -221,11 +221,8 @@ void AuctionManager::onAuctionSearchCompleted(bool success, int pageTotal, std::
 	if(!request) {
 		log(LL_Warning, "Search result for null request\n");
 	} else if(!success) {
-		request->failureNumber++;
-		if(request->failureNumber < 3)
-			pendingRequests.push_front(std::move(request));
-		else
-			log(LL_Warning, "Request for category %d, page %d failed %d times, giving up\n", request->category, request->page, request->failureNumber);
+		log(LL_Warning, "Request for category %d, page %d failed, retrying\n", request->category, request->page);
+		pendingRequests.push_front(std::move(request));
 	} else {
 		//load new pages
 		for(int page = totalPages+1; page <= pageTotal; page++) {
