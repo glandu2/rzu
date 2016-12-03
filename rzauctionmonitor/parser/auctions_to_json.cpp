@@ -1,19 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
-#include <time.h>
-#include <map>
 #include <vector>
-#include "Core/CharsetConverter.h"
-#include "Database/DbQueryJobRef.h"
 #include "Core/Log.h"
-#include "Core/EventLoop.h"
 #include "Config/GlobalCoreConfig.h"
-#include "Database/DbConnectionPool.h"
-#include "Database/DbConnection.h"
 #include "LibRzuInit.h"
 #include "AuctionFile.h"
 #include "Packet/JSONWriter.h"
+#include "AuctionWriter.h"
 
 cval<bool>& compactJson = CFG_CREATE("compactjson", false);
 
@@ -44,17 +36,9 @@ struct ItemData {
 #pragma pack(pop)
 
 template<class AUCTION_FILE>
-int deserialize(void* buffer, size_t fileSize, int version) {
-	AUCTION_FILE auctionFile;
+int writeJson(const AUCTION_FILE& auctionFile) {
 
-	MessageBuffer structBuffer(buffer, fileSize, version);
-	auctionFile.deserialize(&structBuffer);
-	if(!structBuffer.checkFinalSize()) {
-		Object::logStatic(Object::LL_Error, "main", "Invalid file\n");
-		return 3;
-	}
-
-	JSONWriter jsonWriter(version, compactJson.get());
+	JSONWriter jsonWriter(auctionFile.header.file_version, compactJson.get());
 	auctionFile.serialize(&jsonWriter);
 	jsonWriter.finalize();
 	Object::logStatic(Object::LL_Fatal, "main", "%s\n", jsonWriter.toString().c_str());
@@ -64,8 +48,6 @@ int deserialize(void* buffer, size_t fileSize, int version) {
 
 int main(int argc, char* argv[]) {
 	LibRzuInit();
-	DbConnectionPool dbConnectionPool;
-	DbBindingLoader::get()->initAll(&dbConnectionPool);
 
 	ConfigInfo::get()->init(argc, argv);
 
@@ -91,84 +73,38 @@ int main(int argc, char* argv[]) {
 		if(filename[0] == '/' || filename[0] == '-')
 			continue;
 
-		FILE* file = fopen(filename, "rb");
-		if(!file) {
-			Object::logStatic(Object::LL_Error, "main", "Cant open file %s\n", filename);
+		std::vector<uint8_t> data;
+		int version;
+		AuctionFileFormat fileFormat;
+
+		if(!AuctionWriter::readAuctionDataFromFile(filename, data)) {
+			Object::logStatic(Object::LL_Error, "main", "Cant read file %s\n", filename);
 			return 1;
 		}
 
-		fseek(file, 0, SEEK_END);
-		size_t fileSize = ftell(file);
-		fseek(file, 0, SEEK_SET);
-
-		char* buffer = (char*)malloc(fileSize);
-		size_t readDataSize = fread(buffer, 1, fileSize, file);
-		if(readDataSize != fileSize) {
-			Object::logStatic(Object::LL_Error, "main", "Coulnd't read file data, size: %ld, read: %ld\n", (long int)fileSize, (long int)readDataSize);
-			fclose(file);
-			return 2;
+		if(!AuctionWriter::getAuctionFileFormat(data, &version, &fileFormat)) {
+			Object::logStatic(Object::LL_Error, "main", "Invalid file, unrecognized header signature: %s\n", filename);
+			return 1;
 		}
-		fclose(file);
 
-		AuctionFileHeader* auctionHeader = reinterpret_cast<AuctionFileHeader*>(buffer);
-		if(strncmp(auctionHeader->signature, "RAH", 3) == 0) {
-			deserialize<AUCTION_FILE>(buffer, fileSize, auctionHeader->file_version);
-		} else if(strncmp(auctionHeader->signature, "RHS", 3) == 0) {
-			deserialize<AUCTION_SIMPLE_FILE>(buffer, fileSize, auctionHeader->file_version);
+		if(fileFormat == AFF_Complex) {
+			AUCTION_FILE file;
+			if(!AuctionWriter::deserialize(&file, data)) {
+				Object::logStatic(Object::LL_Error, "main", "Can't deserialize file %s\n", filename);
+				return 3;
+			}
+			writeJson(file);
 		} else {
-			Object::logStatic(Object::LL_Error, "main", "Invalid file, unrecognized header signature\n");
-			return 3;
+			AUCTION_SIMPLE_FILE file;
+			if(!AuctionWriter::deserialize(&file, data)) {
+				Object::logStatic(Object::LL_Error, "main", "Can't deserialize file %s\n", filename);
+				return 3;
+			}
+			writeJson(file);
 		}
 	}
-
-	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
 	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", i-1);
 
 	return 0;
 }
-
-/*
-CREATE TABLE "auctions" (
-	"uid"	integer NOT NULL,
-	"diff_flag"	smallint NOT NULL,
-	"previous_time"	INTEGER NOT NULL,
-	"time"	INTEGER NOT NULL,
-	"category"	smallint NOT NULL,
-	"duration_type"	smallint NOT NULL,
-	"bid_price"	bigint NOT NULL,
-	"price"	bigint NOT NULL,
-	"seller"	varchar NOT NULL,
-	"bid_flag"	smallint NOT NULL,
-	"handle"	integer NOT NULL,
-	"code"	integer NOT NULL,
-	"item_uid"	bigint NOT NULL,
-	"count"	bigint NOT NULL,
-	"ethereal_durability"	integer NOT NULL,
-	"endurance"	integer NOT NULL,
-	"enhance"	smallint NOT NULL,
-	"level"	smallint NOT NULL,
-	"flag"	integer NOT NULL,
-	"socket_0"	integer NOT NULL,
-	"socket_1"	integer NOT NULL,
-	"socket_2"	integer NOT NULL,
-	"socket_3"	integer NOT NULL,
-	"awaken_option_value_0"	integer NOT NULL,
-	"awaken_option_value_1"	integer NOT NULL,
-	"awaken_option_value_2"	integer NOT NULL,
-	"awaken_option_value_3"	integer NOT NULL,
-	"awaken_option_value_4"	integer NOT NULL,
-	"awaken_option_data_0"	integer NOT NULL,
-	"awaken_option_data_1"	integer NOT NULL,
-	"awaken_option_data_2"	integer NOT NULL,
-	"awaken_option_data_3"	integer NOT NULL,
-	"awaken_option_data_4"	integer NOT NULL,
-	"remain_time"	integer NOT NULL,
-	"elemental_effect_type"	smallint NOT NULL,
-	"elemental_effect_remain_time"	integer NOT NULL,
-	"elemental_effect_attack_point"	integer NOT NULL,
-	"elemental_effect_magic_point"	integer NOT NULL,
-	"appearance_code"	integer NOT NULL,
-	PRIMARY KEY(uid,time)
-);
-*/

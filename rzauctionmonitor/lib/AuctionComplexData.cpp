@@ -39,7 +39,6 @@ void AuctionComplexData::remove(uint64_t time)
 {
 	if(processStatus == PS_NotProcessed) {
 		setStatus(PS_MaybeDeleted, time);
-		maybeStillDeleted();
 	} else {
 		log(LL_Warning, "Remove call on processed auction: 0x%08X, status: %d\n", getUid().get(), processStatus);
 	}
@@ -90,8 +89,8 @@ void AuctionComplexData::endProcess(uint64_t categoryBeginTime, uint64_t categor
 			remove(categoryEndTime);
 		else if(!deleted)
 			unmodified(categoryBeginTime);
-		else
-			maybeStillDeleted();
+
+		maybeStillDeleted();
 	}
 }
 

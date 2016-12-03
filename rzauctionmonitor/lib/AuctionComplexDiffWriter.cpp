@@ -33,7 +33,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 		case D_Updated:
 		{
 			if(auctionInfo) {
-				if(diffType == D_Added && !auctionInfo->isDeleted()) {
+				if(diffMode && diffType == D_Added && !auctionInfo->isDeleted()) {
 					log(LL_Error, "Added auction already exists: 0x%08X, with state: %d\n", auction->uid, auctionInfo->getProcessStatus());
 				}
 
@@ -55,6 +55,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 			}
 			break;
 		}
+		case D_MaybeDeleted:
 		case D_Deleted: {
 			if(!auctionInfo) {
 				log(LL_Error, "Deleted auction not found: 0x%08X\n", auction->uid);
@@ -117,6 +118,8 @@ AUCTION_FILE AuctionComplexDiffWriter::exportDump(bool doFullDump, bool alwaysWi
 {
 	AUCTION_FILE auctionFile;
 
+	log(LL_Info, "Exporting %d auctions\n", getAuctionCount());
+
 	categoryTimeManager.serializeHeader(auctionFile.header, doFullDump ? DT_Full : DT_Diff);
 
 	auctionFile.auctions.reserve(getAuctionCount());
@@ -141,4 +144,5 @@ void AuctionComplexDiffWriter::importDump(const AUCTION_FILE* auctionFile)
 		const auto& auctionInfo = auctionFile->auctions[i];
 		addAuction(AuctionComplexData::createFromDump(&auctionInfo));
 	}
+	log(LL_Info, "Imported %d auctions\n", getAuctionCount());
 }
