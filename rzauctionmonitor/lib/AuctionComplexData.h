@@ -17,18 +17,7 @@ public:
 		PS_Updated,
 		PS_MaybeDeleted,
 		PS_Deleted
-	};
-	enum DurationType {
-		DT_Unknown = 0,
-		DT_Short = 1,  // 6h
-		DT_Medium = 2, // 24h
-		DT_Long = 3    // 72h
-	};
-	enum BidFlag {
-		BF_Bidded = 0,
-		BF_MyBid = 1,
-		BF_NoBid = 2
-	};
+    };
 	struct DynamicData {
 		DurationType durationType;
 		int64_t bidPrice;

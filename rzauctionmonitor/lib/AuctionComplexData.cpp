@@ -89,9 +89,9 @@ void AuctionComplexData::endProcess(uint64_t categoryBeginTime, uint64_t categor
 			remove(categoryEndTime);
 		else if(!deleted)
 			unmodified(categoryBeginTime);
-
-		maybeStillDeleted();
 	}
+
+	maybeStillDeleted();
 }
 
 bool AuctionComplexData::outputInPartialDump()

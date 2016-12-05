@@ -111,8 +111,8 @@ void Aggregator::exportState(std::string filename, const std::string& lastParsed
 	aggregationState.currentDate = currentDate;
 	aggregationState.lastParsedFile = lastParsedFile;
 
-	auto it = auctionData.begin();
-	auto itEnd = auctionData.end();
+	auto it = auctionsByItemCode.begin();
+	auto itEnd = auctionsByItemCode.end();
 	for(; it != itEnd; ++it) {
 		const std::pair<uint32_t, std::vector<AuctionSummary>>& val = *it;
 
@@ -165,7 +165,7 @@ void Aggregator::importState(std::string filename, std::string& lastParsedFile)
 			auctionSummary.price = item.price;
 			auctionSummary.isSold = item.isSold;
 
-			auctionData[item.itemCode].push_back(auctionSummary);
+			auctionsByItemCode[item.itemCode].push_back(auctionSummary);
 		}
 
 		log(LL_Debug, "Imported %d auctions summaries\n", aggregationState.auctionData.size());
@@ -216,74 +216,6 @@ int Aggregator::compareWithCurrentDate(time_t other)
 	return otherDateTm.tm_mday - currentDateTm.tm_mday;
 }
 
-void Aggregator::computeStatisticsOfDay()
-{
-	JSONWriter jsonWriter(0, true);
-	jsonWriter.clear();
-
-	log(LL_Info, "Computing statistics of %d items for day %d\n", auctionData.size(), currentDate);
-
-	auto it = auctionData.begin();
-	for(; it != auctionData.end(); ++it) {
-		AUCTION_INFO_PER_DAY dayAggregation;
-		uint32_t code = it->first;
-		const std::vector<AuctionSummary>& auctionSummary = it->second;
-
-		size_t i;
-		uint32_t num;
-		int64_t sum;
-		int64_t min;
-		int64_t max;
-
-		for(i = 0, num = 0, sum = 0, min = -1, max = -1; i < auctionSummary.size(); i++) {
-			int64_t price = auctionSummary[i].price;
-			if(auctionSummary[i].isSold == false) {
-				if(price < min || min == -1)
-					min = price;
-
-				if(price > max || max == -1)
-					max = price;
-
-				sum += price;
-				num++;
-			}
-		}
-
-		dayAggregation.code = code;
-		dayAggregation.itemNumber = num;
-		dayAggregation.minPrice = min;
-		dayAggregation.maxPrice = max;
-		dayAggregation.avgPrice = num ? sum/num : -1;
-
-		for(i = 0, num = 0, sum = 0, min = -1, max = -1; i < auctionSummary.size(); i++) {
-			int64_t price = auctionSummary[i].price;
-			if(auctionSummary[i].isSold == true) {
-				if(price < min || min == -1)
-					min = price;
-
-				if(price > max || max == -1)
-					max = price;
-
-				sum += price;
-				num++;
-			}
-		}
-
-		dayAggregation.estimatedSoldNumber = num;
-		dayAggregation.minEstimatedSoldPrice = min;
-		dayAggregation.maxEstimatedSoldPrice = max;
-		dayAggregation.avgEstimatedSoldPrice = num ? sum/num : -1;
-
-		jsonWriter.start();
-		dayAggregation.serialize(&jsonWriter);
-		jsonWriter.finalize();
-	}
-
-	sendToWebServer(jsonWriter.toString());
-
-	auctionData.clear();
-}
-
 bool Aggregator::parseFile(const char* filename) {
 	std::vector<uint8_t> data;
 	int version;
@@ -329,22 +261,106 @@ time_t Aggregator::parseAuctions(const AUCTION_FILE& auctionFile) {
 		const AUCTION_INFO& auctionInfo = auctionFile.auctions[i];
 		ItemData* item = (ItemData*) auctionInfo.data.data();
 
-		if((auctionInfo.diffType == D_Added || auctionInfo.diffType == D_Base) && auctionInfo.price) {
+		if(auctionInfo.diffType == D_Deleted) {
 			AuctionSummary summary;
 			summary.isSold = false;
-			summary.price = auctionInfo.price;
 
-			auctionData[item->code].push_back(summary);
-		} else if(auctionInfo.diffType == D_Deleted && (auctionInfo.time + 60) < auctionInfo.estimatedEndTimeMin && auctionInfo.price) {
-			AuctionSummary summary;
-			summary.isSold = true;
-			summary.price = auctionInfo.price;
+			if(auctionInfo.price == 0) {
+				summary.price = auctionInfo.bid_price;
+			} else {
+				summary.price = auctionInfo.price;
+			}
 
-			auctionData[item->code].push_back(summary);
+			if(item->count > 0)
+				summary.count = item->count;
+			else
+				summary.count = 1;
+
+			summary.price /= summary.count;
+
+			// Si enchère et encheri ou si pas enchère et disparu avant expiration alors objet vendu sinon expiration de la vente
+			if((auctionInfo.price == 0 && auctionInfo.bid_flag != BF_NoBid) ||
+			        (auctionInfo.price != 0 && auctionInfo.estimatedEndTimeMin != 0 && (auctionInfo.time + 120) < auctionInfo.estimatedEndTimeMin)) {
+				summary.isSold = true;
+			}
+
+			if(summary.price == 0) {
+				log(LL_Error, "Auction has price = 0: %d\n", auctionInfo.uid);
+			} else {
+				auctionsByItemCode[item->code].push_back(summary);
+			}
 		}
 	}
 
 	updateCurrentDateAndCompute(lastestDate);
 
 	return lastestDate;
+}
+
+void Aggregator::computeStatisticsOfDay()
+{
+	JSONWriter jsonWriter(0, true);
+	jsonWriter.clear();
+
+	log(LL_Info, "Computing statistics of %d items for day %d\n", auctionsByItemCode.size(), currentDate);
+
+	auto it = auctionsByItemCode.begin();
+	for(; it != auctionsByItemCode.end(); ++it) {
+		AUCTION_INFO_PER_DAY dayAggregation;
+		uint32_t code = it->first;
+		const std::vector<AuctionSummary>& auctionSummary = it->second;
+
+		size_t i;
+		int64_t num;
+		int64_t sum;
+		int64_t min;
+		int64_t max;
+
+		for(i = 0, num = 0, sum = 0, min = -1, max = -1; i < auctionSummary.size(); i++) {
+			int64_t price = auctionSummary[i].price;
+			int64_t count = auctionSummary[i].count;
+			if(price < min || min == -1)
+				min = price;
+
+			if(price > max || max == -1)
+				max = price;
+
+			sum += price * count;
+			num += count;
+		}
+
+		dayAggregation.code = code;
+		dayAggregation.itemNumber = num;
+		dayAggregation.minPrice = min;
+		dayAggregation.maxPrice = max;
+		dayAggregation.avgPrice = num ? sum/num : -1;
+
+		for(i = 0, num = 0, sum = 0, min = -1, max = -1; i < auctionSummary.size(); i++) {
+			int64_t price = auctionSummary[i].price;
+			int64_t count = auctionSummary[i].count;
+			if(auctionSummary[i].isSold == true) {
+				if(price < min || min == -1)
+					min = price;
+
+				if(price > max || max == -1)
+					max = price;
+
+				sum += price * count;
+				num += count;
+			}
+		}
+
+		dayAggregation.estimatedSoldNumber = num;
+		dayAggregation.minEstimatedSoldPrice = min;
+		dayAggregation.maxEstimatedSoldPrice = max;
+		dayAggregation.avgEstimatedSoldPrice = num ? sum/num : -1;
+
+		jsonWriter.start();
+		dayAggregation.serialize(&jsonWriter);
+		jsonWriter.finalize();
+	}
+
+	sendToWebServer(jsonWriter.toString());
+
+	auctionsByItemCode.clear();
 }

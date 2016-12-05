@@ -33,12 +33,14 @@ private:
 	struct AuctionSummary {
 		int64_t price;
 		bool isSold;
+		int32_t count;
 	};
 
 	HttpClientSession httpClientSession;
-	time_t currentDate;
-	std::unordered_map<uint32_t, std::vector<AuctionSummary>> auctionData;
 	cval<std::string>& url;
+	time_t currentDate;
+
+	std::unordered_map<uint32_t, std::vector<AuctionSummary>> auctionsByItemCode;
 };
 
 #endif
