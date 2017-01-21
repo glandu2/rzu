@@ -1,7 +1,8 @@
 #include "BenchmarkAuthSession.h"
 #include "Core/EventLoop.h"
+#include "Packet/PacketEpics.h"
 
-BenchmarkAuthSession::BenchmarkAuthSession(BenchmarkConfig* config) : ClientAuthSession(nullptr)
+BenchmarkAuthSession::BenchmarkAuthSession(BenchmarkConfig* config) : ClientAuthSession(nullptr, EPIC_LATEST)
 {
 	this->config = config;
 }
