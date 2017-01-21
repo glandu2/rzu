@@ -97,7 +97,7 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 DECLARE_DB_BINDING(DB_Item, "db_item");
 
 void DB_Item::addAuction(std::vector<DB_Item::Input>& auctions, const AUCTION_INFO& auctionInfo) {
-	DB_Item::Input input;
+	DB_Item::Input input = {};
 
 	input.uid = auctionInfo.uid;
 	input.diff_flag = auctionInfo.diffType;
@@ -107,38 +107,39 @@ void DB_Item::addAuction(std::vector<DB_Item::Input>& auctions, const AUCTION_IN
 	input.estimatedEndMax.setUnixTime(auctionInfo.estimatedEndTimeMax);
 	input.category = auctionInfo.category;
 
-	ItemData* item = (ItemData*) auctionInfo.data.data();
-
 	input.duration_type = auctionInfo.duration_type;
 	input.bid_price = auctionInfo.bid_price;
 	input.price = auctionInfo.price;
 	input.seller = auctionInfo.seller;
 	input.bid_flag = auctionInfo.bid_flag;
 
-	input.handle = item->handle;
-	input.code = item->code;
-	input.item_uid = item->item_uid;
-	input.count = item->count;
-	input.ethereal_durability = item->ethereal_durability;
-	input.endurance = item->endurance;
-	input.enhance = item->enhance;
-	input.level = item->level;
-	input.flag = item->flag;
-	memcpy(input.socket, item->socket, sizeof(input.socket));
-	memcpy(input.awaken_option_value, item->awaken_option_value, sizeof(input.awaken_option_value));
-	memcpy(input.awaken_option_data, item->awaken_option_data, sizeof(input.awaken_option_data));
-	input.remain_time = item->remain_time;
-	input.elemental_effect_type = item->elemental_effect_type;
-	input.elemental_effect_remain_time = item->elemental_effect_remain_time;
-	input.elemental_effect_attack_point = item->elemental_effect_attack_point;
-	input.elemental_effect_magic_point = item->elemental_effect_magic_point;
-	input.appearance_code = item->appearance_code;
+	ItemData* item = (ItemData*) auctionInfo.data.data();
+	if(item) {
+		input.handle = item->handle;
+		input.code = item->code;
+		input.item_uid = item->item_uid;
+		input.count = item->count;
+		input.ethereal_durability = item->ethereal_durability;
+		input.endurance = item->endurance;
+		input.enhance = item->enhance;
+		input.level = item->level;
+		input.flag = item->flag;
+		memcpy(input.socket, item->socket, sizeof(input.socket));
+		memcpy(input.awaken_option_value, item->awaken_option_value, sizeof(input.awaken_option_value));
+		memcpy(input.awaken_option_data, item->awaken_option_data, sizeof(input.awaken_option_data));
+		input.remain_time = item->remain_time;
+		input.elemental_effect_type = item->elemental_effect_type;
+		input.elemental_effect_remain_time = item->elemental_effect_remain_time;
+		input.elemental_effect_attack_point = item->elemental_effect_attack_point;
+		input.elemental_effect_magic_point = item->elemental_effect_magic_point;
+		input.appearance_code = item->appearance_code;
+	}
 
 	auctions.push_back(input);
 }
 
 void DB_Item::addAuction(std::vector<DB_Item::Input>& auctions, const AUCTION_SIMPLE_INFO& auctionInfo) {
-	DB_Item::Input input;
+	DB_Item::Input input = {};
 
 	input.uid = auctionInfo.uid;
 	input.diff_flag = auctionInfo.diffType;
@@ -149,34 +150,36 @@ void DB_Item::addAuction(std::vector<DB_Item::Input>& auctions, const AUCTION_SI
 	input.category = auctionInfo.category;
 
 	const ItemData* item = (ItemData*) auctionInfo.data.data();
-	if(auctionInfo.data.size() > sizeof(AuctionDataEnd)) {
-		const AuctionDataEnd* auctionDataEnd = (const AuctionDataEnd*) (auctionInfo.data.data() + auctionInfo.data.size() - sizeof(AuctionDataEnd));
+	if(item) {
+		if(auctionInfo.data.size() > sizeof(AuctionDataEnd)) {
+			const AuctionDataEnd* auctionDataEnd = (const AuctionDataEnd*) (auctionInfo.data.data() + auctionInfo.data.size() - sizeof(AuctionDataEnd));
 
-		input.duration_type = auctionDataEnd->duration_type;
-		input.bid_price = auctionDataEnd->bid_price;
-		input.price = auctionDataEnd->price;
-		input.seller = auctionDataEnd->seller;
-		input.bid_flag = auctionDataEnd->bid_flag;
+			input.duration_type = auctionDataEnd->duration_type;
+			input.bid_price = auctionDataEnd->bid_price;
+			input.price = auctionDataEnd->price;
+			input.seller = auctionDataEnd->seller;
+			input.bid_flag = auctionDataEnd->bid_flag;
+		}
+
+		input.handle = item->handle;
+		input.code = item->code;
+		input.item_uid = item->item_uid;
+		input.count = item->count;
+		input.ethereal_durability = item->ethereal_durability;
+		input.endurance = item->endurance;
+		input.enhance = item->enhance;
+		input.level = item->level;
+		input.flag = item->flag;
+		memcpy(input.socket, item->socket, sizeof(input.socket));
+		memcpy(input.awaken_option_value, item->awaken_option_value, sizeof(input.awaken_option_value));
+		memcpy(input.awaken_option_data, item->awaken_option_data, sizeof(input.awaken_option_data));
+		input.remain_time = item->remain_time;
+		input.elemental_effect_type = item->elemental_effect_type;
+		input.elemental_effect_remain_time = item->elemental_effect_remain_time;
+		input.elemental_effect_attack_point = item->elemental_effect_attack_point;
+		input.elemental_effect_magic_point = item->elemental_effect_magic_point;
+		input.appearance_code = item->appearance_code;
 	}
-
-	input.handle = item->handle;
-	input.code = item->code;
-	input.item_uid = item->item_uid;
-	input.count = item->count;
-	input.ethereal_durability = item->ethereal_durability;
-	input.endurance = item->endurance;
-	input.enhance = item->enhance;
-	input.level = item->level;
-	input.flag = item->flag;
-	memcpy(input.socket, item->socket, sizeof(input.socket));
-	memcpy(input.awaken_option_value, item->awaken_option_value, sizeof(input.awaken_option_value));
-	memcpy(input.awaken_option_data, item->awaken_option_data, sizeof(input.awaken_option_data));
-	input.remain_time = item->remain_time;
-	input.elemental_effect_type = item->elemental_effect_type;
-	input.elemental_effect_remain_time = item->elemental_effect_remain_time;
-	input.elemental_effect_attack_point = item->elemental_effect_attack_point;
-	input.elemental_effect_magic_point = item->elemental_effect_magic_point;
-	input.appearance_code = item->appearance_code;
 
 	auctions.push_back(input);
 }
@@ -189,7 +192,7 @@ bool DB_Item::createTable(DbConnectionPool* dbConnectionPool)
 		return false;
 	}
 	bool createResult = connection->execute(
-	              "CREATE TABLE IF NOT EXISTS \"auctions\" (\r\n"
+	              "CREATE TABLE \"auctions\" (\r\n"
 	              "    \"uid\" int NOT NULL,\r\n"
 	              "    \"diff_flag\" smallint NOT NULL,\r\n"
 	              "    \"previous_time\" datetime NOT NULL,\r\n"

@@ -3,6 +3,7 @@
 
 #include "Config/ConfigInfo.h"
 #include "Config/GlobalCoreConfig.h"
+#include "Packet/PacketEpics.h"
 
 struct GlobalConfig {
 	struct ClientConfig {
@@ -12,6 +13,7 @@ struct GlobalConfig {
 		cval<bool> &doFullAuctionDump, &doStateAuctionDump;
 		cval<std::string> &stateFile;
 		cval<bool> &autoStart;
+		cval<int> &version;
 
 		ClientConfig() :
 			useRsa(CFG_CREATE("client.use_rsa", true)),
@@ -29,7 +31,8 @@ struct GlobalConfig {
 		    doFullAuctionDump(CFG_CREATE("client.do_full_auction_dump", false)),
 		    doStateAuctionDump(CFG_CREATE("client.do_state_auction_dump", false)),
 		    stateFile(CFG_CREATE("client.initial_state_file", "")),
-		    autoStart(CFG_CREATE("client.autostart", true))
+		    autoStart(CFG_CREATE("client.autostart", true)),
+		    version(CFG_CREATE("client.version", EPIC_LATEST))
 		{
 			Utils::autoSetAbsoluteDir(auctionListDir);
 		}

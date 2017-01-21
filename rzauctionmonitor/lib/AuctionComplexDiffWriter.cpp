@@ -46,7 +46,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 				if(diffType == D_Updated) {
 					log(LL_Error, "Updated auction not found: 0x%08X\n", auction->uid);
 				} else if(auction->previousTime && auction->previousTime != categoryTimeManager.getEstimatedPreviousCategoryBeginTime(auction->category)) {
-					log(LL_Info, "Added auction previous time mismatch: category previous begin time: %" PRId64 ", new auction previous time: %" PRId64 "\n",
+					log(LL_Debug, "Added auction previous time mismatch: category previous begin time: %" PRId64 ", new auction previous time: %" PRId64 "\n",
 					    (int64_t)categoryTimeManager.getEstimatedPreviousCategoryBeginTime(auction->category), (int64_t)auction->previousTime);
 				}
 
@@ -56,6 +56,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 			break;
 		}
 		case D_MaybeDeleted:
+			break;
 		case D_Deleted: {
 			if(!auctionInfo) {
 				log(LL_Error, "Deleted auction not found: 0x%08X\n", auction->uid);

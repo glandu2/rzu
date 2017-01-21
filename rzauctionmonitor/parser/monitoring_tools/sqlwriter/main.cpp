@@ -4,6 +4,10 @@
 #include "Core/EventLoop.h"
 #include "NetSession/ServersManager.h"
 #include "Core/CrashHandler.h"
+#include "SqlWriter.h"
+#include "Database/DbConnectionPool.h"
+#include "Database/DbBindingLoader.h"
+#include "AuctionSQLWriter.h"
 
 static void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
@@ -17,7 +21,11 @@ int main(int argc, char* argv[]) {
 	LibRzuInit();
 	GlobalConfig::init();
 
+	DbConnectionPool dbConnectionPool;
+	DbBindingLoader::get()->initAll(&dbConnectionPool);
+
 	ConfigInfo::get()->init(argc, argv);
+
 
 	Log mainLogger(GlobalCoreConfig::get()->log.enable,
 	               GlobalCoreConfig::get()->log.level,
@@ -27,21 +35,20 @@ int main(int argc, char* argv[]) {
 	               GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
-	Log trafficLogger(CONFIG_GET()->trafficDump.enable,
-	                  CONFIG_GET()->trafficDump.level,
-	                  CONFIG_GET()->trafficDump.consoleLevel,
-	                  CONFIG_GET()->trafficDump.dir,
-	                  CONFIG_GET()->trafficDump.file,
-	                  GlobalCoreConfig::get()->log.maxQueueSize);
-	Log::setDefaultPacketLogger(&trafficLogger);
-
 	ConfigInfo::get()->dump();
 
 	ServersManager serverManager;
-	AuctionParser auctionParser;
+	SqlWriter sqlWriter;
+	AuctionParser auctionParser(&sqlWriter,
+	                            CONFIG_GET()->input.auctionsPath,
+	                            CONFIG_GET()->input.changeWaitSeconds,
+	                            CONFIG_GET()->states.statesPath,
+	                            CONFIG_GET()->states.auctionStateFile,
+	                            CONFIG_GET()->states.aggregationStateFile);
 
 	serverManager.addServer("auction.monitor", &auctionParser, nullptr);
 
+	//DB_Item::createTable(&dbConnectionPool);
 	serverManager.start();
 
 	CrashHandler::setTerminateCallback(&onTerminate, &serverManager);

@@ -281,6 +281,9 @@ bool AuctionWriter::deserialize(AUCTION_SIMPLE_FILE* file, const std::vector<uin
 		}
 
 		case AFF_Old:
+			memcpy(file->header.signature, "RHS", 4);
+			file->header.file_version = AUCTION_LATEST;
+			file->header.dumpType = DT_UnknownDumpType;
 			switch(version) {
 				case 0:
 					if(!deserializeOldFile<AuctionHeaderV0>(data, file))

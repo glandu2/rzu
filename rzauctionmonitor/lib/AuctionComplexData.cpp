@@ -16,6 +16,9 @@ AuctionComplexData::AuctionComplexData(uint32_t uid, uint64_t timeMin, uint64_t 
 {
 	parseData(data, len);
 	postParseData(true);
+
+	if(data == nullptr || len == 0)
+		log(LL_Error, "Auction added without data: 0x%08X\n", getUid().get());
 }
 
 bool AuctionComplexData::update(uint64_t time, const uint8_t *data, size_t len)
@@ -206,7 +209,7 @@ bool AuctionComplexData::parseData(const uint8_t *data, size_t len)
 	bool hasChanged;
 
 	if(data == nullptr || len == 0) {
-		log(LL_Error, "No auction data, uid: 0x%08X\n", getUid().get());
+		log(LL_Debug, "No auction data, uid: 0x%08X\n", getUid().get());
 		return false;
 	}
 

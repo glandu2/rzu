@@ -10,20 +10,24 @@ struct GlobalConfig {
 		cval<int>& port;
 		cval<std::string>& hostname;
 		cval<std::string>& url;
+		cval<std::string>& pwd;
 
 		WebserverConfig() :
 		    ip(CFG_CREATE("webserver.ip", "127.0.0.1")),
 		    port(CFG_CREATE("webserver.port", 8080)),
 		    hostname(CFG_CREATE("webserver.hostname", "127.0.0.1")),
-		    url(CFG_CREATE("webserver.url", "/api/upload_auction"))
+		    url(CFG_CREATE("webserver.url", "/api/upload_auction")),
+		    pwd(CFG_CREATE("webserver.pwd", ""))
 		{}
 	} webserver;
 
 	struct InputConfig {
 		cval<std::string>& auctionsPath;
+		cval<int>& changeWaitSeconds;
 
 		InputConfig() :
-		    auctionsPath(CFG_CREATE("input.auctionpath", "auctions"))
+		    auctionsPath(CFG_CREATE("input.auctionpath", "auctions")),
+		    changeWaitSeconds(CFG_CREATE("input.waitchangeseconds", 30))
 		{
 			Utils::autoSetAbsoluteDir(auctionsPath);
 		}

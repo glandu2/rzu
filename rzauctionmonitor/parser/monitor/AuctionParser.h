@@ -5,14 +5,15 @@
 #include "AuctionComplexDiffWriter.h"
 #include "Core/Timer.h"
 #include <string>
-#include "Aggregator.h"
 #include "NetSession/StartableObject.h"
+#include "IParser.h"
+#include "./Extern.h"
 
-class AuctionParser : public Object, public StartableObject
+class RZAUCTIONWATCHER_EXTERN AuctionParser : public Object, public StartableObject
 {
 	DECLARE_CLASSNAME(AuctionParser, 0)
 public:
-	AuctionParser();
+	AuctionParser(IParser* aggregator, cval<std::string>& auctionsPath, cval<int>& changeWaitSeconds, cval<std::string>& statesPath, cval<std::string>& auctionStateFile, cval<std::string>& aggregationStateFile);
 
 	virtual bool start();
 	virtual void stop();
@@ -24,13 +25,14 @@ protected:
 	void onTimeout();
 	static void onScandir(uv_fs_t* req);
 
-	bool parseFile(const char* filename);
+	bool parseFile(std::string fullFilename);
 	void exportState();
 
 private:
 	AuctionComplexDiffWriter auctionWriter;
-	Aggregator aggregator;
+	IParser* aggregator;
 	cval<std::string>& auctionsPath;
+	cval<int>& changeWaitSeconds;
 	cval<std::string>& statesPath;
 	cval<std::string>& auctionStateFile;
 	cval<std::string>& aggregationStateFile;

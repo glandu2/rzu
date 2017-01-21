@@ -4,14 +4,15 @@
 #include "Config/ConfigParamVal.h"
 
 AuthSession::AuthSession(GameSession* gameSession,
-						 cval<std::string>& ip,
-						 cval<int>& port,
-						 cval<int>& serverIdx,
-						 cval<int>& delayTime,
-						 cval<bool>& useRsa,
-						 const std::string& account,
-						 const std::string& password)
-	: ClientAuthSession(gameSession),
+                         cval<std::string>& ip,
+                         cval<int>& port,
+                         cval<int>& serverIdx,
+                         cval<int>& delayTime,
+                         cval<bool>& useRsa,
+                         const std::string& account,
+                         const std::string& password,
+                         cval<int>& version)
+    : ClientAuthSession(gameSession, version.get()),
 	  gameSession(gameSession),
 	  ip(ip),
 	  port(port),

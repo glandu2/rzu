@@ -37,7 +37,8 @@ enum DiffType {
 
 enum DumpType {
 	DT_Diff,
-	DT_Full
+	DT_Full,
+	DT_UnknownDumpType
 };
 
 struct AuctionFileHeader {

@@ -1,17 +1,20 @@
 #include "AuctionParser.h"
 #include "Core/EventLoop.h"
 #include "AuctionWriter.h"
-#include "GlobalConfig.h"
 #include <algorithm>
+#include "Config/ConfigParamVal.h"
+#include <time.h>
 
 struct AuctionFile {
 	size_t alreadyExistingAuctions;
+	size_t addedAuctionsInFile;
 	AUCTION_SIMPLE_FILE auctions;
 	bool isFull;
 
 	AuctionFile() {
 		isFull = true;
 		alreadyExistingAuctions = 0;
+		addedAuctionsInFile = 0;
 	}
 
 	void adjustDetectedType(AuctionComplexDiffWriter* auctionWriter) {
@@ -21,19 +24,28 @@ struct AuctionFile {
 				isFull = false;
 			if(auctionData.diffType == D_Added && auctionWriter->hasAuction(AuctionUid(auctionData.uid)))
 				alreadyExistingAuctions++;
+			if(auctionData.diffType == D_Added || auctionData.diffType == D_Base)
+				addedAuctionsInFile++;
 		}
 
-		if(alreadyExistingAuctions == 0)
+		if(alreadyExistingAuctions == 0 && addedAuctionsInFile < auctionWriter->getAuctionCount() / 2)
 			isFull = false;
 	}
 };
 
-AuctionParser::AuctionParser()
+AuctionParser::AuctionParser(IParser* aggregator,
+                             cval<std::string>& auctionsPath,
+                             cval<int>& changeWaitSeconds,
+                             cval<std::string>& statesPath,
+                             cval<std::string>& auctionStateFile,
+                             cval<std::string>& aggregationStateFile)
     : auctionWriter(19),
-      auctionsPath(CONFIG_GET()->input.auctionsPath),
-      statesPath(CONFIG_GET()->states.statesPath),
-      auctionStateFile(CONFIG_GET()->states.auctionStateFile),
-      aggregationStateFile(CONFIG_GET()->states.aggregationStateFile),
+      aggregator(aggregator),
+      auctionsPath(auctionsPath),
+      changeWaitSeconds(changeWaitSeconds),
+      statesPath(statesPath),
+      auctionStateFile(auctionStateFile),
+      aggregationStateFile(aggregationStateFile),
       started(false)
 {
 	importState();
@@ -75,7 +87,13 @@ void AuctionParser::onScandir(uv_fs_t* req)
 	AuctionParser* thisInstance = (AuctionParser*) req->data;
 	uv_dirent_t dent;
 
+	if(req->result < 0) {
+		thisInstance->log(LL_Error, "Failed to scan dir \"%s\", error: %s(%d)\n", req->path, uv_strerror(req->result), req->result);
+		return;
+	}
+
 	std::string maxFile = thisInstance->lastParsedFile;
+	int waitChangeSeconds = thisInstance->changeWaitSeconds.get();
 
 	std::vector<std::string> orderedFiles;
 
@@ -89,17 +107,34 @@ void AuctionParser::onScandir(uv_fs_t* req)
 
 	auto it = orderedFiles.begin();
 	auto itEnd = orderedFiles.end();
-	for(; it != itEnd && !thisInstance->aggregator.isFull(); ++it) {
+	for(; it != itEnd && !thisInstance->aggregator->isFull(); ++it) {
 		const std::string& filename = *it;
 		if(strcmp(thisInstance->lastParsedFile.c_str(), filename.c_str()) < 0) {
+			uv_fs_t statReq;
+			std::string fullFilename = thisInstance->auctionsPath.get() + "/" + filename;
+
+			uv_fs_stat(EventLoop::getLoop(), &statReq, fullFilename.c_str(), nullptr);
+			time_t timeLimit = time(nullptr) - waitChangeSeconds;
+			if(statReq.statbuf.st_mtim.tv_sec > timeLimit ||
+			        statReq.statbuf.st_ctim.tv_sec > timeLimit ||
+			        statReq.statbuf.st_birthtim.tv_sec > timeLimit) {
+				thisInstance->log(LL_Trace, "File %s too new before parsing (modified less than %d seconds: %d)\n",
+				                  waitChangeSeconds, filename.c_str(), statReq.statbuf.st_mtim.tv_sec);
+				// don't parse file after this one if it is a new file (avoid parsing file in wrong order)
+				break;
+			}
+
 			thisInstance->log(LL_Info, "Found new auction file %s\n", filename.c_str());
-			thisInstance->parseFile(filename.c_str());
+			if(!thisInstance->parseFile(fullFilename)) {
+				thisInstance->log(LL_Error, "Parsing failed on %s, stopping parsing of other files\n", filename.c_str());
+				break;
+			}
 			if(strcmp(maxFile.c_str(), filename.c_str()) < 0)
 				maxFile = filename;
 		}
 	}
 
-	if(thisInstance->aggregator.isFull()) {
+	if(thisInstance->aggregator->isFull()) {
 		thisInstance->log(LL_Info, "Stopping parsing, aggregator is full (pending data to send to webserver)\n");
 	}
 
@@ -112,13 +147,12 @@ void AuctionParser::onScandir(uv_fs_t* req)
 	}
 }
 
-bool AuctionParser::parseFile(const char* filename)
+bool AuctionParser::parseFile(std::string fullFilename)
 {
 	std::vector<uint8_t> data;
 	int version;
 	AuctionFileFormat fileFormat;
 	AuctionFile auctionFile;
-	std::string fullFilename = auctionsPath.get() + "/" + filename;
 
 	log(LL_Debug, "Parsing file %s\n", fullFilename.c_str());
 
@@ -139,10 +173,12 @@ bool AuctionParser::parseFile(const char* filename)
 
 	auctionFile.adjustDetectedType(&auctionWriter);
 
-	log(LL_Info, "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d\n",
+	log(LL_Debug, "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d, addedAuctionsInFile: %d/%d\n",
 	    fullFilename.c_str(),
 	    auctionFile.isFull ? "full" : "diff",
 	    auctionFile.alreadyExistingAuctions,
+	    auctionWriter.getAuctionCount(),
+	    auctionFile.addedAuctionsInFile,
 	    auctionWriter.getAuctionCount());
 
 	for(size_t i = 0; i < auctionFile.auctions.header.categories.size(); i++) {
@@ -160,10 +196,7 @@ bool AuctionParser::parseFile(const char* filename)
 	}
 	auctionWriter.endProcess();
 
-	AUCTION_FILE auctionFinalFile = auctionWriter.exportDump(false, true);
-	aggregator.parseAuctions(auctionFinalFile);
-
-	return true;
+	return aggregator->parseAuctions(&auctionWriter);
 }
 
 bool AuctionParser::importState()
@@ -191,7 +224,8 @@ bool AuctionParser::importState()
 
 	if(!aggregationStateFile.empty()) {
 		aggregationStateFile = statesPath.get() + "/" + aggregationStateFile;
-		aggregator.importState(aggregationStateFile, lastParsedFile);
+		aggregator->importState(aggregationStateFile, lastParsedFile);
+		log(LL_Info, "Last parsed file: %s\n", lastParsedFile.c_str());
 	}
 
 	return true;
@@ -212,6 +246,6 @@ void AuctionParser::exportState()
 
 	if(!aggregationStateFile.empty()) {
 		aggregationStateFile = statesPath.get() + "/" + aggregationStateFile;
-		aggregator.exportState(aggregationStateFile, lastParsedFile);
+		aggregator->exportState(aggregationStateFile, lastParsedFile);
 	}
 }

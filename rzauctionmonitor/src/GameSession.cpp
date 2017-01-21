@@ -21,14 +21,16 @@
 #include "TS_SC_AUCTION_SEARCH.h"
 #include "GameClient/TS_SC_RESULT.h"
 
-GameSession::GameSession(AuctionWorker *auctionWorker, const std::string& playername, cval<int>& ggRecoTime)
-	: auctionWorker(auctionWorker),
+GameSession::GameSession(AuctionWorker *auctionWorker, const std::string& playername, cval<int>& ggRecoTime, cval<int>& version)
+    : ClientGameSession(version.get()),
+      auctionWorker(auctionWorker),
 	  playername(playername),
 	  connectedInGame(false),
 	  handle(0),
 	  rappelzTimeOffset(0),
 	  epochTimeOffset(0),
-	  ggRecoTime(ggRecoTime)
+      ggRecoTime(ggRecoTime),
+      version(version)
 {
 }
 
@@ -46,12 +48,12 @@ void GameSession::onGameConnected() {
 
 	TS_CS_CHARACTER_LIST charlistPkt;
 	charlistPkt.account = auth->getAccountName();
-	sendPacket(charlistPkt, EPIC_LATEST);
+	sendPacket(charlistPkt, version.get());
 }
 
 void GameSession::close() {
 	TS_CS_LOGOUT logoutPkt;
-	sendPacket(logoutPkt, EPIC_LATEST);
+	sendPacket(logoutPkt, version.get());
 	closeSession();
 }
 
@@ -82,7 +84,7 @@ void GameSession::onUpdatePacketExpired() {
 	updatPkt.time = getRappelzTime() + rappelzTimeOffset;
 	updatPkt.epoch_time = uint32_t(time(NULL) + epochTimeOffset);
 
-	sendPacket(updatPkt, EPIC_LATEST);
+	sendPacket(updatPkt, version.get());
 }
 
 uint32_t GameSession::getRappelzTime()
@@ -93,11 +95,11 @@ uint32_t GameSession::getRappelzTime()
 void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 	switch(packet->id) {
 		case TS_SC_CHARACTER_LIST::packetID:
-			packet->process(this, &GameSession::onCharacterList, EPIC_LATEST);
+			packet->process(this, &GameSession::onCharacterList, version.get());
 			break;
 
 		case_packet_is(TS_SC_LOGIN_RESULT)
-			packet->process(this, &GameSession::onCharacterLoginResult, EPIC_LATEST);
+		    packet->process(this, &GameSession::onCharacterLoginResult, version.get());
 			break;
 
 		case TS_SC_AUCTION_SEARCH::packetID:
@@ -131,7 +133,7 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 
 			if(epochTimeOffset == 0) {
 				TS_CS_GAME_TIME gameTimePkt;
-				sendPacket(gameTimePkt, EPIC_LATEST);
+				sendPacket(gameTimePkt, version.get());
 			}
 			break;
 		}
@@ -168,7 +170,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 
 	loginPkt.name = playername;
 	loginPkt.race = 0;
-	sendPacket(loginPkt, EPIC_LATEST);
+	sendPacket(loginPkt, version.get());
 }
 
 void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT *packet) {

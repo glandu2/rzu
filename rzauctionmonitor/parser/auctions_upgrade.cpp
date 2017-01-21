@@ -16,12 +16,14 @@
 
 struct AuctionFile {
 	size_t alreadyExistingAuctions;
+	size_t addedAuctionsInFile;
 	AUCTION_SIMPLE_FILE auctions;
 	bool isFull;
 
 	AuctionFile() {
 		isFull = true;
 		alreadyExistingAuctions = 0;
+		addedAuctionsInFile = 0;
 	}
 
 	void adjustDetectedType(AuctionComplexDiffWriter* auctionWriter) {
@@ -31,9 +33,11 @@ struct AuctionFile {
 				isFull = false;
 			if(auctionData.diffType == D_Added && auctionWriter->hasAuction(AuctionUid(auctionData.uid)))
 				alreadyExistingAuctions++;
+			if(auctionData.diffType == D_Added || auctionData.diffType == D_Base)
+				addedAuctionsInFile++;
 		}
 
-		if(alreadyExistingAuctions == 0)
+		if(alreadyExistingAuctions == 0 && addedAuctionsInFile < auctionWriter->getAuctionCount() / 2)
 			isFull = false;
 	}
 };
@@ -62,7 +66,7 @@ int main(int argc, char* argv[]) {
 
 	if(!DB_Item::createTable(&dbConnectionPool)) {
 		Object::logStatic(Object::LL_Info, "main", "Failed to create table\n");
-		return 2;
+		//return 2;
 	}
 
 	std::string stateFileName = stateFile.get();
@@ -98,7 +102,7 @@ int main(int argc, char* argv[]) {
 //		if(fileNumber > 0)
 //			auctionWriter.dumpAuctions("output", "auctions.bin", true, false, true);
 
-		Object::logStatic(Object::LL_Info, "main", "Reading file %s\n", filename);
+		Object::logStatic(Object::LL_Info, "main", "Reading file \"%s\"\n", filename);
 
 		std::vector<uint8_t> data;
 		int version;
@@ -122,11 +126,13 @@ int main(int argc, char* argv[]) {
 
 		auctionFile.adjustDetectedType(&auctionWriter);
 
-		Object::logStatic(Object::LL_Info, "main", "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d\n",
-		        filename,
-		        auctionFile.isFull ? "full" : "diff",
-		        auctionFile.alreadyExistingAuctions,
-		        auctionWriter.getAuctionCount());
+		Object::logStatic(Object::LL_Info, "main", "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d, addedAuctionsInFile: %d/%d\n",
+		                  filename,
+		                  auctionFile.isFull ? "full" : "diff",
+		                  auctionFile.alreadyExistingAuctions,
+		                  auctionWriter.getAuctionCount(),
+		                  auctionFile.addedAuctionsInFile,
+		                  auctionWriter.getAuctionCount());
 
 		for(size_t i = 0; i < auctionFile.auctions.header.categories.size(); i++) {
 			const AUCTION_CATEGORY_INFO& category = auctionFile.auctions.header.categories[i];
@@ -145,24 +151,30 @@ int main(int argc, char* argv[]) {
 
 		fileNumber++;
 
-//		AUCTION_FILE auctionFinalFile = auctionWriter.exportDump(false, true);
-//		for(size_t i = 0; i < auctionFinalFile.auctions.size(); i++) {
-//			const AUCTION_INFO& auctionInfo = auctionFinalFile.auctions[i];
-//			DB_Item::addAuction(dbInputs, auctionInfo);
-//		}
+		AUCTION_FILE auctionFinalFile = auctionWriter.exportDump(false, true);
+		for(size_t i = 0; i < auctionFinalFile.auctions.size(); i++) {
+			const AUCTION_INFO& auctionInfo = auctionFinalFile.auctions[i];
+			DB_Item::addAuction(dbInputs, auctionInfo);
+		}
+
+		if(dbInputs.size() >= 10000) {
+			DbQueryJob<DB_Item>::executeNoResult(dbInputs);
+			EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+			dbInputs.clear();
+		}
 	}
 
-//	if(!dbInputs.empty()) {
-//		DbQueryJob<DB_Item>::executeNoResult(dbInputs);
-//		EventLoop::getInstance()->run(UV_RUN_DEFAULT);
-//		dbInputs.clear();
+	if(!dbInputs.empty()) {
+		DbQueryJob<DB_Item>::executeNoResult(dbInputs);
+		EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+		dbInputs.clear();
+	}
+
+//	if(!stateFileName.empty()) {
+//		std::vector<uint8_t> data;
+//		auctionWriter.dumpAuctions(data, true, true);
+//		AuctionWriter::writeAuctionDataToFile(stateFileName, data);
 //	}
-
-	if(!stateFileName.empty()) {
-		std::vector<uint8_t> data;
-		auctionWriter.dumpAuctions(data, true, true);
-		AuctionWriter::writeAuctionDataToFile(stateFileName, data);
-	}
 
 	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", fileNumber);
 

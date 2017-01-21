@@ -9,32 +9,6 @@
 
 cval<bool>& compactJson = CFG_CREATE("compactjson", false);
 
-#pragma pack(push, 1)
-struct ItemData {
-	uint32_t uid;
-	uint32_t handle;
-	int32_t code;
-	int64_t item_uid;
-	int64_t count;
-	int32_t ethereal_durability;
-	uint32_t endurance;
-	uint8_t enhance;
-	uint8_t level;
-	int32_t flag;
-	int32_t socket[4];
-	uint32_t awaken_option_value[5];
-	int32_t awaken_option_data[5];
-	int32_t remain_time;
-	uint8_t elemental_effect_type;
-	int32_t elemental_effect_remain_time;
-	int32_t elemental_effect_attack_point;
-	int32_t elemental_effect_magic_point;
-	int32_t appearance_code;
-	int32_t unknown1[51];
-	int16_t unknown2;
-};
-#pragma pack(pop)
-
 template<class AUCTION_FILE>
 int writeJson(const AUCTION_FILE& auctionFile) {
 

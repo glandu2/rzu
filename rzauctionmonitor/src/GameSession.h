@@ -14,7 +14,7 @@ class AuctionWorker;
 class GameSession : public ClientGameSession {
 	DECLARE_CLASS(GameSession)
 public:
-	GameSession(AuctionWorker* auctionWorker, const std::string& playername, cval<int>& ggRecoTime);
+	GameSession(AuctionWorker* auctionWorker, const std::string& playername, cval<int>& ggRecoTime, cval<int>& version);
 
 	void close();
 
@@ -48,6 +48,7 @@ private:
 	Timer<GameSession> updateTimer;
 
 	cval<int>& ggRecoTime;
+	cval<int>& version;
 	Timer<GameSession> ggPreventionRecoTimer; //allow graceful reconnect when no auction search is in progress
 	Timer<GameSession> ggRecoTimer;
 };
