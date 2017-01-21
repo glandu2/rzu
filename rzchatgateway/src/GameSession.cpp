@@ -17,9 +17,11 @@
 #include "GameClient/TS_CS_UPDATE.h"
 #include "GameClient/TS_CS_GAME_TIME.h"
 #include "GameClient/TS_SC_GAME_TIME.h"
+#include "Packet/PacketEpics.h"
 
 GameSession::GameSession(const std::string& playername, bool enableGateway, Log *packetLog)
-	: playername(playername),
+    : ClientGameSession(EPIC_LATEST),
+      playername(playername),
 	  ircClient(nullptr),
 	  enableGateway(enableGateway),
 	  connectedInGame(false),
