@@ -23,10 +23,7 @@ public:
 	virtual bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet);
 
 private:
-	void onInventory(const TS_SC_INVENTORY *packet);
-	void onAttack(const TS_SC_ATTACK_EVENT *packet);
-	void onEnter(const TS_SC_ENTER *packet);
-	void onSkill(const TS_SC_SKILL *packet);
+	template<class Packet> void showPacketJson(const Packet* packet);
 
 private:
 	struct Item {

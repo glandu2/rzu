@@ -3,6 +3,7 @@
 #include "GameClient/TS_SC_CHAT.h"
 #include "GameClient/TS_SC_ENTER.h"
 #include "GameClient/TS_SC_STATE_RESULT.h"
+#include "AuthClient/TS_AC_SERVER_LIST.h"
 #include <sstream>
 #include "Packet/JSONWriter.h"
 
@@ -46,11 +47,11 @@ bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* serv
 
 	switch(packet->id) {
 		case TS_SC_SKILL::packetID:
-			packet->process(this, &PacketFilter::onSkill, server->getPacketVersion());
+			//packet->process(this,&PacketFilter::showPacketJson<TS_SC_SKILL>, server->getPacketVersion());
 			break;
 
 		case TS_SC_STATE_RESULT::packetID: {
-			const TS_SC_STATE_RESULT* stateResult = reinterpret_cast<const TS_SC_STATE_RESULT*>(packet);
+			/*const TS_SC_STATE_RESULT* stateResult = reinterpret_cast<const TS_SC_STATE_RESULT*>(packet);
 			char buffer[1024];
 
 			sprintf(buffer, "DOT(caster 0x%08X, target 0x%08X, id %d Lv%d, result %d, value %d, targetval %d, total %d, final %d)",
@@ -64,19 +65,24 @@ bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* serv
 					stateResult->total_amount,
 					stateResult->final);
 			sendChatMessage(client, buffer);
+			*/
 			break;
 		}
 
+		case TS_AC_SERVER_LIST::packetID:
+			packet->process(this, &PacketFilter::showPacketJson<TS_AC_SERVER_LIST>, server->getPacketVersion());
+			break;
+
 		case TS_SC_INVENTORY::packetID:
-			packet->process(this, &PacketFilter::onInventory, server->getPacketVersion());
+			packet->process(this, &PacketFilter::showPacketJson<TS_SC_INVENTORY>, server->getPacketVersion());
 			break;
 
 		case TS_SC_ATTACK_EVENT::packetID:
-			packet->process(this, &PacketFilter::onAttack, server->getPacketVersion());
+			//packet->process(this, &PacketFilter::showPacketJson<TS_SC_ATTACK_EVENT>, server->getPacketVersion());
 			break;
 
 		case_packet_is(TS_SC_ENTER)
-			packet->process(this, &PacketFilter::onEnter, server->getPacketVersion());
+		    packet->process(this, &PacketFilter::showPacketJson<TS_SC_ENTER>, server->getPacketVersion());
 			break;
 	}
 
@@ -85,79 +91,6 @@ bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* serv
 
 bool PacketFilter::onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet) {
 	return true;
-}
-
-void PacketFilter::onInventory(const TS_SC_INVENTORY *packet) {
-	int i;
-	for(i = 0; i < packet->items.size(); i++) {
-		const TS_ITEM_INFO& inventoryItem = packet->items[i];
-		Item item;
-		item.handle = inventoryItem.base_info.handle;
-		item.code = inventoryItem.base_info.code;
-		item.uid = inventoryItem.base_info.uid;
-		item.count = inventoryItem.base_info.count;
-		data->items.insert(std::pair<uint32_t, Item>(item.handle, item));
-	}
-}
-
-void PacketFilter::onAttack(const TS_SC_ATTACK_EVENT *packet) {
-/*	char buffer[512];
-
-	sprintf(buffer,
-			"Attack evt: 0x%08X > 0x%08X, %dspd, %ddl, act: %d, flg: %d",
-			packet->attacker_handle,
-			packet->target_handle,
-			packet->attack_speed,
-			packet->attack_delay,
-			packet->attack_action,
-			packet->attack_flag);
-	sendChatMessage(clientp, buffer);
-
-	for(int i = 0; i < packet->attack.size(); i++) {
-		const ATTACK_INFO& attackInfo = packet->attack[i];
-
-		sprintf(buffer,
-				" - Atk: %dhp, %dmp, flg: %d", attackInfo.damage, attackInfo.mp_damage,
-				attackInfo.flag);
-		sendChatMessage(clientp, buffer);
-
-		sprintf(buffer,
-				"   - %d, %d, %d, %d, %d, %d, %d",
-				attackInfo.elemental_damage[0],
-				attackInfo.elemental_damage[1],
-				attackInfo.elemental_damage[2],
-				attackInfo.elemental_damage[3],
-				attackInfo.elemental_damage[4],
-				attackInfo.elemental_damage[5],
-				attackInfo.elemental_damage[6]);
-		sendChatMessage(clientp, buffer);
-
-		sprintf(buffer,
-				"   - tgt: %dhp, %dmp",
-				attackInfo.target_hp,
-				attackInfo.target_mp);
-		sendChatMessage(clientp, buffer);
-	}*/
-}
-
-void PacketFilter::onEnter(const TS_SC_ENTER *packet)
-{
-	JSONWriter jsonWriter(EPIC_LATEST, false);
-	packet->serialize(&jsonWriter);
-	jsonWriter.finalize();
-	std::string jsonData = jsonWriter.toString();
-
-	Object::logStatic(Object::LL_Info, "rzfilter_module", "TS_ENTER packet:\n%s\n", jsonData.c_str());
-}
-
-void PacketFilter::onSkill(const TS_SC_SKILL *packet)
-{
-	JSONWriter jsonWriter(EPIC_LATEST, false);
-	packet->serialize(&jsonWriter);
-	jsonWriter.finalize();
-	std::string jsonData = jsonWriter.toString();
-
-	Object::logStatic(Object::LL_Info, "rzfilter_module", "TS_SC_SKILL packet:\n%s\n", jsonData.c_str());
 }
 
 IFilter *createFilter(IFilter *oldFilter)
@@ -169,4 +102,15 @@ IFilter *createFilter(IFilter *oldFilter)
 void destroyFilter(IFilter *filter)
 {
 	delete filter;
+}
+
+template<class Packet>
+void PacketFilter::showPacketJson(const Packet* packet)
+{
+	JSONWriter jsonWriter(EPIC_LATEST, false);
+	packet->serialize(&jsonWriter);
+	jsonWriter.finalize();
+	std::string jsonData = jsonWriter.toString();
+
+	Object::logStatic(Object::LL_Info, "rzfilter_module", "%s packet:\n%s\n", typeid(Packet).name(), jsonData.c_str());
 }
