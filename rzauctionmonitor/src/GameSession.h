@@ -9,6 +9,9 @@
 
 struct TS_SC_CHARACTER_LIST;
 struct TS_SC_LOGIN_RESULT;
+struct TS_SC_RESULT;
+struct TS_TIMESYNC;
+struct TS_SC_GAME_TIME;
 class AuctionWorker;
 
 class GameSession : public ClientGameSession {
@@ -31,6 +34,9 @@ protected:
 
 	void onCharacterList(const TS_SC_CHARACTER_LIST* packet);
 	void onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet);
+	void onResult(const TS_SC_RESULT* resultPacket);
+	void onTimeSync(const TS_TIMESYNC *packet);
+	void onGameTime(const TS_SC_GAME_TIME* packet);
 
 	void setConnected(bool connected);
 	uint32_t getRappelzTime();

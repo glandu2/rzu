@@ -32,9 +32,9 @@ CREATE_STRUCT(AGGREGATION_ITEM);
 #define AGGREGATION_STATE_DEF(_) \
 	_(simple)  (uint16_t, file_version) \
 	_(simple)  (uint64_t, currentDate) \
-	_(count)   (uint32_t, auctionNumber, auctionData) \
+	_(count)   (uint32_t, auctionData) \
 	_(dynarray)(AGGREGATION_ITEM, auctionData) \
-	_(count)   (uint8_t, lastParsedFileSize, lastParsedFile) \
+	_(count)   (uint8_t, lastParsedFile) \
 	_(dynstring)(lastParsedFile, false)
 CREATE_STRUCT(AGGREGATION_STATE);
 
@@ -206,7 +206,7 @@ bool Aggregator::parseAuctions(AuctionComplexDiffWriter* auctionWriter) {
 		if(!auctionInfo.data.data())
 			continue;
 
-		TS_AUCTION_INFO item;
+		TS_SEARCHED_AUCTION_INFO item;
 		MessageBuffer structBuffer(auctionInfo.data.data(), auctionInfo.data.size(), EPIC_LATEST);
 
 		item.deserialize(&structBuffer);
@@ -218,16 +218,16 @@ bool Aggregator::parseAuctions(AuctionComplexDiffWriter* auctionWriter) {
 			return false;
 		}
 
-		if(skipItem(auctionInfo, item.item_info))
+		if(skipItem(auctionInfo, item.auction_details.item_info))
 			continue;
 
 		AuctionSummary& summary = auctionsByUid[auctionInfo.uid];
-		summary.code = item.item_info.code;
-		summary.enhance = item.item_info.enhance;
+		summary.code = item.auction_details.item_info.code;
+		summary.enhance = item.auction_details.item_info.enhance;
 
 		if(!summary.isSold) {
-			if(item.item_info.count > 0)
-				summary.count = item.item_info.count;
+			if(item.auction_details.item_info.count > 0)
+				summary.count = item.auction_details.item_info.count;
 			else
 				summary.count = 1;
 

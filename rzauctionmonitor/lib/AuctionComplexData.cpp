@@ -159,6 +159,8 @@ void AuctionComplexData::serialize(AUCTION_INFO *auctionInfo, bool alwaysWithDat
 
 	if(alwaysWithData || auctionInfo->diffType == D_Added)
 		auctionInfo->data = rawData;
+	else
+		auctionInfo->data.clear();
 }
 
 DiffType AuctionComplexData::getAuctionDiffType() const {

@@ -64,7 +64,7 @@ CREATE_STRUCT(AUCTION_CATEGORY_INFO);
 	_(array)   (char, signature, 4) \
 	_(simple)  (uint32_t, file_version) \
 	_(simple)  (int8_t, dumpType) \
-	_(count)   (uint16_t, categoryNumber, categories) \
+	_(count)   (uint16_t, categories) \
 	_(dynarray)(AUCTION_CATEGORY_INFO, categories)
 CREATE_STRUCT(AUCTION_HEADER);
 
@@ -77,7 +77,7 @@ CREATE_STRUCT(AUCTION_HEADER);
 	_(simple)  (int64_t, estimatedEndTimeMax) \
 	_(simple)  (uint16_t, diffType) \
 	_(simple)  (uint16_t, category) \
-	_(count)   (uint16_t, dataSize, data) \
+	_(count)   (uint16_t, data) \
 	_(dynarray)(uint8_t, data) \
 	_(simple)  (int8_t, duration_type, version >= AUCTION_V4) \
 	_(simple)  (int64_t, bid_price, version >= AUCTION_V4) \
@@ -90,7 +90,7 @@ CREATE_STRUCT(AUCTION_INFO);
 
 #define AUCTION_FILE_DEF(_) \
 	_(simple)  (AUCTION_HEADER, header) \
-	_(count)   (uint32_t, auctionNumber, auctions) \
+	_(count)   (uint32_t, auctions) \
 	_(dynarray)(AUCTION_INFO, auctions)
 CREATE_STRUCT(AUCTION_FILE);
 
@@ -100,14 +100,15 @@ CREATE_STRUCT(AUCTION_FILE);
 	_(simple)  (int64_t, previousTime) \
 	_(simple)  (uint16_t, diffType) \
 	_(simple)  (uint16_t, category) \
-	_(count)   (uint16_t, dataSize, data) \
+	_(count)   (uint16_t, data) \
 	_(dynarray)(uint8_t, data)
 CREATE_STRUCT(AUCTION_SIMPLE_INFO);
 
 #define AUCTION_SIMPLE_FILE_DEF(_) \
 	_(simple)  (AUCTION_HEADER, header) \
-	_(count)   (uint32_t, auctionNumber, auctions) \
+	_(count)   (uint32_t, auctions) \
 	_(dynarray)(AUCTION_SIMPLE_INFO, auctions)
 CREATE_STRUCT(AUCTION_SIMPLE_FILE);
+
 
 #endif // AUCTIONFILE_H

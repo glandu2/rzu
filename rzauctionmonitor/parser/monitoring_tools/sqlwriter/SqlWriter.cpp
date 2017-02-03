@@ -10,7 +10,7 @@
 
 #define SQLWRITER_STATE_DEF(_) \
 	_(simple)  (uint16_t, file_version) \
-	_(count)   (uint8_t, lastParsedFileSize, lastParsedFile) \
+	_(count)   (uint8_t, lastParsedFile) \
 	_(dynstring)(lastParsedFile, false)
 CREATE_STRUCT(SQLWRITER_STATE);
 

@@ -108,45 +108,22 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
 				abortSession();
 			break;
 
-		case TS_SC_RESULT::packetID: {
-			const TS_SC_RESULT* resultPacket = (const TS_SC_RESULT*)packet;
-			if(resultPacket->request_msg_id == TS_CS_AUCTION_SEARCH::packetID) {
-				auctionWorker->onAuctionSearchFailed(resultPacket->result);
-			}
+		case TS_SC_RESULT::packetID:
+			packet->process(this, &GameSession::onResult, version.get());
 			break;
-		}
 
 		case TS_SC_DISCONNECT_DESC::packetID:
 			setConnected(false);
 			abortSession();
 			break;
 
-		case TS_TIMESYNC::packetID: {
-			const TS_TIMESYNC* serverTime = (const TS_TIMESYNC*)packet;
-			rappelzTimeOffset = serverTime->time - getRappelzTime();
-
-			TS_TIMESYNC timeSyncPkt;
-
-			TS_MESSAGE::initMessage<TS_TIMESYNC>(&timeSyncPkt);
-			timeSyncPkt.time = serverTime->time;
-			sendPacket(&timeSyncPkt);
-
-			if(epochTimeOffset == 0) {
-				TS_CS_GAME_TIME gameTimePkt;
-				sendPacket(gameTimePkt, version.get());
-			}
+		case TS_TIMESYNC::packetID:
+			packet->process(this, &GameSession::onTimeSync, version.get());
 			break;
-		}
 
-		case TS_SC_GAME_TIME::packetID: {
-			const TS_SC_GAME_TIME* serverTime = (const TS_SC_GAME_TIME*)packet;
-			if(epochTimeOffset == 0)
-				updateTimer.start(this, &GameSession::onUpdatePacketExpired, 5000, 5000);
-
-			rappelzTimeOffset = serverTime->t - getRappelzTime();
-			epochTimeOffset = uint32_t(serverTime->game_time - time(NULL));
+		case TS_SC_GAME_TIME::packetID:
+			packet->process(this, &GameSession::onGameTime, version.get());
 			break;
-		}
 	}
 }
 
@@ -177,6 +154,34 @@ void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT *packet) {
 	handle = packet->handle;
 	log(LL_Info, "Connected with character %s\n", playername.c_str());
 	setConnected(true);
+}
+
+void GameSession::onResult(const TS_SC_RESULT* resultPacket) {
+	if(resultPacket->request_msg_id == TS_CS_AUCTION_SEARCH::packetID) {
+		auctionWorker->onAuctionSearchFailed(resultPacket->result);
+	}
+}
+
+void GameSession::onTimeSync(const TS_TIMESYNC *serverTime)
+{
+	rappelzTimeOffset = serverTime->time - getRappelzTime();
+
+	TS_TIMESYNC timeSyncPkt;
+	timeSyncPkt.time = serverTime->time;
+	sendPacket(timeSyncPkt, version.get());
+
+	if(epochTimeOffset == 0) {
+		TS_CS_GAME_TIME gameTimePkt;
+		sendPacket(gameTimePkt, version.get());
+	}
+}
+
+void GameSession::onGameTime(const TS_SC_GAME_TIME* serverTime) {
+	if(epochTimeOffset == 0)
+		updateTimer.start(this, &GameSession::onUpdatePacketExpired, 5000, 5000);
+
+	rappelzTimeOffset = serverTime->t - getRappelzTime();
+	epochTimeOffset = uint32_t(serverTime->game_time - time(NULL));
 }
 
 void GameSession::setConnected(bool connected)
