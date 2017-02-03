@@ -6,10 +6,10 @@
 #include "GameClient/TS_SC_INVENTORY.h"
 #include "GameClient/TS_SC_ATTACK_EVENT.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
+#include "GameClient/TS_CS_CHAT_REQUEST.h"
 #include <unordered_map>
 
-struct TS_SC_ENTER;
-struct TS_SC_SKILL;
+struct TS_SC_CHAT;
 
 class PacketFilter : public IFilter
 {
@@ -17,13 +17,17 @@ public:
 	PacketFilter(PacketFilter* data);
 	~PacketFilter();
 
-	void sendChatMessage(IFilterEndpoint* client, const char* msg);
+	void sendChatMessage(IFilterEndpoint* client, const char* msg, const char* sender = "Filter", TS_CHAT_TYPE type = CHAT_WHISPER);
 
 	virtual bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet);
 	virtual bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet);
 
+protected:
 private:
 	template<class Packet> void showPacketJson(const Packet* packet);
+	void onChatMessage(const TS_SC_CHAT* packet);
+
+	void printPacketJson(const TS_MESSAGE* packet, int version);
 
 private:
 	struct Item {
