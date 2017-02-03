@@ -22,6 +22,10 @@ template<typename T> class cval;
 	ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type); \
 	ASSERT_NE(nullptr, packet)
 
+#define DESERIALIZE_PACKET(target, version) \
+	ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type); \
+	ASSERT_EQ(true, event.deserializePacket(target, version));
+
 /**
  * @brief Test network operation with a remote server or client
  * This class allow to execute callbacks on event reception (received packet of connection/disconnection events)
@@ -52,6 +56,23 @@ public:
 				return p;
 			else
 				return nullptr;
+		}
+
+		template<typename T>
+		bool deserializePacket(T& p, int version) {
+			// force taking the value instead of reference to packetID
+			EXPECT_EQ((const uint16_t)T::packetID, packet->id);
+			if(packet->id != T::packetID)
+				return false;
+
+			MessageBuffer buffer((void*)packet, packet->size, version);
+
+			p.deserialize(&buffer);
+			if(buffer.checkPacketFinalSize()) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 	};
 
