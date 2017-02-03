@@ -92,16 +92,14 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 	if(!memcmp(packet->szVersion, "TEST", 4)) {
 		uint32_t totalUserCount = ClientData::getClientCount();
 		TS_SC_RESULT result;
-		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
 
 		result.value = totalUserCount ^ 0xADADADAD;
 		result.result = 0;
 		result.request_msg_id = packet->id;
-		sendPacket(&result);
+		sendPacket(result, EPIC_LATEST);
 	} else if(!memcmp(packet->szVersion, "INFO", 4)) {
 		static uint32_t gitVersionSuffix = 0;
 		TS_SC_RESULT result;
-		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
 
 		if(gitVersionSuffix == 0) {
 			std::string shaPart(rzauthVersion+8, 8);
@@ -111,7 +109,7 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.value = gitVersionSuffix ^ 0xADADADAD;
 		result.result = 0;
 		result.request_msg_id = packet->id;
-		sendPacket(&result);
+		sendPacket(result, EPIC_LATEST);
 	} else if(!memcmp(packet->szVersion, "200609280", 9) || !memcmp(packet->szVersion, "Creer", 5)) {
 		isEpic2 = true;
 		log(LL_Debug, "Client is epic 2\n");
