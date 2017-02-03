@@ -1,7 +1,6 @@
 #include "Inventory.h"
 #include "../Database/DB_Item.h"
 #include "GameClient/TS_SC_INVENTORY.h"
-#include "GameClient/TS_SC_EQUIP_SUMMON.h"
 #include "GameClient/TS_SC_WEAR_INFO.h"
 #include "GameClient/TS_SC_ITEM_WEAR_INFO.h"
 #include "../ClientSession.h"

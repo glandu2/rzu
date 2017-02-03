@@ -18,7 +18,7 @@ void GameHandler::onPacketReceived(const TS_MESSAGE *packet) {
 		case TS_TIMESYNC::packetID: {
 			TS_TIMESYNC response;
 			response.time = TimeManager::getRzTime();
-			session->sendPacket(&response);
+			session->sendPacket(response);
 			break;
 		}
 

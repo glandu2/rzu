@@ -8,6 +8,7 @@
 #include "ConnectionHandler.h"
 #include "GameTypes.h"
 
+#include "PacketEnums.h"
 #include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
 #include "GameClient/TS_SC_RESULT.h"

@@ -7,7 +7,7 @@
 #include "../TimeManager.h"
 
 #include "GameClient/TS_SC_STAT_INFO.h"
-#include "GameClient/TS_SC_EQUIP_SUMMON.h"
+#include "GameClient/TS_EQUIP_SUMMON.h"
 #include "GameClient/TS_SC_WEAR_INFO.h"
 #include "GameClient/TS_SC_GOLD_UPDATE.h"
 #include "GameClient/TS_SC_LEVEL_UPDATE.h"
@@ -213,7 +213,7 @@ void Character::synchronizeWithClient() {
 
 	inventory.sendInventory();
 
-	TS_SC_EQUIP_SUMMON equipSummon = {0};
+	TS_EQUIP_SUMMON equipSummon = {0};
 	session->sendPacket(equipSummon);
 
 	sendEquip();

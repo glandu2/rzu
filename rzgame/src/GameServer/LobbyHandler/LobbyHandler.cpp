@@ -24,7 +24,7 @@ void LobbyHandler::onPacketReceived(const TS_MESSAGE *packet) {
 			break;
 
 		case TS_CS_CHECK_CHARACTER_NAME::packetID:
-			onCheckCharacterName(static_cast<const TS_CS_CHECK_CHARACTER_NAME*>(packet));
+			packet->process(this, &LobbyHandler::onCheckCharacterName, session->getVersion());
 			break;
 
 		case TS_CS_CREATE_CHARACTER::packetID:
@@ -32,7 +32,7 @@ void LobbyHandler::onPacketReceived(const TS_MESSAGE *packet) {
 			break;
 
 		case TS_CS_DELETE_CHARACTER::packetID:
-			onDeleteCharacter(static_cast<const TS_CS_DELETE_CHARACTER*>(packet));
+			packet->process(this, &LobbyHandler::onDeleteCharacter, session->getVersion());
 			break;
 	}
 }
@@ -125,19 +125,19 @@ void LobbyHandler::onCharacterWearInfoResult(DbQueryJob<CharacterWearInfoBinding
 }
 
 void LobbyHandler::onCheckCharacterName(const TS_CS_CHECK_CHARACTER_NAME *packet) {
-	std::string name = Utils::convertToString(packet->name, sizeof(packet->name));
+	const std::string& name = packet->name;
 
 	lastValidatedCharacterName.clear();
 
 	if(name.size() > 18 || name.size() < 4) {
 		log(LL_Info, "Character name too long or too short: \"%s\"\n", name.c_str());
-		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
+		session->sendResult(packet->id, TS_RESULT_INVALID_TEXT, 0);
 	} else if(!checkTextAgainstEncoding(name)) {
 		log(LL_Info, "Character name contains invalid characters for encoding %s: \"%s\"\n", CharsetConverter::getEncoding().c_str(), name.c_str());
-		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
+		session->sendResult(packet->id, TS_RESULT_INVALID_TEXT, 0);
 	} else if(ReferenceDataMgr::get()->isWordBanned(name)) {
 		log(LL_Info, "Character name is banned: \"%s\"\n", name.c_str());
-		session->sendResult(packet, TS_RESULT_INVALID_TEXT, 0);
+		session->sendResult(packet->id, TS_RESULT_INVALID_TEXT, 0);
 	} else {
 		CheckCharacterNameBinding::Input input;
 		input.character_name = name;
@@ -236,14 +236,14 @@ void LobbyHandler::onCreateCharacterResult(DbQueryJob<CreateCharacterBinding> *q
 }
 
 void LobbyHandler::onDeleteCharacter(const TS_CS_DELETE_CHARACTER *packet) {
-	std::string name = Utils::convertToString(packet->name, sizeof(packet->name) - 1);
+	const std::string& name = packet->name;
 	bool hasCharacter = false;
 
 	auto it = characters.begin();
 	auto itEnd = characters.end();
 	for(; it != itEnd; ++it) {
 		std::unique_ptr<CharacterLight>& character = *it;
-		if(packet->name == character->name) {
+		if(name == character->name) {
 			hasCharacter = true;
 			break;
 		}
