@@ -104,28 +104,28 @@ void IrcClient::onIrcLine(const std::string& line) {
 
 				msg.assign(trailing, separator+1, std::string::npos);
 				mpRepliesPlayers[target] = sender;
-				gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, sender.c_str(), target.c_str(), msg.c_str());
+				gameSession->sendMsgToGS(CHAT_WHISPER, sender.c_str(), target.c_str(), msg.c_str());
 				break;
 			}
 
 			case '$':
-				gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_ADV, sender.c_str(), "", trailing.c_str()+1);
+				gameSession->sendMsgToGS(CHAT_ADV, sender.c_str(), "", trailing.c_str()+1);
 				break;
 
 			case '!':
-				gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_GLOBAL, sender.c_str(), "", trailing.c_str()+1);
+				gameSession->sendMsgToGS(CHAT_GLOBAL, sender.c_str(), "", trailing.c_str()+1);
 				break;
 
 			case '#':
-				gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_PARTY, sender.c_str(), "", trailing.c_str()+1);
+				gameSession->sendMsgToGS(CHAT_PARTY, sender.c_str(), "", trailing.c_str()+1);
 				break;
 
 			case '%':
-				gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_GUILD, sender.c_str(), "", trailing.c_str()+1);
+				gameSession->sendMsgToGS(CHAT_GUILD, sender.c_str(), "", trailing.c_str()+1);
 				break;
 
 			default:
-				gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_NORMAL, sender.c_str(), "", trailing.c_str());
+				gameSession->sendMsgToGS(CHAT_NORMAL, sender.c_str(), "", trailing.c_str());
 		}
 	}
 }
@@ -142,18 +142,18 @@ void IrcClient::sendMessage(const char* target, const std::string& msg) {
 
 const char* IrcClient::getChatColor(int type) {
 	switch(type) {
-		case TS_CS_CHAT_REQUEST::CHAT_ADV: return "02";
-		case TS_CS_CHAT_REQUEST::CHAT_WHISPER: return "08";
-		case TS_CS_CHAT_REQUEST::CHAT_GLOBAL: return "15";
-		case TS_CS_CHAT_REQUEST::CHAT_EMOTION: return "15";
-		case TS_CS_CHAT_REQUEST::CHAT_GM: return "07";
-		case TS_CS_CHAT_REQUEST::CHAT_GM_WHISPER: return "08";
-		case TS_CS_CHAT_REQUEST::CHAT_PARTY: return "03";
-		case TS_CS_CHAT_REQUEST::CHAT_GUILD: return "06";
-		case TS_CS_CHAT_REQUEST::CHAT_ATTACKTEAM: return "06";
-		case TS_CS_CHAT_REQUEST::CHAT_NOTICE: return "15";
-		case TS_CS_CHAT_REQUEST::CHAT_ANNOUNCE: return "15";
-		case TS_CS_CHAT_REQUEST::CHAT_CENTER_NOTICE: return "15";
+		case CHAT_ADV: return "02";
+		case CHAT_WHISPER: return "08";
+		case CHAT_GLOBAL: return "15";
+		case CHAT_EMOTION: return "15";
+		case CHAT_GM: return "07";
+		case CHAT_GM_WHISPER: return "08";
+		case CHAT_PARTY: return "03";
+		case CHAT_GUILD: return "06";
+		case CHAT_ATTACKTEAM: return "06";
+		case CHAT_NOTICE: return "15";
+		case CHAT_ANNOUNCE: return "15";
+		case CHAT_CENTER_NOTICE: return "15";
 	}
 	return nullptr;
 }
@@ -174,7 +174,7 @@ void IrcClient::sendMsgToIRC(int type, const char* sender, std::string msg) {
 	if(msg.size() < 1)
 		return;
 
-	if(type == TS_CS_CHAT_REQUEST::CHAT_WHISPER) {
+	if(type == CHAT_WHISPER) {
 		size_t separator = msg.find(": ");
 		std::string target;
 

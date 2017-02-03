@@ -12,6 +12,10 @@ struct TS_CS_CHAT_REQUEST;
 struct TS_SC_CHARACTER_LIST;
 struct TS_SC_LOGIN_RESULT;
 struct TS_SC_ENTER;
+struct TS_SC_CHAT_LOCAL;
+struct TS_SC_CHAT;
+struct TS_TIMESYNC;
+struct TS_SC_GAME_TIME;
 
 class GameSession : public ClientGameSession {
 public:
@@ -32,6 +36,10 @@ protected:
 	void onCharacterList(const TS_SC_CHARACTER_LIST* packet);
 	void onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet);
 	void onEnter(const TS_SC_ENTER* packet);
+	void onChatLocal(const TS_SC_CHAT_LOCAL* packet);
+	void onChat(const TS_SC_CHAT* packet);
+	void onTimeSync(const TS_TIMESYNC* packet);
+	void onGameTime(const TS_SC_GAME_TIME* packet);
 
 	uint32_t getRappelzTime();
 
@@ -47,7 +55,7 @@ private:
 
 	Timer<GameSession> updateTimer;
 
-	std::vector<TS_CS_CHAT_REQUEST*> messageQueue;
+	std::vector<TS_CS_CHAT_REQUEST> messageQueue;
 	std::unordered_map<unsigned int, std::string> playerNames;
 };
 
