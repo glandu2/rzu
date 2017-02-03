@@ -71,17 +71,21 @@ EventChain<PacketSession> PlayerCountMonitor::onPacketReceived(const TS_MESSAGE*
 	switch(packet->id) {
 		case TS_SC_RESULT::packetID:
 		{
-			const TS_SC_RESULT* result = reinterpret_cast<const TS_SC_RESULT*>(packet);
-			switch(result->request_msg_id) {
-				case TS_CA_VERSION::packetID: {
-					if(reqStr == "INFO")
-						printf("%lu 0x%x %d\n", (unsigned long)time(NULL), ((unsigned int)result->value) ^ 0xADADADAD, result->result);
-					else
-						printf("%lu %d %d\n", (unsigned long)time(NULL), result->value ^ 0xADADADAD, result->result);
-					fflush(stdout);
-					close();
-					break;
+			TS_SC_RESULT result;
+			if(packet->process(result, EPIC_LATEST)) {
+				switch(result.request_msg_id) {
+					case TS_CA_VERSION::packetID: {
+						if(reqStr == "INFO")
+							printf("%lu 0x%x %d\n", (unsigned long)time(NULL), ((unsigned int)result.value) ^ 0xADADADAD, result.result);
+						else
+							printf("%lu %d %d\n", (unsigned long)time(NULL), result.value ^ 0xADADADAD, result.result);
+						fflush(stdout);
+						close();
+						break;
+					}
 				}
+			} else {
+				log(LL_Error, "Can't parse result packet\n");
 			}
 			break;
 		}
