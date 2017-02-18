@@ -7,6 +7,7 @@
 #include "Extern.h"
 #include "Core/Timer.h"
 #include "Core/Object.h"
+#include "Packet/PacketBaseMessage.h"
 
 #include <functional>
 #include "gtest/gtest.h"
@@ -14,7 +15,6 @@
 class RzTest;
 class TestPacketServer;
 class PacketSession;
-struct TS_MESSAGE;
 template<typename T> class cval;
 
 #define AGET_PACKET(type_) \
