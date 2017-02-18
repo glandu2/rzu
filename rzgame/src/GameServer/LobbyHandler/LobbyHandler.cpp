@@ -93,8 +93,8 @@ void LobbyHandler::onCharacterWearInfoResult(DbQueryJob<CharacterWearInfoBinding
 				dbCharacterInfo->create_time.hour,
 				dbCharacterInfo->create_time.minute,
 				dbCharacterInfo->create_time.second);*/
-		strcpy(characterInfo.szCreateTime, dbCharacterInfo->create_time);
-		strcpy(characterInfo.szDeleteTime, "9999-12-31 00:00:00");
+		characterInfo.szCreateTime = dbCharacterInfo->create_time;
+		characterInfo.szDeleteTime = "9999-12-31 00:00:00";
 
 		auto wearIt = wearInfoResults.begin();
 		auto wearItEnd = wearInfoResults.end();
