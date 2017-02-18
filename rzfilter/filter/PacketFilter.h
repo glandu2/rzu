@@ -27,7 +27,7 @@ private:
 	template<class Packet> void showPacketJson(const Packet* packet);
 	void onChatMessage(const TS_SC_CHAT* packet);
 
-	void printPacketJson(const TS_MESSAGE* packet, int version);
+	void printPacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
 
 private:
 	struct Item {
