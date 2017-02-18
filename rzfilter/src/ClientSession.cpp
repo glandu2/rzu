@@ -80,7 +80,7 @@ void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 
 		for(size_t i = 0; i < serverDetailList.size(); i++) {
 			TS_SERVER_INFO& currentServerInfo = serverDetailList[i];
-			strcpy(currentServerInfo.server_ip, filterIp.c_str());
+			currentServerInfo.server_ip = filterIp.c_str();
 			if(filterPort > 0)
 				currentServerInfo.server_port = filterPort;
 		}
