@@ -9,7 +9,7 @@
 #include "ServerSession.h"
 #include "IFilterEndpoint.h"
 
-class IFilter;
+class FilterProxy;
 
 class ClientSession : public EncryptedSession<PacketSession>, public IFilterEndpoint
 {
@@ -43,7 +43,7 @@ private:
 	~ClientSession();
 
 	ServerSession serverSession;
-	IFilter* packetFilter;
+	FilterProxy* packetFilter;
 	int version;
 };
 

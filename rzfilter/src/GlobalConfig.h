@@ -35,6 +35,14 @@ struct GlobalConfig {
 		{}
 	} client;
 
+	struct FilterConfig {
+		cval<std::string> &filterModuleName;
+
+		FilterConfig() :
+		    filterModuleName(CFG_CREATE("filter.modulename", "rzfilter_module"))
+		{}
+	} filter;
+
 	struct TrafficDump {
 		cval<bool> &enable;
 		cval<std::string> &dir, &file, &level, &consoleLevel;

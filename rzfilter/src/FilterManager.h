@@ -5,18 +5,30 @@
 #include "Core/Object.h"
 #include "uv.h"
 #include "Core/Timer.h"
+#include <list>
+#include <memory>
 
-class FilterManager : public Object, public IFilter
+class FilterProxy;
+
+class FilterManager : public Object
 {
 	DECLARE_CLASSNAME(FilterManager, 0)
 private:
 	typedef void (*DestroyFilterFunction)(IFilter* filter);
+	typedef IFilter* (*CreateFilterFunction)(IFilter* oldFilter);
 
 public:
 	FilterManager();
-	virtual ~FilterManager();
-	virtual bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet);
-	virtual bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet);
+	~FilterManager();
+
+	static FilterManager* getInstance();
+
+	FilterProxy* createFilter();
+	void destroyFilter(FilterProxy* filter);
+
+protected:
+	void destroyInternalFilter(IFilter* filterModule);
+	friend class FilterProxy;
 
 protected:
 	bool unloadModule();
@@ -28,7 +40,9 @@ protected:
 
 private:
 	uv_lib_t filterModule;
-	IFilter* packetFilter;
+	bool filterModuleLoaded;
+	std::list<std::unique_ptr<FilterProxy> > packetFilters;
+	CreateFilterFunction createFilterFunction;
 	DestroyFilterFunction destroyFilterFunction;
 
 	Timer<FilterManager> updateFilterTimer;

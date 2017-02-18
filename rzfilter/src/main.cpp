@@ -11,6 +11,7 @@
 #include "Console/ConsoleSession.h"
 
 #include "ClientSession.h"
+#include "FilterManager.h"
 
 void runServers(Log* trafficLogger);
 
@@ -44,6 +45,7 @@ int main(int argc, char **argv) {
 
 
 	ConfigInfo::get()->dump();
+	FilterManager::getInstance(); // initialize instance
 
 	runServers(&trafficLogger);
 

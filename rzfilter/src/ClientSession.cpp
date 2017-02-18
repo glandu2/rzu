@@ -12,14 +12,15 @@
 #include "Packet/PacketEpics.h"
 
 #include "FilterManager.h"
+#include "FilterProxy.h"
 
 ClientSession::ClientSession()
-  : serverSession(this), packetFilter(new FilterManager), version(CONFIG_GET()->client.epic.get())
+  : serverSession(this), packetFilter(FilterManager::getInstance()->createFilter()), version(CONFIG_GET()->client.epic.get())
 {
 }
 
 ClientSession::~ClientSession() {
-	delete packetFilter;
+	FilterManager::getInstance()->destroyFilter(packetFilter);
 }
 
 EventChain<SocketSession> ClientSession::onConnected() {
