@@ -65,7 +65,13 @@ void sendAccountIMBCDouble(TestConnectionChannel* channel, const char* account, 
 }
 
 RSA* createRSAKey() {
-	return RSA_generate_key(1024, 65537, NULL, NULL);
+	std::unique_ptr<BIGNUM, decltype(&::BN_free)> e (BN_new(), ::BN_free);
+	std::unique_ptr<RSA, decltype(&::RSA_free)> rsa (RSA_new(), ::RSA_free);
+
+	BN_set_word(e.get(), RSA_F4);
+	RSA_generate_key_ex(rsa.get(), 1024, e.get(), NULL);
+
+	return rsa.release();
 }
 
 void freeRSAKey(RSA* rsaCipher) {
