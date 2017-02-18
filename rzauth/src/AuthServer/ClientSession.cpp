@@ -347,9 +347,9 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		serverData.server_idx = serverInfo->getServerIdx();
 		serverData.server_port = serverInfo->getServerPort();
 		serverData.is_adult_server = serverInfo->getIsAdultServer();
-		strcpy(serverData.server_ip, serverInfo->getServerIp().c_str());
-		strcpy(serverData.server_name, serverInfo->getServerName().c_str());
-		strcpy(serverData.server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
+		serverData.server_ip = serverInfo->getServerIp();
+		serverData.server_name = serverInfo->getServerName();
+		serverData.server_screenshot_url = serverInfo->getServerScreenshotUrl();
 
 		uint32_t userRatio = serverInfo->getPlayerCount() * 100 / maxPlayers;
 		serverData.user_ratio = (userRatio > 100)? 100 : userRatio;
