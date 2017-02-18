@@ -1,6 +1,7 @@
 #include "HttpClientSession.h"
 #include "Core/Utils.h"
 #include "Core/EventLoop.h"
+#include <string.h>
 
 HttpClientSession::HttpClientSession(cval<std::string>& ip, cval<int>& port)
     : sending(false), ip(ip), port(port)
@@ -11,7 +12,7 @@ HttpClientSession::HttpClientSession(cval<std::string>& ip, cval<int>& port)
 void HttpClientSession::sendData(std::string url, const std::string& data)
 {
 	if(sending) {
-		log(LL_Warning, "Already sending %d data\n", dataToSend.size());
+		log(LL_Warning, "Already sending %d data\n", (int)dataToSend.size());
 	}
 
 	Data request;

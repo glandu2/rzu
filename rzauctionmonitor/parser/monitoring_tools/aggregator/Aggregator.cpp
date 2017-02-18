@@ -101,10 +101,10 @@ void Aggregator::exportState(std::string filename, const std::string& lastParsed
 	MessageBuffer buffer(data.data(), data.size(), version);
 	aggregationState.serialize(&buffer);
 	if(buffer.checkFinalSize() == false) {
-		log(LL_Error, "Wrong buffer size, size: %d, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
+		log(LL_Error, "Wrong buffer size, size: %u, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
 	} else {
 		AuctionWriter::writeAuctionDataToFile(filename, data);
-		log(LL_Debug, "Exported %d auctions summaries\n", aggregationState.auctionData.size());
+		log(LL_Debug, "Exported %d auctions summaries\n", (int)aggregationState.auctionData.size());
 	}
 }
 
@@ -120,7 +120,7 @@ void Aggregator::importState(std::string filename, std::string& lastParsedFile)
 		MessageBuffer buffer(data.data(), data.size(), version);
 		aggregationState.deserialize(&buffer);
 		if(buffer.checkFinalSize() == false) {
-			log(LL_Error, "Wrong buffer size, size: %d, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
+			log(LL_Error, "Wrong buffer size, size: %u, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
 			return;
 		}
 
@@ -138,7 +138,7 @@ void Aggregator::importState(std::string filename, std::string& lastParsedFile)
 			auctionsByUid[item.uid] = auctionSummary;
 		}
 
-		log(LL_Debug, "Imported %d auctions summaries\n", aggregationState.auctionData.size());
+		log(LL_Debug, "Imported %d auctions summaries\n", (int)aggregationState.auctionData.size());
 	} else {
 		log(LL_Warning, "Cant read state file %s\n", filename.c_str());
 	}
@@ -150,13 +150,13 @@ void Aggregator::updateCurrentDateAndCompute(time_t date)
 	if(currentDate == 0) {
 		currentDate = date;
 	} else if(compareResult > 0) {
-		log(LL_Info, "Date changed from %d to %d, computing statistics of previous day\n", currentDate, date);
+		log(LL_Info, "Date changed from %d to %d, computing statistics of previous day\n", (int)currentDate, (int)date);
 		computeStatisticsOfDay();
 		currentDate = date;
 	} else if(compareResult < 0) {
-		log(LL_Warning, "New date is smaller than current date: %d < %d\n", date, currentDate);
+		log(LL_Warning, "New date is smaller than current date: %d < %d\n", (int)date, (int)currentDate);
 	} else {
-		log(LL_Debug, "Date from %d to %d not changed\n", currentDate, date);
+		log(LL_Debug, "Date from %d to %d not changed\n", (int)currentDate, (int)date);
 	}
 }
 
@@ -198,7 +198,7 @@ bool Aggregator::parseAuctions(AuctionComplexDiffWriter* auctionWriter) {
 
 	if(!auctionFile.header.categories.empty()) {
 		lastestDate = auctionFile.header.categories[0].beginTime;
-		log(LL_Debug, "Parsing %d auctions for date %d\n", auctionFile.auctions.size(), lastestDate);
+		log(LL_Debug, "Parsing %d auctions for date %d\n", (int)auctionFile.auctions.size(), (int)lastestDate);
 	}
 
 	for(size_t i = 0; i < auctionFile.auctions.size(); i++) {
@@ -211,10 +211,10 @@ bool Aggregator::parseAuctions(AuctionComplexDiffWriter* auctionWriter) {
 
 		item.deserialize(&structBuffer);
 		if(!structBuffer.checkFinalSize()) {
-			log(LL_Error, "Invalid item data content for uid %d, can't deserialize\n", auctionInfo.uid);
+			log(LL_Error, "Invalid item data content for uid %u, can't deserialize\n", auctionInfo.uid);
 			return false;
 		} else if(structBuffer.getParsedSize() != auctionInfo.data.size()) {
-			log(LL_Error, "Invalid item data size for uid %d, can't deserialize safely\n", auctionInfo.uid);
+			log(LL_Error, "Invalid item data size for uid %u, can't deserialize safely\n", auctionInfo.uid);
 			return false;
 		}
 
@@ -328,7 +328,7 @@ void Aggregator::computeStatisticsOfDay()
 	JSONWriter jsonWriter(0, true);
 	jsonWriter.clear();
 
-	log(LL_Info, "Computing statistics of %d auctions for day %d\n", auctionsByUid.size(), currentDate);
+	log(LL_Info, "Computing statistics of %d auctions for day %d\n", (int)auctionsByUid.size(), (int)currentDate);
 
 	auto itUid = auctionsByUid.begin();
 	for(; itUid != auctionsByUid.end(); ++itUid) {
