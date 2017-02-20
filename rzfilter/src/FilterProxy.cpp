@@ -11,19 +11,19 @@ FilterProxy::~FilterProxy()
 		filterManager->destroyInternalFilter(filterModule);
 }
 
-bool FilterProxy::onServerPacket(IFilterEndpoint *client, IFilterEndpoint *server, const TS_MESSAGE *packet)
+bool FilterProxy::onServerPacket(IFilterEndpoint *client, IFilterEndpoint *server, const TS_MESSAGE *packet, ServerType serverType)
 {
 	if(filterModule)
-		return filterModule->onServerPacket(client, server, packet);
+		return filterModule->onServerPacket(client, server, packet, serverType);
 	else
-		return IFilter::onServerPacket(client, server, packet);
+		return IFilter::onServerPacket(client, server, packet, serverType);
 }
 
-bool FilterProxy::onClientPacket(IFilterEndpoint *client, IFilterEndpoint *server, const TS_MESSAGE *packet)
+bool FilterProxy::onClientPacket(IFilterEndpoint *client, IFilterEndpoint *server, const TS_MESSAGE *packet, ServerType serverType)
 {
 	if(filterModule)
-		return filterModule->onClientPacket(client, server, packet);
+		return filterModule->onClientPacket(client, server, packet, serverType);
 	else
-		return IFilter::onClientPacket(client, server, packet);
+		return IFilter::onClientPacket(client, server, packet, serverType);
 }
 

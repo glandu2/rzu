@@ -3,6 +3,22 @@
 #include "Packet/JSONWriter.h"
 #include "Core/Utils.h"
 
+#include "AuthClient/TS_AC_ACCOUNT_NAME.h"
+#include "AuthClient/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/TS_AC_RESULT.h"
+#include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
+#include "AuthClient/TS_AC_SELECT_SERVER.h"
+#include "AuthClient/TS_AC_SERVER_LIST.h"
+#include "AuthClient/TS_AC_UPDATE_PENDING_TIME.h"
+#include "AuthClient/TS_CA_ACCOUNT.h"
+#include "AuthClient/TS_CA_DISTRIBUTION_INFO.h"
+#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/TS_CA_OTP_ACCOUNT.h"
+#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
+#include "AuthClient/TS_CA_SELECT_SERVER.h"
+#include "AuthClient/TS_CA_SERVER_LIST.h"
+#include "AuthClient/TS_CA_VERSION.h"
+
 #include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
 #include "GameClient/TS_CS_ANTI_HACK.h"
 #include "GameClient/TS_CS_ARRANGE_ITEM.h"
@@ -330,10 +346,16 @@ void PacketFilter::sendChatMessage(IFilterEndpoint* client, const char* msg, con
 	client->sendPacket(chatRqst);
 }
 
-bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet) {
+bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
 	clientp = client;
 
-	printPacketJson(packet, server->getPacketVersion(), true);
+	if(serverType == ST_Game)
+		printGamePacketJson(packet, server->getPacketVersion(), true);
+	else
+		printAuthPacketJson(packet, server->getPacketVersion(), true);
+
+	if(serverType != ST_Game)
+		return true;
 
 	switch(packet->id) {
 //		case TS_SC_STATE_RESULT::packetID: {
@@ -377,12 +399,44 @@ bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* serv
 	return true;
 }
 
-bool PacketFilter::onClientPacket(IFilterEndpoint*, IFilterEndpoint* server, const TS_MESSAGE* packet) {
-	printPacketJson(packet, server->getPacketVersion(), false);
+bool PacketFilter::onClientPacket(IFilterEndpoint*, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
+	if(serverType == ST_Game)
+		printGamePacketJson(packet, server->getPacketVersion(), false);
+	else
+		printAuthPacketJson(packet, server->getPacketVersion(), false);
+
 	return true;
 }
 
-void PacketFilter::printPacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg) {
+void PacketFilter::printAuthPacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg) {
+	switch(packet->id) {
+		PACKET_TO_JSON(TS_AC_ACCOUNT_NAME);
+		PACKET_TO_JSON(TS_AC_AES_KEY_IV);
+		PACKET_TO_JSON(TS_AC_RESULT);
+		PACKET_TO_JSON(TS_AC_RESULT_WITH_STRING);
+		PACKET_TO_JSON(TS_AC_SELECT_SERVER);
+		PACKET_TO_JSON(TS_AC_SERVER_LIST);
+		PACKET_TO_JSON(TS_AC_UPDATE_PENDING_TIME);
+		PACKET_TO_JSON(TS_CA_ACCOUNT);
+		PACKET_TO_JSON(TS_CA_DISTRIBUTION_INFO);
+		PACKET_TO_JSON(TS_CA_IMBC_ACCOUNT);
+		PACKET_TO_JSON(TS_CA_OTP_ACCOUNT);
+		PACKET_TO_JSON(TS_CA_RSA_PUBLIC_KEY);
+		PACKET_TO_JSON(TS_CA_SELECT_SERVER);
+		PACKET_TO_JSON(TS_CA_SERVER_LIST);
+		PACKET_TO_JSON(TS_CA_VERSION);
+
+		PACKET_TO_JSON(TS_SC_RESULT);
+
+		case 9999: break;
+
+		default:
+			Object::logStatic(Object::LL_Warning, "rzfilter_module", "packet id %d unknown\n", packet->id);
+			break;
+	}
+}
+
+void PacketFilter::printGamePacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg) {
 	switch(packet->id) {
 		PACKET_TO_JSON(TS_CS_ACCOUNT_WITH_AUTH);
 		PACKET_TO_JSON(TS_CS_ANTI_HACK);

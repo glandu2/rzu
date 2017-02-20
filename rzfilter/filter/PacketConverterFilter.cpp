@@ -302,18 +302,31 @@ PacketConverterFilter::~PacketConverterFilter()
 {
 }
 
-bool PacketConverterFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet) {
-	return convertPacketAndSend(client, packet, server->getPacketVersion(), true);
+bool PacketConverterFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
+	if(serverType == ST_Game)
+		return convertPacketAndSend(client, packet, server->getPacketVersion(), true);
+	else
+		return true;
 }
 
-bool PacketConverterFilter::onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet) {
-	return convertPacketAndSend(server, packet, client->getPacketVersion(), false);
+bool PacketConverterFilter::onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
+	if(serverType == ST_Game)
+		return convertPacketAndSend(server, packet, client->getPacketVersion(), false);
+	else
+		return true;
 }
 
 template<typename Packet>
 bool sendPacket(IFilterEndpoint* target, const TS_MESSAGE* packet, int version) {
 	Packet pkt = {0};
 	if(packet->process(pkt, version)) {
+		if(packet->id != Packet::getId(version))
+			Object::logStatic(Object::LL_Warning, "rzfilter_version_converter", "Packet %s id mismatch, got %d, expected %d for version 0x%06x\n",
+			        Packet::getName(),
+			        packet->id,
+			        Packet::getId(version),
+			        version);
+		target->sendPacket(pkt);
 //		int newId = target->sendPacket(pkt);
 //		Object::logStatic(Object::LL_Debug, "rzfilter_version_converter", "Sent packet id from %d to %d, version from %d to %d\n",
 //						  packet->id,

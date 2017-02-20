@@ -8,7 +8,6 @@
 
 #include "PacketEnums.h"
 #include "AuthClient/TS_AC_SERVER_LIST.h"
-#include "AuthClient/TS_AC_SELECT_SERVER.h"
 #include "Packet/PacketEpics.h"
 
 #include "FilterManager.h"
@@ -58,7 +57,7 @@ void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 
 EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	//log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
-	if(packetFilter->onClientPacket(this, &serverSession, packet))
+	if(packetFilter->onClientPacket(this, &serverSession, packet, CONFIG_GET()->client.authMode.get() ? IFilter::ST_Auth : IFilter::ST_Game))
 		serverSession.sendPacket(packet);
 
 	return PacketSession::onPacketReceived(packet);
@@ -88,7 +87,7 @@ void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 		PacketSession::sendPacket(serverList, version);
 	} else {
 		//log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
-		if(packetFilter->onServerPacket(this, &serverSession, packet))
+		if(packetFilter->onServerPacket(this, &serverSession, packet, CONFIG_GET()->client.authMode.get() ? IFilter::ST_Auth : IFilter::ST_Game))
 			sendPacket(packet);
 	}
 }

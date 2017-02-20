@@ -19,15 +19,16 @@ public:
 
 	void sendChatMessage(IFilterEndpoint* client, const char* msg, const char* sender = "Filter", TS_CHAT_TYPE type = CHAT_WHISPER);
 
-	virtual bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet);
-	virtual bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet);
+	virtual bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType);
+	virtual bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType);
 
 protected:
 private:
 	template<class Packet> void showPacketJson(const Packet* packet);
 	void onChatMessage(const TS_SC_CHAT* packet);
 
-	void printPacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
+	void printAuthPacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
+	void printGamePacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
 
 private:
 	struct Item {

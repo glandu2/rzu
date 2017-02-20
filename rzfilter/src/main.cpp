@@ -43,9 +43,15 @@ int main(int argc, char **argv) {
 					  CONFIG_GET()->trafficDump.file,
 					  GlobalCoreConfig::get()->log.maxQueueSize);
 
-
 	ConfigInfo::get()->dump();
 	FilterManager::getInstance(); // initialize instance
+
+	int clientEpic, gameEpic;
+	clientEpic = CONFIG_GET()->client.epic;
+	gameEpic = CONFIG_GET()->server.epic;
+	Object::logStatic(Object::LL_Info, "main", "Client epic: %d.%d.%d, Server epic: %d.%d.%d\n",
+	                  clientEpic >> 16, (clientEpic >> 8) & 0xFF, clientEpic & 0xFF,
+	                  gameEpic >> 16, (gameEpic >> 8) & 0xFF, gameEpic & 0xFF);
 
 	runServers(&trafficLogger);
 

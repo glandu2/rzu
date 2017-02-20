@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "AuthClient/TS_CA_ACCOUNT.h"
-#include "AuthClient/TS_CA_SERVER_LIST.h"
+#include "AuthClient/Flat/TS_CA_ACCOUNT.h"
+#include "AuthClient/Flat/TS_CA_SERVER_LIST.h"
 #include "GlobalConfig.h"
 
 #include "Cipher/RC4Cipher.h"
