@@ -118,7 +118,7 @@ void AuctionParser::onScandir(uv_fs_t* req)
 			if(statReq.statbuf.st_mtim.tv_sec > timeLimit ||
 			        statReq.statbuf.st_ctim.tv_sec > timeLimit ||
 			        statReq.statbuf.st_birthtim.tv_sec > timeLimit) {
-				thisInstance->log(LL_Trace, "File %s too new before parsing (modified less than %d seconds: %d)\n",
+				thisInstance->log(LL_Trace, "File %s too new before parsing (modified less than %d seconds: %ld)\n",
 				                  filename.c_str(), waitChangeSeconds, statReq.statbuf.st_mtim.tv_sec);
 				// don't parse file after this one if it is a new file (avoid parsing file in wrong order)
 				break;

@@ -1,6 +1,7 @@
 #include "AuctionSQLWriter.h"
 #include "Database/DbConnectionPool.h"
 #include "Database/DbConnection.h"
+#include "Packet/MessageBuffer.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
 
 cval<std::string>& DB_Item::connectionString = CFG_CREATE("connectionstring", "DRIVER=SQLite3 ODBC Driver;Database=auctions.sqlite3;");
