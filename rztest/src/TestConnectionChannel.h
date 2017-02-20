@@ -45,7 +45,8 @@ public:
 		const TS_MESSAGE* packet;
 
 		template<typename T>
-		const T* getPacket() {
+		typename std::enable_if<std::is_base_of<TS_MESSAGE, T>::value, const T*>::type
+		getPacket() {
 			const T* p = static_cast<const T*>(packet);
 			if(!p)
 				return nullptr;
@@ -61,18 +62,11 @@ public:
 		template<typename T>
 		bool deserializePacket(T& p, int version) {
 			// force taking the value instead of reference to packetID
-			EXPECT_EQ((const uint16_t)T::packetID, packet->id);
-			if(packet->id != T::packetID)
+			EXPECT_EQ(p.getId(version), packet->id);
+			if(packet->id != p.getId(version))
 				return false;
 
-			MessageBuffer buffer((void*)packet, packet->size, version);
-
-			p.deserialize(&buffer);
-			if(buffer.checkPacketFinalSize()) {
-				return true;
-			} else {
-				return false;
-			}
+			return packet->process(p, version);
 		}
 	};
 
