@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include "TestConnectionChannel.h"
-#include "AuthClient/TS_CA_ACCOUNT.h"
-#include "AuthClient/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/Flat/TS_CA_ACCOUNT.h"
+#include "AuthClient/Flat/TS_AC_AES_KEY_IV.h"
 
 struct rsa_st;
 typedef struct rsa_st RSA;
