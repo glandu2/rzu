@@ -1,6 +1,6 @@
 #include "PlayerCountMonitor.h"
 #include "GameClient/TS_SC_RESULT.h"
-#include "AuthClient/TS_CA_VERSION.h"
+#include "AuthClient/Flat/TS_CA_VERSION.h"
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
