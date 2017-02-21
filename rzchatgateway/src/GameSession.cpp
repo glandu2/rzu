@@ -158,9 +158,8 @@ void GameSession::onChatLocal(const TS_SC_CHAT_LOCAL* packet) {
 	std::string playerName = "Unknown";
 
 	if(packet->handle == handle)
-		return;
-
-	if(it != playerNames.end())
+		playerName = playername;
+	else if(it != playerNames.end())
 		playerName = it->second;
 
 	ircClient->sendMsgToIRC(packet->type, playerName.c_str(), packet->message);

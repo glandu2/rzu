@@ -41,7 +41,8 @@ private:
 	bool joined;
 
 	std::vector<char> buffer;
-	std::unordered_map<std::string, std::string> mpRepliesPlayers;
+	std::unordered_map<std::string, std::string> mpGsToIrc;
+	std::unordered_map<std::string, std::string> mpIrcToGs;
 };
 
 #endif // IRCCLIENT_H
