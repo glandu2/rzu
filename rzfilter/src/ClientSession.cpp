@@ -65,11 +65,8 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == TS_AC_SERVER_LIST::packetID && CONFIG_GET()->client.authMode.get() == true) {
-		MessageBuffer buffer(packet, packet->size, version);
 		TS_AC_SERVER_LIST serverList;
-
-		serverList.deserialize(&buffer);
-		if(!buffer.checkPacketFinalSize()) {
+		if(!packet->process(serverList, serverSession.getPacketVersion())) {
 			return;
 		}
 

@@ -17,6 +17,9 @@ void ServerSession::connect() {
 	uint16_t port = CONFIG_GET()->server.port.get();
 	log(LL_Debug, "Connecting to server %s:%d\n", ip.c_str(), port);
 	SocketSession::connect(ip.c_str(), port);
+	if(CONFIG_GET()->trafficDump.enableServer.get() && getStream() && clientSession->getStream()) {
+		getStream()->setPacketLogger(clientSession->getStream()->getPacketLogger());
+	}
 }
 
 EventChain<SocketSession> ServerSession::onConnected() {
