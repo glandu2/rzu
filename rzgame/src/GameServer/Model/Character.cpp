@@ -188,21 +188,21 @@ void Character::sendPacketStats() {
 void Character::sendEquip() {
 	TS_SC_WEAR_INFO wearInfo = {0};
 	wearInfo.handle = handle;
-	for(size_t i = 0; i < Utils_countOf(wearInfo.wear_info); i++) {
+	for(size_t i = 0; i < Utils_countOf(wearInfo.item_code); i++) {
 		const Item* item = inventory.getEquipedItem((Inventory::ItemWearType)i);
 
 		if(item) {
-			wearInfo.wear_info[i] = item->code;
-			wearInfo.wear_item_level_info[i] = item->level;
-			wearInfo.wear_item_enhance_info[i] = item->enhance;
-			wearInfo.wear_item_elemental_type[i] = item->elemental_effect_type;
-			wearInfo.wear_appearance_code[i] = item->appearance_code;
+			wearInfo.item_code[i] = item->code;
+			wearInfo.item_level[i] = item->level;
+			wearInfo.item_enhance[i] = item->enhance;
+			wearInfo.elemental_effect_type[i] = item->elemental_effect_type;
+			wearInfo.appearance_code[i] = item->appearance_code;
 		} else if(i == Inventory::WEAR_ARMOR) {
-			wearInfo.wear_info[i] = baseModel.armorId;
+			wearInfo.item_code[i] = baseModel.armorId;
 		} else if(i == Inventory::WEAR_GLOVE) {
-			wearInfo.wear_info[i] = baseModel.glovesId;
+			wearInfo.item_code[i] = baseModel.glovesId;
 		} else if(i == Inventory::WEAR_BOOTS) {
-			wearInfo.wear_info[i] = baseModel.bootsId;
+			wearInfo.item_code[i] = baseModel.bootsId;
 		}
 	}
 	session->sendPacket(wearInfo);

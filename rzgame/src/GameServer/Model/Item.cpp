@@ -45,8 +45,8 @@ void Item::fillInventoryItem(TS_ITEM_INFO &item) {
 	item.base_info.elemental_effect_magic_point = 0;
 	item.base_info.elemental_effect_type = 0;
 	item.base_info.appearance_code = appearance_code;
-	memset(item.base_info.awaken_option_data, 0, sizeof(item.base_info.awaken_option_data));
-	memset(item.base_info.awaken_option_value, 0, sizeof(item.base_info.awaken_option_value));
+	memset(item.base_info.awaken_option.data, 0, sizeof(item.base_info.awaken_option.data));
+	memset(item.base_info.awaken_option.value, 0, sizeof(item.base_info.awaken_option.value));
 }
 
 }

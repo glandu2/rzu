@@ -121,8 +121,8 @@ void Inventory::sendItemWearInfo(Item *item, ItemWearType pos) {
 	wearInfo.wear_position = (uint16_t)pos;
 	wearInfo.target_handle = character->handle;
 	wearInfo.enhance = item->enhance;
-	wearInfo.wear_item_elemental_type = item->elemental_effect_type;
-	wearInfo.wear_appearance_code = item->appearance_code;
+	wearInfo.elemental_effect_type = item->elemental_effect_type;
+	wearInfo.appearance_code = item->appearance_code;
 	session->sendPacket(wearInfo);
 }
 
