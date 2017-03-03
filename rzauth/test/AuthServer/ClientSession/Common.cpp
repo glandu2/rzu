@@ -10,6 +10,7 @@
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
+#include <memory>
 
 namespace AuthServer {
 
