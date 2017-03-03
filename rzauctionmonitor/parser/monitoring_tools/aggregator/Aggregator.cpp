@@ -264,11 +264,11 @@ bool Aggregator::skipItem(const AUCTION_INFO& auctionInfo, const TS_ITEM_BASE_IN
 		case C_Cloak:
 		case C_Accessory:
 			return item.enhance > 0 ||
-			        item.awaken_option_value[0] != 0 ||
-			        item.awaken_option_value[1] != 0 ||
-			        item.awaken_option_value[2] != 0 ||
-			        item.awaken_option_value[3] != 0 ||
-			        item.awaken_option_value[4] != 0 ||
+			        item.awaken_option.value[0] != 0 ||
+			        item.awaken_option.value[1] != 0 ||
+			        item.awaken_option.value[2] != 0 ||
+			        item.awaken_option.value[3] != 0 ||
+			        item.awaken_option.value[4] != 0 ||
 			        item.random_type[0] != 0 ||
 			        item.random_type[1] != 0 ||
 			        item.random_type[2] != 0 ||
