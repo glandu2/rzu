@@ -194,7 +194,7 @@ bool AuthPacketConverterFilter::handleAuthPacket(IFilterEndpoint* client, IFilte
 	} else if(packet->id == TS_AC_RESULT_WITH_STRING::packetID) {
 		TS_AC_RESULT_WITH_STRING pkt;
 		if(packet->process(pkt, server->getPacketVersion())) {
-			if(client->getPacketVersion() >= EPIC_6_1) {
+			if(client->getPacketVersion() >= EPIC_8_1) {
 				client->sendPacket(pkt);
 			} else {
 				TS_AC_RESULT resultPkt;
@@ -203,6 +203,8 @@ bool AuthPacketConverterFilter::handleAuthPacket(IFilterEndpoint* client, IFilte
 				resultPkt.login_flag = pkt.login_flag;
 				client->sendPacket(resultPkt);
 			}
+		} else {
+			return true;
 		}
 	} else {
 		int version = isServerMsg ? server->getPacketVersion() : client->getPacketVersion();

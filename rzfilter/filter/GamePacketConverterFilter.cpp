@@ -367,6 +367,32 @@ bool GamePacketConverterFilter::convertPacketAndSend(IFilterEndpoint* target, co
 
 			target->sendPacket(pkt);
 		}
+	} else if(packet->id == TS_CS_CHECK_ILLEGAL_USER::packetID) {
+		return false;
+	} else if(packet->id == TS_SC_STATE::packetID) {
+		TS_SC_STATE pkt;
+		if(packet->process(pkt, version)) {
+			// Epic 3 client crashes if the state code is not in db_tenacity(ascii).rdb
+			if(target->getPacketVersion() <= EPIC_3)
+				pkt.state_code = 1001;
+			target->sendPacket(pkt);
+			return false;
+		}
+		return true;
+	} else if(packet->id == TS_SC_ENTER::getId(version)) {
+		TS_SC_ENTER pkt;
+		if(packet->process(pkt, version)) {
+			if(pkt.objType == EOT_Player) {
+				if(version >= EPIC_4_1) {
+					pkt.playerInfo.energy = pkt.playerInfo.creatureInfo.energy;
+				} else {
+					pkt.playerInfo.creatureInfo.energy = pkt.playerInfo.energy;
+				}
+			}
+			target->sendPacket(pkt);
+			return false;
+		}
+		return true;
 	} else {
 		switch(packet->id) {
 			PACKET_TO_JSON(TS_CS_ACCOUNT_WITH_AUTH);
