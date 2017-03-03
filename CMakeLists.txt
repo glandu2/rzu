@@ -11,7 +11,6 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs instead of static")
 
 # Packaging
 
-set(CPACK_COMPONENT_ALL "binaries" "symbols")
 set(CPACK_NSIS_DISPLAY_NAME "Rappelz Emu - Glandu2")
 set(CPACK_PACKAGE_NAME "rzemu")
 set(CPACK_PACKAGE_VENDOR "Glandu2")
@@ -19,7 +18,6 @@ set(CPACK_PACKAGE_VERSION "4.1" CACHE STRING "Version string")
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_STRIP_FILES ON)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "binaries")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
 message("Package name: ${CPACK_PACKAGE_FILE_NAME}")
 
@@ -84,66 +82,93 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   include(CodeCoverage)
 endif()
 
+
+
 # Compile subprojects if existing
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "deps")
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
+  install_pdb("uv")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libiconv/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libiconv" libiconv)
+  install_pdb("iconv")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/zlib" zlib)
-endif()
-
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest)
+  install_pdb("z")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/librzu/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/librzu" librzu)
 endif()
 
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest)
+endif()
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rztest/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rztest" rztest)
 endif()
+
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzauth")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzauth/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzauth" rzauth)
 endif()
 
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzgame")
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzgame/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzgame" rzgame)
 endif()
+
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzplayercount")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzplayercount/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzplayercount" rzplayercount)
 endif()
 
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzbenchauth")
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzbenchauth/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzbenchauth" rzbenchauth)
 endif()
+
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzchatgateway")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzchatgateway/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzchatgateway" rzchatgateway)
 endif()
 
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzgamereconnect")
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzgamereconnect/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzgamereconnect" rzgamereconnect)
 endif()
+
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzlog")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzlog/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzlog" rzlog)
 endif()
 
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzbenchlog")
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzbenchlog/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzbenchlog" rzbenchlog)
 endif()
 
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzfilter")
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzfilter/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzfilter" rzfilter)
 endif()
+
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzauctionmonitor")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzauctionmonitor/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzauctionmonitor" rzauctionmonitor)

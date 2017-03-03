@@ -1,4 +1,8 @@
-function(add_exe name sources)
+function(install_pdb name)
+	install(FILES $<TARGET_FILE_DIR:${name}>/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols" OPTIONAL)
+endfunction()
+
+function(add_exe_no_install name sources)
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/metadata.rc.in")
     file(GLOB RES_FILES "../res/*")
 
@@ -34,9 +38,13 @@ function(add_exe name sources)
   foreach(lib "${ARGN}")
     target_link_libraries(${name} ${lib})
   endforeach()
+endfunction()
 
-  install(TARGETS ${name} RUNTIME DESTINATION ./)
-  install(FILES $<TARGET_FILE_DIR:${name}>/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols" OPTIONAL)
+function(add_exe name sources)
+	add_exe_no_install("${name}" "${sources}" "${ARGN}")
+
+	install(TARGETS ${name} RUNTIME DESTINATION ./)
+	install_pdb(${name})
 endfunction()
 
 function(add_lib name sources)
@@ -51,8 +59,8 @@ function(add_lib name sources)
     install(TARGETS ${name}
       RUNTIME DESTINATION ./
       LIBRARY DESTINATION ./
-    )
-    install(FILES $<TARGET_FILE_DIR:${name}>/${name}.pdb DESTINATION ./symbols/ COMPONENT "symbols" OPTIONAL)
+	)
+    install_pdb(${name})
   endif()
 endfunction()
 
