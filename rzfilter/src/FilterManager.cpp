@@ -2,53 +2,82 @@
 #include "uv.h"
 #include "Core/EventLoop.h"
 #include <time.h>
+#include "GlobalConfig.h"
+#include "FilterProxy.h"
 
 #ifdef _WIN32
-	static const char* newModuleName = "rzfilter_module.dll";
-	static const char* usedModuleName = "rzfilter_module_used.dll";
+    static const char* moduleSuffix = ".dll";
+	static const char* usedModuleSuffix = "_used.dll";
 #elif defined(__APPLE__)
-	#include <unistd.h>
-	static const char* newModuleName = "rzfilter_module.dylib";
-	static const char* usedModuleName = "rzfilter_module_used.dylib";
+    #include <unistd.h>
+    static const char* moduleSuffix = ".dylib";
+	static const char* usedModuleSuffix = "_used.dylib";
 #else
-	#include <unistd.h>
-	static const char* newModuleName = "rzfilter_module.so";
-	static const char* usedModuleName = "rzfilter_module_used.so";
+    #include <unistd.h>
+    static const char* moduleSuffix = ".so";
+	static const char* usedModuleSuffix = "_used.so";
 #endif
 
-FilterManager::FilterManager() : packetFilter(nullptr), destroyFilterFunction(nullptr), lastFileSize(0) {
+FilterManager::FilterManager() : filterModuleLoaded(false), createFilterFunction(nullptr), destroyFilterFunction(nullptr), lastFileSize(-1) {
 	onUpdateFilter();
 
+	updateFilterTimer.unref();
 	updateFilterTimer.start(this, &FilterManager::onUpdateFilter, 2000, 2000);
 }
 
 FilterManager::~FilterManager()
 {
+	auto it = packetFilters.begin();
+	auto itEnd = packetFilters.end();
+	for(; it != itEnd;) {
+		it = packetFilters.erase(it);
+	}
 	unloadModule();
 }
 
-bool FilterManager::onServerPacket(IFilterEndpoint *client, IFilterEndpoint *server, const TS_MESSAGE *packet)
+FilterManager* FilterManager::getInstance()
 {
-	if(packetFilter)
-		return packetFilter->onServerPacket(client, server, packet);
-	else
-		return IFilter::onServerPacket(client, server, packet);
+	static FilterManager filterManager;
+	return &filterManager;
 }
 
-bool FilterManager::onClientPacket(IFilterEndpoint *client, IFilterEndpoint *server, const TS_MESSAGE *packet)
+FilterProxy* FilterManager::createFilter()
 {
-	if(packetFilter)
-		return packetFilter->onClientPacket(client, server, packet);
-	else
-		return IFilter::onClientPacket(client, server, packet);
+	FilterProxy* filterProxy = new FilterProxy(this);
+	if(filterModuleLoaded) {
+		filterProxy->setFilterModule(createFilterFunction(nullptr));
+	}
+
+	packetFilters.push_back(std::unique_ptr<FilterProxy>(filterProxy));
+
+	return filterProxy;
+}
+
+void FilterManager::destroyFilter(FilterProxy* filter)
+{
+	auto it = packetFilters.begin();
+	auto itEnd = packetFilters.end();
+	for(; it != itEnd; ++it) {
+		if(it->get() == filter) {
+			packetFilters.erase(it);
+			break;
+		}
+	}
+}
+
+void FilterManager::destroyInternalFilter(IFilter* filterModule)
+{
+	if(filterModuleLoaded) {
+		destroyFilterFunction(filterModule);
+	}
 }
 
 bool FilterManager::unloadModule() {
-	if(packetFilter && destroyFilterFunction) {
-		log(LL_Info, "Unloading filter module %p\n", packetFilter);
-		destroyFilterFunction(packetFilter);
+	if(filterModuleLoaded) {
+		log(LL_Info, "Unloading filter module\n");
 		uv_dlclose(&filterModule);
-		packetFilter = nullptr;
+		filterModuleLoaded = false;
+		createFilterFunction = nullptr;
 		destroyFilterFunction = nullptr;
 		return true;
 	}
@@ -68,20 +97,23 @@ static int getFileSize(const char* name) {
 void FilterManager::loadModule()
 {
 	uv_lib_t filterModule;
-	IFilter* newPacketFilter;
-	IFilter* (*createFilterFunction)(IFilter*);
-	void (*destroyFilterFunction)(IFilter*);
+	CreateFilterFunction createFilterFunction;
+	DestroyFilterFunction destroyFilterFunction;
 
 	int err;
 	const char* moduleName;
 	char generatedModuleName[128];
 
-	int fileSize = getFileSize(newModuleName);
+	std::string newModuleName = CONFIG_GET()->filter.filterModuleName.get() + moduleSuffix;
+	std::string usedModuleName = CONFIG_GET()->filter.filterModuleName.get() + usedModuleSuffix;
 
-	if(fileSize > 0 && fileSize == lastFileSize) {
-		moduleName = newModuleName;
-	} else if(this->packetFilter == nullptr && fileSize == 0) {
-		moduleName = usedModuleName;
+	int fileSize = getFileSize(newModuleName.c_str());
+
+	if(fileSize > 0 && (fileSize == lastFileSize || lastFileSize == -1)) {
+		moduleName = newModuleName.c_str();
+		lastFileSize = fileSize;
+	} else if(!filterModuleLoaded && fileSize == 0) {
+		moduleName = usedModuleName.c_str();
 	} else {
 		if(fileSize > 0)
 			log(LL_Debug, "Module size was modified, will reload next time\n");
@@ -91,7 +123,7 @@ void FilterManager::loadModule()
 
 	log(LL_Info, "Loading filter module %s\n", moduleName);
 
-	sprintf(generatedModuleName, "%s.%d", newModuleName, (int)time(NULL));
+	sprintf(generatedModuleName, "%s.%d", newModuleName.c_str(), (int)time(NULL));
 
 	err = rename(moduleName, generatedModuleName);
 	if(err) {
@@ -118,19 +150,28 @@ void FilterManager::loadModule()
 		return;
 	}
 
-	newPacketFilter = createFilterFunction(this->packetFilter);
+	auto it = packetFilters.begin();
+	auto itEnd = packetFilters.end();
+	for(; it != itEnd; ++it) {
+		FilterProxy* filterProxy = it->get();
+		IFilter* oldFilter = filterProxy->getFilterModule();
+		filterProxy->setFilterModule(createFilterFunction(oldFilter));
+		if(oldFilter && this->destroyFilterFunction)
+			this->destroyFilterFunction(oldFilter);
+	}
 
 	unloadModule();
-	unlink(usedModuleName);
-	err = rename(generatedModuleName, usedModuleName);
+	unlink(usedModuleName.c_str());
+	err = rename(generatedModuleName, usedModuleName.c_str());
 	if(err) {
-		log(LL_Error, "Failed to rename %s to %s: %s (%d)\n", generatedModuleName, usedModuleName, strerror(errno), errno);
+		log(LL_Error, "Failed to rename %s to %s: %s (%d)\n", generatedModuleName, usedModuleName.c_str(), strerror(errno), errno);
 	}
 
 	this->filterModule = filterModule;
-	this->packetFilter = newPacketFilter;
+	this->filterModuleLoaded = true;
+	this->createFilterFunction = createFilterFunction;
 	this->destroyFilterFunction = destroyFilterFunction;
-	log(LL_Info, "Loaded new filter %p from %s\n", newPacketFilter, newModuleName);
+	log(LL_Info, "Loaded new filter %s\n", newModuleName.c_str());
 }
 
 void FilterManager::onUpdateFilter() {

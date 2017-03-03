@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <type_traits>
 
 #ifndef __GNUC__
 #pragma warning(disable:4200)  //array [0] extension
@@ -19,7 +20,8 @@ struct TS_MESSAGE {
 	int8_t msg_check_sum;
 
 	template<typename MessageType>
-	static void initMessage(MessageType* msg) {
+	static typename std::enable_if<std::is_base_of<TS_MESSAGE, MessageType>::value, void>::type
+	initMessage(MessageType* msg) {
 		memset(msg, 0, sizeof(MessageType));
 		msg->size = sizeof(MessageType);
 		msg->id = MessageType::packetID;
@@ -54,6 +56,9 @@ struct TS_MESSAGE {
 
 	template<class T, class U>
 	void process(U* instance, void (U::*processFunction)(const T*), int version) const;
+
+	template<class T>
+	bool process(T& packet, int version) const;
 };
 
 //Special struct to prevent copy of server->client packet structs
@@ -82,20 +87,6 @@ struct TS_MESSAGE_WNA : public TS_MESSAGE {
 		   TS_MESSAGE_WNA& operator=( TS_MESSAGE_WNA const & ); // undefined
 };
 
-inline uint8_t getMessageChecksum(uint32_t size, uint16_t id) {
-	uint8_t value = 0;
-
-	value += size & 0xFF;
-	value += (size >> 8) & 0xFF;
-	value += (size >> 16) & 0xFF;
-	value += (size >> 24) & 0xFF;
-
-	value += id & 0xFF;
-	value += (id >> 8) & 0xFF;
-
-	return value;
-}
-
 #pragma pack(pop)
 
 #include "MessageBuffer.h"
@@ -109,6 +100,13 @@ void TS_MESSAGE::process(U* instance, void (U::*processFunction)(const T*), int 
 	if(buffer.checkPacketFinalSize()) {
 		(instance->*processFunction)(&packet);
 	}
+}
+template<class T>
+bool TS_MESSAGE::process(T& packet, int version) const {
+	MessageBuffer buffer((void*)this, this->size, version);
+
+	packet.deserialize(&buffer);
+	return buffer.checkPacketFinalSize();
 }
 
 #endif // PACKETS_PACKETBASEMESSAGE_H

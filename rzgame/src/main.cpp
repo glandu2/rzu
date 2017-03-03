@@ -106,5 +106,5 @@ static void onReferenceDataLoaded(void* data) {
 	serverManager->start();
 
 	int epic = CONFIG_GET()->game.clients.epic;
-	Object::logStatic(Object::LL_Info, "main", "Target epic: %x.%x.%x\n", epic >> 16, (epic >> 8) & 0xFF, epic & 0xFF);
+	Object::logStatic(Object::LL_Info, "main", "Target epic: %d.%d.%d\n", epic >> 16, (epic >> 8) & 0xFF, epic & 0xFF);
 }

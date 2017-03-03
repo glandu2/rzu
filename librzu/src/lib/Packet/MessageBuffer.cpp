@@ -8,7 +8,7 @@ MessageBuffer::MessageBuffer(size_t size, int version) : StructSerializer(versio
 	bufferOverflow = false;
 }
 
-MessageBuffer::MessageBuffer(const void *data, size_t size, int version) : StructSerializer(version) {
+MessageBuffer::MessageBuffer(const void* data, size_t size, int version) : StructSerializer(version) {
 	buffer = Stream::WriteRequest::createFromExisting(const_cast<char*>(static_cast<const char*>(data)), size);
 	p = buffer->buffer.base;
 	bufferOverflow = false;
@@ -53,12 +53,10 @@ void MessageBuffer::writeString(const char *fieldName, const std::string &val, s
 	}
 }
 
-void MessageBuffer::writeDynString(const char *fieldName, const std::string &val, bool hasNullTerminator) {
-	size_t sizeToWrite = val.size() + hasNullTerminator;
-
-	if(checkAvailableBuffer(fieldName, sizeToWrite)) {
-		memcpy(p, val.c_str(), sizeToWrite);
-		p += sizeToWrite;
+void MessageBuffer::writeDynString(const char *fieldName, const std::string &val, size_t count) {
+	if(checkAvailableBuffer(fieldName, count)) {
+		memcpy(p, val.c_str(), count);
+		p += count;
 	}
 }
 
@@ -69,11 +67,24 @@ void MessageBuffer::readString(const char *fieldName, std::string &val, size_t m
 	}
 }
 
-void MessageBuffer::readDynString(const char *fieldName, std::string &val, bool hasNullTerminator) {
-	size_t sizeToRead = val.size() + hasNullTerminator;
-
+void MessageBuffer::readDynString(const char *fieldName, std::string &val, uint32_t sizeToRead, bool hasNullTerminator) {
 	if(checkAvailableBuffer(fieldName, sizeToRead)) {
-		val = Utils::convertToString(p, (int)val.size());
+		if(sizeToRead > 0)
+			val.assign(p, sizeToRead - hasNullTerminator);
+		else
+			val.clear();
 		p += sizeToRead;
+	}
+}
+
+void MessageBuffer::readEndString(const char* fieldName, std::string& val, bool hasNullTerminator)
+{
+	size_t remainingSize = getSize() - getParsedSize();
+	if(checkAvailableBuffer(fieldName, remainingSize)) {
+		if(remainingSize > 0)
+			val.assign(p, remainingSize - hasNullTerminator);
+		else
+			val.clear();
+		p += remainingSize;
 	}
 }

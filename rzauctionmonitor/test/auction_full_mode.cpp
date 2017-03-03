@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "gtest/gtest.h"
 #include "AuctionComplexDiffWriter.h"
 #include "AuctionFile.h"
@@ -6,7 +5,7 @@
 #include <random>
 
 struct AuctionInputTestData {
-	AuctionInputTestData(AuctionComplexData::BidFlag bidFlag, AuctionComplexData::DurationType durationType) {
+	AuctionInputTestData(BidFlag bidFlag, DurationType durationType) {
 		uid = rand();
 		time = rand();
 		bid_flag = bidFlag;
@@ -21,11 +20,11 @@ struct AuctionInputTestData {
 	int64_t previousTime;
 	uint16_t diffType;
 	uint16_t category;
-	AuctionComplexData::DurationType duration_type;
+	DurationType duration_type;
 	int64_t bid_price;
 	int64_t price;
 	std::string seller;
-	AuctionComplexData::BidFlag bid_flag;
+	BidFlag bid_flag;
 
 	std::vector<uint8_t> rawData;
 	std::vector<uint8_t> expectedData;
@@ -53,7 +52,7 @@ struct AuctionInputTestData {
 };
 
 struct AuctionOuputTestData : public AuctionInputTestData {
-	AuctionOuputTestData(AuctionComplexData::BidFlag bidFlag, AuctionComplexData::DurationType durationType)
+	AuctionOuputTestData(BidFlag bidFlag, DurationType durationType)
 	    : AuctionInputTestData(bidFlag, durationType)
 	{}
 
@@ -162,7 +161,7 @@ static void reimportAuctions(std::unique_ptr<AuctionComplexDiffWriter>& auctionW
 
 TEST(auction_full_mode, no_auction) {
 	AuctionComplexDiffWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData(BF_NoBid, DT_Medium);
 	AUCTION_FILE auctionFile;
 
 	time_t categoryBegin = auctionData.time - rand()%1000;
@@ -198,9 +197,9 @@ TEST(auction_full_mode, no_auction) {
 
 TEST(auction_full_mode, added_3_auction) {
 	AuctionComplexDiffWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData2(AuctionComplexData::BF_MyBid, AuctionComplexData::DT_Long);
-	AuctionOuputTestData auctionData3(AuctionComplexData::BF_Bidded, AuctionComplexData::DT_Short);
+	AuctionOuputTestData auctionData(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData2(BF_MyBid, DT_Long);
+	AuctionOuputTestData auctionData3(BF_Bidded, DT_Short);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -256,10 +255,10 @@ TEST(auction_full_mode, added_3_auction) {
 
 TEST(auction_full_mode, added_update_unmodified_removed) {
 	AuctionComplexDiffWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData2(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData3(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData4(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData2(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData3(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData4(BF_NoBid, DT_Medium);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -272,7 +271,7 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 
 	auctionData2 = auctionData;
 	auctionData2.diffType = D_Updated;
-	auctionData2.bid_flag = AuctionComplexData::BF_MyBid;
+	auctionData2.bid_flag = BF_MyBid;
 	auctionData2.previousTime = auctionData2.time;
 	auctionData2.time += 5000;
 
@@ -389,10 +388,10 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 
 TEST(auction_full_mode, added_update_unmodified_removed_diff) {
 	AuctionComplexDiffWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData2(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData3(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData4(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData2(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData3(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData4(BF_NoBid, DT_Medium);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -405,7 +404,7 @@ TEST(auction_full_mode, added_update_unmodified_removed_diff) {
 
 	auctionData2 = auctionData;
 	auctionData2.diffType = D_Updated;
-	auctionData2.bid_flag = AuctionComplexData::BF_MyBid;
+	auctionData2.bid_flag = BF_MyBid;
 	auctionData2.previousTime = auctionData2.time;
 	auctionData2.time += 5000;
 
@@ -529,10 +528,10 @@ TEST(auction_full_mode, added_update_unmodified_removed_diff) {
 
 TEST(auction_full_mode, import_state) {
 	std::unique_ptr<AuctionComplexDiffWriter> auctionWriter;
-	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData2(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData3(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
-	AuctionOuputTestData auctionData4(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData2(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData3(BF_NoBid, DT_Medium);
+	AuctionOuputTestData auctionData4(BF_NoBid, DT_Medium);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -545,7 +544,7 @@ TEST(auction_full_mode, import_state) {
 
 	auctionData2 = auctionData;
 	auctionData2.diffType = D_Updated;
-	auctionData2.bid_flag = AuctionComplexData::BF_MyBid;
+	auctionData2.bid_flag = BF_MyBid;
 	auctionData2.previousTime = auctionData2.time;
 	auctionData2.time += 5000;
 
@@ -672,9 +671,9 @@ TEST(auction_full_mode, import_state) {
 
 TEST(auction_full_mode, estimated_time_adjust) {
 	AuctionComplexDiffWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Long);
-	AuctionOuputTestData auctionData2(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Long);
-	AuctionOuputTestData auctionData3(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Long);
+	AuctionOuputTestData auctionData(BF_NoBid, DT_Long);
+	AuctionOuputTestData auctionData2(BF_NoBid, DT_Long);
+	AuctionOuputTestData auctionData3(BF_NoBid, DT_Long);
 	AUCTION_FILE auctionFile;
 
 	auctionData.diffType = D_Added;
@@ -687,7 +686,7 @@ TEST(auction_full_mode, estimated_time_adjust) {
 
 	auctionData2 = auctionData;
 	auctionData2.diffType = D_Updated;
-	auctionData2.duration_type = AuctionComplexData::DT_Medium;
+	auctionData2.duration_type = DT_Medium;
 	auctionData2.previousTime = auctionData.time + 72*3600 - 24*3600 - 1000;
 	auctionData2.time = auctionData.time + 72*3600 - 24*3600 + 500;
 	auctionData2.estimatedEndTimeFromAdded = false;
@@ -696,7 +695,7 @@ TEST(auction_full_mode, estimated_time_adjust) {
 
 	auctionData3 = auctionData2;
 	auctionData3.diffType = D_Updated;
-	auctionData3.duration_type = AuctionComplexData::DT_Short;
+	auctionData3.duration_type = DT_Short;
 	auctionData3.previousTime = auctionData.time + 72*3600 - 6*3600 - 1500;
 	auctionData3.time = auctionData.time + 72*3600 - 6*3600 - 500;
 	auctionData3.estimatedEndTimeMin = auctionData.time + 72*3600 - 1000;
@@ -759,7 +758,7 @@ static void testWriteReadAuctionsFile(std::string name) {
 	static const size_t AUCTIONS_COUNT = 200;
 
 	AuctionComplexDiffWriter auctionWriter(18);
-	AuctionOuputTestData auctionData(AuctionComplexData::BF_NoBid, AuctionComplexData::DT_Medium);
+	AuctionOuputTestData auctionData(BF_NoBid, DT_Medium);
 	AUCTION_FILE auctionFile;
 	AUCTION_FILE auctionFile2;
 	std::vector<uint8_t> fileDataBefore;

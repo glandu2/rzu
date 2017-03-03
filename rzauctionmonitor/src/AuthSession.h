@@ -19,7 +19,8 @@ public:
 				cval<int>& delayTime,
 				cval<bool>& useRsa,
 				const std::string& account,
-				const std::string& password);
+	            const std::string& password,
+	            cval<int>& version);
 
 	void connect();
 	void disconnect(Callback<DisconnectedCallback> callback);

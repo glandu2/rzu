@@ -20,9 +20,13 @@ public:
 		json << "{";
 	}
 
-	void finalize() { json << (compact ? "}" : "\n}"); }
+	void finalize() { json << (compact ? "}\n" : "\n}\n"); newList = true; }
+	void start() { json << "{"; }
+	void clear() { json.str(std::string()); json.clear(); }
 
 	std::string toString() { return json.str(); }
+
+	uint32_t getParsedSize() const { return 0; }
 
 	void printIdent(bool addNewLine = true) {
 		if(!newList)
@@ -38,6 +42,10 @@ public:
 	}
 
 	// Write functions /////////////////////////
+
+	void writeHeader(uint32_t size, uint16_t id) {
+		write<uint16_t>("id", id);
+	}
 
 	//handle ambiguous << operator for int16_t and int8_t
 	template<typename T>
@@ -95,7 +103,7 @@ public:
 		json << "\"" << val << "\"";
 	}
 
-	void writeDynString(const char* fieldName, const std::string& val, bool hasNullTerminator) {
+	void writeDynString(const char* fieldName, const std::string& val, size_t count) {
 		printIdent();
 		if(fieldName)
 			json << '\"' << fieldName << getEndFieldSeparator();
@@ -138,7 +146,7 @@ public:
 
 	//Dynamic array
 	template<typename T>
-	void writeDynArray(const char* fieldName, const std::vector<T>& val) {
+	void writeDynArray(const char* fieldName, const std::vector<T>& val, uint32_t) {
 		printIdent();
 		if(fieldName)
 			json << '\"' << fieldName << getEndFieldSeparator();
@@ -160,14 +168,21 @@ public:
 	//Dynamic array of primitive with cast
 	template<typename T, typename U>
 	typename std::enable_if<is_castable_primitive<T, U>::value, void>::type
-	writeDynArray(const char* fieldName, const std::vector<U>& val) {
-		writeDynArray<U>(fieldName, val);
+	writeDynArray(const char* fieldName, const std::vector<U>& val, uint32_t count) {
+		writeDynArray<U>(fieldName, val, count);
 	}
 
-	void pad(const char* fieldName, size_t size) {
-	}
+	template<typename T>
+	typename std::enable_if<is_primitive<T>::value, void>::type
+	writeSize(const char* fieldName, T size) {}
+
+	void pad(const char* fieldName, size_t size) {}
+
 
 	// Read functions /////////////////////////
+
+	void readHeader(uint16_t& id) {
+	}
 
 	//Primitives via arg
 	template<typename T, typename U>
@@ -183,7 +198,8 @@ public:
 
 	//String
 	void readString(const char* fieldName, std::string& val, size_t size) {}
-	void readDynString(const char* fieldName, std::string& val, bool hasNullTerminator) {}
+	void readDynString(const char* fieldName, std::string& val, size_t sizeToRead, bool hasNullTerminator) {}
+	void readEndString(const char* fieldName, std::string& val, bool hasNullTerminator) {}
 
 	//Fixed array of primitive
 	template<typename T>
@@ -221,9 +237,15 @@ public:
 	readDynArray(const char* fieldName, std::vector<T>& val) {
 	}
 
+	//End array, read to the end of stream
+	template<typename T>
+	void readEndArray(const char* fieldName, std::vector<T>& val) {
+	}
+
 	//read size for objects (std:: containers)
-	template<typename T, class U>
-	void readSize(const char* fieldName, U& vec) {
+	template<typename T>
+	typename std::enable_if<is_primitive<T>::value, void>::type
+	readSize(const char* fieldName, T& val) {
 	}
 
 	void discard(const char* fieldName, size_t size) {

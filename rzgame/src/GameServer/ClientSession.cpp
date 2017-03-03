@@ -45,12 +45,11 @@ void ClientSession::setConnectionHandler(ConnectionHandler* newConnectionHandler
 
 void ClientSession::onAccountLoginResult(uint16_t result, std::string account, uint32_t accountId, char nPCBangUser, uint32_t nEventCode, uint32_t nAge, uint32_t nContinuousPlayTime, uint32_t nContinuousLogoutTime) {
 	TS_SC_RESULT loginResult;
-	TS_MESSAGE::initMessage(&loginResult);
 
 	loginResult.request_msg_id = TS_CS_ACCOUNT_WITH_AUTH::packetID;
 	loginResult.result = result;
 	loginResult.value = 0;
-	sendPacket(&loginResult);
+	sendPacket(loginResult);
 
 	if(result != TS_RESULT_SUCCESS) {
 		log(LL_Warning, "Login failed for account %s: %d\n", account.c_str(), result);
@@ -110,11 +109,10 @@ void ClientSession::playerLoadingResult(TS_ResultCode result, std::unique_ptr<Ch
 
 void ClientSession::sendResult(uint16_t id, uint16_t result, int32_t value) {
 	TS_SC_RESULT resultPacket;
-	TS_MESSAGE::initMessage(&resultPacket);
 	resultPacket.request_msg_id = id;
 	resultPacket.result = result;
 	resultPacket.value = value;
-	sendPacket(&resultPacket);
+	sendPacket(resultPacket);
 }
 
 void ClientSession::sendResult(const TS_MESSAGE *originalPacket, uint16_t result, int32_t value) {

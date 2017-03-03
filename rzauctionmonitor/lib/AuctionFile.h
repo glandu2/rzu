@@ -4,14 +4,26 @@
 #include "Packet/PacketDeclaration.h"
 
 #pragma pack(push, 1)
-    struct AuctionDataEnd {
-		int8_t duration_type;
-		int64_t bid_price;
-		int64_t price;
-		char seller[31];
-		int8_t bid_flag;
-	};
+struct AuctionDataEnd {
+	int8_t duration_type;
+	int64_t bid_price;
+	int64_t price;
+	char seller[31];
+	int8_t bid_flag;
+};
 #pragma pack(pop)
+
+enum DurationType {
+	DT_Unknown = 0,
+	DT_Short = 1,  // 6h
+	DT_Medium = 2, // 24h
+	DT_Long = 3    // 72h
+};
+enum BidFlag {
+	BF_Bidded = 0,
+	BF_MyBid = 1,
+	BF_NoBid = 2
+};
 
 enum DiffType {
 	D_Added = 0,
@@ -25,7 +37,8 @@ enum DiffType {
 
 enum DumpType {
 	DT_Diff,
-	DT_Full
+	DT_Full,
+	DT_UnknownDumpType
 };
 
 struct AuctionFileHeader {
@@ -51,7 +64,7 @@ CREATE_STRUCT(AUCTION_CATEGORY_INFO);
 	_(array)   (char, signature, 4) \
 	_(simple)  (uint32_t, file_version) \
 	_(simple)  (int8_t, dumpType) \
-	_(count)   (uint16_t, categoryNumber, categories) \
+	_(count)   (uint16_t, categories) \
 	_(dynarray)(AUCTION_CATEGORY_INFO, categories)
 CREATE_STRUCT(AUCTION_HEADER);
 
@@ -64,7 +77,7 @@ CREATE_STRUCT(AUCTION_HEADER);
 	_(simple)  (int64_t, estimatedEndTimeMax) \
 	_(simple)  (uint16_t, diffType) \
 	_(simple)  (uint16_t, category) \
-	_(count)   (uint16_t, dataSize, data) \
+	_(count)   (uint16_t, data) \
 	_(dynarray)(uint8_t, data) \
 	_(simple)  (int8_t, duration_type, version >= AUCTION_V4) \
 	_(simple)  (int64_t, bid_price, version >= AUCTION_V4) \
@@ -77,7 +90,7 @@ CREATE_STRUCT(AUCTION_INFO);
 
 #define AUCTION_FILE_DEF(_) \
 	_(simple)  (AUCTION_HEADER, header) \
-	_(count)   (uint32_t, auctionNumber, auctions) \
+	_(count)   (uint32_t, auctions) \
 	_(dynarray)(AUCTION_INFO, auctions)
 CREATE_STRUCT(AUCTION_FILE);
 
@@ -87,14 +100,15 @@ CREATE_STRUCT(AUCTION_FILE);
 	_(simple)  (int64_t, previousTime) \
 	_(simple)  (uint16_t, diffType) \
 	_(simple)  (uint16_t, category) \
-	_(count)   (uint16_t, dataSize, data) \
+	_(count)   (uint16_t, data) \
 	_(dynarray)(uint8_t, data)
 CREATE_STRUCT(AUCTION_SIMPLE_INFO);
 
 #define AUCTION_SIMPLE_FILE_DEF(_) \
 	_(simple)  (AUCTION_HEADER, header) \
-	_(count)   (uint32_t, auctionNumber, auctions) \
+	_(count)   (uint32_t, auctions) \
 	_(dynarray)(AUCTION_SIMPLE_INFO, auctions)
 CREATE_STRUCT(AUCTION_SIMPLE_FILE);
+
 
 #endif // AUCTIONFILE_H

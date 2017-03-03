@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "gtest/gtest.h"
 #include "AuctionSimpleDiffWriter.h"
 #include "AuctionFile.h"

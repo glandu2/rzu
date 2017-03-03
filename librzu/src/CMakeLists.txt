@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-file(GLOB_RECURSE SOURCE_FILES *.cpp *.h *.inl)
+file(GLOB_RECURSE SOURCE_FILES *.cpp)
+file(GLOB_RECURSE HEADER_FILES *.h *.inl)
 
 include(AddVersionInfo OPTIONAL RESULT_VARIABLE versioncmakefound)
 if( versioncmakefound )
@@ -14,13 +15,13 @@ if(WIN32)
 	list(APPEND LIBS dbghelp)
 endif()
 
-add_lib(${TARGET_NAME} "${SOURCE_FILES}" "${LIBS}")
+add_lib(${TARGET_NAME} "${SOURCE_FILES};${HEADER_FILES}" "${LIBS}")
 target_include_directories(${TARGET_NAME}
 	PUBLIC lib packets ${ODBC_INCLUDE_DIR}
 	PRIVATE ${OPENSSL_INCLUDE_DIR}
 	)
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-	target_compile_definitions(${TARGET_NAME} PRIVATE NOMINMAX)
+	target_compile_definitions(${TARGET_NAME} PUBLIC NOMINMAX)
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -45,6 +46,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 		${OPENSSL_INCLUDE_DIR}/../bin
 		NO_DEFAULT_PATH)
 	if(OPENSSL_LIBEAY32_DLL)
-		install(PROGRAMS ${OPENSSL_LIBEAY32_DLL} DESTINATION ./ COMPONENT "binaries")
+		install(PROGRAMS ${OPENSSL_LIBEAY32_DLL} DESTINATION ./ COMPONENT "deps")
 	endif()
 endif()

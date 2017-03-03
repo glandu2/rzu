@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "AuctionUid.h"
 #include <memory>
+#include "Packet/MessageBuffer.h"
 
 #include "AuctionCommonWriter.h"
 

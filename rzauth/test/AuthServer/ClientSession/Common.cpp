@@ -1,11 +1,11 @@
 #include "Common.h"
-#include "AuthClient/TS_CA_VERSION.h"
-#include "AuthClient/TS_CA_ACCOUNT.h"
-#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
-#include "AuthClient/TS_CA_SERVER_LIST.h"
-#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
-#include "AuthClient/TS_AC_RESULT.h"
-#include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
+#include "AuthClient/Flat/TS_CA_VERSION.h"
+#include "AuthClient/Flat/TS_CA_ACCOUNT.h"
+#include "AuthClient/Flat/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/Flat/TS_CA_SERVER_LIST.h"
+#include "AuthClient/Flat/TS_CA_RSA_PUBLIC_KEY.h"
+#include "AuthClient/Flat/TS_AC_RESULT.h"
+#include "AuthClient/Flat/TS_AC_RESULT_WITH_STRING.h"
 #include "Cipher/DesPasswordCipher.h"
 #include <openssl/bio.h>
 #include <openssl/pem.h>
@@ -65,7 +65,13 @@ void sendAccountIMBCDouble(TestConnectionChannel* channel, const char* account, 
 }
 
 RSA* createRSAKey() {
-	return RSA_generate_key(1024, 65537, NULL, NULL);
+	std::unique_ptr<BIGNUM, decltype(&::BN_free)> e (BN_new(), ::BN_free);
+	std::unique_ptr<RSA, decltype(&::RSA_free)> rsa (RSA_new(), ::RSA_free);
+
+	BN_set_word(e.get(), RSA_F4);
+	RSA_generate_key_ex(rsa.get(), 1024, e.get(), NULL);
+
+	return rsa.release();
 }
 
 void freeRSAKey(RSA* rsaCipher) {

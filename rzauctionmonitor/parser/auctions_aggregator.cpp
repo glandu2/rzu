@@ -1,19 +1,14 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
-#include <time.h>
-#include <map>
+#include <unordered_map>
 #include <vector>
-#include "Core/CharsetConverter.h"
-#include "Database/DbQueryJobRef.h"
 #include "Core/Log.h"
 #include "Core/EventLoop.h"
 #include "Config/GlobalCoreConfig.h"
-#include "Database/DbConnectionPool.h"
-#include "Database/DbConnection.h"
 #include "LibRzuInit.h"
 #include "AuctionFile.h"
 #include "Packet/JSONWriter.h"
+#include "AuctionWriter.h"
 
 #pragma pack(push, 1)
 struct ItemData {
@@ -54,119 +49,36 @@ struct ItemData {
 CREATE_STRUCT(AUCTION_INFO_PER_DAY);
 
 #define AUCTION_AGGREGATE_DEF(_) \
-	_(string)(date, 8) \
+	_(simple)  (int64_t, date) \
 	_(count)   (uint32_t, auctionNumber, auctions) \
 	_(dynarray)(AUCTION_INFO_PER_DAY, auctions)
 CREATE_STRUCT(AUCTION_AGGREGATE);
 
-int main(int argc, char* argv[]) {
-	LibRzuInit();
+struct AuctionSummary {
+	int64_t price;
+	bool isSold;
+};
 
-	cval<bool>& compactJson = CFG_CREATE("compactjson", false);
-	cval<std::string>& dateString = CFG_CREATE("date", "");
+static bool writeToFile(const char* filename, const std::string& data)
+{
+	std::unique_ptr<FILE, int(*)(FILE*)> file(nullptr, &fclose);
 
-	ConfigInfo::get()->init(argc, argv);
-
-	Log mainLogger(GlobalCoreConfig::get()->log.enable,
-	               GlobalCoreConfig::get()->log.level,
-	               GlobalCoreConfig::get()->log.consoleLevel,
-	               GlobalCoreConfig::get()->log.dir,
-	               GlobalCoreConfig::get()->log.file,
-	               GlobalCoreConfig::get()->log.maxQueueSize);
-	Log::setDefaultLogger(&mainLogger);
-
-	DbConnectionPool dbConnectionPool;
-	DbBindingLoader::get()->initAll(&dbConnectionPool);
-
-	if(argc < 2) {
-		Object::logStatic(Object::LL_Info, "main", "Usage: %s auctions.bin\n", argv[0]);
-		return 0;
+	file.reset(fopen(filename, "wt"));
+	if(!file) {
+		Object::logStatic(Object::LL_Error, "main", "Cannot open aggregation file for write %s\n", filename);
+		return false;
 	}
 
-	if(dateString.get().size() == 0) {
-		Object::logStatic(Object::LL_Info, "main", "/date must be set with format YYYYMMDD\n");
-		return 0;
-	}
+	fprintf(file.get(), "%s\n", data.c_str());
+	fclose(file.release());
 
-	struct AuctionSummary {
-		int64_t price;
-		bool isSold;
-	};
+	return true;
+}
 
-	std::unordered_map<uint32_t, std::vector<AuctionSummary>> auctionData;
-
-	int i;
-	for(i = 1; i < argc; i++) {
-		const char* filename = argv[i];
-
-		if(filename[0] == '/' || filename[0] == '-')
-			continue;
-
-		FILE* file = fopen(filename, "rb");
-		if(!file) {
-			Object::logStatic(Object::LL_Error, "main", "Cant open file %s\n", filename);
-			return 1;
-		}
-
-		fseek(file, 0, SEEK_END);
-		size_t fileSize = ftell(file);
-		fseek(file, 0, SEEK_SET);
-
-		char* buffer = (char*)malloc(fileSize);
-		size_t readDataSize = fread(buffer, 1, fileSize, file);
-		if(readDataSize != fileSize) {
-			Object::logStatic(Object::LL_Error, "main", "Coulnd't read file data, size: %ld, read: %ld\n", (long int)fileSize, (long int)readDataSize);
-			fclose(file);
-			return 2;
-		}
-		fclose(file);
-
-		AUCTION_FILE auctionFile;
-		AuctionFileHeader* auctionHeader = reinterpret_cast<AuctionFileHeader*>(buffer);
-		if(strncmp(auctionHeader->signature, "RAH", 3) != 0) {
-			Object::logStatic(Object::LL_Error, "main", "Invalid file, unrecognized header signature\n");
-			return 3;
-		}
-
-		MessageBuffer structBuffer(buffer, fileSize, auctionHeader->file_version);
-		auctionFile.deserialize(&structBuffer);
-		if(!structBuffer.checkFinalSize()) {
-			Object::logStatic(Object::LL_Error, "main", "Invalid file\n");
-			return 3;
-		}
-
-
-		for(size_t i = 0; i < auctionFile.auctions.size(); i++) {
-			const AUCTION_INFO& auctionInfo = auctionFile.auctions[i];
-			ItemData* item = (ItemData*) auctionInfo.data.data();
-
-			if((auctionInfo.diffType == D_Added || auctionInfo.diffType == D_Base) && auctionInfo.price) {
-				AuctionSummary summary;
-				summary.isSold = false;
-				summary.price = auctionInfo.price;
-
-				auto it = auctionData.find(item->code);
-				if(it == auctionData.end()) {
-					auto insertResult = auctionData.insert(std::make_pair(item->code, std::vector<AuctionSummary>()));
-					it = insertResult.first;
-				}
-
-				it->second.push_back(summary);
-			} else if(auctionInfo.diffType == D_Deleted && (auctionInfo.time + 60) < auctionInfo.estimatedEndTimeMin && auctionInfo.price) {
-				AuctionSummary summary;
-				summary.isSold = true;
-				summary.price = auctionInfo.price;
-
-				auto it = auctionData.find(item->code);
-				if(it == auctionData.end()) {
-					auto insertResult = auctionData.insert(std::make_pair(item->code, std::vector<AuctionSummary>()));
-					it = insertResult.first;
-				}
-
-				it->second.push_back(summary);
-			}
-		}
-	}
+static void computeStatisticsOfDay(time_t date, const std::unordered_map<uint32_t, std::vector<AuctionSummary>>& auctionData, bool compactJson)
+{
+	AUCTION_AGGREGATE aggregateData;
+	aggregateData.date = date;
 
 	auto it = auctionData.begin();
 	for(; it != auctionData.end(); ++it) {
@@ -219,11 +131,103 @@ int main(int argc, char* argv[]) {
 		dayAggregation.maxEstimatedSoldPrice = max;
 		dayAggregation.avgEstimatedSoldPrice = num ? sum/num : -1;
 
-		JSONWriter jsonWriter(0, compactJson.get());
-		dayAggregation.serialize(&jsonWriter);
-		jsonWriter.finalize();
-		fprintf(stderr, "%s\r\n", jsonWriter.toString().c_str());
+		aggregateData.auctions.push_back(dayAggregation);
 	}
+
+	JSONWriter jsonWriter(0, compactJson);
+	aggregateData.serialize(&jsonWriter);
+	jsonWriter.finalize();
+	fprintf(stderr, "%s\r\n", jsonWriter.toString().c_str());
+}
+
+int main(int argc, char* argv[]) {
+	LibRzuInit();
+
+	cval<bool>& compactJson = CFG_CREATE("compactjson", false);
+	cval<std::string>& dateString = CFG_CREATE("date", "");
+
+	ConfigInfo::get()->init(argc, argv);
+
+	Log mainLogger(GlobalCoreConfig::get()->log.enable,
+	               GlobalCoreConfig::get()->log.level,
+	               GlobalCoreConfig::get()->log.consoleLevel,
+	               GlobalCoreConfig::get()->log.dir,
+	               GlobalCoreConfig::get()->log.file,
+	               GlobalCoreConfig::get()->log.maxQueueSize);
+	Log::setDefaultLogger(&mainLogger);
+
+	if(argc < 2) {
+		Object::logStatic(Object::LL_Info, "main", "Usage: %s auctions.bin\n", argv[0]);
+		return 0;
+	}
+
+	if(dateString.get().size() == 0) {
+		Object::logStatic(Object::LL_Info, "main", "/date must be set with format YYYYMMDD\n");
+		return 0;
+	}
+
+	std::unordered_map<uint32_t, std::vector<AuctionSummary>> auctionData;
+
+	int i;
+	for(i = 1; i < argc; i++) {
+		const char* filename = argv[i];
+
+		if(filename[0] == '/' || filename[0] == '-')
+			continue;
+
+		std::vector<uint8_t> data;
+		int version;
+		AuctionFileFormat fileFormat;
+
+		if(!AuctionWriter::readAuctionDataFromFile(filename, data)) {
+			Object::logStatic(Object::LL_Error, "main", "Cant read file %s\n", filename);
+			return 1;
+		}
+
+		if(!AuctionWriter::getAuctionFileFormat(data, &version, &fileFormat)) {
+			Object::logStatic(Object::LL_Error, "main", "Invalid file, unrecognized header signature: %s\n", filename);
+			return 2;
+		}
+
+		AUCTION_FILE auctionFile;
+		if(!AuctionWriter::deserialize(&auctionFile, data)) {
+			Object::logStatic(Object::LL_Error, "main", "Can't deserialize file %s\n", filename);
+			return 3;
+		}
+
+		for(size_t i = 0; i < auctionFile.auctions.size(); i++) {
+			const AUCTION_INFO& auctionInfo = auctionFile.auctions[i];
+			ItemData* item = (ItemData*) auctionInfo.data.data();
+
+			if((auctionInfo.diffType == D_Added || auctionInfo.diffType == D_Base) && auctionInfo.price) {
+				AuctionSummary summary;
+				summary.isSold = false;
+				summary.price = auctionInfo.price;
+
+				auto it = auctionData.find(item->code);
+				if(it == auctionData.end()) {
+					auto insertResult = auctionData.insert(std::make_pair(item->code, std::vector<AuctionSummary>()));
+					it = insertResult.first;
+				}
+
+				it->second.push_back(summary);
+			} else if(auctionInfo.diffType == D_Deleted && (auctionInfo.time + 60) < auctionInfo.estimatedEndTimeMin && auctionInfo.price) {
+				AuctionSummary summary;
+				summary.isSold = true;
+				summary.price = auctionInfo.price;
+
+				auto it = auctionData.find(item->code);
+				if(it == auctionData.end()) {
+					auto insertResult = auctionData.insert(std::make_pair(item->code, std::vector<AuctionSummary>()));
+					it = insertResult.first;
+				}
+
+				it->second.push_back(summary);
+			}
+		}
+	}
+
+	computeStatisticsOfDay(auctionData, compactJson);
 
 	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", i-1);
 

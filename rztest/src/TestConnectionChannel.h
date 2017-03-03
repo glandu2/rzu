@@ -7,6 +7,7 @@
 #include "Extern.h"
 #include "Core/Timer.h"
 #include "Core/Object.h"
+#include "Packet/PacketBaseMessage.h"
 
 #include <functional>
 #include "gtest/gtest.h"
@@ -14,13 +15,16 @@
 class RzTest;
 class TestPacketServer;
 class PacketSession;
-struct TS_MESSAGE;
 template<typename T> class cval;
 
 #define AGET_PACKET(type_) \
 	event.getPacket<type_>(); \
 	ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type); \
 	ASSERT_NE(nullptr, packet)
+
+#define DESERIALIZE_PACKET(target, version) \
+	ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type); \
+	ASSERT_EQ(true, event.deserializePacket(target, version));
 
 /**
  * @brief Test network operation with a remote server or client
@@ -41,7 +45,8 @@ public:
 		const TS_MESSAGE* packet;
 
 		template<typename T>
-		const T* getPacket() {
+		typename std::enable_if<std::is_base_of<TS_MESSAGE, T>::value, const T*>::type
+		getPacket() {
 			const T* p = static_cast<const T*>(packet);
 			if(!p)
 				return nullptr;
@@ -52,6 +57,16 @@ public:
 				return p;
 			else
 				return nullptr;
+		}
+
+		template<typename T>
+		bool deserializePacket(T& p, int version) {
+			// force taking the value instead of reference to packetID
+			EXPECT_EQ(p.getId(version), packet->id);
+			if(packet->id != p.getId(version))
+				return false;
+
+			return packet->process(p, version);
 		}
 	};
 

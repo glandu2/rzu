@@ -14,17 +14,17 @@
 #include "LogServerClient.h"
 
 #include "Packet/PacketEpics.h"
-#include "AuthClient/TS_AC_RESULT.h"
+#include "AuthClient/Flat/TS_AC_RESULT.h"
 #include "GameClient/TS_SC_RESULT.h"
-#include "AuthClient/TS_AC_AES_KEY_IV.h"
-#include "AuthClient/TS_AC_SELECT_SERVER.h"
+#include "AuthClient/Flat/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/Flat/TS_AC_SELECT_SERVER.h"
 #include "AuthClient/TS_AC_SERVER_LIST.h"
-#include "AuthClient/TS_CA_VERSION.h"
-#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
-#include "AuthClient/TS_CA_ACCOUNT.h"
-#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
-#include "AuthClient/TS_CA_SERVER_LIST.h"
-#include "AuthClient/TS_CA_SELECT_SERVER.h"
+#include "AuthClient/Flat/TS_CA_VERSION.h"
+#include "AuthClient/Flat/TS_CA_RSA_PUBLIC_KEY.h"
+#include "AuthClient/Flat/TS_CA_ACCOUNT.h"
+#include "AuthClient/Flat/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/Flat/TS_CA_SERVER_LIST.h"
+#include "AuthClient/Flat/TS_CA_SELECT_SERVER.h"
 
 namespace AuthServer {
 
@@ -92,16 +92,14 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 	if(!memcmp(packet->szVersion, "TEST", 4)) {
 		uint32_t totalUserCount = ClientData::getClientCount();
 		TS_SC_RESULT result;
-		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
 
 		result.value = totalUserCount ^ 0xADADADAD;
 		result.result = 0;
 		result.request_msg_id = packet->id;
-		sendPacket(&result);
+		sendPacket(result, EPIC_LATEST);
 	} else if(!memcmp(packet->szVersion, "INFO", 4)) {
 		static uint32_t gitVersionSuffix = 0;
 		TS_SC_RESULT result;
-		TS_MESSAGE::initMessage<TS_SC_RESULT>(&result);
 
 		if(gitVersionSuffix == 0) {
 			std::string shaPart(rzauthVersion+8, 8);
@@ -111,7 +109,7 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.value = gitVersionSuffix ^ 0xADADADAD;
 		result.result = 0;
 		result.request_msg_id = packet->id;
-		sendPacket(&result);
+		sendPacket(result, EPIC_LATEST);
 	} else if(!memcmp(packet->szVersion, "200609280", 9) || !memcmp(packet->szVersion, "Creer", 5)) {
 		isEpic2 = true;
 		log(LL_Debug, "Client is epic 2\n");
@@ -349,9 +347,9 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		serverData.server_idx = serverInfo->getServerIdx();
 		serverData.server_port = serverInfo->getServerPort();
 		serverData.is_adult_server = serverInfo->getIsAdultServer();
-		strcpy(serverData.server_ip, serverInfo->getServerIp().c_str());
-		strcpy(serverData.server_name, serverInfo->getServerName().c_str());
-		strcpy(serverData.server_screenshot_url, serverInfo->getServerScreenshotUrl().c_str());
+		serverData.server_ip = serverInfo->getServerIp();
+		serverData.server_name = serverInfo->getServerName();
+		serverData.server_screenshot_url = serverInfo->getServerScreenshotUrl();
 
 		uint32_t userRatio = serverInfo->getPlayerCount() * 100 / maxPlayers;
 		serverData.user_ratio = (userRatio > 100)? 100 : userRatio;

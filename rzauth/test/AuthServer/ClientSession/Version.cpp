@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "AuthClient/TS_CA_VERSION.h"
+#include "AuthClient/Flat/TS_CA_VERSION.h"
 #include "GameClient/TS_SC_RESULT.h"
 
 namespace AuthServer {
@@ -19,12 +19,14 @@ TEST(TS_CA_VERSION, playercount) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_SC_RESULT* packet = AGET_PACKET(TS_SC_RESULT);
+		//const TS_SC_RESULT* packet = AGET_PACKET(TS_SC_RESULT);
+		TS_SC_RESULT packet;
+		DESERIALIZE_PACKET(packet, EPIC_LATEST);
 
-		int playerCount = packet->value ^ 0xADADADAD;
+		int playerCount = packet.value ^ 0xADADADAD;
 
 		EXPECT_EQ(0, playerCount);
-		EXPECT_EQ(0, packet->result);
+		EXPECT_EQ(0, packet.result);
 
 		channel->closeSession();
 	});
@@ -47,14 +49,16 @@ TEST(TS_CA_VERSION, version) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_SC_RESULT* packet = AGET_PACKET(TS_SC_RESULT);
-		uint32_t versionHex = ((uint32_t)packet->value) ^ 0xADADADAD;
+		TS_SC_RESULT packet;
+		DESERIALIZE_PACKET(packet, EPIC_LATEST);
+
+		uint32_t versionHex = ((uint32_t)packet.value) ^ 0xADADADAD;
 
 		EXPECT_NE(0, versionHex);
 		EXPECT_NE(INT32_MIN, versionHex);
 		EXPECT_NE(INT32_MAX, versionHex);
 		EXPECT_NE(UINT32_MAX, versionHex);
-		EXPECT_EQ(0, packet->result);
+		EXPECT_EQ(0, packet.result);
 
 		channel->closeSession();
 	});
@@ -79,14 +83,16 @@ TEST(TS_CA_VERSION, nonnullterminated) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_SC_RESULT* packet = AGET_PACKET(TS_SC_RESULT);
-		uint32_t versionHex = ((uint32_t)packet->value) ^ 0xADADADAD;
+		TS_SC_RESULT packet;
+		DESERIALIZE_PACKET(packet, EPIC_LATEST);
+
+		uint32_t versionHex = ((uint32_t)packet.value) ^ 0xADADADAD;
 
 		EXPECT_NE(0, versionHex);
 		EXPECT_NE(INT32_MIN, versionHex);
 		EXPECT_NE(INT32_MAX, versionHex);
 		EXPECT_NE(UINT32_MAX, versionHex);
-		EXPECT_EQ(0, packet->result);
+		EXPECT_EQ(0, packet.result);
 
 		channel->closeSession();
 	});

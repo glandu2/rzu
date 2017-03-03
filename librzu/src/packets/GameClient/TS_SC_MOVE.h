@@ -12,9 +12,9 @@ CREATE_STRUCT(MOVE_INFO);
 #define TS_SC_MOVE_DEF(_) \
 	_(simple)(uint32_t, start_time) \
 	_(simple)(uint32_t, handle) \
-	_(simple)(char, tlayer) \
-	_(simple)(char, speed) \
-	_(count) (uint16_t, count, move_infos) \
+	_(simple)(int8_t, tlayer) \
+	_(simple)(int8_t, speed) \
+	_(count) (uint16_t, move_infos) \
 	_(dynarray)(MOVE_INFO, move_infos)
 
 CREATE_PACKET(TS_SC_MOVE, 8);

@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
 #include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
-#include "AuthClient/TS_AC_RESULT.h"
+#include "AuthClient/Flat/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/Flat/TS_AC_RESULT.h"
 #include "PacketEnums.h"
 #include "Common.h"
-#include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
+#include "AuthClient/Flat/TS_AC_RESULT_WITH_STRING.h"
 
 #include "Cipher/DesPasswordCipher.h"
 

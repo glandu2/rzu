@@ -1,7 +1,6 @@
 #include "Inventory.h"
 #include "../Database/DB_Item.h"
 #include "GameClient/TS_SC_INVENTORY.h"
-#include "GameClient/TS_SC_EQUIP_SUMMON.h"
 #include "GameClient/TS_SC_WEAR_INFO.h"
 #include "GameClient/TS_SC_ITEM_WEAR_INFO.h"
 #include "../ClientSession.h"
@@ -122,8 +121,8 @@ void Inventory::sendItemWearInfo(Item *item, ItemWearType pos) {
 	wearInfo.wear_position = (uint16_t)pos;
 	wearInfo.target_handle = character->handle;
 	wearInfo.enhance = item->enhance;
-	wearInfo.wear_item_elemental_type = item->elemental_effect_type;
-	wearInfo.wear_appearance_code = item->appearance_code;
+	wearInfo.elemental_effect_type = item->elemental_effect_type;
+	wearInfo.appearance_code = item->appearance_code;
 	session->sendPacket(wearInfo);
 }
 

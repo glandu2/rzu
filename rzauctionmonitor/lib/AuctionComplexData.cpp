@@ -16,6 +16,9 @@ AuctionComplexData::AuctionComplexData(uint32_t uid, uint64_t timeMin, uint64_t 
 {
 	parseData(data, len);
 	postParseData(true);
+
+	if(data == nullptr || len == 0)
+		log(LL_Error, "Auction added without data: 0x%08X\n", getUid().get());
 }
 
 bool AuctionComplexData::update(uint64_t time, const uint8_t *data, size_t len)
@@ -39,7 +42,6 @@ void AuctionComplexData::remove(uint64_t time)
 {
 	if(processStatus == PS_NotProcessed) {
 		setStatus(PS_MaybeDeleted, time);
-		maybeStillDeleted();
 	} else {
 		log(LL_Warning, "Remove call on processed auction: 0x%08X, status: %d\n", getUid().get(), processStatus);
 	}
@@ -90,9 +92,9 @@ void AuctionComplexData::endProcess(uint64_t categoryBeginTime, uint64_t categor
 			remove(categoryEndTime);
 		else if(!deleted)
 			unmodified(categoryBeginTime);
-		else
-			maybeStillDeleted();
 	}
+
+	maybeStillDeleted();
 }
 
 bool AuctionComplexData::outputInPartialDump()
@@ -157,6 +159,8 @@ void AuctionComplexData::serialize(AUCTION_INFO *auctionInfo, bool alwaysWithDat
 
 	if(alwaysWithData || auctionInfo->diffType == D_Added)
 		auctionInfo->data = rawData;
+	else
+		auctionInfo->data.clear();
 }
 
 DiffType AuctionComplexData::getAuctionDiffType() const {
@@ -207,7 +211,7 @@ bool AuctionComplexData::parseData(const uint8_t *data, size_t len)
 	bool hasChanged;
 
 	if(data == nullptr || len == 0) {
-		log(LL_Error, "No auction data, uid: 0x%08X\n", getUid().get());
+		log(LL_Debug, "No auction data, uid: 0x%08X\n", getUid().get());
 		return false;
 	}
 

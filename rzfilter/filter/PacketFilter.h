@@ -6,10 +6,10 @@
 #include "GameClient/TS_SC_INVENTORY.h"
 #include "GameClient/TS_SC_ATTACK_EVENT.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
+#include "GameClient/TS_CS_CHAT_REQUEST.h"
 #include <unordered_map>
 
-struct TS_SC_ENTER;
-struct TS_SC_SKILL;
+struct TS_SC_CHAT;
 
 class PacketFilter : public IFilter
 {
@@ -17,16 +17,18 @@ public:
 	PacketFilter(PacketFilter* data);
 	~PacketFilter();
 
-	void sendChatMessage(IFilterEndpoint* client, const char* msg);
+	void sendChatMessage(IFilterEndpoint* client, const char* msg, const char* sender = "Filter", TS_CHAT_TYPE type = CHAT_WHISPER);
 
-	virtual bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet);
-	virtual bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet);
+	virtual bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType);
+	virtual bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType);
 
+protected:
 private:
-	void onInventory(const TS_SC_INVENTORY *packet);
-	void onAttack(const TS_SC_ATTACK_EVENT *packet);
-	void onEnter(const TS_SC_ENTER *packet);
-	void onSkill(const TS_SC_SKILL *packet);
+	template<class Packet> void showPacketJson(const Packet* packet);
+	void onChatMessage(const TS_SC_CHAT* packet);
+
+	void printAuthPacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
+	void printGamePacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
 
 private:
 	struct Item {

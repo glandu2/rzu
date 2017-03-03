@@ -11,22 +11,23 @@
 #include <memory>
 
 #include "AuthClient/TS_AC_SERVER_LIST.h"
-#include "AuthClient/TS_AC_SELECT_SERVER.h"
-#include "AuthClient/TS_AC_AES_KEY_IV.h"
-#include "AuthClient/TS_AC_RESULT.h"
-#include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
+#include "AuthClient/Flat/TS_AC_SELECT_SERVER.h"
+#include "AuthClient/Flat/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/Flat/TS_AC_RESULT.h"
+#include "AuthClient/Flat/TS_AC_RESULT_WITH_STRING.h"
 #include "GameClient/TS_SC_RESULT.h"
 
-#include "AuthClient/TS_CA_VERSION.h"
-#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
-#include "AuthClient/TS_CA_ACCOUNT.h"
-#include "AuthClient/TS_CA_SERVER_LIST.h"
-#include "AuthClient/TS_CA_SELECT_SERVER.h"
+#include "AuthClient/Flat/TS_CA_VERSION.h"
+#include "AuthClient/Flat/TS_CA_RSA_PUBLIC_KEY.h"
+#include "AuthClient/Flat/TS_CA_ACCOUNT.h"
+#include "AuthClient/Flat/TS_CA_SERVER_LIST.h"
+#include "AuthClient/Flat/TS_CA_SELECT_SERVER.h"
 
 DesPasswordCipher ClientAuthSession::desCipher("MERONG");
 
-ClientAuthSession::ClientAuthSession(ClientGameSession* gameSession)
-	: gameSession(gameSession)
+ClientAuthSession::ClientAuthSession(ClientGameSession* gameSession, int packetVersion)
+    : gameSession(gameSession),
+      packetVersion(packetVersion)
 {
 	if(gameSession)
 		gameSession->setAuthSession(this);
@@ -117,7 +118,7 @@ EventChain<PacketSession> ClientAuthSession::onPacketReceived(const TS_MESSAGE* 
 		}
 
 		case TS_AC_SERVER_LIST::packetID: {
-			packet->process(this, &ClientAuthSession::onPacketServerList, EPIC_LATEST);
+			packet->process(this, &ClientAuthSession::onPacketServerList, packetVersion);
 			break;
 		}
 
