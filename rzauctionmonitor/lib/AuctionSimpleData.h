@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <vector>
 #include "Extern.h"
-#include "AuctionFile.h"
+#include "AuctionSimpleFile.h"
 #include "AuctionUid.h"
 #include "IAuctionData.h"
 

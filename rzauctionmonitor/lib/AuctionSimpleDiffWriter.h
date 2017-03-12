@@ -5,7 +5,7 @@
 #include <vector>
 #include "Extern.h"
 #include <stdint.h>
-#include "AuctionFile.h"
+#include "AuctionSimpleFile.h"
 #include "AuctionSimpleData.h"
 #include "AuctionGenericWriter.h"
 
