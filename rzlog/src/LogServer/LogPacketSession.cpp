@@ -54,7 +54,7 @@ EventChain<SocketSession> LogPacketSession::onDataReceived() {
 			read(&buffer->currentMessage, 4);
 			if(buffer->currentMessage.size <= 4)
 				buffer->currentMessage.size = 0;
-			buffer->discardPacket = buffer->currentMessage.size > MAX_PACKET_SIZE;
+			buffer->discardPacket = static_cast<size_t>(buffer->currentMessage.size) > MAX_PACKET_SIZE;
 
 			buffer->currentMessage.size -= 4;
 		}
