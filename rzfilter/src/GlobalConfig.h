@@ -21,16 +21,10 @@ struct GlobalConfig {
 
 	struct GameConfig {
 		ListenerConfig listener;
-		cval<bool> &authMode; //if enabled, filter server list IPs
-		cval<std::string> &gameFilterIp;
-		cval<int> &gameFilterPort; //if -1, no change
 		cval<int> &epic;
 
 		GameConfig() :
 		    listener("client.listen", "127.0.0.1", 4500, true, 0),
-		    authMode(CFG_CREATE("client.authmode", false)),
-		    gameFilterIp(CFG_CREATE("client.gamefilter.ip", "127.0.0.1")),
-		    gameFilterPort(CFG_CREATE("client.gamefilter.port", -1)),
 		    epic(CFG_CREATE("client.epic", EPIC_LATEST))
 		{}
 	} client;

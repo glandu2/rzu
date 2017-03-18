@@ -1,5 +1,20 @@
-#include "GamePacketConverterFilter.h"
-#include <functional>
+#include "PacketConverterFilter.h"
+
+#include "AuthClient/TS_AC_ACCOUNT_NAME.h"
+#include "AuthClient/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/TS_AC_RESULT.h"
+#include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
+#include "AuthClient/TS_AC_SELECT_SERVER.h"
+#include "AuthClient/TS_AC_SERVER_LIST.h"
+#include "AuthClient/TS_AC_UPDATE_PENDING_TIME.h"
+#include "AuthClient/TS_CA_ACCOUNT.h"
+#include "AuthClient/TS_CA_DISTRIBUTION_INFO.h"
+#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/TS_CA_OTP_ACCOUNT.h"
+#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
+#include "AuthClient/TS_CA_SELECT_SERVER.h"
+#include "AuthClient/TS_CA_SERVER_LIST.h"
+#include "AuthClient/TS_CA_VERSION.h"
 
 #include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
 #include "GameClient/TS_CS_ANTI_HACK.h"
@@ -295,30 +310,30 @@
 	else \
 	    return sendPacket<type_cli>(target, packet, version);
 
-GamePacketConverterFilter::GamePacketConverterFilter(GamePacketConverterFilter *)
+PacketConverterFilter::PacketConverterFilter(PacketConverterFilter *)
 {
 }
 
-GamePacketConverterFilter::~GamePacketConverterFilter()
+PacketConverterFilter::~PacketConverterFilter()
 {
 }
 
-bool GamePacketConverterFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
+bool PacketConverterFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
 	if(serverType == ST_Game)
-		return convertPacketAndSend(client, packet, server->getPacketVersion(), true);
+		return convertGamePacketAndSend(client, packet, server->getPacketVersion(), true);
 	else
-		return true;
+		return convertAuthPacketAndSend(client, server, packet, true);
 }
 
-bool GamePacketConverterFilter::onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
+bool PacketConverterFilter::onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
 	if(serverType == ST_Game)
-		return convertPacketAndSend(server, packet, client->getPacketVersion(), false);
+		return convertGamePacketAndSend(server, packet, client->getPacketVersion(), false);
 	else
-		return true;
+		return convertAuthPacketAndSend(client, server, packet, false);
 }
 
 template<typename Packet>
-bool sendPacket(IFilterEndpoint* target, const TS_MESSAGE* packet, int version, std::function<void(Packet*,int)> modifier = std::function<void(Packet*,int)>()) {
+bool sendPacket(IFilterEndpoint* target, const TS_MESSAGE* packet, int version) {
 	Packet pkt = {0};
 	if(packet->process(pkt, version)) {
 		if(packet->id != Packet::getId(version))
@@ -327,8 +342,6 @@ bool sendPacket(IFilterEndpoint* target, const TS_MESSAGE* packet, int version, 
 			        packet->id,
 			        Packet::getId(version),
 			        version);
-		if(modifier)
-			modifier(&pkt, target->getPacketVersion());
 		target->sendPacket(pkt);
 		return false; //packet sent, no need to forward the original
 	} else {
@@ -337,63 +350,42 @@ bool sendPacket(IFilterEndpoint* target, const TS_MESSAGE* packet, int version, 
 	}
 }
 
-bool GamePacketConverterFilter::convertPacketAndSend(IFilterEndpoint* target, const TS_MESSAGE* packet, int version, bool isServerMsg) {
-	if(packet->id == TS_CS_VERSION::getId(version)) {
-		sendPacket<TS_CS_VERSION>(target, packet, version, [](TS_CS_VERSION* packet, int version) {
-			if(version <= EPIC_3)
-				packet->szVersion = "200609280";
-			else if(version <= EPIC_9_1)
-				packet->szVersion = "200701120";
-			else if(version <= EPIC_9_4)
-				packet->szVersion = "201507080";
-			else
-				packet->szVersion = "205001120";
-		});
-	} else if(packet->id == TS_SC_LOGIN_RESULT::getId(version)) {
-		TS_SC_LOGIN_RESULT pkt;
-		if(packet->process(pkt, version)) {
-			uint16_t loginResult;
-			if(version < EPIC_7_1) {
-				loginResult = pkt.result ? TS_RESULT_SUCCESS : TS_RESULT_DB_ERROR;
-			} else {
-				loginResult = pkt.result;
-			}
+bool PacketConverterFilter::convertAuthPacketAndSend(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, bool isServerMsg) {
+	if(specificPacketConverter.convertAuthPacketAndSend(client, server, packet, isServerMsg)) {
+		int version = isServerMsg ? server->getPacketVersion() : client->getPacketVersion();
+		IFilterEndpoint* target = isServerMsg ? client : server;
+		switch(packet->id) {
+			PACKET_TO_JSON(TS_AC_ACCOUNT_NAME);
+			PACKET_TO_JSON(TS_AC_AES_KEY_IV);
+			PACKET_TO_JSON(TS_AC_RESULT);
+			PACKET_TO_JSON(TS_AC_RESULT_WITH_STRING);
+			PACKET_TO_JSON(TS_AC_SELECT_SERVER);
+			PACKET_TO_JSON(TS_AC_SERVER_LIST);
+			PACKET_TO_JSON(TS_AC_UPDATE_PENDING_TIME);
+			PACKET_TO_JSON(TS_CA_ACCOUNT);
+			PACKET_TO_JSON(TS_CA_DISTRIBUTION_INFO);
+			PACKET_TO_JSON(TS_CA_IMBC_ACCOUNT);
+			PACKET_TO_JSON(TS_CA_OTP_ACCOUNT);
+			PACKET_TO_JSON(TS_CA_RSA_PUBLIC_KEY);
+			PACKET_TO_JSON(TS_CA_SELECT_SERVER);
+			PACKET_TO_JSON(TS_CA_SERVER_LIST);
+			PACKET_TO_JSON(TS_CA_VERSION);
 
-			if(target->getPacketVersion() < EPIC_7_1) {
-				pkt.result = loginResult == TS_RESULT_SUCCESS;
-			} else {
-				pkt.result = loginResult;
-			}
+			case 9999: break;
+			default:
+				Object::logStatic(Object::LL_Warning, "rzfilter_version_converter", "auth packet id %d unknown\n", packet->id);
+				break;
+		}
 
-			target->sendPacket(pkt);
-		}
-	} else if(packet->id == TS_CS_CHECK_ILLEGAL_USER::packetID) {
-		return false;
-	} else if(packet->id == TS_SC_STATE::packetID) {
-		TS_SC_STATE pkt;
-		if(packet->process(pkt, version)) {
-			// Epic 3 client crashes if the state code is not in db_tenacity(ascii).rdb
-			if(target->getPacketVersion() <= EPIC_3)
-				pkt.state_code = 1001;
-			target->sendPacket(pkt);
-			return false;
-		}
+		//Unknown packet, forward the same raw packet
 		return true;
-	} else if(packet->id == TS_SC_ENTER::getId(version)) {
-		TS_SC_ENTER pkt;
-		if(packet->process(pkt, version)) {
-			if(pkt.objType == EOT_Player) {
-				if(version >= EPIC_4_1) {
-					pkt.playerInfo.energy = pkt.playerInfo.creatureInfo.energy;
-				} else {
-					pkt.playerInfo.creatureInfo.energy = pkt.playerInfo.energy;
-				}
-			}
-			target->sendPacket(pkt);
-			return false;
-		}
-		return true;
-	} else {
+	}
+
+	return false;
+}
+
+bool PacketConverterFilter::convertGamePacketAndSend(IFilterEndpoint* target, const TS_MESSAGE* packet, int version, bool isServerMsg) {
+	if(specificPacketConverter.convertGamePacketAndSend(target, packet, version, isServerMsg)) {
 		switch(packet->id) {
 			PACKET_TO_JSON(TS_CS_ACCOUNT_WITH_AUTH);
 			PACKET_TO_JSON(TS_CS_ANTI_HACK);
@@ -686,7 +678,7 @@ bool GamePacketConverterFilter::convertPacketAndSend(IFilterEndpoint* target, co
 IFilter *createFilter(IFilter *oldFilter)
 {
 	Object::logStatic(Object::LL_Info, "rzfilter_version_converter", "Loaded filter from data: %p\n", oldFilter);
-	return new GamePacketConverterFilter((GamePacketConverterFilter*)oldFilter);
+	return new PacketConverterFilter((PacketConverterFilter*)oldFilter);
 }
 
 void destroyFilter(IFilter *filter)

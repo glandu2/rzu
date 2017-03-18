@@ -11,12 +11,16 @@
 
 class FilterProxy;
 
+/**
+ * @brief The ClientSession class
+ * Spawned when a client connects to the filter
+ */
 class ClientSession : public EncryptedSession<PacketSession>, public IFilterEndpoint
 {
 	DECLARE_CLASS(ClientSession)
 
 public:
-	ClientSession();
+	ClientSession(bool authMode);
 
 	void sendPacket(MessageBuffer& buffer) {
 		if(buffer.checkPacketFinalSize() == false) {
@@ -29,7 +33,7 @@ public:
 	void sendPacket(const TS_MESSAGE *data) { PacketSession::sendPacket(data); }
 	int getPacketVersion() { return version; }
 
-	void onServerPacketReceived(const TS_MESSAGE* packet);
+	virtual void onServerPacketReceived(const TS_MESSAGE* packet);
 
 protected:
 	void logPacket(bool outgoing, const TS_MESSAGE* msg);
@@ -37,14 +41,19 @@ protected:
 	EventChain<SocketSession> onConnected();
 	EventChain<SocketSession> onDisconnected(bool causedByRemote);
 
+	virtual std::string getServerIp() = 0;
+	virtual uint16_t getServerPort() = 0;
+
 	virtual void updateObjectName();
 
-private:
 	~ClientSession();
+
+private:
 
 	ServerSession serverSession;
 	FilterProxy* packetFilter;
 	int version;
+	bool authMode;
 };
 
 #endif // CLIENTSESSION_H

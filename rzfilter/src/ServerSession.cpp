@@ -12,12 +12,10 @@ ServerSession::ServerSession(ClientSession *clientSession)
 ServerSession::~ServerSession() {
 }
 
-void ServerSession::connect() {
-	std::string ip = CONFIG_GET()->server.ip.get();
-	uint16_t port = CONFIG_GET()->server.port.get();
+void ServerSession::connect(std::string ip, uint16_t port) {
 	log(LL_Debug, "Connecting to server %s:%d\n", ip.c_str(), port);
 	SocketSession::connect(ip.c_str(), port);
-	if(CONFIG_GET()->trafficDump.enableServer.get() && getStream() && clientSession->getStream()) {
+	if(getStream() && clientSession->getStream()) {
 		getStream()->setPacketLogger(clientSession->getStream()->getPacketLogger());
 	}
 }
