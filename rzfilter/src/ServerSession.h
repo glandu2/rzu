@@ -7,6 +7,10 @@
 
 class ClientSession;
 
+/**
+ * @brief The ServerSession class
+ * Spawned when connecting to a server by the ClientSession class
+ */
 class ServerSession : public EncryptedSession<PacketSession>, public IFilterEndpoint
 {
 	DECLARE_CLASS(ServerSession)
@@ -14,7 +18,7 @@ public:
 	ServerSession(ClientSession* clientSession);
 	~ServerSession();
 
-	void connect();
+	void connect(std::string ip, uint16_t port);
 
 	void sendPacket(const TS_MESSAGE* message);
 

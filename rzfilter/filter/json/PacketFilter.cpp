@@ -354,7 +354,7 @@ bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* serv
 	else
 		printAuthPacketJson(packet, server->getPacketVersion(), true);
 
-	if(serverType != ST_Game)
+	//if(serverType != ST_Game)
 		return true;
 
 	switch(packet->id) {

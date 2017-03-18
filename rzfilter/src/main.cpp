@@ -10,7 +10,8 @@
 #include "NetSession/SessionServer.h"
 #include "Console/ConsoleSession.h"
 
-#include "ClientSession.h"
+#include "AuthClientSession.h"
+#include "GameClientSessionManager.h"
 #include "FilterManager.h"
 
 void runServers(Log* trafficLogger);
@@ -63,14 +64,17 @@ int main(int argc, char **argv) {
 
 void runServers(Log *trafficLogger) {
 	ServersManager serverManager;
+	GameClientSessionManager gameClientSessionManager;
 
-	SessionServer<ClientSession> clientSessionServer(
-				CONFIG_GET()->client.listener.listenIp,
-				CONFIG_GET()->client.listener.port,
-				&CONFIG_GET()->client.listener.idleTimeout,
-				trafficLogger);
+	SessionServerWithParameter<AuthClientSession, GameClientSessionManager*> clientSessionServer(
+	            &gameClientSessionManager,
+	            CONFIG_GET()->client.listener.listenIp,
+	            CONFIG_GET()->client.listener.port,
+	            &CONFIG_GET()->client.listener.idleTimeout,
+	            trafficLogger);
 
 	serverManager.addServer("clients", &clientSessionServer, &CONFIG_GET()->client.listener.autoStart);
+	serverManager.addServer("gameClientSessionManager", &gameClientSessionManager, nullptr);
 	ConsoleSession::start(&serverManager);
 
 	serverManager.start();
