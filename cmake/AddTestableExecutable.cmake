@@ -72,13 +72,11 @@ function(add_module name sources)
 	target_link_libraries(${name} ${lib})
   endforeach()
 
-  if(BUILD_SHARED_LIBS)
-	install(TARGETS ${name}
-		RUNTIME DESTINATION ./
-	  LIBRARY DESTINATION ./
-	)
-    install_pdb(${name})
-  endif()
+  install(TARGETS ${name}
+	RUNTIME DESTINATION ./
+	LIBRARY DESTINATION ./
+  )
+  install_pdb(${name})
 endfunction()
 
 function(add_rztest name sources)
