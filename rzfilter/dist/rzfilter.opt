@@ -1,0 +1,36 @@
+admin.console.port:4804
+
+# External IP used for the client to connect to the filtered GS port
+client.externalip:EXTERNAL_PUBLIC_IP
+
+# Base filtered GS port. Each GS will use this port incremented based on its order
+# The order is based on the GS index
+# For example with the given config:
+# - GS with index 1 will listen on 14514
+# - GS with index 2 will listen on 14515
+# - etc.
+client.gsbaseport:14514
+
+# Where to listen for clients (the is the ip and port to use in sframe command line)
+client.listen.ip:0.0.0.0
+client.listen.port:14500
+
+# The real auth server to filter
+server.ip:127.0.0.1
+server.port:4500
+
+# Traffic dump config
+trafficdump.enable:false
+trafficdump.level:debug
+trafficdump.consolelevel:fatal
+trafficdump.dir:traffic_log
+trafficdump.file:rzfilter_auth.log
+
+# Log config
+core.log.file:rzfilter_auth.log
+core.log.level:info
+
+# Filter module to use
+# - rzfilter_version_converter: convert packets version
+# - rzfilter_module: dump packet in json format
+filter.modulename:rzfilter_version_converter
