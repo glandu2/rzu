@@ -3,6 +3,8 @@
 #include "AuthClient/TS_CA_SELECT_SERVER.h"
 #include "GlobalConfig.h"
 #include "GameClientSessionManager.h"
+#include <vector>
+#include <algorithm>
 
 AuthClientSession::AuthClientSession(GameClientSessionManager* gameClientSessionManager)
     : ClientSession(true),
@@ -32,14 +34,28 @@ void AuthClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 		TS_AC_SERVER_LIST serverListPkt;
 		if(packet->process(serverListPkt, getPacketVersion())) {
 			std::string listenIp = CONFIG_GET()->client.listener.listenIp.get();
-			auto it = serverListPkt.servers.begin();
-			auto itEnd = serverListPkt.servers.end();
-			for(; it != itEnd; ++it) {
-				TS_SERVER_INFO& server = *it;
+			std::vector<TS_SERVER_INFO*> serversOrdered;
+
+			serversOrdered.reserve(serverListPkt.servers.size());
+			for(size_t i = 0; i < serverListPkt.servers.size(); i++) {
+				serversOrdered.push_back(&serverListPkt.servers[i]);
+			}
+
+			std::sort(serversOrdered.begin(), serversOrdered.end(),
+			    [](TS_SERVER_INFO* a, TS_SERVER_INFO* b) -> bool
+			{
+				return a->server_idx < b->server_idx;
+			});
+
+			uint16_t baseListenPort = CONFIG_GET()->client.gameBasePort.get();
+			for(size_t i = 0; i < serversOrdered.size(); i++) {
+				TS_SERVER_INFO& server = *serversOrdered[i];
 				uint16_t listenPort = gameClientSessionManager->ensureListening(
-				            listenIp,
-				            server.server_ip,
-				            server.server_port);
+				                          listenIp,
+				                          baseListenPort,
+				                          server.server_ip,
+				                          server.server_port,
+				                          this->getStream() ? this->getStream()->getPacketLogger() : nullptr);
 				if(!listenPort) {
 					log(LL_Error, "Failed to listen on %s for server %s:%d\n",
 					    listenIp.c_str(), server.server_ip.c_str(), server.server_port);
@@ -50,6 +66,10 @@ void AuthClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 				}
 				server.server_ip = listenIp;
 				server.server_port = listenPort;
+
+				// If not using random ports (ie: port 0), increment the base port for subsequent GS
+				if(baseListenPort)
+					baseListenPort++;
 			}
 		}
 		PacketSession::sendPacket(serverListPkt, getPacketVersion());
