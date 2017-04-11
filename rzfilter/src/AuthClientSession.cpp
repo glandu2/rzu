@@ -64,7 +64,7 @@ void AuthClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 					    listenIp.c_str(), listenPort,
 					    server.server_ip.c_str(), server.server_port);
 				}
-				server.server_ip = listenIp;
+				server.server_ip = CONFIG_GET()->client.gameExternalIp.get();
 				server.server_port = listenPort;
 
 				// If not using random ports (ie: port 0), increment the base port for subsequent GS
