@@ -36,7 +36,7 @@ before_script:
 - cd build
 script:
 - if [ $TRAVIS_OS_NAME == osx ]; then export CMAKE_OPTS="-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl/ -DAUTH_TEST_ODBC_SQLITE_DRIVER=/usr/local/lib/libsqlite3odbc.dylib -DODBC_DIR=/usr/local/"; fi
-- cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=FALSE $CMAKE_OPTS
+- cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=TRUE $CMAKE_OPTS
 - cmake --build . --target package --config RelWithDebInfo
 - if [ $TRAVIS_OS_NAME == linux ]; then valgrind --trace-children=yes ctest -VV ; else ctest -VV ; fi
 after_failure:
