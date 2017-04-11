@@ -53,6 +53,9 @@ int main(int argc, char **argv) {
 	Object::logStatic(Object::LL_Info, "main", "Client epic: %d.%d.%d, Server epic: %d.%d.%d\n",
 	                  clientEpic >> 16, (clientEpic >> 8) & 0xFF, clientEpic & 0xFF,
 	                  gameEpic >> 16, (gameEpic >> 8) & 0xFF, gameEpic & 0xFF);
+	Object::logStatic(Object::LL_Info, "main", "Target auth: %s:%d\n",
+	                  CONFIG_GET()->server.ip.get().c_str(),
+	                  CONFIG_GET()->server.port.get());
 
 	runServers(&trafficLogger);
 

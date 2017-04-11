@@ -15,7 +15,7 @@ public:
 	GameClientSessionManager();
 	~GameClientSessionManager();
 
-	uint16_t ensureListening(std::string listenIp, std::string serverIp, uint16_t serverPort);
+	uint16_t ensureListening(std::string listenIp, uint16_t listenPort, std::string serverIp, uint16_t serverPort, Log *trafficLogger);
 
 	virtual bool start();
 	virtual void stop();
@@ -28,9 +28,9 @@ private:
 		cval<int> listenPort;
 		SessionServerWithParameter<GameClientSession, GameClientSession::Parameter*> sessionServer;
 
-		ServerFilter()
+		ServerFilter(Log* trafficLogger)
 		    : sessionServer(&serverParameters,
-		                    listenIp, listenPort)
+		                    listenIp, listenPort, nullptr, trafficLogger)
 		{}
 
 	private:

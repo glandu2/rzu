@@ -11,13 +11,14 @@ GameClientSessionManager::~GameClientSessionManager()
 
 }
 
-uint16_t GameClientSessionManager::ensureListening(std::string listenIp, std::string serverIp, uint16_t serverPort)
+uint16_t GameClientSessionManager::ensureListening(std::string listenIp, uint16_t listenPort, std::string serverIp, uint16_t serverPort, Log *trafficLogger)
 {
 	std::string key = serverIp + ":" + Utils::convertToString(serverPort);
 	std::unique_ptr<ServerFilter>& serverFilter = gameClientServers[key];
 
-	if(!serverFilter)
-		serverFilter.reset(new ServerFilter);
+	if(!serverFilter) {
+		serverFilter.reset(new ServerFilter(trafficLogger));
+	}
 
 	if(serverFilter->sessionServer.isStarted()) {
 		Stream* serverStream = serverFilter->sessionServer.getServerStream();
@@ -27,7 +28,7 @@ uint16_t GameClientSessionManager::ensureListening(std::string listenIp, std::st
 		serverFilter->serverParameters.serverIp = serverIp;
 		serverFilter->serverParameters.serverPort = serverPort;
 		serverFilter->listenIp.set(listenIp);
-		serverFilter->listenPort.set(0);
+		serverFilter->listenPort.set(listenPort);
 		serverFilter->sessionServer.start();
 		Stream* serverStream = serverFilter->sessionServer.getServerStream();
 		if(serverFilter->sessionServer.isStarted() && serverStream)
