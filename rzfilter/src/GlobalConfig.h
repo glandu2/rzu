@@ -19,7 +19,7 @@ struct GlobalConfig {
 		{}
 	} server;
 
-	struct GameConfig {
+	struct GameConfig : IListener {
 		ListenerConfig listener;
 		cval<std::string> &gameExternalIp;
 		cval<int> &gameBasePort;
@@ -27,10 +27,14 @@ struct GlobalConfig {
 
 		GameConfig() :
 		    listener("client.listen", "127.0.0.1", 4500, true, 0),
-		    gameExternalIp(CFG_CREATE("client.externalip", "EXTERNAL_FILTER_IP")),
+		    gameExternalIp(CFG_CREATE("client.externalip", "127.0.0.1")),
 		    gameBasePort(CFG_CREATE("client.gsbaseport", 0)),
 		    epic(CFG_CREATE("client.epic", EPIC_LATEST))
-		{}
+		{
+			listener.listenIp.addListener(this, &updateDefaultExternalIp);
+		}
+
+		static void updateDefaultExternalIp(IListener* instance);
 	} client;
 
 	struct FilterConfig {
