@@ -129,10 +129,10 @@ int main(int argc, char* argv[]) {
 		Object::logStatic(Object::LL_Info, "main", "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d, addedAuctionsInFile: %d/%d\n",
 		                  filename,
 		                  auctionFile.isFull ? "full" : "diff",
-		                  auctionFile.alreadyExistingAuctions,
-		                  auctionWriter.getAuctionCount(),
-		                  auctionFile.addedAuctionsInFile,
-		                  auctionWriter.getAuctionCount());
+		                  (int)auctionFile.alreadyExistingAuctions,
+		                  (int)auctionWriter.getAuctionCount(),
+		                  (int)auctionFile.addedAuctionsInFile,
+		                  (int)auctionWriter.getAuctionCount());
 
 		for(size_t i = 0; i < auctionFile.auctions.header.categories.size(); i++) {
 			const AUCTION_CATEGORY_INFO& category = auctionFile.auctions.header.categories[i];

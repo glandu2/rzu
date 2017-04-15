@@ -10,7 +10,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 {
 	if(auction->category >= categoryTimeManager.getCategoryNumber()) {
 		log(LL_Error, "Auction diff with invalid category: uid: 0x%08X, diffType: %d, category: %d, category number: %d\n",
-		    auction->uid, auction->diffType, auction->category, categoryTimeManager.getCategoryNumber());
+		    auction->uid, auction->diffType, auction->category, (int)categoryTimeManager.getCategoryNumber());
 		return;
 	}
 
@@ -119,7 +119,7 @@ AUCTION_FILE AuctionComplexDiffWriter::exportDump(bool doFullDump, bool alwaysWi
 {
 	AUCTION_FILE auctionFile;
 
-	log(LL_Info, "Exporting %d auctions\n", getAuctionCount());
+	log(LL_Info, "Exporting %d auctions\n", (int)getAuctionCount());
 
 	categoryTimeManager.serializeHeader(auctionFile.header, doFullDump ? DT_Full : DT_Diff);
 
@@ -145,5 +145,5 @@ void AuctionComplexDiffWriter::importDump(const AUCTION_FILE* auctionFile)
 		const auto& auctionInfo = auctionFile->auctions[i];
 		addAuction(AuctionComplexData::createFromDump(&auctionInfo));
 	}
-	log(LL_Info, "Imported %d auctions\n", getAuctionCount());
+	log(LL_Info, "Imported %d auctions\n", (int)getAuctionCount());
 }
