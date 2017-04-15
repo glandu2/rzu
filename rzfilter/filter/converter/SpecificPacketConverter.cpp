@@ -47,7 +47,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 
 			TS_AC_AES_KEY_IV aesPkt;
 
-			clientRsaCipher.publicEncrypt(aesKey, aesPkt.data);
+			clientRsaCipher.publicEncrypt(aesKey.data(), aesKey.size(), aesPkt.data);
 			memset(aesKey.data(), 0, aesKey.size());
 
 			client->sendPacket(aesPkt);
@@ -58,7 +58,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 
 		if(packet->process(pkt, client->getPacketVersion())) {
 			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
-				clientAesCipher.decrypt(Utils::convertToDataArray(pkt.passwordAes.password, pkt.passwordAes.password_size), plainPassword);
+				clientAesCipher.decrypt(pkt.passwordAes.password, pkt.passwordAes.password_size, plainPassword);
 			} else {
 				int size = (client->getPacketVersion() >= EPIC_5_1)? 61 : 32;
 				plainPassword.resize(size);
@@ -96,11 +96,11 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 			accountPkt.additionalInfos = account.additionalInfos;
 
 			std::vector<uint8_t> aesKey;
-			serverRsaCipher.privateDecrypt(pkt.data, aesKey);
+			serverRsaCipher.privateDecrypt(pkt.data.data(), pkt.data.size(), aesKey);
 			serverAesCipher.init(aesKey.data());
 
 			std::vector<uint8_t> encryptedPassword;
-			serverAesCipher.encrypt(account.password, encryptedPassword);
+			serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
 			memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
 			memcpy(accountPkt.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
 			accountPkt.passwordAes.password_size = (uint32_t)encryptedPassword.size();
@@ -119,7 +119,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 		if(packet->process(pkt, server->getPacketVersion())) {
 			if(server->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				std::vector<uint8_t> plainOTP;
-				serverAesCipher.decrypt(Utils::convertToDataArray(pkt.encrypted_data, pkt.encrypted_data_size), plainOTP);
+				serverAesCipher.decrypt(pkt.encrypted_data, pkt.encrypted_data_size, plainOTP);
 				if(plainOTP.size() >= sizeof(otp)) {
 					otp = *reinterpret_cast<uint64_t*>(plainOTP.data());
 				} else {
@@ -136,7 +136,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 				plainOTP.resize(sizeof(otp));
 				memcpy(plainOTP.data(), &otp, sizeof(otp));
 
-				clientAesCipher.encrypt(plainOTP, encryptedOTP);
+				clientAesCipher.encrypt(plainOTP.data(), plainOTP.size(), encryptedOTP);
 				memcpy(pkt.encrypted_data, encryptedOTP.data(), encryptedOTP.size());
 				pkt.encrypted_data_size = (uint32_t)encryptedOTP.size();
 
