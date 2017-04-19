@@ -40,6 +40,9 @@ AuthSession::AuthSession(GameServerSession *gameServerSession,
 	  pendingLogin(false),
 	  synchronizedWithAuth(false)
 {
+	for(size_t i = 0; i < sizeof(guid); i++) {
+		guid[i] = rand() & 0xFF;
+	}
 	servers.insert(std::pair<uint16_t, AuthSession*>(serverIdx, this));
 }
 
@@ -73,8 +76,8 @@ void AuthSession::sendLogin() {
 
 	pendingLogin = true;
 
-	TS_GA_LOGIN_WITH_LOGOUT loginPacket;
-	TS_MESSAGE::initMessage<TS_GA_LOGIN_WITH_LOGOUT>(&loginPacket);
+	TS_GA_LOGIN_WITH_LOGOUT_EXT loginPacket;
+	TS_MESSAGE::initMessage<TS_GA_LOGIN_WITH_LOGOUT_EXT>(&loginPacket);
 
 	loginPacket.server_idx = serverIdx;
 	strcpy(loginPacket.server_name, serverName.c_str());
@@ -82,6 +85,9 @@ void AuthSession::sendLogin() {
 	loginPacket.is_adult_server = isAdultServer;
 	strcpy(loginPacket.server_ip, serverIp.c_str());
 	loginPacket.server_port = serverPort;
+
+	static_assert(sizeof(loginPacket.guid) == sizeof(guid), "Session GUID and packet GUID must have the same size");
+	memcpy(loginPacket.guid, guid, sizeof(guid));
 
 	log(LL_Info, "Sending informations for GS %s[%d]\n", loginPacket.server_name, loginPacket.server_idx);
 	sendPacketToNetwork(&loginPacket);
@@ -291,7 +297,7 @@ void AuthSession::sendPacket(const TS_MESSAGE* message) {
 
 void AuthSession::sendPacketToNetwork(const TS_MESSAGE* message) {
 	PacketSession::sendPacket(message);
-	if(message->id == TS_GA_LOGIN_WITH_LOGOUT::packetID)
+	if(message->id == TS_GA_LOGIN_WITH_LOGOUT_EXT::packetID)
 		sentLoginPacket = true;
 	else if(message->id == TS_GA_LOGOUT::packetID)
 		closeSession();

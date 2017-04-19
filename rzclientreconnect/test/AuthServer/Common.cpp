@@ -24,7 +24,7 @@ void sendGameLogin(TestConnectionChannel* channel, uint16_t index, const char* n
 }
 
 void sendGameLoginEx(TestConnectionChannel* channel, uint16_t index, const char* name, const char* screenshot, bool isAdult, const char* ip, int32_t port) {
-	TS_GA_LOGIN_WITH_LOGOUT packet;
+	TS_GA_LOGIN_WITH_LOGOUT_EXT packet;
 	TS_MESSAGE::initMessage(&packet);
 
 	packet.server_idx = index;

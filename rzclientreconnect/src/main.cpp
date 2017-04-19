@@ -14,6 +14,8 @@
 
 #include "Console/ConsoleSession.h"
 
+#include <stdlib.h>
+
 void runServers(Log* trafficLogger);
 
 void onTerminate(void* instance) {
@@ -27,6 +29,8 @@ int main(int argc, char **argv) {
 	LibRzuInit();
 	GlobalConfig::init();
 	AuthServer::AuthSession::init();
+
+	srand(time(nullptr) ^ (time_t)argv);
 
 	ConfigInfo::get()->init(argc, argv);
 

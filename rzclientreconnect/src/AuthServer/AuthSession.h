@@ -87,6 +87,7 @@ private:
 	std::string serverScreenshotUrl;
 	bool isAdultServer;
 	time_t creationTime;
+	uint8_t guid[16]; // Used to detect lost network connection on the auth side. Must be non predictible
 
 	bool sentLoginPacket;
 	bool pendingLogin;
