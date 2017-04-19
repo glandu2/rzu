@@ -44,7 +44,7 @@ protected:
 	EventChain<SocketSession> onConnected();
 	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 
-	void onServerLogin(const TS_GA_LOGIN* packet);
+	void onServerLogin(const TS_GA_LOGIN* packet, const std::array<uint8_t, 16>* guid);
 	void onAccountList(const TS_GA_ACCOUNT_LIST *packet);
 	void onServerLogout(const TS_GA_LOGOUT* packet);
 	void onClientLogin(const TS_GA_CLIENT_LOGIN* packet);

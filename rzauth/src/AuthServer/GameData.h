@@ -30,6 +30,7 @@ public:
 							int32_t serverPort,
 							std::string serverScreenshotUrl,
 							bool isAdultServer,
+							const std::array<uint8_t, 16>* guid,
 							GameData **oldGameData = nullptr);
 	static void remove(GameData* gameData);
 
@@ -48,6 +49,7 @@ public:
 	int32_t getServerPort() { return serverPort; }
 	std::string getServerScreenshotUrl() { return serverScreenshotUrl; }
 	bool getIsAdultServer() { return isAdultServer; }
+	const std::array<uint8_t, 16>& getGuid() { return guid; }
 
 	void incPlayerCount() { playerCount++; }
 	void decPlayerCount() { playerCount--; }
@@ -66,7 +68,8 @@ private:
 			 std::string serverIp,
 			 int32_t serverPort,
 			 std::string serverScreenshotUrl,
-			 bool isAdultServer);
+			 bool isAdultServer,
+			 const std::array<uint8_t, 16>* guid);
 	~GameData();
 
 	static std::unordered_map<uint16_t, GameData*> servers;
@@ -79,6 +82,7 @@ private:
 	int32_t serverPort;
 	std::string serverScreenshotUrl;
 	bool isAdultServer;
+	std::array<uint8_t, 16> guid;
 
 	uint32_t playerCount;
 	time_t creationTime;

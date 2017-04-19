@@ -73,12 +73,22 @@ EventChain<PacketSession> GameServerSession::onPacketReceived(const TS_MESSAGE* 
 	switch(packet->id) {
 		case TS_GA_LOGIN_WITH_LOGOUT::packetID:
 			useAutoReconnectFeature = true;
-			onServerLogin(static_cast<const TS_GA_LOGIN_WITH_LOGOUT*>(packet));
+			onServerLogin(static_cast<const TS_GA_LOGIN_WITH_LOGOUT*>(packet), nullptr);
 			break;
+
+		case TS_GA_LOGIN_WITH_LOGOUT_EXT::packetID: {
+			const TS_GA_LOGIN_WITH_LOGOUT_EXT* loginPacket = static_cast<const TS_GA_LOGIN_WITH_LOGOUT_EXT*>(packet);
+			useAutoReconnectFeature = true;
+			std::array<uint8_t, 16> guid;
+			static_assert(sizeof(loginPacket->guid) == guid.size(), "GUID size must match");
+			std::copy(std::begin(loginPacket->guid), std::end(loginPacket->guid), std::begin(guid));
+			onServerLogin(loginPacket, &guid);
+			break;
+		}
 
 		case TS_GA_LOGIN::packetID:
 			useAutoReconnectFeature = false;
-			onServerLogin(static_cast<const TS_GA_LOGIN*>(packet));
+			onServerLogin(static_cast<const TS_GA_LOGIN*>(packet), nullptr);
 			break;
 
 		case TS_GA_ACCOUNT_LIST::packetID:
@@ -113,7 +123,7 @@ EventChain<PacketSession> GameServerSession::onPacketReceived(const TS_MESSAGE* 
 	return PacketSession::onPacketReceived(packet);
 }
 
-void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
+void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet, const std::array<uint8_t, 16>* guid) {
 	TS_AG_LOGIN_RESULT result;
 	TS_MESSAGE::initMessage<TS_AG_LOGIN_RESULT>(&result);
 
@@ -136,7 +146,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	result.result = TS_RESULT_UNKNOWN;
 
 	GameData* oldGameData = nullptr;
-	GameData* gameData = GameData::tryAdd(this, packet->server_idx, localServerName, localServerIp, packet->server_port, localScreenshotUrl, packet->is_adult_server, &oldGameData);
+	GameData* gameData = GameData::tryAdd(this, packet->server_idx, localServerName, localServerIp, packet->server_port, localScreenshotUrl, packet->is_adult_server, guid, &oldGameData);
 	if(gameData) {
 		result.result = TS_RESULT_SUCCESS;
 		log(LL_Debug, "Success\n");
@@ -147,12 +157,14 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 			gameData->setReady(false);
 	} else if(oldGameData) {
 		if(useAutoReconnectFeature &&
+				guid != nullptr &&
 				oldGameData->getServerIdx() == packet->server_idx &&
 				oldGameData->getServerName() == localServerName &&
 				oldGameData->getServerIp() == localServerIp &&
 				oldGameData->getServerPort() == packet->server_port &&
 				oldGameData->getServerScreenshotUrl() == localScreenshotUrl &&
-				oldGameData->getIsAdultServer() == packet->is_adult_server)
+				oldGameData->getIsAdultServer() == packet->is_adult_server &&
+				oldGameData->getGuid() == *guid)
 		{
 			GameServerSession* gameServer = oldGameData->getGameServer();
 
