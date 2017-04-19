@@ -125,6 +125,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 				} else {
 					Object::logStatic(Object::LL_Error, "rzfilter_version_converter", "Select server OTP wrong size: %d\n",
 					        (int)plainOTP.size());
+					otp = 0;
 				}
 			} else {
 				otp = pkt.one_time_key;
