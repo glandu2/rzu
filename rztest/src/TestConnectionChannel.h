@@ -170,6 +170,8 @@ public:
 	 */
 	void unregisterSession(PacketSession *session);
 
+	bool isConnected();
+
 protected:
 	void callEventCallback(Event event, PacketSession* session);
 	static TS_MESSAGE *copyMessage(const TS_MESSAGE *packet);
