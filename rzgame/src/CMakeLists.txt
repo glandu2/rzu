@@ -8,3 +8,4 @@ if( versioncmakefound )
 endif()
 
 add_exe(${TARGET_NAME} "${SOURCE_FILES}" rzu)
+target_include_directories(${TARGET_NAME} PRIVATE ./)
