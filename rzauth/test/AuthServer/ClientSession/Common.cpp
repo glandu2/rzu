@@ -187,6 +187,7 @@ void addClientLoginToServerListScenario(TestConnectionChannel& auth, AuthMethod 
 				parseAESKey(rsaCipher, packet, aes_key_iv);
 				sendAccountRSA(aes_key_iv, channel, account, password);
 			}
+			RSA_free(rsaCipher);
 		});
 	} else {
 		auth.addCallback([account, password, version](TestConnectionChannel* channel, TestConnectionChannel::Event event) {

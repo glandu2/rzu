@@ -1,5 +1,5 @@
 #include "Core/EventLoop.h"
-#include "GlobalConfig.h"
+#include "Config/GlobalConfig.h"
 #include "LibRzuInit.h"
 #include "Config/GlobalCoreConfig.h"
 #include "Core/CrashHandler.h"
@@ -9,9 +9,9 @@
 #include "NetSession/BanManager.h"
 #include "NetSession/SessionServer.h"
 
-#include "GameServer/ReferenceData/ReferenceDataMgr.h"
-#include "GameServer/AuthServerSession.h"
-#include "GameServer/ClientSession.h"
+#include "ReferenceData/ReferenceDataMgr.h"
+#include "AuthServerSession.h"
+#include "ClientSession.h"
 
 #include "Console/ConsoleSession.h"
 

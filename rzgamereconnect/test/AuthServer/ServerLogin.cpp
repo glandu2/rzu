@@ -85,7 +85,7 @@ TEST(TS_GA_LOGIN, gs_connect__auth_connect__gs_disconnect__accout_list) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_GA_LOGIN_WITH_LOGOUT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT);
+		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
 		EXPECT_EQ(1, packet->server_idx);
 		EXPECT_STREQ("Server name", packet->server_name);
@@ -138,7 +138,7 @@ TEST(TS_GA_LOGIN, gs_connect__auth_connect__account_list__gs_disconnect) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_GA_LOGIN_WITH_LOGOUT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT);
+		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
 		EXPECT_EQ(1, packet->server_idx);
 		EXPECT_STREQ("Server name", packet->server_name);
@@ -199,7 +199,7 @@ TEST(TS_GA_LOGIN, gs_connect__auth_connect__auth_disconnect__gs_disconnect__auth
 
 	//Auth GS login
 	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_GA_LOGIN_WITH_LOGOUT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT);
+		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
 		EXPECT_EQ(1, packet->server_idx);
 		EXPECT_STREQ("Server name", packet->server_name);
@@ -238,7 +238,7 @@ TEST(TS_GA_LOGIN, gs_connect__auth_connect__auth_disconnect__gs_disconnect__auth
 
 	//Auth GS login
 	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_GA_LOGIN_WITH_LOGOUT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT);
+		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
 		EXPECT_EQ(1, packet->server_idx);
 		EXPECT_STREQ("Server name", packet->server_name);
@@ -292,7 +292,7 @@ TEST(TS_GA_LOGIN, gs_connect__auth_connect__account_list__auth_disconnect__gs_di
 
 	//Auth GS login
 	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_GA_LOGIN_WITH_LOGOUT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT);
+		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
 		EXPECT_EQ(1, packet->server_idx);
 		EXPECT_STREQ("Server name", packet->server_name);
@@ -342,7 +342,7 @@ TEST(TS_GA_LOGIN, gs_connect__auth_connect__account_list__auth_disconnect__gs_di
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 	});
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_GA_LOGIN_WITH_LOGOUT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT);
+		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
 		EXPECT_EQ(1, packet->server_idx);
 		EXPECT_STREQ("Server name", packet->server_name);
@@ -392,7 +392,7 @@ TEST(TS_GA_LOGIN, gs_connect__auth_connect__gs_login_fail__account_list__gs_disc
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		const TS_GA_LOGIN_WITH_LOGOUT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT);
+		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
 		EXPECT_EQ(1, packet->server_idx);
 		EXPECT_STREQ("Server name", packet->server_name);

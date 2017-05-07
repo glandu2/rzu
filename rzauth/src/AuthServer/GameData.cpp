@@ -21,7 +21,8 @@ GameData::GameData(GameServerSession *gameServerSession,
 				   std::string serverIp,
 				   int32_t serverPort,
 				   std::string serverScreenshotUrl,
-				   bool isAdultServer)
+				   bool isAdultServer,
+				   const std::array<uint8_t, 16>* guid)
 	: gameServerSession(gameServerSession),
 	  serverIdx(serverIdx),
 	  serverName(serverName),
@@ -35,6 +36,12 @@ GameData::GameData(GameServerSession *gameServerSession,
 {
 	setDirtyObjectName();
 
+	if(guid != nullptr) {
+		this->guid = *guid;
+	} else {
+		this->guid = std::array<uint8_t, 16>{};
+	}
+
 	LogServerClient::sendLog(LogServerClient::LM_GAME_SERVER_LOGIN, 0, 0, 0, serverIdx, serverPort, 0, 0, 0, 0, 0, 0,
 							 0, 0, 0, 0, serverIp.c_str(), -1, serverName.c_str(), -1);
 }
@@ -46,13 +53,14 @@ GameData::~GameData() {
 }
 
 GameData* GameData::tryAdd(GameServerSession* gameServerSession,
-						uint16_t serverIdx,
-						std::string serverName,
-						std::string serverIp,
-						int32_t serverPort,
-						std::string serverScreenshotUrl,
-						bool isAdultServer,
-						GameData** oldGameData)
+							uint16_t serverIdx,
+							std::string serverName,
+							std::string serverIp,
+							int32_t serverPort,
+							std::string serverScreenshotUrl,
+							bool isAdultServer,
+							const std::array<uint8_t, 16>* guid,
+							GameData **oldGameData)
 {
 	auto it = servers.find(serverIdx);
 
@@ -66,7 +74,8 @@ GameData* GameData::tryAdd(GameServerSession* gameServerSession,
 										  serverIp,
 										  serverPort,
 										  serverScreenshotUrl,
-										  isAdultServer);
+										  isAdultServer,
+										  guid);
 
 		servers.insert(std::pair<uint16_t, GameData*>(serverIdx, gameData));
 

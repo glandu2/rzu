@@ -32,6 +32,7 @@ TestConnectionChannel::~TestConnectionChannel() {
 
 void TestConnectionChannel::YieldData::executeTimerForYield() {
 	callback(instance);
+	delete this;
 }
 
 void TestConnectionChannel::addYield(YieldCallback callback, int time) {
@@ -113,7 +114,7 @@ void TestConnectionChannel::callEventCallback(Event event, PacketSession* sessio
 	if(eventCallbacks.size() > 0) {
 		switch(event.type) {
 			case Event::Packet:
-				log(LL_Debug, "[%s:%d] Received event type Packet, packet id %d\n", host.get().c_str(), port.get(), event.packet->id);
+				log(LL_Debug, "[%s:%d] Received event type Packet, packet id %d\n", host.get().c_str(), port.get(), event.packet ? event.packet->id : 0);
 				break;
 			case Event::Connection:
 				log(LL_Debug, "[%s:%d] Received event type connection\n", host.get().c_str(), port.get());
@@ -147,6 +148,10 @@ void TestConnectionChannel::registerSession(PacketSession *session) {
 void TestConnectionChannel::unregisterSession(PacketSession *session) {
 	if(this->session == session)
 		this->session = nullptr;
+}
+
+bool TestConnectionChannel::isConnected() {
+	return session && session->getState() != Stream::UnconnectedState;
 }
 
 TS_MESSAGE *TestConnectionChannel::copyMessage(const TS_MESSAGE *packet) {

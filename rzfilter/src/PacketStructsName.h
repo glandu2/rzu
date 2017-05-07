@@ -219,6 +219,7 @@ static const PacketNameInfo gamePacketNames[] = {
 	{2006, "TS_CS_CHECK_CHARACTER_NAME"},
     {2007, "TS_CS_CHARACTER_LIST_2"},
     {2179, "TS_CS_CHARACTER_LIST_3"},
+    {2008, "TS_CS_CHARACTER_LIST_4"},
 	{3000, "TS_SC_DIALOG"},
 	{3001, "TS_CS_DIALOG"},
 	{3002, "TS_CS_CONTACT"},

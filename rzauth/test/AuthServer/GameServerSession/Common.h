@@ -8,7 +8,8 @@
 namespace AuthServer {
 
 void sendGameLogin(TestConnectionChannel* channel, uint16_t index, const char* name, const char* screenshot, bool isAdult, const char* ip, int32_t port);
-void sendGameLoginEx(TestConnectionChannel* channel, uint16_t index, const char* name, const char* screenshot, bool isAdult, const char* ip, int32_t port);
+void sendGameLoginWithLogout(TestConnectionChannel* channel, uint16_t index, const char* name, const char* screenshot, bool isAdult, const char* ip, int32_t port);
+void sendGameLoginWithLogoutEx(TestConnectionChannel* channel, uint16_t index, const char* name, const char* screenshot, bool isAdult, const char* ip, int32_t port, int8_t guid);
 
 struct AccountInfo {
 	std::string account;
