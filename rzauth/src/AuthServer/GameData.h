@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <time.h>
+#include <array>
 
 class IWritableConsole;
 
