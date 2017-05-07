@@ -80,7 +80,9 @@ EventChain<PacketSession> GameServerSession::onPacketReceived(const TS_MESSAGE* 
 			const TS_GA_LOGIN_WITH_LOGOUT_EXT* loginPacket = static_cast<const TS_GA_LOGIN_WITH_LOGOUT_EXT*>(packet);
 			useAutoReconnectFeature = true;
 			std::array<uint8_t, 16> guid;
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
 			static_assert(sizeof(loginPacket->guid) == guid.size(), "GUID size must match");
+#endif
 			std::copy(std::begin(loginPacket->guid), std::end(loginPacket->guid), std::begin(guid));
 			onServerLogin(loginPacket, &guid);
 			break;
