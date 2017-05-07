@@ -28,6 +28,9 @@ namespace GameServer {
 Character::Character(ClientSession* session, game_sid_t sid, const std::string& account, DB_Character *databaseData)
 	: statBase(), statBuffs(), inventory(session, this)
 {
+	static_assert(sizeof(prevJobId) == sizeof(databaseData->jobs), "Previous jobs array size mismatch");
+	static_assert(sizeof(prevJobLevel) == sizeof(databaseData->jlvs), "Previous jobs level array size mismatch");
+
 	this->account = account;
 	this->session = session;
 
@@ -40,8 +43,8 @@ Character::Character(ClientSession* session, game_sid_t sid, const std::string& 
 	this->face_direction = 0;
 	this->hp = databaseData->hp;
 	this->mp = databaseData->mp;
-	this->maxHp = databaseData->hp;
-	this->maxMp = databaseData->mp;
+	this->maxHp = this->hp;
+	this->maxMp = this->mp;
 	this->level = databaseData->lv;
 	this->jobLevel = databaseData->jlv;
 	this->exp = databaseData->exp;
@@ -49,14 +52,23 @@ Character::Character(ClientSession* session, game_sid_t sid, const std::string& 
 	this->sex = databaseData->sex;
 	this->race = databaseData->race;
 	this->skinColor = databaseData->skin_color;
+
 	this->baseModel.hairId = databaseData->model[0];
 	this->baseModel.faceId = databaseData->model[1];
 	this->baseModel.armorId = databaseData->model[2];
 	this->baseModel.glovesId = databaseData->model[3];
 	this->baseModel.bootsId = databaseData->model[4];
+
 	this->job = databaseData->job;
 	this->stamina = databaseData->stamina;
+	this->maxStamina = this->stamina;
+	this->staminaRegen = 30;
 	this->chaos = databaseData->chaos;
+	this->maxChaos = this->chaos;
+
+	memcpy(this->prevJobId, databaseData->jobs, sizeof(this->prevJobId));
+	memcpy(this->prevJobLevel, databaseData->jlvs, sizeof(this->prevJobLevel));
+
 	this->tp = databaseData->talent_point;
 	this->huntaholicPoint = databaseData->huntaholic_point;
 	this->huntaholicEntries = databaseData->huntaholic_enter_count;
@@ -69,15 +81,9 @@ Character::Character(ClientSession* session, game_sid_t sid, const std::string& 
 	this->permission = databaseData->permission;
 	this->channel = 1;
 	this->status = 0;
-	this->staminaRegen = 30;
 	this->clientInfo = databaseData->client_info;
 	this->quickSlot = databaseData->flag_list;
 	this->gold = databaseData->gold;
-
-	static_assert(sizeof(prevJobId) == sizeof(databaseData->jobs), "Previous jobs array size mismatch");
-	static_assert(sizeof(prevJobLevel) == sizeof(databaseData->jlvs), "Previous jobs level array size mismatch");
-	memcpy(this->prevJobId, databaseData->jobs, sizeof(this->prevJobId));
-	memcpy(this->prevJobLevel, databaseData->jlvs, sizeof(this->prevJobLevel));
 
 	updateStats();
 }
@@ -110,69 +116,70 @@ void Character::updateStats() {
 	jobs[i] = job;
 	jobLevels[i] = jobLevel;
 
-	stats.applyJobLevelBonus(jobs, jobLevels, Utils_countOf(jobs));
+	// Number of jobs is i+1
+	stats.applyJobLevelBonus(jobs, jobLevels, i+1);
 
-	stats.nAttackPointRight = level;
-	stats.nAttackPointLeft = 0;
-	stats.nAccuracyRight = level;
-	stats.nAccuracyLeft = stats.nAccuracyRight;
-	stats.nMagicPoint = level;
-	stats.nDefence = level;
-	stats.nAvoid = level;
-	stats.nAttackSpeed = 100;
-	stats.nMagicAccuracy = level;
-	stats.nMagicDefence = level;
-	stats.nMagicAvoid = level;
-	stats.nMoveSpeed = 120;
-	stats.nHPRegenPercentage = 5;
-	stats.nMPRegenPercentage = 5;
-	stats.nBlockChance = 0;
-	stats.nBlockDefence = 0;
-	stats.nCritical = 3;
-	stats.nCastingSpeed = 100;
-	stats.nHPRegenPoint = 48 + 2 * level;
-	stats.nMPRegenPoint = 48 + 2 * level;
-	stats.nCriticalPower = 80;
-	stats.nCoolTimeSpeed = 100;
-	stats.nMaxWeight = 10 * level;
-	stats.nItemChance = 0;
-	stats.nPerfectBlock = 20;
-	stats.nAttackRange = 50;
-	stats.nMagicalDefIgnore = 0;
-	stats.nMagicalDefIgnoreRatio = 0;
-	stats.nPhysicalDefIgnore = 0;
-	stats.nPhysicalDefIgnoreRatio = 0;
-	stats.nMagicalPenetration = 0;
-	stats.nMagicalPenetrationRatio = 0;
-	stats.nPhysicalPenetration = 0;
-	stats.nPhysicalPenetrationRatio = 0;
-	stats.maxHp = 20 * level;
-	stats.maxMp = 20 * level;
-	stats.maxStamina = 500000;
-	stats.maxChaos = 500;
+	stats.extended.nAttackPointRight = level;
+	stats.extended.nAttackPointLeft = 0;
+	stats.extended.nAccuracyRight = level;
+	stats.extended.nAccuracyLeft = stats.extended.nAccuracyRight;
+	stats.extended.nMagicPoint = level;
+	stats.extended.nDefence = level;
+	stats.extended.nAvoid = level;
+	stats.extended.nAttackSpeed = 100;
+	stats.extended.nMagicAccuracy = level;
+	stats.extended.nMagicDefence = level;
+	stats.extended.nMagicAvoid = level;
+	stats.extended.nMoveSpeed = 120;
+	stats.extended.nHPRegenPercentage = 5;
+	stats.extended.nMPRegenPercentage = 5;
+	stats.extended.nBlockChance = 0;
+	stats.extended.nBlockDefence = 0;
+	stats.extended.nCritical = 3;
+	stats.extended.nCastingSpeed = 100;
+	stats.extended.nHPRegenPoint = 48 + 2 * level;
+	stats.extended.nMPRegenPoint = 48 + 2 * level;
+	stats.extended.nCriticalPower = 80;
+	stats.extended.nCoolTimeSpeed = 100;
+	stats.extended.nMaxWeight = 10 * level;
+	stats.extended.nItemChance = 0;
+	stats.extended.nPerfectBlock = 20;
+	stats.extended.nAttackRange = 50;
+	stats.extended.nMagicalDefIgnore = 0;
+	stats.extended.nMagicalDefIgnoreRatio = 0;
+	stats.extended.nPhysicalDefIgnore = 0;
+	stats.extended.nPhysicalDefIgnoreRatio = 0;
+	stats.extended.nMagicalPenetration = 0;
+	stats.extended.nMagicalPenetrationRatio = 0;
+	stats.extended.nPhysicalPenetration = 0;
+	stats.extended.nPhysicalPenetrationRatio = 0;
+	stats.properties.maxHp = 20 * level;
+	stats.properties.maxMp = 20 * level;
+	stats.properties.maxStamina = 500000;
+	stats.properties.maxChaos = 500;
 
 	statBase = stats;
 
 	if(/* DISABLES CODE */ (true)) {
-		stats.nAttackPointRight += 2.8f * statBase.strength;
+		stats.extended.nAttackPointRight += 2.8f * statBase.base.strength;
 	} else {
-		stats.nAttackPointRight += 1.2f * statBase.agility + 2.2f * statBase.dexterity;
+		stats.extended.nAttackPointRight += 1.2f * statBase.base.agility + 2.2f * statBase.base.dexterity;
 	}
-	stats.nAccuracyRight += 0.5f * statBase.dexterity;
-	stats.nAccuracyLeft += statBase.nAccuracyRight;
-	stats.nMagicPoint += 2 * statBase.intelligence;
-	stats.nDefence += 1.6f * statBase.vitality;
-	stats.nAvoid += 0.5f * statBase.agility;
-	stats.nAttackSpeed += 0.1f * statBase.agility;
-	stats.nMagicAccuracy += 0.4f * statBase.wisdom;
-	stats.nMagicDefence += 2 * statBase.wisdom;
-	stats.nMagicAvoid += 0.5f * statBase.wisdom;
-	stats.nCritical += statBase.luck / 5;
-	stats.nMPRegenPoint += 4.1f * statBase.wisdom;
-	stats.nMaxWeight += 10 * statBase.strength;
-	stats.nItemChance += statBase.luck / 5;
-	stats.maxHp += 33 * statBase.vitality;
-	stats.maxMp += 30 * statBase.intelligence;
+	stats.extended.nAccuracyRight += 0.5f * statBase.base.dexterity;
+	stats.extended.nAccuracyLeft += statBase.extended.nAccuracyRight;
+	stats.extended.nMagicPoint += 2 * statBase.base.intelligence;
+	stats.extended.nDefence += 1.6f * statBase.base.vitality;
+	stats.extended.nAvoid += 0.5f * statBase.base.agility;
+	stats.extended.nAttackSpeed += 0.1f * statBase.base.agility;
+	stats.extended.nMagicAccuracy += 0.4f * statBase.base.wisdom;
+	stats.extended.nMagicDefence += 2 * statBase.base.wisdom;
+	stats.extended.nMagicAvoid += 0.5f * statBase.base.wisdom;
+	stats.extended.nCritical += statBase.base.luck / 5;
+	stats.extended.nMPRegenPoint += 4.1f * statBase.base.wisdom;
+	stats.extended.nMaxWeight += 10 * statBase.base.strength;
+	stats.extended.nItemChance += statBase.base.luck / 5;
+	stats.properties.maxHp += 33 * statBase.base.vitality;
+	stats.properties.maxMp += 30 * statBase.base.intelligence;
 
 	statBuffs = {};
 

@@ -11,7 +11,7 @@ namespace GameServer {
 struct StatResource;
 class ClientSession;
 
-class StatBase : public Object
+class StatBase
 {
 public:
 	enum Type {
@@ -21,53 +21,59 @@ public:
 
 public:
 	int32_t stat_id;
-	float strength;
-	float vitality;
-	float dexterity;
-	float agility;
-	float intelligence;
-	float wisdom;
-	float luck;
+	struct {
+		float strength;
+		float vitality;
+		float dexterity;
+		float agility;
+		float intelligence;
+		float wisdom;
+		float luck;
+	} base;
 
-	float nCritical;
-	float nCriticalPower;
-	float nAttackPointRight;
-	float nAttackPointLeft;
-	float nDefence;
-	float nBlockDefence;
-	float nMagicPoint;
-	float nMagicDefence;
-	float nAccuracyRight;
-	float nAccuracyLeft;
-	float nMagicAccuracy;
-	float nAvoid;
-	float nMagicAvoid;
-	float nBlockChance;
-	float nMoveSpeed;
-	float nAttackSpeed;
-	float nAttackRange;
-	float nMaxWeight;
-	float nCastingSpeed;
-	float nCoolTimeSpeed;
-	float nItemChance;
-	float nHPRegenPercentage;
-	float nHPRegenPoint;
-	float nMPRegenPercentage;
-	float nMPRegenPoint;
-	float nPerfectBlock;
-	float nMagicalDefIgnore;
-	float nMagicalDefIgnoreRatio;
-	float nPhysicalDefIgnore;
-	float nPhysicalDefIgnoreRatio;
-	float nMagicalPenetration;
-	float nMagicalPenetrationRatio;
-	float nPhysicalPenetration;
-	float nPhysicalPenetrationRatio;
+	struct {
+		float nCritical;
+		float nCriticalPower;
+		float nAttackPointRight;
+		float nAttackPointLeft;
+		float nDefence;
+		float nBlockDefence;
+		float nMagicPoint;
+		float nMagicDefence;
+		float nAccuracyRight;
+		float nAccuracyLeft;
+		float nMagicAccuracy;
+		float nAvoid;
+		float nMagicAvoid;
+		float nBlockChance;
+		float nMoveSpeed;
+		float nAttackSpeed;
+		float nAttackRange;
+		float nMaxWeight;
+		float nCastingSpeed;
+		float nCoolTimeSpeed;
+		float nItemChance;
+		float nHPRegenPercentage;
+		float nHPRegenPoint;
+		float nMPRegenPercentage;
+		float nMPRegenPoint;
+		float nPerfectBlock;
+		float nMagicalDefIgnore;
+		float nMagicalDefIgnoreRatio;
+		float nPhysicalDefIgnore;
+		float nPhysicalDefIgnoreRatio;
+		float nMagicalPenetration;
+		float nMagicalPenetrationRatio;
+		float nPhysicalPenetration;
+		float nPhysicalPenetrationRatio;
+	} extended;
 
-	float maxHp;
-	float maxMp;
-	float maxStamina;
-	float maxChaos;
+	struct {
+		float maxHp;
+		float maxMp;
+		float maxStamina;
+		float maxChaos;
+	} properties;
 
 public:
 	StatBase(const StatResource* statResource = nullptr);

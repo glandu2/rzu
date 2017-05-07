@@ -4,6 +4,7 @@
 #include "GameClient/TS_TIMESYNC.h"
 #include "GameClient/TS_CS_GAME_TIME.h"
 #include "GameClient/TS_SC_MOVE.h"
+#include "GameClient/TS_CS_REQUEST_LOGOUT.h"
 
 #include "Component/Inventory/Inventory.h"
 #include "Component/Time/TimeManager.h"
@@ -38,6 +39,10 @@ void GameHandler::onPacketReceived(const TS_MESSAGE *packet) {
 
 		case_packet_is(TS_CS_MOVE_REQUEST)
 			packet->process(this, &GameHandler::onMoveRequest, session->getVersion());
+			break;
+
+		case TS_CS_REQUEST_LOGOUT::packetID:
+			session->sendResult(packet, 0, 0);
 			break;
 	}
 }
