@@ -7,6 +7,7 @@
 #include <string>
 #include "ClientData.h"
 #include <list>
+#include <array>
 #include "DB_SecurityNoCheck.h"
 
 #include "PacketEnums.h"
