@@ -11,6 +11,7 @@
 #include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
 #include "AuthClient/TS_AC_SELECT_SERVER.h"
 #include "AuthClient/TS_CA_ACCOUNT.h"
+#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
 #include "AuthClient/TS_CA_DISTRIBUTION_INFO.h"
 #include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
 #include "AuthClient/TS_CA_VERSION.h"
@@ -67,6 +68,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 				plainPassword.assign(pkt.passwordDes.password, std::find(pkt.passwordDes.password, pkt.passwordDes.password + size, '\0'));
 			}
 
+			account.useImbc = false;
+
 			if(server->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				TS_CA_RSA_PUBLIC_KEY rsaKeyPkt;
 
@@ -88,26 +91,74 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 				server->sendPacket(pkt);
 			}
 		}
+	} else if(packet->id == TS_CA_IMBC_ACCOUNT::packetID) {
+		TS_CA_IMBC_ACCOUNT pkt;
+		std::vector<uint8_t> plainPassword;
+
+		if(packet->process(pkt, client->getPacketVersion())) {
+			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
+				clientAesCipher.decrypt(pkt.passwordAes.password, pkt.passwordAes.password_size, plainPassword);
+			} else {
+				plainPassword = Utils::convertToDataArray(pkt.passwordPlain.password, sizeof(pkt.passwordPlain.password));
+			}
+
+			account.useImbc = true;
+
+			if(server->getPacketVersion() >= EPIC_8_1_1_RSA) {
+				TS_CA_RSA_PUBLIC_KEY rsaKeyPkt;
+
+				serverRsaCipher.generateKey();
+				serverRsaCipher.getPemPublicKey(rsaKeyPkt.key);
+
+				server->sendPacket(rsaKeyPkt);
+
+				account.account = pkt.account;
+				account.password = plainPassword;
+			} else {
+				memcpy(pkt.passwordPlain.password, plainPassword.data(), std::min(sizeof(pkt.passwordPlain.password), plainPassword.size()));
+
+				server->sendPacket(pkt);
+			}
+		}
 	} else if(packet->id == TS_AC_AES_KEY_IV::packetID) {
 		TS_AC_AES_KEY_IV pkt;
 		if(packet->process(pkt, server->getPacketVersion())) {
-			TS_CA_ACCOUNT accountPkt;
-			accountPkt.account = account.account;
-			accountPkt.additionalInfos = account.additionalInfos;
+			if(account.useImbc) {
+				TS_CA_IMBC_ACCOUNT accountPkt;
+				accountPkt.account = account.account;
 
-			std::vector<uint8_t> aesKey;
-			serverRsaCipher.privateDecrypt(pkt.data.data(), pkt.data.size(), aesKey);
-			serverAesCipher.init(aesKey.data());
+				std::vector<uint8_t> aesKey;
+				serverRsaCipher.privateDecrypt(pkt.data.data(), pkt.data.size(), aesKey);
+				serverAesCipher.init(aesKey.data());
 
-			std::vector<uint8_t> encryptedPassword;
-			serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
-			memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
-			memcpy(accountPkt.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
-			accountPkt.passwordAes.password_size = (uint32_t)encryptedPassword.size();
+				std::vector<uint8_t> encryptedPassword;
+				serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
+				memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
+				memcpy(accountPkt.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
+				accountPkt.passwordAes.password_size = (uint32_t)encryptedPassword.size();
 
-			server->sendPacket(accountPkt);
+				server->sendPacket(accountPkt);
 
-			memset(&account.password[0], 0, account.password.size());
+				memset(&account.password[0], 0, account.password.size());
+			} else {
+				TS_CA_ACCOUNT accountPkt;
+				accountPkt.account = account.account;
+				accountPkt.additionalInfos = account.additionalInfos;
+
+				std::vector<uint8_t> aesKey;
+				serverRsaCipher.privateDecrypt(pkt.data.data(), pkt.data.size(), aesKey);
+				serverAesCipher.init(aesKey.data());
+
+				std::vector<uint8_t> encryptedPassword;
+				serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
+				memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
+				memcpy(accountPkt.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
+				accountPkt.passwordAes.password_size = (uint32_t)encryptedPassword.size();
+
+				server->sendPacket(accountPkt);
+
+				memset(&account.password[0], 0, account.password.size());
+			}
 		}
 	} else if(packet->id == TS_AC_ACCOUNT_NAME::packetID) {
 		if(client->getPacketVersion() >= EPIC_9_4)
