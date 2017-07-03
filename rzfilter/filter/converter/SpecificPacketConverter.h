@@ -17,6 +17,7 @@ private:
 	AesPasswordCipher serverAesCipher;
 	RsaCipher serverRsaCipher;
 	struct {
+		bool useImbc;
 		std::string account;
 		std::vector<uint8_t> password;
 		std::vector<TS_ACCOUNT_ADDITIONAL_INFO> additionalInfos;
