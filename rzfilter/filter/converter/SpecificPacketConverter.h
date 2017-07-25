@@ -22,6 +22,7 @@ private:
 		std::vector<uint8_t> password;
 		std::vector<TS_ACCOUNT_ADDITIONAL_INFO> additionalInfos;
 	} account;
+	int64_t startTime;
 };
 
 #endif // SPECIFICPACKETCONVERTERFILTER_H
