@@ -24,7 +24,7 @@ public:
 
 protected:
 private:
-	template<class Packet> void showPacketJson(const Packet* packet);
+	template<class Packet> void showPacketJson(const Packet* packet, int version);
 	void onChatMessage(const TS_SC_CHAT* packet);
 
 	void printAuthPacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
