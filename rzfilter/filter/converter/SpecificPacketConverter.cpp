@@ -21,6 +21,9 @@
 #include "GameClient/TS_CS_CHECK_ILLEGAL_USER.h"
 #include "GameClient/TS_SC_STATE.h"
 #include "GameClient/TS_SC_ENTER.h"
+#include "GameClient/TS_CS_REGION_UPDATE.h"
+#include "GameClient/TS_SC_MOVE_ACK.h"
+#include "GameClient/TS_SC_MOVE.h"
 
 bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, bool) {
 	if(packet->id == TS_CA_VERSION::packetID) {
@@ -275,6 +278,28 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target, 
 			}
 			target->sendPacket(pkt);
 			return false;
+		} else {
+			return true;
+		}
+	} else if(packet->id == TS_SC_MOVE::getId(version)) {
+		TS_SC_MOVE pkt;
+		if(packet->process(pkt, version)) {
+			startTime = Utils::getTimeInMsec();
+		}
+		return true;
+	} else if(packet->id == TS_SC_MOVE_ACK::getId(version)) {
+		TS_SC_MOVE_ACK pkt;
+		if(packet->process(pkt, version)) {
+			startTime = Utils::getTimeInMsec();
+		}
+		return true;
+	} else if(packet->id == TS_CS_REGION_UPDATE::getId(version)) {
+		TS_CS_REGION_UPDATE pkt;
+		if(packet->process(pkt, version)) {
+			if(version >= EPIC_9_3 && target->getPacketVersion() < EPIC_9_3) {
+				pkt.update_time = static_cast<uint32_t>((Utils::getTimeInMsec() - startTime) / 10 + (pkt.bIsStopMessage != 0 ? 10 : 0));
+			}
+			target->sendPacket(pkt);
 		} else {
 			return true;
 		}

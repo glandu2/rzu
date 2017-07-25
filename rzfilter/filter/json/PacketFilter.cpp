@@ -297,12 +297,12 @@
 #define PACKET_TO_JSON(type_) \
 	case type_::packetID: \
 	(void)(sizeof(&type_::getSize)); \
-	packet->process(this, &PacketFilter::showPacketJson<type_>, version); \
+	packet->process(this, &PacketFilter::showPacketJson<type_>, version, version); \
 	break;
 
 #define PACKET_TO_JSON_2(type_) \
 	case_packet_is(type_) \
-	packet->process(this, &PacketFilter::showPacketJson<type_>, version); \
+	packet->process(this, &PacketFilter::showPacketJson<type_>, version, version); \
 	break;
 
 #define PACKET_TO_JSON_CLISERV(isServerMsg, type_serv, type_cli) \
@@ -311,9 +311,9 @@
 	(void)(sizeof(&type_serv::getSize)); \
 	(void)(sizeof(&type_cli::getSize)); \
 	if(isServerMsg) \
-	    packet->process(this, &PacketFilter::showPacketJson<type_serv>, version); \
+	    packet->process(this, &PacketFilter::showPacketJson<type_serv>, version, version); \
 	else \
-	    packet->process(this, &PacketFilter::showPacketJson<type_cli>, version); \
+	    packet->process(this, &PacketFilter::showPacketJson<type_cli>, version, version); \
 	break;
 
 PacketFilter::PacketFilter(PacketFilter *oldFilter)
@@ -765,9 +765,9 @@ void destroyFilter(IFilter *filter)
 }
 
 template<class Packet>
-void PacketFilter::showPacketJson(const Packet* packet)
+void PacketFilter::showPacketJson(const Packet* packet, int version)
 {
-	JSONWriter jsonWriter(EPIC_LATEST, false);
+	JSONWriter jsonWriter(version, false);
 	packet->serialize(&jsonWriter);
 	jsonWriter.finalize();
 	std::string jsonData = jsonWriter.toString();
