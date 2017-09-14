@@ -11,11 +11,13 @@ namespace LogServer {
 ClientSession::ClientSession() {
 	file = nullptr;
 	memset(&fileDate, 0, sizeof(fileDate));
+	log(LL_Info, "New server connection\n");
 }
 
 ClientSession::~ClientSession() {
 	if(file)
 		fclose(file);
+	log(LL_Info, "Server %s disconnected\n", serverName.c_str());
 }
 
 bool ClientSession::isDateNeedNewFile(const struct tm& date) {
@@ -51,6 +53,11 @@ void ClientSession::updateOpenedFile(const struct tm& date) {
 		std::string fullFileName = absoluteDir + "/" + filename;
 
 		file = fopen(fullFileName.c_str(), "wt");
+		if(!file) {
+			log(LL_Error, "Failed to open file %s, error %d\n", fullFileName.c_str(), errno);
+		} else {
+			log(LL_Error, "Opened file %s\n", fullFileName.c_str());
+		}
 	}
 }
 
@@ -74,7 +81,7 @@ bool ClientSession::checkName(std::string name) {
 }
 
 EventChain<LogPacketSession> ClientSession::onPacketReceived(const LS_11N4S* packet) {
-	log(LL_Debug, "Received log packet id %d, size %d\n", packet->id, packet->size);
+	log(LL_Trace, "Received log packet id %d, size %d\n", packet->id, packet->size);
 	LogData logData;
 
 	const int expectedSize = sizeof(*packet) + packet->len1 + packet->len2 + packet->len3 + packet->len4;
@@ -127,6 +134,7 @@ EventChain<LogPacketSession> ClientSession::onPacketReceived(const LS_11N4S* pac
 			log(LL_Error, "Received login message with invalid characters in server name: %s\n", logData.s4.c_str());
 		} else {
 			serverName = logData.s4;
+			log(LL_Info, "Server login: %s\n", serverName.c_str());
 		}
 	}
 
@@ -165,6 +173,7 @@ EventChain<LogPacketSession> ClientSession::onPacketReceived(const LS_11N4S* pac
 						  logData.s3.c_str(),
 						  logData.s4.c_str());
 
+		log(LL_Debug, "Log message: %s", lineBuffer);
 		fwrite(lineBuffer, len, 1, file);
 	}
 

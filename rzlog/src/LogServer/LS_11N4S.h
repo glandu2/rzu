@@ -13,10 +13,10 @@ struct LS_11N4S
 
 	int64_t n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11;
 
-	uint16_t len1;
-	uint16_t len2;
-	uint16_t len3;
-	uint16_t len4;
+	int16_t len1;
+	int16_t len2;
+	int16_t len3;
+	int16_t len4;
 };
 #pragma pack(pop)
 
