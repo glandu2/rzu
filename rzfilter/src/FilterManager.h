@@ -15,7 +15,7 @@ class FilterManager : public Object
 	DECLARE_CLASSNAME(FilterManager, 0)
 private:
 	typedef void (*DestroyFilterFunction)(IFilter* filter);
-	typedef IFilter* (*CreateFilterFunction)(IFilter* oldFilter);
+	typedef IFilter* (*CreateFilterFunction)(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter);
 
 public:
 	FilterManager();
@@ -23,7 +23,7 @@ public:
 
 	static FilterManager* getInstance();
 
-	FilterProxy* createFilter();
+	FilterProxy* createFilter(IFilterEndpoint* client, IFilterEndpoint* server);
 	void destroyFilter(FilterProxy* filter);
 
 protected:

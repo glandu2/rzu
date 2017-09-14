@@ -32,6 +32,7 @@ public:
 	int getPacketVersion() { return version; }
 
 protected:
+	void logPacket(bool outgoing, const TS_MESSAGE* msg);
 	EventChain<SocketSession> onConnected();
 	EventChain<SocketSession> onDisconnected(bool causedByRemote);
 	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
