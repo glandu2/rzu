@@ -84,7 +84,7 @@ bool AuctionCommonWriter::readAuctionDataFromFile(std::string auctionsDir, std::
 	fseek(file.get(), 0, SEEK_SET);
 
 	if(fileSize > 50*1024*1024) {
-		log(LL_Error, "State file %s size too large (over 50MB): %d\n", filename.c_str(), fileSize);
+		log(LL_Error, "State file %s size too large (over 50MB): %d\n", filename.c_str(), (int)fileSize);
 		return false;
 	}
 

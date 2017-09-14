@@ -79,7 +79,7 @@ EventChain<SocketSession> HttpClientSession::onConnected()
 	                    data.url.c_str(),
 	                    currentHost.c_str(),
 	                    currentPort,
-	                    data.data.size());
+	                    (int)data.data.size());
 	write(requestHeader.c_str(), requestHeader.size());
 	write(data.data.c_str(), data.data.size());
 

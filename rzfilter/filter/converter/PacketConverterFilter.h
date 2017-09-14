@@ -8,11 +8,11 @@
 class PacketConverterFilter : public IFilter
 {
 public:
-	PacketConverterFilter(PacketConverterFilter* data);
+	PacketConverterFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketConverterFilter* data);
 	~PacketConverterFilter();
 
-	virtual bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType);
-	virtual bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType);
+	virtual bool onServerPacket(const TS_MESSAGE* packet, ServerType serverType);
+	virtual bool onClientPacket(const TS_MESSAGE* packet, ServerType serverType);
 
 protected:
 	bool convertAuthPacketAndSend(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, bool isServerMsg);
@@ -23,7 +23,7 @@ private:
 };
 
 extern "C" {
-SYMBOL_EXPORT IFilter* createFilter(IFilter* oldFilter);
+SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter);
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 

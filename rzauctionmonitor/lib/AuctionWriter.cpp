@@ -105,7 +105,7 @@ bool AuctionWriter::readAuctionDataFromFile(std::string auctionsFile, std::vecto
 	fseek(file.get(), 0, SEEK_SET);
 
 	if(fileSize > 50*1024*1024) {
-		logStatic(LL_Error, getStaticClassName(), "State file %s size too large (over 50MB): %d\n", auctionsFile.c_str(), fileSize);
+		logStatic(LL_Error, getStaticClassName(), "State file %s size too large (over 50MB): %d\n", auctionsFile.c_str(), (int)fileSize);
 		return false;
 	}
 
@@ -208,10 +208,10 @@ bool AuctionWriter::deserializeOldFile(const std::vector<uint8_t>& data, AUCTION
 		const size_t remainingDataSize = endp - p;
 
 		if(sizeof(*header) > remainingDataSize || (sizeof(*header) + header->getSize()) > remainingDataSize ) {
-			logStatic(LL_Error, getStaticClassName(), "Data size too large: %d at offset %d\n", sizeof(*header), (int)(p - data.data()));
+			logStatic(LL_Error, getStaticClassName(), "Data size too large: %d at offset %d\n", (int)sizeof(*header), (int)(p - data.data()));
 			return false;
 		} else if((sizeof(*header) + header->getSize()) > remainingDataSize ) {
-			logStatic(LL_Error, getStaticClassName(), "Data size too large: %d at offset %d\n", sizeof(*header) + header->getSize(), (int)(p - data.data()));
+			logStatic(LL_Error, getStaticClassName(), "Data size too large: %d at offset %d\n", (int)sizeof(*header) + header->getSize(), (int)(p - data.data()));
 			return false;
 		}
 

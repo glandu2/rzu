@@ -88,7 +88,7 @@ void AuctionParser::onScandir(uv_fs_t* req)
 	uv_dirent_t dent;
 
 	if(req->result < 0) {
-		thisInstance->log(LL_Error, "Failed to scan dir \"%s\", error: %s(%d)\n", req->path, uv_strerror(req->result), req->result);
+		thisInstance->log(LL_Error, "Failed to scan dir \"%s\", error: %s(%d)\n", req->path, uv_strerror(req->result), (int)req->result);
 		return;
 	}
 
@@ -176,10 +176,10 @@ bool AuctionParser::parseFile(std::string fullFilename)
 	log(LL_Debug, "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d, addedAuctionsInFile: %d/%d\n",
 	    fullFilename.c_str(),
 	    auctionFile.isFull ? "full" : "diff",
-	    auctionFile.alreadyExistingAuctions,
-	    auctionWriter.getAuctionCount(),
-	    auctionFile.addedAuctionsInFile,
-	    auctionWriter.getAuctionCount());
+	    (int)auctionFile.alreadyExistingAuctions,
+	    (int)auctionWriter.getAuctionCount(),
+	    (int)auctionFile.addedAuctionsInFile,
+	    (int)auctionWriter.getAuctionCount());
 
 	for(size_t i = 0; i < auctionFile.auctions.header.categories.size(); i++) {
 		const AUCTION_CATEGORY_INFO& category = auctionFile.auctions.header.categories[i];
@@ -214,7 +214,7 @@ bool AuctionParser::importState()
 			if(!AuctionWriter::deserialize(&auctionFileData, data)) {
 				log(LL_Error, "Can't deserialize state file %s\n", auctionStateFile.c_str());
 			} else {
-				log(LL_Info, "Loading auction state file %s with %d auctions\n", auctionStateFile.c_str(), auctionFileData.auctions.size());
+				log(LL_Info, "Loading auction state file %s with %d auctions\n", auctionStateFile.c_str(), (int)auctionFileData.auctions.size());
 				auctionWriter.importDump(&auctionFileData);
 			}
 		} else {

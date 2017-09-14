@@ -58,3 +58,23 @@ EventChain<PacketSession> ServerSession::onPacketReceived(const TS_MESSAGE* pack
 
 	return PacketSession::onPacketReceived(packet);
 }
+
+void ServerSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
+	if(!CONFIG_GET()->trafficDump.enableServer.get())
+		return;
+
+	const char* packetName = clientSession->getPacketName(msg->id);
+
+	log(LL_Debug, "%s packet id: %5d, name %s, size: %d\n",
+	    (outgoing)? "SERV->CLI" : "CLI->SERV",
+	    msg->id,
+	    packetName,
+	    int(msg->size - sizeof(TS_MESSAGE)));
+
+	getStream()->packetLog(Object::LL_Debug, reinterpret_cast<const unsigned char*>(msg) + sizeof(TS_MESSAGE), (int)msg->size - sizeof(TS_MESSAGE),
+	                       "%s packet id: %5d, name %s, size: %d\n",
+	                       (outgoing)? "SERV->CLI" : "CLI->SERV",
+	                       msg->id,
+	                       packetName,
+	                       int(msg->size - sizeof(TS_MESSAGE)));
+}

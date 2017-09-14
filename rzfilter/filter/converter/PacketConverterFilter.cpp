@@ -310,7 +310,8 @@
 	else \
 	    return sendPacket<type_cli>(target, packet, version);
 
-PacketConverterFilter::PacketConverterFilter(PacketConverterFilter *)
+PacketConverterFilter::PacketConverterFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketConverterFilter *)
+    : IFilter(client, server)
 {
 }
 
@@ -318,14 +319,14 @@ PacketConverterFilter::~PacketConverterFilter()
 {
 }
 
-bool PacketConverterFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
+bool PacketConverterFilter::onServerPacket(const TS_MESSAGE* packet, ServerType serverType) {
 	if(serverType == ST_Game)
 		return convertGamePacketAndSend(client, packet, server->getPacketVersion(), true);
 	else
 		return convertAuthPacketAndSend(client, server, packet, true);
 }
 
-bool PacketConverterFilter::onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
+bool PacketConverterFilter::onClientPacket(const TS_MESSAGE* packet, ServerType serverType) {
 	if(serverType == ST_Game)
 		return convertGamePacketAndSend(server, packet, client->getPacketVersion(), false);
 	else
@@ -675,10 +676,10 @@ bool PacketConverterFilter::convertGamePacketAndSend(IFilterEndpoint* target, co
 	return false;
 }
 
-IFilter *createFilter(IFilter *oldFilter)
+IFilter *createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter *oldFilter)
 {
 	Object::logStatic(Object::LL_Info, "rzfilter_version_converter", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketConverterFilter((PacketConverterFilter*)oldFilter);
+	return new PacketConverterFilter(client, server, (PacketConverterFilter*)oldFilter);
 }
 
 void destroyFilter(IFilter *filter)

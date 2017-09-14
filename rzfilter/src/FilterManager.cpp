@@ -41,11 +41,11 @@ FilterManager* FilterManager::getInstance()
 	return &filterManager;
 }
 
-FilterProxy* FilterManager::createFilter()
+FilterProxy* FilterManager::createFilter(IFilterEndpoint* client, IFilterEndpoint* server)
 {
-	FilterProxy* filterProxy = new FilterProxy(this);
+	FilterProxy* filterProxy = new FilterProxy(this, client, server);
 	if(filterModuleLoaded) {
-		filterProxy->setFilterModule(createFilterFunction(nullptr));
+		filterProxy->setFilterModule(createFilterFunction(client, server, nullptr));
 	}
 
 	packetFilters.push_back(std::unique_ptr<FilterProxy>(filterProxy));
@@ -155,7 +155,7 @@ void FilterManager::loadModule()
 	for(; it != itEnd; ++it) {
 		FilterProxy* filterProxy = it->get();
 		IFilter* oldFilter = filterProxy->getFilterModule();
-		filterProxy->setFilterModule(createFilterFunction(oldFilter));
+		filterProxy->setFilterModule(createFilterFunction(filterProxy->getClientEndpoint(), filterProxy->getServerEndpoint(), oldFilter));
 		if(oldFilter && this->destroyFilterFunction)
 			this->destroyFilterFunction(oldFilter);
 	}

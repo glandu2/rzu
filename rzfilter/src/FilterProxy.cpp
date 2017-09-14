@@ -1,7 +1,10 @@
 #include "FilterProxy.h"
 #include "FilterManager.h"
 
-FilterProxy::FilterProxy(FilterManager* filterManager) : filterManager(filterManager), filterModule(nullptr)
+FilterProxy::FilterProxy(FilterManager* filterManager, IFilterEndpoint* client, IFilterEndpoint* server)
+    : IFilter(client, server),
+      filterManager(filterManager),
+      filterModule(nullptr)
 {
 }
 
@@ -11,19 +14,19 @@ FilterProxy::~FilterProxy()
 		filterManager->destroyInternalFilter(filterModule);
 }
 
-bool FilterProxy::onServerPacket(IFilterEndpoint *client, IFilterEndpoint *server, const TS_MESSAGE *packet, ServerType serverType)
+bool FilterProxy::onServerPacket(const TS_MESSAGE *packet, ServerType serverType)
 {
 	if(filterModule)
-		return filterModule->onServerPacket(client, server, packet, serverType);
+		return filterModule->onServerPacket(packet, serverType);
 	else
-		return IFilter::onServerPacket(client, server, packet, serverType);
+		return IFilter::onServerPacket(packet, serverType);
 }
 
-bool FilterProxy::onClientPacket(IFilterEndpoint *client, IFilterEndpoint *server, const TS_MESSAGE *packet, ServerType serverType)
+bool FilterProxy::onClientPacket(const TS_MESSAGE *packet, ServerType serverType)
 {
 	if(filterModule)
-		return filterModule->onClientPacket(client, server, packet, serverType);
+		return filterModule->onClientPacket(packet, serverType);
 	else
-		return IFilter::onClientPacket(client, server, packet, serverType);
+		return IFilter::onClientPacket(packet, serverType);
 }
 

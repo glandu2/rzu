@@ -316,7 +316,8 @@
 	    packet->process(this, &PacketFilter::showPacketJson<type_cli>, version, version); \
 	break;
 
-PacketFilter::PacketFilter(PacketFilter *oldFilter)
+PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter *oldFilter)
+    : IFilter(client, server)
 {
 	if(oldFilter) {
 		data = oldFilter->data;
@@ -346,9 +347,7 @@ void PacketFilter::sendChatMessage(IFilterEndpoint* client, const char* msg, con
 	client->sendPacket(chatRqst);
 }
 
-bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
-	clientp = client;
-
+bool PacketFilter::onServerPacket(const TS_MESSAGE* packet, ServerType serverType) {
 	if(serverType == ST_Game)
 		printGamePacketJson(packet, server->getPacketVersion(), true);
 	else
@@ -399,7 +398,7 @@ bool PacketFilter::onServerPacket(IFilterEndpoint* client, IFilterEndpoint* serv
 	return true;
 }
 
-bool PacketFilter::onClientPacket(IFilterEndpoint*, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType) {
+bool PacketFilter::onClientPacket(const TS_MESSAGE* packet, ServerType serverType) {
 	if(serverType == ST_Game)
 		printGamePacketJson(packet, server->getPacketVersion(), false);
 	else
@@ -738,8 +737,8 @@ void PacketFilter::onChatMessage(const TS_SC_CHAT* packet)
 		         currentTime.tm_sec,
 		         packet->szSender.c_str());
 		newMessage[sizeof(newMessage)-1] = '\0';
-		sendChatMessage(clientp, newMessage);
-		clientp->sendPacket(*packet);
+		sendChatMessage(client, newMessage);
+		client->sendPacket(*packet);
 		return;
 	}
 
@@ -750,13 +749,13 @@ void PacketFilter::onChatMessage(const TS_SC_CHAT* packet)
 	         packet->message.c_str());
 	newMessage[sizeof(newMessage)-1] = '\0';
 
-	sendChatMessage(clientp, newMessage, packet->szSender.c_str(), packet->type);
+	sendChatMessage(client, newMessage, packet->szSender.c_str(), packet->type);
 }
 
-IFilter *createFilter(IFilter *oldFilter)
+IFilter *createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter *oldFilter)
 {
 	Object::logStatic(Object::LL_Info, "rzfilter_module", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketFilter((PacketFilter*)oldFilter);
+	return new PacketFilter(client, server, (PacketFilter*)oldFilter);
 }
 
 void destroyFilter(IFilter *filter)

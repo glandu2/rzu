@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
 	DbQueryJob<DB_Item>::executeNoResult(inputs);
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
-	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", processedFiles);
+	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", (int)processedFiles);
 
 	return 0;
 }

@@ -202,7 +202,7 @@ std::unique_ptr<AuctionWorker::AuctionRequest> AuctionManager::getNextRequest()
 		if(ret->page == 1 && ret->category == (int)currentCategory) {
 			auctionWriter.beginCategory(ret->category, ::time(nullptr));
 		} else if(ret->page == 1) {
-			log(LL_Warning, "Next request is page 1 of category %d but current category is %" PRIuS "\n", ret->category, currentCategory);
+			log(LL_Warning, "Next request is page 1 of category %d but current category is %d\n", ret->category, currentCategory);
 		}
 
 		pendingRequests.pop_front();

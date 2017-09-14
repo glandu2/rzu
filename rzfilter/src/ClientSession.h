@@ -35,6 +35,8 @@ public:
 
 	virtual void onServerPacketReceived(const TS_MESSAGE* packet);
 
+	const char* getPacketName(int16_t id);
+
 protected:
 	void logPacket(bool outgoing, const TS_MESSAGE* msg);
 	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);

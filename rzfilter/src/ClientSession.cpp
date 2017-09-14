@@ -15,9 +15,10 @@
 
 ClientSession::ClientSession(bool authMode)
   : serverSession(this),
-    packetFilter(FilterManager::getInstance()->createFilter()), version(CONFIG_GET()->client.epic.get()),
+    packetFilter(nullptr), version(CONFIG_GET()->client.epic.get()),
     authMode(authMode)
 {
+	packetFilter = FilterManager::getInstance()->createFilter(this, &serverSession);
 }
 
 ClientSession::~ClientSession() {
@@ -42,7 +43,7 @@ EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 }
 
 void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
-	const char* packetName = getPacketName(msg->id, authMode);
+	const char* packetName = getPacketName(msg->id);
 
 	log(LL_Debug, "%s packet id: %5d, name %s, size: %d\n",
 		(outgoing)? "SERV->CLI" : "CLI->SERV",
@@ -60,7 +61,7 @@ void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 
 EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	//log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
-	if(packetFilter->onClientPacket(this, &serverSession, packet, authMode ? IFilter::ST_Auth : IFilter::ST_Game))
+	if(packetFilter->onClientPacket(packet, authMode ? IFilter::ST_Auth : IFilter::ST_Game))
 		serverSession.sendPacket(packet);
 
 	return PacketSession::onPacketReceived(packet);
@@ -68,9 +69,13 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	//log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
-	if(packetFilter->onServerPacket(this, &serverSession, packet, authMode ? IFilter::ST_Auth : IFilter::ST_Game)) {
+	if(packetFilter->onServerPacket(packet, authMode ? IFilter::ST_Auth : IFilter::ST_Game)) {
 		sendPacket(packet);
 	}
+}
+
+const char* ClientSession::getPacketName(int16_t id) {
+	return ::getPacketName(id, authMode);
 }
 
 void ClientSession::updateObjectName() {
