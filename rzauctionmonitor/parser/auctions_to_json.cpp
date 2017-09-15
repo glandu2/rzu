@@ -44,7 +44,11 @@ int main(int argc, char* argv[]) {
 	for(i = 1; i < argc; i++) {
 		const char* filename = argv[i];
 
-		if(filename[0] == '/' || filename[0] == '-')
+#ifdef _WIN32
+		if(filename[0] == '/')
+			continue;
+#endif
+		if(filename[0] == '-')
 			continue;
 
 		std::vector<uint8_t> data;
