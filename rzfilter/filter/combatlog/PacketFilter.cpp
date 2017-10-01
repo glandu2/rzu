@@ -1,12 +1,11 @@
 #include "PacketFilter.h"
-#include <sstream>
-#include "Packet/JSONWriter.h"
 #include "Core/Utils.h"
 #include "GameClient/TS_SC_CHAT.h"
+#include "Packet/JSONWriter.h"
+#include <sstream>
 
-PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter *oldFilter)
-    : IFilter(client, server)
-{
+PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter* oldFilter)
+    : IFilter(client, server) {
 	if(oldFilter) {
 		data = oldFilter->data;
 		oldFilter->data = nullptr;
@@ -18,8 +17,7 @@ PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, Pac
 	}
 }
 
-PacketFilter::~PacketFilter()
-{
+PacketFilter::~PacketFilter() {
 	if(data)
 		delete data;
 }
@@ -33,36 +31,32 @@ bool PacketFilter::onServerPacket(const TS_MESSAGE* packet, ServerType serverTyp
 
 	switch(packet->id) {
 		case_packet_is(TS_SC_LOGIN_RESULT)
-		        packet->process(this, &PacketFilter::onLoginResultMessage, server->getPacketVersion());
-		        break;
+		    packet->process(this, &PacketFilter::onLoginResultMessage, server->getPacketVersion());
+		break;
 
-		case_packet_is(TS_SC_ENTER)
-		        packet->process(this, &PacketFilter::onEnterMessage, server->getPacketVersion());
-		        break;
+		case_packet_is(TS_SC_ENTER) packet->process(this, &PacketFilter::onEnterMessage, server->getPacketVersion());
+		break;
 
 		case TS_SC_ATTACK_EVENT::packetID:
-			    packet->process(this, &PacketFilter::onAttackEventMessage, server->getPacketVersion());
-			    break;
+			packet->process(this, &PacketFilter::onAttackEventMessage, server->getPacketVersion());
+			break;
 
 		case TS_SC_SKILL::packetID:
-			    packet->process(this, &PacketFilter::onSkillMessage, server->getPacketVersion());
-			    break;
+			packet->process(this, &PacketFilter::onSkillMessage, server->getPacketVersion());
+			break;
 
 		case TS_SC_STATE_RESULT::packetID:
 			packet->process(this, &PacketFilter::onStateResultMessage, server->getPacketVersion());
 			break;
-
 	}
 	return true;
 }
 
-void PacketFilter::onLoginResultMessage(const TS_SC_LOGIN_RESULT* packet)
-{
+void PacketFilter::onLoginResultMessage(const TS_SC_LOGIN_RESULT* packet) {
 	data->players[packet->handle] = packet->name;
 }
 
-void PacketFilter::onEnterMessage(const TS_SC_ENTER* packet)
-{
+void PacketFilter::onEnterMessage(const TS_SC_ENTER* packet) {
 	if(packet->objType == EOT_Player) {
 		data->players[packet->handle] = packet->playerInfo.szName;
 	} else if(packet->objType == EOT_Summon) {
@@ -79,8 +73,7 @@ void PacketFilter::onEnterMessage(const TS_SC_ENTER* packet)
 	}
 }
 
-void PacketFilter::onAttackEventMessage(const TS_SC_ATTACK_EVENT* packet)
-{
+void PacketFilter::onAttackEventMessage(const TS_SC_ATTACK_EVENT* packet) {
 	SwingData swingData;
 
 	showPacketJson(packet, serverVersion);
@@ -99,7 +92,6 @@ void PacketFilter::onAttackEventMessage(const TS_SC_ATTACK_EVENT* packet)
 		if(attackInfo.flag & AIF_Miss)
 			hitType |= DT_Miss;
 		swingData.damageType = hitType;
-
 
 		if(attackInfo.flag & AIF_Critical)
 			swingData.critical = true;
@@ -126,16 +118,14 @@ void PacketFilter::onAttackEventMessage(const TS_SC_ATTACK_EVENT* packet)
 	}
 }
 
-void PacketFilter::onSkillMessage(const TS_SC_SKILL* packet)
-{
-	static const char* ELEMENTAL_TYPE[] = { "None", "Fire", "Water", "Wind", "Earth", "Light", "Dark" };
+void PacketFilter::onSkillMessage(const TS_SC_SKILL* packet) {
+	static const char* ELEMENTAL_TYPE[] = {"None", "Fire", "Water", "Wind", "Earth", "Light", "Dark"};
 	SwingData swingData;
 
 	showPacketJson(packet, serverVersion);
 
 	if(packet->type != ST_Fire && packet->type != ST_RegionFire)
 		return;
-
 
 	swingData.attacker = getHandleName(packet->caster);
 	swingData.attackName = "#skill|" + std::to_string(packet->skill_id) + "|" + std::to_string(packet->skill_level);
@@ -144,10 +134,8 @@ void PacketFilter::onSkillMessage(const TS_SC_SKILL* packet)
 	for(const TS_SC_SKILL__HIT_DETAILS& hit : packet->fire.hits) {
 		swingData.victim = getHandleName(hit.hTarget);
 
-		if(hit.type == SHT_DAMAGE || hit.type == SHT_MAGIC_DAMAGE ||
-		        hit.type == SHT_DAMAGE_WITH_KNOCK_BACK ||
-		        hit.type == SHT_CHAIN_DAMAGE || hit.type == SHT_CHAIN_MAGIC_DAMAGE)
-		{
+		if(hit.type == SHT_DAMAGE || hit.type == SHT_MAGIC_DAMAGE || hit.type == SHT_DAMAGE_WITH_KNOCK_BACK ||
+		   hit.type == SHT_CHAIN_DAMAGE || hit.type == SHT_CHAIN_MAGIC_DAMAGE) {
 			const TS_SC_SKILL__HIT_DAMAGE_INFO* damageInfo;
 			if(hit.type == SHT_DAMAGE || hit.type == SHT_MAGIC_DAMAGE)
 				damageInfo = &hit.hitDamage.damage;
@@ -270,8 +258,7 @@ void PacketFilter::onSkillMessage(const TS_SC_SKILL* packet)
 	}
 }
 
-void PacketFilter::onStateResultMessage(const TS_SC_STATE_RESULT* packet)
-{
+void PacketFilter::onStateResultMessage(const TS_SC_STATE_RESULT* packet) {
 	SwingData swingData;
 
 	showPacketJson(packet, serverVersion);
@@ -322,8 +309,7 @@ void PacketFilter::onStateResultMessage(const TS_SC_STATE_RESULT* packet)
 	sendCombatLogLine(swingData);
 }
 
-std::string PacketFilter::getHandleName(uint32_t handle)
-{
+std::string PacketFilter::getHandleName(uint32_t handle) {
 	if(data->players.count(handle)) {
 		return data->players[handle];
 	} else {
@@ -331,8 +317,7 @@ std::string PacketFilter::getHandleName(uint32_t handle)
 	}
 }
 
-void PacketFilter::sendCombatLogLine(const PacketFilter::SwingData& data)
-{
+void PacketFilter::sendCombatLogLine(const PacketFilter::SwingData& data) {
 	TS_SC_CHAT chatRqst;
 	char buffer[256];
 
@@ -345,11 +330,21 @@ void PacketFilter::sendCombatLogLine(const PacketFilter::SwingData& data)
 
 	std::string swingTypeStr = "unkST";
 	switch(data.swingType) {
-		case SwingType::Melee: swingTypeStr = "Melee"; break;
-		case SwingType::NonMelee: swingTypeStr = "NonMelee"; break;
-		case SwingType::Healing: swingTypeStr = "Healing"; break;
-		case SwingType::ManaDrain: swingTypeStr = "ManaDrain"; break;
-		case SwingType::ManaHealing: swingTypeStr = "ManaHealing"; break;
+		case SwingType::Melee:
+			swingTypeStr = "Melee";
+			break;
+		case SwingType::NonMelee:
+			swingTypeStr = "NonMelee";
+			break;
+		case SwingType::Healing:
+			swingTypeStr = "Healing";
+			break;
+		case SwingType::ManaDrain:
+			swingTypeStr = "ManaDrain";
+			break;
+		case SwingType::ManaHealing:
+			swingTypeStr = "ManaHealing";
+			break;
 	}
 
 	std::string damageTypeStr;
@@ -360,7 +355,6 @@ void PacketFilter::sendCombatLogLine(const PacketFilter::SwingData& data)
 	} else if(data.damageType & DT_Block) {
 		damageTypeStr = "Block";
 	}
-
 
 	if(this->data->file) {
 		fprintf(this->data->file,
@@ -377,8 +371,8 @@ void PacketFilter::sendCombatLogLine(const PacketFilter::SwingData& data)
 		fflush(this->data->file);
 	}
 
-
-	sprintf(buffer, "%s->%s: %s(%s%s%s) = %lld%s(%s)",
+	sprintf(buffer,
+	        "%s->%s: %s(%s%s%s) = %lld%s(%s)",
 	        data.attacker.c_str(),
 	        data.victim.c_str(),
 	        data.attackName.c_str(),
@@ -391,22 +385,18 @@ void PacketFilter::sendCombatLogLine(const PacketFilter::SwingData& data)
 
 	Object::logStatic(Object::LL_Info, "rzfilter_module", "Damage: %s\n", buffer);
 
-
 	chatRqst.message = buffer;
 	if(chatRqst.message.size() > 32766)
 		chatRqst.message.resize(32766);
-	//chatRqst.message.append(1, '\0');
+	// chatRqst.message.append(1, '\0');
 
 	chatRqst.szSender = "Filter";
 	chatRqst.type = CHAT_WHISPER;
 
-	//clientp->sendPacket(chatRqst);
+	// clientp->sendPacket(chatRqst);
 }
 
-template<class Packet>
-void PacketFilter::showPacketJson(const Packet* packet, int version)
-{
-
+template<class Packet> void PacketFilter::showPacketJson(const Packet* packet, int version) {
 	return;
 	JSONWriter jsonWriter(version, false);
 	packet->serialize(&jsonWriter);
@@ -416,13 +406,11 @@ void PacketFilter::showPacketJson(const Packet* packet, int version)
 	Object::logStatic(Object::LL_Info, "rzfilter_module", "%s packet:\n%s\n", Packet::getName(), jsonData.c_str());
 }
 
-IFilter *createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter *oldFilter)
-{
+IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter) {
 	Object::logStatic(Object::LL_Info, "rzfilter_module", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketFilter(client, server, (PacketFilter*)oldFilter);
+	return new PacketFilter(client, server, (PacketFilter*) oldFilter);
 }
 
-void destroyFilter(IFilter *filter)
-{
+void destroyFilter(IFilter* filter) {
 	delete filter;
 }

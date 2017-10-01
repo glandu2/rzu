@@ -4,13 +4,9 @@
 #include "IFilterEndpoint.h"
 #include "Packet/PacketBaseMessage.h"
 
-class IFilter
-{
+class IFilter {
 public:
-	enum ServerType {
-		ST_Auth,
-		ST_Game
-	};
+	enum ServerType { ST_Auth, ST_Game };
 
 	virtual ~IFilter() {}
 	virtual bool onServerPacket(const TS_MESSAGE* packet, ServerType serverType) { return true; }
@@ -22,4 +18,4 @@ protected:
 	IFilterEndpoint* server;
 };
 
-#endif // IFILTER_H
+#endif  // IFILTER_H

@@ -13,9 +13,8 @@ void GlobalConfig::init() {
 	GlobalCoreConfig::get()->admin.listener.port.setDefault(4803);
 }
 
-void GlobalConfig::GameConfig::updateDefaultExternalIp(IListener *instance)
-{
-	GlobalConfig::GameConfig* thisInstance = (GlobalConfig::GameConfig*)instance;
+void GlobalConfig::GameConfig::updateDefaultExternalIp(IListener* instance) {
+	GlobalConfig::GameConfig* thisInstance = (GlobalConfig::GameConfig*) instance;
 
 	thisInstance->gameExternalIp.setDefault(thisInstance->listener.listenIp.get());
 }

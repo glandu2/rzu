@@ -3,17 +3,16 @@
 
 #include "IFilter.h"
 #include "LibGlobal.h"
-#include <unordered_map>
 #include <stdio.h>
+#include <unordered_map>
 
-#include "GameClient/TS_SC_LOGIN_RESULT.h"
-#include "GameClient/TS_SC_ENTER.h"
 #include "GameClient/TS_SC_ATTACK_EVENT.h"
+#include "GameClient/TS_SC_ENTER.h"
+#include "GameClient/TS_SC_LOGIN_RESULT.h"
 #include "GameClient/TS_SC_SKILL.h"
 #include "GameClient/TS_SC_STATE_RESULT.h"
 
-class PacketFilter : public IFilter
-{
+class PacketFilter : public IFilter {
 protected:
 	enum class SwingType {
 		Melee = 0,
@@ -23,11 +22,7 @@ protected:
 		ManaHealing = 4,
 	};
 
-	enum DamageType {
-		DT_Miss = 1,
-		DT_PerfectBlock = 2,
-		DT_Block = 4
-	};
+	enum DamageType { DT_Miss = 1, DT_PerfectBlock = 2, DT_Block = 4 };
 
 	struct SwingData {
 		SwingType swingType;
@@ -77,4 +72,4 @@ SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* se
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 
-#endif // PACKETFILTER_H
+#endif  // PACKETFILTER_H

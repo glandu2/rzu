@@ -6,8 +6,7 @@
 
 class GameClientSessionManager;
 
-class AuthClientSession : public ClientSession
-{
+class AuthClientSession : public ClientSession {
 	DECLARE_CLASS(ClientSession)
 
 public:
@@ -26,4 +25,4 @@ private:
 	GameClientSessionManager* gameClientSessionManager;
 };
 
-#endif // CLIENTSESSION_H
+#endif  // CLIENTSESSION_H

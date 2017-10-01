@@ -1,17 +1,16 @@
 #ifndef FILTERMANAGER_H
 #define FILTERMANAGER_H
 
-#include "IFilter.h"
 #include "Core/Object.h"
-#include "uv.h"
 #include "Core/Timer.h"
+#include "IFilter.h"
+#include "uv.h"
 #include <list>
 #include <memory>
 
 class FilterProxy;
 
-class FilterManager : public Object
-{
+class FilterManager : public Object {
 	DECLARE_CLASSNAME(FilterManager, 0)
 private:
 	typedef void (*DestroyFilterFunction)(IFilter* filter);
@@ -49,4 +48,4 @@ private:
 	int lastFileSize;
 };
 
-#endif // FILTERMANAGER_H
+#endif  // FILTERMANAGER_H

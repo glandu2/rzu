@@ -11,21 +11,24 @@
 #include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
 #include "AuthClient/TS_AC_SELECT_SERVER.h"
 #include "AuthClient/TS_CA_ACCOUNT.h"
-#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
 #include "AuthClient/TS_CA_DISTRIBUTION_INFO.h"
+#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
 #include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
 #include "AuthClient/TS_CA_VERSION.h"
 
-#include "GameClient/TS_CS_VERSION.h"
-#include "GameClient/TS_SC_LOGIN_RESULT.h"
 #include "GameClient/TS_CS_CHECK_ILLEGAL_USER.h"
-#include "GameClient/TS_SC_STATE.h"
-#include "GameClient/TS_SC_ENTER.h"
 #include "GameClient/TS_CS_REGION_UPDATE.h"
-#include "GameClient/TS_SC_MOVE_ACK.h"
+#include "GameClient/TS_CS_VERSION.h"
+#include "GameClient/TS_SC_ENTER.h"
+#include "GameClient/TS_SC_LOGIN_RESULT.h"
 #include "GameClient/TS_SC_MOVE.h"
+#include "GameClient/TS_SC_MOVE_ACK.h"
+#include "GameClient/TS_SC_STATE.h"
 
-bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, bool) {
+bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
+                                                       IFilterEndpoint* server,
+                                                       const TS_MESSAGE* packet,
+                                                       bool) {
 	if(packet->id == TS_CA_VERSION::packetID) {
 		TS_CA_VERSION pkt;
 		if(packet->process(pkt, client->getPacketVersion())) {
@@ -64,11 +67,12 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				clientAesCipher.decrypt(pkt.passwordAes.password, pkt.passwordAes.password_size, plainPassword);
 			} else {
-				int size = (client->getPacketVersion() >= EPIC_5_1)? 61 : 32;
+				int size = (client->getPacketVersion() >= EPIC_5_1) ? 61 : 32;
 				plainPassword.resize(size);
 				DesPasswordCipher desCipher("MERONG");
 				desCipher.decrypt(pkt.passwordDes.password, size);
-				plainPassword.assign(pkt.passwordDes.password, std::find(pkt.passwordDes.password, pkt.passwordDes.password + size, '\0'));
+				plainPassword.assign(pkt.passwordDes.password,
+				                     std::find(pkt.passwordDes.password, pkt.passwordDes.password + size, '\0'));
 			}
 
 			account.useImbc = false;
@@ -85,7 +89,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 				account.password = plainPassword;
 				account.additionalInfos = pkt.additionalInfos;
 			} else {
-				int size = (server->getPacketVersion() >= EPIC_5_1)? 61 : 32;
+				int size = (server->getPacketVersion() >= EPIC_5_1) ? 61 : 32;
 				DesPasswordCipher desCipher("MERONG");
 				memset(pkt.passwordDes.password, 0, sizeof(pkt.passwordDes.password));
 				memcpy(pkt.passwordDes.password, plainPassword.data(), plainPassword.size());
@@ -102,7 +106,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				clientAesCipher.decrypt(pkt.passwordAes.password, pkt.passwordAes.password_size, plainPassword);
 			} else {
-				plainPassword = Utils::convertToDataArray(pkt.passwordPlain.password, sizeof(pkt.passwordPlain.password));
+				plainPassword =
+				    Utils::convertToDataArray(pkt.passwordPlain.password, sizeof(pkt.passwordPlain.password));
 			}
 
 			account.useImbc = true;
@@ -118,7 +123,9 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 				account.account = pkt.account;
 				account.password = plainPassword;
 			} else {
-				memcpy(pkt.passwordPlain.password, plainPassword.data(), std::min(sizeof(pkt.passwordPlain.password), plainPassword.size()));
+				memcpy(pkt.passwordPlain.password,
+				       plainPassword.data(),
+				       std::min(sizeof(pkt.passwordPlain.password), plainPassword.size()));
 
 				server->sendPacket(pkt);
 			}
@@ -138,7 +145,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 				serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
 				memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
 				memcpy(accountPkt.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
-				accountPkt.passwordAes.password_size = (uint32_t)encryptedPassword.size();
+				accountPkt.passwordAes.password_size = (uint32_t) encryptedPassword.size();
 
 				server->sendPacket(accountPkt);
 
@@ -156,7 +163,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 				serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
 				memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
 				memcpy(accountPkt.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
-				accountPkt.passwordAes.password_size = (uint32_t)encryptedPassword.size();
+				accountPkt.passwordAes.password_size = (uint32_t) encryptedPassword.size();
 
 				server->sendPacket(accountPkt);
 
@@ -177,8 +184,10 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 				if(plainOTP.size() >= sizeof(otp)) {
 					otp = *reinterpret_cast<uint64_t*>(plainOTP.data());
 				} else {
-					Object::logStatic(Object::LL_Error, "rzfilter_version_converter", "Select server OTP wrong size: %d\n",
-					        (int)plainOTP.size());
+					Object::logStatic(Object::LL_Error,
+					                  "rzfilter_version_converter",
+					                  "Select server OTP wrong size: %d\n",
+					                  (int) plainOTP.size());
 					otp = 0;
 				}
 			} else {
@@ -193,7 +202,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 
 				clientAesCipher.encrypt(plainOTP.data(), plainOTP.size(), encryptedOTP);
 				memcpy(pkt.encrypted_data, encryptedOTP.data(), encryptedOTP.size());
-				pkt.encrypted_data_size = (uint32_t)encryptedOTP.size();
+				pkt.encrypted_data_size = (uint32_t) encryptedOTP.size();
 
 				client->sendPacket(pkt);
 			} else {
@@ -221,7 +230,10 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client, 
 	return false;
 }
 
-bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target, const TS_MESSAGE* packet, int version, bool) {
+bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
+                                                       const TS_MESSAGE* packet,
+                                                       int version,
+                                                       bool) {
 	if(packet->id == TS_CS_VERSION::getId(version)) {
 		TS_CS_VERSION pkt;
 		if(packet->process(pkt, version)) {
@@ -297,7 +309,8 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target, 
 		TS_CS_REGION_UPDATE pkt;
 		if(packet->process(pkt, version)) {
 			if(version >= EPIC_9_3 && target->getPacketVersion() < EPIC_9_3) {
-				pkt.update_time = static_cast<uint32_t>((Utils::getTimeInMsec() - startTime) / 10 + (pkt.bIsStopMessage != 0 ? 10 : 0));
+				pkt.update_time = static_cast<uint32_t>((Utils::getTimeInMsec() - startTime) / 10 +
+				                                        (pkt.bIsStopMessage != 0 ? 10 : 0));
 			}
 			target->sendPacket(pkt);
 		} else {

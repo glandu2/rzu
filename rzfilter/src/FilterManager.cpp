@@ -1,32 +1,32 @@
 #include "FilterManager.h"
-#include "uv.h"
 #include "Core/EventLoop.h"
-#include <time.h>
-#include "GlobalConfig.h"
 #include "FilterProxy.h"
+#include "GlobalConfig.h"
+#include "uv.h"
+#include <time.h>
 
 #ifdef _WIN32
-    static const char* moduleSuffix = ".dll";
-	static const char* usedModuleSuffix = "_used.dll";
+static const char* moduleSuffix = ".dll";
+static const char* usedModuleSuffix = "_used.dll";
 #elif defined(__APPLE__)
-    #include <unistd.h>
-    static const char* moduleSuffix = ".dylib";
-	static const char* usedModuleSuffix = "_used.dylib";
+#include <unistd.h>
+static const char* moduleSuffix = ".dylib";
+static const char* usedModuleSuffix = "_used.dylib";
 #else
-    #include <unistd.h>
-    static const char* moduleSuffix = ".so";
-	static const char* usedModuleSuffix = "_used.so";
+#include <unistd.h>
+static const char* moduleSuffix = ".so";
+static const char* usedModuleSuffix = "_used.so";
 #endif
 
-FilterManager::FilterManager() : filterModuleLoaded(false), createFilterFunction(nullptr), destroyFilterFunction(nullptr), lastFileSize(-1) {
+FilterManager::FilterManager()
+    : filterModuleLoaded(false), createFilterFunction(nullptr), destroyFilterFunction(nullptr), lastFileSize(-1) {
 	onUpdateFilter();
 
 	updateFilterTimer.unref();
 	updateFilterTimer.start(this, &FilterManager::onUpdateFilter, 2000, 2000);
 }
 
-FilterManager::~FilterManager()
-{
+FilterManager::~FilterManager() {
 	auto it = packetFilters.begin();
 	auto itEnd = packetFilters.end();
 	for(; it != itEnd;) {
@@ -35,14 +35,12 @@ FilterManager::~FilterManager()
 	unloadModule();
 }
 
-FilterManager* FilterManager::getInstance()
-{
+FilterManager* FilterManager::getInstance() {
 	static FilterManager filterManager;
 	return &filterManager;
 }
 
-FilterProxy* FilterManager::createFilter(IFilterEndpoint* client, IFilterEndpoint* server)
-{
+FilterProxy* FilterManager::createFilter(IFilterEndpoint* client, IFilterEndpoint* server) {
 	FilterProxy* filterProxy = new FilterProxy(this, client, server);
 	if(filterModuleLoaded) {
 		filterProxy->setFilterModule(createFilterFunction(client, server, nullptr));
@@ -53,8 +51,7 @@ FilterProxy* FilterManager::createFilter(IFilterEndpoint* client, IFilterEndpoin
 	return filterProxy;
 }
 
-void FilterManager::destroyFilter(FilterProxy* filter)
-{
+void FilterManager::destroyFilter(FilterProxy* filter) {
 	auto it = packetFilters.begin();
 	auto itEnd = packetFilters.end();
 	for(; it != itEnd; ++it) {
@@ -65,8 +62,7 @@ void FilterManager::destroyFilter(FilterProxy* filter)
 	}
 }
 
-void FilterManager::destroyInternalFilter(IFilter* filterModule)
-{
+void FilterManager::destroyInternalFilter(IFilter* filterModule) {
 	if(filterModuleLoaded) {
 		destroyFilterFunction(filterModule);
 	}
@@ -94,8 +90,7 @@ static int getFileSize(const char* name) {
 		return 0;
 }
 
-void FilterManager::loadModule()
-{
+void FilterManager::loadModule() {
 	uv_lib_t filterModule;
 	CreateFilterFunction createFilterFunction;
 	DestroyFilterFunction destroyFilterFunction;
@@ -123,7 +118,7 @@ void FilterManager::loadModule()
 
 	log(LL_Info, "Loading filter module %s\n", moduleName);
 
-	sprintf(generatedModuleName, "%s.%d", newModuleName.c_str(), (int)time(NULL));
+	sprintf(generatedModuleName, "%s.%d", newModuleName.c_str(), (int) time(NULL));
 
 	err = rename(moduleName, generatedModuleName);
 	if(err) {
@@ -137,15 +132,23 @@ void FilterManager::loadModule()
 		return;
 	}
 
-	err = uv_dlsym(&filterModule, "createFilter", (void**)&createFilterFunction);
+	err = uv_dlsym(&filterModule, "createFilter", (void**) &createFilterFunction);
 	if(err) {
-		log(LL_Error, "Can't find function createFilter in library %s: %s (%d)\n", generatedModuleName, uv_strerror(err), err);
+		log(LL_Error,
+		    "Can't find function createFilter in library %s: %s (%d)\n",
+		    generatedModuleName,
+		    uv_strerror(err),
+		    err);
 		uv_dlclose(&filterModule);
 		return;
 	}
-	err = uv_dlsym(&filterModule, "destroyFilter", (void**)&destroyFilterFunction);
+	err = uv_dlsym(&filterModule, "destroyFilter", (void**) &destroyFilterFunction);
 	if(err) {
-		log(LL_Error, "Can't find function destroyFilter in library %s: %s (%d)\n", generatedModuleName, uv_strerror(err), err);
+		log(LL_Error,
+		    "Can't find function destroyFilter in library %s: %s (%d)\n",
+		    generatedModuleName,
+		    uv_strerror(err),
+		    err);
 		uv_dlclose(&filterModule);
 		return;
 	}
@@ -155,7 +158,8 @@ void FilterManager::loadModule()
 	for(; it != itEnd; ++it) {
 		FilterProxy* filterProxy = it->get();
 		IFilter* oldFilter = filterProxy->getFilterModule();
-		filterProxy->setFilterModule(createFilterFunction(filterProxy->getClientEndpoint(), filterProxy->getServerEndpoint(), oldFilter));
+		filterProxy->setFilterModule(
+		    createFilterFunction(filterProxy->getClientEndpoint(), filterProxy->getServerEndpoint(), oldFilter));
 		if(oldFilter && this->destroyFilterFunction)
 			this->destroyFilterFunction(oldFilter);
 	}
@@ -164,7 +168,12 @@ void FilterManager::loadModule()
 	unlink(usedModuleName.c_str());
 	err = rename(generatedModuleName, usedModuleName.c_str());
 	if(err) {
-		log(LL_Error, "Failed to rename %s to %s: %s (%d)\n", generatedModuleName, usedModuleName.c_str(), strerror(errno), errno);
+		log(LL_Error,
+		    "Failed to rename %s to %s: %s (%d)\n",
+		    generatedModuleName,
+		    usedModuleName.c_str(),
+		    strerror(errno),
+		    errno);
 	}
 
 	this->filterModule = filterModule;

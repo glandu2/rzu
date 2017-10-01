@@ -1,18 +1,12 @@
 #include "GameClientSessionManager.h"
 #include "Core/Utils.h"
 
-GameClientSessionManager::GameClientSessionManager()
-{
+GameClientSessionManager::GameClientSessionManager() {}
 
-}
+GameClientSessionManager::~GameClientSessionManager() {}
 
-GameClientSessionManager::~GameClientSessionManager()
-{
-
-}
-
-uint16_t GameClientSessionManager::ensureListening(std::string listenIp, uint16_t listenPort, std::string serverIp, uint16_t serverPort, Log *trafficLogger)
-{
+uint16_t GameClientSessionManager::ensureListening(
+    std::string listenIp, uint16_t listenPort, std::string serverIp, uint16_t serverPort, Log* trafficLogger) {
 	std::string key = serverIp + ":" + Utils::convertToString(serverPort);
 	std::unique_ptr<ServerFilter>& serverFilter = gameClientServers[key];
 
@@ -38,14 +32,12 @@ uint16_t GameClientSessionManager::ensureListening(std::string listenIp, uint16_
 	return 0;
 }
 
-bool GameClientSessionManager::start()
-{
+bool GameClientSessionManager::start() {
 	started = true;
 	return true;
 }
 
-void GameClientSessionManager::stop()
-{
+void GameClientSessionManager::stop() {
 	started = false;
 	auto it = gameClientServers.begin();
 	auto itEnd = gameClientServers.end();
@@ -55,7 +47,6 @@ void GameClientSessionManager::stop()
 	}
 }
 
-bool GameClientSessionManager::isStarted()
-{
+bool GameClientSessionManager::isStarted() {
 	return started || !gameClientServers.empty();
 }

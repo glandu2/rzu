@@ -1,15 +1,17 @@
 #ifndef SPECIFICPACKETCONVERTERFILTER_H
 #define SPECIFICPACKETCONVERTERFILTER_H
 
-#include "IFilter.h"
 #include "AuthClient/TS_CA_ACCOUNT.h"
 #include "Cipher/AesPasswordCipher.h"
 #include "Cipher/RsaCipher.h"
+#include "IFilter.h"
 
-class SpecificPacketConverter
-{
+class SpecificPacketConverter {
 public:
-	bool convertAuthPacketAndSend(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, bool isServerMsg);
+	bool convertAuthPacketAndSend(IFilterEndpoint* client,
+	                              IFilterEndpoint* server,
+	                              const TS_MESSAGE* packet,
+	                              bool isServerMsg);
 	bool convertGamePacketAndSend(IFilterEndpoint* target, const TS_MESSAGE* packet, int version, bool isServerMsg);
 
 private:
@@ -25,4 +27,4 @@ private:
 	int64_t startTime;
 };
 
-#endif // SPECIFICPACKETCONVERTERFILTER_H
+#endif  // SPECIFICPACKETCONVERTERFILTER_H
