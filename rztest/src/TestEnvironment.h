@@ -1,13 +1,12 @@
 #ifndef TESTENVIRONMENT_H
 #define TESTENVIRONMENT_H
 
-#include "gtest/gtest.h"
 #include "Core/Object.h"
 #include "Extern.h"
 #include "uv.h"
+#include "gtest/gtest.h"
 
-class RZTEST_EXTERN TestEnvironment : public ::testing::Environment, public Object
-{
+class RZTEST_EXTERN TestEnvironment : public ::testing::Environment, public Object {
 	DECLARE_CLASS(TestEnvironment)
 public:
 	virtual ~TestEnvironment();
@@ -19,7 +18,6 @@ public:
 protected:
 	virtual void beforeTests() = 0;
 	virtual void afterTests() = 0;
-
 
 protected:
 	void spawnProcess(int portCheck, const char* exeFile, int argNumber, ...);

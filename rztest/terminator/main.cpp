@@ -1,14 +1,13 @@
+#include "Config/ConfigInfo.h"
+#include "Config/GlobalCoreConfig.h"
+#include "Core/EventLoop.h"
+#include "LibRzuInit.h"
 #include "Terminator.h"
 #include <string.h>
-#include "LibRzuInit.h"
-#include "Config/ConfigInfo.h"
-#include "Core/EventLoop.h"
-#include "Config/GlobalCoreConfig.h"
 
 static void init();
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char* argv[]) {
 	LibRzuInit();
 	init();
 	ConfigInfo::get()->init(argc, argv);

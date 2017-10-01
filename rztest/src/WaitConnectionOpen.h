@@ -1,12 +1,11 @@
 #ifndef WAITCONNECTIONOPEN_H
 #define WAITCONNECTIONOPEN_H
 
-#include "NetSession/SocketSession.h"
-#include "Extern.h"
 #include "Core/Timer.h"
+#include "Extern.h"
+#include "NetSession/SocketSession.h"
 
-class RZTEST_EXTERN WaitConnectionOpen : public SocketSession
-{
+class RZTEST_EXTERN WaitConnectionOpen : public SocketSession {
 	DECLARE_CLASS(WaitConnectionOpen)
 public:
 	void start(uint16_t port, int timeoutms, std::string host = "127.0.0.1");
@@ -29,4 +28,4 @@ private:
 	bool stop;
 };
 
-#endif // WAITCONNECTIONOPEN_H
+#endif  // WAITCONNECTIONOPEN_H

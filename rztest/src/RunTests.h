@@ -9,7 +9,7 @@ class Log;
 
 class RZTEST_EXTERN TestRunner {
 public:
-	TestRunner(int argc, char **argv, ConfigInitCallback configInit = nullptr);
+	TestRunner(int argc, char** argv, ConfigInitCallback configInit = nullptr);
 	~TestRunner();
 
 	int runTests();
@@ -17,6 +17,5 @@ public:
 private:
 	Log* mainLogger;
 };
-
 
 #endif

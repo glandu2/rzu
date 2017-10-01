@@ -1,12 +1,12 @@
 #include "RunTests.h"
-#include "gtest/gtest.h"
-#include "LibRzuInit.h"
-#include "Core/Log.h"
 #include "Config/GlobalCoreConfig.h"
-#include "TestGlobalConfig.h"
+#include "Core/Log.h"
+#include "LibRzuInit.h"
 #include "RzuGtestPrettyUnitTestResultPrinter.h"
+#include "TestGlobalConfig.h"
+#include "gtest/gtest.h"
 
-TestRunner::TestRunner(int argc, char **argv, ConfigInitCallback configInit) {
+TestRunner::TestRunner(int argc, char** argv, ConfigInitCallback configInit) {
 	LibRzuInit();
 	TestGlobalConfig::init();
 	if(configInit)
@@ -14,11 +14,11 @@ TestRunner::TestRunner(int argc, char **argv, ConfigInitCallback configInit) {
 
 	ConfigInfo::get()->init(argc, argv);
 	mainLogger = new Log(GlobalCoreConfig::get()->log.enable,
-				   GlobalCoreConfig::get()->log.level,
-				   GlobalCoreConfig::get()->log.consoleLevel,
-				   GlobalCoreConfig::get()->log.dir,
-				   GlobalCoreConfig::get()->log.file,
-				   GlobalCoreConfig::get()->log.maxQueueSize);
+	                     GlobalCoreConfig::get()->log.level,
+	                     GlobalCoreConfig::get()->log.consoleLevel,
+	                     GlobalCoreConfig::get()->log.dir,
+	                     GlobalCoreConfig::get()->log.file,
+	                     GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(mainLogger);
 	ConfigInfo::get()->dump();
 
@@ -29,12 +29,10 @@ TestRunner::TestRunner(int argc, char **argv, ConfigInitCallback configInit) {
 	listeners.Append(new RzuTestPrinter);
 }
 
-TestRunner::~TestRunner()
-{
+TestRunner::~TestRunner() {
 	delete mainLogger;
 }
 
-int TestRunner::runTests()
-{
+int TestRunner::runTests() {
 	return RUN_ALL_TESTS();
 }

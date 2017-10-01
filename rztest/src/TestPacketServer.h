@@ -1,16 +1,19 @@
 #ifndef TESTPACKETSERVER_H
 #define TESTPACKETSERVER_H
 
-#include "NetSession/SessionServer.h"
 #include "Extern.h"
+#include "NetSession/SessionServer.h"
 
 class TestConnectionChannel;
 
-class RZTEST_EXTERN TestPacketServer : public SessionServerCommon
-{
+class RZTEST_EXTERN TestPacketServer : public SessionServerCommon {
 	DECLARE_CLASS(TestPacketServer)
 public:
-	TestPacketServer(TestConnectionChannel* channel, cval<std::string>& host, cval<int>& port, bool encryptedConnection, Log* packetLogger = nullptr);
+	TestPacketServer(TestConnectionChannel* channel,
+	                 cval<std::string>& host,
+	                 cval<int>& port,
+	                 bool encryptedConnection,
+	                 Log* packetLogger = nullptr);
 
 	void updateObjectName();
 
@@ -23,4 +26,4 @@ private:
 	bool encryptedConnection;
 };
 
-#endif // TESTPACKETSERVER_H
+#endif  // TESTPACKETSERVER_H

@@ -1,14 +1,12 @@
 #include "RzTest.h"
-#include "Packet/PacketBaseMessage.h"
 #include "Core/EventLoop.h"
-#include "TestPacketSession.h"
-#include "TestPacketServer.h"
 #include "NetSession/EncryptedSession.h"
+#include "Packet/PacketBaseMessage.h"
+#include "TestPacketServer.h"
+#include "TestPacketSession.h"
 #include <tuple>
 
-RzTest::RzTest()
-{
-}
+RzTest::RzTest() {}
 
 void RzTest::addChannel(TestConnectionChannel* channel) {
 	channels.push_back(channel);
