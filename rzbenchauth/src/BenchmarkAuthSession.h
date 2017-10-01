@@ -1,8 +1,8 @@
 #ifndef BENCHMARKAUTHSESSION_H
 #define BENCHMARKAUTHSESSION_H
 
-#include "NetSession/ClientAuthSession.h"
 #include "Core/Timer.h"
+#include "NetSession/ClientAuthSession.h"
 #include <string>
 
 struct BenchmarkConfig {
@@ -16,8 +16,7 @@ struct BenchmarkConfig {
 	int connectionTargetCount;
 };
 
-class BenchmarkAuthSession : public ClientAuthSession
-{
+class BenchmarkAuthSession : public ClientAuthSession {
 public:
 	BenchmarkAuthSession(BenchmarkConfig* config);
 
@@ -47,4 +46,4 @@ private:
 	Timer<BenchmarkAuthSession> recoDelayTimer;
 };
 
-#endif // BENCHMARKAUTHSESSION_H
+#endif  // BENCHMARKAUTHSESSION_H
