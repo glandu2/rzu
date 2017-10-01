@@ -1,22 +1,22 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
-#include "GlobalConfig.h"
-#include "PacketEnums.h"
-#include "AuthGame/TS_AG_LOGIN_RESULT.h"
 #include "AuthGame/TS_AG_CLIENT_LOGIN.h"
-#include "AuthGame/TS_GA_LOGIN.h"
-#include "AuthGame/TS_GA_LOGOUT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_GA_ACCOUNT_LIST.h"
+#include "AuthGame/TS_GA_CLIENT_KICK_FAILED.h"
 #include "AuthGame/TS_GA_CLIENT_LOGIN.h"
 #include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
-#include "AuthGame/TS_GA_CLIENT_KICK_FAILED.h"
-#include "AuthGame/TS_GA_ACCOUNT_LIST.h"
+#include "AuthGame/TS_GA_LOGIN.h"
+#include "AuthGame/TS_GA_LOGOUT.h"
 #include "Common.h"
+#include "GlobalConfig.h"
+#include "PacketEnums.h"
+#include "RzTest.h"
+#include "gtest/gtest.h"
 
 #include "Cipher/DesPasswordCipher.h"
 
 namespace AuthServer {
 
-//GS connect, connect to auth, account list, client connection, client disconnect
+// GS connect, connect to auth, account list, client connection, client disconnect
 TEST(TS_GA_CLIENT_LOGIN, client_connect_disconnect) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
@@ -24,7 +24,8 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_disconnect) {
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLogin(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
+		AuthServer::sendGameLogin(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -110,7 +111,6 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_disconnect) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 	});
 
-
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
@@ -140,7 +140,7 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_disconnect) {
 	test.run();
 }
 
-//GS connect, connect to auth, account list, client connection, auth disconnect, client disconnect, auth connect
+// GS connect, connect to auth, account list, client connection, auth disconnect, client disconnect, auth connect
 TEST(TS_GA_CLIENT_LOGIN, client_connect_auth_disconnect_client_disconnect) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
@@ -148,7 +148,8 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_auth_disconnect_client_disconnect) {
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLogin(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
+		AuthServer::sendGameLogin(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -257,7 +258,7 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_auth_disconnect_client_disconnect) {
 	test.run();
 }
 
-//GS connect, connect to auth, account list, auth disconnect, client kick failed, auth connect
+// GS connect, connect to auth, account list, auth disconnect, client kick failed, auth connect
 TEST(TS_GA_CLIENT_LOGIN, auth_disconnect_client_kick_failed_auth_connect) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
@@ -265,7 +266,8 @@ TEST(TS_GA_CLIENT_LOGIN, auth_disconnect_client_kick_failed_auth_connect) {
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLogin(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
+		AuthServer::sendGameLogin(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -351,7 +353,8 @@ TEST(TS_GA_CLIENT_LOGIN, auth_disconnect_client_kick_failed_auth_connect) {
 	test.run();
 }
 
-//GS connect, connect to auth, account list, client connection x200, auth disconnect, auth connect, 200 accounts in 2 packets (195 + 5)
+// GS connect, connect to auth, account list, client connection x200, auth disconnect, auth connect, 200 accounts in 2
+// packets (195 + 5)
 TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
@@ -359,7 +362,8 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLogin(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
+		AuthServer::sendGameLogin(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -416,7 +420,7 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 			strcpy(clientLoginPacket.account, accountName);
 			clientLoginPacket.nAccountID = i;
 			clientLoginPacket.result = TS_RESULT_SUCCESS;
-			clientLoginPacket.ip = i+1;
+			clientLoginPacket.ip = i + 1;
 			clientLoginPacket.loginTime = i;
 			channel->sendPacket(&clientLoginPacket);
 		});
@@ -434,7 +438,6 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 				auth.closeSession();
 		});
 	}
-
 
 	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Disconnection, event.type);
@@ -466,7 +469,7 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 			sprintf(accountName, "account%d", i);
 
 			EXPECT_STREQ(accountName, accountInfo->account);
-			EXPECT_EQ(i+1, accountInfo->ip);
+			EXPECT_EQ(i + 1, accountInfo->ip);
 			EXPECT_EQ(i, accountInfo->loginTime);
 		}
 	});
@@ -479,11 +482,11 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 		for(int i = 0; i < packet->count; i++) {
 			const TS_GA_ACCOUNT_LIST::AccountInfo* accountInfo = &packet->accountInfo[i];
 			char accountName[61];
-			sprintf(accountName, "account%d", i+195);
+			sprintf(accountName, "account%d", i + 195);
 
 			EXPECT_STREQ(accountName, accountInfo->account);
-			EXPECT_EQ(i+1+195, accountInfo->ip);
-			EXPECT_EQ(i+195, accountInfo->loginTime);
+			EXPECT_EQ(i + 1 + 195, accountInfo->ip);
+			EXPECT_EQ(i + 195, accountInfo->loginTime);
 		}
 
 		game.closeSession();
@@ -501,7 +504,8 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 	test.run();
 }
 
-//GS connect, connect to auth, account list, client connection failed, auth disconnect, auth connect, account list empty
+// GS connect, connect to auth, account list, client connection failed, auth disconnect, auth connect, account list
+// empty
 TEST(TS_GA_CLIENT_LOGIN, client_connect_failed) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
@@ -509,7 +513,8 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_failed) {
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLogin(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
+		AuthServer::sendGameLogin(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -583,7 +588,6 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_failed) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 	});
 
-
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
@@ -613,4 +617,4 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_failed) {
 	test.run();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

@@ -1,15 +1,21 @@
 #include "Common.h"
-#include "AuthGame/TS_GA_LOGIN.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_GA_ACCOUNT_LIST.h"
 #include "AuthGame/TS_GA_CLIENT_LOGIN.h"
 #include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
-#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_GA_LOGIN.h"
 #include "AuthGame/TS_GA_LOGOUT.h"
-#include "AuthGame/TS_GA_ACCOUNT_LIST.h"
 #include "PacketEnums.h"
 
 namespace AuthServer {
 
-void sendGameLogin(TestConnectionChannel* channel, uint16_t index, const char* name, const char* screenshot, bool isAdult, const char* ip, int32_t port) {
+void sendGameLogin(TestConnectionChannel* channel,
+                   uint16_t index,
+                   const char* name,
+                   const char* screenshot,
+                   bool isAdult,
+                   const char* ip,
+                   int32_t port) {
 	TS_GA_LOGIN packet;
 	TS_MESSAGE::initMessage(&packet);
 
@@ -23,7 +29,13 @@ void sendGameLogin(TestConnectionChannel* channel, uint16_t index, const char* n
 	channel->sendPacket(&packet);
 }
 
-void sendGameLoginEx(TestConnectionChannel* channel, uint16_t index, const char* name, const char* screenshot, bool isAdult, const char* ip, int32_t port) {
+void sendGameLoginEx(TestConnectionChannel* channel,
+                     uint16_t index,
+                     const char* name,
+                     const char* screenshot,
+                     bool isAdult,
+                     const char* ip,
+                     int32_t port) {
 	TS_GA_LOGIN_WITH_LOGOUT_EXT packet;
 	TS_MESSAGE::initMessage(&packet);
 
@@ -37,14 +49,14 @@ void sendGameLoginEx(TestConnectionChannel* channel, uint16_t index, const char*
 	channel->sendPacket(&packet);
 }
 
-void sendGameLogout(TestConnectionChannel *channel) {
+void sendGameLogout(TestConnectionChannel* channel) {
 	TS_GA_LOGOUT logout;
 	TS_MESSAGE::initMessage(&logout);
 	channel->sendPacket(&logout);
 	channel->closeSession();
 }
 
-void sendClientLogin(TestConnectionChannel *channel, const char* account, uint64_t oneTimePassword) {
+void sendClientLogin(TestConnectionChannel* channel, const char* account, uint64_t oneTimePassword) {
 	TS_GA_CLIENT_LOGIN packet;
 	TS_MESSAGE::initMessage(&packet);
 
@@ -54,7 +66,7 @@ void sendClientLogin(TestConnectionChannel *channel, const char* account, uint64
 	channel->sendPacket(&packet);
 }
 
-void sendClientLogout(TestConnectionChannel *channel, const char* account) {
+void sendClientLogout(TestConnectionChannel* channel, const char* account) {
 	TS_GA_CLIENT_LOGOUT packet;
 	TS_MESSAGE::initMessage(&packet);
 
@@ -63,11 +75,16 @@ void sendClientLogout(TestConnectionChannel *channel, const char* account) {
 	channel->sendPacket(&packet);
 }
 
-void addGameLoginScenario(TestConnectionChannel &game,
-						  uint16_t index, const char* name, const char* screenshot, bool isAdult, const char* ip, int32_t port,
-						  TestConnectionChannel::EventCallback callback)
-{
-	game.addCallback([index, name, screenshot, isAdult, ip, port](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+void addGameLoginScenario(TestConnectionChannel& game,
+                          uint16_t index,
+                          const char* name,
+                          const char* screenshot,
+                          bool isAdult,
+                          const char* ip,
+                          int32_t port,
+                          TestConnectionChannel::EventCallback callback) {
+	game.addCallback([index, name, screenshot, isAdult, ip, port](TestConnectionChannel* channel,
+	                                                              TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		AuthServer::sendGameLogin(channel, index, name, screenshot, isAdult, ip, port);
 	});
@@ -81,11 +98,11 @@ void addGameLoginScenario(TestConnectionChannel &game,
 	});
 }
 
-void sendGameConnectedAccounts(TestConnectionChannel *channel, std::vector<AccountInfo> accounts) {
+void sendGameConnectedAccounts(TestConnectionChannel* channel, std::vector<AccountInfo> accounts) {
 	static const int MAXCOUNT_PER_PACKET = 2;
 
 	TS_GA_ACCOUNT_LIST* accountListPacket;
-	int maxCount = (int)(accounts.size() <= MAXCOUNT_PER_PACKET ? accounts.size() : MAXCOUNT_PER_PACKET);
+	int maxCount = (int) (accounts.size() <= MAXCOUNT_PER_PACKET ? accounts.size() : MAXCOUNT_PER_PACKET);
 	accountListPacket = TS_MESSAGE_WNA::create<TS_GA_ACCOUNT_LIST, TS_GA_ACCOUNT_LIST::AccountInfo>(maxCount);
 
 	auto it = accounts.begin();
@@ -117,4 +134,4 @@ void sendGameConnectedAccounts(TestConnectionChannel *channel, std::vector<Accou
 	TS_MESSAGE_WNA::destroy(accountListPacket);
 }
 
-} //namespace AuthServer
+}  // namespace AuthServer

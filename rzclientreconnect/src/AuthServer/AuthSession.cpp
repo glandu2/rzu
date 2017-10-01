@@ -1,14 +1,14 @@
 #include "AuthSession.h"
-#include "GameServerSession.h"
 #include "../GlobalConfig.h"
-#include "Core/EventLoop.h"
 #include "Console/ConsoleCommands.h"
+#include "Core/EventLoop.h"
 #include "Core/Utils.h"
+#include "GameServerSession.h"
 #include <stdlib.h>
 
-#include "AuthGame/TS_GA_LOGOUT.h"
-#include "AuthGame/TS_AG_LOGIN_RESULT.h"
 #include "AuthGame/TS_AG_CLIENT_LOGIN.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_GA_LOGOUT.h"
 #include "PacketEnums.h"
 
 namespace AuthServer {
@@ -16,30 +16,28 @@ namespace AuthServer {
 std::unordered_map<uint16_t, AuthSession*> AuthSession::servers;
 
 void AuthSession::init() {
-	ConsoleCommands::get()->addCommand("gameserver.list", "list", 0, 1, &commandList,
-									   "List all game servers",
-									   "list : list all game servers");
+	ConsoleCommands::get()->addCommand(
+	    "gameserver.list", "list", 0, 1, &commandList, "List all game servers", "list : list all game servers");
 }
 
-AuthSession::AuthSession(GameServerSession *gameServerSession,
-						 uint16_t serverIdx,
-						 std::string serverName,
-						 std::string serverIp,
-						 int32_t serverPort,
-						 std::string serverScreenshotUrl,
-						 bool isAdultServer)
-	: gameServerSession(gameServerSession),
-	  serverIdx(serverIdx),
-	  serverName(serverName),
-	  serverIp(serverIp),
-	  serverPort(serverPort),
-	  serverScreenshotUrl(serverScreenshotUrl),
-	  isAdultServer(isAdultServer),
-	  creationTime(time(nullptr)),
-	  sentLoginPacket(false),
-	  pendingLogin(false),
-	  synchronizedWithAuth(false)
-{
+AuthSession::AuthSession(GameServerSession* gameServerSession,
+                         uint16_t serverIdx,
+                         std::string serverName,
+                         std::string serverIp,
+                         int32_t serverPort,
+                         std::string serverScreenshotUrl,
+                         bool isAdultServer)
+    : gameServerSession(gameServerSession),
+      serverIdx(serverIdx),
+      serverName(serverName),
+      serverIp(serverIp),
+      serverPort(serverPort),
+      serverScreenshotUrl(serverScreenshotUrl),
+      isAdultServer(isAdultServer),
+      creationTime(time(nullptr)),
+      sentLoginPacket(false),
+      pendingLogin(false),
+      synchronizedWithAuth(false) {
 	for(size_t i = 0; i < sizeof(guid); i++) {
 		guid[i] = rand() & 0xFF;
 	}
@@ -117,15 +115,16 @@ void AuthSession::onLoginResult(const TS_AG_LOGIN_RESULT* packet) {
 
 void AuthSession::sendAccountList() {
 	static const int MAX_PACKET_SIZE = 16000;
-	static const int MAX_COUNT_PER_PACKET = (MAX_PACKET_SIZE - sizeof(TS_GA_ACCOUNT_LIST)) / sizeof(TS_GA_ACCOUNT_LIST::AccountInfo);
+	static const int MAX_COUNT_PER_PACKET =
+	    (MAX_PACKET_SIZE - sizeof(TS_GA_ACCOUNT_LIST)) / sizeof(TS_GA_ACCOUNT_LIST::AccountInfo);
 
 	synchronizedWithAuth = true;
 
 	TS_GA_ACCOUNT_LIST* accountListPacket;
-	const int maxCount = (int)(accountList.size() <= MAX_COUNT_PER_PACKET ? accountList.size() : MAX_COUNT_PER_PACKET);
+	const int maxCount = (int) (accountList.size() <= MAX_COUNT_PER_PACKET ? accountList.size() : MAX_COUNT_PER_PACKET);
 	accountListPacket = TS_MESSAGE_WNA::create<TS_GA_ACCOUNT_LIST, TS_GA_ACCOUNT_LIST::AccountInfo>(maxCount);
 
-	log(LL_Debug, "Sending %d accounts\n", (int)accountList.size());
+	log(LL_Debug, "Sending %d accounts\n", (int) accountList.size());
 
 	auto it = accountList.begin();
 	do {
@@ -215,7 +214,7 @@ void AuthSession::logoutClient(const TS_GA_CLIENT_LOGOUT* packet) {
 
 void AuthSession::disconnect() {
 	gameServerSession = nullptr;
-	pendingMessages.clear(); //pending messages don't matter anymore (GS has disconnected)
+	pendingMessages.clear();  // pending messages don't matter anymore (GS has disconnected)
 
 	if(sentLoginPacket == false) {
 		log(LL_Info, "Fast auth disconnect: login message wasn't send\n");
@@ -250,7 +249,7 @@ EventChain<SocketSession> AuthSession::onDisconnected(bool causedByRemote) {
 	pendingLogin = false;
 	if(causedByRemote && (gameServerSession != nullptr || pendingMessages.size() > 0)) {
 		int delay = CONFIG_GET()->auth.reconnectDelay.get();
-		log(LL_Warning, "Disconnected from auth server, reconnecting in %d seconds\n", delay/1000);
+		log(LL_Warning, "Disconnected from auth server, reconnecting in %d seconds\n", delay / 1000);
 		recoTimer.start(this, &AuthSession::onTimerReconnect, delay, 0);
 	} else {
 		log(LL_Info, "Disconnected from auth server\n");
@@ -314,17 +313,18 @@ void AuthSession::commandList(IWritableConsole* console, const std::vector<std::
 			struct tm upTime;
 			Utils::getGmTime(time(nullptr) - server->getCreationTime(), &upTime);
 
-			console->writef("index: %2d, name: %s, address: %s:%d, players count: %u, uptime: %d:%02d:%02d:%02d, screenshot url: %s\r\n",
-							server->getServerIdx(),
-							server->getServerName().c_str(),
-							server->getServerIp().c_str(),
-							server->getServerPort(),
-							(int)server->getAccountList().size(),
-							(upTime.tm_year - 1970) * 365 + upTime.tm_yday,
-							upTime.tm_hour,
-							upTime.tm_min,
-							upTime.tm_sec,
-							server->getServerScreenshotUrl().c_str());
+			console->writef("index: %2d, name: %s, address: %s:%d, players count: %u, uptime: %d:%02d:%02d:%02d, "
+			                "screenshot url: %s\r\n",
+			                server->getServerIdx(),
+			                server->getServerName().c_str(),
+			                server->getServerIp().c_str(),
+			                server->getServerPort(),
+			                (int) server->getAccountList().size(),
+			                (upTime.tm_year - 1970) * 365 + upTime.tm_yday,
+			                upTime.tm_hour,
+			                upTime.tm_min,
+			                upTime.tm_sec,
+			                server->getServerScreenshotUrl().c_str());
 		}
 	} else {
 		int serverIdx = atoi(args[0].c_str());
@@ -340,7 +340,9 @@ void AuthSession::commandList(IWritableConsole* console, const std::vector<std::
 		auto& accountList = authSession->getAccountList();
 
 		console->writef("Gameserver %s[%d]: %d account(s)\r\n",
-						authSession->getServerName().c_str(), authSession->getServerIdx(), (int)accountList.size());
+		                authSession->getServerName().c_str(),
+		                authSession->getServerIdx(),
+		                (int) accountList.size());
 
 		auto it = accountList.begin();
 		auto itEnd = accountList.end();
@@ -353,17 +355,17 @@ void AuthSession::commandList(IWritableConsole* console, const std::vector<std::
 			Utils::getGmTime(accountInfo.loginTime, &loginTimeTm);
 
 			console->writef("Account id: %d, name: %s, ip: %s, login time: %d-%02d-%02d %02d:%02d:%02d\r\n",
-							accountInfo.nAccountID,
-							accountInfo.account,
-							ipStr,
-							loginTimeTm.tm_year,
-							loginTimeTm.tm_mon,
-							loginTimeTm.tm_mday,
-							loginTimeTm.tm_hour,
-							loginTimeTm.tm_min,
-							loginTimeTm.tm_sec);
+			                accountInfo.nAccountID,
+			                accountInfo.account,
+			                ipStr,
+			                loginTimeTm.tm_year,
+			                loginTimeTm.tm_mon,
+			                loginTimeTm.tm_mday,
+			                loginTimeTm.tm_hour,
+			                loginTimeTm.tm_min,
+			                loginTimeTm.tm_sec);
 		}
 	}
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

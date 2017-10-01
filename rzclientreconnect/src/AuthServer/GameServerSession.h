@@ -3,20 +3,19 @@
 
 #include "NetSession/PacketSession.h"
 #include <stdint.h>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
-#include "AuthGame/TS_GA_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_KICK_FAILED.h"
 #include "AuthGame/TS_GA_CLIENT_LOGIN.h"
 #include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
-#include "AuthGame/TS_GA_CLIENT_KICK_FAILED.h"
+#include "AuthGame/TS_GA_LOGIN.h"
 
 namespace AuthServer {
 
 class AuthSession;
 
-class GameServerSession : public PacketSession
-{
+class GameServerSession : public PacketSession {
 	DECLARE_CLASS(AuthServer::GameServerSession)
 
 public:
@@ -32,7 +31,7 @@ protected:
 	void onClientLogin(const TS_GA_CLIENT_LOGIN* packet);
 	void onClientLogout(const TS_GA_CLIENT_LOGOUT* packet);
 
-	//virtual void updateObjectName();
+	// virtual void updateObjectName();
 
 private:
 	~GameServerSession();
@@ -41,6 +40,6 @@ private:
 	uint16_t serverIdx;
 };
 
-} // namespace AuthServer
+}  // namespace AuthServer
 
-#endif // AUTHSERVER_GAMESERVERSESSION_H
+#endif  // AUTHSERVER_GAMESERVERSESSION_H

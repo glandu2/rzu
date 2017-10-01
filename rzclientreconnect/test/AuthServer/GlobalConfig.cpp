@@ -12,4 +12,4 @@ void GlobalConfig::init() {
 	GlobalConfig::get();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer
