@@ -29,8 +29,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
 
-include(FindCXXFeatures)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS}")
+set(CMAKE_CXX_STANDARD 11)
+
+find_program(
+  CLANG_TIDY_EXE
+  NAMES "clang-tidy" "clang-tidy-6.0" "clang-tidy-5.0"
+  DOC "Path to clang-tidy executable"
+  )
+if(CLANG_TIDY_EXE)
+	option(USE_CLANG_TIDY "Enable use of clang-tidy")
+endif()
 
 if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -102,12 +110,22 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
   install_pdb("z")
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/librzu/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/librzu" librzu)
-endif()
-
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/liblua/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/liblua" liblua)
+endif()
+
+
+if(CLANG_TIDY_EXE AND USE_CLANG_TIDY)
+  message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+  set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*")
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/librzu/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/librzu" librzu)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rztest/CMakeLists.txt")
@@ -172,6 +190,10 @@ set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzauctionmonitor")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzauctionmonitor/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzauctionmonitor" rzauctionmonitor)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rztestgs/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rztestgs" rztestgs)
 endif()
 
 include(CPack OPTIONAL)

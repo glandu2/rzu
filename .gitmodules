@@ -53,3 +53,7 @@
 	path = libiconv
 	url = ../libiconv
 	branch = master
+[submodule "liblua"]
+	path = liblua
+	url = ../liblua
+	branch = master
