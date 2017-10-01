@@ -14,8 +14,7 @@ struct BenchmarkConfig {
 	int packetTargetCount;
 };
 
-class BenchmarkLogSession : public SocketSession
-{
+class BenchmarkLogSession : public SocketSession {
 public:
 	BenchmarkLogSession(BenchmarkConfig* config);
 
@@ -31,4 +30,4 @@ private:
 	Timer<BenchmarkLogSession> delayTimer;
 };
 
-#endif // BenchmarkLogSession_H
+#endif  // BenchmarkLogSession_H

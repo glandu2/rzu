@@ -4,8 +4,7 @@
 
 #include "LS_11N4S.h"
 
-BenchmarkLogSession::BenchmarkLogSession(BenchmarkConfig* config)
-{
+BenchmarkLogSession::BenchmarkLogSession(BenchmarkConfig* config) {
 	this->config = config;
 
 	LS_11N4S* packet = reinterpret_cast<LS_11N4S*>(buffer);

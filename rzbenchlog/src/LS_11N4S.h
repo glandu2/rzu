@@ -4,8 +4,7 @@
 #include <stdint.h>
 
 #pragma pack(push, 1)
-struct LS_11N4S
-{
+struct LS_11N4S {
 	uint16_t id;
 	uint16_t size;
 	uint8_t type;
@@ -20,4 +19,4 @@ struct LS_11N4S
 };
 #pragma pack(pop)
 
-#endif // LOGSERVER_LS_11N4S_H
+#endif  // LOGSERVER_LS_11N4S_H
