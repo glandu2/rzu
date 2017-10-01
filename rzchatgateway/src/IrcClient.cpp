@@ -1,20 +1,31 @@
 #include "IrcClient.h"
 #include "Core/Utils.h"
-#include <algorithm>
-#include "GameSession.h"
 #include "GameClient/TS_CS_CHAT_REQUEST.h"
+#include "GameSession.h"
+#include <algorithm>
 
-IrcClient::IrcClient(const std::string& ip, int port, const std::string& hostname, const std::string& channel, const std::string& nickname, Log* packetLog)
-	: gameSession(nullptr), channelName(channel), nickname(nickname), ip(ip), hostname(hostname), port(port), joined(false)
-{
-}
+IrcClient::IrcClient(const std::string& ip,
+                     int port,
+                     const std::string& hostname,
+                     const std::string& channel,
+                     const std::string& nickname,
+                     Log* packetLog)
+    : gameSession(nullptr),
+      channelName(channel),
+      nickname(nickname),
+      ip(ip),
+      hostname(hostname),
+      port(port),
+      joined(false) {}
 
 void IrcClient::connect(std::string servername) {
 	this->servername = servername.substr(0, servername.find_first_of(" \t("));
 	SocketSession::connect(ip.c_str(), port);
 }
 
-EventChain<SocketSession> IrcClient::onStateChanged(Stream::State oldState, Stream::State newState, bool causedByRemote) {
+EventChain<SocketSession> IrcClient::onStateChanged(Stream::State oldState,
+                                                    Stream::State newState,
+                                                    bool causedByRemote) {
 	if(newState == Stream::ConnectedState) {
 		char loginText[128];
 		std::string lowerCaseServerName;
@@ -28,12 +39,13 @@ EventChain<SocketSession> IrcClient::onStateChanged(Stream::State oldState, Stre
 		if(channelName.size() == 0)
 			channelName = "#rappelz-" + lowerCaseServerName;
 
-		sprintf(loginText, "NICK %s\r\nUSER gw-%s gw-%s %s :rzchatgateway %s\r\n",
-				nickname.c_str(),
-				lowerCaseServerName.c_str(),
-				lowerCaseServerName.c_str(),
-				hostname.c_str(),
-				servername.c_str());
+		sprintf(loginText,
+		        "NICK %s\r\nUSER gw-%s gw-%s %s :rzchatgateway %s\r\n",
+		        nickname.c_str(),
+		        lowerCaseServerName.c_str(),
+		        lowerCaseServerName.c_str(),
+		        hostname.c_str(),
+		        servername.c_str());
 
 		write(loginText, strlen(loginText));
 	} else if(newState == Stream::UnconnectedState) {
@@ -47,10 +59,10 @@ EventChain<SocketSession> IrcClient::onStateChanged(Stream::State oldState, Stre
 EventChain<SocketSession> IrcClient::onDataReceived() {
 	std::vector<char> dataRecv;
 	getStream()->readAll(&dataRecv);
-	char *p;
+	char* p;
 
 	buffer.insert(buffer.end(), dataRecv.begin(), dataRecv.end());
-	while(buffer.size() > 0 && (p = (char*)Utils::memmem(&buffer[0], buffer.size(), "\r\n", 2))) {
+	while(buffer.size() > 0 && (p = (char*) Utils::memmem(&buffer[0], buffer.size(), "\r\n", 2))) {
 		std::string line(&buffer[0], p);
 		buffer.erase(buffer.begin(), buffer.begin() + (p - &buffer[0]) + 2);
 		onIrcLine(line);
@@ -74,7 +86,12 @@ void IrcClient::onIrcLine(const std::string& line) {
 		sprintf(login, "JOIN %s\r\n", channelName.c_str());
 		write(login, strlen(login));
 		joined = true;
-		log(LL_Info, "Joined IRC channel %s at %s:%d as user %s\n", channelName.c_str(), ip.c_str(), port, nickname.c_str());
+		log(LL_Info,
+		    "Joined IRC channel %s at %s:%d as user %s\n",
+		    channelName.c_str(),
+		    ip.c_str(),
+		    port,
+		    nickname.c_str());
 	} else if(command == "PING") {
 		std::string pong = "PONG :" + trailing + "\r\n";
 		write(pong.c_str(), pong.size());
@@ -84,7 +101,7 @@ void IrcClient::onIrcLine(const std::string& line) {
 		if(trailing.size() == 0)
 			return;
 
-		//ignore special commands
+		// ignore special commands
 		if(trailing[0] < ' ')
 			return;
 
@@ -95,33 +112,34 @@ void IrcClient::onIrcLine(const std::string& line) {
 				std::string target, msg;
 				size_t separator = trailing.find_first_of(' ');
 
-				target.assign(trailing, 1, separator-1);
+				target.assign(trailing, 1, separator - 1);
 
 				if(separator == std::string::npos || separator == trailing.size() - 1) {
-					sendMessage(sender.c_str(), "Utilisation des messages priv\xE9s comme en jeu: \"Player message \xE0 envoyer");
+					sendMessage(sender.c_str(),
+					            "Utilisation des messages priv\xE9s comme en jeu: \"Player message \xE0 envoyer");
 					break;
 				}
 
-				msg.assign(trailing, separator+1, std::string::npos);
+				msg.assign(trailing, separator + 1, std::string::npos);
 				mpGsToIrc[target] = sender;
 				gameSession->sendMsgToGS(CHAT_WHISPER, sender.c_str(), target.c_str(), msg.c_str());
 				break;
 			}
 
 			case '$':
-				gameSession->sendMsgToGS(CHAT_ADV, sender.c_str(), "", trailing.c_str()+1);
+				gameSession->sendMsgToGS(CHAT_ADV, sender.c_str(), "", trailing.c_str() + 1);
 				break;
 
 			case '!':
-				gameSession->sendMsgToGS(CHAT_GLOBAL, sender.c_str(), "", trailing.c_str()+1);
+				gameSession->sendMsgToGS(CHAT_GLOBAL, sender.c_str(), "", trailing.c_str() + 1);
 				break;
 
 			case '#':
-				gameSession->sendMsgToGS(CHAT_PARTY, sender.c_str(), "", trailing.c_str()+1);
+				gameSession->sendMsgToGS(CHAT_PARTY, sender.c_str(), "", trailing.c_str() + 1);
 				break;
 
 			case '%':
-				gameSession->sendMsgToGS(CHAT_GUILD, sender.c_str(), "", trailing.c_str()+1);
+				gameSession->sendMsgToGS(CHAT_GUILD, sender.c_str(), "", trailing.c_str() + 1);
 				break;
 
 			default: {
@@ -130,7 +148,8 @@ void IrcClient::onIrcLine(const std::string& line) {
 					auto it = mpIrcToGs.find(std::string(sender));
 
 					if(it == mpIrcToGs.end()) {
-						sendMessage(sender.c_str(), "Utilisation des messages priv\xE9s comme en jeu: \"Player message \xE0 envoyer");
+						sendMessage(sender.c_str(),
+						            "Utilisation des messages priv\xE9s comme en jeu: \"Player message \xE0 envoyer");
 					} else {
 						target = it->second;
 					}
@@ -154,21 +173,32 @@ void IrcClient::sendMessage(const char* target, const std::string& msg) {
 	write(msgText, strlen(msgText));
 }
 
-
 const char* IrcClient::getChatColor(int type) {
 	switch(type) {
-		case CHAT_ADV: return "02";
-		case CHAT_WHISPER: return "08";
-		case CHAT_GLOBAL: return "15";
-		case CHAT_EMOTION: return "15";
-		case CHAT_GM: return "07";
-		case CHAT_GM_WHISPER: return "08";
-		case CHAT_PARTY: return "03";
-		case CHAT_GUILD: return "06";
-		case CHAT_ATTACKTEAM: return "06";
-		case CHAT_NOTICE: return "15";
-		case CHAT_ANNOUNCE: return "15";
-		case CHAT_CENTER_NOTICE: return "15";
+		case CHAT_ADV:
+			return "02";
+		case CHAT_WHISPER:
+			return "08";
+		case CHAT_GLOBAL:
+			return "15";
+		case CHAT_EMOTION:
+			return "15";
+		case CHAT_GM:
+			return "07";
+		case CHAT_GM_WHISPER:
+			return "08";
+		case CHAT_PARTY:
+			return "03";
+		case CHAT_GUILD:
+			return "06";
+		case CHAT_ATTACKTEAM:
+			return "06";
+		case CHAT_NOTICE:
+			return "15";
+		case CHAT_ANNOUNCE:
+			return "15";
+		case CHAT_CENTER_NOTICE:
+			return "15";
 	}
 	return nullptr;
 }
@@ -193,13 +223,15 @@ void IrcClient::sendMsgToIRC(int type, const char* sender, std::string msg) {
 		size_t separator = msg.find(": ");
 		std::string target;
 
-		if(separator == std::string::npos || separator == msg.size()-2) {
+		if(separator == std::string::npos || separator == msg.size() - 2) {
 			auto it = mpGsToIrc.find(std::string(sender));
 			separator = 0;
 
 			if(it == mpGsToIrc.end()) {
-//					gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Pour envoyer un message priv\xE9, il faut indiquer le nom suivi de \": \". Exemple:");
-//					gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Player: message \xE0 envoyer");
+				// gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Pour envoyer
+				// un  message priv\xE9, il faut indiquer le nom suivi de \": \". Exemple:");
+				// gameSession->sendMsgToGS(TS_CS_CHAT_REQUEST::CHAT_WHISPER, "", sender, "Player:
+				// message \xE0  envoyer");
 			} else {
 				target = it->second;
 			}
@@ -228,12 +260,15 @@ void IrcClient::sendMsgToIRC(int type, const char* sender, std::string msg) {
 	}
 }
 
-void IrcClient::parseIrcMessage(const std::string& message, std::string& prefix, std::string& command, std::string& parameters, std::string& trailing)
-{
+void IrcClient::parseIrcMessage(const std::string& message,
+                                std::string& prefix,
+                                std::string& command,
+                                std::string& parameters,
+                                std::string& trailing) {
 	size_t prefixEnd, trailingStart;
 	size_t commandEnd, parametersStart;
 
-	if (message[0] == ':') {
+	if(message[0] == ':') {
 		prefixEnd = message.find_first_of(' ');
 		prefix.assign(message, 1, prefixEnd - 1);
 		prefixEnd++;
@@ -242,8 +277,8 @@ void IrcClient::parseIrcMessage(const std::string& message, std::string& prefix,
 	}
 
 	trailingStart = message.find(" :");
-	if (trailingStart != std::string::npos)
-		trailing.assign(message, trailingStart+2, std::string::npos);
+	if(trailingStart != std::string::npos)
+		trailing.assign(message, trailingStart + 2, std::string::npos);
 	else
 		trailingStart = message.size();
 

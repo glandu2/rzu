@@ -1,11 +1,11 @@
 #ifndef GAMESESSION_H
 #define GAMESESSION_H
 
-#include "NetSession/PacketSession.h"
-#include "NetSession/ClientGameSession.h"
-#include <vector>
-#include <unordered_map>
 #include "Core/Timer.h"
+#include "NetSession/ClientGameSession.h"
+#include "NetSession/PacketSession.h"
+#include <unordered_map>
+#include <vector>
 
 class IrcClient;
 struct TS_CS_CHAT_REQUEST;
@@ -24,7 +24,7 @@ public:
 	void setIrcClient(IrcClient* ircClient) { this->ircClient = ircClient; }
 
 	void onGameConnected();
-	void onGamePacketReceived(const TS_MESSAGE *packet);
+	void onGamePacketReceived(const TS_MESSAGE* packet);
 	void onGameDisconnected();
 
 	void setGameServerName(std::string name);
@@ -59,5 +59,4 @@ private:
 	std::unordered_map<unsigned int, std::string> playerNames;
 };
 
-
-#endif // GAMESESSION_H
+#endif  // GAMESESSION_H

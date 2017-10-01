@@ -1,12 +1,27 @@
 #include "ChatAuthSession.h"
-#include "GameSession.h"
 #include "Core/EventLoop.h"
+#include "GameSession.h"
 #include "Packet/PacketEpics.h"
 
-ChatAuthSession::ChatAuthSession(GameSession* gameSession, const std::string& ip, uint16_t port, const std::string& account, const std::string& password, int serverIdx, int delayTime, int ggRecoTime, AuthCipherMethod method)
-    : ClientAuthSession(gameSession, EPIC_LATEST), gameSession(gameSession), ip(ip), port(port), account(account), password(password), serverIdx(serverIdx), method(method), delayTime(delayTime), ggRecoTime(ggRecoTime)
-{
-}
+ChatAuthSession::ChatAuthSession(GameSession* gameSession,
+                                 const std::string& ip,
+                                 uint16_t port,
+                                 const std::string& account,
+                                 const std::string& password,
+                                 int serverIdx,
+                                 int delayTime,
+                                 int ggRecoTime,
+                                 AuthCipherMethod method)
+    : ClientAuthSession(gameSession, EPIC_LATEST),
+      gameSession(gameSession),
+      ip(ip),
+      port(port),
+      account(account),
+      password(password),
+      serverIdx(serverIdx),
+      method(method),
+      delayTime(delayTime),
+      ggRecoTime(ggRecoTime) {}
 
 void ChatAuthSession::connect() {
 	ClientAuthSession::connect(ip, port, account, password, method);
@@ -32,7 +47,11 @@ void ChatAuthSession::onAuthDisconnected() {
 
 void ChatAuthSession::onAuthResult(TS_ResultCode result, const std::string& resultString) {
 	if(result != TS_RESULT_SUCCESS) {
-		log(LL_Error, "%s: Auth failed result: %d (%s)\n", account.c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
+		log(LL_Error,
+		    "%s: Auth failed result: %d (%s)\n",
+		    account.c_str(),
+		    result,
+		    resultString.empty() ? "no associated string" : resultString.c_str());
 		abortSession();
 	} else {
 		log(LL_Info, "Retrieving server list\n");
@@ -46,12 +65,13 @@ void ChatAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 	log(LL_Debug, "Server list (last id: %d)\n", lastSelectedServerId);
 	for(size_t i = 0; i < servers.size(); i++) {
 		const ServerInfo& serverInfo = servers.at(i);
-		log(LL_Debug, "%d: %20s at %16s:%d %d%% user ratio\n",
-				serverInfo.serverId,
-				serverInfo.serverName.c_str(),
-				serverInfo.serverIp.c_str(),
-				serverInfo.serverPort,
-				serverInfo.userRatio);
+		log(LL_Debug,
+		    "%d: %20s at %16s:%d %d%% user ratio\n",
+		    serverInfo.serverId,
+		    serverInfo.serverName.c_str(),
+		    serverInfo.serverIp.c_str(),
+		    serverInfo.serverPort,
+		    serverInfo.userRatio);
 
 		if(serverInfo.serverId == serverIdx && !serverFound) {
 			gameSession->setGameServerName(serverInfo.serverName);
@@ -64,12 +84,13 @@ void ChatAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 		log(LL_Info, "Server list (last id: %d)\n", lastSelectedServerId);
 		for(size_t i = 0; i < servers.size(); i++) {
 			const ServerInfo& serverInfo = servers.at(i);
-			log(LL_Info, "%d: %20s at %16s:%d %d%% user ratio\n",
-					serverInfo.serverId,
-					serverInfo.serverName.c_str(),
-					serverInfo.serverIp.c_str(),
-					serverInfo.serverPort,
-					serverInfo.userRatio);
+			log(LL_Info,
+			    "%d: %20s at %16s:%d %d%% user ratio\n",
+			    serverInfo.serverId,
+			    serverInfo.serverName.c_str(),
+			    serverInfo.serverIp.c_str(),
+			    serverInfo.serverPort,
+			    serverInfo.userRatio);
 		}
 	}
 
@@ -78,7 +99,7 @@ void ChatAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 
 	if(ggRecoTime > 0) {
 		log(LL_Debug, "Starting GG timer: %ds\n", ggRecoTime);
-		ggRecoTimer.start(this, &ChatAuthSession::onGGTimerExpired, ggRecoTime*1000, 0);
+		ggRecoTimer.start(this, &ChatAuthSession::onGGTimerExpired, ggRecoTime * 1000, 0);
 	}
 }
 

@@ -4,32 +4,30 @@
 #include <algorithm>
 #include <time.h>
 
+#include "GameClient/TS_CS_CHARACTER_LIST.h"
+#include "GameClient/TS_CS_CHAT_REQUEST.h"
+#include "GameClient/TS_CS_GAME_TIME.h"
+#include "GameClient/TS_CS_LOGIN.h"
+#include "GameClient/TS_CS_UPDATE.h"
+#include "GameClient/TS_SC_CHARACTER_LIST.h"
 #include "GameClient/TS_SC_CHAT.h"
 #include "GameClient/TS_SC_CHAT_LOCAL.h"
-#include "GameClient/TS_CS_CHAT_REQUEST.h"
-#include "GameClient/TS_CS_CHARACTER_LIST.h"
-#include "GameClient/TS_SC_CHARACTER_LIST.h"
-#include "GameClient/TS_CS_LOGIN.h"
+#include "GameClient/TS_SC_DISCONNECT_DESC.h"
+#include "GameClient/TS_SC_ENTER.h"
+#include "GameClient/TS_SC_GAME_TIME.h"
 #include "GameClient/TS_SC_LOGIN_RESULT.h"
 #include "GameClient/TS_TIMESYNC.h"
-#include "GameClient/TS_SC_ENTER.h"
-#include "GameClient/TS_SC_DISCONNECT_DESC.h"
-#include "GameClient/TS_CS_UPDATE.h"
-#include "GameClient/TS_CS_GAME_TIME.h"
-#include "GameClient/TS_SC_GAME_TIME.h"
 #include "Packet/PacketEpics.h"
 
-GameSession::GameSession(const std::string& playername, bool enableGateway, Log *packetLog)
+GameSession::GameSession(const std::string& playername, bool enableGateway, Log* packetLog)
     : ClientGameSession(EPIC_LATEST),
       playername(playername),
-	  ircClient(nullptr),
-	  enableGateway(enableGateway),
-	  connectedInGame(false),
-	  handle(0),
-	  rappelzTimeOffset(0),
-	  epochTimeOffset(0)
-{
-}
+      ircClient(nullptr),
+      enableGateway(enableGateway),
+      connectedInGame(false),
+      handle(0),
+      rappelzTimeOffset(0),
+      epochTimeOffset(0) {}
 
 void GameSession::onGameConnected() {
 	updateTimer.start(this, &GameSession::onUpdatePacketExpired, 5000, 5000);
@@ -64,23 +62,20 @@ void GameSession::onUpdatePacketExpired() {
 	sendPacket(updatPkt, EPIC_LATEST);
 }
 
-uint32_t GameSession::getRappelzTime()
-{
+uint32_t GameSession::getRappelzTime() {
 	return uint32_t(uv_hrtime() / (10 * 1000 * 1000));
 }
 
-void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
+void GameSession::onGamePacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_SC_CHARACTER_LIST::packetID:
 			packet->process(this, &GameSession::onCharacterList, EPIC_LATEST);
 			break;
 
-		case_packet_is(TS_SC_LOGIN_RESULT)
-			packet->process(this, &GameSession::onCharacterLoginResult, EPIC_LATEST);
+			case_packet_is(TS_SC_LOGIN_RESULT) packet->process(this, &GameSession::onCharacterLoginResult, EPIC_LATEST);
 			break;
 
-		case_packet_is(TS_SC_ENTER)
-			packet->process(this, &GameSession::onEnter, EPIC_LATEST);
+			case_packet_is(TS_SC_ENTER) packet->process(this, &GameSession::onEnter, EPIC_LATEST);
 			break;
 
 		case TS_SC_CHAT_LOCAL::packetID:
@@ -135,7 +130,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	ircClient->sendMessage("", "\001ACTION is connected to the game server\001");
 }
 
-void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT *packet) {
+void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet) {
 	handle = packet->handle;
 	connectedInGame = true;
 	log(LL_Info, "Connected with character %s\n", playername.c_str());
@@ -147,7 +142,7 @@ void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT *packet) {
 	messageQueue.clear();
 }
 
-void GameSession::onEnter(const TS_SC_ENTER *packet) {
+void GameSession::onEnter(const TS_SC_ENTER* packet) {
 	if(packet->objType == EOT_Player) {
 		playerNames[packet->handle] = packet->playerInfo.szName;
 	}
@@ -218,7 +213,7 @@ void GameSession::sendMsgToGS(int type, const char* sender, const char* target, 
 	if(chatRqst.message.size() > 127)
 		chatRqst.message.resize(127);
 
-	chatRqst.type = (TS_CHAT_TYPE)type;
+	chatRqst.type = (TS_CHAT_TYPE) type;
 	chatRqst.request_id = 0;
 
 	if(connectedInGame) {
