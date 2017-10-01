@@ -2,39 +2,32 @@
 #define GLOBALCONFIG_H
 
 #include "Config/ConfigInfo.h"
-#include "Core/Utils.h"
 #include "Config/GlobalCoreConfig.h"
+#include "Core/Utils.h"
 
 struct GlobalConfig {
-
 	struct LogConfig {
-		cval<std::string> &logDir;
+		cval<std::string>& logDir;
 
 		struct ClientConfig {
 			ListenerConfig listener;
 
-			ClientConfig() :
-				listener("log.clients", "127.0.0.1", 4516, true, 0) {}
+			ClientConfig() : listener("log.clients", "127.0.0.1", 4516, true, 0) {}
 		} client;
 
-		LogConfig() :
-			logDir(CFG_CREATE("log.dir", "log"))
-		{
-			Utils::autoSetAbsoluteDir(logDir);
-		}
+		LogConfig() : logDir(CFG_CREATE("log.dir", "log")) { Utils::autoSetAbsoluteDir(logDir); }
 	} log;
 
 	struct TrafficDump {
-		cval<bool> &enable;
-		cval<std::string> &dir, &file, &level, &consoleLevel;
+		cval<bool>& enable;
+		cval<std::string>&dir, &file, &level, &consoleLevel;
 
-		TrafficDump() :
-			enable(CFG_CREATE("trafficdump.enable", false)),
-			dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
-			file(CFG_CREATE("trafficdump.file", "rzlog.log")),
-			level(CFG_CREATE("trafficdump.level", "debug")),
-			consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal"))
-		{
+		TrafficDump()
+		    : enable(CFG_CREATE("trafficdump.enable", false)),
+		      dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
+		      file(CFG_CREATE("trafficdump.file", "rzlog.log")),
+		      level(CFG_CREATE("trafficdump.level", "debug")),
+		      consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal")) {
 			Utils::autoSetAbsoluteDir(dir);
 		}
 	} trafficDump;
@@ -45,4 +38,4 @@ struct GlobalConfig {
 
 #define CONFIG_GET() GlobalConfig::get()
 
-#endif // GLOBALCONFIG_H
+#endif  // GLOBALCONFIG_H

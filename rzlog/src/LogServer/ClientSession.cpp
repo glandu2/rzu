@@ -1,10 +1,9 @@
 #include "ClientSession.h"
 #include "../GlobalConfig.h"
-#include <time.h>
-#include "Core/Utils.h"
-#include <time.h>
-#include <string.h>
 #include "Core/PrintfFormats.h"
+#include "Core/Utils.h"
+#include <string.h>
+#include <time.h>
 
 namespace LogServer {
 
@@ -21,10 +20,8 @@ ClientSession::~ClientSession() {
 }
 
 bool ClientSession::isDateNeedNewFile(const struct tm& date) {
-	if(date.tm_year == fileDate.year &&
-			date.tm_mon == fileDate.month &&
-			date.tm_mday == fileDate.day &&
-			date.tm_hour == fileDate.hour)
+	if(date.tm_year == fileDate.year && date.tm_mon == fileDate.month && date.tm_mday == fileDate.day &&
+	   date.tm_hour == fileDate.hour)
 		return false;
 	else
 		return true;
@@ -42,12 +39,12 @@ void ClientSession::updateOpenedFile(const struct tm& date) {
 
 		char filename[512];
 		sprintf(filename,
-				"%s_%04d-%02d-%02d %02d.txt",
-				serverName.c_str(),
-				fileDate.year,
-				fileDate.month,
-				fileDate.day,
-				fileDate.hour);
+		        "%s_%04d-%02d-%02d %02d.txt",
+		        serverName.c_str(),
+		        fileDate.year,
+		        fileDate.month,
+		        fileDate.day,
+		        fileDate.hour);
 
 		std::string absoluteDir = CONFIG_GET()->log.logDir.get();
 		std::string fullFileName = absoluteDir + "/" + filename;
@@ -68,11 +65,7 @@ bool ClientSession::checkName(std::string name) {
 	for(size_t i = 0; i < size; i++) {
 		const char c = p[i];
 
-		if(!((c >= '0' && c <= '9') ||
-			 (c >= 'A' && c <= 'Z') ||
-			 (c >= 'a' && c <= 'z') ||
-			 c == '_' || c == '.'))
-		{
+		if(!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '.')) {
 			return false;
 		}
 	}
@@ -93,7 +86,7 @@ EventChain<LogPacketSession> ClientSession::onPacketReceived(const LS_11N4S* pac
 	struct tm date;
 	uint64_t timemsec = Utils::getTimeInMsec();
 
-	Utils::getGmTime(timemsec/1000, &date);
+	Utils::getGmTime(timemsec / 1000, &date);
 
 	logData.date.year = date.tm_year;
 	logData.date.month = date.tm_mon;
@@ -101,7 +94,7 @@ EventChain<LogPacketSession> ClientSession::onPacketReceived(const LS_11N4S* pac
 	logData.date.hour = date.tm_hour;
 	logData.date.minute = date.tm_min;
 	logData.date.second = date.tm_sec;
-	logData.date.fraction = (timemsec % 1000) * 1000000; // unit: ns
+	logData.date.fraction = (timemsec % 1000) * 1000000;  // unit: ns
 
 	logData.id = packet->id;
 	logData.thread_id = packet->thread_id;
@@ -129,7 +122,10 @@ EventChain<LogPacketSession> ClientSession::onPacketReceived(const LS_11N4S* pac
 
 	if(logData.id == 101) {
 		if(!serverName.empty()) {
-			log(LL_Warning, "Already received login message for server %s. Received new name is %s (ignored)\n", serverName.c_str(), logData.s4.c_str());
+			log(LL_Warning,
+			    "Already received login message for server %s. Received new name is %s (ignored)\n",
+			    serverName.c_str(),
+			    logData.s4.c_str());
 		} else if(!checkName(logData.s4)) {
 			log(LL_Error, "Received login message with invalid characters in server name: %s\n", logData.s4.c_str());
 		} else {
@@ -141,37 +137,38 @@ EventChain<LogPacketSession> ClientSession::onPacketReceived(const LS_11N4S* pac
 	updateOpenedFile(date);
 
 	if(file) {
-		static char lineBuffer[20 + 20*13 + 255*4 + 18];
+		static char lineBuffer[20 + 20 * 13 + 255 * 4 + 18];
 		int len = sprintf(lineBuffer,
-						  "%04d-%02d-%02d %02d:%02d:%02d.%03d\t"
-						  "%d\t%d\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t"
-						  "%s\t%s\t%s\t%s\n",
-						  logData.date.year,
-						  logData.date.month,
-						  logData.date.day,
-						  logData.date.hour,
-						  logData.date.minute,
-						  logData.date.second,
-						  (int)(timemsec % 1000),
+		                  "%04d-%02d-%02d %02d:%02d:%02d.%03d\t"
+		                  "%d\t%d\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64
+		                  "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t%" PRId64 "\t"
+		                  "%s\t%s\t%s\t%s\n",
+		                  logData.date.year,
+		                  logData.date.month,
+		                  logData.date.day,
+		                  logData.date.hour,
+		                  logData.date.minute,
+		                  logData.date.second,
+		                  (int) (timemsec % 1000),
 
-						  logData.thread_id,
-						  logData.id,
-						  logData.n1,
-						  logData.n2,
-						  logData.n3,
-						  logData.n4,
-						  logData.n5,
-						  logData.n6,
-						  logData.n7,
-						  logData.n8,
-						  logData.n9,
-						  logData.n10,
-						  logData.n11,
+		                  logData.thread_id,
+		                  logData.id,
+		                  logData.n1,
+		                  logData.n2,
+		                  logData.n3,
+		                  logData.n4,
+		                  logData.n5,
+		                  logData.n6,
+		                  logData.n7,
+		                  logData.n8,
+		                  logData.n9,
+		                  logData.n10,
+		                  logData.n11,
 
-						  logData.s1.c_str(),
-						  logData.s2.c_str(),
-						  logData.s3.c_str(),
-						  logData.s4.c_str());
+		                  logData.s1.c_str(),
+		                  logData.s2.c_str(),
+		                  logData.s3.c_str(),
+		                  logData.s4.c_str());
 
 		log(LL_Debug, "Log message: %s", lineBuffer);
 		fwrite(lineBuffer, len, 1, file);
@@ -180,4 +177,4 @@ EventChain<LogPacketSession> ClientSession::onPacketReceived(const LS_11N4S* pac
 	return LogPacketSession::onPacketReceived(packet);
 }
 
-} // namespace LogServer
+}  // namespace LogServer

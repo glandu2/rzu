@@ -1,12 +1,12 @@
-#include "Core/EventLoop.h"
-#include "GlobalConfig.h"
-#include "LibRzuInit.h"
 #include "Config/GlobalCoreConfig.h"
 #include "Core/CrashHandler.h"
+#include "Core/EventLoop.h"
 #include "Database/DbConnectionPool.h"
+#include "GlobalConfig.h"
+#include "LibRzuInit.h"
 
-#include "NetSession/ServersManager.h"
 #include "NetSession/BanManager.h"
+#include "NetSession/ServersManager.h"
 #include "NetSession/SessionServer.h"
 
 #include "LogServer/ClientSession.h"
@@ -22,7 +22,7 @@ void onTerminate(void* instance) {
 		serverManager->forceStop();
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 	LibRzuInit();
 	GlobalConfig::init();
 	BanManager::registerConfig();
@@ -30,42 +30,39 @@ int main(int argc, char **argv) {
 	ConfigInfo::get()->init(argc, argv);
 
 	Log mainLogger(GlobalCoreConfig::get()->log.enable,
-				   GlobalCoreConfig::get()->log.level,
-				   GlobalCoreConfig::get()->log.consoleLevel,
-				   GlobalCoreConfig::get()->log.dir,
-				   GlobalCoreConfig::get()->log.file,
-				   GlobalCoreConfig::get()->log.maxQueueSize);
+	               GlobalCoreConfig::get()->log.level,
+	               GlobalCoreConfig::get()->log.consoleLevel,
+	               GlobalCoreConfig::get()->log.dir,
+	               GlobalCoreConfig::get()->log.file,
+	               GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 	Log trafficLogger(CONFIG_GET()->trafficDump.enable,
-					  CONFIG_GET()->trafficDump.level,
-					  CONFIG_GET()->trafficDump.consoleLevel,
-					  CONFIG_GET()->trafficDump.dir,
-					  CONFIG_GET()->trafficDump.file,
-					  GlobalCoreConfig::get()->log.maxQueueSize);
-
+	                  CONFIG_GET()->trafficDump.level,
+	                  CONFIG_GET()->trafficDump.consoleLevel,
+	                  CONFIG_GET()->trafficDump.dir,
+	                  CONFIG_GET()->trafficDump.file,
+	                  GlobalCoreConfig::get()->log.maxQueueSize);
 
 	ConfigInfo::get()->dump();
 
 	runServers(&trafficLogger);
 
-	//Make valgrind happy
+	// Make valgrind happy
 	EventLoop::getInstance()->deleteObjects();
 
 	return 0;
 }
 
-void runServers(Log *trafficLogger) {
+void runServers(Log* trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
-	SessionServer<LogServer::ClientSession> logClientServer(
-				CONFIG_GET()->log.client.listener.listenIp,
-				CONFIG_GET()->log.client.listener.port,
-				&CONFIG_GET()->log.client.listener.idleTimeout,
-				trafficLogger,
-				&banManager);
-
+	SessionServer<LogServer::ClientSession> logClientServer(CONFIG_GET()->log.client.listener.listenIp,
+	                                                        CONFIG_GET()->log.client.listener.port,
+	                                                        &CONFIG_GET()->log.client.listener.idleTimeout,
+	                                                        trafficLogger,
+	                                                        &banManager);
 
 	serverManager.addServer("log.clients", &logClientServer, &CONFIG_GET()->log.client.listener.autoStart);
 	ConsoleSession::start(&serverManager);
