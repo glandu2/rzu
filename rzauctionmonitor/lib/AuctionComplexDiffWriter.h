@@ -1,13 +1,13 @@
 #ifndef AUCTIONCOMPLEXDIFFWRITER_H
 #define AUCTIONCOMPLEXDIFFWRITER_H
 
+#include "AuctionComplexData.h"
+#include "AuctionFile.h"
+#include "AuctionGenericWriter.h"
 #include "Core/Object.h"
-#include <vector>
 #include "Extern.h"
 #include <stdint.h>
-#include "AuctionFile.h"
-#include "AuctionComplexData.h"
-#include "AuctionGenericWriter.h"
+#include <vector>
 
 class RZAUCTION_EXTERN AuctionComplexDiffWriter : public AuctionGenericWriter<AuctionComplexData> {
 	DECLARE_CLASSNAME(AuctionComplexDiffWriter, 0)
@@ -15,14 +15,14 @@ class RZAUCTION_EXTERN AuctionComplexDiffWriter : public AuctionGenericWriter<Au
 public:
 	AuctionComplexDiffWriter(size_t categoryCount);
 
-	void addAuctionInfo(const AUCTION_SIMPLE_INFO *auction);
+	void addAuctionInfo(const AUCTION_SIMPLE_INFO* auction);
 	void beginProcess();
 	void endProcess();
 	void setDiffInputMode(bool diffMode);
 
-	void dumpAuctions(std::vector<uint8_t> &output, bool doFullDump, bool alwaysWithData);
+	void dumpAuctions(std::vector<uint8_t>& output, bool doFullDump, bool alwaysWithData);
 	AUCTION_FILE exportDump(bool doFullDump, bool alwaysWithData);
-	void importDump(const AUCTION_FILE *auctionFile);
+	void importDump(const AUCTION_FILE* auctionFile);
 
 private:
 	bool diffMode;

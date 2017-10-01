@@ -1,8 +1,8 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
 #include "../GlobalConfig.h"
 #include "AuthClient/Flat/TS_CA_VERSION.h"
 #include "GameClient/TS_SC_RESULT.h"
+#include "RzTest.h"
+#include "gtest/gtest.h"
 
 namespace AuthServer {
 
@@ -19,7 +19,7 @@ TEST(TS_CA_VERSION, playercount) {
 	});
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		//const TS_SC_RESULT* packet = AGET_PACKET(TS_SC_RESULT);
+		// const TS_SC_RESULT* packet = AGET_PACKET(TS_SC_RESULT);
 		TS_SC_RESULT packet;
 		DESERIALIZE_PACKET(packet, EPIC_LATEST);
 
@@ -52,7 +52,7 @@ TEST(TS_CA_VERSION, version) {
 		TS_SC_RESULT packet;
 		DESERIALIZE_PACKET(packet, EPIC_LATEST);
 
-		uint32_t versionHex = ((uint32_t)packet.value) ^ 0xADADADAD;
+		uint32_t versionHex = ((uint32_t) packet.value) ^ 0xADADADAD;
 
 		EXPECT_NE(0, versionHex);
 		EXPECT_NE(INT32_MIN, versionHex);
@@ -86,7 +86,7 @@ TEST(TS_CA_VERSION, nonnullterminated) {
 		TS_SC_RESULT packet;
 		DESERIALIZE_PACKET(packet, EPIC_LATEST);
 
-		uint32_t versionHex = ((uint32_t)packet.value) ^ 0xADADADAD;
+		uint32_t versionHex = ((uint32_t) packet.value) ^ 0xADADADAD;
 
 		EXPECT_NE(0, versionHex);
 		EXPECT_NE(INT32_MIN, versionHex);
@@ -102,4 +102,4 @@ TEST(TS_CA_VERSION, nonnullterminated) {
 	test.run();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

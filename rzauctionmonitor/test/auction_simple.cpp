@@ -1,7 +1,7 @@
-#include "gtest/gtest.h"
-#include "AuctionSimpleDiffWriter.h"
 #include "AuctionFile.h"
+#include "AuctionSimpleDiffWriter.h"
 #include "Core/Utils.h"
+#include "gtest/gtest.h"
 #include <random>
 
 struct AuctionSimpleInputTestData {
@@ -23,7 +23,7 @@ struct AuctionSimpleInputTestData {
 		if(rawData.size() > 0)
 			return;
 
-		rawData.resize(rand()%1024 + 1);
+		rawData.resize(rand() % 1024 + 1);
 		for(size_t i = 0; i < rawData.size(); i++)
 			rawData[i] = rand() & 0xFF;
 
@@ -32,17 +32,15 @@ struct AuctionSimpleInputTestData {
 };
 
 struct AuctionSimpleOuputTestData : public AuctionSimpleInputTestData {
-	AuctionSimpleOuputTestData()
-	    : AuctionSimpleInputTestData()
-	{}
+	AuctionSimpleOuputTestData() : AuctionSimpleInputTestData() {}
 
 	int64_t previousTime;
 };
 
-static void addAuction(AuctionSimpleDiffWriter* auctionWriter, AuctionSimpleInputTestData& testData)
-{
+static void addAuction(AuctionSimpleDiffWriter* auctionWriter, AuctionSimpleInputTestData& testData) {
 	testData.updateRawData();
-	auctionWriter->addAuctionInfo(AuctionUid(testData.uid), testData.time, testData.category, testData.rawData.data(), testData.rawData.size());
+	auctionWriter->addAuctionInfo(
+	    AuctionUid(testData.uid), testData.time, testData.category, testData.rawData.data(), testData.rawData.size());
 }
 
 static void dumpAuctions(AuctionSimpleDiffWriter* auctionWriter, AUCTION_SIMPLE_FILE* auctionFile, bool doFulldump) {
@@ -55,9 +53,7 @@ static void dumpAuctions(AuctionSimpleDiffWriter* auctionWriter, AUCTION_SIMPLE_
 	ASSERT_TRUE(messageBuffer.checkFinalSize());
 }
 
-static void expectAuction(AUCTION_SIMPLE_FILE* auctionFile,
-                          AuctionSimpleOuputTestData& auctionOutput)
-{
+static void expectAuction(AUCTION_SIMPLE_FILE* auctionFile, AuctionSimpleOuputTestData& auctionOutput) {
 	bool auctionFound = false;
 
 	for(size_t i = 0; i < auctionFile->auctions.size(); i++) {
@@ -77,7 +73,8 @@ static void expectAuction(AUCTION_SIMPLE_FILE* auctionFile,
 
 		EXPECT_EQ(auctionOutput.expectedData.size(), auction.data.size());
 		if(auctionOutput.expectedData.size() == auction.data.size())
-			EXPECT_EQ(0, memcmp(auction.data.data(), auctionOutput.expectedData.data(), auction.data.size())) << "auction.data est différent de l'attendu";
+			EXPECT_EQ(0, memcmp(auction.data.data(), auctionOutput.expectedData.data(), auction.data.size()))
+			    << "auction.data est différent de l'attendu";
 	}
 
 	EXPECT_TRUE(auctionFound) << "Auction " << auctionOutput.uid << " not found";
@@ -103,8 +100,8 @@ TEST(auction_simple_mode, no_auction) {
 	AUCTION_SIMPLE_FILE auctionFile;
 
 	auctionWriter.beginProcess();
-	auctionWriter.beginCategory(auctionData.category, auctionData.time - rand()%1000);
-	auctionWriter.endCategory(auctionData.category, auctionData.time + rand()%1000);
+	auctionWriter.beginCategory(auctionData.category, auctionData.time - rand() % 1000);
+	auctionWriter.endCategory(auctionData.category, auctionData.time + rand() % 1000);
 	auctionWriter.endProcess();
 
 	dumpAuctions(&auctionWriter, &auctionFile, true);
@@ -132,20 +129,24 @@ TEST(auction_simple_mode, added_3_auction) {
 	auctionData.diffType = D_Added;
 	auctionData.previousTime = 0;
 
-	auctionData2.uid = auctionData.uid + 5454; // be sure they are differents
+	auctionData2.uid = auctionData.uid + 5454;  // be sure they are differents
 	auctionData2.diffType = D_Added;
 	auctionData2.previousTime = 0;
 
-	auctionData3.uid = auctionData2.uid + 5454; // be sure they are differents
+	auctionData3.uid = auctionData2.uid + 5454;  // be sure they are differents
 	auctionData3.diffType = D_Added;
 	auctionData3.previousTime = 0;
 
 	auctionWriter.beginProcess();
-	auctionWriter.beginCategory(auctionData.category, std::min(std::min(auctionData3.time, auctionData2.time), auctionData.time) - rand()%1000);
+	auctionWriter.beginCategory(
+	    auctionData.category,
+	    std::min(std::min(auctionData3.time, auctionData2.time), auctionData.time) - rand() % 1000);
 	addAuction(&auctionWriter, auctionData);
 	addAuction(&auctionWriter, auctionData2);
 	addAuction(&auctionWriter, auctionData3);
-	auctionWriter.endCategory(auctionData.category, std::max(std::max(auctionData3.time, auctionData2.time), auctionData.time) + rand()%1000);
+	auctionWriter.endCategory(
+	    auctionData.category,
+	    std::max(std::max(auctionData3.time, auctionData2.time), auctionData.time) + rand() % 1000);
 	auctionWriter.endProcess();
 
 	dumpAuctions(&auctionWriter, &auctionFile, true);
@@ -195,21 +196,21 @@ TEST(auction_simple_mode, added_update_unmodified_removed) {
 
 	auctionData5.diffType = D_Added;
 	auctionData5.previousTime = auctionData3.time;
-	auctionData5.time = auctionData5.previousTime + 1000 + rand()%1000;
+	auctionData5.time = auctionData5.previousTime + 1000 + rand() % 1000;
 	auctionData5.category = auctionData4.category - 1;
 	auctionData5.updateRawData();
 
 	auctionData6.diffType = D_Added;
-	auctionData6.previousTime = auctionData4.time - rand()%1000;
-	auctionData6.time = auctionData6.previousTime + 1000 + rand()%1000;
+	auctionData6.previousTime = auctionData4.time - rand() % 1000;
+	auctionData6.time = auctionData6.previousTime + 1000 + rand() % 1000;
 	auctionData6.category = auctionData4.category + 1;
 	auctionData6.updateRawData();
 
 	// Added auction
 	auctionWriter.beginProcess();
-	auctionWriter.beginCategory(auctionData.category, auctionData.time - rand()%1000);
+	auctionWriter.beginCategory(auctionData.category, auctionData.time - rand() % 1000);
 	addAuction(&auctionWriter, auctionData);
-	auctionWriter.endCategory(auctionData.category, auctionData.time + rand()%1000);
+	auctionWriter.endCategory(auctionData.category, auctionData.time + rand() % 1000);
 	auctionWriter.endProcess();
 
 	dumpAuctions(&auctionWriter, &auctionFile, true);
@@ -222,9 +223,9 @@ TEST(auction_simple_mode, added_update_unmodified_removed) {
 
 	// Updated auction
 	auctionWriter.beginProcess();
-	auctionWriter.beginCategory(auctionData.category, auctionData2.time - rand()%1000);
+	auctionWriter.beginCategory(auctionData.category, auctionData2.time - rand() % 1000);
 	addAuction(&auctionWriter, auctionData2);
-	auctionWriter.endCategory(auctionData.category, auctionData2.time + rand()%1000);
+	auctionWriter.endCategory(auctionData.category, auctionData2.time + rand() % 1000);
 	auctionWriter.endProcess();
 
 	dumpAuctions(&auctionWriter, &auctionFile, true);
@@ -237,7 +238,7 @@ TEST(auction_simple_mode, added_update_unmodified_removed) {
 
 	// Unmodified auction
 	auctionWriter.beginProcess();
-	auctionWriter.beginCategory(auctionData.category, auctionData3.time - rand()%1000);
+	auctionWriter.beginCategory(auctionData.category, auctionData3.time - rand() % 1000);
 	addAuction(&auctionWriter, auctionData3);
 	auctionWriter.endCategory(auctionData.category, auctionData3.time);
 	auctionWriter.endProcess();
@@ -267,12 +268,12 @@ TEST(auction_simple_mode, added_update_unmodified_removed) {
 
 	// Re-added auctions
 	auctionWriter.beginProcess();
-	auctionWriter.beginCategory(auctionData5.category, auctionData5.time - rand()%1000);
+	auctionWriter.beginCategory(auctionData5.category, auctionData5.time - rand() % 1000);
 	addAuction(&auctionWriter, auctionData5);
-	auctionWriter.endCategory(auctionData5.category, auctionData5.time + rand()%1000);
-	auctionWriter.beginCategory(auctionData6.category, auctionData6.time - rand()%1000);
+	auctionWriter.endCategory(auctionData5.category, auctionData5.time + rand() % 1000);
+	auctionWriter.beginCategory(auctionData6.category, auctionData6.time - rand() % 1000);
 	addAuction(&auctionWriter, auctionData6);
-	auctionWriter.endCategory(auctionData6.category, auctionData6.time + rand()%1000);
+	auctionWriter.endCategory(auctionData6.category, auctionData6.time + rand() % 1000);
 	auctionWriter.endProcess();
 
 	dumpAuctions(&auctionWriter, &auctionFile, true);
@@ -285,7 +286,6 @@ TEST(auction_simple_mode, added_update_unmodified_removed) {
 	expectAuction(&auctionFile, auctionData5);
 	expectAuction(&auctionFile, auctionData6);
 }
-
 
 TEST(auction_simple_mode, import_state) {
 	std::unique_ptr<AuctionSimpleDiffWriter> auctionWriter;
@@ -321,22 +321,22 @@ TEST(auction_simple_mode, import_state) {
 
 	auctionData5.diffType = D_Added;
 	auctionData5.previousTime = auctionData3.time;
-	auctionData5.time = auctionData5.previousTime + 1000 + rand()%1000;
+	auctionData5.time = auctionData5.previousTime + 1000 + rand() % 1000;
 	auctionData5.category = auctionData4.category - 1;
 	auctionData5.updateRawData();
 
 	auctionData6.diffType = D_Added;
-	auctionData6.previousTime = auctionData4.time - rand()%1000;
-	auctionData6.time = auctionData6.previousTime + 1000 + rand()%1000;
+	auctionData6.previousTime = auctionData4.time - rand() % 1000;
+	auctionData6.time = auctionData6.previousTime + 1000 + rand() % 1000;
 	auctionData6.category = auctionData4.category + 1;
 	auctionData6.updateRawData();
 
 	// Added auction
 	reimportAuctions(auctionWriter);
 	auctionWriter->beginProcess();
-	auctionWriter->beginCategory(auctionData.category, auctionData.time - rand()%1000);
+	auctionWriter->beginCategory(auctionData.category, auctionData.time - rand() % 1000);
 	addAuction(auctionWriter.get(), auctionData);
-	auctionWriter->endCategory(auctionData.category, auctionData.time + rand()%1000);
+	auctionWriter->endCategory(auctionData.category, auctionData.time + rand() % 1000);
 	auctionWriter->endProcess();
 
 	dumpAuctions(auctionWriter.get(), &auctionFile, true);
@@ -350,9 +350,9 @@ TEST(auction_simple_mode, import_state) {
 	// Updated auction
 	reimportAuctions(auctionWriter);
 	auctionWriter->beginProcess();
-	auctionWriter->beginCategory(auctionData.category, auctionData2.time - rand()%1000);
+	auctionWriter->beginCategory(auctionData.category, auctionData2.time - rand() % 1000);
 	addAuction(auctionWriter.get(), auctionData2);
-	auctionWriter->endCategory(auctionData.category, auctionData2.time + rand()%1000);
+	auctionWriter->endCategory(auctionData.category, auctionData2.time + rand() % 1000);
 	auctionWriter->endProcess();
 
 	dumpAuctions(auctionWriter.get(), &auctionFile, true);
@@ -366,7 +366,7 @@ TEST(auction_simple_mode, import_state) {
 	// Unmodified auction
 	reimportAuctions(auctionWriter);
 	auctionWriter->beginProcess();
-	auctionWriter->beginCategory(auctionData.category, auctionData3.time - rand()%1000);
+	auctionWriter->beginCategory(auctionData.category, auctionData3.time - rand() % 1000);
 	addAuction(auctionWriter.get(), auctionData3);
 	auctionWriter->endCategory(auctionData.category, auctionData3.time);
 	auctionWriter->endProcess();
@@ -398,12 +398,12 @@ TEST(auction_simple_mode, import_state) {
 	// Re-added auctions
 	reimportAuctions(auctionWriter);
 	auctionWriter->beginProcess();
-	auctionWriter->beginCategory(auctionData5.category, auctionData5.time - rand()%1000);
+	auctionWriter->beginCategory(auctionData5.category, auctionData5.time - rand() % 1000);
 	addAuction(auctionWriter.get(), auctionData5);
-	auctionWriter->endCategory(auctionData5.category, auctionData5.time + rand()%1000);
-	auctionWriter->beginCategory(auctionData6.category, auctionData6.time - rand()%1000);
+	auctionWriter->endCategory(auctionData5.category, auctionData5.time + rand() % 1000);
+	auctionWriter->beginCategory(auctionData6.category, auctionData6.time - rand() % 1000);
 	addAuction(auctionWriter.get(), auctionData6);
-	auctionWriter->endCategory(auctionData6.category, auctionData6.time + rand()%1000);
+	auctionWriter->endCategory(auctionData6.category, auctionData6.time + rand() % 1000);
 	auctionWriter->endProcess();
 
 	dumpAuctions(auctionWriter.get(), &auctionFile, true);
@@ -450,9 +450,9 @@ static void testWriteReadAuctionsFile(std::string name) {
 
 	auctionWriter.beginProcess();
 	for(size_t i = 0; i < AUCTIONS_COUNT; i++) {
-		auctionData.uid = i; // be sure they are differents
+		auctionData.uid = i;  // be sure they are differents
 		auctionData.diffType = D_Added;
-		auctionData.previousTime = i*2;
+		auctionData.previousTime = i * 2;
 		addAuction(&auctionWriter, auctionData);
 	}
 	auctionWriter.endProcess();
@@ -462,12 +462,11 @@ static void testWriteReadAuctionsFile(std::string name) {
 	ASSERT_EQ(AUCTIONS_COUNT, auctionFile.auctions.size());
 
 	for(size_t i = 0; i < AUCTIONS_COUNT; i++) {
-		auctionData.uid = i; // be sure they are differents
+		auctionData.uid = i;  // be sure they are differents
 		auctionData.diffType = D_Added;
 		auctionData.previousTime = 0;
 		expectAuction(&auctionFile, auctionData);
 	}
-
 
 	// dump to file
 	auctionWriter.dumpAuctions(fileDataAfter, true);
@@ -480,7 +479,7 @@ static void testWriteReadAuctionsFile(std::string name) {
 		EXPECT_EQ(0, memcmp(fileDataBefore.data(), fileDataAfter2.data(), fileDataBefore.size()));
 	}
 
-	uint32_t version = ((Header*)fileDataAfter2.data())->version;
+	uint32_t version = ((Header*) fileDataAfter2.data())->version;
 	MessageBuffer structBuffer(fileDataAfter2.data(), fileDataAfter2.size(), version);
 
 	auctionFile.deserialize(&structBuffer);
@@ -490,12 +489,12 @@ static void testWriteReadAuctionsFile(std::string name) {
 
 	auctionWriter.importDump(&auctionFile);
 
-	//check all auctions
+	// check all auctions
 	dumpAuctions(&auctionWriter, &auctionFile2, true);
 	ASSERT_EQ(AUCTIONS_COUNT, auctionFile2.auctions.size());
 
 	for(size_t i = 0; i < AUCTIONS_COUNT; i++) {
-		auctionData.uid = i; // be sure they are differents
+		auctionData.uid = i;  // be sure they are differents
 		auctionData.diffType = D_Added;
 		auctionData.previousTime = 0;
 		expectAuction(&auctionFile2, auctionData);

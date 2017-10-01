@@ -1,12 +1,12 @@
 #include "ClientSession.h"
-#include "GameServerSession.h"
-#include "UploadRequest.h"
 #include "../GlobalConfig.h"
 #include "Core/PrintfFormats.h"
+#include "GameServerSession.h"
+#include "UploadRequest.h"
 
-#include <time.h>
-#include <stdio.h>
 #include "Core/Utils.h"
+#include <stdio.h>
+#include <time.h>
 
 #include "PacketEnums.h"
 #include "UploadClient/TS_UC_LOGIN_RESULT.h"
@@ -45,17 +45,19 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 	TS_UC_LOGIN_RESULT result;
 	TS_MESSAGE::initMessage<TS_UC_LOGIN_RESULT>(&result);
 
-	std::string serverName = Utils::convertToString(packet->raw_server_name, sizeof(packet->raw_server_name)-1);
+	std::string serverName = Utils::convertToString(packet->raw_server_name, sizeof(packet->raw_server_name) - 1);
 
-	log(LL_Debug, "Upload from client %s:%d, client id %u with account id %u for guild id %u on server %s\n",
-		  getStream()->getRemoteIpStr(),
-		  getStream()->getRemotePort(),
-		  packet->client_id,
-		  packet->account_id,
-		  packet->guild_id,
-		  serverName.c_str());
+	log(LL_Debug,
+	    "Upload from client %s:%d, client id %u with account id %u for guild id %u on server %s\n",
+	    getStream()->getRemoteIpStr(),
+	    getStream()->getRemotePort(),
+	    packet->client_id,
+	    packet->account_id,
+	    packet->guild_id,
+	    serverName.c_str());
 
-	currentRequest = UploadRequest::popRequest(packet->client_id, packet->account_id, packet->guild_id, packet->one_time_password, serverName);
+	currentRequest = UploadRequest::popRequest(
+	    packet->client_id, packet->account_id, packet->guild_id, packet->one_time_password, serverName);
 
 	if(currentRequest) {
 		result.result = TS_RESULT_SUCCESS;
@@ -72,14 +74,19 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	char filename[128];
 	TS_MESSAGE::initMessage<TS_UC_UPLOAD>(&result);
 
-
 	log(LL_Debug, "Upload from client %s:%d\n", getStream()->getRemoteIpStr(), getStream()->getRemotePort());
 
 	if(currentRequest == nullptr) {
-		log(LL_Warning, "Upload attempt without a request from %s:%d\n", getStream()->getRemoteIpStr(), getStream()->getRemotePort());
+		log(LL_Warning,
+		    "Upload attempt without a request from %s:%d\n",
+		    getStream()->getRemoteIpStr(),
+		    getStream()->getRemotePort());
 		result.result = TS_RESULT_NOT_EXIST;
 	} else if(packet->file_length != packet->size - sizeof(TS_CU_UPLOAD)) {
-		log(LL_Warning, "Upload packet size invalid, received %d bytes but the packet say %u bytes\n", int(packet->size - sizeof(TS_CU_UPLOAD)), packet->file_length);
+		log(LL_Warning,
+		    "Upload packet size invalid, received %d bytes but the packet say %u bytes\n",
+		    int(packet->size - sizeof(TS_CU_UPLOAD)),
+		    packet->file_length);
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 	} else if(packet->file_length > 64000) {
 		log(LL_Debug, "Upload file is too large: %d bytes. Max 64000 bytes\n", packet->file_length);
@@ -88,24 +95,31 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 		log(LL_Debug, "Upload file is not a jpeg file\n");
 		result.result = TS_RESULT_INVALID_ARGUMENT;
 	} else if(currentRequest->getGameServer()->getName().size() > sizeof(filename) / 2) {
-		log(LL_Debug, "Game server name is too long: %d\n", (int)currentRequest->getGameServer()->getName().size());
+		log(LL_Debug, "Game server name is too long: %d\n", (int) currentRequest->getGameServer()->getName().size());
 		result.result = TS_RESULT_INVALID_TEXT;
 	} else {
 		struct tm timeinfo;
 
 		Utils::getGmTime(time(NULL), &timeinfo);
 
-		snprintf(filename, sizeof(filename), "%s_%010d_%02d%02d%02d_%02d%02d%02d.jpg",
-				 currentRequest->getGameServer()->getName().c_str(),
-				 currentRequest->getGuildId(),
-				 timeinfo.tm_year % 100,
-				 timeinfo.tm_mon,
-				 timeinfo.tm_mday,
-				 timeinfo.tm_hour,
-				 timeinfo.tm_min,
-				 timeinfo.tm_sec);
+		snprintf(filename,
+		         sizeof(filename),
+		         "%s_%010d_%02d%02d%02d_%02d%02d%02d.jpg",
+		         currentRequest->getGameServer()->getName().c_str(),
+		         currentRequest->getGuildId(),
+		         timeinfo.tm_year % 100,
+		         timeinfo.tm_mon,
+		         timeinfo.tm_mday,
+		         timeinfo.tm_hour,
+		         timeinfo.tm_min,
+		         timeinfo.tm_sec);
 
-		log(LL_Debug, "Uploading image %s for client id %u with account id %u for guild %u\n", filename, currentRequest->getClientId(), currentRequest->getAccountId(), currentRequest->getGuildId());
+		log(LL_Debug,
+		    "Uploading image %s for client id %u with account id %u for guild %u\n",
+		    filename,
+		    currentRequest->getClientId(),
+		    currentRequest->getAccountId(),
+		    currentRequest->getGuildId());
 
 		std::string absoluteDir = CONFIG_GET()->upload.client.uploadDir.get();
 		std::string fullFileName = absoluteDir + "/" + filename;
@@ -121,7 +135,8 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 
 			if(dataWritten == 1) {
 				result.result = TS_RESULT_SUCCESS;
-				currentRequest->getGameServer()->sendUploadResult(currentRequest->getGuildId(), packet->file_length, filename);
+				currentRequest->getGameServer()->sendUploadResult(
+				    currentRequest->getGuildId(), packet->file_length, filename);
 			} else {
 				log(LL_Warning, "Cant write upload target file %s, disk full ?\n", fullFileName.c_str());
 				result.result = TS_RESULT_ACCESS_DENIED;
@@ -135,11 +150,11 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	sendPacket(&result);
 }
 
-bool ClientSession::checkJpegImage(uint32_t length, const unsigned char *data) {
+bool ClientSession::checkJpegImage(uint32_t length, const unsigned char* data) {
 	if(length < 2 || data[0] != 0xFF || data[1] != 0xD8)
 		return false;
 
 	return true;
 }
 
-} // namespace UploadServer
+}  // namespace UploadServer

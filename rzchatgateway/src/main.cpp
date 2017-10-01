@@ -1,33 +1,32 @@
-#include <stdio.h>
-#include "uv.h"
-#include <string.h>
-#include "Core/EventLoop.h"
-#include "LibRzuInit.h"
+#include "ChatAuthSession.h"
 #include "Config/ConfigInfo.h"
 #include "Config/GlobalCoreConfig.h"
+#include "Core/EventLoop.h"
 #include "Core/Log.h"
-#include "IrcClient.h"
 #include "GameSession.h"
-#include "ChatAuthSession.h"
+#include "IrcClient.h"
+#include "LibRzuInit.h"
+#include "uv.h"
+#include <stdio.h>
+#include <string.h>
 
-#include <vector>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 struct TrafficDump {
-	cval<bool> &enable;
-	cval<std::string> &dir, &file, &level, &consoleLevel;
+	cval<bool>& enable;
+	cval<std::string>&dir, &file, &level, &consoleLevel;
 
-	TrafficDump() :
-		enable(CFG_CREATE("trafficdump.enable", false)),
-		dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
-		file(CFG_CREATE("trafficdump.file", "chatgateway.log")),
-		level(CFG_CREATE("trafficdump.level", "debug")),
-		consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal"))
-	{
+	TrafficDump()
+	    : enable(CFG_CREATE("trafficdump.enable", false)),
+	      dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
+	      file(CFG_CREATE("trafficdump.file", "chatgateway.log")),
+	      level(CFG_CREATE("trafficdump.level", "debug")),
+	      consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal")) {
 		Utils::autoSetAbsoluteDir(dir);
 	}
-}* trafficDump;
+} * trafficDump;
 
 static void init() {
 	CFG_CREATE("game.ip", "127.0.0.1");
@@ -52,27 +51,25 @@ static void init() {
 	trafficDump = new TrafficDump;
 }
 
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char* argv[]) {
 	LibRzuInit();
 	init();
 	ConfigInfo::get()->init(argc, argv);
 
 	Log mainLogger(GlobalCoreConfig::get()->log.enable,
-				   GlobalCoreConfig::get()->log.level,
-				   GlobalCoreConfig::get()->log.consoleLevel,
-				   GlobalCoreConfig::get()->log.dir,
-				   GlobalCoreConfig::get()->log.file,
-				   GlobalCoreConfig::get()->log.maxQueueSize);
+	               GlobalCoreConfig::get()->log.level,
+	               GlobalCoreConfig::get()->log.consoleLevel,
+	               GlobalCoreConfig::get()->log.dir,
+	               GlobalCoreConfig::get()->log.file,
+	               GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 	Log trafficLogger(trafficDump->enable,
-					  trafficDump->level,
-					  trafficDump->consoleLevel,
-					  trafficDump->dir,
-					  trafficDump->file,
-					  GlobalCoreConfig::get()->log.maxQueueSize);
+	                  trafficDump->level,
+	                  trafficDump->consoleLevel,
+	                  trafficDump->dir,
+	                  trafficDump->file,
+	                  GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultPacketLogger(&trafficLogger);
 
 	ConfigInfo::get()->dump();
@@ -100,7 +97,16 @@ int main(int argc, char *argv[])
 	GameSession* gameSession = new GameSession(playername, enableGateway, &trafficLogger);
 	IrcClient* ircClient = new IrcClient(ircIp, ircPort, ircHost, ircChannel, ircNick, &trafficLogger);
 
-	ChatAuthSession* authSession = new ChatAuthSession(gameSession, ip, port, account, password, serverIdx, recoDelay, autoReco, usersa ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES);
+	ChatAuthSession* authSession =
+	    new ChatAuthSession(gameSession,
+	                        ip,
+	                        port,
+	                        account,
+	                        password,
+	                        serverIdx,
+	                        recoDelay,
+	                        autoReco,
+	                        usersa ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES);
 
 	gameSession->setIrcClient(ircClient);
 	ircClient->setGameSession(gameSession);

@@ -1,9 +1,10 @@
 #ifndef AUCTIONFILE_H
 #define AUCTIONFILE_H
 
-#include "Packet/PacketDeclaration.h"
 #include "AuctionSimpleFile.h"
+#include "Packet/PacketDeclaration.h"
 
+// clang-format off
 #define AUCTION_INFO_DEF(_) \
 	_(simple)  (uint32_t, uid) \
 	_(simple)  (int64_t, time) \
@@ -30,5 +31,4 @@ CREATE_STRUCT(AUCTION_INFO);
 	_(dynarray)(AUCTION_INFO, auctions)
 CREATE_STRUCT(AUCTION_FILE);
 
-
-#endif // AUCTIONFILE_H
+#endif  // AUCTIONFILE_H

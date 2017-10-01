@@ -1,16 +1,15 @@
 #ifndef LOGSERVER_LOGPACKETSESSION_H
 #define LOGSERVER_LOGPACKETSESSION_H
 
-#include "NetSession/SocketSession.h"
 #include "LS_11N4S.h"
+#include "NetSession/SocketSession.h"
 #include "Stream/Stream.h"
 
 class SessionServerCommon;
 
 namespace LogServer {
 
-class LogPacketSession : public SocketSession
-{
+class LogPacketSession : public SocketSession {
 	DECLARE_CLASS(LogServer::LogPacketSession)
 
 public:
@@ -39,7 +38,9 @@ public:
 	static bool hasCustomPacketLoggerStatic() { return true; }
 
 protected:
-	virtual EventChain<LogPacketSession> onPacketReceived(const LS_11N4S* packet) { return EventChain<LogPacketSession>(); }
+	virtual EventChain<LogPacketSession> onPacketReceived(const LS_11N4S* packet) {
+		return EventChain<LogPacketSession>();
+	}
 
 	void dispatchPacket(const LS_11N4S* packetData);
 	virtual void logPacket(bool outgoing, const LS_11N4S* msg);
@@ -51,6 +52,6 @@ private:
 	InputBuffer inputBuffer;
 };
 
-} // namespace LogServer
+}  // namespace LogServer
 
-#endif // PACKETSESSION_H
+#endif  // PACKETSESSION_H

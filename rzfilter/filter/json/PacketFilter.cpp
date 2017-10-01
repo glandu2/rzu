@@ -1,7 +1,7 @@
 #include "PacketFilter.h"
-#include <sstream>
-#include "Packet/JSONWriter.h"
 #include "Core/Utils.h"
+#include "Packet/JSONWriter.h"
+#include <sstream>
 
 #include "AuthClient/TS_AC_ACCOUNT_NAME.h"
 #include "AuthClient/TS_AC_AES_KEY_IV.h"
@@ -23,8 +23,8 @@
 #include "GameClient/TS_CS_ANTI_HACK.h"
 #include "GameClient/TS_CS_ARRANGE_ITEM.h"
 #include "GameClient/TS_CS_ATTACK_REQUEST.h"
-#include "GameClient/TS_CS_AUCTION_BIDDED_LIST.h"
 #include "GameClient/TS_CS_AUCTION_BID.h"
+#include "GameClient/TS_CS_AUCTION_BIDDED_LIST.h"
 #include "GameClient/TS_CS_AUCTION_CANCEL.h"
 #include "GameClient/TS_CS_AUCTION_INSTANT_PURCHASE.h"
 #include "GameClient/TS_CS_AUCTION_REGISTER.h"
@@ -128,11 +128,11 @@
 #include "GameClient/TS_CS_STOP_BOOTH.h"
 #include "GameClient/TS_CS_STOP_WATCH_BOOTH.h"
 #include "GameClient/TS_CS_STORAGE.h"
-#include "GameClient/TS_CS_SUMMON_CARD_SKILL_LIST.h"
 #include "GameClient/TS_CS_SUMMON.h"
+#include "GameClient/TS_CS_SUMMON_CARD_SKILL_LIST.h"
 #include "GameClient/TS_CS_SWAP_EQUIP.h"
-#include "GameClient/TS_CS_TAKE_ITEM.h"
 #include "GameClient/TS_CS_TAKEOUT_COMMERCIAL_ITEM.h"
+#include "GameClient/TS_CS_TAKE_ITEM.h"
 #include "GameClient/TS_CS_TARGETING.h"
 #include "GameClient/TS_CS_TRANSMIT_ETHEREAL_DURABILITY.h"
 #include "GameClient/TS_CS_TRANSMIT_ETHEREAL_DURABILITY_TO_EQUIPMENT.h"
@@ -230,8 +230,8 @@
 #include "GameClient/TS_SC_MARKET.h"
 #include "GameClient/TS_SC_MIX_RESULT.h"
 #include "GameClient/TS_SC_MOUNT_SUMMON.h"
-#include "GameClient/TS_SC_MOVE_ACK.h"
 #include "GameClient/TS_SC_MOVE.h"
+#include "GameClient/TS_SC_MOVE_ACK.h"
 #include "GameClient/TS_SC_NPC_TRADE_INFO.h"
 #include "GameClient/TS_SC_OPEN_GUILD_WINDOW.h"
 #include "GameClient/TS_SC_OPEN_ITEM_SHOP.h"
@@ -250,8 +250,8 @@
 #include "GameClient/TS_SC_REMOVE_PET_INFO.h"
 #include "GameClient/TS_SC_REMOVE_SUMMON_INFO.h"
 #include "GameClient/TS_SC_REQUEST_SECURITY_NO.h"
-#include "GameClient/TS_SC_RESULT_FOSTER.h"
 #include "GameClient/TS_SC_RESULT.h"
+#include "GameClient/TS_SC_RESULT_FOSTER.h"
 #include "GameClient/TS_SC_RESULT_NURSE.h"
 #include "GameClient/TS_SC_RESULT_RETRIEVE.h"
 #include "GameClient/TS_SC_SET_MAIN_TITLE.h"
@@ -264,15 +264,15 @@
 #include "GameClient/TS_SC_SHOW_SOULSTONE_REPAIR_WINDOW.h"
 #include "GameClient/TS_SC_SHOW_SUMMON_NAME_CHANGE.h"
 #include "GameClient/TS_SC_SHOW_WINDOW.h"
-#include "GameClient/TS_SC_SKILLCARD_INFO.h"
 #include "GameClient/TS_SC_SKILL.h"
+#include "GameClient/TS_SC_SKILLCARD_INFO.h"
 #include "GameClient/TS_SC_SKILL_LEVEL_LIST.h"
 #include "GameClient/TS_SC_SKILL_LIST.h"
 #include "GameClient/TS_SC_SP.h"
 #include "GameClient/TS_SC_STATE.h"
 #include "GameClient/TS_SC_STATE_RESULT.h"
-#include "GameClient/TS_SC_STAT_INFO.h"
 #include "GameClient/TS_SC_STATUS_CHANGE.h"
+#include "GameClient/TS_SC_STAT_INFO.h"
 #include "GameClient/TS_SC_SUMMON_EVOLUTION.h"
 #include "GameClient/TS_SC_TAKE_ITEM_RESULT.h"
 #include "GameClient/TS_SC_TAMING_INFO.h"
@@ -296,29 +296,27 @@
 
 #define PACKET_TO_JSON(type_) \
 	case type_::packetID: \
-	(void)(sizeof(&type_::getSize)); \
-	packet->process(this, &PacketFilter::showPacketJson<type_>, version, version); \
-	break;
+		(void) (sizeof(&type_::getSize)); \
+		packet->process(this, &PacketFilter::showPacketJson<type_>, version, version); \
+		break;
 
 #define PACKET_TO_JSON_2(type_) \
-	case_packet_is(type_) \
-	packet->process(this, &PacketFilter::showPacketJson<type_>, version, version); \
+	case_packet_is(type_) packet->process(this, &PacketFilter::showPacketJson<type_>, version, version); \
 	break;
 
 #define PACKET_TO_JSON_CLISERV(isServerMsg, type_serv, type_cli) \
 	case type_serv::packetID: \
-	static_assert(type_serv::packetID == type_cli::packetID, "expected same packet ID"); \
-	(void)(sizeof(&type_serv::getSize)); \
-	(void)(sizeof(&type_cli::getSize)); \
-	if(isServerMsg) \
-	    packet->process(this, &PacketFilter::showPacketJson<type_serv>, version, version); \
-	else \
-	    packet->process(this, &PacketFilter::showPacketJson<type_cli>, version, version); \
-	break;
+		static_assert(type_serv::packetID == type_cli::packetID, "expected same packet ID"); \
+		(void) (sizeof(&type_serv::getSize)); \
+		(void) (sizeof(&type_cli::getSize)); \
+		if(isServerMsg) \
+			packet->process(this, &PacketFilter::showPacketJson<type_serv>, version, version); \
+		else \
+			packet->process(this, &PacketFilter::showPacketJson<type_cli>, version, version); \
+		break;
 
-PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter *oldFilter)
-    : IFilter(client, server)
-{
+PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter* oldFilter)
+    : IFilter(client, server) {
 	if(oldFilter) {
 		data = oldFilter->data;
 		oldFilter->data = nullptr;
@@ -327,8 +325,7 @@ PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, Pac
 	}
 }
 
-PacketFilter::~PacketFilter()
-{
+PacketFilter::~PacketFilter() {
 	if(data)
 		delete data;
 }
@@ -353,29 +350,29 @@ bool PacketFilter::onServerPacket(const TS_MESSAGE* packet, ServerType serverTyp
 	else
 		printAuthPacketJson(packet, server->getPacketVersion(), true);
 
-	//if(serverType != ST_Game)
-		return true;
+	// if(serverType != ST_Game)
+	return true;
 
 	switch(packet->id) {
-//		case TS_SC_STATE_RESULT::packetID: {
-//			TS_SC_STATE_RESULT stateResult;
-//			bool ok = packet->process(stateResult, EPIC_LATEST);
-//			char buffer[1024];
+			//		case TS_SC_STATE_RESULT::packetID: {
+			//			TS_SC_STATE_RESULT stateResult;
+			//			bool ok = packet->process(stateResult, EPIC_LATEST);
+			//			char buffer[1024];
 
-//			sprintf(buffer, "DOT(caster 0x%08X, target 0x%08X, id %d Lv%d, result %d, value %d, targetval %d, total %d, final %d)",
-//					stateResult.caster_handle,
-//					stateResult.target_handle,
-//					stateResult.code,
-//					stateResult.level,
-//					stateResult.result_type,
-//					stateResult.value,
-//					stateResult.target_value,
-//					stateResult.total_amount,
-//					stateResult.final);
-//			sendChatMessage(client, buffer);
+			//			sprintf(buffer, "DOT(caster 0x%08X, target 0x%08X, id %d Lv%d, result %d, value %d, targetval
+			//%d,  total %d, final %d)", 					stateResult.caster_handle,
+			//					stateResult.target_handle,
+			//					stateResult.code,
+			//					stateResult.level,
+			//					stateResult.result_type,
+			//					stateResult.value,
+			//					stateResult.target_value,
+			//					stateResult.total_amount,
+			//					stateResult.final);
+			//			sendChatMessage(client, buffer);
 
-//			break;
-//		}
+			//			break;
+			//		}
 
 		case TS_SC_CHAT::packetID: {
 			TS_SC_CHAT chatPacket;
@@ -386,9 +383,7 @@ bool PacketFilter::onServerPacket(const TS_MESSAGE* packet, ServerType serverTyp
 			break;
 		}
 
-		case_packet_is(TS_SC_ENTER) {
-			break;
-		}
+			case_packet_is(TS_SC_ENTER) { break; }
 
 		case TS_SC_WEAR_INFO::packetID: {
 			break;
@@ -427,7 +422,8 @@ void PacketFilter::printAuthPacketJson(const TS_MESSAGE* packet, int version, bo
 
 		PACKET_TO_JSON(TS_SC_RESULT);
 
-		case 9999: break;
+		case 9999:
+			break;
 
 		default:
 			Object::logStatic(Object::LL_Warning, "rzfilter_module", "packet id %d unknown\n", packet->id);
@@ -712,7 +708,8 @@ void PacketFilter::printGamePacketJson(const TS_MESSAGE* packet, int version, bo
 
 		PACKET_TO_JSON_CLISERV(isServerMsg, TS_SC_SHOW_SOULSTONE_CRAFT_WINDOW, TS_CS_DONATE_REWARD);
 
-		case 9999: break;
+		case 9999:
+			break;
 
 		default:
 			Object::logStatic(Object::LL_Warning, "rzfilter_module", "packet id %d unknown\n", packet->id);
@@ -720,10 +717,9 @@ void PacketFilter::printGamePacketJson(const TS_MESSAGE* packet, int version, bo
 	}
 }
 
-void PacketFilter::onChatMessage(const TS_SC_CHAT* packet)
-{
-	//9:38:23
-	//2017-01-29 17:26:22
+void PacketFilter::onChatMessage(const TS_SC_CHAT* packet) {
+	// 9:38:23
+	// 2017-01-29 17:26:22
 	struct tm currentTime;
 	char newMessage[32767];
 	Utils::getGmTime(time(nullptr), &currentTime);
@@ -731,41 +727,41 @@ void PacketFilter::onChatMessage(const TS_SC_CHAT* packet)
 	if(packet->szSender[0] == '@') {
 		if(packet->szSender == "@PARTY" || packet->szSender == "@GUILD")
 			return;
-		snprintf(newMessage, sizeof(newMessage), "<b>%02d:%02d:%02d</b>: Next message: %s",
+		snprintf(newMessage,
+		         sizeof(newMessage),
+		         "<b>%02d:%02d:%02d</b>: Next message: %s",
 		         currentTime.tm_hour,
 		         currentTime.tm_min,
 		         currentTime.tm_sec,
 		         packet->szSender.c_str());
-		newMessage[sizeof(newMessage)-1] = '\0';
+		newMessage[sizeof(newMessage) - 1] = '\0';
 		sendChatMessage(client, newMessage);
 		client->sendPacket(*packet);
 		return;
 	}
 
-	snprintf(newMessage, sizeof(newMessage), "<b>%02d:%02d:%02d</b>: %s",
+	snprintf(newMessage,
+	         sizeof(newMessage),
+	         "<b>%02d:%02d:%02d</b>: %s",
 	         currentTime.tm_hour,
 	         currentTime.tm_min,
 	         currentTime.tm_sec,
 	         packet->message.c_str());
-	newMessage[sizeof(newMessage)-1] = '\0';
+	newMessage[sizeof(newMessage) - 1] = '\0';
 
 	sendChatMessage(client, newMessage, packet->szSender.c_str(), packet->type);
 }
 
-IFilter *createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter *oldFilter)
-{
+IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter) {
 	Object::logStatic(Object::LL_Info, "rzfilter_module", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketFilter(client, server, (PacketFilter*)oldFilter);
+	return new PacketFilter(client, server, (PacketFilter*) oldFilter);
 }
 
-void destroyFilter(IFilter *filter)
-{
+void destroyFilter(IFilter* filter) {
 	delete filter;
 }
 
-template<class Packet>
-void PacketFilter::showPacketJson(const Packet* packet, int version)
-{
+template<class Packet> void PacketFilter::showPacketJson(const Packet* packet, int version) {
 	JSONWriter jsonWriter(version, false);
 	packet->serialize(&jsonWriter);
 	jsonWriter.finalize();

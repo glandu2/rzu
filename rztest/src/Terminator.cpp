@@ -7,8 +7,7 @@ void Terminator::start(std::string host, uint16_t port, std::string command) {
 	connect(host.c_str(), port);
 }
 
-EventChain<SocketSession> Terminator::onConnected()
-{
+EventChain<SocketSession> Terminator::onConnected() {
 	log(LL_Debug, "Connected to %s:%d\n", host.c_str(), port);
 	log(LL_Debug, "Sending %s", command.c_str());
 	write(command.c_str(), command.size());
@@ -16,14 +15,12 @@ EventChain<SocketSession> Terminator::onConnected()
 	return SocketSession::onConnected();
 }
 
-EventChain<SocketSession> Terminator::onDisconnected(bool causedByRemote)
-{
+EventChain<SocketSession> Terminator::onDisconnected(bool causedByRemote) {
 	log(LL_Debug, "Disconnected\n");
 	return SocketSession::onDisconnected(causedByRemote);
 }
 
-EventChain<SocketSession> Terminator::onDataReceived()
-{
+EventChain<SocketSession> Terminator::onDataReceived() {
 	if(getStream()) {
 		getStream()->discardAll();
 	}

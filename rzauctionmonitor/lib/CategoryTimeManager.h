@@ -1,11 +1,11 @@
 #ifndef CATEGORYTIMEMANAGER_H
 #define CATEGORYTIMEMANAGER_H
 
+#include "AuctionFile.h"
 #include "Core/Object.h"
-#include <vector>
 #include "Extern.h"
 #include <stdint.h>
-#include "AuctionFile.h"
+#include <vector>
 
 class RZAUCTION_EXTERN CategoryTimeManager : public Object {
 	DECLARE_CLASSNAME(CategoryTimeManager, 0)
@@ -51,4 +51,4 @@ private:
 	std::vector<CategoryTime> categoryTime;
 };
 
-#endif // AUCTIONSIMPLEDIFF_H
+#endif  // AUCTIONSIMPLEDIFF_H

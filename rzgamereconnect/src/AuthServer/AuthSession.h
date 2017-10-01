@@ -1,11 +1,11 @@
 #ifndef AUTHSESSION_H
 #define AUTHSESSION_H
 
-#include "NetSession/PacketSession.h"
 #include "AuthGame/TS_GA_ACCOUNT_LIST.h"
 #include "Core/Timer.h"
-#include <time.h>
+#include "NetSession/PacketSession.h"
 #include <string>
+#include <time.h>
 #include <vector>
 
 struct TS_AG_LOGIN_RESULT;
@@ -17,19 +17,18 @@ namespace AuthServer {
 
 class GameServerSession;
 
-class AuthSession : public PacketSession
-{
+class AuthSession : public PacketSession {
 	DECLARE_CLASS(AuthServer::AuthSession)
 public:
 	static void init();
 
 	AuthSession(GameServerSession* gameServerSession,
-				uint16_t serverIdx,
-				std::string serverName,
-				std::string serverIp,
-				int32_t serverPort,
-				std::string serverScreenshotUrl,
-				bool isAdultServer);
+	            uint16_t serverIdx,
+	            std::string serverName,
+	            std::string serverIp,
+	            int32_t serverPort,
+	            std::string serverScreenshotUrl,
+	            bool isAdultServer);
 	~AuthSession();
 
 	const std::list<TS_GA_ACCOUNT_LIST::AccountInfo>& getAccountList() { return accountList; }
@@ -42,7 +41,7 @@ public:
 	bool isSynchronizedWithAuth() { return synchronizedWithAuth; }
 
 	bool loginServer();
-	void logoutClient(const TS_GA_CLIENT_LOGOUT *packet);
+	void logoutClient(const TS_GA_CLIENT_LOGOUT* packet);
 
 	void sendPacket(const TS_MESSAGE* message);
 
@@ -64,13 +63,13 @@ protected:
 
 	void onTimerReconnect();
 	void sendPacketToNetwork(const TS_MESSAGE* message);
-	//void updateObjectName();
+	// void updateObjectName();
 
-	void onLoginResult(const TS_AG_LOGIN_RESULT *packet);
-	void onClientLoginResult(const TS_AG_CLIENT_LOGIN_EXTENDED *packet);
+	void onLoginResult(const TS_AG_LOGIN_RESULT* packet);
+	void onClientLoginResult(const TS_AG_CLIENT_LOGIN_EXTENDED* packet);
 
 	void sendPendingMessages();
-	
+
 	static void commandList(IWritableConsole* console, const std::vector<std::string>& args);
 
 private:
@@ -87,7 +86,7 @@ private:
 	std::string serverScreenshotUrl;
 	bool isAdultServer;
 	time_t creationTime;
-	uint8_t guid[16]; // Used to detect lost network connection on the auth side. Must be non predictible
+	uint8_t guid[16];  // Used to detect lost network connection on the auth side. Must be non predictible
 
 	bool sentLoginPacket;
 	bool pendingLogin;
@@ -98,6 +97,6 @@ private:
 	std::list<TS_GA_ACCOUNT_LIST::AccountInfo> accountList;
 };
 
-} // namespace AuthServer
+}  // namespace AuthServer
 
-#endif // AUTHSESSION_H
+#endif  // AUTHSESSION_H

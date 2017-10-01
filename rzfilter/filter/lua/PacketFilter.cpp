@@ -1,11 +1,10 @@
 #include "PacketFilter.h"
 #include "Core/Utils.h"
 #include "LuaTableWriter.h"
-#include "PacketTemplates.h"
 #include "LuaTimer.h"
+#include "PacketTemplates.h"
 
-template<class T>
-struct SendPacketFromLuaCallback {
+template<class T> struct SendPacketFromLuaCallback {
 	void operator()(lua_State* L, IFilterEndpoint* endpoint, bool* ok) {
 		bool result = LuaEndpointMetaTable::sendPacketFromLua<T>(L, endpoint);
 		if(ok)
@@ -13,19 +12,17 @@ struct SendPacketFromLuaCallback {
 	}
 };
 
-template<class T>
-struct LuaDeclarePacketTypeNameCallback {
+template<class T> struct LuaDeclarePacketTypeNameCallback {
 	void operator()(lua_State* L) {
 		lua_pushinteger(L, T::getId(EPIC_LATEST));
 		lua_setglobal(L, T::getName());
 	}
 };
 
-template<class T>
-struct LuaSerializePackerCallback {
+template<class T> struct LuaSerializePackerCallback {
 	void operator()(lua_State* L, int version, const TS_MESSAGE* packet, bool* serializationSucess) {
 		T deserializedPacket;
-		MessageBuffer buffer((void*)packet, packet->size, version);
+		MessageBuffer buffer((void*) packet, packet->size, version);
 
 		deserializedPacket.deserialize(&buffer);
 		if(buffer.checkPacketFinalSize()) {
@@ -45,15 +42,13 @@ struct LuaSerializePackerCallback {
 };
 
 const char* const LuaEndpointMetaTable::NAME = "rzfilter.IFilterEndpoint";
-const luaL_Reg LuaEndpointMetaTable::FUNCTIONS[] = {
-    {"getPacketVersion", &getPacketVersion},
-    {"sendAuthPacket", &sendAuthPacket},
-    {"sendGamePacket", &sendGamePacket},
-    {NULL, NULL}
-};
+const luaL_Reg LuaEndpointMetaTable::FUNCTIONS[] = {{"getPacketVersion", &getPacketVersion},
+                                                    {"sendAuthPacket", &sendAuthPacket},
+                                                    {"sendGamePacket", &sendGamePacket},
+                                                    {NULL, NULL}};
 
 int LuaEndpointMetaTable::getPacketVersion(lua_State* L) {
-	LuaEndpointMetaTable *self = (LuaEndpointMetaTable*) luaL_checkudata(L, 1, NAME);
+	LuaEndpointMetaTable* self = (LuaEndpointMetaTable*) luaL_checkudata(L, 1, NAME);
 	if(!self || !self->endpoint)
 		return 0;
 
@@ -69,7 +64,6 @@ int LuaEndpointMetaTable::sendAuthPacket(lua_State* L) {
 	});
 }
 
-
 int LuaEndpointMetaTable::sendGamePacket(lua_State* L) {
 	return sendPacket(L, [](int packetId, bool isServerPacket, lua_State* L, IFilterEndpoint* endpoint) {
 		bool ok = true;
@@ -78,15 +72,13 @@ int LuaEndpointMetaTable::sendGamePacket(lua_State* L) {
 	});
 }
 
-template<typename Callback>
-int LuaEndpointMetaTable::sendPacket(lua_State* L, Callback callback) {
-
-	LuaEndpointMetaTable *self = (LuaEndpointMetaTable*) luaL_checkudata(L, 1, NAME);
+template<typename Callback> int LuaEndpointMetaTable::sendPacket(lua_State* L, Callback callback) {
+	LuaEndpointMetaTable* self = (LuaEndpointMetaTable*) luaL_checkudata(L, 1, NAME);
 
 	if(!self || !self->endpoint)
 		return 0;
 
-	IFilterEndpoint *endpoint = self->endpoint;
+	IFilterEndpoint* endpoint = self->endpoint;
 	luaL_checktype(L, 2, LUA_TTABLE);
 
 	lua_getfield(L, 2, "id");
@@ -94,7 +86,7 @@ int LuaEndpointMetaTable::sendPacket(lua_State* L, Callback callback) {
 		luaL_error(L, "Bad packet field type for id, expected integer, got %s", lua_typename(L, lua_type(L, -1)));
 	}
 
-	int packetId = (int)lua_tointeger(L, -1);
+	int packetId = (int) lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
 	bool ok = callback(packetId, self->isServerEndpoint, L, endpoint);
@@ -106,8 +98,7 @@ int LuaEndpointMetaTable::sendPacket(lua_State* L, Callback callback) {
 	return 0;
 }
 
-template<class T>
-bool LuaEndpointMetaTable::sendPacketFromLua(lua_State* L, IFilterEndpoint *endpoint) {
+template<class T> bool LuaEndpointMetaTable::sendPacketFromLua(lua_State* L, IFilterEndpoint* endpoint) {
 	T packet;
 	LuaTableWriter luaDeserialiser(L, endpoint->getPacketVersion());
 
@@ -121,30 +112,27 @@ bool LuaEndpointMetaTable::sendPacketFromLua(lua_State* L, IFilterEndpoint *endp
 	return true;
 }
 
-
-
-PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter *)
-    : IFilter(client, server), clientEndpoint(client, false), serverEndpoint(server, true)
-{
+PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter*)
+    : IFilter(client, server), clientEndpoint(client, false), serverEndpoint(server, true) {
 	initLuaVM();
 }
 
-PacketFilter::~PacketFilter()
-{
+PacketFilter::~PacketFilter() {
 	deinitLuaVM();
 }
 
-bool PacketFilter::onServerPacket(const TS_MESSAGE* packet, ServerType serverType)
-{
+bool PacketFilter::onServerPacket(const TS_MESSAGE* packet, ServerType serverType) {
 	return luaCallPacket(lua_onServerPacketFunction, "onServerPacket", packet, serverType);
 }
 
-bool PacketFilter::onClientPacket(const TS_MESSAGE* packet, ServerType serverType)
-{
+bool PacketFilter::onClientPacket(const TS_MESSAGE* packet, ServerType serverType) {
 	return luaCallPacket(lua_onClientPacketFunction, "onClientPacket", packet, serverType);
 }
 
-bool PacketFilter::luaCallPacket(int function, const char* functionName, const TS_MESSAGE* packet, ServerType serverType) {
+bool PacketFilter::luaCallPacket(int function,
+                                 const char* functionName,
+                                 const TS_MESSAGE* packet,
+                                 ServerType serverType) {
 	if(packet->id == 9999)
 		return true;
 
@@ -159,16 +147,17 @@ bool PacketFilter::luaCallPacket(int function, const char* functionName, const T
 		pushEndpoint(L, &clientEndpoint);
 		pushEndpoint(L, &serverEndpoint);
 		if(!pushPacket(L, packet, server->getPacketVersion(), false, serverType)) {
-			Object::logStatic(Object::LL_Error, "rzfilter_lua_module", "Cannot serialize packet id: %d\n",
-			                             packet->id);
+			Object::logStatic(Object::LL_Error, "rzfilter_lua_module", "Cannot serialize packet id: %d\n", packet->id);
 			lua_settop(L, topBeforeCall);
 			return true;
 		}
 		lua_pushinteger(L, serverType);
 
 		int result = lua_pcall(L, 4, 1, -6);
-		if (result) {
-			Object::logStatic(Object::LL_Error, "rzfilter_lua_module", "Cannot run lua %s function: %d:%s\n",
+		if(result) {
+			Object::logStatic(Object::LL_Error,
+			                  "rzfilter_lua_module",
+			                  "Cannot run lua %s function: %d:%s\n",
 			                  functionName,
 			                  result,
 			                  lua_tostring(L, -1));
@@ -188,13 +177,12 @@ bool PacketFilter::luaCallPacket(int function, const char* functionName, const T
 }
 
 int PacketFilter::luaMessageHandler(lua_State* L) {
-	const char *msg = lua_tostring(L, 1);
+	const char* msg = lua_tostring(L, 1);
 	luaL_traceback(L, L, msg, 1);
 	return 1;
 }
 
-void PacketFilter::initLuaVM()
-{
+void PacketFilter::initLuaVM() {
 	deinitLuaVM();
 
 	L = luaL_newstate();
@@ -226,50 +214,51 @@ void PacketFilter::initLuaVM()
 	lua_pushcfunction(L, &luaMessageHandler);
 
 	const char* const filename = "rzfilter.lua";
-	int result  = luaL_loadfilex(L, filename, nullptr);
-	if (result) {
-		Object::logStatic(Object::LL_Error, "rzfilter_lua_module", "Cannot load lua file %s: %s\n",
-		                 filename,
-		                 lua_tostring(L, -1));
-		lua_pop(L, 2); // remove the error object and the message handler
+	int result = luaL_loadfilex(L, filename, nullptr);
+	if(result) {
+		Object::logStatic(
+		    Object::LL_Error, "rzfilter_lua_module", "Cannot load lua file %s: %s\n", filename, lua_tostring(L, -1));
+		lua_pop(L, 2);  // remove the error object and the message handler
 		return;
 	}
 
 	result = lua_pcall(L, 0, 0, -2);
-	if (result) {
-		Object::logStatic(Object::LL_Error, "rzfilter_lua_module", "Cannot run lua file %s: %s\n",
-		                 filename,
-		                 lua_tostring(L, -1));
-		lua_pop(L, 2); // remove the error object and the message handler
+	if(result) {
+		Object::logStatic(
+		    Object::LL_Error, "rzfilter_lua_module", "Cannot run lua file %s: %s\n", filename, lua_tostring(L, -1));
+		lua_pop(L, 2);  // remove the error object and the message handler
 		return;
 	}
-	lua_pop(L, 1); // remove the message handler
+	lua_pop(L, 1);  // remove the message handler
 
 	lua_getglobal(L, "onServerPacket");
 	if(lua_isfunction(L, -1)) {
 		lua_onServerPacketFunction = luaL_ref(L, LUA_REGISTRYINDEX);
-		lua_pushnil(L); // for the next pop as luaL_ref pop the value
+		lua_pushnil(L);  // for the next pop as luaL_ref pop the value
 	} else {
-		Object::logStatic(Object::LL_Error, "rzfilter_lua_module",
+		Object::logStatic(Object::LL_Error,
+		                  "rzfilter_lua_module",
 		                  "Lua register: onServerPacket must be a lua function matching its C counterpart: "
-		                  "bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType)\n");
+		                  "bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* "
+		                  "packet, ServerType serverType)\n");
 	}
 	lua_pop(L, 1);
 
 	lua_getglobal(L, "onClientPacket");
 	if(lua_isfunction(L, -1)) {
 		lua_onClientPacketFunction = luaL_ref(L, LUA_REGISTRYINDEX);
-		lua_pushnil(L); // for the next pop as luaL_ref pop the value
+		lua_pushnil(L);  // for the next pop as luaL_ref pop the value
 	} else {
-		Object::logStatic(Object::LL_Error, "rzfilter_lua_module",
+		Object::logStatic(Object::LL_Error,
+		                  "rzfilter_lua_module",
 		                  "Lua register: onClientPacket must be a lua function matching its C counterpart: "
-		                  "bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, ServerType serverType)\n");
+		                  "bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* "
+		                  "packet, ServerType serverType)\n");
 	}
 	lua_pop(L, 1);
 }
 
-void PacketFilter::deinitLuaVM()
-{
+void PacketFilter::deinitLuaVM() {
 	if(L) {
 		if(lua_onServerPacketFunction != LUA_NOREF) {
 			luaL_unref(L, LUA_REGISTRYINDEX, lua_onServerPacketFunction);
@@ -284,11 +273,10 @@ void PacketFilter::deinitLuaVM()
 	}
 }
 
-int PacketFilter::luaPrintToLogs(lua_State* L)
-{
+int PacketFilter::luaPrintToLogs(lua_State* L) {
 	int nargs = lua_gettop(L);
 
-	for (int i=1; i <= nargs; i++) {
+	for(int i = 1; i <= nargs; i++) {
 		const char* str = lua_tostring(L, i);
 		Object::logStatic(Object::LL_Info, "rzfilter_lua_module", "Lua message: %s\n", str);
 	}
@@ -296,33 +284,31 @@ int PacketFilter::luaPrintToLogs(lua_State* L)
 	return 0;
 }
 
-void PacketFilter::pushEndpoint(lua_State* L, LuaEndpointMetaTable* endpoint)
-{
+void PacketFilter::pushEndpoint(lua_State* L, LuaEndpointMetaTable* endpoint) {
 	lua_pushlightuserdata(L, endpoint);
 	luaL_getmetatable(L, LuaEndpointMetaTable::NAME);
 	lua_setmetatable(L, -2);
 }
 
-bool PacketFilter::pushPacket(lua_State* L, const TS_MESSAGE* packet, int version, bool isServer, ServerType serverType)
-{
+bool PacketFilter::pushPacket(
+    lua_State* L, const TS_MESSAGE* packet, int version, bool isServer, ServerType serverType) {
 	bool ok;
 	bool serializationSucess = false;
 
 	if(serverType == ST_Game)
-		ok = processGamePacket<LuaSerializePackerCallback>(packet->id, isServer, L, version, packet, &serializationSucess);
+		ok = processGamePacket<LuaSerializePackerCallback>(
+		    packet->id, isServer, L, version, packet, &serializationSucess);
 	else
 		ok = processAuthPacket<LuaSerializePackerCallback>(packet->id, L, version, packet, &serializationSucess);
 
 	return ok && serializationSucess;
 }
 
-IFilter *createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter *oldFilter)
-{
+IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter) {
 	Object::logStatic(Object::LL_Info, "rzfilter_lua_module", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketFilter(client, server, (PacketFilter*)oldFilter);
+	return new PacketFilter(client, server, (PacketFilter*) oldFilter);
 }
 
-void destroyFilter(IFilter *filter)
-{
+void destroyFilter(IFilter* filter) {
 	delete filter;
 }

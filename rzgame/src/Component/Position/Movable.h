@@ -26,6 +26,6 @@ protected:
 	float targetY;
 };
 
-}
+}  // namespace GameServer
 
 #endif

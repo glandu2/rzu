@@ -15,15 +15,11 @@ struct AuctionDataEnd {
 
 enum DurationType {
 	DT_Unknown = 0,
-	DT_Short = 1,  // 6h
-	DT_Medium = 2, // 24h
-	DT_Long = 3    // 72h
+	DT_Short = 1,   // 6h
+	DT_Medium = 2,  // 24h
+	DT_Long = 3     // 72h
 };
-enum BidFlag {
-	BF_Bidded = 0,
-	BF_MyBid = 1,
-	BF_NoBid = 2
-};
+enum BidFlag { BF_Bidded = 0, BF_MyBid = 1, BF_NoBid = 2 };
 
 enum DiffType {
 	D_Added = 0,
@@ -35,11 +31,7 @@ enum DiffType {
 	D_Invalid = 0xFFFF
 };
 
-enum DumpType {
-	DT_Diff,
-	DT_Full,
-	DT_UnknownDumpType
-};
+enum DumpType { DT_Diff, DT_Full, DT_UnknownDumpType };
 
 struct AuctionFileHeader {
 	char signature[4];
@@ -54,6 +46,7 @@ enum AuctionFileVersion {
 	AUCTION_LATEST = AUCTION_VERSION_NUM - 1
 };
 
+// clang-format off
 #define AUCTION_CATEGORY_INFO_DEF(_) \
 	_(simple)(int64_t, previousBegin, version < AUCTION_V5) \
 	_(simple)(int64_t, beginTime) \
@@ -84,5 +77,4 @@ CREATE_STRUCT(AUCTION_SIMPLE_INFO);
 	_(dynarray)(AUCTION_SIMPLE_INFO, auctions)
 CREATE_STRUCT(AUCTION_SIMPLE_FILE);
 
-
-#endif // AUCTIONSIMPLEFILE_H
+#endif  // AUCTIONSIMPLEFILE_H

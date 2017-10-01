@@ -1,19 +1,17 @@
 #ifndef FILTERPROXY_H
 #define FILTERPROXY_H
 
-#include "IFilter.h"
 #include "Core/Object.h"
+#include "IFilter.h"
 
 class FilterManager;
 
-class FilterProxy : public IFilter
-{
+class FilterProxy : public IFilter {
 public:
 	FilterProxy(FilterManager* filterManager, IFilterEndpoint* client, IFilterEndpoint* server);
 	virtual ~FilterProxy();
 	virtual bool onServerPacket(const TS_MESSAGE* packet, ServerType serverType);
 	virtual bool onClientPacket(const TS_MESSAGE* packet, ServerType serverType);
-
 
 protected:
 	void setFilterModule(IFilter* filterModule) { this->filterModule = filterModule; }
@@ -28,4 +26,4 @@ private:
 	IFilter* filterModule;
 };
 
-#endif // FILTERPROXY_H
+#endif  // FILTERPROXY_H

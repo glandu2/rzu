@@ -1,13 +1,13 @@
 #ifndef AUCTIONSIMPLEDIFF_H
 #define AUCTIONSIMPLEDIFF_H
 
+#include "AuctionGenericWriter.h"
+#include "AuctionSimpleData.h"
+#include "AuctionSimpleFile.h"
 #include "Core/Object.h"
-#include <vector>
 #include "Extern.h"
 #include <stdint.h>
-#include "AuctionSimpleFile.h"
-#include "AuctionSimpleData.h"
-#include "AuctionGenericWriter.h"
+#include <vector>
 
 class RZAUCTION_EXTERN AuctionSimpleDiffWriter : public AuctionGenericWriter<AuctionSimpleData> {
 	DECLARE_CLASSNAME(AuctionSimpleDiffWriter, 0)
@@ -15,13 +15,13 @@ class RZAUCTION_EXTERN AuctionSimpleDiffWriter : public AuctionGenericWriter<Auc
 public:
 	AuctionSimpleDiffWriter(size_t categoryCount);
 
-	void addAuctionInfo(AuctionUid uid, uint64_t time, uint16_t category, const uint8_t *data, size_t len);
+	void addAuctionInfo(AuctionUid uid, uint64_t time, uint16_t category, const uint8_t* data, size_t len);
 	void beginProcess();
 	void endProcess();
 
-	void dumpAuctions(std::vector<uint8_t> &output, bool doFullDump);
+	void dumpAuctions(std::vector<uint8_t>& output, bool doFullDump);
 	AUCTION_SIMPLE_FILE exportDump(bool doFullDump);
 	void importDump(const AUCTION_SIMPLE_FILE* auctionFile);
 };
 
-#endif // AUCTIONSIMPLEDIFF_H
+#endif  // AUCTIONSIMPLEDIFF_H

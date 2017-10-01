@@ -8,8 +8,7 @@ namespace GameServer {
 
 class ReferenceDataMgr;
 
-class RefDataLoader : public Object
-{
+class RefDataLoader : public Object {
 public:
 	RefDataLoader();
 
@@ -23,9 +22,7 @@ private:
 	ReferenceDataMgr* refMgr;
 };
 
-template<class RefDataStruct, class RefDataBinding>
-class RefDataLoaderHelper : public RefDataLoader
-{
+template<class RefDataStruct, class RefDataBinding> class RefDataLoaderHelper : public RefDataLoader {
 public:
 	struct Input {};
 	typedef RefDataStruct Output;
@@ -60,7 +57,7 @@ protected:
 			}
 		}
 
-		log(LL_Info, "Loaded %d lines\n", (int)data.size());
+		log(LL_Info, "Loaded %d lines\n", (int) data.size());
 
 		dataLoaded();
 	}
@@ -71,8 +68,9 @@ private:
 };
 
 template<class RefDataStruct, class RefDataBinding>
-std::unordered_map<int32_t, const std::unique_ptr<RefDataStruct>> RefDataLoaderHelper<RefDataStruct, RefDataBinding>::data;
+std::unordered_map<int32_t, const std::unique_ptr<RefDataStruct>>
+    RefDataLoaderHelper<RefDataStruct, RefDataBinding>::data;
 
-}
+}  // namespace GameServer
 
-#endif // REFDATALOADER_H
+#endif  // REFDATALOADER_H

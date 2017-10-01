@@ -1,23 +1,25 @@
 #ifndef PACKETFILTER_H
 #define PACKETFILTER_H
 
-#include "IFilter.h"
-#include "LibGlobal.h"
-#include "GameClient/TS_SC_INVENTORY.h"
+#include "GameClient/TS_CS_CHAT_REQUEST.h"
 #include "GameClient/TS_SC_ATTACK_EVENT.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
-#include "GameClient/TS_CS_CHAT_REQUEST.h"
+#include "GameClient/TS_SC_INVENTORY.h"
+#include "IFilter.h"
+#include "LibGlobal.h"
 #include <unordered_map>
 
 struct TS_SC_CHAT;
 
-class PacketFilter : public IFilter
-{
+class PacketFilter : public IFilter {
 public:
 	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter* data);
 	~PacketFilter();
 
-	void sendChatMessage(IFilterEndpoint* client, const char* msg, const char* sender = "Filter", TS_CHAT_TYPE type = CHAT_WHISPER);
+	void sendChatMessage(IFilterEndpoint* client,
+	                     const char* msg,
+	                     const char* sender = "Filter",
+	                     TS_CHAT_TYPE type = CHAT_WHISPER);
 
 	virtual bool onServerPacket(const TS_MESSAGE* packet, ServerType serverType);
 	virtual bool onClientPacket(const TS_MESSAGE* packet, ServerType serverType);
@@ -48,4 +50,4 @@ SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* se
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 
-#endif // PACKETFILTER_H
+#endif  // PACKETFILTER_H

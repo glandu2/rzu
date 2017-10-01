@@ -1,17 +1,15 @@
+#include "AuctionFile.h"
+#include "AuctionWriter.h"
+#include "Config/GlobalCoreConfig.h"
+#include "Core/Log.h"
+#include "LibRzuInit.h"
+#include "Packet/JSONWriter.h"
 #include <stdint.h>
 #include <vector>
-#include "Core/Log.h"
-#include "Config/GlobalCoreConfig.h"
-#include "LibRzuInit.h"
-#include "AuctionFile.h"
-#include "Packet/JSONWriter.h"
-#include "AuctionWriter.h"
 
 cval<bool>& compactJson = CFG_CREATE("compactjson", false);
 
-template<class AUCTION_FILE>
-int writeJson(const AUCTION_FILE& auctionFile) {
-
+template<class AUCTION_FILE> int writeJson(const AUCTION_FILE& auctionFile) {
 	JSONWriter jsonWriter(auctionFile.header.file_version, compactJson.get());
 	auctionFile.serialize(&jsonWriter);
 	jsonWriter.finalize();
@@ -26,11 +24,11 @@ int main(int argc, char* argv[]) {
 	ConfigInfo::get()->init(argc, argv);
 
 	Log mainLogger(GlobalCoreConfig::get()->log.enable,
-				   GlobalCoreConfig::get()->log.level,
-				   GlobalCoreConfig::get()->log.consoleLevel,
-				   GlobalCoreConfig::get()->log.dir,
-				   GlobalCoreConfig::get()->log.file,
-				   GlobalCoreConfig::get()->log.maxQueueSize);
+	               GlobalCoreConfig::get()->log.level,
+	               GlobalCoreConfig::get()->log.consoleLevel,
+	               GlobalCoreConfig::get()->log.dir,
+	               GlobalCoreConfig::get()->log.file,
+	               GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 	ConfigInfo::get()->dump();
@@ -44,7 +42,11 @@ int main(int argc, char* argv[]) {
 	for(i = 1; i < argc; i++) {
 		const char* filename = argv[i];
 
-		if(filename[0] == '/' || filename[0] == '-')
+#ifdef _WIN32
+		if(filename[0] == '/')
+			continue;
+#endif
+		if(filename[0] == '-')
 			continue;
 
 		std::vector<uint8_t> data;
@@ -78,7 +80,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", i-1);
+	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", i - 1);
 
 	return 0;
 }

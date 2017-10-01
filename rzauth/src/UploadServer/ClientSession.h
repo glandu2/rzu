@@ -1,8 +1,8 @@
 #ifndef UPLOADSERVER_CLIENTSESSION_H
 #define UPLOADSERVER_CLIENTSESSION_H
 
-#include "NetSession/PacketSession.h"
 #include "NetSession/EncryptedSession.h"
+#include "NetSession/PacketSession.h"
 
 #include "UploadClient/TS_CU_LOGIN.h"
 #include "UploadClient/TS_CU_UPLOAD.h"
@@ -11,8 +11,7 @@ namespace UploadServer {
 
 class UploadRequest;
 
-class ClientSession : public EncryptedSession<PacketSession>
-{
+class ClientSession : public EncryptedSession<PacketSession> {
 	DECLARE_CLASS(UploadServer::ClientSession)
 
 public:
@@ -24,7 +23,7 @@ protected:
 	void onLogin(const TS_CU_LOGIN* packet);
 	void onUpload(const TS_CU_UPLOAD* packet);
 
-	bool checkJpegImage(uint32_t length, const unsigned char *data);
+	bool checkJpegImage(uint32_t length, const unsigned char* data);
 
 private:
 	~ClientSession();
@@ -32,6 +31,6 @@ private:
 	UploadRequest* currentRequest;
 };
 
-}
+}  // namespace UploadServer
 
-#endif // UPLOADSERVER_CLIENTSESSION_H
+#endif  // UPLOADSERVER_CLIENTSESSION_H

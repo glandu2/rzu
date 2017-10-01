@@ -1,12 +1,12 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
 #include "../GlobalConfig.h"
 #include "PacketEnums.h"
+#include "RzTest.h"
 #include "UploadGame/TS_SU_LOGIN.h"
-#include "UploadGame/TS_US_LOGIN_RESULT.h"
 #include "UploadGame/TS_SU_REQUEST_UPLOAD.h"
+#include "UploadGame/TS_US_LOGIN_RESULT.h"
 #include "UploadGame/TS_US_REQUEST_UPLOAD.h"
 #include "UploadGame/TS_US_UPLOAD.h"
+#include "gtest/gtest.h"
 
 namespace UploadServer {
 
@@ -113,4 +113,4 @@ TEST(TS_SU_REQUEST_UPLOAD, double_request) {
 	test.run();
 }
 
-} // namespace UploadServer
+}  // namespace UploadServer

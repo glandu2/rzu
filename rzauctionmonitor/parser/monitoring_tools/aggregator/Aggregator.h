@@ -1,11 +1,11 @@
 #ifndef AGGREGATOR_H
 #define AGGREGATOR_H
 
-#include <stdint.h>
-#include <unordered_map>
 #include "Core/Object.h"
 #include "HttpClientSession.h"
 #include "IParser.h"
+#include <stdint.h>
+#include <unordered_map>
 
 struct AUCTION_FILE;
 struct AUCTION_INFO;
@@ -77,7 +77,6 @@ private:
 		C_CraftMaterials = 17,
 		C_Supplies = 18
 	};
-
 
 	HttpClientSession httpClientSession;
 	cval<std::string>& url;

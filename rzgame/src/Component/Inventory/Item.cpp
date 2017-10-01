@@ -4,7 +4,7 @@
 
 namespace GameServer {
 
-Item::Item(DB_Item *dbItem) {
+Item::Item(DB_Item* dbItem) {
 	summon_id = dbItem->summon_id;
 	idx = dbItem->idx;
 	code = dbItem->code;
@@ -26,7 +26,7 @@ Item::Item(DB_Item *dbItem) {
 	addObject(dbItem->sid, this);
 }
 
-void Item::fillInventoryItem(TS_ITEM_INFO &item) {
+void Item::fillInventoryItem(TS_ITEM_INFO& item) {
 	item.own_summon_handle = summon_id;
 	item.index = idx;
 	item.base_info.code = code;
@@ -49,4 +49,4 @@ void Item::fillInventoryItem(TS_ITEM_INFO &item) {
 	memset(item.base_info.awaken_option.value, 0, sizeof(item.base_info.awaken_option.value));
 }
 
-}
+}  // namespace GameServer

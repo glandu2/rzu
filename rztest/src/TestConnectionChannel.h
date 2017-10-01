@@ -1,16 +1,16 @@
 #ifndef TESTCONNECTIONCHANNEL_H
 #define TESTCONNECTIONCHANNEL_H
 
-#include <string>
 #include <list>
+#include <string>
 
-#include "Extern.h"
-#include "Core/Timer.h"
 #include "Core/Object.h"
+#include "Core/Timer.h"
+#include "Extern.h"
 #include "Packet/PacketBaseMessage.h"
 
-#include <functional>
 #include "gtest/gtest.h"
+#include <functional>
 
 class RzTest;
 class TestPacketServer;
@@ -31,36 +31,29 @@ template<typename T> class cval;
  * This class allow to execute callbacks on event reception (received packet of connection/disconnection events)
  * These callbacks are meant to test if the network event is expected and send network packets
  */
-class RZTEST_EXTERN TestConnectionChannel : public Object
-{
+class RZTEST_EXTERN TestConnectionChannel : public Object {
 	DECLARE_CLASS(TestConnectionChannel)
 public:
 	struct Event {
-		enum Type {
-			Connection,
-			Disconnection,
-			Packet
-		};
+		enum Type { Connection, Disconnection, Packet };
 		Type type;
 		const TS_MESSAGE* packet;
 
 		template<typename T>
-		typename std::enable_if<std::is_base_of<TS_MESSAGE, T>::value, const T*>::type
-		getPacket() {
+		typename std::enable_if<std::is_base_of<TS_MESSAGE, T>::value, const T*>::type getPacket() {
 			const T* p = static_cast<const T*>(packet);
 			if(!p)
 				return nullptr;
 
 			// force taking the value instead of reference to packetID
-			EXPECT_EQ((const uint16_t)T::packetID, p->id);
+			EXPECT_EQ((const uint16_t) T::packetID, p->id);
 			if(p->id == T::packetID)
 				return p;
 			else
 				return nullptr;
 		}
 
-		template<typename T>
-		bool deserializePacket(T& p, int version) {
+		template<typename T> bool deserializePacket(T& p, int version) {
 			// force taking the value instead of reference to packetID
 			EXPECT_EQ(p.getId(version), packet->id);
 			if(packet->id != p.getId(version))
@@ -70,12 +63,9 @@ public:
 		}
 	};
 
-	enum Type {
-		Client,
-		Server
-	};
+	enum Type { Client, Server };
 
-	//typedef void (*EventCallback)(RzTest* test, Event event, PacketSession* session);
+	// typedef void (*EventCallback)(RzTest* test, Event event, PacketSession* session);
 	typedef std::function<void(TestConnectionChannel* channel, Event event)> EventCallback;
 	typedef std::function<void(TestConnectionChannel* channel)> YieldCallback;
 
@@ -106,8 +96,9 @@ public:
 	/**
 	 * @brief getPendingCallbacks
 	 * Get the number of callback not triggered
-	 * The number can be > 0 after the test if there are events that were expected (and so a callback was registered for them) but didn't happen
-	 * This function is used by RzTest to check that all callbacks were triggered after each test
+	 * The number can be > 0 after the test if there are events that were expected (and so a callback was registered for
+	 * them) but didn't happen This function is used by RzTest to check that all callbacks were triggered after each
+	 * test
 	 * @return the number of pending callbacks
 	 */
 	size_t getPendingCallbacks() { return eventCallbacks.size(); }
@@ -115,7 +106,8 @@ public:
 	/**
 	 * @brief getPort
 	 * Used by RzTest when callbacks are still pending after a test,
-	 * to print the port associated with the channel (to identify in logs which channel still have callbacks pending after a test)
+	 * to print the port associated with the channel (to identify in logs which channel still have callbacks pending
+	 * after a test)
 	 * @return
 	 */
 	int getPort();
@@ -147,7 +139,7 @@ public:
 	 * Send a packet to remote end
 	 * @param packet the packet to send
 	 */
-	void sendPacket(const TS_MESSAGE *packet);
+	void sendPacket(const TS_MESSAGE* packet);
 
 	/**
 	 * @brief closeSession
@@ -168,13 +160,13 @@ public:
 	 * unbind a client session with the channel (when disconnected)
 	 * @param session the session to unbind
 	 */
-	void unregisterSession(PacketSession *session);
+	void unregisterSession(PacketSession* session);
 
 	bool isConnected();
 
 protected:
 	void callEventCallback(Event event, PacketSession* session);
-	static TS_MESSAGE *copyMessage(const TS_MESSAGE *packet);
+	static TS_MESSAGE* copyMessage(const TS_MESSAGE* packet);
 
 	void startClient();
 	void startServer();
@@ -183,7 +175,7 @@ private:
 	struct YieldData {
 		Timer<YieldData> timer;
 		YieldCallback callback;
-		TestConnectionChannel *instance;
+		TestConnectionChannel* instance;
 
 		void executeTimerForYield();
 	};
@@ -198,4 +190,4 @@ private:
 	RzTest* test;
 };
 
-#endif // TESTCONNECTIONCHANNEL_H
+#endif  // TESTCONNECTIONCHANNEL_H

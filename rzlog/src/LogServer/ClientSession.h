@@ -10,8 +10,7 @@ namespace LogServer {
 
 class UploadRequest;
 
-class ClientSession : public LogPacketSession
-{
+class ClientSession : public LogPacketSession {
 	DECLARE_CLASS(LogServer::ClientSession)
 
 public:
@@ -31,7 +30,7 @@ protected:
 
 	bool isDateNeedNewFile(const struct tm& date);
 	bool checkName(std::string name);
-	void updateOpenedFile(const tm &date);
+	void updateOpenedFile(const tm& date);
 
 private:
 	~ClientSession();
@@ -45,6 +44,6 @@ private:
 	} fileDate;
 };
 
-}
+}  // namespace LogServer
 
-#endif // UPLOADSERVER_CLIENTSESSION_H
+#endif  // UPLOADSERVER_CLIENTSESSION_H

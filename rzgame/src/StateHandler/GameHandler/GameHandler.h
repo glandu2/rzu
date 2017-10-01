@@ -1,19 +1,18 @@
 #ifndef GAMEHANDLER_H
 #define GAMEHANDLER_H
 
-#include "ConnectionHandler.h"
 #include "Component/Character/Character.h"
-#include <memory>
-#include "GameClient/TS_CS_PUTON_ITEM.h"
-#include "GameClient/TS_CS_PUTOFF_ITEM.h"
+#include "ConnectionHandler.h"
 #include "GameClient/TS_CS_MOVE_REQUEST.h"
+#include "GameClient/TS_CS_PUTOFF_ITEM.h"
+#include "GameClient/TS_CS_PUTON_ITEM.h"
+#include <memory>
 
 namespace GameServer {
 
 class ClientSession;
 
-class GameHandler : public ConnectionHandler
-{
+class GameHandler : public ConnectionHandler {
 	DECLARE_CLASS(GameServer::GameHandler)
 public:
 	GameHandler(ClientSession* session, std::unique_ptr<Character> character);
@@ -29,6 +28,6 @@ private:
 	std::unique_ptr<Character> character;
 };
 
-} // namespace GameServer
+}  // namespace GameServer
 
-#endif // GAMEHANDLER_H
+#endif  // GAMEHANDLER_H

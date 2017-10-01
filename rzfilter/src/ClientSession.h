@@ -1,13 +1,13 @@
 #ifndef CLIENTSESSION_H
 #define CLIENTSESSION_H
 
+#include "IFilterEndpoint.h"
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
-#include <stdint.h>
-#include <unordered_map>
-#include <string>
 #include "ServerSession.h"
-#include "IFilterEndpoint.h"
+#include <stdint.h>
+#include <string>
+#include <unordered_map>
 
 class FilterProxy;
 
@@ -15,8 +15,7 @@ class FilterProxy;
  * @brief The ClientSession class
  * Spawned when a client connects to the filter
  */
-class ClientSession : public EncryptedSession<PacketSession>, public IFilterEndpoint
-{
+class ClientSession : public EncryptedSession<PacketSession>, public IFilterEndpoint {
 	DECLARE_CLASS(ClientSession)
 
 public:
@@ -24,13 +23,17 @@ public:
 
 	void sendPacket(MessageBuffer& buffer) {
 		if(buffer.checkPacketFinalSize() == false) {
-			log(LL_Error, "Wrong packet buffer size, id: %d, size: %d, field: %s\n", buffer.getMessageId(), buffer.getSize(), buffer.getFieldInOverflow().c_str());
+			log(LL_Error,
+			    "Wrong packet buffer size, id: %d, size: %d, field: %s\n",
+			    buffer.getMessageId(),
+			    buffer.getSize(),
+			    buffer.getFieldInOverflow().c_str());
 		} else {
-			logPacket(true, (const TS_MESSAGE*)buffer.getData());
+			logPacket(true, (const TS_MESSAGE*) buffer.getData());
 			write(buffer.getWriteRequest());
 		}
 	}
-	void sendPacket(const TS_MESSAGE *data) { PacketSession::sendPacket(data); }
+	void sendPacket(const TS_MESSAGE* data) { PacketSession::sendPacket(data); }
 	int getPacketVersion() { return version; }
 
 	virtual void onServerPacketReceived(const TS_MESSAGE* packet);
@@ -51,11 +54,10 @@ protected:
 	~ClientSession();
 
 private:
-
 	ServerSession serverSession;
 	FilterProxy* packetFilter;
 	int version;
 	bool authMode;
 };
 
-#endif // CLIENTSESSION_H
+#endif  // CLIENTSESSION_H

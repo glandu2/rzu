@@ -9,13 +9,12 @@
 
 namespace UploadServer {
 
-class GameServerSession : public PacketSession
-{
+class GameServerSession : public PacketSession {
 	DECLARE_CLASS(UploadServer::GameServerSession)
 public:
 	GameServerSession();
 
-	void sendUploadResult(uint32_t guidId, uint32_t fileSize, const char *fileName);
+	void sendUploadResult(uint32_t guidId, uint32_t fileSize, const char* fileName);
 	const std::string& getName() { return serverName; }
 
 protected:
@@ -32,6 +31,6 @@ private:
 	std::string serverName;
 };
 
-}
+}  // namespace UploadServer
 
-#endif // UPLOADSERVER_GAMESERVERSESSION_H
+#endif  // UPLOADSERVER_GAMESERVERSESSION_H

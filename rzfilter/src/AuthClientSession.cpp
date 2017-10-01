@@ -1,27 +1,21 @@
 #include "AuthClientSession.h"
 #include "AuthClient/TS_AC_SERVER_LIST.h"
 #include "AuthClient/TS_CA_SELECT_SERVER.h"
-#include "GlobalConfig.h"
 #include "GameClientSessionManager.h"
-#include <vector>
+#include "GlobalConfig.h"
 #include <algorithm>
+#include <vector>
 
 AuthClientSession::AuthClientSession(GameClientSessionManager* gameClientSessionManager)
-    : ClientSession(true),
-      gameClientSessionManager(gameClientSessionManager)
-{
-}
+    : ClientSession(true), gameClientSessionManager(gameClientSessionManager) {}
 
-AuthClientSession::~AuthClientSession() {
-}
+AuthClientSession::~AuthClientSession() {}
 
-std::string AuthClientSession::getServerIp()
-{
+std::string AuthClientSession::getServerIp() {
 	return CONFIG_GET()->server.ip.get();
 }
 
-uint16_t AuthClientSession::getServerPort()
-{
+uint16_t AuthClientSession::getServerPort() {
 	return CONFIG_GET()->server.port.get();
 }
 
@@ -41,9 +35,7 @@ void AuthClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 				serversOrdered.push_back(&serverListPkt.servers[i]);
 			}
 
-			std::sort(serversOrdered.begin(), serversOrdered.end(),
-			    [](TS_SERVER_INFO* a, TS_SERVER_INFO* b) -> bool
-			{
+			std::sort(serversOrdered.begin(), serversOrdered.end(), [](TS_SERVER_INFO* a, TS_SERVER_INFO* b) -> bool {
 				return a->server_idx < b->server_idx;
 			});
 
@@ -51,18 +43,24 @@ void AuthClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 			for(size_t i = 0; i < serversOrdered.size(); i++) {
 				TS_SERVER_INFO& server = *serversOrdered[i];
 				uint16_t listenPort = gameClientSessionManager->ensureListening(
-				                          listenIp,
-				                          baseListenPort,
-				                          server.server_ip,
-				                          server.server_port,
-				                          this->getStream() ? this->getStream()->getPacketLogger() : nullptr);
+				    listenIp,
+				    baseListenPort,
+				    server.server_ip,
+				    server.server_port,
+				    this->getStream() ? this->getStream()->getPacketLogger() : nullptr);
 				if(!listenPort) {
-					log(LL_Error, "Failed to listen on %s for server %s:%d\n",
-					    listenIp.c_str(), server.server_ip.c_str(), server.server_port);
+					log(LL_Error,
+					    "Failed to listen on %s for server %s:%d\n",
+					    listenIp.c_str(),
+					    server.server_ip.c_str(),
+					    server.server_port);
 				} else {
-					log(LL_Debug, "Listening on %s:%d for server %s:%d\n",
-					    listenIp.c_str(), listenPort,
-					    server.server_ip.c_str(), server.server_port);
+					log(LL_Debug,
+					    "Listening on %s:%d for server %s:%d\n",
+					    listenIp.c_str(),
+					    listenPort,
+					    server.server_ip.c_str(),
+					    server.server_port);
 				}
 				server.server_ip = CONFIG_GET()->client.gameExternalIp.get();
 				server.server_port = listenPort;

@@ -15,19 +15,16 @@ struct LuaEndpointMetaTable {
 
 	template<typename Callback> static int sendPacket(lua_State* L, Callback callback);
 
-	template<class T>
-	static bool sendPacketFromLua(lua_State* L, IFilterEndpoint* endpoint);
+	template<class T> static bool sendPacketFromLua(lua_State* L, IFilterEndpoint* endpoint);
 
 	IFilterEndpoint* endpoint;
 	bool isServerEndpoint;
 
 	LuaEndpointMetaTable(IFilterEndpoint* endpoint, bool isServerEndpoint)
-	    : endpoint(endpoint), isServerEndpoint(isServerEndpoint)
-	{}
+	    : endpoint(endpoint), isServerEndpoint(isServerEndpoint) {}
 };
 
-class PacketFilter : public IFilter
-{
+class PacketFilter : public IFilter {
 public:
 	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter* data);
 	~PacketFilter();
@@ -59,4 +56,4 @@ SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* se
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 
-#endif // PACKETFILTER_H
+#endif  // PACKETFILTER_H

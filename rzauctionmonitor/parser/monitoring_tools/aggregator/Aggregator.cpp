@@ -1,12 +1,13 @@
 #include "Aggregator.h"
+#include "AuctionComplexDiffWriter.h"
 #include "AuctionFile.h"
-#include "Packet/JSONWriter.h"
 #include "AuctionWriter.h"
 #include "Core/Utils.h"
-#include "GlobalConfig.h"
-#include "AuctionComplexDiffWriter.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
+#include "GlobalConfig.h"
+#include "Packet/JSONWriter.h"
 
+// clang-format off
 #define AUCTION_INFO_PER_DAY_DEF(_) \
 	_(simple)(uint32_t, code) \
 	_(simple)(int64_t, estimatedSoldNumber) \
@@ -37,25 +38,22 @@ CREATE_STRUCT(AGGREGATION_ITEM);
 	_(count)   (uint8_t, lastParsedFile) \
 	_(dynstring)(lastParsedFile, false)
 CREATE_STRUCT(AGGREGATION_STATE);
-
+// clang-format on
 
 Aggregator::Aggregator()
-    : httpClientSession(CONFIG_GET()->webserver.ip,
-                        CONFIG_GET()->webserver.port),
+    : httpClientSession(CONFIG_GET()->webserver.ip, CONFIG_GET()->webserver.port),
       url(CONFIG_GET()->webserver.url),
       pwd(CONFIG_GET()->webserver.pwd),
-      currentDate(0)
-{
-}
+      currentDate(0) {}
 
-bool Aggregator::sendToWebServer(const std::string& data)
-{
+bool Aggregator::sendToWebServer(const std::string& data) {
 	std::string fullUrl;
 	struct tm currentDateTm;
 
 	Utils::getGmTime(currentDate, &currentDateTm);
 
-	Utils::stringFormat(fullUrl, "%s/%04d%02d%02d/%s",
+	Utils::stringFormat(fullUrl,
+	                    "%s/%04d%02d%02d/%s",
 	                    url.get().c_str(),
 	                    currentDateTm.tm_year,
 	                    currentDateTm.tm_mon,
@@ -68,8 +66,7 @@ bool Aggregator::sendToWebServer(const std::string& data)
 	return true;
 }
 
-void Aggregator::exportState(std::string filename, const std::string& lastParsedFile)
-{
+void Aggregator::exportState(std::string filename, const std::string& lastParsedFile) {
 	AGGREGATION_STATE aggregationState;
 
 	log(LL_Debug, "Writting aggregation state file %s\n", filename.c_str());
@@ -101,15 +98,17 @@ void Aggregator::exportState(std::string filename, const std::string& lastParsed
 	MessageBuffer buffer(data.data(), data.size(), version);
 	aggregationState.serialize(&buffer);
 	if(buffer.checkFinalSize() == false) {
-		log(LL_Error, "Wrong buffer size, size: %u, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
+		log(LL_Error,
+		    "Wrong buffer size, size: %u, field: %s\n",
+		    buffer.getSize(),
+		    buffer.getFieldInOverflow().c_str());
 	} else {
 		AuctionWriter::writeAuctionDataToFile(filename, data);
-		log(LL_Debug, "Exported %d auctions summaries\n", (int)aggregationState.auctionData.size());
+		log(LL_Debug, "Exported %d auctions summaries\n", (int) aggregationState.auctionData.size());
 	}
 }
 
-void Aggregator::importState(std::string filename, std::string& lastParsedFile)
-{
+void Aggregator::importState(std::string filename, std::string& lastParsedFile) {
 	log(LL_Info, "Loading aggregation state file %s\n", filename.c_str());
 
 	std::vector<uint8_t> data;
@@ -120,7 +119,10 @@ void Aggregator::importState(std::string filename, std::string& lastParsedFile)
 		MessageBuffer buffer(data.data(), data.size(), version);
 		aggregationState.deserialize(&buffer);
 		if(buffer.checkFinalSize() == false) {
-			log(LL_Error, "Wrong buffer size, size: %u, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
+			log(LL_Error,
+			    "Wrong buffer size, size: %u, field: %s\n",
+			    buffer.getSize(),
+			    buffer.getFieldInOverflow().c_str());
 			return;
 		}
 
@@ -138,37 +140,39 @@ void Aggregator::importState(std::string filename, std::string& lastParsedFile)
 			auctionsByUid[item.uid] = auctionSummary;
 		}
 
-		log(LL_Debug, "Imported %d auctions summaries\n", (int)aggregationState.auctionData.size());
+		log(LL_Debug, "Imported %d auctions summaries\n", (int) aggregationState.auctionData.size());
 	} else {
 		log(LL_Warning, "Cant read state file %s\n", filename.c_str());
 	}
 }
 
-void Aggregator::updateCurrentDateAndCompute(time_t date)
-{
+void Aggregator::updateCurrentDateAndCompute(time_t date) {
 	int compareResult = compareWithCurrentDate(date);
 	if(currentDate == 0) {
 		currentDate = date;
 	} else if(compareResult > 0) {
-		log(LL_Info, "Date changed from %d to %d, computing statistics of previous day\n", (int)currentDate, (int)date);
+		log(LL_Info,
+		    "Date changed from %d to %d, computing statistics of previous day\n",
+		    (int) currentDate,
+		    (int) date);
 		computeStatisticsOfDay();
 		currentDate = date;
 	} else if(compareResult < 0) {
-		log(LL_Warning, "New date is smaller than current date: %d < %d\n", (int)date, (int)currentDate);
+		log(LL_Warning, "New date is smaller than current date: %d < %d\n", (int) date, (int) currentDate);
 	} else {
-		log(LL_Debug, "Date from %d to %d not changed\n", (int)currentDate, (int)date);
+		log(LL_Debug, "Date from %d to %d not changed\n", (int) currentDate, (int) date);
 	}
 }
 
-int Aggregator::compareWithCurrentDate(time_t other)
-{
+int Aggregator::compareWithCurrentDate(time_t other) {
 	struct tm currentDateTm;
 	struct tm otherDateTm;
 
 	Utils::getGmTime(currentDate, &currentDateTm);
 	Utils::getGmTime(other, &otherDateTm);
 
-	log(LL_Debug, "Date changed from %04d-%02d-%02d to %04d-%02d-%02d\n",
+	log(LL_Debug,
+	    "Date changed from %04d-%02d-%02d to %04d-%02d-%02d\n",
 	    currentDateTm.tm_year,
 	    currentDateTm.tm_mon,
 	    currentDateTm.tm_mday,
@@ -198,7 +202,7 @@ bool Aggregator::parseAuctions(AuctionComplexDiffWriter* auctionWriter) {
 
 	if(!auctionFile.header.categories.empty()) {
 		lastestDate = auctionFile.header.categories[0].beginTime;
-		log(LL_Debug, "Parsing %d auctions for date %d\n", (int)auctionFile.auctions.size(), (int)lastestDate);
+		log(LL_Debug, "Parsing %d auctions for date %d\n", (int) auctionFile.auctions.size(), (int) lastestDate);
 	}
 
 	for(size_t i = 0; i < auctionFile.auctions.size(); i++) {
@@ -240,7 +244,8 @@ bool Aggregator::parseAuctions(AuctionComplexDiffWriter* auctionWriter) {
 				summary.price = auctionInfo.bid_price / summary.count;
 			}
 
-			if(auctionInfo.price != 0 && auctionInfo.estimatedEndTimeMin != 0 && (auctionInfo.time + 120) < auctionInfo.estimatedEndTimeMin) {
+			if(auctionInfo.price != 0 && auctionInfo.estimatedEndTimeMin != 0 &&
+			   (auctionInfo.time + 120) < auctionInfo.estimatedEndTimeMin) {
 				summary.isSold = true;
 				summary.price = auctionInfo.price / summary.count;
 			}
@@ -252,8 +257,7 @@ bool Aggregator::parseAuctions(AuctionComplexDiffWriter* auctionWriter) {
 	return true;
 }
 
-bool Aggregator::skipItem(const AUCTION_INFO& auctionInfo, const TS_ITEM_BASE_INFO& item)
-{
+bool Aggregator::skipItem(const AUCTION_INFO& auctionInfo, const TS_ITEM_BASE_INFO& item) {
 	switch(auctionInfo.category) {
 		case C_Weapon:
 		case C_Armor:
@@ -263,34 +267,23 @@ bool Aggregator::skipItem(const AUCTION_INFO& auctionInfo, const TS_ITEM_BASE_IN
 		case C_Boots:
 		case C_Cloak:
 		case C_Accessory:
-			return item.enhance > 0 ||
-			        item.awaken_option.value[0] != 0 ||
-			        item.awaken_option.value[1] != 0 ||
-			        item.awaken_option.value[2] != 0 ||
-			        item.awaken_option.value[3] != 0 ||
-			        item.awaken_option.value[4] != 0 ||
-			        item.random_type[0] != 0 ||
-			        item.random_type[1] != 0 ||
-			        item.random_type[2] != 0 ||
-			        item.random_type[3] != 0 ||
-			        item.random_type[4] != 0 ||
-			        item.random_type[5] != 0 ||
-			        item.random_type[6] != 0 ||
-			        item.random_type[7] != 0 ||
-			        item.random_type[8] != 0 ||
-			        item.random_type[9] != 0;
+			return item.enhance > 0 || item.awaken_option.value[0] != 0 || item.awaken_option.value[1] != 0 ||
+			       item.awaken_option.value[2] != 0 || item.awaken_option.value[3] != 0 ||
+			       item.awaken_option.value[4] != 0 || item.random_type[0] != 0 || item.random_type[1] != 0 ||
+			       item.random_type[2] != 0 || item.random_type[3] != 0 || item.random_type[4] != 0 ||
+			       item.random_type[5] != 0 || item.random_type[6] != 0 || item.random_type[7] != 0 ||
+			       item.random_type[8] != 0 || item.random_type[9] != 0;
 		case C_Belt:
 			return item.enhance > 0 || item.socket[0] > 0;
 		case C_SkillCard:
 			return item.enhance > 1;
 		case C_SummonerCard:
-			return (item.flag & 0x80000000) != 0 || item.enhance > 0; // exclude tamed and staged
+			return (item.flag & 0x80000000) != 0 || item.enhance > 0;  // exclude tamed and staged
 
 		default:
 			return false;
 	}
 }
-
 
 void Aggregator::DayAggregation::PriceInfo::updateAggregatedStats(const Aggregator::AuctionSummary& summary) {
 	if(minPrice == -1 || minPrice > summary.price)
@@ -299,36 +292,31 @@ void Aggregator::DayAggregation::PriceInfo::updateAggregatedStats(const Aggregat
 	if(maxPrice == -1 || maxPrice < summary.price)
 		maxPrice = summary.price;
 
-	avgPrice = (avgPrice * itemNumber + summary.price * summary.count) /
-	           (itemNumber + summary.count);
+	avgPrice = (avgPrice * itemNumber + summary.price * summary.count) / (itemNumber + summary.count);
 
 	itemNumber += summary.count;
 }
 
-void Aggregator::computeStatisticsOfDay()
-{
+void Aggregator::computeStatisticsOfDay() {
 	struct Key {
 		uint32_t code;
-		//int16_t enhance;
+		// int16_t enhance;
 		Key() {}
-		Key(const AuctionSummary& auction) : code(auction.code)/*, enhance(auction.enhance)*/ {}
+		Key(const AuctionSummary& auction) : code(auction.code) /*, enhance(auction.enhance)*/ {}
 
-		bool operator==(const Key& other) const {
-			return code == other.code /* && enhance == other.enhance*/;
-		}
+		bool operator==(const Key& other) const { return code == other.code /* && enhance == other.enhance*/; }
 	};
 	struct KeyHasher {
-	  std::size_t operator()(const Key& k) const
-	  {
-		return (std::hash<uint32_t>()(k.code))/* ^ (std::hash<int16_t>()(k.enhance) << 1)) >> 1*/;
-	  }
+		std::size_t operator()(const Key& k) const {
+			return (std::hash<uint32_t>()(k.code)) /* ^ (std::hash<int16_t>()(k.enhance) << 1)) >> 1*/;
+		}
 	};
 
 	std::unordered_map<Key, DayAggregation, KeyHasher> auctionsByItemCode;
 	JSONWriter jsonWriter(0, true);
 	jsonWriter.clear();
 
-	log(LL_Info, "Computing statistics of %d auctions for day %d\n", (int)auctionsByUid.size(), (int)currentDate);
+	log(LL_Info, "Computing statistics of %d auctions for day %d\n", (int) auctionsByUid.size(), (int) currentDate);
 
 	auto itUid = auctionsByUid.begin();
 	for(; itUid != auctionsByUid.end(); ++itUid) {
@@ -349,7 +337,7 @@ void Aggregator::computeStatisticsOfDay()
 		const DayAggregation& aggregation = it->second;
 
 		dayAggregation.code = key.code;
-		//dayAggregation.enhance = key.enhance;
+		// dayAggregation.enhance = key.enhance;
 
 		dayAggregation.itemNumber = aggregation.allItems.itemNumber;
 		dayAggregation.minPrice = aggregation.allItems.minPrice;

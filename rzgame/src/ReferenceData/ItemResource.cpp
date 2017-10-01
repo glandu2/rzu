@@ -4,9 +4,9 @@
 
 template<> void DbQueryJob<GameServer::ItemResourceBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-				  CONFIG_GET()->game.arcadia.connectionString,
-				  "select * from ItemResource",
-				  DbQueryBinding::EM_MultiRows);
+	              CONFIG_GET()->game.arcadia.connectionString,
+	              "select * from ItemResource",
+	              DbQueryBinding::EM_MultiRows);
 
 	addColumn("id", &OutputType::id);
 	addColumn("name_id", &OutputType::name_id);

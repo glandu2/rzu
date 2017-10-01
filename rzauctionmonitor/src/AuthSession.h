@@ -1,24 +1,24 @@
 #ifndef CHATAUTHSESSION_H
 #define CHATAUTHSESSION_H
 
-#include "NetSession/ClientAuthSession.h"
 #include "Core/Timer.h"
+#include "NetSession/ClientAuthSession.h"
 #include <string>
 
 class GameSession;
 
-class AuthSession : public ClientAuthSession
-{
+class AuthSession : public ClientAuthSession {
 public:
 	typedef void (*DisconnectedCallback)(IListener* instance);
+
 public:
 	AuthSession(GameSession* gameSession,
-				cval<std::string>& ip,
-				cval<int>& port,
-				cval<int>& serverIdx,
-				cval<int>& delayTime,
-				cval<bool>& useRsa,
-				const std::string& account,
+	            cval<std::string>& ip,
+	            cval<int>& port,
+	            cval<int>& serverIdx,
+	            cval<int>& delayTime,
+	            cval<bool>& useRsa,
+	            const std::string& account,
 	            const std::string& password,
 	            cval<int>& version);
 
@@ -58,4 +58,4 @@ private:
 	Callback<DisconnectedCallback> disconnectedCallback;
 };
 
-#endif // CHATAUTHSESSION_H
+#endif  // CHATAUTHSESSION_H

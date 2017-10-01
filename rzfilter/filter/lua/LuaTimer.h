@@ -1,8 +1,8 @@
 #ifndef LUATIMER_H
 #define LUATIMER_H
 
-#include <lua.hpp>
 #include "Core/Timer.h"
+#include <lua.hpp>
 
 class LuaTimer {
 public:
@@ -31,4 +31,4 @@ private:
 	int callbackLuaFunction;
 };
 
-#endif // LUATIMER_H
+#endif  // LUATIMER_H

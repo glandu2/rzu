@@ -6,10 +6,14 @@
 
 class GameSession;
 
-class IrcClient : public SocketSession
-{
+class IrcClient : public SocketSession {
 public:
-	IrcClient(const std::string& ip, int port, const std::string& hostname, const std::string& channel, const std::string& nickname, Log* packetLog);
+	IrcClient(const std::string& ip,
+	          int port,
+	          const std::string& hostname,
+	          const std::string& channel,
+	          const std::string& nickname,
+	          Log* packetLog);
 
 	void setGameSession(GameSession* gameSession) { this->gameSession = gameSession; }
 
@@ -19,7 +23,11 @@ public:
 	bool isConnected() { return joined; }
 
 protected:
-	static void parseIrcMessage(const std::string& message, std::string& prefix, std::string& command, std::string& parameters, std::string& trailing);
+	static void parseIrcMessage(const std::string& message,
+	                            std::string& prefix,
+	                            std::string& command,
+	                            std::string& parameters,
+	                            std::string& trailing);
 	static const char* getChatColor(int type);
 
 private:
@@ -45,4 +53,4 @@ private:
 	std::unordered_map<std::string, std::string> mpIrcToGs;
 };
 
-#endif // IRCCLIENT_H
+#endif  // IRCCLIENT_H

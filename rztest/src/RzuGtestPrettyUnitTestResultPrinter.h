@@ -4,10 +4,8 @@
 #include "Core/Object.h"
 #include "gtest/gtest.h"
 
-class RzuTestPrinter : public Object, public testing::TestEventListener
-{
+class RzuTestPrinter : public Object, public testing::TestEventListener {
 public:
-
 	// The following methods override what's in the TestEventListener class.
 	virtual void OnTestProgramStart(const testing::UnitTest& /*unit_test*/) {}
 	virtual void OnTestIterationStart(const testing::UnitTest& unit_test, int iteration);
@@ -31,5 +29,4 @@ private:
 	DECLARE_CLASS(RzuTestPrinter)
 };
 
-#endif // RZUGTESTPRETTYUNITTESTRESULTPRINTER_H
-
+#endif  // RZUGTESTPRETTYUNITTESTRESULTPRINTER_H

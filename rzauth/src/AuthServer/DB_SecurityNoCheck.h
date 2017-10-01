@@ -1,9 +1,9 @@
 #ifndef AUTHSERVER_DB_SECURITY_NO_CHECK_H
 #define AUTHSERVER_DB_SECURITY_NO_CHECK_H
 
+#include "Database/DbQueryJobRef.h"
 #include "uv.h"
 #include <stdint.h>
-#include "Database/DbQueryJobRef.h"
 
 class DbConnectionPool;
 
@@ -19,14 +19,14 @@ struct DB_SecurityNoCheckData {
 		char securityNoMd5String[33];
 
 		Input() {}
-		Input(std::string account, std::string securityNo, int32_t mode) : account(account), securityNo(securityNo), mode(mode) {}
+		Input(std::string account, std::string securityNo, int32_t mode)
+		    : account(account), securityNo(securityNo), mode(mode) {}
 	};
 
 	struct Output {};
 };
 
-class DB_SecurityNoCheck : public DbQueryJobCallback<DB_SecurityNoCheckData, GameServerSession, DB_SecurityNoCheck>
-{
+class DB_SecurityNoCheck : public DbQueryJobCallback<DB_SecurityNoCheckData, GameServerSession, DB_SecurityNoCheck> {
 	DECLARE_CLASS(AuthServer::DB_SecurityNoCheck)
 
 public:
@@ -44,6 +44,6 @@ private:
 	static cval<std::string>* securityNoSalt;
 };
 
-} // namespace AuthServer
+}  // namespace AuthServer
 
-#endif // AUTHSERVER_DB_SECURITY_NO_CHECK_H
+#endif  // AUTHSERVER_DB_SECURITY_NO_CHECK_H

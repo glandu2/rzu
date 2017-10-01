@@ -1,24 +1,22 @@
 #include "IconServerSession.h"
 #include "../GlobalConfig.h"
-#include <string.h>
-#include <stdio.h>
 #include "Core/Utils.h"
+#include <stdio.h>
+#include <string.h>
 
 namespace UploadServer {
 
-static const char * const htmlNotFound =
-		"HTTP/1.1 404 Not Found\r\n"
-		"Content-Type: text/html\r\n"
-		"Content-Length: 22\r\n"
-		"\r\n"
-		"<h1>404 Not Found</h1>";
+static const char* const htmlNotFound = "HTTP/1.1 404 Not Found\r\n"
+                                        "Content-Type: text/html\r\n"
+                                        "Content-Length: 22\r\n"
+                                        "\r\n"
+                                        "<h1>404 Not Found</h1>";
 static size_t htmlNotFoundSize = strlen(htmlNotFound);
 
-static const char * const htmlFound =
-		"HTTP/1.1 200 Ok\r\n"
-		"Content-Type: image/jpeg\r\n"
-		"Content-Length: %ld\r\n"
-		"\r\n";
+static const char* const htmlFound = "HTTP/1.1 200 Ok\r\n"
+                                     "Content-Type: image/jpeg\r\n"
+                                     "Content-Length: %ld\r\n"
+                                     "\r\n";
 static size_t htmlFoundSize = strlen(htmlFound);
 
 IconServerSession::IconServerSession() {
@@ -39,8 +37,8 @@ EventChain<SocketSession> IconServerSession::onDataReceived() {
 }
 
 void IconServerSession::parseData(const std::vector<char>& data) {
-	static const char * const beginUrl = "GET ";
-	static const char * const endHeader = "\r\n\r\n";
+	static const char* const beginUrl = "GET ";
+	static const char* const endHeader = "\r\n\r\n";
 	const char* begin = &data[0];
 	const char* end = &data[0] + data.size();
 
@@ -96,16 +94,16 @@ void IconServerSession::parseData(const std::vector<char>& data) {
 
 void IconServerSession::parseUrl(std::string urlString) {
 	ssize_t p;
-	for(p = urlString.size()-1; p >= 0; p--) {
+	for(p = urlString.size() - 1; p >= 0; p--) {
 		const char c = urlString.at(p);
 		if(c == '/' || c == '\\' || c == ':')
 			break;
 	}
-	if(p+1 >= (ssize_t)urlString.size()) {
-		//attempt to get a directory
+	if(p + 1 >= (ssize_t) urlString.size()) {
+		// attempt to get a directory
 		getStream()->write(htmlNotFound, htmlNotFoundSize);
 	} else {
-		std::string filename = urlString.substr(p+1, std::string::npos);
+		std::string filename = urlString.substr(p + 1, std::string::npos);
 		if(checkName(filename.c_str(), filename.size())) {
 			sendIcon(filename);
 		} else {
@@ -119,12 +117,8 @@ bool IconServerSession::checkName(const char* filename, size_t size) {
 	for(size_t i = 0; i < size; i++) {
 		const char c = filename[i];
 
-		//Update getAllowedCharsForName when changing this condition
-		if(!((c >= '0' && c <= '9') ||
-			 (c >= 'A' && c <= 'Z') ||
-			 (c >= 'a' && c <= 'z') ||
-			 c == '_' || c == '.'))
-		{
+		// Update getAllowedCharsForName when changing this condition
+		if(!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '.')) {
 			return false;
 		}
 	}
@@ -150,8 +144,8 @@ void IconServerSession::sendIcon(const std::string& filename) {
 			fileSize = 64000;
 
 		size_t bufferSize = htmlFoundSize + 10 + fileSize;
-		char *buffer = new char[bufferSize];
-		size_t fileContentBegin = sprintf(buffer, htmlFound, (long int)fileSize);
+		char* buffer = new char[bufferSize];
+		size_t fileContentBegin = sprintf(buffer, htmlFound, (long int) fileSize);
 
 		size_t bytesTransferred = 0;
 		size_t nbrw = 0;
@@ -174,4 +168,4 @@ void IconServerSession::sendIcon(const std::string& filename) {
 	}
 }
 
-} //namespace UploadServer
+}  // namespace UploadServer

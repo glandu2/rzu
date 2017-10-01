@@ -1,19 +1,23 @@
 #ifndef AUCTIONPARSER_H
 #define AUCTIONPARSER_H
 
-#include "Core/Object.h"
-#include "AuctionComplexDiffWriter.h"
-#include "Core/Timer.h"
-#include <string>
-#include "NetSession/StartableObject.h"
-#include "IParser.h"
 #include "./Extern.h"
+#include "AuctionComplexDiffWriter.h"
+#include "Core/Object.h"
+#include "Core/Timer.h"
+#include "IParser.h"
+#include "NetSession/StartableObject.h"
+#include <string>
 
-class RZAUCTIONWATCHER_EXTERN AuctionParser : public Object, public StartableObject
-{
+class RZAUCTIONWATCHER_EXTERN AuctionParser : public Object, public StartableObject {
 	DECLARE_CLASSNAME(AuctionParser, 0)
 public:
-	AuctionParser(IParser* aggregator, cval<std::string>& auctionsPath, cval<int>& changeWaitSeconds, cval<std::string>& statesPath, cval<std::string>& auctionStateFile, cval<std::string>& aggregationStateFile);
+	AuctionParser(IParser* aggregator,
+	              cval<std::string>& auctionsPath,
+	              cval<int>& changeWaitSeconds,
+	              cval<std::string>& statesPath,
+	              cval<std::string>& auctionStateFile,
+	              cval<std::string>& aggregationStateFile);
 
 	virtual bool start();
 	virtual void stop();
@@ -36,7 +40,6 @@ private:
 	cval<std::string>& statesPath;
 	cval<std::string>& auctionStateFile;
 	cval<std::string>& aggregationStateFile;
-
 
 	Timer<AuctionParser> dirWatchTimer;
 	bool started;

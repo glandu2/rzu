@@ -3,17 +3,14 @@
 #include "PacketFilter.h"
 
 const char* const LuaTimer::NAME = "LuaTimer";
-const luaL_Reg LuaTimer::FUNCTIONS[] = {
-    {"start", &start},
-    {"stop", &stop},
-    {"again", &again},
-    {"setRepeat", &setRepeat},
-    {"getRepeat", &getRepeat},
-    {NULL, NULL}
-};
+const luaL_Reg LuaTimer::FUNCTIONS[] = {{"start", &start},
+                                        {"stop", &stop},
+                                        {"again", &again},
+                                        {"setRepeat", &setRepeat},
+                                        {"getRepeat", &getRepeat},
+                                        {NULL, NULL}};
 
-int LuaTimer::initLua(lua_State* L)
-{
+int LuaTimer::initLua(lua_State* L) {
 	luaL_newmetatable(L, NAME);
 
 	lua_pushcfunction(L, &gc);
@@ -34,8 +31,7 @@ int LuaTimer::initLua(lua_State* L)
 	return 1;
 }
 
-int LuaTimer::createTimer(lua_State* L)
-{
+int LuaTimer::createTimer(lua_State* L) {
 	LuaTimer* self = new LuaTimer();
 	*static_cast<LuaTimer**>(lua_newuserdata(L, sizeof(LuaTimer*))) = self;
 
@@ -48,8 +44,7 @@ int LuaTimer::createTimer(lua_State* L)
 	return 1;
 }
 
-int LuaTimer::gc(lua_State* L)
-{
+int LuaTimer::gc(lua_State* L) {
 	LuaTimer** userData = static_cast<LuaTimer**>(luaL_checkudata(L, 1, NAME));
 	if(!userData || !*userData)
 		return 0;
@@ -60,8 +55,7 @@ int LuaTimer::gc(lua_State* L)
 	return 0;
 }
 
-LuaTimer* LuaTimer::check_userdata(lua_State* L, int idx)
-{
+LuaTimer* LuaTimer::check_userdata(lua_State* L, int idx) {
 	LuaTimer** userData = static_cast<LuaTimer**>(luaL_checkudata(L, idx, NAME));
 	if(!userData)
 		return nullptr;
@@ -70,7 +64,7 @@ LuaTimer* LuaTimer::check_userdata(lua_State* L, int idx)
 }
 
 int LuaTimer::start(lua_State* L) {
-	LuaTimer *self = check_userdata(L, 1);
+	LuaTimer* self = check_userdata(L, 1);
 	if(!self)
 		return 0;
 
@@ -92,7 +86,7 @@ int LuaTimer::start(lua_State* L) {
 }
 
 int LuaTimer::stop(lua_State* L) {
-	LuaTimer *self = check_userdata(L, 1);
+	LuaTimer* self = check_userdata(L, 1);
 	if(!self)
 		return 0;
 
@@ -105,7 +99,7 @@ int LuaTimer::stop(lua_State* L) {
 }
 
 int LuaTimer::again(lua_State* L) {
-	LuaTimer *self = check_userdata(L, 1);
+	LuaTimer* self = check_userdata(L, 1);
 	if(!self)
 		return 0;
 
@@ -118,7 +112,7 @@ int LuaTimer::again(lua_State* L) {
 }
 
 int LuaTimer::setRepeat(lua_State* L) {
-	LuaTimer *self = check_userdata(L, 1);
+	LuaTimer* self = check_userdata(L, 1);
 	if(!self)
 		return 0;
 
@@ -129,7 +123,7 @@ int LuaTimer::setRepeat(lua_State* L) {
 }
 
 int LuaTimer::getRepeat(lua_State* L) {
-	LuaTimer *self = check_userdata(L, 1);
+	LuaTimer* self = check_userdata(L, 1);
 	if(!self)
 		return 0;
 
@@ -139,19 +133,18 @@ int LuaTimer::getRepeat(lua_State* L) {
 	return 1;
 }
 
-void LuaTimer::onTimerCallback()
-{
+void LuaTimer::onTimerCallback() {
 	if(L && callbackLuaFunction != LUA_NOREF) {
 		lua_pushcfunction(L, &PacketFilter::luaMessageHandler);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, callbackLuaFunction);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, luaUserDataRef);
 		int result = lua_pcall(L, 1, 0, -3);
-		if (result == LUA_ERRRUN) {
-			Object::logStatic(Object::LL_Error, "rzfilter_lua_module", "Cannot call lua timer callback: %s\n",
-			                 lua_tostring(L, -1));
-			lua_pop(L, 2); // remove the error object and the message handler
+		if(result == LUA_ERRRUN) {
+			Object::logStatic(
+			    Object::LL_Error, "rzfilter_lua_module", "Cannot call lua timer callback: %s\n", lua_tostring(L, -1));
+			lua_pop(L, 2);  // remove the error object and the message handler
 			return;
 		}
-		lua_pop(L, 1); // remove the message handler
+		lua_pop(L, 1);  // remove the message handler
 	}
 }

@@ -1,12 +1,12 @@
 #ifndef AUCTIONSIMPLEDATA_H
 #define AUCTIONSIMPLEDATA_H
 
-#include <stdint.h>
-#include <vector>
-#include "Extern.h"
 #include "AuctionSimpleFile.h"
 #include "AuctionUid.h"
+#include "Extern.h"
 #include "IAuctionData.h"
+#include <stdint.h>
+#include <vector>
 
 struct AuctionSimpleDataView {
 	AuctionUid uid;
@@ -20,18 +20,13 @@ struct AuctionSimpleDataView {
 class RZAUCTION_EXTERN AuctionSimpleData : public IAuctionData {
 	DECLARE_CLASSNAME(AuctionSimpleData, 0)
 private:
-	enum ProcessStatus {
-		PS_NotProcessed,
-		PS_Unmodifed,
-		PS_Added,
-		PS_Updated,
-		PS_Deleted
-	};
+	enum ProcessStatus { PS_NotProcessed, PS_Unmodifed, PS_Added, PS_Updated, PS_Deleted };
 
 public:
-	AuctionSimpleData(AuctionUid uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len);
+	AuctionSimpleData(
+	    AuctionUid uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t* data, size_t len);
 
-	virtual bool doUpdate(uint64_t timeMax, const uint8_t *data, size_t len);
+	virtual bool doUpdate(uint64_t timeMax, const uint8_t* data, size_t len);
 	virtual void beginProcess();
 	virtual void endProcess(uint64_t categoryEndTime);
 	virtual bool isInFinalState() const;
@@ -42,8 +37,9 @@ public:
 	void serialize(AUCTION_SIMPLE_INFO* auctionInfo) const;
 
 	void setStatus(ProcessStatus status, uint64_t time);
+
 private:
-	bool parseData(const uint8_t *data, size_t len);
+	bool parseData(const uint8_t* data, size_t len);
 	DiffType getAuctionDiffType() const;
 	static ProcessStatus getAuctionProcessStatus(DiffType diffType);
 

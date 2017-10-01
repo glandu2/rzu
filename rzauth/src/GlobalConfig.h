@@ -2,28 +2,27 @@
 #define GLOBALCONFIG_H
 
 #include "Config/ConfigInfo.h"
-#include "Core/Utils.h"
 #include "Config/GlobalCoreConfig.h"
+#include "Core/Utils.h"
 
 struct DbConfig : public IListener {
-	cval<std::string> &driver, &server, &name, &account, &password, &cryptedPassword, &salt;
-	cval<int> &port;
-	cval<std::string> &connectionString, &cryptedConnectionString;
-	cval<bool> &ignoreInitCheck;
+	cval<std::string>&driver, &server, &name, &account, &password, &cryptedPassword, &salt;
+	cval<int>& port;
+	cval<std::string>&connectionString, &cryptedConnectionString;
+	cval<bool>& ignoreInitCheck;
 
-	DbConfig(const std::string& prefix) :
-		driver(CFG_CREATE(prefix + ".db.driver", "osdriver")), //Set in .cpp according to OS
-		server(CFG_CREATE(prefix + ".db.server", "127.0.0.1")),
-		name(CFG_CREATE(prefix + ".db.name", "Auth")),
-		account(CFG_CREATE(prefix + ".db.account", "sa", true)),
-		password(CFG_CREATE(prefix + ".db.password", "", true)),
-		cryptedPassword(CFG_CREATE(prefix + ".db.cryptedpassword", "", true)),
-		salt(CFG_CREATE(prefix + ".db.salt", "2011")),
-		port(CFG_CREATE(prefix + ".db.port", 1433)),
-		connectionString(CFG_CREATE(prefix + ".db.connectionstring", "", true)),
-		cryptedConnectionString(CFG_CREATE(prefix + ".db.cryptedconnectionstring", "", true)),
-		ignoreInitCheck(CFG_CREATE(prefix + ".db.ignoreinitcheck", true))
-	{
+	DbConfig(const std::string& prefix)
+	    : driver(CFG_CREATE(prefix + ".db.driver", "osdriver")),  // Set in .cpp according to OS
+	      server(CFG_CREATE(prefix + ".db.server", "127.0.0.1")),
+	      name(CFG_CREATE(prefix + ".db.name", "Auth")),
+	      account(CFG_CREATE(prefix + ".db.account", "sa", true)),
+	      password(CFG_CREATE(prefix + ".db.password", "", true)),
+	      cryptedPassword(CFG_CREATE(prefix + ".db.cryptedpassword", "", true)),
+	      salt(CFG_CREATE(prefix + ".db.salt", "2011")),
+	      port(CFG_CREATE(prefix + ".db.port", 1433)),
+	      connectionString(CFG_CREATE(prefix + ".db.connectionstring", "", true)),
+	      cryptedConnectionString(CFG_CREATE(prefix + ".db.cryptedconnectionstring", "", true)),
+	      ignoreInitCheck(CFG_CREATE(prefix + ".db.ignoreinitcheck", true)) {
 		driver.addListener(this, &updateConnectionString);
 		server.addListener(this, &updateConnectionString);
 		name.addListener(this, &updateConnectionString);
@@ -39,55 +38,49 @@ struct DbConfig : public IListener {
 };
 
 struct GlobalConfig {
-
 	struct AuthConfig {
 		DbConfig db;
 
 		struct ClientConfig {
 			ListenerConfig listener;
-			cval<std::string> &desKey;
-			cval<int> &maxPublicServerIdx;
-			cval<bool> &enableImbc;
+			cval<std::string>& desKey;
+			cval<int>& maxPublicServerIdx;
+			cval<bool>& enableImbc;
 
-			ClientConfig() :
-				listener("auth.clients", "0.0.0.0", 4500, true, 301),
-				desKey(CFG_CREATE("auth.clients.des_key", "MERONG")),
-				maxPublicServerIdx(CFG_CREATE("auth.clients.maxpublicserveridx", 30)),
-				enableImbc(CFG_CREATE("auth.clients.enableimbc", true))
-			{}
+			ClientConfig()
+			    : listener("auth.clients", "0.0.0.0", 4500, true, 301),
+			      desKey(CFG_CREATE("auth.clients.des_key", "MERONG")),
+			      maxPublicServerIdx(CFG_CREATE("auth.clients.maxpublicserveridx", 30)),
+			      enableImbc(CFG_CREATE("auth.clients.enableimbc", true)) {}
 		} client;
 
 		struct GameConfig {
 			ListenerConfig listener;
-			cval<bool> &strictKick;
-			cval<int> &maxPlayers;
+			cval<bool>& strictKick;
+			cval<int>& maxPlayers;
 
-			GameConfig() :
-				listener("auth.gameserver", "127.0.0.1", 4502, true, 0),
-				strictKick(CFG_CREATE("auth.gameserver.strictkick", true)),
-				maxPlayers(CFG_CREATE("auth.gameserver.maxplayers", 400)) {}
+			GameConfig()
+			    : listener("auth.gameserver", "127.0.0.1", 4502, true, 0),
+			      strictKick(CFG_CREATE("auth.gameserver.strictkick", true)),
+			      maxPlayers(CFG_CREATE("auth.gameserver.maxplayers", 400)) {}
 		} game;
 
 		struct BillingConfig {
 			ListenerConfig listener;
 
-			BillingConfig() :
-				listener("auth.billing", "127.0.0.1", 4503, true, 0) {}
+			BillingConfig() : listener("auth.billing", "127.0.0.1", 4503, true, 0) {}
 		} billing;
 
-		AuthConfig() :
-			db("auth") {}
+		AuthConfig() : db("auth") {}
 	} auth;
 
 	struct UploadConfig {
 		struct ClientConfig {
 			ListenerConfig listener;
-			cval<std::string> &uploadDir;
+			cval<std::string>& uploadDir;
 
-			ClientConfig() :
-				listener("upload.clients", "0.0.0.0", 4617, true, 61),
-				uploadDir(CFG_CREATE("upload.dir", "upload"))
-			{
+			ClientConfig()
+			    : listener("upload.clients", "0.0.0.0", 4617, true, 61), uploadDir(CFG_CREATE("upload.dir", "upload")) {
 				Utils::autoSetAbsoluteDir(uploadDir);
 			}
 		} client;
@@ -95,43 +88,39 @@ struct GlobalConfig {
 		struct IconConfig {
 			ListenerConfig listener;
 
-			IconConfig() :
-				listener("upload.iconserver", "0.0.0.0", 80, true, 31) {}
+			IconConfig() : listener("upload.iconserver", "0.0.0.0", 80, true, 31) {}
 		} icons;
 
 		struct GameConfig {
 			ListenerConfig listener;
 
-			GameConfig() :
-				listener("upload.gameserver", "127.0.0.1", 4616, true, 0) {}
+			GameConfig() : listener("upload.gameserver", "127.0.0.1", 4616, true, 0) {}
 		} game;
 	} upload;
 
 	struct TrafficDump {
-		cval<bool> &enable;
-		cval<std::string> &dir, &file, &level, &consoleLevel;
+		cval<bool>& enable;
+		cval<std::string>&dir, &file, &level, &consoleLevel;
 
-		TrafficDump() :
-			enable(CFG_CREATE("trafficdump.enable", false)),
-			dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
-			file(CFG_CREATE("trafficdump.file", "auth.log")),
-			level(CFG_CREATE("trafficdump.level", "debug")),
-			consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal"))
-		{
+		TrafficDump()
+		    : enable(CFG_CREATE("trafficdump.enable", false)),
+		      dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
+		      file(CFG_CREATE("trafficdump.file", "auth.log")),
+		      level(CFG_CREATE("trafficdump.level", "debug")),
+		      consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal")) {
 			Utils::autoSetAbsoluteDir(dir);
 		}
 	} trafficDump;
 
 	struct LogServerConfig {
-		cval<std::string> &ip;
-		cval<int> &port;
-		cval<bool> &enable;
+		cval<std::string>& ip;
+		cval<int>& port;
+		cval<bool>& enable;
 
-		LogServerConfig() :
-			ip(CFG_CREATE("logclient.ip", "127.0.0.1")),
-			port(CFG_CREATE("logclient.port", 4516)),
-			enable(CFG_CREATE("logclient.enable", true))
-		{}
+		LogServerConfig()
+		    : ip(CFG_CREATE("logclient.ip", "127.0.0.1")),
+		      port(CFG_CREATE("logclient.port", 4516)),
+		      enable(CFG_CREATE("logclient.enable", true)) {}
 	} logclient;
 
 	static GlobalConfig* get();
@@ -140,4 +129,4 @@ struct GlobalConfig {
 
 #define CONFIG_GET() GlobalConfig::get()
 
-#endif // GLOBALCONFIG_H
+#endif  // GLOBALCONFIG_H

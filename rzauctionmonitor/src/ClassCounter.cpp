@@ -1,6 +1,6 @@
 #include "ClassCounter.h"
 
-//generated with notepad++ with this pattern: (.*) ->
+// generated with notepad++ with this pattern: (.*) ->
 //#include "\1.h"\nDECLARE_CLASSCOUNT_STATIC\(\1\)\n
 /* Class list:
 ClientData

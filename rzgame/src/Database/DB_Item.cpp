@@ -3,9 +3,9 @@
 
 template<> void DbQueryJob<GameServer::DB_ItemBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-				  CONFIG_GET()->game.telecaster.connectionString,
-				  "select * from item where account_id = 0 AND owner_id = ? AND auction_id = 0 AND keeping_id = 0",
-				  DbQueryBinding::EM_MultiRows);
+	              CONFIG_GET()->game.telecaster.connectionString,
+	              "select * from item where account_id = 0 AND owner_id = ? AND auction_id = 0 AND keeping_id = 0",
+	              DbQueryBinding::EM_MultiRows);
 
 	addParam("owner_id", &InputType::owner_id);
 

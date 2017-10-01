@@ -1,11 +1,11 @@
 #ifndef BANNEDWORDS_H
 #define BANNEDWORDS_H
 
-#include "RefDataLoader.h"
-#include "Database/DbQueryJobRef.h"
 #include "Database/DbQueryJob.h"
-#include <unordered_set>
+#include "Database/DbQueryJobRef.h"
+#include "RefDataLoader.h"
 #include <stdint.h>
+#include <unordered_set>
 
 namespace GameServer {
 
@@ -32,6 +32,6 @@ private:
 	static std::unordered_set<std::string> data;
 };
 
-}
+}  // namespace GameServer
 
-#endif // BANNEDWORDS_H
+#endif  // BANNEDWORDS_H

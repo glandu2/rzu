@@ -1,13 +1,13 @@
 #ifndef AUCTIONMANAGER_H
 #define AUCTIONMANAGER_H
 
-#include "Core/Object.h"
-#include "AuctionWorker.h"
 #include "AuctionSimpleDiffWriter.h"
-#include <memory>
-#include <deque>
-#include <time.h>
+#include "AuctionWorker.h"
+#include "Core/Object.h"
 #include "NetSession/StartableObject.h"
+#include <deque>
+#include <memory>
+#include <time.h>
 
 struct TS_SC_CHARACTER_LIST;
 struct TS_SC_LOGIN_RESULT;
@@ -28,8 +28,10 @@ public:
 	void loadAccounts();
 
 	std::unique_ptr<AuctionWorker::AuctionRequest> getNextRequest();
-	void addAuctionInfo(const AuctionWorker::AuctionRequest* request, uint32_t uid, const uint8_t *data, int len);
-	void onAuctionSearchCompleted(bool success, int pageTotal, std::unique_ptr<AuctionWorker::AuctionRequest> auctionRequest);
+	void addAuctionInfo(const AuctionWorker::AuctionRequest* request, uint32_t uid, const uint8_t* data, int len);
+	void onAuctionSearchCompleted(bool success,
+	                              int pageTotal,
+	                              std::unique_ptr<AuctionWorker::AuctionRequest> auctionRequest);
 
 	static void onReloadAccounts(IWritableConsole* console, const std::vector<std::string>& args);
 
@@ -64,8 +66,7 @@ private:
 	bool reloadingAccounts;
 	Timer<AuctionManager> accountReloadTimer;
 	static AuctionManager* instance;
-	std::vector<uint8_t> fileData; //cache allocated memory
+	std::vector<uint8_t> fileData;  // cache allocated memory
 };
 
-
-#endif // AUCTIONMANAGER_H
+#endif  // AUCTIONMANAGER_H

@@ -1,11 +1,11 @@
 #ifndef AUTHSERVER_CLIENTSESSION_H
 #define AUTHSERVER_CLIENTSESSION_H
 
-#include "NetSession/PacketSession.h"
-#include "NetSession/EncryptedSession.h"
-#include <stdint.h>
 #include "DB_Account.h"
 #include "DB_UpdateLastServerIdx.h"
+#include "NetSession/EncryptedSession.h"
+#include "NetSession/PacketSession.h"
+#include <stdint.h>
 
 struct TS_CA_VERSION;
 struct TS_CA_RSA_PUBLIC_KEY;
@@ -18,14 +18,13 @@ namespace AuthServer {
 
 class ClientData;
 
-class ClientSession : public EncryptedSession<PacketSession>
-{
+class ClientSession : public EncryptedSession<PacketSession> {
 	DECLARE_CLASS(AuthServer::ClientSession)
 
 public:
 	ClientSession();
 
-	void clientAuthResult(DB_Account *query);
+	void clientAuthResult(DB_Account* query);
 
 protected:
 	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
@@ -37,7 +36,7 @@ protected:
 	void onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet);
 	void onServerList(const TS_CA_SERVER_LIST* packet);
 	void onSelectServer(const TS_CA_SELECT_SERVER* packet);
-	
+
 private:
 	~ClientSession();
 
@@ -51,6 +50,6 @@ private:
 	DbQueryJobRef dbQuery;
 };
 
-} // namespace AuthServer
+}  // namespace AuthServer
 
-#endif // AUTHSERVER_CLIENTSESSION_H
+#endif  // AUTHSERVER_CLIENTSESSION_H

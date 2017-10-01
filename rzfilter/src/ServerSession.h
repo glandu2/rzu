@@ -1,9 +1,9 @@
 #ifndef AUTHSESSION_H
 #define AUTHSESSION_H
 
+#include "IFilterEndpoint.h"
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
-#include "IFilterEndpoint.h"
 
 class ClientSession;
 
@@ -11,8 +11,7 @@ class ClientSession;
  * @brief The ServerSession class
  * Spawned when connecting to a server by the ClientSession class
  */
-class ServerSession : public EncryptedSession<PacketSession>, public IFilterEndpoint
-{
+class ServerSession : public EncryptedSession<PacketSession>, public IFilterEndpoint {
 	DECLARE_CLASS(ServerSession)
 public:
 	ServerSession(ClientSession* clientSession);
@@ -24,9 +23,13 @@ public:
 
 	void sendPacket(MessageBuffer& buffer) {
 		if(buffer.checkPacketFinalSize() == false) {
-			log(LL_Error, "Wrong packet buffer size, id: %d, size: %d, field: %s\n", buffer.getMessageId(), buffer.getSize(), buffer.getFieldInOverflow().c_str());
+			log(LL_Error,
+			    "Wrong packet buffer size, id: %d, size: %d, field: %s\n",
+			    buffer.getMessageId(),
+			    buffer.getSize(),
+			    buffer.getFieldInOverflow().c_str());
 		} else {
-			sendPacket((const TS_MESSAGE*)buffer.getData());
+			sendPacket((const TS_MESSAGE*) buffer.getData());
 		}
 	}
 	int getPacketVersion() { return version; }
@@ -46,4 +49,4 @@ private:
 	int version;
 };
 
-#endif // AUTHSESSION_H
+#endif  // AUTHSESSION_H

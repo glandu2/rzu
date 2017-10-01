@@ -4,9 +4,9 @@
 
 template<> void DbQueryJob<GameServer::BannedWordsBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-				  CONFIG_GET()->game.arcadia.connectionString,
-				  "select * from BanWordResource",
-				  DbQueryBinding::EM_MultiRows);
+	              CONFIG_GET()->game.arcadia.connectionString,
+	              "select * from BanWordResource",
+	              DbQueryBinding::EM_MultiRows);
 
 	addColumn("string", &OutputType::word);
 }
@@ -20,7 +20,7 @@ void BannedWordsBinding::load() {
 	dbQuery.executeDbQuery<BannedWordsBinding>(this, &BannedWordsBinding::onDataLoaded, BannedWordsBinding::Input());
 }
 
-bool BannedWordsBinding::isWordBanned(const std::string &word) {
+bool BannedWordsBinding::isWordBanned(const std::string& word) {
 	return data.find(word) != data.end();
 }
 
@@ -39,9 +39,9 @@ void BannedWordsBinding::onDataLoaded(DbQueryJob<BannedWordsBinding>* query) {
 		}
 	}
 
-	log(LL_Info, "Loaded %d lines\n", (int)data.size());
+	log(LL_Info, "Loaded %d lines\n", (int) data.size());
 
 	dataLoaded();
 }
 
-}
+}  // namespace GameServer

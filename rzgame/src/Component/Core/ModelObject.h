@@ -1,17 +1,16 @@
 #ifndef MODELOBJECT_H
 #define MODELOBJECT_H
 
+#include "Core/Object.h"
 #include "GameTypes.h"
 #include <unordered_map>
-#include "Core/Object.h"
 #include <vector>
 
 namespace GameServer {
 
 class ClientSession;
 
-template<class ModelType, game_handle_t HANDLE_MASK>
-class ModelObject : public Object {
+template<class ModelType, game_handle_t HANDLE_MASK> class ModelObject : public Object {
 public:
 	~ModelObject() {
 		freeHandles.push_back(handle);
@@ -61,12 +60,10 @@ public:
 protected:
 	ModelObject() : sid(0), handle(allocHandle()) {}
 
-
 private:
-
 	static game_handle_t allocHandle() {
 		if(freeHandles.empty()) {
-			nextHandle = (nextHandle+1) & 0x0FFFFFFF;
+			nextHandle = (nextHandle + 1) & 0x0FFFFFFF;
 			return nextHandle | (HANDLE_MASK << 28);
 		} else {
 			game_handle_t ret = freeHandles.back();
@@ -87,12 +84,11 @@ std::unordered_map<game_sid_t, ModelType*> ModelObject<ModelType, HANDLE_MASK>::
 template<class ModelType, game_handle_t HANDLE_MASK>
 std::unordered_map<game_handle_t, ModelType*> ModelObject<ModelType, HANDLE_MASK>::dataObjectsByHandle;
 
-template<class ModelType, game_handle_t HANDLE_MASK>
-game_handle_t ModelObject<ModelType, HANDLE_MASK>::nextHandle = 0;
+template<class ModelType, game_handle_t HANDLE_MASK> game_handle_t ModelObject<ModelType, HANDLE_MASK>::nextHandle = 0;
 
 template<class ModelType, game_handle_t HANDLE_MASK>
 std::vector<game_handle_t> ModelObject<ModelType, HANDLE_MASK>::freeHandles;
 
-}
+}  // namespace GameServer
 
-#endif // MODELOBJECT_H
+#endif  // MODELOBJECT_H

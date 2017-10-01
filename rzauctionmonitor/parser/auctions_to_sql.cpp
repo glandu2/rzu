@@ -1,23 +1,22 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <time.h>
-#include <map>
-#include <vector>
-#include "Core/CharsetConverter.h"
-#include "Database/DbQueryJobRef.h"
-#include "Core/Log.h"
-#include "Core/EventLoop.h"
-#include "Config/GlobalCoreConfig.h"
-#include "Database/DbConnectionPool.h"
-#include "Database/DbConnection.h"
-#include "LibRzuInit.h"
 #include "AuctionFile.h"
 #include "AuctionSQLWriter.h"
 #include "AuctionWriter.h"
+#include "Config/GlobalCoreConfig.h"
+#include "Core/CharsetConverter.h"
+#include "Core/EventLoop.h"
+#include "Core/Log.h"
+#include "Database/DbConnection.h"
+#include "Database/DbConnectionPool.h"
+#include "Database/DbQueryJobRef.h"
+#include "LibRzuInit.h"
+#include <map>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <vector>
 
-template<class AUCTION_FILE>
-void writeSql(const AUCTION_FILE& auctionFile, std::vector<DB_Item::Input>& inputs) {
+template<class AUCTION_FILE> void writeSql(const AUCTION_FILE& auctionFile, std::vector<DB_Item::Input>& inputs) {
 	for(size_t i = 0; i < auctionFile.auctions.size(); i++) {
 		DB_Item::addAuction(inputs, auctionFile.auctions[i]);
 	}
@@ -31,11 +30,11 @@ int main(int argc, char* argv[]) {
 	ConfigInfo::get()->init(argc, argv);
 
 	Log mainLogger(GlobalCoreConfig::get()->log.enable,
-				   GlobalCoreConfig::get()->log.level,
-				   GlobalCoreConfig::get()->log.consoleLevel,
-				   GlobalCoreConfig::get()->log.dir,
-				   GlobalCoreConfig::get()->log.file,
-				   GlobalCoreConfig::get()->log.maxQueueSize);
+	               GlobalCoreConfig::get()->log.level,
+	               GlobalCoreConfig::get()->log.consoleLevel,
+	               GlobalCoreConfig::get()->log.dir,
+	               GlobalCoreConfig::get()->log.file,
+	               GlobalCoreConfig::get()->log.maxQueueSize);
 	Log::setDefaultLogger(&mainLogger);
 
 	ConfigInfo::get()->dump();
@@ -94,7 +93,7 @@ int main(int argc, char* argv[]) {
 	DbQueryJob<DB_Item>::executeNoResult(inputs);
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 
-	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", (int)processedFiles);
+	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", (int) processedFiles);
 
 	return 0;
 }

@@ -1,15 +1,14 @@
 #ifndef JOBLEVELBONUS_H
 #define JOBLEVELBONUS_H
 
-#include "RefDataLoader.h"
 #include "Database/DbQueryJobRef.h"
-#include <unordered_map>
+#include "RefDataLoader.h"
 #include <stdint.h>
+#include <unordered_map>
 
 namespace GameServer {
 
 class StatBase;
-
 
 struct JobLevelBonus {
 	int32_t id;
@@ -27,15 +26,15 @@ struct JobLevelBonus {
 	int32_t default_intelligence;
 	int32_t default_wisdom;
 	int32_t default_luck;
-	//int32_t text_id;
-	//int32_t icon_id;
-	//std::string icon_file_name;
+	// int32_t text_id;
+	// int32_t icon_id;
+	// std::string icon_file_name;
 };
 
 class JobLevelBonusBinding : public RefDataLoaderHelper<JobLevelBonus, JobLevelBonusBinding> {
 	DECLARE_CLASS(GameServer::JobLevelBonusBinding)
 };
 
-}
+}  // namespace GameServer
 
-#endif // JOBLEVELBONUS_H
+#endif  // JOBLEVELBONUS_H

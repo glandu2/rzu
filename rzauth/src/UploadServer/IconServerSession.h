@@ -2,13 +2,12 @@
 #define UPLOADSERVER_ICONSERVERSESSION_H
 
 #include "NetSession/SocketSession.h"
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace UploadServer {
 
-class IconServerSession : public SocketSession
-{
+class IconServerSession : public SocketSession {
 	DECLARE_CLASS(UploadServer::IconServerSession)
 public:
 	IconServerSession();
@@ -24,12 +23,7 @@ protected:
 	void sendIcon(const std::string& filename);
 
 private:
-
-	enum State : char {
-		WaitStatusLine,
-		RetrievingStatusLine,
-		WaitEndOfHeaders
-	} status;
+	enum State : char { WaitStatusLine, RetrievingStatusLine, WaitEndOfHeaders } status;
 
 	uint8_t nextByteToMatch;
 
@@ -37,6 +31,6 @@ private:
 	uint8_t urlLength;
 };
 
-} // namespace UploadServer
+}  // namespace UploadServer
 
-#endif // UPLOADSERVER_ICONSERVERSESSION_H
+#endif  // UPLOADSERVER_ICONSERVERSESSION_H

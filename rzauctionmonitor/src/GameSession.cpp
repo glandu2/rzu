@@ -1,46 +1,47 @@
 #include "GameSession.h"
+#include "AuctionWorker.h"
 #include "AuthSession.h"
+#include "Config/ConfigParamVal.h"
 #include "Core/EventLoop.h"
 #include <algorithm>
-#include "AuctionWorker.h"
 #include <time.h>
-#include "Config/ConfigParamVal.h"
 
-#include "GameClient/TS_CS_REPORT.h"
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
-#include "GameClient/TS_SC_CHARACTER_LIST.h"
-#include "GameClient/TS_CS_LOGIN.h"
-#include "GameClient/TS_SC_LOGIN_RESULT.h"
-#include "GameClient/TS_CS_LOGOUT.h"
-#include "GameClient/TS_TIMESYNC.h"
-#include "GameClient/TS_SC_DISCONNECT_DESC.h"
-#include "GameClient/TS_CS_UPDATE.h"
 #include "GameClient/TS_CS_GAME_TIME.h"
+#include "GameClient/TS_CS_LOGIN.h"
+#include "GameClient/TS_CS_LOGOUT.h"
+#include "GameClient/TS_CS_REPORT.h"
+#include "GameClient/TS_CS_UPDATE.h"
+#include "GameClient/TS_SC_CHARACTER_LIST.h"
+#include "GameClient/TS_SC_DISCONNECT_DESC.h"
 #include "GameClient/TS_SC_GAME_TIME.h"
+#include "GameClient/TS_SC_LOGIN_RESULT.h"
+#include "GameClient/TS_SC_RESULT.h"
+#include "GameClient/TS_TIMESYNC.h"
 #include "TS_CS_AUCTION_SEARCH.h"
 #include "TS_SC_AUCTION_SEARCH.h"
-#include "GameClient/TS_SC_RESULT.h"
 
-GameSession::GameSession(AuctionWorker *auctionWorker, const std::string& playername, cval<int>& ggRecoTime, cval<int>& version)
+GameSession::GameSession(AuctionWorker* auctionWorker,
+                         const std::string& playername,
+                         cval<int>& ggRecoTime,
+                         cval<int>& version)
     : ClientGameSession(version.get()),
       auctionWorker(auctionWorker),
-	  playername(playername),
-	  connectedInGame(false),
-	  handle(0),
-	  rappelzTimeOffset(0),
-	  epochTimeOffset(0),
+      playername(playername),
+      connectedInGame(false),
+      handle(0),
+      rappelzTimeOffset(0),
+      epochTimeOffset(0),
       ggRecoTime(ggRecoTime),
-      version(version)
-{
-}
+      version(version) {}
 
 void GameSession::onGameConnected() {
 	int ggRecoTimeValue = ggRecoTime.get();
 	if(ggRecoTimeValue > 10)
-		ggPreventionRecoTimer.start(this, &GameSession::onGGPreventionTimerExpired, (ggRecoTimeValue - 10)*1000, 0);
+		ggPreventionRecoTimer.start(this, &GameSession::onGGPreventionTimerExpired, (ggRecoTimeValue - 10) * 1000, 0);
 	if(ggRecoTimeValue > 0) {
 		log(LL_Debug, "Starting GG timer: %ds\n", ggRecoTimeValue);
-		ggRecoTimer.start(this, &GameSession::onGGTimerExpired, ggRecoTimeValue*1000, 0);
+		ggRecoTimer.start(this, &GameSession::onGGTimerExpired, ggRecoTimeValue * 1000, 0);
 	}
 	shouldReconnect = false;
 
@@ -87,23 +88,22 @@ void GameSession::onUpdatePacketExpired() {
 	sendPacket(updatPkt, version.get());
 }
 
-uint32_t GameSession::getRappelzTime()
-{
+uint32_t GameSession::getRappelzTime() {
 	return uint32_t(uv_hrtime() / (10 * 1000 * 1000));
 }
 
-void GameSession::onGamePacketReceived(const TS_MESSAGE *packet) {
+void GameSession::onGamePacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_SC_CHARACTER_LIST::packetID:
 			packet->process(this, &GameSession::onCharacterList, version.get());
 			break;
 
-		case_packet_is(TS_SC_LOGIN_RESULT)
-		    packet->process(this, &GameSession::onCharacterLoginResult, version.get());
+			case_packet_is(TS_SC_LOGIN_RESULT)
+			    packet->process(this, &GameSession::onCharacterLoginResult, version.get());
 			break;
 
 		case TS_SC_AUCTION_SEARCH::packetID:
-			auctionWorker->onAuctionSearchResult((const TS_SC_AUCTION_SEARCH*)packet);
+			auctionWorker->onAuctionSearchResult((const TS_SC_AUCTION_SEARCH*) packet);
 			if(shouldReconnect)
 				abortSession();
 			break;
@@ -150,7 +150,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	sendPacket(loginPkt, version.get());
 }
 
-void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT *packet) {
+void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet) {
 	handle = packet->handle;
 	log(LL_Info, "Connected with character %s\n", playername.c_str());
 	setConnected(true);
@@ -162,8 +162,7 @@ void GameSession::onResult(const TS_SC_RESULT* resultPacket) {
 	}
 }
 
-void GameSession::onTimeSync(const TS_TIMESYNC *serverTime)
-{
+void GameSession::onTimeSync(const TS_TIMESYNC* serverTime) {
 	rappelzTimeOffset = serverTime->time - getRappelzTime();
 
 	TS_TIMESYNC timeSyncPkt;
@@ -184,8 +183,7 @@ void GameSession::onGameTime(const TS_SC_GAME_TIME* serverTime) {
 	epochTimeOffset = uint32_t(serverTime->game_time - time(NULL));
 }
 
-void GameSession::setConnected(bool connected)
-{
+void GameSession::setConnected(bool connected) {
 	if(connected && !connectedInGame)
 		auctionWorker->onConnected();
 	else if(!connected && connectedInGame)
@@ -193,8 +191,7 @@ void GameSession::setConnected(bool connected)
 	connectedInGame = connected;
 }
 
-void GameSession::auctionSearch(int category_id, int page)
-{
+void GameSession::auctionSearch(int category_id, int page) {
 	TS_CS_AUCTION_SEARCH auctionSearchPacket;
 	TS_MESSAGE::initMessage<TS_CS_AUCTION_SEARCH>(&auctionSearchPacket);
 

@@ -21,8 +21,8 @@
 #include "GameClient/TS_CS_ANTI_HACK.h"
 #include "GameClient/TS_CS_ARRANGE_ITEM.h"
 #include "GameClient/TS_CS_ATTACK_REQUEST.h"
-#include "GameClient/TS_CS_AUCTION_BIDDED_LIST.h"
 #include "GameClient/TS_CS_AUCTION_BID.h"
+#include "GameClient/TS_CS_AUCTION_BIDDED_LIST.h"
 #include "GameClient/TS_CS_AUCTION_CANCEL.h"
 #include "GameClient/TS_CS_AUCTION_INSTANT_PURCHASE.h"
 #include "GameClient/TS_CS_AUCTION_REGISTER.h"
@@ -126,11 +126,11 @@
 #include "GameClient/TS_CS_STOP_BOOTH.h"
 #include "GameClient/TS_CS_STOP_WATCH_BOOTH.h"
 #include "GameClient/TS_CS_STORAGE.h"
-#include "GameClient/TS_CS_SUMMON_CARD_SKILL_LIST.h"
 #include "GameClient/TS_CS_SUMMON.h"
+#include "GameClient/TS_CS_SUMMON_CARD_SKILL_LIST.h"
 #include "GameClient/TS_CS_SWAP_EQUIP.h"
-#include "GameClient/TS_CS_TAKE_ITEM.h"
 #include "GameClient/TS_CS_TAKEOUT_COMMERCIAL_ITEM.h"
+#include "GameClient/TS_CS_TAKE_ITEM.h"
 #include "GameClient/TS_CS_TARGETING.h"
 #include "GameClient/TS_CS_TRANSMIT_ETHEREAL_DURABILITY.h"
 #include "GameClient/TS_CS_TRANSMIT_ETHEREAL_DURABILITY_TO_EQUIPMENT.h"
@@ -228,8 +228,8 @@
 #include "GameClient/TS_SC_MARKET.h"
 #include "GameClient/TS_SC_MIX_RESULT.h"
 #include "GameClient/TS_SC_MOUNT_SUMMON.h"
-#include "GameClient/TS_SC_MOVE_ACK.h"
 #include "GameClient/TS_SC_MOVE.h"
+#include "GameClient/TS_SC_MOVE_ACK.h"
 #include "GameClient/TS_SC_NPC_TRADE_INFO.h"
 #include "GameClient/TS_SC_OPEN_GUILD_WINDOW.h"
 #include "GameClient/TS_SC_OPEN_ITEM_SHOP.h"
@@ -248,8 +248,8 @@
 #include "GameClient/TS_SC_REMOVE_PET_INFO.h"
 #include "GameClient/TS_SC_REMOVE_SUMMON_INFO.h"
 #include "GameClient/TS_SC_REQUEST_SECURITY_NO.h"
-#include "GameClient/TS_SC_RESULT_FOSTER.h"
 #include "GameClient/TS_SC_RESULT.h"
+#include "GameClient/TS_SC_RESULT_FOSTER.h"
 #include "GameClient/TS_SC_RESULT_NURSE.h"
 #include "GameClient/TS_SC_RESULT_RETRIEVE.h"
 #include "GameClient/TS_SC_SET_MAIN_TITLE.h"
@@ -262,15 +262,15 @@
 #include "GameClient/TS_SC_SHOW_SOULSTONE_REPAIR_WINDOW.h"
 #include "GameClient/TS_SC_SHOW_SUMMON_NAME_CHANGE.h"
 #include "GameClient/TS_SC_SHOW_WINDOW.h"
-#include "GameClient/TS_SC_SKILLCARD_INFO.h"
 #include "GameClient/TS_SC_SKILL.h"
+#include "GameClient/TS_SC_SKILLCARD_INFO.h"
 #include "GameClient/TS_SC_SKILL_LEVEL_LIST.h"
 #include "GameClient/TS_SC_SKILL_LIST.h"
 #include "GameClient/TS_SC_SP.h"
 #include "GameClient/TS_SC_STATE.h"
 #include "GameClient/TS_SC_STATE_RESULT.h"
-#include "GameClient/TS_SC_STAT_INFO.h"
 #include "GameClient/TS_SC_STATUS_CHANGE.h"
+#include "GameClient/TS_SC_STAT_INFO.h"
 #include "GameClient/TS_SC_SUMMON_EVOLUTION.h"
 #include "GameClient/TS_SC_TAKE_ITEM_RESULT.h"
 #include "GameClient/TS_SC_TAMING_INFO.h"
@@ -292,13 +292,11 @@
 #include "GameClient/TS_TIMESYNC.h"
 #include "GameClient/TS_TRADE.h"
 
-template<template<typename> class Functor, typename ...Args>
-bool processAuthPacket(int packetId, Args... args) {
-
+template<template<typename> class Functor, typename... Args> bool processAuthPacket(int packetId, Args... args) {
 #define SEND_PACKET(_type) \
 	case _type::packetID: \
-	    Functor<_type>()(args...); \
-	    break
+		Functor<_type>()(args...); \
+		break
 
 	switch(packetId) {
 		SEND_PACKET(TS_AC_ACCOUNT_NAME);
@@ -328,29 +326,27 @@ bool processAuthPacket(int packetId, Args... args) {
 	return true;
 }
 
-template<template<typename> class Functor, typename ...Args>
+template<template<typename> class Functor, typename... Args>
 bool processGamePacket(int packetId, bool isServerPacket, Args... args) {
-
 #define SEND_PACKET(_type) \
 	case _type::packetID: \
-	    Functor<_type>()(args...); \
-	    break
+		Functor<_type>()(args...); \
+		break
 
 #define SEND_PACKET_2(_type) \
-	case_packet_is(_type) \
-	    Functor<_type>()(args...); \
-	    break
+	case_packet_is(_type) Functor<_type>()(args...); \
+	break
 
 #define SEND_PACKET_CLISERV(_isServer, _type_serv, _type_client) \
 	case _type_serv::packetID: \
-	    static_assert(_type_serv::packetID == _type_client::packetID, "expected same packet ID"); \
-	    (void)(sizeof(&_type_serv::getSize)); \
-	    (void)(sizeof(&_type_client::getSize)); \
-	    if(_isServer) \
-	        Functor<_type_serv>()(args...); \
-	    else \
-	        Functor<_type_client>()(args...); \
-	    break
+		static_assert(_type_serv::packetID == _type_client::packetID, "expected same packet ID"); \
+		(void) (sizeof(&_type_serv::getSize)); \
+		(void) (sizeof(&_type_client::getSize)); \
+		if(_isServer) \
+			Functor<_type_serv>()(args...); \
+		else \
+			Functor<_type_client>()(args...); \
+		break
 
 	switch(packetId) {
 		SEND_PACKET(TS_CS_ACCOUNT_WITH_AUTH);
@@ -638,8 +634,7 @@ bool processGamePacket(int packetId, bool isServerPacket, Args... args) {
 	return true;
 }
 
-template<template<typename> class Functor, typename ...Args>
-void iterateAllPacketTypes(Args... args) {
+template<template<typename> class Functor, typename... Args> void iterateAllPacketTypes(Args... args) {
 	// Auth packets
 	Functor<TS_AC_ACCOUNT_NAME>()(args...);
 	Functor<TS_AC_AES_KEY_IV>()(args...);

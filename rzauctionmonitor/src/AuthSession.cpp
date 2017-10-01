@@ -1,7 +1,7 @@
 #include "AuthSession.h"
-#include "GameSession.h"
-#include "Core/EventLoop.h"
 #include "Config/ConfigParamVal.h"
+#include "Core/EventLoop.h"
+#include "GameSession.h"
 
 AuthSession::AuthSession(GameSession* gameSession,
                          cval<std::string>& ip,
@@ -13,17 +13,15 @@ AuthSession::AuthSession(GameSession* gameSession,
                          const std::string& password,
                          cval<int>& version)
     : ClientAuthSession(gameSession, version.get()),
-	  gameSession(gameSession),
-	  ip(ip),
-	  port(port),
-	  account(account),
-	  password(password),
-	  serverIdx(serverIdx),
-	  delayTime(delayTime),
-	  useRsa(useRsa),
-	  disconnectRequested(false)
-{
-}
+      gameSession(gameSession),
+      ip(ip),
+      port(port),
+      account(account),
+      password(password),
+      serverIdx(serverIdx),
+      delayTime(delayTime),
+      useRsa(useRsa),
+      disconnectRequested(false) {}
 
 void AuthSession::connect() {
 	disconnectRequested = false;
@@ -66,7 +64,11 @@ void AuthSession::onAuthDisconnected() {
 
 void AuthSession::onAuthResult(TS_ResultCode result, const std::string& resultString) {
 	if(result != TS_RESULT_SUCCESS) {
-		log(LL_Error, "%s: Auth failed result: %d (%s)\n", getAccountName().c_str(), result, resultString.empty() ? "no associated string" : resultString.c_str());
+		log(LL_Error,
+		    "%s: Auth failed result: %d (%s)\n",
+		    getAccountName().c_str(),
+		    result,
+		    resultString.empty() ? "no associated string" : resultString.c_str());
 		abortSession();
 	} else {
 		log(LL_Debug, "Retrieving server list\n");
@@ -81,12 +83,13 @@ void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t 
 	log(LL_Debug, "Server list (last id: %d)\n", lastSelectedServerId);
 	for(size_t i = 0; i < servers.size(); i++) {
 		const ServerInfo& serverInfo = servers.at(i);
-		log(LL_Debug, "%d: %20s at %16s:%d %d%% user ratio\n",
-				serverInfo.serverId,
-				serverInfo.serverName.c_str(),
-				serverInfo.serverIp.c_str(),
-				serverInfo.serverPort,
-				serverInfo.userRatio);
+		log(LL_Debug,
+		    "%d: %20s at %16s:%d %d%% user ratio\n",
+		    serverInfo.serverId,
+		    serverInfo.serverName.c_str(),
+		    serverInfo.serverIp.c_str(),
+		    serverInfo.serverPort,
+		    serverInfo.userRatio);
 
 		if(serverInfo.serverId == serverIdxToSelect && !serverFound) {
 			serverFound = true;
@@ -98,12 +101,13 @@ void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t 
 		log(LL_Info, "Server list (last id: %d)\n", lastSelectedServerId);
 		for(size_t i = 0; i < servers.size(); i++) {
 			const ServerInfo& serverInfo = servers.at(i);
-			log(LL_Info, "%d: %20s at %16s:%d %d%% user ratio\n",
-					serverInfo.serverId,
-					serverInfo.serverName.c_str(),
-					serverInfo.serverIp.c_str(),
-					serverInfo.serverPort,
-					serverInfo.userRatio);
+			log(LL_Info,
+			    "%d: %20s at %16s:%d %d%% user ratio\n",
+			    serverInfo.serverId,
+			    serverInfo.serverName.c_str(),
+			    serverInfo.serverIp.c_str(),
+			    serverInfo.serverPort,
+			    serverInfo.userRatio);
 		}
 	}
 

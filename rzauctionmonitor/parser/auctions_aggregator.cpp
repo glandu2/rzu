@@ -1,14 +1,14 @@
-#include <stdio.h>
+#include "AuctionFile.h"
+#include "AuctionWriter.h"
+#include "Config/GlobalCoreConfig.h"
+#include "Core/EventLoop.h"
+#include "Core/Log.h"
+#include "LibRzuInit.h"
+#include "Packet/JSONWriter.h"
 #include <stdint.h>
+#include <stdio.h>
 #include <unordered_map>
 #include <vector>
-#include "Core/Log.h"
-#include "Core/EventLoop.h"
-#include "Config/GlobalCoreConfig.h"
-#include "LibRzuInit.h"
-#include "AuctionFile.h"
-#include "Packet/JSONWriter.h"
-#include "AuctionWriter.h"
 
 #pragma pack(push, 1)
 struct ItemData {
@@ -37,21 +37,15 @@ struct ItemData {
 #pragma pack(pop)
 
 #define AUCTION_INFO_PER_DAY_DEF(_) \
-	_(simple)(uint32_t, code) \
-	_(simple)(uint32_t, estimatedSoldNumber) \
-	_(simple)(int64_t, minEstimatedSoldPrice) \
-	_(simple)(int64_t, maxEstimatedSoldPrice) \
-	_(simple)(int64_t, avgEstimatedSoldPrice) \
-	_(simple)(uint32_t, itemNumber) \
-	_(simple)(int64_t, minPrice) \
-	_(simple)(int64_t, maxPrice) \
-	_(simple)(int64_t, avgPrice)
+	_(simple) \
+	(uint32_t, code) _(simple)(uint32_t, estimatedSoldNumber) _(simple)(int64_t, minEstimatedSoldPrice) \
+	    _(simple)(int64_t, maxEstimatedSoldPrice) _(simple)(int64_t, avgEstimatedSoldPrice) \
+	        _(simple)(uint32_t, itemNumber) _(simple)(int64_t, minPrice) _(simple)(int64_t, maxPrice) \
+	            _(simple)(int64_t, avgPrice)
 CREATE_STRUCT(AUCTION_INFO_PER_DAY);
 
 #define AUCTION_AGGREGATE_DEF(_) \
-	_(simple)  (int64_t, date) \
-	_(count)   (uint32_t, auctionNumber, auctions) \
-	_(dynarray)(AUCTION_INFO_PER_DAY, auctions)
+	_(simple)(int64_t, date) _(count)(uint32_t, auctionNumber, auctions) _(dynarray)(AUCTION_INFO_PER_DAY, auctions)
 CREATE_STRUCT(AUCTION_AGGREGATE);
 
 struct AuctionSummary {
@@ -59,9 +53,8 @@ struct AuctionSummary {
 	bool isSold;
 };
 
-static bool writeToFile(const char* filename, const std::string& data)
-{
-	std::unique_ptr<FILE, int(*)(FILE*)> file(nullptr, &fclose);
+static bool writeToFile(const char* filename, const std::string& data) {
+	std::unique_ptr<FILE, int (*)(FILE*)> file(nullptr, &fclose);
 
 	file.reset(fopen(filename, "wt"));
 	if(!file) {
@@ -75,8 +68,9 @@ static bool writeToFile(const char* filename, const std::string& data)
 	return true;
 }
 
-static void computeStatisticsOfDay(time_t date, const std::unordered_map<uint32_t, std::vector<AuctionSummary>>& auctionData, bool compactJson)
-{
+static void computeStatisticsOfDay(time_t date,
+                                   const std::unordered_map<uint32_t, std::vector<AuctionSummary>>& auctionData,
+                                   bool compactJson) {
 	AUCTION_AGGREGATE aggregateData;
 	aggregateData.date = date;
 
@@ -110,7 +104,7 @@ static void computeStatisticsOfDay(time_t date, const std::unordered_map<uint32_
 		dayAggregation.itemNumber = num;
 		dayAggregation.minPrice = min;
 		dayAggregation.maxPrice = max;
-		dayAggregation.avgPrice = num ? sum/num : -1;
+		dayAggregation.avgPrice = num ? sum / num : -1;
 
 		for(i = 0, num = 0, sum = 0, min = -1, max = -1; i < auctionSummary.size(); i++) {
 			int64_t price = auctionSummary[i].price;
@@ -129,7 +123,7 @@ static void computeStatisticsOfDay(time_t date, const std::unordered_map<uint32_
 		dayAggregation.estimatedSoldNumber = num;
 		dayAggregation.minEstimatedSoldPrice = min;
 		dayAggregation.maxEstimatedSoldPrice = max;
-		dayAggregation.avgEstimatedSoldPrice = num ? sum/num : -1;
+		dayAggregation.avgEstimatedSoldPrice = num ? sum / num : -1;
 
 		aggregateData.auctions.push_back(dayAggregation);
 	}
@@ -211,7 +205,8 @@ int main(int argc, char* argv[]) {
 				}
 
 				it->second.push_back(summary);
-			} else if(auctionInfo.diffType == D_Deleted && (auctionInfo.time + 60) < auctionInfo.estimatedEndTimeMin && auctionInfo.price) {
+			} else if(auctionInfo.diffType == D_Deleted && (auctionInfo.time + 60) < auctionInfo.estimatedEndTimeMin &&
+			          auctionInfo.price) {
 				AuctionSummary summary;
 				summary.isSold = true;
 				summary.price = auctionInfo.price;
@@ -229,7 +224,7 @@ int main(int argc, char* argv[]) {
 
 	computeStatisticsOfDay(auctionData, compactJson);
 
-	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", i-1);
+	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", i - 1);
 
 	return 0;
 }

@@ -1,33 +1,32 @@
 #include "Character.h"
 
-#include "Database/DB_Character.h"
-#include "ReferenceData/ReferenceDataMgr.h"
-#include "Config/GlobalConfig.h"
 #include "ClientSession.h"
 #include "Component/Time/TimeManager.h"
+#include "Config/GlobalConfig.h"
+#include "Database/DB_Character.h"
+#include "ReferenceData/ReferenceDataMgr.h"
 
 #include "Core/Utils.h"
 
-#include "GameClient/TS_SC_STAT_INFO.h"
 #include "GameClient/TS_EQUIP_SUMMON.h"
-#include "GameClient/TS_SC_WEAR_INFO.h"
+#include "GameClient/TS_SC_ADDED_SKILL_LIST.h"
+#include "GameClient/TS_SC_BELT_SLOT_INFO.h"
+#include "GameClient/TS_SC_CHANGE_LOCATION.h"
+#include "GameClient/TS_SC_COMMERCIAL_STORAGE_INFO.h"
+#include "GameClient/TS_SC_DETECT_RANGE_UPDATE.h"
+#include "GameClient/TS_SC_EXP_UPDATE.h"
 #include "GameClient/TS_SC_GOLD_UPDATE.h"
 #include "GameClient/TS_SC_LEVEL_UPDATE.h"
-#include "GameClient/TS_SC_EXP_UPDATE.h"
-#include "GameClient/TS_SC_ADDED_SKILL_LIST.h"
-#include "GameClient/TS_SC_DETECT_RANGE_UPDATE.h"
-#include "GameClient/TS_SC_BELT_SLOT_INFO.h"
-#include "GameClient/TS_SC_STATUS_CHANGE.h"
 #include "GameClient/TS_SC_QUEST_LIST.h"
-#include "GameClient/TS_SC_CHANGE_LOCATION.h"
+#include "GameClient/TS_SC_STATUS_CHANGE.h"
+#include "GameClient/TS_SC_STAT_INFO.h"
+#include "GameClient/TS_SC_WEAR_INFO.h"
 #include "GameClient/TS_SC_WEATHER_INFO.h"
-#include "GameClient/TS_SC_COMMERCIAL_STORAGE_INFO.h"
 
 namespace GameServer {
 
-Character::Character(ClientSession* session, game_sid_t sid, const std::string& account, DB_Character *databaseData)
-	: statBase(), statBuffs(), inventory(session, this)
-{
+Character::Character(ClientSession* session, game_sid_t sid, const std::string& account, DB_Character* databaseData)
+    : statBase(), statBuffs(), inventory(session, this) {
 	static_assert(sizeof(prevJobId) == sizeof(databaseData->jobs), "Previous jobs array size mismatch");
 	static_assert(sizeof(prevJobLevel) == sizeof(databaseData->jlvs), "Previous jobs level array size mismatch");
 
@@ -104,8 +103,8 @@ void Character::updateStats() {
 
 	// + items, title, passive skill, jlv, buff
 	// * items, title, passive skill, jlv, buff
-	int32_t jobs[Utils_countOf(prevJobId)+1];
-	int32_t jobLevels[Utils_countOf(prevJobId)+1];
+	int32_t jobs[Utils_countOf(prevJobId) + 1];
+	int32_t jobLevels[Utils_countOf(prevJobId) + 1];
 	size_t i;
 	for(i = 0; i < Utils_countOf(prevJobId); i++) {
 		if(prevJobId[i] == 0 || prevJobLevel[i] == 0)
@@ -117,7 +116,7 @@ void Character::updateStats() {
 	jobLevels[i] = jobLevel;
 
 	// Number of jobs is i+1
-	stats.applyJobLevelBonus(jobs, jobLevels, i+1);
+	stats.applyJobLevelBonus(jobs, jobLevels, i + 1);
 
 	stats.extended.nAttackPointRight = level;
 	stats.extended.nAttackPointLeft = 0;
@@ -198,7 +197,7 @@ void Character::sendEquip() {
 	TS_SC_WEAR_INFO wearInfo = {0};
 	wearInfo.handle = handle;
 	for(size_t i = 0; i < Utils_countOf(wearInfo.item_code); i++) {
-		const Item* item = inventory.getEquipedItem((Inventory::ItemWearType)i);
+		const Item* item = inventory.getEquipedItem((Inventory::ItemWearType) i);
 
 		// Use item if one is equipped else use default model pseudo item
 		if(item) {
@@ -318,4 +317,4 @@ void Character::synchronizeWithClient() {
 	session->sendProperty(handle, "stamina_regen", staminaRegen);
 }
 
-}
+}  // namespace GameServer

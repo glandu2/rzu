@@ -11,8 +11,7 @@ namespace GameServer {
 
 class Character;
 
-class PlayerLoadingHandler : public ConnectionHandler
-{
+class PlayerLoadingHandler : public ConnectionHandler {
 	DECLARE_CLASS(GameServer::PlayerLoadingHandler)
 public:
 	PlayerLoadingHandler(ClientSession* session, game_sid_t sid);
@@ -28,6 +27,6 @@ private:
 	std::unique_ptr<Character> character;
 };
 
-} // namespace GameServer
+}  // namespace GameServer
 
-#endif // PLAYERLOADINGHANDLER_H
+#endif  // PLAYERLOADINGHANDLER_H

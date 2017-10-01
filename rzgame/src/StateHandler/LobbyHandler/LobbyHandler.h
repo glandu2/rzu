@@ -1,32 +1,30 @@
 #ifndef LOBBYHANDLER_H
 #define LOBBYHANDLER_H
 
-#include "Core/Object.h"
-#include "ConnectionHandler.h"
-#include "Database/DbQueryJobRef.h"
 #include "CharacterLight.h"
 #include "CharacterWearInfo.h"
+#include "ConnectionHandler.h"
+#include "Core/Object.h"
+#include "Database/DbQueryJobRef.h"
 
 #include "CheckCharacterName.h"
 #include "CreateCharacter.h"
 #include "DeleteCharacter.h"
 
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
-#include "GameClient/TS_CS_LOGIN.h"
 #include "GameClient/TS_CS_CHECK_CHARACTER_NAME.h"
 #include "GameClient/TS_CS_CREATE_CHARACTER.h"
 #include "GameClient/TS_CS_DELETE_CHARACTER.h"
+#include "GameClient/TS_CS_LOGIN.h"
 
 namespace GameServer {
 
-class LobbyHandler : public ConnectionHandler
-{
+class LobbyHandler : public ConnectionHandler {
 	DECLARE_CLASS(GameServer::LobbyHandler)
 public:
 	LobbyHandler(ClientSession* session);
 
 	void onPacketReceived(const TS_MESSAGE* packet) override;
-
 
 protected:
 	void onCharacterListQuery(const TS_CS_CHARACTER_LIST* packet);
@@ -45,7 +43,7 @@ protected:
 	void onCharacterLogin(const TS_CS_LOGIN* packet);
 
 protected:
-	static bool checkTextAgainstEncoding(const std::string &text);
+	static bool checkTextAgainstEncoding(const std::string& text);
 
 private:
 	DbQueryJobRef lobbyQueries;
@@ -55,6 +53,6 @@ private:
 	std::string lastValidatedCharacterName;
 };
 
-} // namespace GameServer
+}  // namespace GameServer
 
-#endif // LOBBYHANDLER_H
+#endif  // LOBBYHANDLER_H

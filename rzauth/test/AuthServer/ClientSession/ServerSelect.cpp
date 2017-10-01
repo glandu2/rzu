@@ -1,14 +1,14 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
+#include "../GameServerSession/Common.h"
 #include "../GlobalConfig.h"
-#include "FlatPackets/TS_AC_SERVER_LIST.h"
 #include "AuthClient/Flat/TS_AC_SELECT_SERVER.h"
 #include "AuthClient/Flat/TS_CA_SELECT_SERVER.h"
 #include "AuthGame/TS_AG_CLIENT_LOGIN.h"
-#include "PacketEnums.h"
 #include "Common.h"
-#include "../GameServerSession/Common.h"
+#include "FlatPackets/TS_AC_SERVER_LIST.h"
+#include "PacketEnums.h"
+#include "RzTest.h"
 #include "openssl/evp.h"
+#include "gtest/gtest.h"
 
 namespace AuthServer {
 
@@ -21,15 +21,13 @@ TEST(TS_CA_SELECT_SERVER, valid_aes) {
 	game.start();
 
 	addGameLoginScenario(game,
-						 11,
-						 "Server 11",
-						 "http://www.example.com/index_11.html",
-						 false,
-						 "127.0.0.1",
-						 4514,
-						 [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		auth.start();
-	});
+	                     11,
+	                     "Server 11",
+	                     "http://www.example.com/index_11.html",
+	                     false,
+	                     "127.0.0.1",
+	                     4514,
+	                     [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) { auth.start(); });
 
 	addClientLoginToServerListScenario(auth, AM_Aes, "test5", "admin", aesKey);
 
@@ -54,12 +52,14 @@ TEST(TS_CA_SELECT_SERVER, valid_aes) {
 			uint64_t oneTimePassword;
 			unsigned char raw[128];
 		} otp;
-		//pendingTime ignored here
+		// pendingTime ignored here
 
 		d_ctx = EVP_CIPHER_CTX_new();
 		ASSERT_NE(nullptr, d_ctx);
 		ASSERT_NE(0, EVP_DecryptInit_ex(d_ctx, EVP_aes_128_cbc(), NULL, aesKey, aesKey + 16));
-		ASSERT_NE(0, EVP_DecryptUpdate(d_ctx, otp.raw, &bytesWritten, packet->encrypted_data, sizeof(packet->encrypted_data)));
+		ASSERT_NE(
+		    0,
+		    EVP_DecryptUpdate(d_ctx, otp.raw, &bytesWritten, packet->encrypted_data, sizeof(packet->encrypted_data)));
 		ASSERT_NE(0, EVP_DecryptFinal_ex(d_ctx, otp.raw + bytesWritten, &bytesWritten));
 		EVP_CIPHER_CTX_free(d_ctx);
 
@@ -76,8 +76,8 @@ TEST(TS_CA_SELECT_SERVER, valid_aes) {
 		EXPECT_EQ(0, packet->nPCBangUser);
 		EXPECT_EQ(0, packet->nEventCode);
 		EXPECT_EQ(19, packet->nAge);
-//		EXPECT_EQ(0, packet->nContinuousPlayTime);
-//		EXPECT_EQ(0, packet->nContinuousLogoutTime);
+		//		EXPECT_EQ(0, packet->nContinuousPlayTime);
+		//		EXPECT_EQ(0, packet->nContinuousLogoutTime);
 
 		sendClientLogout(channel, "test5");
 		channel->closeSession();
@@ -97,15 +97,13 @@ TEST(TS_CA_SELECT_SERVER, valid_des) {
 	game.start();
 
 	addGameLoginScenario(game,
-						 12,
-						 "Server 12",
-						 "http://www.example.com/index_12.html",
-						 false,
-						 "127.0.0.1",
-						 4514,
-						 [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		auth.start();
-	});
+	                     12,
+	                     "Server 12",
+	                     "http://www.example.com/index_12.html",
+	                     false,
+	                     "127.0.0.1",
+	                     4514,
+	                     [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) { auth.start(); });
 
 	addClientLoginToServerListScenario(auth, AM_Des, "test6", "admin", nullptr);
 
@@ -136,8 +134,8 @@ TEST(TS_CA_SELECT_SERVER, valid_des) {
 		EXPECT_EQ(0, packet->nPCBangUser);
 		EXPECT_EQ(0, packet->nEventCode);
 		EXPECT_EQ(19, packet->nAge);
-//		EXPECT_EQ(0, packet->nContinuousPlayTime);
-//		EXPECT_EQ(0, packet->nContinuousLogoutTime);
+		//		EXPECT_EQ(0, packet->nContinuousPlayTime);
+		//		EXPECT_EQ(0, packet->nContinuousLogoutTime);
 
 		sendClientLogout(channel, "test6");
 		channel->closeSession();
@@ -156,15 +154,13 @@ TEST(TS_CA_SELECT_SERVER, invalid_index) {
 	game.start();
 
 	addGameLoginScenario(game,
-						 11,
-						 "Server 11",
-						 "http://www.example.com/index_11.html",
-						 false,
-						 "127.0.0.1",
-						 4514,
-						 [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		auth.start();
-	});
+	                     11,
+	                     "Server 11",
+	                     "http://www.example.com/index_11.html",
+	                     false,
+	                     "127.0.0.1",
+	                     4514,
+	                     [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) { auth.start(); });
 
 	addClientLoginToServerListScenario(auth, AM_Aes, "test5", "admin");
 
@@ -210,4 +206,4 @@ TEST(TS_CA_SELECT_SERVER, not_authenticated) {
 	test.run();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

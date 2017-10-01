@@ -1,11 +1,11 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
 #include "../GlobalConfig.h"
+#include "PacketEnums.h"
+#include "RzTest.h"
 #include "UploadClient/TS_CU_LOGIN.h"
 #include "UploadClient/TS_CU_UPLOAD.h"
 #include "UploadClient/TS_UC_LOGIN_RESULT.h"
 #include "UploadClient/TS_UC_UPLOAD.h"
-#include "PacketEnums.h"
+#include "gtest/gtest.h"
 
 /*
  * Double login
@@ -16,7 +16,8 @@ namespace UploadServer {
 
 TEST(TS_CU_LOGIN, no_request) {
 	RzTest test;
-	TestConnectionChannel upload(TestConnectionChannel::Client, CONFIG_GET()->upload.ip, CONFIG_GET()->upload.port, true);
+	TestConnectionChannel upload(
+	    TestConnectionChannel::Client, CONFIG_GET()->upload.ip, CONFIG_GET()->upload.port, true);
 
 	upload.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -43,4 +44,4 @@ TEST(TS_CU_LOGIN, no_request) {
 	test.run();
 }
 
-} // namespace UploadServer
+}  // namespace UploadServer

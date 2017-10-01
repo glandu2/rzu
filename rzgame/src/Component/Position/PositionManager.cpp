@@ -1,9 +1,9 @@
 #include "PositionManager.h"
 #include "Core/Utils.h"
-#include <array>
-#include <stdlib.h>
 #include <algorithm>
+#include <array>
 #include <math.h>
+#include <stdlib.h>
 
 namespace GameServer {
 
@@ -19,7 +19,7 @@ Region::Region(int32_t rx, int32_t ry, uint8_t layer) {
 	this->layer = layer;
 }
 
-bool Region::isVisibleRegion(const Region &other) {
+bool Region::isVisibleRegion(const Region& other) {
 	if(other.layer != layer)
 		return false;
 
@@ -27,14 +27,12 @@ bool Region::isVisibleRegion(const Region &other) {
 	return distance <= VISIBILITY_RADIUS;
 }
 
-PositionManager *PositionManager::get() {
+PositionManager* PositionManager::get() {
 	static PositionManager positionManager;
 	return &positionManager;
 }
 
-PositionManager::PositionManager() {
-
-}
+PositionManager::PositionManager() {}
 
 void PositionManager::start() {
 	positionsUpdateTimer.start(this, &PositionManager::update, 100, 100);
@@ -44,7 +42,7 @@ void PositionManager::stop() {
 	positionsUpdateTimer.stop();
 }
 
-void PositionManager::moveObject(Movable *movable, float x, float y, uint8_t layer) {
+void PositionManager::moveObject(Movable* movable, float x, float y, uint8_t layer) {
 	if(movable->x == x && movable->y == y && movable->layer == layer)
 		return;
 
@@ -54,13 +52,13 @@ void PositionManager::moveObject(Movable *movable, float x, float y, uint8_t lay
 
 	movable->targetX = x;
 	movable->targetY = y;
-//	movable->targerLayer = layer;
+	//	movable->targerLayer = layer;
 }
 
-void PositionManager::updatePosition(Movable *movable, uint64_t timestamp) {
+void PositionManager::updatePosition(Movable* movable, uint64_t timestamp) {
 	float deltaX = movable->targetX - movable->x;
 	float deltaY = movable->targetY - movable->y;
-	float distance = sqrt(deltaX*deltaX + deltaY*deltaY);
+	float distance = sqrt(deltaX * deltaX + deltaY * deltaY);
 
 	float oldX = movable->x;
 	float oldY = movable->y;
@@ -83,8 +81,7 @@ void PositionManager::updatePosition(Movable *movable, uint64_t timestamp) {
 	movable->lastUpdate = timestamp;
 }
 
-void PositionManager::updateRegion(Movable *movable, float oldX, float oldY, uint8_t oldLayer)
-{
+void PositionManager::updateRegion(Movable* movable, float oldX, float oldY, uint8_t oldLayer) {
 	Region oldRegion(oldX, oldY, oldLayer);
 	Region newRegion(movable->x, movable->y, movable->layer);
 
@@ -101,7 +98,7 @@ void PositionManager::updateRegion(Movable *movable, float oldX, float oldY, uin
 		for(int32_t ry = ryStart; ry <= ryEnd; ry++) {
 			Region testRegion(rx, ry, oldRegion.layer);
 			if(oldRegion.isVisibleRegion(testRegion) && !newRegion.isVisibleRegion(testRegion)) {
-				//disappear in old region
+				// disappear in old region
 				movable->onLeaveRegion(&testRegion);
 			}
 		}
@@ -114,15 +111,14 @@ void PositionManager::updateRegion(Movable *movable, float oldX, float oldY, uin
 		for(int32_t ry = ryStart; ry <= ryEnd; ry++) {
 			Region testRegion(rx, ry, newRegion.layer);
 			if(newRegion.isVisibleRegion(testRegion) && !oldRegion.isVisibleRegion(testRegion)) {
-				//appear in new region
+				// appear in new region
 				movable->onEnterRegion(&testRegion);
 			}
 		}
 	}
 }
 
-void PositionManager::update()
-{
+void PositionManager::update() {
 	auto it = movingObjects.begin();
 	auto itEnd = movingObjects.begin();
 	uint64_t timestamp = Utils::getTimeInMsec();
@@ -131,4 +127,4 @@ void PositionManager::update()
 	}
 }
 
-}
+}  // namespace GameServer

@@ -1,18 +1,15 @@
 #include "HttpClientSession.h"
-#include "Core/Utils.h"
 #include "Core/EventLoop.h"
+#include "Core/Utils.h"
 #include <string.h>
 
-HttpClientSession::HttpClientSession(cval<std::string>& ip, cval<int>& port)
-    : sending(false), ip(ip), port(port)
-{
+HttpClientSession::HttpClientSession(cval<std::string>& ip, cval<int>& port) : sending(false), ip(ip), port(port) {
 	resolver.data = this;
 }
 
-void HttpClientSession::sendData(std::string url, const std::string& data)
-{
+void HttpClientSession::sendData(std::string url, const std::string& data) {
 	if(sending) {
-		log(LL_Warning, "Already sending %d data\n", (int)dataToSend.size());
+		log(LL_Warning, "Already sending %d data\n", (int) dataToSend.size());
 	}
 
 	Data request;
@@ -38,17 +35,22 @@ void HttpClientSession::connectToHost() {
 	currentHost = currentIp;
 	currentPort = port.get();
 
-	int result = uv_getaddrinfo(EventLoop::getLoop(), &resolver, &HttpClientSession::onResolved, currentIp.c_str(), nullptr, &hints);
+	int result = uv_getaddrinfo(
+	    EventLoop::getLoop(), &resolver, &HttpClientSession::onResolved, currentIp.c_str(), nullptr, &hints);
 	if(result) {
 		log(LL_Error, "Failed to resolve %s: %s(%d), retrying later\n", currentIp.c_str(), uv_strerror(result), result);
 		reconnectLater();
 	}
 }
 
-void HttpClientSession::onResolved(uv_getaddrinfo_t *resolver, int status, struct addrinfo *res) {
+void HttpClientSession::onResolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res) {
 	HttpClientSession* thisInstance = (HttpClientSession*) resolver->data;
-	if (status < 0) {
-		thisInstance->log(LL_Error, "Failed to resolve %s: %s(%d), retrying later\n", thisInstance->currentIp.c_str(), uv_strerror(status), status);
+	if(status < 0) {
+		thisInstance->log(LL_Error,
+		                  "Failed to resolve %s: %s(%d), retrying later\n",
+		                  thisInstance->currentIp.c_str(),
+		                  uv_strerror(status),
+		                  status);
 		thisInstance->reconnectLater();
 		return;
 	}
@@ -62,8 +64,7 @@ void HttpClientSession::onResolved(uv_getaddrinfo_t *resolver, int status, struc
 	thisInstance->SocketSession::connect(addr, thisInstance->currentPort);
 }
 
-EventChain<SocketSession> HttpClientSession::onConnected()
-{
+EventChain<SocketSession> HttpClientSession::onConnected() {
 	const Data& data = dataToSend.front();
 
 	std::string requestHeader;
@@ -79,7 +80,7 @@ EventChain<SocketSession> HttpClientSession::onConnected()
 	                    data.url.c_str(),
 	                    currentHost.c_str(),
 	                    currentPort,
-	                    (int)data.data.size());
+	                    (int) data.data.size());
 	write(requestHeader.c_str(), requestHeader.size());
 	write(data.data.c_str(), data.data.size());
 
@@ -88,8 +89,7 @@ EventChain<SocketSession> HttpClientSession::onConnected()
 	return SocketSession::onConnected();
 }
 
-EventChain<SocketSession> HttpClientSession::onDataReceived()
-{
+EventChain<SocketSession> HttpClientSession::onDataReceived() {
 	static const char HTTP_STATUS_OK[] = "HTTP/1.1 200 OK\r\n";
 	std::vector<char> data;
 	getStream()->readAll(&data);
@@ -110,8 +110,7 @@ EventChain<SocketSession> HttpClientSession::onDataReceived()
 	return SocketSession::onDataReceived();
 }
 
-EventChain<SocketSession> HttpClientSession::onDisconnected(bool causedByRemote)
-{
+EventChain<SocketSession> HttpClientSession::onDisconnected(bool causedByRemote) {
 	if(dataToSend.empty()) {
 		sending = false;
 	} else {

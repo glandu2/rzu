@@ -1,14 +1,13 @@
 #ifndef AUTHSERVER_LOGSERVERCLIENT_H
 #define AUTHSERVER_LOGSERVERCLIENT_H
 
+#include "Config/ConfigParamVal.h"
 #include "NetSession/SocketSession.h"
 #include "NetSession/StartableObject.h"
-#include "Config/ConfigParamVal.h"
 
 namespace AuthServer {
 
-class LogServerClient : public SocketSession, public StartableObject
-{
+class LogServerClient : public SocketSession, public StartableObject {
 public:
 	LogServerClient(cval<std::string>& ip, cval<int>& port);
 
@@ -50,25 +49,25 @@ public:
 	void sendLog(const Message& message);
 
 	static void sendLog(unsigned short id,
-				 uint64_t n1,
-				 uint64_t n2,
-				 uint64_t n3,
-				 uint64_t n4,
-				 uint64_t n5,
-				 uint64_t n6,
-				 uint64_t n7,
-				 uint64_t n8,
-				 uint64_t n9,
-				 uint64_t n10,
-				 uint64_t n11,
-				 const char * str1,
-				 int len1,
-				 const char * str2,
-				 int len2,
-				 const char * str3,
-				 int len3,
-				 const char * str4,
-				 int len4);
+	                    uint64_t n1,
+	                    uint64_t n2,
+	                    uint64_t n3,
+	                    uint64_t n4,
+	                    uint64_t n5,
+	                    uint64_t n6,
+	                    uint64_t n7,
+	                    uint64_t n8,
+	                    uint64_t n9,
+	                    uint64_t n10,
+	                    uint64_t n11,
+	                    const char* str1,
+	                    int len1,
+	                    const char* str2,
+	                    int len2,
+	                    const char* str3,
+	                    int len3,
+	                    const char* str4,
+	                    int len4);
 
 private:
 	static LogServerClient* instance;
@@ -78,6 +77,6 @@ private:
 	std::vector<Message> pendingMessages;
 };
 
-} // namespace AuthServer
+}  // namespace AuthServer
 
-#endif // AUTHSERVER_LOGSERVERCLIENT_H
+#endif  // AUTHSERVER_LOGSERVERCLIENT_H

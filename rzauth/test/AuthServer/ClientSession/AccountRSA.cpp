@@ -1,13 +1,12 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "AuthClient/Flat/TS_CA_ACCOUNT.h"
-#include "AuthClient/Flat/TS_CA_RSA_PUBLIC_KEY.h"
 #include "AuthClient/Flat/TS_AC_AES_KEY_IV.h"
 #include "AuthClient/Flat/TS_AC_RESULT.h"
-#include "PacketEnums.h"
+#include "AuthClient/Flat/TS_CA_ACCOUNT.h"
+#include "AuthClient/Flat/TS_CA_RSA_PUBLIC_KEY.h"
 #include "Common.h"
-
+#include "PacketEnums.h"
+#include "RzTest.h"
+#include "gtest/gtest.h"
 
 /* TODO:
  * max size password (which must pass)
@@ -17,9 +16,7 @@ namespace AuthServer {
 
 class TS_CA_ACCOUNT_RSA_Test : public ::testing::Test {
 public:
-	virtual void SetUp() {
-		rsaCipher = createRSAKey();
-	}
+	virtual void SetUp() { rsaCipher = createRSAKey(); }
 	virtual void TearDown() {
 		freeRSAKey(rsaCipher);
 		rsaCipher = nullptr;
@@ -114,7 +111,7 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, rsa_key_invalid) {
 	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		AuthServer::sendVersion(channel);
-		TS_CA_RSA_PUBLIC_KEY *keyMsg;
+		TS_CA_RSA_PUBLIC_KEY* keyMsg;
 		int public_key_size = 256;
 
 		keyMsg = TS_MESSAGE_WNA::create<TS_CA_RSA_PUBLIC_KEY, unsigned char>(public_key_size);
@@ -140,11 +137,11 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, rsa_key_size_too_large) {
 	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		AuthServer::sendVersion(channel);
-		TS_CA_RSA_PUBLIC_KEY *keyMsg;
+		TS_CA_RSA_PUBLIC_KEY* keyMsg;
 		int public_key_size = 7;
 
 		keyMsg = TS_MESSAGE_WNA::create<TS_CA_RSA_PUBLIC_KEY, unsigned char>(public_key_size);
-		keyMsg->key_size = public_key_size*2;
+		keyMsg->key_size = public_key_size * 2;
 		memset(keyMsg->key, 127, public_key_size);
 		channel->sendPacket(keyMsg);
 		TS_MESSAGE_WNA::destroy(keyMsg);
@@ -166,7 +163,7 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, rsa_key_size_negative) {
 	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		AuthServer::sendVersion(channel);
-		TS_CA_RSA_PUBLIC_KEY *keyMsg;
+		TS_CA_RSA_PUBLIC_KEY* keyMsg;
 		int public_key_size = 7;
 
 		keyMsg = TS_MESSAGE_WNA::create<TS_CA_RSA_PUBLIC_KEY, unsigned char>(public_key_size);
@@ -259,7 +256,8 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, long_password_47_chars) {
 		const TS_AC_AES_KEY_IV* packet = AGET_PACKET(TS_AC_AES_KEY_IV);
 		parseAESKey(rsaCipher, packet, aes_key_iv);
 		TS_CA_ACCOUNT_RSA accountMsg;
-		prepareAccountRSAPacket(aes_key_iv, &accountMsg, "testPw47Chars", "47_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxx");
+		prepareAccountRSAPacket(
+		    aes_key_iv, &accountMsg, "testPw47Chars", "47_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxx");
 
 		channel->sendPacket(&accountMsg);
 	});
@@ -288,7 +286,8 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, long_password_60_chars) {
 		const TS_AC_AES_KEY_IV* packet = AGET_PACKET(TS_AC_AES_KEY_IV);
 		parseAESKey(rsaCipher, packet, aes_key_iv);
 		TS_CA_ACCOUNT_RSA accountMsg;
-		prepareAccountRSAPacket(aes_key_iv, &accountMsg, "testPw60Chars", "60_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		prepareAccountRSAPacket(
+		    aes_key_iv, &accountMsg, "testPw60Chars", "60_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
 		channel->sendPacket(&accountMsg);
 	});
@@ -317,7 +316,8 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, garbage_rsa_data) {
 		const TS_AC_AES_KEY_IV* packet = AGET_PACKET(TS_AC_AES_KEY_IV);
 		parseAESKey(rsaCipher, packet, aes_key_iv);
 		TS_CA_ACCOUNT_RSA accountMsg;
-		prepareAccountRSAPacket(aes_key_iv, &accountMsg, "test1", "60_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		prepareAccountRSAPacket(
+		    aes_key_iv, &accountMsg, "test1", "60_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 		accountMsg.password[55] = 127;
 		accountMsg.password[56] = 127;
 
@@ -394,4 +394,4 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, invalid_password_data_size_negative) {
 	test.run();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

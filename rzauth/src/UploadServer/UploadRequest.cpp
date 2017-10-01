@@ -1,7 +1,7 @@
 #include "UploadRequest.h"
+#include "GameServerSession.h"
 #include "uv.h"
 #include <time.h>
-#include "GameServerSession.h"
 
 namespace UploadServer {
 
@@ -13,17 +13,24 @@ uv_mutex_t UploadRequest::initializeLock() {
 	return mapLock;
 }
 
-UploadRequest::UploadRequest(GameServerSession *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password) :
-	gameServer(gameServer),
-	client_id(client_id),
-	account_id(account_id),
-	guild_sid(guild_sid),
-	one_time_password(one_time_password),
-	timestamp(time(NULL))
-{}
+UploadRequest::UploadRequest(GameServerSession* gameServer,
+                             uint32_t client_id,
+                             uint32_t account_id,
+                             uint32_t guild_sid,
+                             uint32_t one_time_password)
+    : gameServer(gameServer),
+      client_id(client_id),
+      account_id(account_id),
+      guild_sid(guild_sid),
+      one_time_password(one_time_password),
+      timestamp(time(NULL)) {}
 
-UploadRequest* UploadRequest::pushRequest(GameServerSession *gameServer, uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password) {
-	std::pair< std::unordered_map<uint32_t, UploadRequest*>::iterator, bool> result;
+UploadRequest* UploadRequest::pushRequest(GameServerSession* gameServer,
+                                          uint32_t client_id,
+                                          uint32_t account_id,
+                                          uint32_t guild_sid,
+                                          uint32_t one_time_password) {
+	std::pair<std::unordered_map<uint32_t, UploadRequest*>::iterator, bool> result;
 	UploadRequest* oldRequest;
 	UploadRequest* newRequest = new UploadRequest(gameServer, client_id, account_id, guild_sid, one_time_password);
 
@@ -45,7 +52,11 @@ UploadRequest* UploadRequest::pushRequest(GameServerSession *gameServer, uint32_
 	return newRequest;
 }
 
-UploadRequest* UploadRequest::popRequest(uint32_t client_id, uint32_t account_id, uint32_t guild_sid, uint32_t one_time_password, const std::string& gameServerName) {
+UploadRequest* UploadRequest::popRequest(uint32_t client_id,
+                                         uint32_t account_id,
+                                         uint32_t guild_sid,
+                                         uint32_t one_time_password,
+                                         const std::string& gameServerName) {
 	UploadRequest* ret;
 	std::unordered_map<uint32_t, UploadRequest*>::iterator it;
 
@@ -54,7 +65,8 @@ UploadRequest* UploadRequest::popRequest(uint32_t client_id, uint32_t account_id
 	it = pendingRequests.find(client_id);
 	if(it != pendingRequests.end()) {
 		ret = it->second;
-		if(ret->getAccountId() == account_id && ret->getGuildId() == guild_sid && ret->getOneTimePassword() == one_time_password && ret->getGameServer()->getName() == gameServerName) {
+		if(ret->getAccountId() == account_id && ret->getGuildId() == guild_sid &&
+		   ret->getOneTimePassword() == one_time_password && ret->getGameServer()->getName() == gameServerName) {
 			pendingRequests.erase(it);
 		} else {
 			ret = nullptr;
@@ -84,4 +96,4 @@ void UploadRequest::removeServer(GameServerSession* server) {
 	uv_mutex_unlock(&mapLock);
 }
 
-} // namespace UploadServer
+}  // namespace UploadServer

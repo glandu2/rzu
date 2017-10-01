@@ -1,47 +1,35 @@
 #include "AuctionSimpleDiffWriter.h"
 #include <time.h>
 
-AuctionSimpleDiffWriter::AuctionSimpleDiffWriter(size_t categoryCount) : AuctionGenericWriter(categoryCount)
-{
-}
+AuctionSimpleDiffWriter::AuctionSimpleDiffWriter(size_t categoryCount) : AuctionGenericWriter(categoryCount) {}
 
-void AuctionSimpleDiffWriter::addAuctionInfo(AuctionUid uid, uint64_t time, uint16_t category, const uint8_t* data, size_t len)
-{
+void AuctionSimpleDiffWriter::addAuctionInfo(
+    AuctionUid uid, uint64_t time, uint16_t category, const uint8_t* data, size_t len) {
 	AuctionSimpleData* auctionData = getAuction(uid);
 	if(auctionData)
 		auctionData->doUpdate(time, data, len);
 	else
-		addAuction(new AuctionSimpleData(uid,
-		                                 categoryTimeManager.getEstimatedPreviousCategoryBeginTime(category),
-		                                 time,
-		                                 category,
-		                                 data,
-		                                 len));
+		addAuction(new AuctionSimpleData(
+		    uid, categoryTimeManager.getEstimatedPreviousCategoryBeginTime(category), time, category, data, len));
 	categoryTimeManager.adjustCategoryTimeRange(category, time);
 }
 
-void AuctionSimpleDiffWriter::beginProcess()
-{
-	AuctionGenericWriter::beginProcess([](AuctionSimpleData* data) {
-		data->beginProcess();
-	});
+void AuctionSimpleDiffWriter::beginProcess() {
+	AuctionGenericWriter::beginProcess([](AuctionSimpleData* data) { data->beginProcess(); });
 }
 
-void AuctionSimpleDiffWriter::endProcess()
-{
+void AuctionSimpleDiffWriter::endProcess() {
 	AuctionGenericWriter::endProcess([this](AuctionSimpleData* data) {
 		data->endProcess(categoryTimeManager.getEstimatedCategoryEndTime(data->getCategory()));
 	});
 }
 
-void AuctionSimpleDiffWriter::dumpAuctions(std::vector<uint8_t> &output, bool doFullDump)
-{
+void AuctionSimpleDiffWriter::dumpAuctions(std::vector<uint8_t>& output, bool doFullDump) {
 	AUCTION_SIMPLE_FILE file = exportDump(doFullDump);
 	serialize(file, output);
 }
 
-AUCTION_SIMPLE_FILE AuctionSimpleDiffWriter::exportDump(bool doFullDump)
-{
+AUCTION_SIMPLE_FILE AuctionSimpleDiffWriter::exportDump(bool doFullDump) {
 	AUCTION_SIMPLE_FILE auctionFile;
 
 	categoryTimeManager.serializeHeader(auctionFile.header, doFullDump ? DT_Full : DT_Diff);
@@ -61,8 +49,7 @@ AUCTION_SIMPLE_FILE AuctionSimpleDiffWriter::exportDump(bool doFullDump)
 	return auctionFile;
 }
 
-void AuctionSimpleDiffWriter::importDump(const AUCTION_SIMPLE_FILE *auctionFile)
-{
+void AuctionSimpleDiffWriter::importDump(const AUCTION_SIMPLE_FILE* auctionFile) {
 	clearAuctions();
 	categoryTimeManager.deserializeHeader(auctionFile->header);
 	for(size_t i = 0; i < auctionFile->auctions.size(); i++) {

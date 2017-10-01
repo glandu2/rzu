@@ -1,32 +1,30 @@
 #define __STDC_LIMIT_MACROS
 #include "ClientSession.h"
-#include <string.h>
 #include "AuthServerSession.h"
 #include "Config/GlobalConfig.h"
 #include "Database/DbQueryJobCallback.h"
+#include <string.h>
 
+#include "Component/Character/Character.h"
 #include "ConnectionHandler.h"
+#include "StateHandler/GameHandler/GameHandler.h"
 #include "StateHandler/LobbyHandler/LobbyHandler.h"
 #include "StateHandler/PlayerLoadingHandler/PlayerLoadingHandler.h"
-#include "StateHandler/GameHandler/GameHandler.h"
-#include "Component/Character/Character.h"
 
-#include "PacketEnums.h"
-#include "GameClient/TS_SC_RESULT.h"
 #include "AuthGame/TS_GA_CLIENT_LOGIN.h"
 #include "GameClient/TS_SC_CHARACTER_LIST.h"
 #include "GameClient/TS_SC_LOGIN_RESULT.h"
 #include "GameClient/TS_SC_PROPERTY.h"
+#include "GameClient/TS_SC_RESULT.h"
+#include "PacketEnums.h"
 
 #include "GameClient/TS_CS_VERSION.h"
 
 namespace GameServer {
 
-void ClientSession::init() {
-}
+void ClientSession::init() {}
 
-void ClientSession::deinit() {
-}
+void ClientSession::deinit() {}
 
 ClientSession::ClientSession() : authReceived(false), accountId(UINT32_MAX) {
 	version = CONFIG_GET()->game.clients.epic.get();
@@ -43,7 +41,14 @@ void ClientSession::setConnectionHandler(ConnectionHandler* newConnectionHandler
 	connectionHandler.reset(newConnectionHandler);
 }
 
-void ClientSession::onAccountLoginResult(uint16_t result, std::string account, uint32_t accountId, char nPCBangUser, uint32_t nEventCode, uint32_t nAge, uint32_t nContinuousPlayTime, uint32_t nContinuousLogoutTime) {
+void ClientSession::onAccountLoginResult(uint16_t result,
+                                         std::string account,
+                                         uint32_t accountId,
+                                         char nPCBangUser,
+                                         uint32_t nEventCode,
+                                         uint32_t nAge,
+                                         uint32_t nContinuousPlayTime,
+                                         uint32_t nContinuousLogoutTime) {
 	TS_SC_RESULT loginResult;
 
 	loginResult.request_msg_id = TS_CS_ACCOUNT_WITH_AUTH::packetID;
@@ -70,7 +75,7 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 		}
 	} else if(connectionHandler) {
 		connectionHandler->onPacketReceived(packet);
-		oldConnectionHandler.reset(); // free old connection handler if it has changed
+		oldConnectionHandler.reset();  // free old connection handler if it has changed
 	} else {
 		log(LL_Warning, "Account %s authenticated but no connection handler !\n", account.c_str());
 	}
@@ -115,11 +120,11 @@ void ClientSession::sendResult(uint16_t id, uint16_t result, int32_t value) {
 	sendPacket(resultPacket);
 }
 
-void ClientSession::sendResult(const TS_MESSAGE *originalPacket, uint16_t result, int32_t value) {
+void ClientSession::sendResult(const TS_MESSAGE* originalPacket, uint16_t result, int32_t value) {
 	sendResult(originalPacket->id, result, value);
 }
 
-void ClientSession::sendProperty(game_handle_t handle, const char *name, int64_t value) {
+void ClientSession::sendProperty(game_handle_t handle, const char* name, int64_t value) {
 	TS_SC_PROPERTY property;
 	property.handle = handle;
 	property.name = name;
@@ -128,7 +133,7 @@ void ClientSession::sendProperty(game_handle_t handle, const char *name, int64_t
 	sendPacket(property);
 }
 
-void ClientSession::sendProperty(game_handle_t handle, const char *name, const std::string &value) {
+void ClientSession::sendProperty(game_handle_t handle, const char* name, const std::string& value) {
 	TS_SC_PROPERTY property;
 	property.handle = handle;
 	property.name = name;
@@ -137,4 +142,4 @@ void ClientSession::sendProperty(game_handle_t handle, const char *name, const s
 	sendPacket(property);
 }
 
-} //namespace UploadServer
+}  // namespace GameServer

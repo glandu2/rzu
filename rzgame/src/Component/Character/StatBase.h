@@ -1,23 +1,19 @@
 #ifndef STATBASE_H
 #define STATBASE_H
 
-#include <stdint.h>
+#include "Core/Object.h"
 #include "GameTypes.h"
 #include <stddef.h>
-#include "Core/Object.h"
+#include <stdint.h>
 
 namespace GameServer {
 
 struct StatResource;
 class ClientSession;
 
-class StatBase
-{
+class StatBase {
 public:
-	enum Type {
-		Base = 0,
-		Buff = 1
-	};
+	enum Type { Base = 0, Buff = 1 };
 
 public:
 	int32_t stat_id;
@@ -77,7 +73,7 @@ public:
 
 public:
 	StatBase(const StatResource* statResource = nullptr);
-	void sendPacket(ClientSession *session, game_handle_t handle, Type type);
+	void sendPacket(ClientSession* session, game_handle_t handle, Type type);
 
 	/**
 	 * @brief Apply job related stats bonuses
@@ -88,13 +84,13 @@ public:
 	 * @param jobLevels jobs level
 	 * @param size number of jobs
 	 */
-	void applyJobLevelBonus(const int32_t *jobs, const int32_t *jobLevels, size_t size);
+	void applyJobLevelBonus(const int32_t* jobs, const int32_t* jobLevels, size_t size);
 
 protected:
 	static void fillLevelParts(int32_t jobLevel, int32_t* jobLevelParts, size_t size, int32_t partLevelLength);
 	static int32_t computeSumProduct(const int32_t* a1, const int32_t* a2, size_t size);
 };
 
-}
+}  // namespace GameServer
 
-#endif // STATBASE_H
+#endif  // STATBASE_H

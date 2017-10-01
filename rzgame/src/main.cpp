@@ -1,17 +1,17 @@
-#include "Core/EventLoop.h"
 #include "Config/GlobalConfig.h"
-#include "LibRzuInit.h"
 #include "Config/GlobalCoreConfig.h"
 #include "Core/CrashHandler.h"
+#include "Core/EventLoop.h"
 #include "Database/DbConnectionPool.h"
+#include "LibRzuInit.h"
 
-#include "NetSession/ServersManager.h"
 #include "NetSession/BanManager.h"
+#include "NetSession/ServersManager.h"
 #include "NetSession/SessionServer.h"
 
-#include "ReferenceData/ReferenceDataMgr.h"
 #include "AuthServerSession.h"
 #include "ClientSession.h"
+#include "ReferenceData/ReferenceDataMgr.h"
 
 #include "Console/ConsoleSession.h"
 
@@ -27,7 +27,7 @@ void onTerminate(void* instance) {
 	uv_loop_close(EventLoop::getLoop());
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 	LibRzuInit();
 	GlobalConfig::init();
 	BanManager::registerConfig();
@@ -42,19 +42,19 @@ int main(int argc, char **argv) {
 
 	{
 		Log mainLogger(GlobalCoreConfig::get()->log.enable,
-					   GlobalCoreConfig::get()->log.level,
-					   GlobalCoreConfig::get()->log.consoleLevel,
-					   GlobalCoreConfig::get()->log.dir,
-					   GlobalCoreConfig::get()->log.file,
-					   GlobalCoreConfig::get()->log.maxQueueSize);
+		               GlobalCoreConfig::get()->log.level,
+		               GlobalCoreConfig::get()->log.consoleLevel,
+		               GlobalCoreConfig::get()->log.dir,
+		               GlobalCoreConfig::get()->log.file,
+		               GlobalCoreConfig::get()->log.maxQueueSize);
 		Log::setDefaultLogger(&mainLogger);
 
 		Log trafficLogger(CONFIG_GET()->trafficDump.enable,
-						  CONFIG_GET()->trafficDump.level,
-						  CONFIG_GET()->trafficDump.consoleLevel,
-						  CONFIG_GET()->trafficDump.dir,
-						  CONFIG_GET()->trafficDump.file,
-						  GlobalCoreConfig::get()->log.maxQueueSize);
+		                  CONFIG_GET()->trafficDump.level,
+		                  CONFIG_GET()->trafficDump.consoleLevel,
+		                  CONFIG_GET()->trafficDump.dir,
+		                  CONFIG_GET()->trafficDump.file,
+		                  GlobalCoreConfig::get()->log.maxQueueSize);
 		Log::setDefaultPacketLogger(&trafficLogger);
 
 		ConfigInfo::get()->dump();
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 
 		runServers(&trafficLogger);
 
-		//Make valgrind happy
+		// Make valgrind happy
 		GameServer::AuthServerSession::deinit();
 		EventLoop::getInstance()->deleteObjects();
 	}
@@ -72,26 +72,21 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-static void runServers(Log *trafficLogger) {
+static void runServers(Log* trafficLogger) {
 	ServersManager serverManager;
 	BanManager banManager;
 
 	SessionServer<GameServer::ClientSession> clientsServer(
-				CONFIG_GET()->game.clients.listenIp,
-				CONFIG_GET()->game.clients.port,
-				nullptr,
-				trafficLogger);
+	    CONFIG_GET()->game.clients.listenIp, CONFIG_GET()->game.clients.port, nullptr, trafficLogger);
 	GameServer::AuthServerSession authConnection;
 
 	banManager.loadFile();
 
 	ConsoleSession::start(&serverManager);
 
-	serverManager.addServer("game.clients", &clientsServer,
-	                        &CONFIG_GET()->game.clients.autoStart);
+	serverManager.addServer("game.clients", &clientsServer, &CONFIG_GET()->game.clients.autoStart);
 
-	serverManager.addServer("game.auth", &authConnection,
-	                        &authConnection.getAutoStartConfig());
+	serverManager.addServer("game.auth", &authConnection, &authConnection.getAutoStartConfig());
 
 	CrashHandler::setTerminateCallback(&onTerminate, &serverManager);
 

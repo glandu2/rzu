@@ -1,19 +1,17 @@
 #include "PlayerLoadingHandler.h"
 #include "ClientSession.h"
-#include "Config/GlobalConfig.h"
 #include "Component/Character/Character.h"
 #include "Component/Inventory/Item.h"
+#include "Config/GlobalConfig.h"
 
 #include "GameClient/TS_SC_LOGIN_RESULT.h"
-#include "GameClient/TS_SC_URL_LIST.h"
-#include "GameClient/TS_SC_STAT_INFO.h"
 #include "GameClient/TS_SC_PROPERTY.h"
+#include "GameClient/TS_SC_STAT_INFO.h"
+#include "GameClient/TS_SC_URL_LIST.h"
 
 namespace GameServer {
 
-PlayerLoadingHandler::PlayerLoadingHandler(ClientSession *session, game_sid_t sid)
-	: ConnectionHandler(session)
-{
+PlayerLoadingHandler::PlayerLoadingHandler(ClientSession* session, game_sid_t sid) : ConnectionHandler(session) {
 	DB_CharacterBinding::Input input;
 	input.sid = sid;
 	characterQuery.executeDbQuery<DB_CharacterBinding>(this, &PlayerLoadingHandler::onCharacterResult, input);
@@ -23,11 +21,9 @@ PlayerLoadingHandler::PlayerLoadingHandler(ClientSession *session, game_sid_t si
 	session->sendPacket(urlListPacket);
 }
 
-void PlayerLoadingHandler::onPacketReceived(const TS_MESSAGE *packet) {
+void PlayerLoadingHandler::onPacketReceived(const TS_MESSAGE* packet) {}
 
-}
-
-void PlayerLoadingHandler::onCharacterResult(DbQueryJob<DB_CharacterBinding> *query) {
+void PlayerLoadingHandler::onCharacterResult(DbQueryJob<DB_CharacterBinding>* query) {
 	auto& results = query->getResults();
 	TS_SC_LOGIN_RESULT loginResult = {0};
 
@@ -68,7 +64,7 @@ void PlayerLoadingHandler::onCharacterResult(DbQueryJob<DB_CharacterBinding> *qu
 	}
 }
 
-void PlayerLoadingHandler::onItemListResult(DbQueryJob<DB_ItemBinding> *query) {
+void PlayerLoadingHandler::onItemListResult(DbQueryJob<DB_ItemBinding>* query) {
 	std::vector<std::unique_ptr<DB_Item>>& results = query->getResults();
 
 	Inventory& inventory = character->inventory;
@@ -79,4 +75,4 @@ void PlayerLoadingHandler::onItemListResult(DbQueryJob<DB_ItemBinding> *query) {
 	session->playerLoadingResult(TS_RESULT_SUCCESS, std::move(character));
 }
 
-} // namespace GameServer
+}  // namespace GameServer

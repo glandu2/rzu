@@ -1,13 +1,13 @@
 #ifndef REFERENCEDATAMGR_H
 #define REFERENCEDATAMGR_H
 
-#include "Core/Object.h"
-#include "ObjectSidState.h"
 #include "BannedWords.h"
-#include "JobResource.h"
-#include "StatResource.h"
-#include "JobLevelBonus.h"
+#include "Core/Object.h"
 #include "ItemResource.h"
+#include "JobLevelBonus.h"
+#include "JobResource.h"
+#include "ObjectSidState.h"
+#include "StatResource.h"
 
 namespace GameServer {
 
@@ -18,6 +18,7 @@ class ReferenceDataMgr : public Object {
 	DECLARE_CLASS(GameServer::ReferenceDataMgr)
 public:
 	typedef void (*OnReferenceDataLoaded)(void* data);
+
 public:
 	static ReferenceDataMgr* get();
 	static void load(OnReferenceDataLoaded callback, void* data);
@@ -58,7 +59,6 @@ private:
 	JobLevelBonusBinding jobLevelBonus;
 	ItemResourceBinding itemResource;
 
-
 	AwakenOptionSidBinding awakenOptionSidBinding;
 	FarmSidBinding farmSidBinding;
 	ItemSidBinding itemSidBinding;
@@ -69,6 +69,6 @@ private:
 	TitleConditionSidBinding titleConditionSidBinding;
 };
 
-}
+}  // namespace GameServer
 
-#endif // REFERENCEDATAMGR_H
+#endif  // REFERENCEDATAMGR_H

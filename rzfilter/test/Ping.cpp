@@ -1,7 +1,7 @@
-#include "gtest/gtest.h"
 #include "AuthClient/Flat/TS_CA_ACCOUNT.h"
 #include "AuthClient/Flat/TS_CA_SERVER_LIST.h"
 #include "GlobalConfig.h"
+#include "gtest/gtest.h"
 
 #include "Cipher/RC4Cipher.h"
 
@@ -10,8 +10,7 @@
 #endif
 
 #pragma pack(push, 1)
-struct TS_BIG : public TS_MESSAGE
-{
+struct TS_BIG : public TS_MESSAGE {
 	char account[1024];
 	static const uint16_t packetID = 10010;
 };
@@ -63,7 +62,7 @@ public:
 		sin.sin_port = htons(CONFIG_GET()->output.port.get());
 		sin.sin_family = AF_INET;
 
-		ASSERT_NE(-1, bind(outputServerSocket, (struct sockaddr *) &sin, sizeof(sin)));
+		ASSERT_NE(-1, bind(outputServerSocket, (struct sockaddr*) &sin, sizeof(sin)));
 		ASSERT_NE(-1, listen(outputServerSocket, 5));
 
 		// Setup client
@@ -75,20 +74,20 @@ public:
 		sin.sin_port = htons(CONFIG_GET()->input.port.get());
 		sin.sin_family = AF_INET;
 
-		ASSERT_NE(-1, connect(inputSocket, (struct sockaddr *) &sin, sizeof(sin)));
+		ASSERT_NE(-1, connect(inputSocket, (struct sockaddr*) &sin, sizeof(sin)));
 
 		// Expect a connection on the server @ port 4800
 		socklen_t csinSize = sizeof(csin);
-		outputSocket = accept(outputServerSocket, (struct sockaddr *) &csin, &csinSize);
+		outputSocket = accept(outputServerSocket, (struct sockaddr*) &csin, &csinSize);
 		ASSERT_NE(-1, outputSocket);
 
 		int flag = 1;
-		ASSERT_NE(-1, setsockopt(inputSocket, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(flag)));
+		ASSERT_NE(-1, setsockopt(inputSocket, IPPROTO_TCP, TCP_NODELAY, (char*) &flag, sizeof(flag)));
 
 		char** buffers = new char*[PING_LOOPS];
 		for(int i = 0; i < PING_LOOPS; i++) {
 			char* buffer = new char[packetSize];
-			inputCipher.encode((const char*)testPacket, buffer, packetSize);
+			inputCipher.encode((const char*) testPacket, buffer, packetSize);
 			buffers[i] = buffer;
 		}
 
@@ -99,7 +98,7 @@ public:
 		}
 		endTime = uv_hrtime();
 
-		printf("Ping duration: %f ns\n", (endTime - startTime)/(float)PING_LOOPS);
+		printf("Ping duration: %f ns\n", (endTime - startTime) / (float) PING_LOOPS);
 
 		for(int i = 0; i < PING_LOOPS; i++) {
 			char* buffer = buffers[i];
