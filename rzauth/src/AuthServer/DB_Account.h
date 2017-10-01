@@ -2,9 +2,9 @@
 #define AUTHSERVER_DB_ACCOUNT_H
 
 #include "Database/DbQueryJobRef.h"
-#include <string>
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
+#include <string>
 
 class DbConnectionPool;
 class DesPasswordCipher;
@@ -13,16 +13,10 @@ namespace AuthServer {
 
 class ClientSession;
 
-struct DB_AccountData
-{
-	enum EncryptMode {
-		EM_None,
-		EM_DES,
-		EM_AES
-	};
+struct DB_AccountData {
+	enum EncryptMode { EM_None, EM_DES, EM_AES };
 
-	struct Input
-	{
+	struct Input {
 		std::string account;
 		char ip[INET_ADDRSTRLEN];
 		std::vector<unsigned char> cryptedPassword;
@@ -33,18 +27,20 @@ struct DB_AccountData
 		char password[33];
 
 		Input() {}
-		Input(const std::string& account, const char* ip, EncryptMode cryptMode, const std::vector<unsigned char> &cryptedPassword, unsigned char aesKey[32])
-			: account(account), cryptedPassword(cryptedPassword), cryptMode(cryptMode)
-		{
+		Input(const std::string& account,
+		      const char* ip,
+		      EncryptMode cryptMode,
+		      const std::vector<unsigned char>& cryptedPassword,
+		      unsigned char aesKey[32])
+		    : account(account), cryptedPassword(cryptedPassword), cryptMode(cryptMode) {
 			strncpy(this->ip, ip, INET_ADDRSTRLEN);
-			this->ip[INET_ADDRSTRLEN-1] = 0;
+			this->ip[INET_ADDRSTRLEN - 1] = 0;
 
 			memcpy(this->aesKey, aesKey, sizeof(this->aesKey));
 		}
 	};
 
-	struct Output
-	{
+	struct Output {
 		bool ok;
 		uint32_t account_id;
 		char password[35];
@@ -73,8 +69,7 @@ struct DB_AccountData
 	};
 };
 
-class DB_Account : public DbQueryJobCallback<DB_AccountData, ClientSession, DB_Account>
-{
+class DB_Account : public DbQueryJobCallback<DB_AccountData, ClientSession, DB_Account> {
 	DECLARE_CLASS(AuthServer::DB_Account)
 public:
 	static bool init(cval<std::string>& desKeyStr);
@@ -90,11 +85,11 @@ protected:
 	void setPasswordMD5(unsigned char givenPasswordMd5[16]);
 
 private:
-	static DesPasswordCipher* desCipher; //cached DES cipher
+	static DesPasswordCipher* desCipher;  // cached DES cipher
 	static std::string currentDesKey;
 	static cval<bool>* restrictCharacters;
 };
 
-} // namespace AuthServer
+}  // namespace AuthServer
 
-#endif // AUTHSERVER_DB_ACCOUNT_H
+#endif  // AUTHSERVER_DB_ACCOUNT_H

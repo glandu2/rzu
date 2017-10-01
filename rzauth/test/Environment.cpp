@@ -1,7 +1,7 @@
 #include "Environment.h"
 #include "AuthServer/GlobalConfig.h"
-#include "Database/DbConnectionPool.h"
 #include "Database/DbConnection.h"
+#include "Database/DbConnectionPool.h"
 
 Environment* Environment::instance = nullptr;
 
@@ -14,15 +14,17 @@ void Environment::beforeTests() {
 	DbConnection* connection = dbConnectionPool.getConnection(connectionString.c_str());
 	ASSERT_NE(nullptr, connection);
 	ASSERT_NE(false, connection->execute("DROP TABLE IF EXISTS account;"));
-	ASSERT_NE(false, connection->execute("CREATE TABLE account (\r\n"
-	                    "        \"account_id\"    INTEGER NOT NULL,\r\n"
-	                    "        \"account\"       VARCHAR(61) NOT NULL,\r\n"
-	                    "        \"password\"      VARCHAR(61),\r\n"
-	                    "        \"last_login_server_idx\" INTEGER,\r\n"
-	                    "        \"server_idx_offset\"     INTEGER,\r\n"
-	                    "        \"security_no\"   VARCHAR(61),\r\n"
-	                    "        PRIMARY KEY(account_id)\r\n);"));
+	ASSERT_NE(false,
+	          connection->execute("CREATE TABLE account (\r\n"
+	                              "        \"account_id\"    INTEGER NOT NULL,\r\n"
+	                              "        \"account\"       VARCHAR(61) NOT NULL,\r\n"
+	                              "        \"password\"      VARCHAR(61),\r\n"
+	                              "        \"last_login_server_idx\" INTEGER,\r\n"
+	                              "        \"server_idx_offset\"     INTEGER,\r\n"
+	                              "        \"security_no\"   VARCHAR(61),\r\n"
+	                              "        PRIMARY KEY(account_id)\r\n);"));
 	connection->setAutoCommit(false);
+	// clang-format off
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(0,'test0','613b5247e3398350918cb622a3ec19e9',NULL,NULL,NULL);"));
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(1,'test1','613b5247e3398350918cb622a3ec19e9',NULL,NULL,'613b5247e3398350918cb622a3ec19e9');"));
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(2,'test2','613b5247e3398350918cb622a3ec19e9',4,NULL,NULL);"));
@@ -48,6 +50,8 @@ void Environment::beforeTests() {
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(1000000001,'testPw47Chars','c8d8079110d491e6d115dc0755c7e5eb',NULL,NULL,NULL);"));
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(1000000002,'testPw60Chars','33410d89b4a115d9ac9c7aaaff255b91',NULL,NULL,NULL);"));
 	ASSERT_NE(false, connection->execute("INSERT INTO account VALUES(1000000003,'testPw64Chars','0504f832c91bc39001f67f4209f7f077',NULL,NULL,NULL);"));
+	// clang-format on
+
 	connection->endTransaction(true);
 	connection->releaseAndClose();
 
@@ -65,8 +69,7 @@ void Environment::afterTests() {
 		stop(4801);
 }
 
-bool Environment::isGameReconnectBeingTested()
-{
+bool Environment::isGameReconnectBeingTested() {
 	if(instance && instance->testGameReconnect)
 		return true;
 	return false;

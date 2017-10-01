@@ -1,8 +1,8 @@
 #include "GlobalConfig.h"
-#include "Config/GlobalCoreConfig.h"
-#include "rzauthGitVersion.h"
 #include "Cipher/DbPasswordCipher.h"
+#include "Config/GlobalCoreConfig.h"
 #include "Core/Utils.h"
+#include "rzauthGitVersion.h"
 
 GlobalConfig* GlobalConfig::get() {
 	static GlobalConfig config;
@@ -23,11 +23,12 @@ void GlobalConfig::init() {
 }
 
 void DbConfig::updateConnectionString(IListener* instance) {
-	DbConfig* thisInstance = (DbConfig*)instance;
+	DbConfig* thisInstance = (DbConfig*) instance;
 
 	std::string cryptedConnectionStringHex = thisInstance->cryptedConnectionString.get();
 	if(cryptedConnectionStringHex.size() > 0) {
-		thisInstance->connectionString.setDefault(DbPasswordCipher::decrypt(Utils::convertHexToData(cryptedConnectionStringHex)));
+		thisInstance->connectionString.setDefault(
+		    DbPasswordCipher::decrypt(Utils::convertHexToData(cryptedConnectionStringHex)));
 	} else {
 		std::string password;
 		std::string cryptedPasswordHex = thisInstance->cryptedPassword.get();
@@ -38,13 +39,8 @@ void DbConfig::updateConnectionString(IListener* instance) {
 		}
 
 		thisInstance->connectionString.setDefault(
-		            "DRIVER=" + thisInstance->driver.get() +
-		            ";Server=" + thisInstance->server.get() +
-		            "," + Utils::convertToString(thisInstance->port.get()) +
-		            ";Database=" + thisInstance->name.get() +
-		            ";UID=" + thisInstance->account.get() +
-		            ";PWD=" + password +
-		            ";");
+		    "DRIVER=" + thisInstance->driver.get() + ";Server=" + thisInstance->server.get() + "," +
+		    Utils::convertToString(thisInstance->port.get()) + ";Database=" + thisInstance->name.get() +
+		    ";UID=" + thisInstance->account.get() + ";PWD=" + password + ";");
 	}
-
 }

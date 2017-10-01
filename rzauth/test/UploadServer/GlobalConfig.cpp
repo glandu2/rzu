@@ -14,4 +14,4 @@ void GlobalConfig::init() {
 	GlobalCoreConfig::get()->log.consoleLevel.setDefault("info");
 }
 
-} // namespace UploadServer
+}  // namespace UploadServer

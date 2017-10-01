@@ -1,7 +1,7 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
 #include "../GlobalConfig.h"
 #include "Packet/PacketBaseMessage.h"
+#include "RzTest.h"
+#include "gtest/gtest.h"
 
 namespace AuthServer {
 
@@ -11,9 +11,9 @@ TEST(RAW_PACKET, large_size) {
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		static const int PACKET_SIZE = 1*1024*1024; // 1MB
+		static const int PACKET_SIZE = 1 * 1024 * 1024;  // 1MB
 
-		TS_MESSAGE *packet = (TS_MESSAGE*)calloc(PACKET_SIZE, 1);
+		TS_MESSAGE* packet = (TS_MESSAGE*) calloc(PACKET_SIZE, 1);
 		packet->size = PACKET_SIZE;
 		packet->id = 0;
 		packet->msg_check_sum = 0;
@@ -38,9 +38,9 @@ TEST(RAW_PACKET, unknown_id) {
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		static const int PACKET_SIZE = 1*1024; // 1kB
+		static const int PACKET_SIZE = 1 * 1024;  // 1kB
 
-		TS_MESSAGE* packet = (TS_MESSAGE*)calloc(PACKET_SIZE, 1);
+		TS_MESSAGE* packet = (TS_MESSAGE*) calloc(PACKET_SIZE, 1);
 		packet->size = PACKET_SIZE;
 		packet->id = 32165;
 		packet->msg_check_sum = 0;
@@ -59,4 +59,4 @@ TEST(RAW_PACKET, unknown_id) {
 	test.run();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

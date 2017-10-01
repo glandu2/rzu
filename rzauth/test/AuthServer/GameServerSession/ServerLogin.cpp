@@ -1,10 +1,10 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "PacketEnums.h"
-#include "AuthGame/TS_GA_LOGIN.h"
 #include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_GA_LOGIN.h"
 #include "Common.h"
+#include "PacketEnums.h"
+#include "RzTest.h"
+#include "gtest/gtest.h"
 
 #include "Cipher/DesPasswordCipher.h"
 
@@ -16,7 +16,8 @@ TEST(TS_GA_LOGIN, valid) {
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLogin(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
+		AuthServer::sendGameLogin(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
 	});
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -35,11 +36,12 @@ TEST(TS_GA_LOGIN, valid) {
 TEST(TS_GA_LOGIN, double_login) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
-	static_assert(sizeof(((TS_GA_LOGIN*)0)->server_name) == 21, "Test expect a name field size of 21");
+	static_assert(sizeof(((TS_GA_LOGIN*) 0)->server_name) == 21, "Test expect a name field size of 21");
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLogin(channel, 2, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
+		AuthServer::sendGameLogin(
+		    channel, 2, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
 	});
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -47,7 +49,8 @@ TEST(TS_GA_LOGIN, double_login) {
 
 		EXPECT_EQ(TS_RESULT_SUCCESS, packet->result);
 
-		AuthServer::sendGameLogin(channel, 3, "Server name 1", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
+		AuthServer::sendGameLogin(
+		    channel, 3, "Server name 1", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
 	});
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -70,7 +73,8 @@ TEST(TS_GA_LOGIN, duplicate_index) {
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLogin(channel, 4, "Server name 2", "http://www.example.com/index2.html", true, "121.131.165.157", 4517);
+		AuthServer::sendGameLogin(
+		    channel, 4, "Server name 2", "http://www.example.com/index2.html", true, "121.131.165.157", 4517);
 	});
 
 	game.addCallback([&](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -83,7 +87,8 @@ TEST(TS_GA_LOGIN, duplicate_index) {
 
 	game2.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLogin(channel, 4, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
+		AuthServer::sendGameLogin(
+		    channel, 4, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516);
 	});
 
 	game2.addCallback([&](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -104,17 +109,21 @@ TEST(TS_GA_LOGIN, duplicate_index) {
 TEST(TS_GA_LOGIN, long_values) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
-	static_assert(sizeof(((TS_GA_LOGIN*)0)->server_name) == 21, "Test expect a name field size of 21");
+	static_assert(sizeof(((TS_GA_LOGIN*) 0)->server_name) == 21, "Test expect a name field size of 21");
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		AuthServer::sendGameLogin(channel,
-							  5,
-							  "21_chars_aaaaaaaaaaaa",
-							  "http://www.example.com/index_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.html",
-							  true,
-							  "121.131.165.156.",
-							  65312);
+		                          5,
+		                          "21_chars_aaaaaaaaaaaa",
+		                          "http://www.example.com/"
+		                          "index_"
+		                          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		                          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		                          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.html",
+		                          true,
+		                          "121.131.165.156.",
+		                          65312);
 	});
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -130,4 +139,4 @@ TEST(TS_GA_LOGIN, long_values) {
 	test.run();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

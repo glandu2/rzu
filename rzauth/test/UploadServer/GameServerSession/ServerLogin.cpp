@@ -1,9 +1,9 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
 #include "../GlobalConfig.h"
 #include "PacketEnums.h"
+#include "RzTest.h"
 #include "UploadGame/TS_SU_LOGIN.h"
 #include "UploadGame/TS_US_LOGIN_RESULT.h"
+#include "gtest/gtest.h"
 
 namespace UploadServer {
 
@@ -85,4 +85,4 @@ TEST(TS_SU_LOGIN, large) {
 	test.run();
 }
 
-} // namespace UploadServer
+}  // namespace UploadServer

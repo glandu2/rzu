@@ -1,6 +1,6 @@
 #include "BillingInterface.h"
-#include "GameData.h"
 #include "ClientData.h"
+#include "GameData.h"
 #include <stdlib.h>
 
 namespace AuthServer {
@@ -17,11 +17,11 @@ void BillingInterface::onCommand(const std::vector<std::string>& args) {
 	if(args.size() == 0)
 		return;
 
-	if( args[0] == "billing_notify") {
+	if(args[0] == "billing_notify") {
 		if(args.size() >= 3) {
 			billingNotice(args[1], args[2]);
 		} else {
-			log(LL_Debug, "Command billing_notify: expected 2 arguments, got %d\n", (int)args.size() - 1);
+			log(LL_Debug, "Command billing_notify: expected 2 arguments, got %d\n", (int) args.size() - 1);
 		}
 	} else {
 		log(LL_Debug, "Unknown billing command: %s\n", args[0].c_str());
@@ -45,4 +45,4 @@ void BillingInterface::billingNotice(const std::string& cmd, const std::string& 
 	}
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

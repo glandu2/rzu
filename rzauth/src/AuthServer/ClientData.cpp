@@ -1,7 +1,7 @@
 #include "ClientData.h"
-#include "uv.h"
 #include "ClientSession.h"
 #include "GameData.h"
+#include "uv.h"
 #include <algorithm>
 #include <time.h>
 
@@ -16,16 +16,13 @@ uv_mutex_t ClientData::initializeLock() {
 	return mapLock;
 }
 
-ClientData::ClientData(ClientSession *clientInfo)
-	: accountId(0), kickRequested(false),
-	  client(clientInfo), server(nullptr), inGame(false) {
-}
+ClientData::ClientData(ClientSession* clientInfo)
+    : accountId(0), kickRequested(false), client(clientInfo), server(nullptr), inGame(false) {}
 
 ClientData::~ClientData() {
 	if(getGameServer() && inGame)
 		getGameServer()->decPlayerCount();
 }
-
 
 static int toLowerChar(int c) {
 	if(c >= 'A' && c <= 'Z')
@@ -40,9 +37,16 @@ std::string ClientData::toLower(const std::string& str) {
 	return lcase;
 }
 
-ClientData* ClientData::tryAddClient(ClientSession *clientInfo, const std::string& account, uint32_t accoundId, uint32_t age, uint32_t event_code, uint32_t pcBang, uint32_t ip, ClientData** oldClientPtr) {
-	std::pair< std::unordered_map<uint32_t, ClientData*>::iterator, bool> result;
-	std::pair< std::unordered_map<std::string, ClientData*>::iterator, bool> resultForName;
+ClientData* ClientData::tryAddClient(ClientSession* clientInfo,
+                                     const std::string& account,
+                                     uint32_t accoundId,
+                                     uint32_t age,
+                                     uint32_t event_code,
+                                     uint32_t pcBang,
+                                     uint32_t ip,
+                                     ClientData** oldClientPtr) {
+	std::pair<std::unordered_map<uint32_t, ClientData*>::iterator, bool> result;
+	std::pair<std::unordered_map<std::string, ClientData*>::iterator, bool> resultForName;
 	ClientData* newClient;
 
 	if(oldClientPtr)
@@ -95,7 +99,10 @@ bool ClientData::removeClient(const std::string& account) {
 		delete clientData;
 		ret = true;
 	} else {
-		logStatic(LL_Error, ClientData::getStaticClassName(), "Trying to remove a not connected account : %s\n", account.c_str());
+		logStatic(LL_Error,
+		          ClientData::getStaticClassName(),
+		          "Trying to remove a not connected account : %s\n",
+		          account.c_str());
 	}
 	uv_mutex_unlock(&mapLock);
 
@@ -115,7 +122,8 @@ bool ClientData::removeClient(uint32_t accountId) {
 		delete clientData;
 		ret = true;
 	} else {
-		logStatic(LL_Error, ClientData::getStaticClassName(), "Trying to remove a not connected account : %d\n", accountId);
+		logStatic(
+		    LL_Error, ClientData::getStaticClassName(), "Trying to remove a not connected account : %d\n", accountId);
 	}
 	uv_mutex_unlock(&mapLock);
 
@@ -192,4 +200,4 @@ void ClientData::removeServer(GameData* server) {
 	uv_mutex_unlock(&mapLock);
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

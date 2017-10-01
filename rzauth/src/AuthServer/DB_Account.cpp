@@ -1,16 +1,16 @@
 #include "DB_Account.h"
-#include <openssl/md5.h>
-#include "ClientSession.h"
 #include "../GlobalConfig.h"
-#include <openssl/evp.h>
-#include <openssl/err.h>
 #include "Cipher/DesPasswordCipher.h"
+#include "ClientSession.h"
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/md5.h>
 
 template<> void DbQueryJob<AuthServer::DB_AccountData>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-				  CONFIG_GET()->auth.db.connectionString,
-				  "SELECT * FROM account WHERE account = ? AND password = ?;",
-				  DbQueryBinding::EM_OneRow);
+	              CONFIG_GET()->auth.db.connectionString,
+	              "SELECT * FROM account WHERE account = ? AND password = ?;",
+	              DbQueryBinding::EM_OneRow);
 
 	addParam("account", &InputType::account);
 	addParam("password", &InputType::password);
@@ -48,26 +48,24 @@ void DB_Account::deinit() {
 	restrictCharacters = nullptr;
 }
 
-DB_Account::DB_Account(ClientSession* clientInfo, DbCallback callback)
-	: DbQueryJobCallback(clientInfo, callback)
-{
-}
+DB_Account::DB_Account(ClientSession* clientInfo, DbCallback callback) : DbQueryJobCallback(clientInfo, callback) {}
 
 bool DB_Account::decryptPassword() {
-	char password[64+16];
+	char password[64 + 16];
 	bool ok = false;
 	DB_AccountData::Input* input = getInput();
 
 	if(input->cryptMode == DB_AccountData::EM_AES) {
-		std::unique_ptr<EVP_CIPHER_CTX, void(*)(EVP_CIPHER_CTX*)> d_ctx(nullptr, &EVP_CIPHER_CTX_free);
+		std::unique_ptr<EVP_CIPHER_CTX, void (*)(EVP_CIPHER_CTX*)> d_ctx(nullptr, &EVP_CIPHER_CTX_free);
 		int bytesWritten, totalLength;
 		unsigned int bytesRead;
 
 		log(LL_Debug, "Client login using AES\n");
 
-		// if crypted size is > max size - 128 bits, then the decrypted password will overflow in the destination variable
+		// if crypted size is > max size - 128 bits, then the decrypted password will overflow in the destination
+		// variable
 		if(input->cryptedPassword.size() > sizeof(password) - 16) {
-			log(LL_Warning, "RSA: invalid password length: %d\n", (int)input->cryptedPassword.size());
+			log(LL_Warning, "RSA: invalid password length: %d\n", (int) input->cryptedPassword.size());
 			return false;
 		}
 
@@ -79,18 +77,22 @@ bool DB_Account::decryptPassword() {
 			goto cleanup_aes;
 
 		for(totalLength = bytesRead = 0; bytesRead + 15 < input->cryptedPassword.size(); bytesRead += 16) {
-			if(EVP_DecryptUpdate(d_ctx.get(), (unsigned char*)password + totalLength, &bytesWritten, &input->cryptedPassword[0] + bytesRead, 16) <= 0)
+			if(EVP_DecryptUpdate(d_ctx.get(),
+			                     (unsigned char*) password + totalLength,
+			                     &bytesWritten,
+			                     &input->cryptedPassword[0] + bytesRead,
+			                     16) <= 0)
 				goto cleanup_aes;
 			totalLength += bytesWritten;
 		}
 
-		if(EVP_DecryptFinal_ex(d_ctx.get(), (unsigned char*)password + totalLength, &bytesWritten) <= 0)
+		if(EVP_DecryptFinal_ex(d_ctx.get(), (unsigned char*) password + totalLength, &bytesWritten) <= 0)
 			goto cleanup_aes;
 
 		totalLength += bytesWritten;
 
-		if(totalLength >= (int)sizeof(password)) {
-			log(LL_Error, "Password length overflow: %d >= %d\n", totalLength, (int)sizeof(password));
+		if(totalLength >= (int) sizeof(password)) {
+			log(LL_Error, "Password length overflow: %d >= %d\n", totalLength, (int) sizeof(password));
 			goto cleanup_aes;
 		}
 
@@ -100,12 +102,18 @@ bool DB_Account::decryptPassword() {
 	cleanup_aes:
 		unsigned long errorCode = ERR_get_error();
 		if(errorCode)
-			log(LL_Warning, "AES: error while processing password for account %s: %s\n", input->account.c_str(), ERR_error_string(errorCode, nullptr));
+			log(LL_Warning,
+			    "AES: error while processing password for account %s: %s\n",
+			    input->account.c_str(),
+			    ERR_error_string(errorCode, nullptr));
 	} else if(input->cryptMode == DB_AccountData::EM_None) {
 		if(input->cryptedPassword.size() >= sizeof(password)) {
-			log(LL_Error, "Password length overflow: %d >= %d\n", (int)input->cryptedPassword.size(), (int)sizeof(password));
+			log(LL_Error,
+			    "Password length overflow: %d >= %d\n",
+			    (int) input->cryptedPassword.size(),
+			    (int) sizeof(password));
 		} else {
-			memcpy(password, (char*)&input->cryptedPassword[0], input->cryptedPassword.size());
+			memcpy(password, (char*) &input->cryptedPassword[0], input->cryptedPassword.size());
 			password[input->cryptedPassword.size()] = 0;
 
 			log(LL_Debug, "Client login using clear text\n");
@@ -114,12 +122,15 @@ bool DB_Account::decryptPassword() {
 		}
 	} else {
 		if(input->cryptedPassword.size() >= sizeof(password)) {
-			log(LL_Error, "Password length overflow: %d >= %d\n", (int)input->cryptedPassword.size(), (int)sizeof(password));
+			log(LL_Error,
+			    "Password length overflow: %d >= %d\n",
+			    (int) input->cryptedPassword.size(),
+			    (int) sizeof(password));
 		} else {
-			memcpy(password, (char*)&input->cryptedPassword[0], input->cryptedPassword.size());
+			memcpy(password, (char*) &input->cryptedPassword[0], input->cryptedPassword.size());
 
 			log(LL_Debug, "Client login using DES\n");
-			desCipher->decrypt(password, (int)input->cryptedPassword.size());
+			desCipher->decrypt(password, (int) input->cryptedPassword.size());
 			password[input->cryptedPassword.size()] = 0;
 
 			ok = true;
@@ -131,7 +142,7 @@ bool DB_Account::decryptPassword() {
 		std::string buffer = CONFIG_GET()->auth.db.salt;
 
 		buffer.append(password, password + strlen(password));
-		MD5((const unsigned char*)buffer.c_str(), buffer.size(), givenPasswordMd5);
+		MD5((const unsigned char*) buffer.c_str(), buffer.size(), givenPasswordMd5);
 		setPasswordMD5(givenPasswordMd5);
 	}
 
@@ -144,15 +155,15 @@ void DB_Account::setPasswordMD5(unsigned char givenPasswordMd5[16]) {
 	for(int i = 0; i < 16; i++) {
 		unsigned char val = givenPasswordMd5[i] >> 4;
 		if(val < 10)
-			input->password[i*2] = val + '0';
+			input->password[i * 2] = val + '0';
 		else
-			input->password[i*2] = val - 10 + 'a';
+			input->password[i * 2] = val - 10 + 'a';
 
 		val = givenPasswordMd5[i] & 0x0F;
 		if(val < 10)
-			input->password[i*2+1] = val + '0';
+			input->password[i * 2 + 1] = val + '0';
 		else
-			input->password[i*2+1] = val - 10 + 'a';
+			input->password[i * 2 + 1] = val - 10 + 'a';
 	}
 	input->password[32] = '\0';
 }
@@ -162,10 +173,8 @@ bool DB_Account::isAccountNameValid(const std::string& account) {
 		return false;
 
 	for(size_t i = 0; i < account.size(); i++) {
-		if((account[i] < 'a' || account[i] > 'z') &&
-			(account[i] < 'A' || account[i] > 'Z') &&
-			(account[i] < '0' || account[i] > '9'))
-		{
+		if((account[i] < 'a' || account[i] > 'z') && (account[i] < 'A' || account[i] > 'Z') &&
+		   (account[i] < '0' || account[i] > '9')) {
 			return false;
 		}
 	}
@@ -176,7 +185,7 @@ bool DB_Account::isAccountNameValid(const std::string& account) {
 bool DB_Account::onPreProcess() {
 	DB_AccountData::Input* input = getInput();
 
-	//Accounts with invalid names are refused
+	// Accounts with invalid names are refused
 	if(restrictCharacters && restrictCharacters->get() && !isAccountNameValid(input->account)) {
 		log(LL_Debug, "Account name has invalid character: %s\n", input->account.c_str());
 		return false;
@@ -201,13 +210,17 @@ bool DB_Account::onRowDone() {
 
 	if(output->nullPassword == true && output->password[0] == '\0') {
 		output->ok = true;
-	} else if(!strcmp(input->password, output->password)){
+	} else if(!strcmp(input->password, output->password)) {
 		output->ok = true;
 	} else {
-		log(LL_Trace, "Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n", input->account.c_str(), input->password, output->password);
+		log(LL_Trace,
+		    "Password mismatch for account \"%s\": client tried \"%s\", database has \"%s\"\n",
+		    input->account.c_str(),
+		    input->password,
+		    output->password);
 	}
 
 	return false;
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

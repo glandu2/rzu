@@ -1,28 +1,23 @@
 #define __STDC_LIMIT_MACROS
 #include "GameServerSession.h"
-#include "ClientSession.h"
-#include <string.h>
 #include "../GlobalConfig.h"
+#include "ClientSession.h"
 #include "Core/PrintfFormats.h"
-#include "LogServerClient.h"
-#include <time.h>
 #include "GameData.h"
+#include "LogServerClient.h"
+#include <string.h>
+#include <time.h>
 
-#include "PacketEnums.h"
-#include "AuthGame/TS_AG_LOGIN_RESULT.h"
 #include "AuthGame/TS_AG_CLIENT_LOGIN.h"
-#include "AuthGame/TS_AG_KICK_CLIENT.h"
 #include "AuthGame/TS_AG_ITEM_PURCHASED.h"
+#include "AuthGame/TS_AG_KICK_CLIENT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
 #include "AuthGame/TS_AG_SECURITY_NO_CHECK.h"
+#include "PacketEnums.h"
 
 namespace AuthServer {
 
-GameServerSession::GameServerSession()
-  : gameData(nullptr),
-	useAutoReconnectFeature(false),
-	securityNoSendMode(true)
-{
-}
+GameServerSession::GameServerSession() : gameData(nullptr), useAutoReconnectFeature(false), securityNoSendMode(true) {}
 
 void GameServerSession::sendNotifyItemPurchased(ClientData* client) {
 	TS_AG_ITEM_PURCHASED itemPurchasedPacket;
@@ -129,14 +124,20 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet, const std::arra
 	TS_AG_LOGIN_RESULT result;
 	TS_MESSAGE::initMessage<TS_AG_LOGIN_RESULT>(&result);
 
-	//to manage non null terminated strings
+	// to manage non null terminated strings
 	std::string localServerName, localServerIp, localScreenshotUrl;
 
-	localServerName = Utils::convertToString(packet->server_name, sizeof(packet->server_name)-1);
-	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip)-1);
-	localScreenshotUrl = Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url)-1);
+	localServerName = Utils::convertToString(packet->server_name, sizeof(packet->server_name) - 1);
+	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip) - 1);
+	localScreenshotUrl =
+	    Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url) - 1);
 
-	log(LL_Info, "Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
+	log(LL_Info,
+	    "Server Login: %s[%d] at %s:%d\n",
+	    localServerName.c_str(),
+	    packet->server_idx,
+	    localServerIp.c_str(),
+	    packet->server_port);
 
 	if(this->gameData) {
 		result.result = TS_RESULT_INVALID_ARGUMENT;
@@ -148,7 +149,15 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet, const std::arra
 	result.result = TS_RESULT_UNKNOWN;
 
 	GameData* oldGameData = nullptr;
-	GameData* gameData = GameData::tryAdd(this, packet->server_idx, localServerName, localServerIp, packet->server_port, localScreenshotUrl, packet->is_adult_server, guid, &oldGameData);
+	GameData* gameData = GameData::tryAdd(this,
+	                                      packet->server_idx,
+	                                      localServerName,
+	                                      localServerIp,
+	                                      packet->server_port,
+	                                      localScreenshotUrl,
+	                                      packet->is_adult_server,
+	                                      guid,
+	                                      &oldGameData);
 	if(gameData) {
 		result.result = TS_RESULT_SUCCESS;
 		log(LL_Debug, "Success\n");
@@ -158,16 +167,11 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet, const std::arra
 		else
 			gameData->setReady(false);
 	} else if(oldGameData) {
-		if(useAutoReconnectFeature &&
-				guid != nullptr &&
-				oldGameData->getServerIdx() == packet->server_idx &&
-				oldGameData->getServerName() == localServerName &&
-				oldGameData->getServerIp() == localServerIp &&
-				oldGameData->getServerPort() == packet->server_port &&
-				oldGameData->getServerScreenshotUrl() == localScreenshotUrl &&
-				oldGameData->getIsAdultServer() == packet->is_adult_server &&
-				oldGameData->getGuid() == *guid)
-		{
+		if(useAutoReconnectFeature && guid != nullptr && oldGameData->getServerIdx() == packet->server_idx &&
+		   oldGameData->getServerName() == localServerName && oldGameData->getServerIp() == localServerIp &&
+		   oldGameData->getServerPort() == packet->server_port &&
+		   oldGameData->getServerScreenshotUrl() == localScreenshotUrl &&
+		   oldGameData->getIsAdultServer() == packet->is_adult_server && oldGameData->getGuid() == *guid) {
 			GameServerSession* gameServer = oldGameData->getGameServer();
 
 			result.result = TS_RESULT_SUCCESS;
@@ -175,8 +179,11 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet, const std::arra
 			oldGameData->setReady(false);
 
 			if(gameServer) {
-				log(LL_Info, "Received same game info for server %s[%d] but from different connection, dropping the old one (maybe halfopen ?)\n",
-					 localServerName.c_str(), packet->server_idx);
+				log(LL_Info,
+				    "Received same game info for server %s[%d] but from different connection, dropping the old one "
+				    "(maybe halfopen ?)\n",
+				    localServerName.c_str(),
+				    packet->server_idx);
 				gameServer->closeSession();
 			} else {
 				log(LL_Info, "Game server %s[%d] reconnected\n", localServerName.c_str(), packet->server_idx);
@@ -190,7 +197,7 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet, const std::arra
 	sendPacket(&result);
 }
 
-void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST *packet) {
+void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST* packet) {
 	if(!gameData) {
 		log(LL_Error, "Received account list but game server is not logged on\n");
 		return;
@@ -204,34 +211,34 @@ void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST *packet) {
 
 	for(uint8_t i = 0; i < packet->count; i++) {
 		TS_GA_ACCOUNT_LIST::AccountInfo accountInfo = packet->accountInfo[i];
-		accountInfo.account[sizeof(((TS_GA_ACCOUNT_LIST::AccountInfo*)0)->account) - 1] = '\0';
+		accountInfo.account[sizeof(((TS_GA_ACCOUNT_LIST::AccountInfo*) 0)->account) - 1] = '\0';
 		alreadyConnectedAccounts.push_back(accountInfo);
 	}
 	log(LL_Debug, "Added %d accounts\n", packet->count);
 
 	if(packet->final_packet) {
-		//Remove all account connected on this server (they will be recreated after that using the list)
+		// Remove all account connected on this server (they will be recreated after that using the list)
 		ClientData::removeServer(gameData);
 
 		for(size_t i = 0; i < alreadyConnectedAccounts.size(); i++) {
 			const TS_GA_ACCOUNT_LIST::AccountInfo& accountInfo = alreadyConnectedAccounts[i];
-			std::string account = Utils::convertToString(accountInfo.account, sizeof(accountInfo.account)-1);
+			std::string account = Utils::convertToString(accountInfo.account, sizeof(accountInfo.account) - 1);
 
 			log(LL_Debug, "Adding already connected account %s\n", account.c_str());
 
 			ClientData* clientData = ClientData::tryAddClient(nullptr,
-															  account.c_str(),
-															  accountInfo.nAccountID,
-															  accountInfo.nAge,
-															  accountInfo.nEventCode,
-															  accountInfo.nPCBangUser,
-															  accountInfo.ip);
+			                                                  account.c_str(),
+			                                                  accountInfo.nAccountID,
+			                                                  accountInfo.nAge,
+			                                                  accountInfo.nEventCode,
+			                                                  accountInfo.nPCBangUser,
+			                                                  accountInfo.ip);
 			if(clientData) {
 				clientData->switchClientToServer(gameData, 0);
 				clientData->connectedToGame();
 				clientData->loginTime = accountInfo.loginTime;
 			} else {
-				//Client is connected somewhere else
+				// Client is connected somewhere else
 				TS_AG_KICK_CLIENT msg;
 
 				TS_MESSAGE::initMessage<TS_AG_KICK_CLIENT>(&msg);
@@ -243,7 +250,7 @@ void GameServerSession::onAccountList(const TS_GA_ACCOUNT_LIST *packet) {
 			}
 		}
 		gameData->setReady(true);
-		log(LL_Info, "Synchronized account list with %d accounts\n", (int)alreadyConnectedAccounts.size());
+		log(LL_Info, "Synchronized account list with %d accounts\n", (int) alreadyConnectedAccounts.size());
 		alreadyConnectedAccounts.clear();
 	}
 }
@@ -260,7 +267,7 @@ void GameServerSession::onServerLogout(const TS_GA_LOGOUT* packet) {
 
 void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	ClientData* client;
-	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
 
 	client = ClientData::getClient(account);
 
@@ -269,19 +276,31 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 	if(!gameData) {
 		log(LL_Error, "Received client login for account %s but game server is not logged on\n", account.c_str());
 	} else if(account.size() >= sizeof(packet->account)) {
-		log(LL_Error, "Account name too long:  \"%s\" (max %d characters)\n", account.c_str(), (int)sizeof(packet->account)-1);
+		log(LL_Error,
+		    "Account name too long:  \"%s\" (max %d characters)\n",
+		    account.c_str(),
+		    (int) sizeof(packet->account) - 1);
 	} else if(client == nullptr || client->getGameServer() == nullptr) {
 		log(LL_Warning, "Client %s login on gameserver but not in client list\n", account.c_str());
 	} else if(client->getGameServer() != gameData) {
-		log(LL_Warning, "Client %s login on wrong gameserver %s, expected %s\n", account.c_str(), gameData->getServerName().c_str(), client->getGameServer() ? client->getGameServer()->getServerName().c_str() : "none");
+		log(LL_Warning,
+		    "Client %s login on wrong gameserver %s, expected %s\n",
+		    account.c_str(),
+		    gameData->getServerName().c_str(),
+		    client->getGameServer() ? client->getGameServer()->getServerName().c_str() : "none");
 	} else if(gameData->isReady() == false) {
 		log(LL_Warning, "Client %s login on a not ready gameserver\n", account.c_str());
 	} else if(client->oneTimePassword != packet->one_time_key) {
-		log(LL_Warning, "Client %s login on gameserver but wrong one time password: expected %" PRIu64 " but received %" PRIu64 "\n", account.c_str(), client->oneTimePassword, packet->one_time_key);
+		log(LL_Warning,
+		    "Client %s login on gameserver but wrong one time password: expected %" PRIu64 " but received %" PRIu64
+		    "\n",
+		    account.c_str(),
+		    client->oneTimePassword,
+		    packet->one_time_key);
 	} else if(client->isConnectedToGame()) {
 		log(LL_Info, "Client %s login on gameserver but already connected\n", account.c_str());
 	} else {
-		//To complete
+		// To complete
 		log(LL_Debug, "Client %s now on gameserver\n", account.c_str());
 		result = TS_RESULT_SUCCESS;
 
@@ -290,15 +309,33 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		char ipStr[INET_ADDRSTRLEN] = "";
 		uv_inet_ntop(AF_INET, &client->ip, ipStr, sizeof(ipStr));
 
-		LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_LOGIN, client->accountId, client->pcBang, client->eventCode, gameData->getServerIdx(), client->age, 0, 0, 0, 0, 0, 0,
-				client->account.c_str(), -1, ipStr, -1, 0, 0, 0, 0);
+		LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_LOGIN,
+		                         client->accountId,
+		                         client->pcBang,
+		                         client->eventCode,
+		                         gameData->getServerIdx(),
+		                         client->age,
+		                         0,
+		                         0,
+		                         0,
+		                         0,
+		                         0,
+		                         0,
+		                         client->account.c_str(),
+		                         -1,
+		                         ipStr,
+		                         -1,
+		                         0,
+		                         0,
+		                         0,
+		                         0);
 	}
 
 	sendClientLoginResult(account.c_str(), result, client);
 }
 
 void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
-	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
 
 	if(!gameData) {
 		log(LL_Error, "Received client logout for account %s but game server is not logged on\n", account.c_str());
@@ -307,7 +344,10 @@ void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 
 	ClientData* clientData = ClientData::getClient(account);
 
-	log(LL_Debug, "Client %s has been disconnected from gameserver%s\n", account.c_str(), clientData ? "" : " (not a known client)");
+	log(LL_Debug,
+	    "Client %s has been disconnected from gameserver%s\n",
+	    account.c_str(),
+	    clientData ? "" : " (not a known client)");
 
 	if(!clientData)
 		return;
@@ -315,8 +355,26 @@ void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 	char ipStr[INET_ADDRSTRLEN];
 	uv_inet_ntop(AF_INET, &clientData->ip, ipStr, sizeof(ipStr));
 
-	LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_LOGOUT, clientData->accountId, 0, 0, gameData->getServerIdx(), clientData->pcBang, 0, 0, 0, 0, 0, time(nullptr) - clientData->loginTime,
-			clientData->account.c_str(), -1, ipStr, -1, 0, 0, clientData->kickRequested ? "DKICK" : "NORMAL", -1);
+	LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_LOGOUT,
+	                         clientData->accountId,
+	                         0,
+	                         0,
+	                         gameData->getServerIdx(),
+	                         clientData->pcBang,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         time(nullptr) - clientData->loginTime,
+	                         clientData->account.c_str(),
+	                         -1,
+	                         ipStr,
+	                         -1,
+	                         0,
+	                         0,
+	                         clientData->kickRequested ? "DKICK" : "NORMAL",
+	                         -1);
 
 	ClientData::removeClient(clientData);
 }
@@ -337,7 +395,7 @@ void GameServerSession::kickClient(ClientData* clientData) {
 }
 
 void GameServerSession::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packet) {
-	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
 
 	if(!gameData) {
 		log(LL_Error, "Received client kick failed for account %s but game server is not logged on\n", account.c_str());
@@ -351,15 +409,33 @@ void GameServerSession::onClientKickFailed(const TS_GA_CLIENT_KICK_FAILED* packe
 	if(!clientData)
 		return;
 
-	LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_LOGOUT, clientData->accountId, 0, 0, gameData->getServerIdx(), clientData->pcBang, 0, 0, 0, 0, 0, time(nullptr) - clientData->loginTime,
-			clientData->account.c_str(), -1, 0, 0, 0, 0, "FKICK", -1);
+	LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_LOGOUT,
+	                         clientData->accountId,
+	                         0,
+	                         0,
+	                         gameData->getServerIdx(),
+	                         clientData->pcBang,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         time(nullptr) - clientData->loginTime,
+	                         clientData->account.c_str(),
+	                         -1,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         "FKICK",
+	                         -1);
 
 	ClientData::removeClient(clientData);
 }
 
-void GameServerSession::onSecurityNoCheck(const TS_GA_SECURITY_NO_CHECK *packet) {
-	std::string account = Utils::convertToString(packet->account, sizeof(packet->account)-1);
-	std::string securityNo = Utils::convertToString(packet->security, sizeof(packet->security)-1);
+void GameServerSession::onSecurityNoCheck(const TS_GA_SECURITY_NO_CHECK* packet) {
+	std::string account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
+	std::string securityNo = Utils::convertToString(packet->security, sizeof(packet->security) - 1);
 
 	int32_t mode = TS_GA_SECURITY_NO_CHECK::SC_NONE;
 	if(packet->size >= sizeof(TS_GA_SECURITY_NO_CHECK))
@@ -368,10 +444,11 @@ void GameServerSession::onSecurityNoCheck(const TS_GA_SECURITY_NO_CHECK *packet)
 		securityNoSendMode = false;
 
 	DB_SecurityNoCheckData::Input input(account, securityNo, mode);
-	securityNoCheckQueries.executeDbQuery<DB_SecurityNoCheckData, DB_SecurityNoCheck>(this, &GameServerSession::onSecurityNoCheckResult, input);
+	securityNoCheckQueries.executeDbQuery<DB_SecurityNoCheckData, DB_SecurityNoCheck>(
+	    this, &GameServerSession::onSecurityNoCheckResult, input);
 }
 
-void GameServerSession::onSecurityNoCheckResult(DB_SecurityNoCheck *query) {
+void GameServerSession::onSecurityNoCheckResult(DB_SecurityNoCheck* query) {
 	bool ok = query->getResults().size() == 1;
 	DB_SecurityNoCheckData::Input* input = query->getInput();
 
@@ -414,7 +491,10 @@ void GameServerSession::sendClientLoginResult(const char* account, TS_ResultCode
 	}
 }
 
-void GameServerSession::fillClientLoginResult(TS_AG_CLIENT_LOGIN* packet, const char* account, TS_ResultCode result, ClientData* clientData) {
+void GameServerSession::fillClientLoginResult(TS_AG_CLIENT_LOGIN* packet,
+                                              const char* account,
+                                              TS_ResultCode result,
+                                              ClientData* clientData) {
 	strncpy(packet->account, account, sizeof(packet->account));
 	packet->result = result;
 	if(result == TS_RESULT_SUCCESS && clientData) {
@@ -434,7 +514,10 @@ void GameServerSession::fillClientLoginResult(TS_AG_CLIENT_LOGIN* packet, const 
 	}
 }
 
-void GameServerSession::fillClientLoginExtendedResult(TS_AG_CLIENT_LOGIN_EXTENDED* packet, const char* account, TS_ResultCode result, ClientData* clientData) {
+void GameServerSession::fillClientLoginExtendedResult(TS_AG_CLIENT_LOGIN_EXTENDED* packet,
+                                                      const char* account,
+                                                      TS_ResultCode result,
+                                                      ClientData* clientData) {
 	fillClientLoginResult(packet, account, result, clientData);
 	if(result == TS_RESULT_SUCCESS && clientData) {
 		packet->ip = clientData->ip;
@@ -445,4 +528,4 @@ void GameServerSession::fillClientLoginExtendedResult(TS_AG_CLIENT_LOGIN_EXTENDE
 	}
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

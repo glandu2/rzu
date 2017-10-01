@@ -6,8 +6,7 @@
 namespace AuthServer {
 
 #pragma pack(push, 1)
-struct LS_11N4S
-{
+struct LS_11N4S {
 	uint16_t id;
 	uint16_t size;
 	uint8_t type;
@@ -24,20 +23,35 @@ struct LS_11N4S
 
 LogServerClient* LogServerClient::instance = nullptr;
 
-LogServerClient::LogServerClient(cval<std::string>& ip, cval<int>& port) :
-	ip(ip), port(port)
-{
+LogServerClient::LogServerClient(cval<std::string>& ip, cval<int>& port) : ip(ip), port(port) {
 	instance = this;
 }
 
 EventChain<SocketSession> LogServerClient::onConnected() {
 	log(LL_Info, "Connected to Log server %s:%d\n", ip.get().c_str(), port.get());
 
-	sendLog(LM_SERVER_LOGIN, 0, 0, 0, Utils::getPid(), 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, "Main", NTS, GlobalCoreConfig::get()->app.appName.get().c_str(), NTS);
+	sendLog(LM_SERVER_LOGIN,
+	        0,
+	        0,
+	        0,
+	        Utils::getPid(),
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        0,
+	        "Main",
+	        NTS,
+	        GlobalCoreConfig::get()->app.appName.get().c_str(),
+	        NTS);
 
-	sendLog(LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, "START", -1);
+	sendLog(LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "START", -1);
 
 	for(size_t i = 0; i < pendingMessages.size(); i++) {
 		sendLog(pendingMessages[i]);
@@ -48,8 +62,7 @@ EventChain<SocketSession> LogServerClient::onConnected() {
 }
 
 void LogServerClient::stop() {
-	sendLog(LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, "END", -1);
+	sendLog(LM_SERVER_INFO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "END", -1);
 
 	closeSession();
 }
@@ -95,26 +108,25 @@ void LogServerClient::sendLog(const Message& message) {
 }
 
 void LogServerClient::sendLog(unsigned short id,
-			 uint64_t n1,
-			 uint64_t n2,
-			 uint64_t n3,
-			 uint64_t n4,
-			 uint64_t n5,
-			 uint64_t n6,
-			 uint64_t n7,
-			 uint64_t n8,
-			 uint64_t n9,
-			 uint64_t n10,
-			 uint64_t n11,
-			 const char * str1,
-			 int len1,
-			 const char * str2,
-			 int len2,
-			 const char * str3,
-			 int len3,
-			 const char * str4,
-			 int len4)
-{
+                              uint64_t n1,
+                              uint64_t n2,
+                              uint64_t n3,
+                              uint64_t n4,
+                              uint64_t n5,
+                              uint64_t n6,
+                              uint64_t n7,
+                              uint64_t n8,
+                              uint64_t n9,
+                              uint64_t n10,
+                              uint64_t n11,
+                              const char* str1,
+                              int len1,
+                              const char* str2,
+                              int len2,
+                              const char* str3,
+                              int len3,
+                              const char* str4,
+                              int len4) {
 	if(!instance || !instance->getStream() || instance->getStream()->getState() == Stream::UnconnectedState)
 		return;
 
@@ -163,4 +175,4 @@ void LogServerClient::sendLog(unsigned short id,
 		instance->pendingMessages.push_back(message);
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

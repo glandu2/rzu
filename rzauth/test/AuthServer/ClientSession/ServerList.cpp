@@ -1,14 +1,14 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
-#include "../GlobalConfig.h"
-#include "FlatPackets/TS_AC_SERVER_LIST.h"
-#include "AuthClient/Flat/TS_AC_RESULT.h"
-#include "AuthClient/Flat/TS_CA_VERSION.h"
-#include "AuthClient/Flat/TS_CA_SERVER_LIST.h"
-#include "AuthGame/TS_AG_LOGIN_RESULT.h"
-#include "PacketEnums.h"
-#include "Common.h"
 #include "../GameServerSession/Common.h"
+#include "../GlobalConfig.h"
+#include "AuthClient/Flat/TS_AC_RESULT.h"
+#include "AuthClient/Flat/TS_CA_SERVER_LIST.h"
+#include "AuthClient/Flat/TS_CA_VERSION.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "Common.h"
+#include "FlatPackets/TS_AC_SERVER_LIST.h"
+#include "PacketEnums.h"
+#include "RzTest.h"
+#include "gtest/gtest.h"
 
 namespace AuthServer {
 
@@ -87,15 +87,24 @@ TEST(TS_CA_SERVER_LIST, two_gs_list) {
 
 	game1.start();
 
-	addGameLoginScenario(game1, 10, "Server 10", "http://www.example.com/index10.html", true, "127.0.0.10", 4710,
-						 [&game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		game2.start();
-	});
+	addGameLoginScenario(
+	    game1,
+	    10,
+	    "Server 10",
+	    "http://www.example.com/index10.html",
+	    true,
+	    "127.0.0.10",
+	    4710,
+	    [&game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) { game2.start(); });
 
-	addGameLoginScenario(game2, 1, "Server 1", "http://www.example.com/index1.html", false, "127.0.0.1", 4610,
-						 [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		auth.start();
-	});
+	addGameLoginScenario(game2,
+	                     1,
+	                     "Server 1",
+	                     "http://www.example.com/index1.html",
+	                     false,
+	                     "127.0.0.1",
+	                     4610,
+	                     [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) { auth.start(); });
 
 	addClientLoginToServerListScenario(auth, AM_Aes, "test3", "admin");
 
@@ -153,15 +162,24 @@ TEST(TS_CA_SERVER_LIST, two_epic2_gs_list) {
 
 	game1.start();
 
-	addGameLoginScenario(game1, 13, "Server 10", "http://www.example.com/index10.html", true, "127.0.0.10", 4710,
-						 [&game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		game2.start();
-	});
+	addGameLoginScenario(
+	    game1,
+	    13,
+	    "Server 10",
+	    "http://www.example.com/index10.html",
+	    true,
+	    "127.0.0.10",
+	    4710,
+	    [&game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) { game2.start(); });
 
-	addGameLoginScenario(game2, 3, "Server 1", "http://www.example.com/index1.html", false, "127.0.0.1", 4610,
-						 [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		auth.start();
-	});
+	addGameLoginScenario(game2,
+	                     3,
+	                     "Server 1",
+	                     "http://www.example.com/index1.html",
+	                     false,
+	                     "127.0.0.1",
+	                     4610,
+	                     [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) { auth.start(); });
 
 	addClientLoginToServerListScenario(auth, AM_Des, "test1", "admin", nullptr, "200609280");
 
@@ -196,7 +214,6 @@ TEST(TS_CA_SERVER_LIST, two_epic2_gs_list) {
 		EXPECT_EQ(4610, serverInfo->server_port);
 		EXPECT_EQ(0, serverInfo->user_ratio);
 
-
 		channel->closeSession();
 		game1.closeSession();
 		game2.closeSession();
@@ -216,15 +233,17 @@ TEST(TS_CA_SERVER_LIST, non_null_terminated_gs_info) {
 	game.start();
 
 	addGameLoginScenario(game,
-						 2,
-						 "21_chars_aaaaaaaaaaaa",
-						 "http://www.example.com/index_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.html",
-						 true,
-						 "121.131.165.156.",
-						 65312,
-						 [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
-		auth.start();
-	});
+	                     2,
+	                     "21_chars_aaaaaaaaaaaa",
+	                     "http://www.example.com/"
+	                     "index_"
+	                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.html",
+	                     true,
+	                     "121.131.165.156.",
+	                     65312,
+	                     [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) { auth.start(); });
 
 	addClientLoginToServerListScenario(auth, AM_Aes, "test4", "admin");
 
@@ -237,7 +256,12 @@ TEST(TS_CA_SERVER_LIST, non_null_terminated_gs_info) {
 		EXPECT_EQ(2, serverInfo->server_idx);
 		EXPECT_STREQ("21_chars_aaaaaaaaaaa", serverInfo->server_name);
 		EXPECT_TRUE(serverInfo->is_adult_server);
-		EXPECT_STREQ("http://www.example.com/index_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.htm", serverInfo->server_screenshot_url);
+		EXPECT_STREQ("http://www.example.com/"
+		             "index_"
+		             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		             "aaaaaaaaaaaaaaaaaaaaaaaaaaaa.htm",
+		             serverInfo->server_screenshot_url);
 		EXPECT_STREQ("121.131.165.156", serverInfo->server_ip);
 		EXPECT_EQ(65312, serverInfo->server_port);
 
@@ -250,4 +274,4 @@ TEST(TS_CA_SERVER_LIST, non_null_terminated_gs_info) {
 	test.run();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

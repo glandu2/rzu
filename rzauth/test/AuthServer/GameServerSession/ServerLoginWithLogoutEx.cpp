@@ -1,15 +1,15 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
 #include "../../Environment.h"
-#include "../GlobalConfig.h"
-#include "PacketEnums.h"
-#include "AuthGame/TS_GA_LOGIN.h"
-#include "AuthGame/TS_AG_LOGIN_RESULT.h"
-#include "AuthGame/TS_AG_KICK_CLIENT.h"
-#include "FlatPackets/TS_AC_SERVER_LIST.h"
-#include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
-#include "Common.h"
 #include "../ClientSession/Common.h"
+#include "../GlobalConfig.h"
+#include "AuthGame/TS_AG_KICK_CLIENT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
+#include "AuthGame/TS_GA_LOGIN.h"
+#include "Common.h"
+#include "FlatPackets/TS_AC_SERVER_LIST.h"
+#include "PacketEnums.h"
+#include "RzTest.h"
+#include "gtest/gtest.h"
 
 #include "Cipher/DesPasswordCipher.h"
 
@@ -35,14 +35,14 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, server_idx_duplicate) {
 		game.start();
 	});
 
-
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Disconnection, event.type);
 	});
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLoginWithLogoutEx(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
+		AuthServer::sendGameLoginWithLogoutEx(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
 	});
 
 	game.addCallback([&game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -56,7 +56,8 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, server_idx_duplicate) {
 	// Duplicate with different guid connection must be rejected
 	game2.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLoginWithLogoutEx(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 2);
+		AuthServer::sendGameLoginWithLogoutEx(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 2);
 	});
 
 	game2.addCallback([&game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -75,7 +76,8 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, server_idx_duplicate) {
 	// Duplicate connection with same guid, previous is closed
 	game2.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLoginWithLogoutEx(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
+		AuthServer::sendGameLoginWithLogoutEx(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
 		ASSERT_TRUE(game.isConnected());
 	});
 
@@ -130,7 +132,8 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, server_idx_duplicate) {
 	// assert GS can reconnect
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLoginWithLogoutEx(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 3);
+		AuthServer::sendGameLoginWithLogoutEx(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 3);
 	});
 
 	game.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -156,10 +159,10 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, valid_not_ready_hidden) {
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
-
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLoginWithLogoutEx(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
+		AuthServer::sendGameLoginWithLogoutEx(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
 	});
 
 	game.addCallback([&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -195,10 +198,10 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, valid_account_list_empty_ready) {
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
-
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLoginWithLogoutEx(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 0);
+		AuthServer::sendGameLoginWithLogoutEx(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 0);
 	});
 
 	game.addCallback([&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -236,10 +239,10 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, valid_account_list_1) {
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
-
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLoginWithLogoutEx(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
+		AuthServer::sendGameLoginWithLogoutEx(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
 	});
 
 	game.addCallback([&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -313,7 +316,8 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, valid_account_list_4) {
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLoginWithLogoutEx(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
+		AuthServer::sendGameLoginWithLogoutEx(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
 	});
 
 	game.addCallback([&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -339,9 +343,7 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, valid_account_list_4) {
 		}
 		sendGameConnectedAccounts(channel, accounts);
 
-		auth.addYield([](TestConnectionChannel* channel) {
-			channel->start();
-		}, 100);
+		auth.addYield([](TestConnectionChannel* channel) { channel->start(); }, 100);
 	});
 
 	addClientLoginToServerListScenario(auth, AM_Aes, "test5", "admin");
@@ -412,7 +414,8 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, valid_account_list_1_kick) {
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-		AuthServer::sendGameLoginWithLogoutEx(channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
+		AuthServer::sendGameLoginWithLogoutEx(
+		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
 	});
 
 	game.addCallback([&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -447,4 +450,4 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, valid_account_list_1_kick) {
 	test.run();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

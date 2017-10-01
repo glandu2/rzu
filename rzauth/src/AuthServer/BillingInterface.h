@@ -7,8 +7,7 @@
 
 namespace AuthServer {
 
-class BillingInterface : public TelnetSession
-{
+class BillingInterface : public TelnetSession {
 	DECLARE_CLASS(AuthServer::BillingInterface)
 protected:
 	EventChain<SocketSession> onConnected();
@@ -17,6 +16,6 @@ protected:
 	void billingNotice(const std::string& cmd, const std::string& accountIdStr);
 };
 
-} // namespace AuthServer
+}  // namespace AuthServer
 
-#endif // AUTHSERVER_BILLINGINTERFACE_H
+#endif  // AUTHSERVER_BILLINGINTERFACE_H

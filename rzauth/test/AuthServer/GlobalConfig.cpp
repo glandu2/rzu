@@ -16,7 +16,6 @@ void GlobalConfig::init() {
 #else
 	GlobalConfig::get()->connectionString.setDefault("DRIVER=SQLite3;Database=AuthDatabase.db;");
 #endif
-
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

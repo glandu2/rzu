@@ -1,39 +1,37 @@
 #include "GameData.h"
-#include "GameServerSession.h"
 #include "ClientData.h"
-#include "LogServerClient.h"
 #include "Console/ConsoleCommands.h"
 #include "Core/Utils.h"
+#include "GameServerSession.h"
+#include "LogServerClient.h"
 
 namespace AuthServer {
 
 std::unordered_map<uint16_t, GameData*> GameData::servers;
 
 void GameData::init() {
-	ConsoleCommands::get()->addCommand("gameserver.list", "list", 0, &commandList,
-									   "List all game servers",
-									   "list : list all game servers");
+	ConsoleCommands::get()->addCommand(
+	    "gameserver.list", "list", 0, &commandList, "List all game servers", "list : list all game servers");
 }
 
-GameData::GameData(GameServerSession *gameServerSession,
-				   uint16_t serverIdx,
-				   std::string serverName,
-				   std::string serverIp,
-				   int32_t serverPort,
-				   std::string serverScreenshotUrl,
-				   bool isAdultServer,
-				   const std::array<uint8_t, 16>* guid)
-	: gameServerSession(gameServerSession),
-	  serverIdx(serverIdx),
-	  serverName(serverName),
-	  serverIp(serverIp),
-	  serverPort(serverPort),
-	  serverScreenshotUrl(serverScreenshotUrl),
-	  isAdultServer(isAdultServer),
-	  playerCount(0),
-	  creationTime(time(nullptr)),
-	  ready(false)
-{
+GameData::GameData(GameServerSession* gameServerSession,
+                   uint16_t serverIdx,
+                   std::string serverName,
+                   std::string serverIp,
+                   int32_t serverPort,
+                   std::string serverScreenshotUrl,
+                   bool isAdultServer,
+                   const std::array<uint8_t, 16>* guid)
+    : gameServerSession(gameServerSession),
+      serverIdx(serverIdx),
+      serverName(serverName),
+      serverIp(serverIp),
+      serverPort(serverPort),
+      serverScreenshotUrl(serverScreenshotUrl),
+      isAdultServer(isAdultServer),
+      playerCount(0),
+      creationTime(time(nullptr)),
+      ready(false) {
 	setDirtyObjectName();
 
 	if(guid != nullptr) {
@@ -42,40 +40,69 @@ GameData::GameData(GameServerSession *gameServerSession,
 		this->guid = std::array<uint8_t, 16>{};
 	}
 
-	LogServerClient::sendLog(LogServerClient::LM_GAME_SERVER_LOGIN, 0, 0, 0, serverIdx, serverPort, 0, 0, 0, 0, 0, 0,
-							 0, 0, 0, 0, serverIp.c_str(), -1, serverName.c_str(), -1);
+	LogServerClient::sendLog(LogServerClient::LM_GAME_SERVER_LOGIN,
+	                         0,
+	                         0,
+	                         0,
+	                         serverIdx,
+	                         serverPort,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         serverIp.c_str(),
+	                         -1,
+	                         serverName.c_str(),
+	                         -1);
 }
 
 GameData::~GameData() {
-	LogServerClient::sendLog(LogServerClient::LM_GAME_SERVER_LOGOUT, 0, 0, 0, serverIdx, serverPort, 0, 0, 0, 0, 0, 0,
-							 0, 0, 0, 0, serverIp.c_str(), -1, serverName.c_str(), -1);
+	LogServerClient::sendLog(LogServerClient::LM_GAME_SERVER_LOGOUT,
+	                         0,
+	                         0,
+	                         0,
+	                         serverIdx,
+	                         serverPort,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         0,
+	                         serverIp.c_str(),
+	                         -1,
+	                         serverName.c_str(),
+	                         -1);
 	ClientData::removeServer(this);
 }
 
 GameData* GameData::tryAdd(GameServerSession* gameServerSession,
-							uint16_t serverIdx,
-							std::string serverName,
-							std::string serverIp,
-							int32_t serverPort,
-							std::string serverScreenshotUrl,
-							bool isAdultServer,
-							const std::array<uint8_t, 16>* guid,
-							GameData **oldGameData)
-{
+                           uint16_t serverIdx,
+                           std::string serverName,
+                           std::string serverIp,
+                           int32_t serverPort,
+                           std::string serverScreenshotUrl,
+                           bool isAdultServer,
+                           const std::array<uint8_t, 16>* guid,
+                           GameData** oldGameData) {
 	auto it = servers.find(serverIdx);
 
 	if(oldGameData)
 		*oldGameData = nullptr;
 
 	if(it == servers.end()) {
-		GameData* gameData = new GameData(gameServerSession,
-										  serverIdx,
-										  serverName,
-										  serverIp,
-										  serverPort,
-										  serverScreenshotUrl,
-										  isAdultServer,
-										  guid);
+		GameData* gameData = new GameData(
+		    gameServerSession, serverIdx, serverName, serverIp, serverPort, serverScreenshotUrl, isAdultServer, guid);
 
 		servers.insert(std::pair<uint16_t, GameData*>(serverIdx, gameData));
 
@@ -93,7 +120,7 @@ void GameData::remove(GameData* gameData) {
 	delete gameData;
 }
 
-void GameData::setGameServer(GameServerSession *gameServerSession) {
+void GameData::setGameServer(GameServerSession* gameServerSession) {
 	GameServerSession* oldGameServerSession = this->gameServerSession;
 
 	if(this->gameServerSession != gameServerSession) {
@@ -106,11 +133,14 @@ void GameData::setGameServer(GameServerSession *gameServerSession) {
 	}
 }
 
-void GameData::kickClient(ClientData *client) {
+void GameData::kickClient(ClientData* client) {
 	if(gameServerSession) {
 		gameServerSession->kickClient(client);
 	} else {
-		log(LL_Info, "Game server %s not reachable, not kicking account %s\n", serverName.c_str(), client->account.c_str());
+		log(LL_Info,
+		    "Game server %s not reachable, not kicking account %s\n",
+		    serverName.c_str(),
+		    client->account.c_str());
 	}
 }
 
@@ -118,12 +148,15 @@ void GameData::sendNotifyItemPurchased(ClientData* client) {
 	if(gameServerSession) {
 		gameServerSession->sendNotifyItemPurchased(client);
 	} else {
-		log(LL_Info, "Game server %s not reachable, not notifying account %s\n", serverName.c_str(), client->account.c_str());
+		log(LL_Info,
+		    "Game server %s not reachable, not notifying account %s\n",
+		    serverName.c_str(),
+		    client->account.c_str());
 	}
 }
 
 void GameData::updateObjectName() {
-	setObjectName(10 + (int)serverName.size(), "GameData[%s]", serverName.c_str());
+	setObjectName(10 + (int) serverName.size(), "GameData[%s]", serverName.c_str());
 }
 
 void GameData::commandList(IWritableConsole* console, const std::vector<std::string>& args) {
@@ -136,18 +169,19 @@ void GameData::commandList(IWritableConsole* console, const std::vector<std::str
 		struct tm upTime;
 		Utils::getGmTime(time(nullptr) - server->getCreationTime(), &upTime);
 
-		console->writef("index: %d, name: %s, address: %s:%d, players count: %u, uptime: %d:%02d:%02d:%02d, screenshot url: %s\r\n",
-						server->getServerIdx(),
-						server->getServerName().c_str(),
-						server->getServerIp().c_str(),
-						server->getServerPort(),
-						server->getPlayerCount(),
-						(upTime.tm_year - 1970) * 365 + upTime.tm_yday,
-						upTime.tm_hour,
-						upTime.tm_min,
-						upTime.tm_sec,
-						server->getServerScreenshotUrl().c_str());
+		console->writef(
+		    "index: %d, name: %s, address: %s:%d, players count: %u, uptime: %d:%02d:%02d:%02d, screenshot url: %s\r\n",
+		    server->getServerIdx(),
+		    server->getServerName().c_str(),
+		    server->getServerIp().c_str(),
+		    server->getServerPort(),
+		    server->getPlayerCount(),
+		    (upTime.tm_year - 1970) * 365 + upTime.tm_yday,
+		    upTime.tm_hour,
+		    upTime.tm_min,
+		    upTime.tm_sec,
+		    server->getServerScreenshotUrl().c_str());
 	}
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer

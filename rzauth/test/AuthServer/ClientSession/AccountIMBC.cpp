@@ -1,11 +1,11 @@
-#include "gtest/gtest.h"
-#include "RzTest.h"
 #include "../GlobalConfig.h"
-#include "AuthClient/Flat/TS_CA_IMBC_ACCOUNT.h"
 #include "AuthClient/Flat/TS_AC_RESULT.h"
-#include "PacketEnums.h"
-#include "Common.h"
 #include "AuthClient/Flat/TS_AC_RESULT_WITH_STRING.h"
+#include "AuthClient/Flat/TS_CA_IMBC_ACCOUNT.h"
+#include "Common.h"
+#include "PacketEnums.h"
+#include "RzTest.h"
+#include "gtest/gtest.h"
 
 #include "Cipher/DesPasswordCipher.h"
 
@@ -50,7 +50,8 @@ TEST(TS_CA_IMBC_ACCOUNT, double_account_before_result) {
 
 	auth.addCallback([&receivedFirst, &firstIsOk](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type);
-		EXPECT_TRUE(event.packet->id == TS_AC_RESULT::packetID || event.packet->id == TS_AC_RESULT_WITH_STRING::packetID);
+		EXPECT_TRUE(event.packet->id == TS_AC_RESULT::packetID ||
+		            event.packet->id == TS_AC_RESULT_WITH_STRING::packetID);
 
 		if(event.packet->id == TS_AC_RESULT::packetID) {
 			const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
@@ -89,7 +90,8 @@ TEST(TS_CA_IMBC_ACCOUNT, double_account_before_result) {
 
 	auth.addCallback([&receivedFirst, &firstIsOk](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type);
-		EXPECT_TRUE(event.packet->id == TS_AC_RESULT::packetID || event.packet->id == TS_AC_RESULT_WITH_STRING::packetID);
+		EXPECT_TRUE(event.packet->id == TS_AC_RESULT::packetID ||
+		            event.packet->id == TS_AC_RESULT_WITH_STRING::packetID);
 
 		if(event.packet->id == TS_AC_RESULT::packetID) {
 			const TS_AC_RESULT* packet = AGET_PACKET(TS_AC_RESULT);
@@ -280,4 +282,4 @@ TEST(TS_CA_IMBC_ACCOUNT, garbage_data) {
 	test.run();
 }
 
-} // namespace AuthServer
+}  // namespace AuthServer
