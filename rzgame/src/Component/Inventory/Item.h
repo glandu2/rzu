@@ -1,10 +1,10 @@
 #ifndef ITEM_H
 #define ITEM_H
 
-#include "GameTypes.h"
-#include "GameClient/TS_SC_INVENTORY.h"
 #include "Component/Core/ModelObject.h"
 #include "Core/Timer.h"
+#include "GameClient/TS_SC_INVENTORY.h"
+#include "GameTypes.h"
 
 namespace GameServer {
 
@@ -38,6 +38,6 @@ public:
 	TimerStatic expire_timer;
 };
 
-}
+}  // namespace GameServer
 
-#endif // ITEM_H
+#endif  // ITEM_H

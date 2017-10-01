@@ -3,17 +3,15 @@
 
 namespace GameServer {
 
-RefDataLoader::RefDataLoader() : refMgr(nullptr) {
+RefDataLoader::RefDataLoader() : refMgr(nullptr) {}
 
-}
-
-void RefDataLoader::loadData(ReferenceDataMgr *refMgr) {
-    this->refMgr = refMgr;
-    load();
+void RefDataLoader::loadData(ReferenceDataMgr* refMgr) {
+	this->refMgr = refMgr;
+	load();
 }
 
 void RefDataLoader::dataLoaded() {
-    refMgr->signalDataLoaded(this);
+	refMgr->signalDataLoaded(this);
 }
 
-}
+}  // namespace GameServer

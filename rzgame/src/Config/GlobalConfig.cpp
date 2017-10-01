@@ -1,7 +1,7 @@
 #include "GlobalConfig.h"
 #include "Config/GlobalCoreConfig.h"
-#include "rzgameGitVersion.h"
 #include "Core/Utils.h"
+#include "rzgameGitVersion.h"
 
 GlobalConfig* GlobalConfig::get() {
 	static GlobalConfig config;
@@ -15,14 +15,10 @@ void GlobalConfig::init() {
 }
 
 void DbConfig::updateConnectionString(IListener* instance) {
-	DbConfig* thisInstance = (DbConfig*)instance;
+	DbConfig* thisInstance = (DbConfig*) instance;
 
 	thisInstance->connectionString.setDefault(
-	            "DRIVER=" + thisInstance->driver.get() +
-	            ";Server=" + thisInstance->server.get() +
-	            "," + Utils::convertToString(thisInstance->port.get()) +
-	            ";Database=" + thisInstance->name.get() +
-	            ";UID=" + thisInstance->account.get() +
-	            ";PWD=" + thisInstance->password.get() +
-	            ";");
+	    "DRIVER=" + thisInstance->driver.get() + ";Server=" + thisInstance->server.get() + "," +
+	    Utils::convertToString(thisInstance->port.get()) + ";Database=" + thisInstance->name.get() +
+	    ";UID=" + thisInstance->account.get() + ";PWD=" + thisInstance->password.get() + ";");
 }

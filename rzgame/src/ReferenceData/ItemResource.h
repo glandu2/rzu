@@ -1,8 +1,8 @@
 #ifndef ITEMRESOURCE_H
 #define ITEMRESOURCE_H
 
-#include "RefDataLoader.h"
 #include "Database/DbQueryJobRef.h"
+#include "RefDataLoader.h"
 #include <stdint.h>
 
 namespace GameServer {
@@ -68,6 +68,6 @@ class ItemResourceBinding : public RefDataLoaderHelper<ItemResource, ItemResourc
 	DECLARE_CLASS(GameServer::ItemResourceBinding)
 };
 
-}
+}  // namespace GameServer
 
-#endif // ITEMRESOURCE_H
+#endif  // ITEMRESOURCE_H

@@ -15,6 +15,6 @@ struct DeleteCharacterBinding {
 	struct Output {};
 };
 
-}
+}  // namespace GameServer
 
-#endif // AUTHSERVER_DELETE_CHARACTER_H
+#endif  // AUTHSERVER_DELETE_CHARACTER_H

@@ -44,6 +44,6 @@ struct CreateCharacterBinding {
 	struct Output {};
 };
 
-}
+}  // namespace GameServer
 
-#endif // AUTHSERVER_CREATE_CHARACTER_H
+#endif  // AUTHSERVER_CREATE_CHARACTER_H

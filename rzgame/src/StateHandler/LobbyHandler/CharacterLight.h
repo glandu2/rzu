@@ -40,6 +40,6 @@ struct CharacterLightBinding {
 	typedef CharacterLight Output;
 };
 
-}
+}  // namespace GameServer
 
-#endif // AUTHSERVER_CHARACTER_LIGHT_H
+#endif  // AUTHSERVER_CHARACTER_LIGHT_H

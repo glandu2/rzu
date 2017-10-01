@@ -3,9 +3,9 @@
 
 template<> void DbQueryJob<GameServer::DB_CharacterBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-				  CONFIG_GET()->game.telecaster.connectionString,
-				  "select * from character where sid = ?",
-				  DbQueryBinding::EM_OneRow);
+	              CONFIG_GET()->game.telecaster.connectionString,
+	              "select * from character where sid = ?",
+	              DbQueryBinding::EM_OneRow);
 
 	addParam("sid", &InputType::sid);
 

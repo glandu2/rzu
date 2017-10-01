@@ -1,22 +1,20 @@
 #include "GameHandler.h"
 #include "ClientSession.h"
 
-#include "GameClient/TS_TIMESYNC.h"
 #include "GameClient/TS_CS_GAME_TIME.h"
-#include "GameClient/TS_SC_MOVE.h"
 #include "GameClient/TS_CS_REQUEST_LOGOUT.h"
+#include "GameClient/TS_SC_MOVE.h"
+#include "GameClient/TS_TIMESYNC.h"
 
 #include "Component/Inventory/Inventory.h"
 #include "Component/Time/TimeManager.h"
 
 namespace GameServer {
 
-GameHandler::GameHandler(ClientSession *session, std::unique_ptr<Character> character)
-	: ConnectionHandler(session), character(std::move(character))
-{
-}
+GameHandler::GameHandler(ClientSession* session, std::unique_ptr<Character> character)
+    : ConnectionHandler(session), character(std::move(character)) {}
 
-void GameHandler::onPacketReceived(const TS_MESSAGE *packet) {
+void GameHandler::onPacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_TIMESYNC::packetID: {
 			TS_TIMESYNC response;
@@ -37,8 +35,8 @@ void GameHandler::onPacketReceived(const TS_MESSAGE *packet) {
 			packet->process(this, &GameHandler::onPutoffItem, session->getVersion());
 			break;
 
-		case_packet_is(TS_CS_MOVE_REQUEST)
-			packet->process(this, &GameHandler::onMoveRequest, session->getVersion());
+			case_packet_is(TS_CS_MOVE_REQUEST)
+			    packet->process(this, &GameHandler::onMoveRequest, session->getVersion());
 			break;
 
 		case TS_CS_REQUEST_LOGOUT::packetID:
@@ -47,17 +45,17 @@ void GameHandler::onPacketReceived(const TS_MESSAGE *packet) {
 	}
 }
 
-void GameHandler::onPutonItem(const TS_CS_PUTON_ITEM *packet) {
-	character->inventory.equipItem(packet->item_handle, (Inventory::ItemWearType)packet->position);
+void GameHandler::onPutonItem(const TS_CS_PUTON_ITEM* packet) {
+	character->inventory.equipItem(packet->item_handle, (Inventory::ItemWearType) packet->position);
 	character->sendEquip();
 }
 
-void GameHandler::onPutoffItem(const TS_CS_PUTOFF_ITEM *packet) {
-	character->inventory.unequipItem((Inventory::ItemWearType)packet->position);
+void GameHandler::onPutoffItem(const TS_CS_PUTOFF_ITEM* packet) {
+	character->inventory.unequipItem((Inventory::ItemWearType) packet->position);
 	character->sendEquip();
 }
 
-void GameHandler::onMoveRequest(const TS_CS_MOVE_REQUEST *packet) {
+void GameHandler::onMoveRequest(const TS_CS_MOVE_REQUEST* packet) {
 	TS_SC_MOVE movePkt;
 	movePkt.start_time = TimeManager::getRzTime();
 	movePkt.handle = character->handle;
@@ -76,4 +74,4 @@ void GameHandler::onMoveRequest(const TS_CS_MOVE_REQUEST *packet) {
 	session->sendPacket(movePkt);
 }
 
-} // namespace GameServer
+}  // namespace GameServer

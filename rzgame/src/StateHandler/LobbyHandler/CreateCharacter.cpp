@@ -4,9 +4,10 @@
 
 template<> void DbQueryJob<GameServer::CreateCharacterBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-				  CONFIG_GET()->game.telecaster.connectionString,
-				  "{CALL smp_insert_character(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}",
-				  DbQueryBinding::EM_NoRow);
+	              CONFIG_GET()->game.telecaster.connectionString,
+	              "{CALL smp_insert_character(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+	              "?, ?, ?, ?, ?, ?, ?, ?)}",
+	              DbQueryBinding::EM_NoRow);
 
 	addOutputParam("out_character_sid", &InputType::out_character_sid);
 

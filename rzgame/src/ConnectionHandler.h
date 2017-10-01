@@ -8,8 +8,7 @@ namespace GameServer {
 
 class ClientSession;
 
-class ConnectionHandler : public Object
-{
+class ConnectionHandler : public Object {
 public:
 	ConnectionHandler(ClientSession* session) : session(session) {}
 
@@ -19,6 +18,6 @@ protected:
 	ClientSession* session;
 };
 
-} // namespace GameServer
+}  // namespace GameServer
 
-#endif // ICONNECTIONHANDLER_H
+#endif  // ICONNECTIONHANDLER_H

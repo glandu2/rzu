@@ -2,20 +2,18 @@
 #define INVENTORY_H
 
 #include "GameTypes.h"
+#include "Item.h"
+#include <array>
 #include <memory>
 #include <unordered_map>
-#include <array>
-#include "Item.h"
 
 namespace GameServer {
 
 class ClientSession;
 class Character;
 
-class Inventory
-{
+class Inventory {
 public:
-
 	enum ItemWearType {
 		WEAR_NONE = -1,
 		WEAR_RIGHTHAND = 0,
@@ -46,16 +44,17 @@ public:
 		WEAR_EMBLEM = 25,
 		WEAR_EAR_2 = 26,
 		WEAR_LAK = 27,
-		WEAR_SPARE_RIGHTHAND = 24, // +4 >= EPIC_9_5
+		WEAR_SPARE_RIGHTHAND = 24,  // +4 >= EPIC_9_5
 		WEAR_SPARE_LEFTHAND = 25,
 		WEAR_SPARE_DECO_WEAPON = 26,
 		WEAR_SPARE_DECO_SHIELD = 27,
 		WEAR_MAX = 28
 	};
+
 public:
 	Inventory(ClientSession* session, Character* character);
 
-	void initializeItems(std::vector<std::unique_ptr<DB_Item> > &dbItems);
+	void initializeItems(std::vector<std::unique_ptr<DB_Item>>& dbItems);
 	void addItem(std::unique_ptr<Item> item);
 	void equipItem(game_handle_t itemHandle, ItemWearType pos);
 	void unequipItem(ItemWearType pos);
@@ -74,6 +73,6 @@ private:
 	Character* character;
 };
 
-}
+}  // namespace GameServer
 
-#endif // INVENTORY_H
+#endif  // INVENTORY_H

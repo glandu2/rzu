@@ -14,6 +14,6 @@ struct CheckCharacterNameBinding {
 	struct Output {};
 };
 
-}
+}  // namespace GameServer
 
-#endif // AUTHSERVER_CHECK_CHARACTER_NAME_H
+#endif  // AUTHSERVER_CHECK_CHARACTER_NAME_H

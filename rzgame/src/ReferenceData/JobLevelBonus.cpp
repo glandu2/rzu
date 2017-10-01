@@ -4,9 +4,9 @@
 
 template<> void DbQueryJob<GameServer::JobLevelBonusBinding>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-				  CONFIG_GET()->game.arcadia.connectionString,
-				  "select * from JobLevelBonus",
-				  DbQueryBinding::EM_MultiRows);
+	              CONFIG_GET()->game.arcadia.connectionString,
+	              "select * from JobLevelBonus",
+	              DbQueryBinding::EM_MultiRows);
 
 	addColumn("job_id", &OutputType::id);
 

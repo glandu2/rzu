@@ -1,16 +1,15 @@
 #ifndef OBJECTSIDSTATE_H
 #define OBJECTSIDSTATE_H
 
-#include "RefDataLoader.h"
-#include "Database/DbQueryJobRef.h"
-#include "Database/DbQueryJob.h"
-#include "GameTypes.h"
 #include "Core/PrintfFormats.h"
+#include "Database/DbQueryJob.h"
+#include "Database/DbQueryJobRef.h"
+#include "GameTypes.h"
+#include "RefDataLoader.h"
 
 namespace GameServer {
 
-template<class T>
-class ObjectSidStateBinding : public RefDataLoader {
+template<class T> class ObjectSidStateBinding : public RefDataLoader {
 public:
 	struct Input {};
 
@@ -32,8 +31,7 @@ private:
 	game_sid_t next_sid;
 };
 
-template<class T>
-void ObjectSidStateBinding<T>::load() {
+template<class T> void ObjectSidStateBinding<T>::load() {
 	if(loaded == false) {
 		loaded = true;
 		dbQuery.executeDbQuery<T>(this, &ObjectSidStateBinding::onDataLoaded, ObjectSidStateBinding::Input());
@@ -42,8 +40,7 @@ void ObjectSidStateBinding<T>::load() {
 	}
 }
 
-template<class T>
-void ObjectSidStateBinding<T>::onDataLoaded(DbQueryJob<T> *query) {
+template<class T> void ObjectSidStateBinding<T>::onDataLoaded(DbQueryJob<T>* query) {
 	auto& results = query->getResults();
 	if(results.size() > 0)
 		next_sid = results.front().get()->max_sid + 1;
@@ -87,7 +84,6 @@ class TitleConditionSidBinding : public ObjectSidStateBinding<TitleConditionSidB
 	DECLARE_CLASS(GameServer::TitleConditionSidBinding)
 };
 
+}  // namespace GameServer
 
-}
-
-#endif // OBJECTSIDSTATE_H
+#endif  // OBJECTSIDSTATE_H

@@ -1,39 +1,38 @@
 #define __STDC_LIMIT_MACROS
 #include "AuthServerSession.h"
-#include <string.h>
+#include "ClientSession.h"
 #include "Config/ConfigInfo.h"
 #include "Core/Utils.h"
-#include "ClientSession.h"
+#include <string.h>
 
-#include "PacketEnums.h"
-#include "AuthGame/TS_GA_LOGIN.h"
 #include "AuthGame/TS_GA_CLIENT_LOGIN.h"
 #include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
+#include "AuthGame/TS_GA_LOGIN.h"
+#include "PacketEnums.h"
 
 namespace GameServer {
 
 AuthServerSession* AuthServerSession::instance = nullptr;
 
 struct AuthServerSessionConfig {
-	cval<bool> &isAdultServer;
-	cval<std::string> &name, &screenshotUrl, &listenIp;
-	cval<int> &listenPort, &serverIdx;
+	cval<bool>& isAdultServer;
+	cval<std::string>&name, &screenshotUrl, &listenIp;
+	cval<int>&listenPort, &serverIdx;
 
-	cval<std::string> &authIp;
-	cval<int> &authPort;
-	cval<bool> &authAutoConnect;
+	cval<std::string>& authIp;
+	cval<int>& authPort;
+	cval<bool>& authAutoConnect;
 
-	AuthServerSessionConfig() :
-		isAdultServer(CFG_CREATE("game.isadultserver", false)),
-		name         (CFG_CREATE("game.name" , "GS Emu")),
-		screenshotUrl(CFG_CREATE("game.screenshoturl" , "about:blank")),
-		listenIp     (CFG_CREATE("game.listen.externalip", "127.0.0.1")),
-		listenPort   (CFG_CREATE("game.listen.port", 4514)),
-		serverIdx    (CFG_CREATE("game.serveridx", 1)),
-		authIp       (CFG_CREATE("auth.ip", "127.0.0.1")),
-		authPort     (CFG_CREATE("auth.port", 4502)),
-		authAutoConnect(CFG_CREATE("auth.autoconnect", true))
-	{}
+	AuthServerSessionConfig()
+	    : isAdultServer(CFG_CREATE("game.isadultserver", false)),
+	      name(CFG_CREATE("game.name", "GS Emu")),
+	      screenshotUrl(CFG_CREATE("game.screenshoturl", "about:blank")),
+	      listenIp(CFG_CREATE("game.listen.externalip", "127.0.0.1")),
+	      listenPort(CFG_CREATE("game.listen.port", 4514)),
+	      serverIdx(CFG_CREATE("game.serveridx", 1)),
+	      authIp(CFG_CREATE("auth.ip", "127.0.0.1")),
+	      authPort(CFG_CREATE("auth.port", 4502)),
+	      authAutoConnect(CFG_CREATE("auth.autoconnect", true)) {}
 };
 
 static AuthServerSessionConfig* config = nullptr;
@@ -54,7 +53,9 @@ AuthServerSession::~AuthServerSession() {
 	instance = nullptr;
 }
 
-void AuthServerSession::loginClient(ClientSession* clientSession, const std::string &account, uint64_t oneTimePassword) {
+void AuthServerSession::loginClient(ClientSession* clientSession,
+                                    const std::string& account,
+                                    uint64_t oneTimePassword) {
 	TS_GA_CLIENT_LOGIN loginMsg;
 
 	if(pendingClients.find(account) != pendingClients.end()) {
@@ -72,7 +73,7 @@ void AuthServerSession::loginClient(ClientSession* clientSession, const std::str
 	pendingClients.insert(std::make_pair(account, clientSession));
 }
 
-void AuthServerSession::logoutClient(const char *account, uint32_t playTime) {
+void AuthServerSession::logoutClient(const char* account, uint32_t playTime) {
 	TS_GA_CLIENT_LOGOUT loginMsg;
 	TS_MESSAGE::initMessage(&loginMsg);
 
@@ -95,7 +96,8 @@ EventChain<SocketSession> AuthServerSession::onConnected() {
 	TS_MESSAGE::initMessage(&loginMsg);
 	loginMsg.server_idx = config->serverIdx;
 	strncpy(loginMsg.server_name, config->name.get().c_str(), sizeof(loginMsg.server_name));
-	strncpy(loginMsg.server_screenshot_url, config->screenshotUrl.get().c_str(), sizeof(loginMsg.server_screenshot_url));
+	strncpy(
+	    loginMsg.server_screenshot_url, config->screenshotUrl.get().c_str(), sizeof(loginMsg.server_screenshot_url));
 	strncpy(loginMsg.server_ip, config->listenIp.get().c_str(), sizeof(loginMsg.server_ip));
 	loginMsg.server_port = config->listenPort;
 	loginMsg.is_adult_server = config->isAdultServer;
@@ -133,14 +135,14 @@ void AuthServerSession::onClientLoginResult(const TS_AG_CLIENT_LOGIN* packet) {
 		ClientSession* client = it->second;
 		pendingClients.erase(it);
 		client->onAccountLoginResult(packet->result,
-									 account,
-									 packet->nAccountID,
-									 packet->nPCBangUser,
-									 packet->nEventCode,
-									 packet->nAge,
-									 packet->nContinuousPlayTime,
-									 packet->nContinuousLogoutTime);
+		                             account,
+		                             packet->nAccountID,
+		                             packet->nPCBangUser,
+		                             packet->nEventCode,
+		                             packet->nAge,
+		                             packet->nContinuousPlayTime,
+		                             packet->nContinuousLogoutTime);
 	}
 }
 
-} //namespace UploadServer
+}  // namespace GameServer

@@ -1,8 +1,8 @@
 #ifndef DBITEM_H
 #define DBITEM_H
 
-#include "GameTypes.h"
 #include "Database/DbQueryJob.h"
+#include "GameTypes.h"
 
 namespace GameServer {
 
@@ -41,6 +41,6 @@ struct DB_ItemBinding {
 	typedef DB_Item Output;
 };
 
-}
+}  // namespace GameServer
 
-#endif // DBITEM_H
+#endif  // DBITEM_H

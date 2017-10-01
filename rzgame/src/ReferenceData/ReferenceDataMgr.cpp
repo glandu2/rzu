@@ -1,11 +1,11 @@
 #include "ReferenceDataMgr.h"
+#include "Console/ConsoleCommands.h"
 #include "RefDataLoader.h"
 #include <algorithm>
-#include "Console/ConsoleCommands.h"
 
 namespace GameServer {
 
-ReferenceDataMgr *ReferenceDataMgr::get() {
+ReferenceDataMgr* ReferenceDataMgr::get() {
 	static ReferenceDataMgr referenceData;
 	return &referenceData;
 }
@@ -26,9 +26,8 @@ ReferenceDataMgr::ReferenceDataMgr() {
 	loaders.push_back(&titleSidBinding);
 	loaders.push_back(&titleConditionSidBinding);
 
-	ConsoleCommands::get()->addCommand("game.reload", "reload", 0, &commandReload,
-									   "Reload Arcadia",
-									   "reload : reload reference data from arcadia");
+	ConsoleCommands::get()->addCommand(
+	    "game.reload", "reload", 0, &commandReload, "Reload Arcadia", "reload : reload reference data from arcadia");
 }
 
 void ReferenceDataMgr::load(OnReferenceDataLoaded callback, void* data) {
@@ -83,7 +82,7 @@ game_sid_t ReferenceDataMgr::allocateTitleConditionSid() {
 	return titleConditionSidBinding.getNextSid();
 }
 
-void ReferenceDataMgr::signalDataLoaded(RefDataLoader *loader) {
+void ReferenceDataMgr::signalDataLoaded(RefDataLoader* loader) {
 	state.remaining--;
 
 	if(state.remaining <= 0) {
@@ -93,8 +92,8 @@ void ReferenceDataMgr::signalDataLoaded(RefDataLoader *loader) {
 	}
 }
 
-void ReferenceDataMgr::commandReload(IWritableConsole *console, const std::vector<std::string> &args) {
+void ReferenceDataMgr::commandReload(IWritableConsole* console, const std::vector<std::string>& args) {
 	ReferenceDataMgr::get()->load(nullptr, nullptr);
 }
 
-}
+}  // namespace GameServer

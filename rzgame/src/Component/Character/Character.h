@@ -2,10 +2,10 @@
 #define CHARACTER_H
 
 #include "Component/Core/ModelObject.h"
-#include "GameTypes.h"
 #include "Database/DbQueryJob.h"
-#include <unordered_map>
+#include "GameTypes.h"
 #include "StatBase.h"
+#include <unordered_map>
 
 #include "Component/Inventory/Inventory.h"
 #include "Component/Position/PositionManager.h"
@@ -87,6 +87,6 @@ public:
 	ClientSession* session;
 };
 
-}
+}  // namespace GameServer
 
-#endif // CHARACTER_H
+#endif  // CHARACTER_H

@@ -1,13 +1,12 @@
 #ifndef DBCHARACTER_H
 #define DBCHARACTER_H
 
-#include "GameTypes.h"
 #include "Database/DbQueryJob.h"
+#include "GameTypes.h"
 
 namespace GameServer {
 
 class DB_Character {
-
 public:
 	std::string name;
 	char account[61];
@@ -82,6 +81,6 @@ struct DB_CharacterBinding {
 	typedef DB_Character Output;
 };
 
-}
+}  // namespace GameServer
 
-#endif // DBCHARACTER_H
+#endif  // DBCHARACTER_H
