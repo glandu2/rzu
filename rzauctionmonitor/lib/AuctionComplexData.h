@@ -1,23 +1,16 @@
 #ifndef AUCTIONCOMPLEXDATA_H
 #define AUCTIONCOMPLEXDATA_H
 
+#include "AuctionFile.h"
+#include "Extern.h"
+#include "IAuctionData.h"
 #include <stdint.h>
 #include <vector>
-#include "Extern.h"
-#include "AuctionFile.h"
-#include "IAuctionData.h"
 
 class RZAUCTION_EXTERN AuctionComplexData : public IAuctionData {
 	DECLARE_CLASSNAME(AuctionComplexData, 0)
 public:
-	enum ProcessStatus {
-		PS_NotProcessed,
-		PS_Unmodifed,
-		PS_Added,
-		PS_Updated,
-		PS_MaybeDeleted,
-		PS_Deleted
-    };
+	enum ProcessStatus { PS_NotProcessed, PS_Unmodifed, PS_Added, PS_Updated, PS_MaybeDeleted, PS_Deleted };
 	struct DynamicData {
 		DurationType durationType;
 		int64_t bidPrice;
@@ -26,20 +19,17 @@ public:
 		DynamicData() : durationType(DT_Unknown), bidPrice(0), bidFlag(BF_Bidded) {}
 
 		bool operator==(const DynamicData& other) {
-			return durationType == other.durationType &&
-			        bidPrice == other.bidPrice &&
-			        bidFlag == other.bidFlag;
+			return durationType == other.durationType && bidPrice == other.bidPrice && bidFlag == other.bidFlag;
 		}
 
-		bool operator!=(const DynamicData& other) {
-			return !(*this == other);
-		}
+		bool operator!=(const DynamicData& other) { return !(*this == other); }
 	};
 
 public:
-	AuctionComplexData(uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t *data, size_t len);
+	AuctionComplexData(
+	    uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t* data, size_t len);
 
-	bool update(uint64_t time, const uint8_t *data, size_t len);
+	bool update(uint64_t time, const uint8_t* data, size_t len);
 	void remove(uint64_t time);
 
 	virtual void beginProcess();
@@ -47,10 +37,8 @@ public:
 	virtual bool outputInPartialDump();
 	virtual bool isInFinalState() const;
 
-
 	static AuctionComplexData* createFromDump(const AUCTION_INFO* auctionInfo);
 	void serialize(AUCTION_INFO* auctionInfo, bool alwaysWithData) const;
-
 
 	ProcessStatus getProcessStatus() const { return processStatus; }
 	bool isDeleted() const { return deleted; }
@@ -59,7 +47,7 @@ protected:
 	void unmodified(uint64_t time);
 	void maybeStillDeleted();
 
-	bool parseData(const uint8_t *data, size_t len);
+	bool parseData(const uint8_t* data, size_t len);
 	void postParseData(bool newData);
 	uint32_t durationTypeToSecond(DurationType durationType);
 	void setStatus(ProcessStatus status, uint64_t time);
@@ -78,11 +66,10 @@ private:
 	std::string seller;
 	int64_t price;
 
-	//updatable data
+	// updatable data
 	std::vector<uint8_t> rawData;
 	DynamicData dynamicData;
 	DynamicData oldDynamicData;
-
 
 	// computed
 	bool estimatedEndTimeFromAdded;

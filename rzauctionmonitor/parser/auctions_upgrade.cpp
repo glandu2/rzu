@@ -1,18 +1,18 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <time.h>
-#include <map>
-#include <vector>
 #include "AuctionComplexDiffWriter.h"
 #include "AuctionFile.h"
-#include <memory>
 #include "AuctionSQLWriter.h"
-#include "Core/EventLoop.h"
-#include "Config/GlobalCoreConfig.h"
-#include "Database/DbConnectionPool.h"
-#include "Database/DbConnection.h"
-#include "LibRzuInit.h"
 #include "AuctionWriter.h"
+#include "Config/GlobalCoreConfig.h"
+#include "Core/EventLoop.h"
+#include "Database/DbConnection.h"
+#include "Database/DbConnectionPool.h"
+#include "LibRzuInit.h"
+#include <map>
+#include <memory>
+#include <stdint.h>
+#include <stdio.h>
+#include <time.h>
+#include <vector>
 
 struct AuctionFile {
 	size_t alreadyExistingAuctions;
@@ -60,13 +60,11 @@ int main(int argc, char* argv[]) {
 
 	ConfigInfo::get()->dump();
 
-
 	AuctionComplexDiffWriter auctionWriter(19);
-
 
 	if(!DB_Item::createTable(&dbConnectionPool)) {
 		Object::logStatic(Object::LL_Info, "main", "Failed to create table\n");
-		//return 2;
+		// return 2;
 	}
 
 	std::string stateFileName = stateFile.get();
@@ -86,7 +84,6 @@ int main(int argc, char* argv[]) {
 		} else {
 			Object::logStatic(Object::LL_Error, "main", "Cant read file %s\n", stateFileName.c_str());
 		}
-
 	}
 
 	char filename[1024];
@@ -98,9 +95,9 @@ int main(int argc, char* argv[]) {
 			continue;
 		filename[strcspn(filename, "\r\n")] = 0;
 
-		//dump last processed file
-//		if(fileNumber > 0)
-//			auctionWriter.dumpAuctions("output", "auctions.bin", true, false, true);
+		// dump last processed file
+		//		if(fileNumber > 0)
+		//			auctionWriter.dumpAuctions("output", "auctions.bin", true, false, true);
 
 		Object::logStatic(Object::LL_Info, "main", "Reading file \"%s\"\n", filename);
 
@@ -126,13 +123,16 @@ int main(int argc, char* argv[]) {
 
 		auctionFile.adjustDetectedType(&auctionWriter);
 
-		Object::logStatic(Object::LL_Info, "main", "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d, addedAuctionsInFile: %d/%d\n",
-		                  filename,
-		                  auctionFile.isFull ? "full" : "diff",
-		                  (int)auctionFile.alreadyExistingAuctions,
-		                  (int)auctionWriter.getAuctionCount(),
-		                  (int)auctionFile.addedAuctionsInFile,
-		                  (int)auctionWriter.getAuctionCount());
+		Object::logStatic(
+		    Object::LL_Info,
+		    "main",
+		    "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d, addedAuctionsInFile: %d/%d\n",
+		    filename,
+		    auctionFile.isFull ? "full" : "diff",
+		    (int) auctionFile.alreadyExistingAuctions,
+		    (int) auctionWriter.getAuctionCount(),
+		    (int) auctionFile.addedAuctionsInFile,
+		    (int) auctionWriter.getAuctionCount());
 
 		for(size_t i = 0; i < auctionFile.auctions.header.categories.size(); i++) {
 			const AUCTION_CATEGORY_INFO& category = auctionFile.auctions.header.categories[i];
@@ -170,11 +170,11 @@ int main(int argc, char* argv[]) {
 		dbInputs.clear();
 	}
 
-//	if(!stateFileName.empty()) {
-//		std::vector<uint8_t> data;
-//		auctionWriter.dumpAuctions(data, true, true);
-//		AuctionWriter::writeAuctionDataToFile(stateFileName, data);
-//	}
+	//	if(!stateFileName.empty()) {
+	//		std::vector<uint8_t> data;
+	//		auctionWriter.dumpAuctions(data, true, true);
+	//		AuctionWriter::writeAuctionDataToFile(stateFileName, data);
+	//	}
 
 	Object::logStatic(Object::LL_Info, "main", "Processed %d files\n", fileNumber);
 

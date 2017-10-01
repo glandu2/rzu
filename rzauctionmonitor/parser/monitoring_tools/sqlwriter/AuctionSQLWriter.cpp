@@ -1,10 +1,11 @@
 #include "AuctionSQLWriter.h"
-#include "Database/DbConnectionPool.h"
 #include "Database/DbConnection.h"
-#include "Packet/MessageBuffer.h"
+#include "Database/DbConnectionPool.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
+#include "Packet/MessageBuffer.h"
 
-cval<std::string>& DB_Item::connectionString = CFG_CREATE("connectionstring", "DRIVER=SQLite3 ODBC Driver;Database=auctions.sqlite3;");
+cval<std::string>& DB_Item::connectionString =
+    CFG_CREATE("connectionstring", "DRIVER=SQLite3 ODBC Driver;Database=auctions.sqlite3;");
 
 template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 	/*createBinding(dbConnectionPool,
@@ -83,12 +84,15 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 	              "\"elemental_effect_magic_point\", "
 	              "\"appearance_code\", "
 	              "\"summon_code\") "
-	              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-				  DbQueryBinding::EM_NoRow);*/
+	              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+	   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+	   ?, ?, ?, ?);", DbQueryBinding::EM_NoRow);*/
 
 	createBinding(dbConnectionPool,
 	              DB_Item::connectionString,
-	              "{ CALL add_auctions (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }",
+	              "{ CALL add_auctions (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }",
 	              DbQueryBinding::EM_NoRow);
 
 	addParam("uid", &InputType::uid);
@@ -167,8 +171,7 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 }
 DECLARE_DB_BINDING(DB_Item, "db_item");
 
-void DB_Item::fillItemInfo(DB_Item::Input& input, const std::vector<uint8_t>& data)
-{
+void DB_Item::fillItemInfo(DB_Item::Input& input, const std::vector<uint8_t>& data) {
 	TS_SEARCHED_AUCTION_INFO item;
 	MessageBuffer structBuffer(data.data(), data.size(), EPIC_LATEST);
 
@@ -181,11 +184,16 @@ void DB_Item::fillItemInfo(DB_Item::Input& input, const std::vector<uint8_t>& da
 		}
 
 		static_assert(sizeof(input.socket) == sizeof(item.auction_details.item_info.socket), "wrong size: socket");
-		static_assert(sizeof(input.awaken_option_value) == sizeof(item.auction_details.item_info.awaken_option.value), "wrong size: awaken_option_value");
-		static_assert(sizeof(input.awaken_option_data) == sizeof(item.auction_details.item_info.awaken_option.data), "wrong size: awaken_option_data");
-		static_assert(sizeof(input.random_type) == sizeof(item.auction_details.item_info.random_type), "wrong size: random_type");
-		static_assert(sizeof(input.random_value_1) == sizeof(item.auction_details.item_info.random_value_1), "wrong size: random_value_1");
-		static_assert(sizeof(input.random_value_2) == sizeof(item.auction_details.item_info.random_value_2), "wrong size: random_value_2");
+		static_assert(sizeof(input.awaken_option_value) == sizeof(item.auction_details.item_info.awaken_option.value),
+		              "wrong size: awaken_option_value");
+		static_assert(sizeof(input.awaken_option_data) == sizeof(item.auction_details.item_info.awaken_option.data),
+		              "wrong size: awaken_option_data");
+		static_assert(sizeof(input.random_type) == sizeof(item.auction_details.item_info.random_type),
+		              "wrong size: random_type");
+		static_assert(sizeof(input.random_value_1) == sizeof(item.auction_details.item_info.random_value_1),
+		              "wrong size: random_value_1");
+		static_assert(sizeof(input.random_value_2) == sizeof(item.auction_details.item_info.random_value_2),
+		              "wrong size: random_value_2");
 
 		input.handle = item.auction_details.item_info.handle;
 		input.code = item.auction_details.item_info.code;
@@ -198,8 +206,12 @@ void DB_Item::fillItemInfo(DB_Item::Input& input, const std::vector<uint8_t>& da
 		input.unknown3 = item.auction_details.item_info.unknown3;
 		input.flag = item.auction_details.item_info.flag;
 		memcpy(input.socket, item.auction_details.item_info.socket, sizeof(input.socket));
-		memcpy(input.awaken_option_value, item.auction_details.item_info.awaken_option.value, sizeof(input.awaken_option_value));
-		memcpy(input.awaken_option_data, item.auction_details.item_info.awaken_option.data, sizeof(input.awaken_option_data));
+		memcpy(input.awaken_option_value,
+		       item.auction_details.item_info.awaken_option.value,
+		       sizeof(input.awaken_option_value));
+		memcpy(input.awaken_option_data,
+		       item.auction_details.item_info.awaken_option.data,
+		       sizeof(input.awaken_option_data));
 		memcpy(input.random_type, item.auction_details.item_info.random_type, sizeof(input.random_type));
 		memcpy(input.random_value_1, item.auction_details.item_info.random_value_1, sizeof(input.random_value_1));
 		memcpy(input.random_value_2, item.auction_details.item_info.random_value_2, sizeof(input.random_value_2));
@@ -247,7 +259,8 @@ void DB_Item::addAuction(std::vector<DB_Item::Input>& auctions, const AUCTION_SI
 	input.category = auctionInfo.category;
 
 	if(auctionInfo.data.size() > sizeof(AuctionDataEnd)) {
-		const AuctionDataEnd* auctionDataEnd = (const AuctionDataEnd*) (auctionInfo.data.data() + auctionInfo.data.size() - sizeof(AuctionDataEnd));
+		const AuctionDataEnd* auctionDataEnd =
+		    (const AuctionDataEnd*) (auctionInfo.data.data() + auctionInfo.data.size() - sizeof(AuctionDataEnd));
 
 		input.duration_type = auctionDataEnd->duration_type;
 		input.bid_price = auctionDataEnd->bid_price;
@@ -261,93 +274,91 @@ void DB_Item::addAuction(std::vector<DB_Item::Input>& auctions, const AUCTION_SI
 	auctions.push_back(input);
 }
 
-bool DB_Item::createTable(DbConnectionPool* dbConnectionPool)
-{
+bool DB_Item::createTable(DbConnectionPool* dbConnectionPool) {
 	DbConnection* connection = dbConnectionPool->getConnection(DB_Item::connectionString.get().c_str());
 	if(!connection) {
 		Object::logStatic(Object::LL_Error, "DB_Item", "Failed to open DB connection\n");
 		return false;
 	}
-	bool createResult = connection->execute(
-	              "CREATE TABLE \"auctions\" (\r\n"
-	              "    \"uid\" int NOT NULL,\r\n"
-	              "    \"diff_flag\" smallint NOT NULL,\r\n"
-	              "    \"previous_time\" datetime NOT NULL,\r\n"
-	              "    \"time\" datetime NOT NULL,\r\n"
-	              "    \"estimated_end_min\" datetime NOT NULL,\r\n"
-	              "    \"estimated_end_max\" datetime NOT NULL,\r\n"
-	              "    \"category\" smallint NOT NULL,\r\n"
-	              "    \"duration_type\" smallint NOT NULL,\r\n"
-	              "    \"bid_price\" bigint NOT NULL,\r\n"
-	              "    \"price\" bigint NOT NULL,\r\n"
-	              "    \"seller\" varchar(32) NOT NULL,\r\n"
-	              "    \"bid_flag\" smallint NOT NULL,\r\n"
-	              "    \"handle\" int NOT NULL,\r\n"
-	              "    \"code\" int NOT NULL,\r\n"
-	              "    \"item_uid\" bigint NOT NULL,\r\n"
-	              "    \"count\" bigint NOT NULL,\r\n"
-	              "    \"ethereal_durability\" int NOT NULL,\r\n"
-	              "    \"endurance\" int NOT NULL,\r\n"
-	              "    \"enhance\" smallint NOT NULL,\r\n"
-	              "    \"level\" smallint NOT NULL,\r\n"
-	              "    \"unknown3\" int NOT NULL,\r\n"
-	              "    \"flag\" int NOT NULL,\r\n"
-	              "    \"socket_0\" int NOT NULL,\r\n"
-	              "    \"socket_1\" int NOT NULL,\r\n"
-	              "    \"socket_2\" int NOT NULL,\r\n"
-	              "    \"socket_3\" int NOT NULL,\r\n"
-	              "    \"awaken_option_value_0\" int NOT NULL,\r\n"
-	              "    \"awaken_option_value_1\" int NOT NULL,\r\n"
-	              "    \"awaken_option_value_2\" int NOT NULL,\r\n"
-	              "    \"awaken_option_value_3\" int NOT NULL,\r\n"
-	              "    \"awaken_option_value_4\" int NOT NULL,\r\n"
-	              "    \"awaken_option_data_0\" int NOT NULL,\r\n"
-	              "    \"awaken_option_data_1\" int NOT NULL,\r\n"
-	              "    \"awaken_option_data_2\" int NOT NULL,\r\n"
-	              "    \"awaken_option_data_3\" int NOT NULL,\r\n"
-	              "    \"awaken_option_data_4\" int NOT NULL,\r\n"
-	              "    \"random_type_0\" int NOT NULL,\r\n"
-	              "    \"random_type_1\" int NOT NULL,\r\n"
-	              "    \"random_type_2\" int NOT NULL,\r\n"
-	              "    \"random_type_3\" int NOT NULL,\r\n"
-	              "    \"random_type_4\" int NOT NULL,\r\n"
-	              "    \"random_type_5\" int NOT NULL,\r\n"
-	              "    \"random_type_6\" int NOT NULL,\r\n"
-	              "    \"random_type_7\" int NOT NULL,\r\n"
-	              "    \"random_type_8\" int NOT NULL,\r\n"
-	              "    \"random_type_9\" int NOT NULL,\r\n"
-	              "    \"random_value_1_0\" bigint NOT NULL,\r\n"
-	              "    \"random_value_1_1\" bigint NOT NULL,\r\n"
-	              "    \"random_value_1_2\" bigint NOT NULL,\r\n"
-	              "    \"random_value_1_3\" bigint NOT NULL,\r\n"
-	              "    \"random_value_1_4\" bigint NOT NULL,\r\n"
-	              "    \"random_value_1_5\" bigint NOT NULL,\r\n"
-	              "    \"random_value_1_6\" bigint NOT NULL,\r\n"
-	              "    \"random_value_1_7\" bigint NOT NULL,\r\n"
-	              "    \"random_value_1_8\" bigint NOT NULL,\r\n"
-	              "    \"random_value_1_9\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_0\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_1\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_2\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_3\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_4\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_5\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_6\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_7\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_8\" bigint NOT NULL,\r\n"
-	              "    \"random_value_2_9\" bigint NOT NULL,\r\n"
-	              "    \"remain_time\" int NOT NULL,\r\n"
-	              "    \"elemental_effect_type\" smallint NOT NULL,\r\n"
-	              "    \"elemental_effect_remain_time\" int NOT NULL,\r\n"
-	              "    \"elemental_effect_attack_point\" int NOT NULL,\r\n"
-	              "    \"elemental_effect_magic_point\" int NOT NULL,\r\n"
-	              "    \"appearance_code\" int NOT NULL,\r\n"
-	              "    \"summon_code\" int NOT NULL,\r\n"
-	              "    PRIMARY KEY (\r\n"
-	              "        \"time\" ASC,\r\n"
-	              "        \"uid\" ASC\r\n"
-	              "    )\r\n"
-	              ");");
+	bool createResult = connection->execute("CREATE TABLE \"auctions\" (\r\n"
+	                                        "    \"uid\" int NOT NULL,\r\n"
+	                                        "    \"diff_flag\" smallint NOT NULL,\r\n"
+	                                        "    \"previous_time\" datetime NOT NULL,\r\n"
+	                                        "    \"time\" datetime NOT NULL,\r\n"
+	                                        "    \"estimated_end_min\" datetime NOT NULL,\r\n"
+	                                        "    \"estimated_end_max\" datetime NOT NULL,\r\n"
+	                                        "    \"category\" smallint NOT NULL,\r\n"
+	                                        "    \"duration_type\" smallint NOT NULL,\r\n"
+	                                        "    \"bid_price\" bigint NOT NULL,\r\n"
+	                                        "    \"price\" bigint NOT NULL,\r\n"
+	                                        "    \"seller\" varchar(32) NOT NULL,\r\n"
+	                                        "    \"bid_flag\" smallint NOT NULL,\r\n"
+	                                        "    \"handle\" int NOT NULL,\r\n"
+	                                        "    \"code\" int NOT NULL,\r\n"
+	                                        "    \"item_uid\" bigint NOT NULL,\r\n"
+	                                        "    \"count\" bigint NOT NULL,\r\n"
+	                                        "    \"ethereal_durability\" int NOT NULL,\r\n"
+	                                        "    \"endurance\" int NOT NULL,\r\n"
+	                                        "    \"enhance\" smallint NOT NULL,\r\n"
+	                                        "    \"level\" smallint NOT NULL,\r\n"
+	                                        "    \"unknown3\" int NOT NULL,\r\n"
+	                                        "    \"flag\" int NOT NULL,\r\n"
+	                                        "    \"socket_0\" int NOT NULL,\r\n"
+	                                        "    \"socket_1\" int NOT NULL,\r\n"
+	                                        "    \"socket_2\" int NOT NULL,\r\n"
+	                                        "    \"socket_3\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_value_0\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_value_1\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_value_2\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_value_3\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_value_4\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_data_0\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_data_1\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_data_2\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_data_3\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_data_4\" int NOT NULL,\r\n"
+	                                        "    \"random_type_0\" int NOT NULL,\r\n"
+	                                        "    \"random_type_1\" int NOT NULL,\r\n"
+	                                        "    \"random_type_2\" int NOT NULL,\r\n"
+	                                        "    \"random_type_3\" int NOT NULL,\r\n"
+	                                        "    \"random_type_4\" int NOT NULL,\r\n"
+	                                        "    \"random_type_5\" int NOT NULL,\r\n"
+	                                        "    \"random_type_6\" int NOT NULL,\r\n"
+	                                        "    \"random_type_7\" int NOT NULL,\r\n"
+	                                        "    \"random_type_8\" int NOT NULL,\r\n"
+	                                        "    \"random_type_9\" int NOT NULL,\r\n"
+	                                        "    \"random_value_1_0\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_1_1\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_1_2\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_1_3\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_1_4\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_1_5\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_1_6\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_1_7\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_1_8\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_1_9\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_0\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_1\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_2\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_3\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_4\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_5\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_6\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_7\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_8\" bigint NOT NULL,\r\n"
+	                                        "    \"random_value_2_9\" bigint NOT NULL,\r\n"
+	                                        "    \"remain_time\" int NOT NULL,\r\n"
+	                                        "    \"elemental_effect_type\" smallint NOT NULL,\r\n"
+	                                        "    \"elemental_effect_remain_time\" int NOT NULL,\r\n"
+	                                        "    \"elemental_effect_attack_point\" int NOT NULL,\r\n"
+	                                        "    \"elemental_effect_magic_point\" int NOT NULL,\r\n"
+	                                        "    \"appearance_code\" int NOT NULL,\r\n"
+	                                        "    \"summon_code\" int NOT NULL,\r\n"
+	                                        "    PRIMARY KEY (\r\n"
+	                                        "        \"time\" ASC,\r\n"
+	                                        "        \"uid\" ASC\r\n"
+	                                        "    )\r\n"
+	                                        ");");
 	if(!createResult) {
 		Object::logStatic(Object::LL_Info, "DB_Item", "Failed to create table \"auctions\"\n");
 		return false;

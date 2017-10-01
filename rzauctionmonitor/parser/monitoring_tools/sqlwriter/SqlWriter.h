@@ -1,9 +1,9 @@
 #ifndef SQLWRITER_H
 #define SQLWRITER_H
 
+#include "AuctionSQLWriter.h"
 #include "Core/Object.h"
 #include "IParser.h"
-#include "AuctionSQLWriter.h"
 
 class SqlWriter : public IParser, public Object {
 	DECLARE_CLASSNAME(SqlWriter, 0)

@@ -1,9 +1,8 @@
 #ifndef AUCTIONSQLWRITER_H
 #define AUCTIONSQLWRITER_H
 
-#include "Database/DbQueryJobRef.h"
 #include "AuctionFile.h"
-
+#include "Database/DbQueryJobRef.h"
 
 #pragma pack(push, 1)
 struct ItemData {
@@ -31,8 +30,7 @@ struct ItemData {
 };
 #pragma pack(pop)
 
-struct DB_Item
-{
+struct DB_Item {
 	static cval<std::string>& connectionString;
 	struct Input {
 		int32_t uid;

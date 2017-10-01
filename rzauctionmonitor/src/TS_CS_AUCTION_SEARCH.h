@@ -4,8 +4,7 @@
 #include "Packet/PacketBaseMessage.h"
 
 #pragma pack(push, 1)
-struct TS_CS_AUCTION_SEARCH : public TS_MESSAGE
-{
+struct TS_CS_AUCTION_SEARCH : public TS_MESSAGE {
 	int category_id;
 	int sub_category_id;
 	char keyword[31];
@@ -15,4 +14,4 @@ struct TS_CS_AUCTION_SEARCH : public TS_MESSAGE
 };
 #pragma pack(pop)
 
-#endif // TS_CS_AUCTION_SEARCH_H
+#endif  // TS_CS_AUCTION_SEARCH_H

@@ -4,9 +4,7 @@
 #include "Config/ConfigInfo.h"
 
 struct GlobalConfig {
-
-	GlobalConfig()
-	{}
+	GlobalConfig() {}
 
 	static GlobalConfig* get();
 	static void init();
@@ -16,4 +14,4 @@ struct GlobalConfig {
 #define CONFIG_GET() GlobalConfig::get()
 #endif
 
-#endif // GLOBALCONFIG_H
+#endif  // GLOBALCONFIG_H

@@ -1,10 +1,10 @@
+#include "Aggregator.h"
 #include "AuctionParser.h"
+#include "Core/CrashHandler.h"
+#include "Core/EventLoop.h"
 #include "GlobalConfig.h"
 #include "LibRzuInit.h"
-#include "Core/EventLoop.h"
 #include "NetSession/ServersManager.h"
-#include "Core/CrashHandler.h"
-#include "Aggregator.h"
 
 static void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;

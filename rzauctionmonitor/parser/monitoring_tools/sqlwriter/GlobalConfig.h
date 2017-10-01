@@ -9,10 +9,9 @@ struct GlobalConfig {
 		cval<std::string>& auctionsPath;
 		cval<int>& changeWaitSeconds;
 
-		InputConfig() :
-		    auctionsPath(CFG_CREATE("input.auctionpath", "auctions")),
-		    changeWaitSeconds(CFG_CREATE("input.waitchangeseconds", 30))
-		{
+		InputConfig()
+		    : auctionsPath(CFG_CREATE("input.auctionpath", "auctions")),
+		      changeWaitSeconds(CFG_CREATE("input.waitchangeseconds", 30)) {
 			Utils::autoSetAbsoluteDir(auctionsPath);
 		}
 	} input;
@@ -22,11 +21,10 @@ struct GlobalConfig {
 		cval<std::string>& auctionStateFile;
 		cval<std::string>& aggregationStateFile;
 
-		StatesConfig() :
-		    statesPath(CFG_CREATE("state.path", "parser_states")),
-		    auctionStateFile(CFG_CREATE("state.auctionfile", "auction_state.bin")),
-		    aggregationStateFile(CFG_CREATE("state.aggregationfile", "aggregation_state.bin"))
-		{
+		StatesConfig()
+		    : statesPath(CFG_CREATE("state.path", "parser_states")),
+		      auctionStateFile(CFG_CREATE("state.auctionfile", "auction_state.bin")),
+		      aggregationStateFile(CFG_CREATE("state.aggregationfile", "aggregation_state.bin")) {
 			Utils::autoSetAbsoluteDir(statesPath);
 		}
 	} states;
@@ -37,4 +35,4 @@ struct GlobalConfig {
 
 #define CONFIG_GET() GlobalConfig::get()
 
-#endif // GLOBALCONFIG_H
+#endif  // GLOBALCONFIG_H

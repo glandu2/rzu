@@ -1,8 +1,8 @@
 #include "AuctionParser.h"
-#include "Core/EventLoop.h"
 #include "AuctionWriter.h"
-#include <algorithm>
 #include "Config/ConfigParamVal.h"
+#include "Core/EventLoop.h"
+#include <algorithm>
 #include <time.h>
 
 struct AuctionFile {
@@ -46,13 +46,11 @@ AuctionParser::AuctionParser(IParser* aggregator,
       statesPath(statesPath),
       auctionStateFile(auctionStateFile),
       aggregationStateFile(aggregationStateFile),
-      started(false)
-{
+      started(false) {
 	importState();
 }
 
-bool AuctionParser::start()
-{
+bool AuctionParser::start() {
 	if(!isStarted()) {
 		started = true;
 		log(LL_Info, "Starting watching auctions directory %s\n", auctionsPath.get().c_str());
@@ -62,33 +60,33 @@ bool AuctionParser::start()
 	return true;
 }
 
-void AuctionParser::stop()
-{
+void AuctionParser::stop() {
 	log(LL_Info, "Stop watching auctions\n");
 	started = false;
 	dirWatchTimer.stop();
 }
 
-bool AuctionParser::isStarted()
-{
+bool AuctionParser::isStarted() {
 	return started;
 }
 
-void AuctionParser::onTimeout()
-{
+void AuctionParser::onTimeout() {
 	scandirReq.data = this;
 	std::string path = auctionsPath.get();
 	log(LL_Debug, "Checking %s for new files since file \"%s\"\n", path.c_str(), lastParsedFile.c_str());
 	uv_fs_scandir(EventLoop::getLoop(), &scandirReq, path.c_str(), 0, &AuctionParser::onScandir);
 }
 
-void AuctionParser::onScandir(uv_fs_t* req)
-{
+void AuctionParser::onScandir(uv_fs_t* req) {
 	AuctionParser* thisInstance = (AuctionParser*) req->data;
 	uv_dirent_t dent;
 
 	if(req->result < 0) {
-		thisInstance->log(LL_Error, "Failed to scan dir \"%s\", error: %s(%d)\n", req->path, uv_strerror(req->result), (int)req->result);
+		thisInstance->log(LL_Error,
+		                  "Failed to scan dir \"%s\", error: %s(%d)\n",
+		                  req->path,
+		                  uv_strerror(req->result),
+		                  (int) req->result);
 		return;
 	}
 
@@ -98,7 +96,7 @@ void AuctionParser::onScandir(uv_fs_t* req)
 	std::vector<std::string> orderedFiles;
 
 	// Get all file names and order by name
-	while (UV_EOF != uv_fs_scandir_next(req, &dent)) {
+	while(UV_EOF != uv_fs_scandir_next(req, &dent)) {
 		if(dent.type != UV_DIRENT_DIR)
 			orderedFiles.push_back(dent.name);
 	}
@@ -115,18 +113,21 @@ void AuctionParser::onScandir(uv_fs_t* req)
 
 			uv_fs_stat(EventLoop::getLoop(), &statReq, fullFilename.c_str(), nullptr);
 			time_t timeLimit = time(nullptr) - waitChangeSeconds;
-			if(statReq.statbuf.st_mtim.tv_sec > timeLimit ||
-			        statReq.statbuf.st_ctim.tv_sec > timeLimit ||
-			        statReq.statbuf.st_birthtim.tv_sec > timeLimit) {
-				thisInstance->log(LL_Trace, "File %s too new before parsing (modified less than %d seconds: %ld)\n",
-				                  filename.c_str(), waitChangeSeconds, statReq.statbuf.st_mtim.tv_sec);
+			if(statReq.statbuf.st_mtim.tv_sec > timeLimit || statReq.statbuf.st_ctim.tv_sec > timeLimit ||
+			   statReq.statbuf.st_birthtim.tv_sec > timeLimit) {
+				thisInstance->log(LL_Trace,
+				                  "File %s too new before parsing (modified less than %d seconds: %ld)\n",
+				                  filename.c_str(),
+				                  waitChangeSeconds,
+				                  statReq.statbuf.st_mtim.tv_sec);
 				// don't parse file after this one if it is a new file (avoid parsing file in wrong order)
 				break;
 			}
 
 			thisInstance->log(LL_Info, "Found new auction file %s\n", filename.c_str());
 			if(!thisInstance->parseFile(fullFilename)) {
-				thisInstance->log(LL_Error, "Parsing failed on %s, stopping parsing of other files\n", filename.c_str());
+				thisInstance->log(
+				    LL_Error, "Parsing failed on %s, stopping parsing of other files\n", filename.c_str());
 				break;
 			}
 			if(strcmp(maxFile.c_str(), filename.c_str()) < 0)
@@ -147,8 +148,7 @@ void AuctionParser::onScandir(uv_fs_t* req)
 	}
 }
 
-bool AuctionParser::parseFile(std::string fullFilename)
-{
+bool AuctionParser::parseFile(std::string fullFilename) {
 	std::vector<uint8_t> data;
 	int version;
 	AuctionFileFormat fileFormat;
@@ -173,13 +173,14 @@ bool AuctionParser::parseFile(std::string fullFilename)
 
 	auctionFile.adjustDetectedType(&auctionWriter);
 
-	log(LL_Debug, "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d, addedAuctionsInFile: %d/%d\n",
+	log(LL_Debug,
+	    "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d, addedAuctionsInFile: %d/%d\n",
 	    fullFilename.c_str(),
 	    auctionFile.isFull ? "full" : "diff",
-	    (int)auctionFile.alreadyExistingAuctions,
-	    (int)auctionWriter.getAuctionCount(),
-	    (int)auctionFile.addedAuctionsInFile,
-	    (int)auctionWriter.getAuctionCount());
+	    (int) auctionFile.alreadyExistingAuctions,
+	    (int) auctionWriter.getAuctionCount(),
+	    (int) auctionFile.addedAuctionsInFile,
+	    (int) auctionWriter.getAuctionCount());
 
 	for(size_t i = 0; i < auctionFile.auctions.header.categories.size(); i++) {
 		const AUCTION_CATEGORY_INFO& category = auctionFile.auctions.header.categories[i];
@@ -199,8 +200,7 @@ bool AuctionParser::parseFile(std::string fullFilename)
 	return aggregator->parseAuctions(&auctionWriter);
 }
 
-bool AuctionParser::importState()
-{
+bool AuctionParser::importState() {
 	std::string auctionStateFile = this->auctionStateFile.get();
 	std::string aggregationStateFile = this->aggregationStateFile.get();
 
@@ -214,7 +214,10 @@ bool AuctionParser::importState()
 			if(!AuctionWriter::deserialize(&auctionFileData, data)) {
 				log(LL_Error, "Can't deserialize state file %s\n", auctionStateFile.c_str());
 			} else {
-				log(LL_Info, "Loading auction state file %s with %d auctions\n", auctionStateFile.c_str(), (int)auctionFileData.auctions.size());
+				log(LL_Info,
+				    "Loading auction state file %s with %d auctions\n",
+				    auctionStateFile.c_str(),
+				    (int) auctionFileData.auctions.size());
 				auctionWriter.importDump(&auctionFileData);
 			}
 		} else {
@@ -231,8 +234,7 @@ bool AuctionParser::importState()
 	return true;
 }
 
-void AuctionParser::exportState()
-{
+void AuctionParser::exportState() {
 	std::string auctionStateFile = this->auctionStateFile.get();
 	std::string aggregationStateFile = this->aggregationStateFile.get();
 

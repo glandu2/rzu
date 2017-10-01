@@ -1,24 +1,23 @@
 #ifndef CHATAUTHSESSION_H
 #define CHATAUTHSESSION_H
 
-#include "NetSession/ClientAuthSession.h"
 #include "Core/Timer.h"
+#include "NetSession/ClientAuthSession.h"
 #include <string>
 
 class GameSession;
 
-class AutoAuthSession : public ClientAuthSession
-{
+class AutoAuthSession : public ClientAuthSession {
 public:
 	AutoAuthSession(GameSession* gameSession,
-					const std::string& ip,
-					uint16_t port,
-					const std::string& account,
-					const std::string& password,
-					int serverIdx,
-					int delayTime,
-					int ggRecoTime,
-					AuthCipherMethod method = ACM_DES);
+	                const std::string& ip,
+	                uint16_t port,
+	                const std::string& account,
+	                const std::string& password,
+	                int serverIdx,
+	                int delayTime,
+	                int ggRecoTime,
+	                AuthCipherMethod method = ACM_DES);
 
 	void connect();
 	void delayedConnect();
@@ -52,4 +51,4 @@ private:
 	Timer<AutoAuthSession> ggRecoTimer;
 };
 
-#endif // CHATAUTHSESSION_H
+#endif  // CHATAUTHSESSION_H

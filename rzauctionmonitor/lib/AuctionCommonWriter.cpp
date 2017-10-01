@@ -1,28 +1,35 @@
 #include "AuctionCommonWriter.h"
-#include <stdio.h>
-#include <string.h>
-#include "zlib.h"
-#include <time.h>
 #include "Core/PrintfFormats.h"
+#include "Core/ScopeGuard.h"
 #include "Core/Utils.h"
 #include "Packet/MessageBuffer.h"
+#include "zlib.h"
 #include <memory>
-#include "Core/ScopeGuard.h"
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
 
-AuctionCommonWriter::AuctionCommonWriter(size_t categoryCount) : categoryTimeManager(categoryCount), fileNumber(0)
-{
-}
+AuctionCommonWriter::AuctionCommonWriter(size_t categoryCount) : categoryTimeManager(categoryCount), fileNumber(0) {}
 
-void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::string auctionsFile, const std::vector<uint8_t> &data, time_t fileTimeStamp, const char* suffix)
-{
+void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir,
+                                                 std::string auctionsFile,
+                                                 const std::vector<uint8_t>& data,
+                                                 time_t fileTimeStamp,
+                                                 const char* suffix) {
 	char filenameSuffix[256];
 	struct tm localtm;
 
 	Utils::getGmTime(fileTimeStamp, &localtm);
 
-	sprintf(filenameSuffix, "_%04d%02d%02d_%02d%02d%02d_%04X%s",
-	        localtm.tm_year, localtm.tm_mon, localtm.tm_mday,
-	        localtm.tm_hour, localtm.tm_min, localtm.tm_sec, fileNumber,
+	sprintf(filenameSuffix,
+	        "_%04d%02d%02d_%02d%02d%02d_%04X%s",
+	        localtm.tm_year,
+	        localtm.tm_mon,
+	        localtm.tm_mday,
+	        localtm.tm_hour,
+	        localtm.tm_min,
+	        localtm.tm_sec,
+	        fileNumber,
 	        suffix ? suffix : "");
 	fileNumber = (fileNumber + 1) & 0xFFFF;
 
@@ -31,10 +38,11 @@ void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::s
 	writeAuctionDataToFile(auctionsDir, auctionsFile, data);
 }
 
-void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::string auctionsFile, const std::vector<uint8_t> &data)
-{
+void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir,
+                                                 std::string auctionsFile,
+                                                 const std::vector<uint8_t>& data) {
 	std::string auctionsFilename = auctionsDir + "/" + auctionsFile;
-	std::unique_ptr<FILE, int(*)(FILE*)> file(nullptr, &fclose);
+	std::unique_ptr<FILE, int (*)(FILE*)> file(nullptr, &fclose);
 
 	Utils::mkdir(auctionsDir.c_str());
 
@@ -52,11 +60,16 @@ void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::s
 		const char* zlibMessage;
 		int result = compressGzip(compressedData, data, Z_BEST_COMPRESSION, zlibMessage);
 		if(result == Z_OK) {
-			if(fwrite(&compressedData[0], sizeof(uint8_t), compressedData.size(), file.get()) != compressedData.size()) {
+			if(fwrite(&compressedData[0], sizeof(uint8_t), compressedData.size(), file.get()) !=
+			   compressedData.size()) {
 				log(LL_Error, "Failed to write data to file %s: error %d\n", auctionsFilename.c_str(), errno);
 			}
 		} else {
-			log(LL_Error, "Failed to compress %d bytes: %d: %s\n", (int)data.size(), result, zlibMessage ? zlibMessage : "");
+			log(LL_Error,
+			    "Failed to compress %d bytes: %d: %s\n",
+			    (int) data.size(),
+			    result,
+			    zlibMessage ? zlibMessage : "");
 		}
 	} else {
 		log(LL_Info, "Writting data to file %s\n", auctionsFile.c_str());
@@ -66,9 +79,10 @@ void AuctionCommonWriter::writeAuctionDataToFile(std::string auctionsDir, std::s
 	}
 }
 
-bool AuctionCommonWriter::readAuctionDataFromFile(std::string auctionsDir, std::string auctionsFile, std::vector<uint8_t>& data)
-{
-	std::unique_ptr<FILE, int(*)(FILE*)> file(nullptr, &fclose);
+bool AuctionCommonWriter::readAuctionDataFromFile(std::string auctionsDir,
+                                                  std::string auctionsFile,
+                                                  std::vector<uint8_t>& data) {
+	std::unique_ptr<FILE, int (*)(FILE*)> file(nullptr, &fclose);
 	std::string filename = auctionsDir + "/" + auctionsFile;
 
 	data.clear();
@@ -83,8 +97,8 @@ bool AuctionCommonWriter::readAuctionDataFromFile(std::string auctionsDir, std::
 	size_t fileSize = ftell(file.get());
 	fseek(file.get(), 0, SEEK_SET);
 
-	if(fileSize > 50*1024*1024) {
-		log(LL_Error, "State file %s size too large (over 50MB): %d\n", filename.c_str(), (int)fileSize);
+	if(fileSize > 50 * 1024 * 1024) {
+		log(LL_Error, "State file %s size too large (over 50MB): %d\n", filename.c_str(), (int) fileSize);
 		return false;
 	}
 
@@ -96,14 +110,22 @@ bool AuctionCommonWriter::readAuctionDataFromFile(std::string auctionsDir, std::
 		compressedData.resize(fileSize);
 		size_t readDataSize = fread(compressedData.data(), 1, fileSize, file.get());
 		if(readDataSize != fileSize) {
-			log(LL_Error, "Coulnd't read all file data: %s, size: %ld, read: %ld\n", filename.c_str(), (long int)fileSize, (long int)readDataSize);
+			log(LL_Error,
+			    "Coulnd't read all file data: %s, size: %ld, read: %ld\n",
+			    filename.c_str(),
+			    (long int) fileSize,
+			    (long int) readDataSize);
 			return false;
 		}
 
 		const char* zlibMessage;
 		int result = uncompressGzip(data, compressedData, zlibMessage);
 		if(result != Z_OK) {
-			log(LL_Error, "Failed to uncompress %s: %d: %s\n", filename.c_str(), result, zlibMessage ? zlibMessage : "");
+			log(LL_Error,
+			    "Failed to uncompress %s: %d: %s\n",
+			    filename.c_str(),
+			    result,
+			    zlibMessage ? zlibMessage : "");
 			data.clear();
 			return false;
 		}
@@ -112,7 +134,11 @@ bool AuctionCommonWriter::readAuctionDataFromFile(std::string auctionsDir, std::
 		data.resize(fileSize);
 		size_t readDataSize = fread(data.data(), 1, fileSize, file.get());
 		if(readDataSize != fileSize) {
-			log(LL_Error, "Coulnd't read all file data: %s, size: %ld, read: %ld\n", filename.c_str(), (long int)fileSize, (long int)readDataSize);
+			log(LL_Error,
+			    "Coulnd't read all file data: %s, size: %ld, read: %ld\n",
+			    filename.c_str(),
+			    (long int) fileSize,
+			    (long int) readDataSize);
 			return false;
 		}
 	}
@@ -120,16 +146,17 @@ bool AuctionCommonWriter::readAuctionDataFromFile(std::string auctionsDir, std::
 	return true;
 }
 
-int AuctionCommonWriter::compressGzip(std::vector<uint8_t>& compressedData, const std::vector<uint8_t>& sourceData, int level, const char*& msg) {
+int AuctionCommonWriter::compressGzip(std::vector<uint8_t>& compressedData,
+                                      const std::vector<uint8_t>& sourceData,
+                                      int level,
+                                      const char*& msg) {
 	z_stream stream;
 	int err;
 	msg = nullptr;
 
 	memset(&stream, 0, sizeof(stream));
 
-	guard_on_exit(setMsg, [&] {
-		msg = stream.msg;
-	});
+	guard_on_exit(setMsg, [&] { msg = stream.msg; });
 
 	err = deflateInit2(&stream, level, Z_DEFLATED, MAX_WBITS + 16, 8, Z_DEFAULT_STRATEGY);
 	if(err != Z_OK) {
@@ -139,10 +166,10 @@ int AuctionCommonWriter::compressGzip(std::vector<uint8_t>& compressedData, cons
 	compressedData.resize(deflateBound(&stream, sourceData.size()));
 
 	stream.next_in = sourceData.data();
-	stream.avail_in = (uInt)sourceData.size();
+	stream.avail_in = (uInt) sourceData.size();
 	stream.next_out = compressedData.data();
-	stream.avail_out = (uInt)compressedData.size();
-	if((uLong)stream.avail_out != compressedData.size())
+	stream.avail_out = (uInt) compressedData.size();
+	if((uLong) stream.avail_out != compressedData.size())
 		return Z_BUF_ERROR;
 
 	err = deflate(&stream, Z_FINISH);
@@ -157,18 +184,18 @@ int AuctionCommonWriter::compressGzip(std::vector<uint8_t>& compressedData, cons
 	return err;
 }
 
-int AuctionCommonWriter::uncompressGzip(std::vector<uint8_t>& uncompressedData, const std::vector<uint8_t>& compressedData, const char*& msg) {
+int AuctionCommonWriter::uncompressGzip(std::vector<uint8_t>& uncompressedData,
+                                        const std::vector<uint8_t>& compressedData,
+                                        const char*& msg) {
 	z_stream stream;
 	int err;
 	size_t outputIndex = 0;
 
 	memset(&stream, 0, sizeof(stream));
 
-	guard_on_exit(setMsg, [&] {
-		msg = stream.msg;
-	});
+	guard_on_exit(setMsg, [&] { msg = stream.msg; });
 
-	err = inflateInit2(&stream, 16+MAX_WBITS);
+	err = inflateInit2(&stream, 16 + MAX_WBITS);
 	if(err != Z_OK)
 		return err;
 
@@ -177,17 +204,17 @@ int AuctionCommonWriter::uncompressGzip(std::vector<uint8_t>& uncompressedData, 
 
 	/* run inflate() on input until output buffer not full */
 	do {
-		uncompressedData.resize(uncompressedData.size() + 1024*1024);
+		uncompressedData.resize(uncompressedData.size() + 1024 * 1024);
 		stream.avail_out = uncompressedData.size() - outputIndex;
 		stream.next_out = &uncompressedData[outputIndex];
 		err = inflate(&stream, Z_NO_FLUSH);
 		switch(err) {
 			case Z_NEED_DICT:
-				err = Z_DATA_ERROR;     /* and fall through */
+				err = Z_DATA_ERROR; /* and fall through */
 			case Z_DATA_ERROR:
 			case Z_MEM_ERROR:
 			case Z_STREAM_ERROR:
-				(void)inflateEnd(&stream);
+				(void) inflateEnd(&stream);
 				return err;
 		}
 		outputIndex = uncompressedData.size() - stream.avail_out;

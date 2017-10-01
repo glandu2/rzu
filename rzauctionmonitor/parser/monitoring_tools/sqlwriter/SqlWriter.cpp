@@ -1,26 +1,24 @@
 #include "SqlWriter.h"
+#include "AuctionComplexDiffWriter.h"
 #include "AuctionFile.h"
-#include "Packet/JSONWriter.h"
 #include "AuctionWriter.h"
 #include "Core/Utils.h"
 #include "GlobalConfig.h"
-#include "AuctionComplexDiffWriter.h"
+#include "Packet/JSONWriter.h"
 
 #define SQLWRITER_STATE_VERSION 0
 
+// clang-format off
 #define SQLWRITER_STATE_DEF(_) \
-	_(simple)  (uint16_t, file_version) \
-	_(count)   (uint8_t, lastParsedFile) \
+	_(simple)(uint16_t, file_version) \
+	_(count)(uint8_t, lastParsedFile) \
 	_(dynstring)(lastParsedFile, false)
 CREATE_STRUCT(SQLWRITER_STATE);
+// clang-format on
 
+SqlWriter::SqlWriter() {}
 
-SqlWriter::SqlWriter()
-{
-}
-
-void SqlWriter::exportState(std::string filename, const std::string& lastParsedFile)
-{
+void SqlWriter::exportState(std::string filename, const std::string& lastParsedFile) {
 	SQLWRITER_STATE sqlWriterState;
 
 	log(LL_Debug, "Writting sqlwriter state file %s\n", filename.c_str());
@@ -35,7 +33,10 @@ void SqlWriter::exportState(std::string filename, const std::string& lastParsedF
 	MessageBuffer buffer(data.data(), data.size(), version);
 	sqlWriterState.serialize(&buffer);
 	if(buffer.checkFinalSize() == false) {
-		log(LL_Error, "Wrong buffer size, size: %d, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
+		log(LL_Error,
+		    "Wrong buffer size, size: %d, field: %s\n",
+		    buffer.getSize(),
+		    buffer.getFieldInOverflow().c_str());
 	} else {
 		AuctionWriter::writeAuctionDataToFile(filename, data);
 	}
@@ -45,8 +46,7 @@ void SqlWriter::exportState(std::string filename, const std::string& lastParsedF
 	}
 }
 
-void SqlWriter::importState(std::string filename, std::string& lastParsedFile)
-{
+void SqlWriter::importState(std::string filename, std::string& lastParsedFile) {
 	log(LL_Info, "Loading sqlwriter state file %s\n", filename.c_str());
 
 	std::vector<uint8_t> data;
@@ -57,7 +57,10 @@ void SqlWriter::importState(std::string filename, std::string& lastParsedFile)
 		MessageBuffer buffer(data.data(), data.size(), version);
 		aggregationState.deserialize(&buffer);
 		if(buffer.checkFinalSize() == false) {
-			log(LL_Error, "Wrong buffer size, size: %d, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
+			log(LL_Error,
+			    "Wrong buffer size, size: %d, field: %s\n",
+			    buffer.getSize(),
+			    buffer.getFieldInOverflow().c_str());
 			return;
 		}
 
@@ -67,11 +70,10 @@ void SqlWriter::importState(std::string filename, std::string& lastParsedFile)
 	}
 }
 
-void SqlWriter::flushDbInputs()
-{
-	log(LL_Info, "Flushing %d auctions to database\n", (int)dbInputs.size());
+void SqlWriter::flushDbInputs() {
+	log(LL_Info, "Flushing %d auctions to database\n", (int) dbInputs.size());
 	DbQueryJob<DB_Item>::executeNoResult(dbInputs);
-	//EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+	// EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 	dbInputs.clear();
 }
 
@@ -89,4 +91,3 @@ bool SqlWriter::parseAuctions(AuctionComplexDiffWriter* auctionWriter) {
 
 	return true;
 }
-

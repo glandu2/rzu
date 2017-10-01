@@ -1,10 +1,10 @@
 #ifndef IAUCTIONDATA_H
 #define IAUCTIONDATA_H
 
-#include <stdint.h>
-#include "Extern.h"
 #include "AuctionUid.h"
 #include "Core/Object.h"
+#include "Extern.h"
+#include <stdint.h>
 
 class RZAUCTION_EXTERN IAuctionData : public Object {
 	DECLARE_CLASS(IAuctionData)
@@ -22,17 +22,12 @@ public:
 	uint64_t getTimeMin() const { return timeMin; }
 	uint64_t getTimeMax() const { return timeMax; }
 
-	void setTimeMin(uint64_t time) {
-		timeMin = time;
-	}
-protected:
-	void updateTime(uint64_t time) {
-		timeMax = time;
-	}
+	void setTimeMin(uint64_t time) { timeMin = time; }
 
-	void advanceTime() {
-		timeMin = timeMax;
-	}
+protected:
+	void updateTime(uint64_t time) { timeMax = time; }
+
+	void advanceTime() { timeMin = timeMax; }
 
 private:
 	AuctionUid uid;

@@ -1,12 +1,12 @@
 #ifndef GAMESESSION_H
 #define GAMESESSION_H
 
-#include "NetSession/PacketSession.h"
-#include "NetSession/ClientGameSession.h"
-#include <vector>
-#include <unordered_map>
-#include "Core/Timer.h"
 #include "Core/ThreadWork.h"
+#include "Core/Timer.h"
+#include "NetSession/ClientGameSession.h"
+#include "NetSession/PacketSession.h"
+#include <unordered_map>
+#include <vector>
 
 struct TS_CS_CHAT_REQUEST;
 struct TS_SC_CHARACTER_LIST;
@@ -20,7 +20,7 @@ public:
 	GameSession(const std::string& playername, Log* packetLog);
 
 	void onGameConnected();
-	void onGamePacketReceived(const TS_MESSAGE *packet);
+	void onGamePacketReceived(const TS_MESSAGE* packet);
 	void onGameDisconnected();
 
 protected:
@@ -31,7 +31,7 @@ protected:
 	void onCharacterList(const TS_SC_CHARACTER_LIST* packet);
 	void onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet);
 	void onEnter(const TS_SC_ENTER* packet);
-	void onTimeSync(const TS_TIMESYNC *packet);
+	void onTimeSync(const TS_TIMESYNC* packet);
 	void onGameTime(const TS_SC_GAME_TIME* packet);
 
 	uint32_t getRappelzTime();
@@ -54,5 +54,4 @@ private:
 	std::unordered_map<unsigned int, std::string> playerNames;
 };
 
-
-#endif // GAMESESSION_H
+#endif  // GAMESESSION_H

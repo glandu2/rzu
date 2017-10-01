@@ -1,10 +1,10 @@
 #include "AuctionManager.h"
-#include "GlobalConfig.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <iterator>
 #include "Console/ConsoleCommands.h"
 #include "Core/PrintfFormats.h"
+#include "GlobalConfig.h"
+#include <iterator>
+#include <stdio.h>
+#include <stdlib.h>
 
 AuctionManager* AuctionManager::instance = nullptr;
 
@@ -19,19 +19,21 @@ void AuctionManager::onReloadAccounts(IWritableConsole* console, const std::vect
 	}
 }
 
-AuctionManager::AuctionManager() : auctionWriter(CATEGORY_MAX_INDEX), stopped(true), totalPages(0), firstDump(true), reloadingAccounts(false)
-{
+AuctionManager::AuctionManager()
+    : auctionWriter(CATEGORY_MAX_INDEX), stopped(true), totalPages(0), firstDump(true), reloadingAccounts(false) {
 	if(!instance) {
-		ConsoleCommands::get()->addCommand("client.reload_accounts", "reload", 0, &AuctionManager::onReloadAccounts,
-										   "Restart clients and reload accounts from accounts file");
+		ConsoleCommands::get()->addCommand("client.reload_accounts",
+		                                   "reload",
+		                                   0,
+		                                   &AuctionManager::onReloadAccounts,
+		                                   "Restart clients and reload accounts from accounts file");
 		instance = this;
 	} else {
 		log(LL_Error, "Multiples instance of AuctionManager started, reload command will not apply to this instance\n");
 	}
 }
 
-bool AuctionManager::start()
-{
+bool AuctionManager::start() {
 	loadInitialState();
 	loadAccounts();
 
@@ -44,16 +46,16 @@ bool AuctionManager::start()
 	return true;
 }
 
-void AuctionManager::stop()
-{
+void AuctionManager::stop() {
 	stopped = true;
 	stopClients();
 }
 
 void AuctionManager::stopClients() {
-	log(LL_Info, "Stopping %d clients\n", (int)clients.size());
+	log(LL_Info, "Stopping %d clients\n", (int) clients.size());
 
-	stoppingClients.insert(stoppingClients.end(), std::make_move_iterator(clients.begin()), std::make_move_iterator(clients.end()));
+	stoppingClients.insert(
+	    stoppingClients.end(), std::make_move_iterator(clients.begin()), std::make_move_iterator(clients.end()));
 	clients.clear();
 
 	auto it = stoppingClients.begin();
@@ -62,8 +64,7 @@ void AuctionManager::stopClients() {
 	}
 }
 
-bool AuctionManager::isStarted()
-{
+bool AuctionManager::isStarted() {
 	return !clients.empty();
 }
 
@@ -75,7 +76,7 @@ void AuctionManager::reloadAccounts() {
 			loadAccounts();
 		}
 	} else {
-		log(LL_Error, "Attempt to reload clients but %d clients are still stopping\n", (int)stoppingClients.size());
+		log(LL_Error, "Attempt to reload clients but %d clients are still stopping\n", (int) stoppingClients.size());
 	}
 }
 
@@ -98,29 +99,35 @@ void AuctionManager::loadAccounts() {
 		return;
 	}
 
-	while (fgets(line, sizeof(line), file) != NULL)  {
+	while(fgets(line, sizeof(line), file) != NULL) {
 		std::string account, password, playerName;
 
 		lineNumber++;
 
 		p = strchr(line, '\t');
 		if(!p) {
-			log(LL_Warning, "Error in account file %s:%d: missing tabulation separator after account name\n", accountFile.c_str(), lineNumber);
+			log(LL_Warning,
+			    "Error in account file %s:%d: missing tabulation separator after account name\n",
+			    accountFile.c_str(),
+			    lineNumber);
 			continue;
 		}
 		account = std::string(line, p - line);
 		if(account.size() == 0 || account[0] == '#')
 			continue;
 
-		lastP = p+1;
+		lastP = p + 1;
 		p = strchr(lastP, '\t');
 		if(!p) {
-			log(LL_Warning, "Error in account file %s:%d: missing tabulation separator after password\n", accountFile.c_str(), lineNumber);
+			log(LL_Warning,
+			    "Error in account file %s:%d: missing tabulation separator after password\n",
+			    accountFile.c_str(),
+			    lineNumber);
 			continue;
 		}
 		password = std::string(lastP, p - lastP);
 
-		lastP = p+1;
+		lastP = p + 1;
 		p = strpbrk(lastP, "\r\n");
 		if(!p) {
 			playerName = std::string(lastP);
@@ -128,25 +135,19 @@ void AuctionManager::loadAccounts() {
 			playerName = std::string(lastP, p - lastP);
 		}
 
-		AuctionWorker* auctionWorker = new AuctionWorker(this,
-														 ip,
-														 port,
-														 serverIdx,
-														 recoDelay,
-														 useRsa,
-														 autoRecoDelay,
-														 account,
-														 password,
-														 playerName);
+		AuctionWorker* auctionWorker = new AuctionWorker(
+		    this, ip, port, serverIdx, recoDelay, useRsa, autoRecoDelay, account, password, playerName);
 		auctionWorker->start();
 		clients.push_back(std::unique_ptr<AuctionWorker>(auctionWorker));
 
 		log(LL_Info, "Added account %s:%s:%s\n", account.c_str(), password.c_str(), playerName.c_str());
 	}
-	log(LL_Info, "Loaded %d accounts\n", (int)clients.size());
+	log(LL_Info, "Loaded %d accounts\n", (int) clients.size());
 }
 
-void AuctionManager::onClientStoppedStatic(IListener* instance, AuctionWorker* worker) { ((AuctionManager*) instance)->onClientStopped(worker); }
+void AuctionManager::onClientStoppedStatic(IListener* instance, AuctionWorker* worker) {
+	((AuctionManager*) instance)->onClientStopped(worker);
+}
 void AuctionManager::onClientStopped(AuctionWorker* worker) {
 	bool foundWorker = false;
 
@@ -165,7 +166,10 @@ void AuctionManager::onClientStopped(AuctionWorker* worker) {
 	}
 
 	if(!foundWorker)
-		log(LL_Warning, "Worker %s stopped but not found in currently stopping workers, %d worker left to stop\n", worker->getObjectName(), (int)stoppingClients.size());
+		log(LL_Warning,
+		    "Worker %s stopped but not found in currently stopping workers, %d worker left to stop\n",
+		    worker->getObjectName(),
+		    (int) stoppingClients.size());
 
 	if(stoppingClients.empty() && !stopped)
 		accountReloadTimer.start(this, &AuctionManager::onAccountReloadTimer, CONFIG_GET()->client.recoDelay.get(), 0);
@@ -176,8 +180,7 @@ void AuctionManager::onAccountReloadTimer() {
 	reloadingAccounts = false;
 }
 
-void AuctionManager::addRequest(int category, int page)
-{
+void AuctionManager::addRequest(int category, int page) {
 	log(LL_Debug, "Adding request for category %d, page %d\n", category, page);
 
 	AuctionWorker::AuctionRequest* request = new AuctionWorker::AuctionRequest(category, page);
@@ -189,8 +192,7 @@ void AuctionManager::addRequest(int category, int page)
 	}
 }
 
-std::unique_ptr<AuctionWorker::AuctionRequest> AuctionManager::getNextRequest()
-{
+std::unique_ptr<AuctionWorker::AuctionRequest> AuctionManager::getNextRequest() {
 	if(pendingRequests.empty()) {
 		log(LL_Debug, "No more pending request\n");
 		return std::unique_ptr<AuctionWorker::AuctionRequest>();
@@ -199,10 +201,13 @@ std::unique_ptr<AuctionWorker::AuctionRequest> AuctionManager::getNextRequest()
 
 		log(LL_Debug, "Poping next request: category %d, page %d\n", ret->category, ret->page);
 
-		if(ret->page == 1 && ret->category == (int)currentCategory) {
+		if(ret->page == 1 && ret->category == (int) currentCategory) {
 			auctionWriter.beginCategory(ret->category, ::time(nullptr));
 		} else if(ret->page == 1) {
-			log(LL_Warning, "Next request is page 1 of category %d but current category is %d\n", ret->category, currentCategory);
+			log(LL_Warning,
+			    "Next request is page 1 of category %d but current category is %d\n",
+			    ret->category,
+			    currentCategory);
 		}
 
 		pendingRequests.pop_front();
@@ -210,13 +215,16 @@ std::unique_ptr<AuctionWorker::AuctionRequest> AuctionManager::getNextRequest()
 	}
 }
 
-void AuctionManager::addAuctionInfo(const AuctionWorker::AuctionRequest *request, uint32_t uid, const uint8_t *data, int len)
-{
+void AuctionManager::addAuctionInfo(const AuctionWorker::AuctionRequest* request,
+                                    uint32_t uid,
+                                    const uint8_t* data,
+                                    int len) {
 	auctionWriter.addAuctionInfo(AuctionUid(uid), time(nullptr), request->category, data, len);
 }
 
-void AuctionManager::onAuctionSearchCompleted(bool success, int pageTotal, std::unique_ptr<AuctionWorker::AuctionRequest> request)
-{
+void AuctionManager::onAuctionSearchCompleted(bool success,
+                                              int pageTotal,
+                                              std::unique_ptr<AuctionWorker::AuctionRequest> request) {
 	log(LL_Debug, "Received search result: %s\n", success ? "success" : "failure");
 	if(!request) {
 		log(LL_Warning, "Search result for null request\n");
@@ -224,8 +232,8 @@ void AuctionManager::onAuctionSearchCompleted(bool success, int pageTotal, std::
 		log(LL_Warning, "Request for category %d, page %d failed, retrying\n", request->category, request->page);
 		pendingRequests.push_front(std::move(request));
 	} else {
-		//load new pages
-		for(int page = totalPages+1; page <= pageTotal; page++) {
+		// load new pages
+		for(int page = totalPages + 1; page <= pageTotal; page++) {
 			addRequest(request->category, page);
 		}
 		if(pageTotal > totalPages)
@@ -236,8 +244,7 @@ void AuctionManager::onAuctionSearchCompleted(bool success, int pageTotal, std::
 	}
 }
 
-bool AuctionManager::isAllRequestProcessed()
-{
+bool AuctionManager::isAllRequestProcessed() {
 	if(!pendingRequests.empty())
 		return false;
 
@@ -279,8 +286,7 @@ void AuctionManager::dumpAuctions() {
 	}
 }
 
-void AuctionManager::loadInitialState()
-{
+void AuctionManager::loadInitialState() {
 	struct Header {
 		char sign[4];
 		uint32_t version;
@@ -295,7 +301,7 @@ void AuctionManager::loadInitialState()
 
 	auctionWriter.readAuctionDataFromFile(CONFIG_GET()->client.auctionListDir.get(), filename, buffer);
 
-	uint32_t version = ((Header*)buffer.data())->version;
+	uint32_t version = ((Header*) buffer.data())->version;
 
 	MessageBuffer structBuffer(buffer.data(), buffer.size(), version);
 
@@ -314,8 +320,7 @@ void AuctionManager::loadInitialState()
 	auctionWriter.importDump(&auctionFile);
 }
 
-void AuctionManager::onAllRequestProcessed()
-{
+void AuctionManager::onAllRequestProcessed() {
 	auctionWriter.endCategory(currentCategory, ::time(nullptr));
 
 	currentCategory++;

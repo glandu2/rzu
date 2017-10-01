@@ -1,11 +1,11 @@
 #ifndef AUCTIONWORKER_H
 #define AUCTIONWORKER_H
 
-#include "Core/Object.h"
-#include "GameSession.h"
 #include "AuthSession.h"
-#include "Core/Timer.h"
 #include "Core/IDelegate.h"
+#include "Core/Object.h"
+#include "Core/Timer.h"
+#include "GameSession.h"
 #include <memory>
 
 class AuctionManager;
@@ -22,17 +22,18 @@ public:
 		AuctionRequest(int category, int page) : category(category), page(page), failureNumber(0) {}
 	};
 	typedef void (*StoppedCallback)(IListener* instance, AuctionWorker* worker);
+
 public:
 	AuctionWorker(AuctionManager* auctionManager,
-				  cval<std::string>& ip,
-				  cval<int>& port,
-				  cval<int>& serverIdx,
-				  cval<int>& delayTime,
-				  cval<bool>& useRsa,
-				  cval<int>& autoRecoDelay,
-				  const std::string& account,
-				  const std::string& password,
-				  const std::string& playername);
+	              cval<std::string>& ip,
+	              cval<int>& port,
+	              cval<int>& serverIdx,
+	              cval<int>& delayTime,
+	              cval<bool>& useRsa,
+	              cval<int>& autoRecoDelay,
+	              const std::string& account,
+	              const std::string& password,
+	              const std::string& playername);
 
 	void start();
 	void stop(Callback<StoppedCallback> callback);
@@ -66,5 +67,4 @@ private:
 	Callback<StoppedCallback> stopCallback;
 };
 
-
-#endif // AUCTIONMANAGER_H
+#endif  // AUCTIONMANAGER_H

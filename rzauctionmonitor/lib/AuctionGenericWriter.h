@@ -1,35 +1,26 @@
 #ifndef AUCTIONGENERICWRITER_H
 #define AUCTIONGENERICWRITER_H
 
+#include "AuctionUid.h"
+#include "Packet/MessageBuffer.h"
+#include <memory>
+#include <stdint.h>
 #include <unordered_map>
 #include <vector>
-#include <stdint.h>
-#include "AuctionUid.h"
-#include <memory>
-#include "Packet/MessageBuffer.h"
 
 #include "AuctionCommonWriter.h"
 
-template<class AuctionData>
-class AuctionGenericWriter : public AuctionCommonWriter
-{
+template<class AuctionData> class AuctionGenericWriter : public AuctionCommonWriter {
 public:
-	enum MergeResult {
-		MR_Added,
-		MR_Updated
-	};
+	enum MergeResult { MR_Added, MR_Updated };
 
 public:
 	AuctionGenericWriter(size_t categoryCount) : AuctionCommonWriter(categoryCount) {}
 	~AuctionGenericWriter() {}
 
-	bool hasAuction(AuctionUid uid) {
-		return auctions.count(uid.get()) > 0;
-	}
+	bool hasAuction(AuctionUid uid) { return auctions.count(uid.get()) > 0; }
 
-	size_t getAuctionCount() {
-		return auctions.size();
-	}
+	size_t getAuctionCount() { return auctions.size(); }
 
 	AuctionData* getAuction(AuctionUid uid) {
 		auto it = auctions.find(uid.get());
@@ -40,46 +31,43 @@ public:
 	}
 
 	bool addAuction(AuctionData* auctionData) {
-		auto insertIt = auctions.insert(std::make_pair(auctionData->getUid().get(), std::move(std::unique_ptr<AuctionData>(auctionData))));
+		auto insertIt = auctions.insert(
+		    std::make_pair(auctionData->getUid().get(), std::move(std::unique_ptr<AuctionData>(auctionData))));
 		if(insertIt.second == false) {
 			log(LL_Error, "Coulnd't insert added auction: 0x%08X\n", auctionData->getUid().get());
 		}
 		return insertIt.second;
 	}
 
-	void clearAuctions() {
-		auctions.clear();
-	}
+	void clearAuctions() { auctions.clear(); }
 
-	template<class Serializable>
-	void serialize(const Serializable& auctionFile, std::vector<uint8_t> &output)
-	{
+	template<class Serializable> void serialize(const Serializable& auctionFile, std::vector<uint8_t>& output) {
 		output.clear();
 
 		MessageBuffer buffer(auctionFile.getSize(auctionFile.header.file_version), auctionFile.header.file_version);
 		auctionFile.serialize(&buffer);
 		if(buffer.checkFinalSize() == false) {
-			log(LL_Error, "Wrong buffer size, size: %d, field: %s\n", buffer.getSize(), buffer.getFieldInOverflow().c_str());
+			log(LL_Error,
+			    "Wrong buffer size, size: %d, field: %s\n",
+			    buffer.getSize(),
+			    buffer.getFieldInOverflow().c_str());
 		} else {
 			output.insert(output.end(), buffer.getData(), buffer.getData() + buffer.getSize());
 		}
 	}
 
 protected:
-	template<typename OnEach>
-	void beginProcess(OnEach callback) {
+	template<typename OnEach> void beginProcess(OnEach callback) {
 		purgeAuctions();
 		forEachAuction(callback);
 	}
 
-	template<typename OnEach>
-	void endProcess(OnEach callback) {
+	template<typename OnEach> void endProcess(OnEach callback) {
 		forEachAuction(callback);
 		categoryTimeManager.resetCategoryTime();
 	}
 
-	template<typename OnEachCallback>
-	void forEachAuction(OnEachCallback callback) {
+	template<typename OnEachCallback> void forEachAuction(OnEachCallback callback) {
 		auto it = auctions.begin();
 		for(; it != auctions.end(); ++it) {
 			AuctionData* auction = it->second.get();
@@ -105,4 +93,4 @@ private:
 	std::unordered_map<uint32_t, const std::unique_ptr<AuctionData>> auctions;
 };
 
-#endif // AUCTIONSIMPLEDIFF_H
+#endif  // AUCTIONSIMPLEDIFF_H
