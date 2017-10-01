@@ -1,22 +1,19 @@
 #define __STDC_LIMIT_MACROS
 #include "GameServerSession.h"
-#include <string.h>
 #include "../GlobalConfig.h"
-#include "Core/PrintfFormats.h"
 #include "AuthSession.h"
+#include "Core/PrintfFormats.h"
+#include <string.h>
 
-#include "PacketEnums.h"
-#include "AuthGame/TS_AG_LOGIN_RESULT.h"
 #include "AuthGame/TS_AG_CLIENT_LOGIN.h"
-#include "AuthGame/TS_AG_KICK_CLIENT.h"
 #include "AuthGame/TS_AG_ITEM_PURCHASED.h"
+#include "AuthGame/TS_AG_KICK_CLIENT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "PacketEnums.h"
 
 namespace AuthServer {
 
-GameServerSession::GameServerSession()
-  : authSession(nullptr), serverIdx(UINT16_MAX)
-{
-}
+GameServerSession::GameServerSession() : authSession(nullptr), serverIdx(UINT16_MAX) {}
 
 GameServerSession::~GameServerSession() {
 	if(authSession)
@@ -71,18 +68,26 @@ EventChain<PacketSession> GameServerSession::onPacketReceived(const TS_MESSAGE* 
 }
 
 void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
-	//to manage non null terminated strings
+	// to manage non null terminated strings
 	std::string localServerName, localServerIp, localScreenshotUrl;
 
-	localServerName = Utils::convertToString(packet->server_name, sizeof(packet->server_name)-1);
-	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip)-1);
-	localScreenshotUrl = Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url)-1);
+	localServerName = Utils::convertToString(packet->server_name, sizeof(packet->server_name) - 1);
+	localServerIp = Utils::convertToString(packet->server_ip, sizeof(packet->server_ip) - 1);
+	localScreenshotUrl =
+	    Utils::convertToString(packet->server_screenshot_url, sizeof(packet->server_screenshot_url) - 1);
 
-	log(LL_Info, "Server Login: %s[%d] at %s:%d\n", localServerName.c_str(), packet->server_idx, localServerIp.c_str(), packet->server_port);
+	log(LL_Info,
+	    "Server Login: %s[%d] at %s:%d\n",
+	    localServerName.c_str(),
+	    packet->server_idx,
+	    localServerIp.c_str(),
+	    packet->server_port);
 
 	if(authSession != nullptr) {
-		log(LL_Error, "Server %s[%d] already logged on\n",
-			  authSession->getServerName().c_str(), authSession->getServerIdx());
+		log(LL_Error,
+		    "Server %s[%d] already logged on\n",
+		    authSession->getServerName().c_str(),
+		    authSession->getServerIdx());
 
 		TS_AG_LOGIN_RESULT result;
 		TS_MESSAGE::initMessage<TS_AG_LOGIN_RESULT>(&result);
@@ -92,12 +97,12 @@ void GameServerSession::onServerLogin(const TS_GA_LOGIN* packet) {
 	}
 
 	authSession = new AuthSession(this,
-								  packet->server_idx,
-								  localServerName,
-								  localServerIp,
-								  packet->server_port,
-								  localScreenshotUrl,
-								  packet->is_adult_server);
+	                              packet->server_idx,
+	                              localServerName,
+	                              localServerIp,
+	                              packet->server_port,
+	                              localScreenshotUrl,
+	                              packet->is_adult_server);
 	authSession->connect();
 
 	serverIdx = packet->server_idx;
@@ -148,8 +153,8 @@ void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 }
 /*
 void GameServerSession::updateObjectName() {
-	if(authSession)
-		setObjectName(12 + authSession->getServerName().size(), "ServerInfo[%s]", authSession->getServerName().c_str());
+    if(authSession)
+        setObjectName(12 + authSession->getServerName().size(), "ServerInfo[%s]", authSession->getServerName().c_str());
 }*/
 
-} // namespace AuthServer
+}  // namespace AuthServer
