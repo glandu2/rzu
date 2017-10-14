@@ -225,6 +225,10 @@ void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
 		account = Utils::convertToString(accountv2->account, sizeof(accountv2->account) - 1);
 		cryptedPassword =
 		    Utils::convertToDataArray(accountv2->password, sizeof(accountv2->password), accountv2->password_size);
+	} else if(packet->size == sizeof(TS_CA_IMBC_ACCOUNT_OLD)) {
+		const TS_CA_IMBC_ACCOUNT_OLD* accountOld = reinterpret_cast<const TS_CA_IMBC_ACCOUNT_OLD*>(packet);
+		account = Utils::convertToString(accountOld->account, sizeof(accountOld->account) - 1);
+		cryptedPassword = Utils::convertToDataArray(accountOld->password, sizeof(accountOld->password));
 	} else {
 		account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
 		cryptedPassword = Utils::convertToDataArray(packet->password, sizeof(packet->password));

@@ -88,7 +88,7 @@ TEST(TS_CU_UPLOAD, valid) {
 		channel->closeSession();
 	});
 
-	game.addCallback([&upload, &timeinfo](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	game.addCallback([&timeinfo](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_US_UPLOAD* packet = AGET_PACKET(TS_US_UPLOAD);
 
 		char expectedFilename[128];

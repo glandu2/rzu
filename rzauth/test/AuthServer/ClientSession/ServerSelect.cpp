@@ -92,7 +92,6 @@ TEST(TS_CA_SELECT_SERVER, valid_des) {
 	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
-	unsigned char aesKey[32];
 
 	game.start();
 
@@ -116,7 +115,7 @@ TEST(TS_CA_SELECT_SERVER, valid_des) {
 		channel->sendPacket(&selectServerPkt);
 	});
 
-	auth.addCallback([&game, &aesKey](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_AC_SELECT_SERVER* packet = AGET_PACKET(TS_AC_SELECT_SERVER);
 
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);

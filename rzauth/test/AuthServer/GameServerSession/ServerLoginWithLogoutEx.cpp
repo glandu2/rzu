@@ -81,7 +81,7 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, server_idx_duplicate) {
 		ASSERT_TRUE(game.isConnected());
 	});
 
-	game2.addCallback([&game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	game2.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_AG_LOGIN_RESULT* packet = AGET_PACKET(TS_AG_LOGIN_RESULT);
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
 	});
@@ -418,7 +418,7 @@ TEST(TS_GA_LOGIN_WITH_LOGOUT_EX, valid_account_list_1_kick) {
 		    channel, 1, "Server name", "http://www.example.com/index.html", false, "121.131.165.156", 4516, 1);
 	});
 
-	game.addCallback([&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_AG_LOGIN_RESULT* packet = AGET_PACKET(TS_AG_LOGIN_RESULT);
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
 
