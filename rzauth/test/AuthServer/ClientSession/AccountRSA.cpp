@@ -7,6 +7,7 @@
 #include "PacketEnums.h"
 #include "RzTest.h"
 #include "gtest/gtest.h"
+#include <stdlib.h>
 
 /* TODO:
  * max size password (which must pass)
@@ -108,7 +109,7 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, rsa_key_invalid) {
 	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
-	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		AuthServer::sendVersion(channel);
 		TS_CA_RSA_PUBLIC_KEY* keyMsg;
@@ -134,7 +135,7 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, rsa_key_size_too_large) {
 	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
-	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		AuthServer::sendVersion(channel);
 		TS_CA_RSA_PUBLIC_KEY* keyMsg;
@@ -160,7 +161,7 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, rsa_key_size_negative) {
 	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
-	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
 		AuthServer::sendVersion(channel);
 		TS_CA_RSA_PUBLIC_KEY* keyMsg;
