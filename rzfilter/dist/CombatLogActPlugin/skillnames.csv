@@ -1,0 +1,2689 @@
+1221	Maître de l'Esquive
+1832	Assagissement de Créature
+2021	Briseur de Défense
+2045	Coupure du Vent
+2055	Rafale de Spiracles
+2074	Frappe de l'Ombre
+2313	Impact de Spiracle
+2337	Impact Vengeur
+2621	Concentration
+2642	Spiracles de Vitalité
+2671	Style Brûlant
+3002	Flash
+3023	Enracinement
+3181	Racines de Mère Nature
+3209	Guérison du Poison
+3401	Eclat Divin
+3435	Neutralisation de Magies
+3616	Brume du Cauchemar
+3814	Interception de Sorts
+4207	Sanctuaire Céleste
+4901	Sceau de Halisha
+6013	Résurrection Parfaite de Créature
+6020	Plume de Téléportation
+6034	Parchemin de Guérison Niv.5
+6047	Parchemin de Vent de Créature Niv. 1
+6071	Pierre d'Intelligence Ancestrale
+6083	??? ???? ??
+6095	Pierre d'Agilité Séculaire
+6157	Pierre de Force Purifiée
+6163	Pierre de Force Ancestrale
+6901	Récolte
+6906	Contrôle du Cœur
+7004	Pourfendeur 
+7009	Clash
+8005	Eclaboussure d'Eclairs 
+9104	S_3 Mouvement Divisé_3 Coups Consécutifs
+9110	S_Dégâts Longue Portée 120 Degré Avant
+9153	S_Attaque de Flèche_Type de Coups Successifs
+9202	S_Attaque Magique_Effet Additionnel d'Activation
+9206	S_Attaque Magique_Type d'Activation
+9302	S_Restauration Durable
+9404	S_Dés Diaboliques
+9506	Magie d'Oforia
+9518	Rage de Takin 
+9528	Violente Tempête 
+9531	Larme de Mort
+9537	Horrible 
+9548	Cri de Célérité Test 
+9554	Souffle d'Or
+9562	Invocation de Génie Niv. 3
+9571	Vague Fatale
+9580	Explosion Insensée
+9586	Danse du Sang
+9589	Invocation de Fanatiques
+9606	Colonne En Ruine
+9618	Manipulateur de Lumière
+9628	Parchemin de Pétrification
+9631	Invocation de Monstres Stade 2
+9638	Soins Progressifs
+9642	Mur de Feu
+9647	Brouillard Toxique
+9660	Malédiction
+9671	Hachoir
+9680	Sombre Pieu
+9684	Jet de Dés
+9696	?? ?
+9704	??? ??
+9908	Démonstration_Coup Latéral
+9954	Démonstration_Sombre Spirale
+9962	??_??? ??? ??
+9981	??_?? ???
+9997	??_?? ?? ?????
+10010	Boule de Neige
+21104	Sceau de Vindicte Renforcé
+21118	Maîtrise des Masses
+21124	Protection Divine
+21201	Unité Séculaire
+21209	Liens Sacrés : Destin Scellé
+21317	Sablier
+21427	Bénédiction Massive de Coordination
+21525	Maîtrise de Bénédiction
+31101	Prière de Surate
+31109	Intouchable
+31203	Imprévisible Renforcé
+31212	Maître Circulaire Renforcé
+31315	Foudre Suprême
+31325	Guerrier du Temps Renforcé
+31420	Réaction en Chaîne
+31503	Régénération Miraculeuse Renforcée
+40002	Eveil de Défense
+40014	Compétence d'Eveil Défensif : Vitalité + Défense Magique
+40041	Eveil d'Attaque
+40054	Compétence d'Eveil Offensif : Attaque Magique
+40062	Eveil de Défense Magique
+40082	Eveil d'Attaque Magique
+40085	Eveil d'Attaque Magique
+40106	Eveil d'Attaque Totale
+40144	Bouclier de Gnome
+40152	Bouclier de Sylphe
+40174	Bouclier de Lumine
+40221	Armure de Guerrier
+40244	Armure de Chasseur
+40263	Armure d'Invocateur
+40286	Armure de Magicien
+40305	Expertise : Masse & Bâton
+40326	Expertise: Arme de Mêlée
+40344	Expertise : Dague
+40373	Unité du Chasseur : Armes à Distance
+40382	Vision Améliorée
+40406	Ciblage Magique
+40444	Eveil d'Esquive
+40464	Eveil de Restauration de HP
+40484	Eveil de Restauration de MP
+40504	Eveil de Restauration de HP & MP
+40525	Renforcement Corporel
+40549	Ouverture Spirituelle
+40565	Carte: Force
+40626	Carte: Dextérité, Sagesse
+40644	Carte : Intelligence
+40662	Carte: Force, Intelligence
+40684	Carte : Vitalité, Intelligence
+40695	Carte : Force, Vitalité
+40704	Ceinture de Défense
+40762	Ceinture Magique d'Attaque 
+40804	Ceinture d'Attaque Physique & Magique
+40821	Ceinture de Défense & Attaque Magique
+40831	Ceinture d'Attaque & Précision
+40884	Ceinture de Rapidité d'Attaque
+40887	Carte : Taux de Critique
+40893	Carte : Blocage%
+40903	Bénédiction d'Intelligence
+40908	Bénédiction de Force (adulte)
+41005	Résistance à la Nature
+41108	Ténacité Naturelle
+41121	Charge de Spiracle Ultime Renforcée
+41210	Energie de Mana
+41218	Force Naturelle de Spiracles
+41302	Soins Boomerang
+41333	Aide Divine
+41401	Bénédiction d'Eau Pure
+41410	Créature Magique
+41511	Puissance du Métamorphe
+41527	Essence de Vigueur
+44004	Expert en Objet de Créature
+45003	Infusion Provocatrice
+45026	Attaque Sournoise
+45037	Rugissement
+45113	Lumière Sacrée
+45118	Mutiler
+45209	Paroles de Frustration
+45218	Impact Cruel
+45305	Choc Squelettique
+45310	Centaure Constricteur
+45326	Corne Majestueuse
+45411	Homme-Faucon Déchaîné
+45429	Pieux Glacés
+45508	Esprit d'Ondine
+45519	Tempête de Stress
+45530	Roi de la Jungle
+45601	Unité : Panthère
+45613	Unité : Centaure
+45627	Unité: Kainen
+45658	Unité : Relique de la Panthère
+45664	Unité : Relique du Génie Mystique
+45701	Stimulation : Force
+45706	Stimulation : Agilité
+45718	Stimulation : Dextérité
+45729	Stimulation : Force, Vitalité
+45741	Trèfle de Bonne Fortune
+45760	Encouragement : Régénération de MP
+45813	Création : Plume d'Ange
+45826	Création : Esprit de Revenant
+45906	Création : Potion de Squelette
+45914	Création : Potion de Cerbère
+45921	Création : Potion de Tafari
+45933	Unité : Esprit de la Veuve Noire
+45940	Unité : Esprit du Pick
+45947	Bienfait d'Intelligence (Unique basique)
+45955	Bienfait de Vitalité (Unique intermédiaire)
+45963	Unité Unique : Relique de la Harpie
+45971	Bénédiction Spirituelle Unique : Ame de Créature
+46010	Bénédiction Féerique
+46022	Rituel Chamanique
+46031	Réorganisation de Mana
+47011	Nuée d'Insectes
+47022	Bouclier de Vent
+48003	Main Apaisante
+48034	Unité : Boucher
+48062	Souffle Provocateur
+48097	Force Séculaire
+48130	Régénération
+48139	Croyances Suprêmes du Chevalier : Bienfait Corporel Renforcé
+48145	?? ??: ??
+48162	Proclamation d'Immortalité
+48201	Corps Robuste
+48212	Coup Givré
+48224	Bouclier d'Ondine
+48233	Dépouille
+48241	Baiser Angélique
+48253	Secourisme
+48302	Compétence Passive pour Tank : Expert en Objet
+48306	Compétence Active pour Tank : Attaque Renforcée
+48311	Compétence Active pour Tank : Régénération
+48315	Compétence Active pour Tank : Coup Secret
+48322	Compétence Passive de Courte Distance : Expert en Objet
+48326	Compétence Active de Courte Distance : Attaque Renforcée
+48330	Compétence Active de Courte Distance : Unité
+48335	Compétence Active de Courte Distance : Coup Secret
+48342	Compétence Passive de Longue Distance : Expert en Objet
+48348	Compétence Passive de Longue Distance : Carte Exponentielle
+48355	Compétence Active de Longue Distance : Coup Secret
+48362	Compétence Passive Magique : Expert en Objet
+48367	Compétence Passive Magique : Armure
+48374	Compétence Active Magique : Spécial
+48382	Compétence Passive Apaisante : Expert en Objet
+48391	Compétence Active Apaisante : Régénération
+48396	Compétence Passive Apaisante : Régénération
+48405	Compétence Passive de Courte Distance : Mana
+48412	Compétence Active de Courte Distance : Unité
+48420	Compétence Passive de Courte Distance : Renforcement de Statistiques
+48434	Compétence Passive de Longue Distance : Vitalité
+48442	Compétence Active de Longue Distance : Unité
+48448	Compétence Passive de Longue Distance : Régénération
+48451	Compétence Passive de Longue Distance : Statistiques
+48464	Compétence Passive Magique : Vitalité
+48473	Compétence Active Magique : Régénération
+48480	Compétence Passive Magique : Renforcement de Statistiques
+48493	Spécial : Compétence Active
+48502	Bénédiction Spirituelle : Ame de Créature
+48510	Bienfait d'Agilité : Ame de Créature
+48517	Bienfait de Dextérité : Ame de Créature
+48526	Compétence Unique Active d'Attaque Magique : Double Unité
+48530	Compétence Unique Active de Longue Distance : Unité
+50301	Instinct Naturel
+51821	Sagesse de Créature
+52009	Vague Perçante
+52046	Avalanche de Pierres
+52303	Flèches Perçantes
+52334	Tir Aveuglant
+52642	Spiracles de Vitalité
+52673	Style du Crépuscule
+53012	Boule de Feu
+53212	Absorption des MP d'un Cadavre
+53412	Force des Ténèbres
+53425	Force du Feu Sacré
+53435	Neutralisation de Magies
+53445	Bouclier du Cauchemar
+53614	Tremblements du Vent Puissant
+54204	Créature Restauration
+57003	Prison de Givre
+61002	Maîtrise d'Arme du Mercenaire
+61012	Maîtrise du Combat du Mercenaire
+62006	Double Coupe-Jarret
+62306	Décharge de Flèches
+63007	Flèches Enflammées
+63015	Lance Enflammée
+63402	Bouclier Déflecteur
+63409	Bouclier Divin
+63417	Griffe Divine
+63430	Soutien Spirituel
+63442	Réflexion du Corps
+63603	Menace Sauvage
+64203	Purification de Créature
+64806	Arbre de Régénération
+64810	Bombe à Ours Magique
+64819	Pétrification
+64826	Régénération de MP Supendue
+64832	Réduction de Défense
+64835	Régénération de MP Supendue
+64843	Régénération de MP Suspendue
+64852	Pétrification
+64858	Réduction de Rapidité
+64868	Pétrification
+64876	Pétrification
+64881	Réduction d'Attaque
+64886	Horrible
+64890	Réduction de Rapidité
+64896	Réduction Défense
+64902	Horrible
+64908	Pétrification
+64913	Réduction d'Attaque
+64918	Horrible
+64924	Pétrification
+64929	Réduction d'Attaque
+64935	Marais d'Acide Card
+64940	Pétrification
+64944	Réduction Défense
+64948	Pétrification
+64957	Empoisonné
+64965	Empoisonné
+64973	Empoisonné
+64980	Pétrification
+64986	Régénération de Rapidités
+64991	Marais d'Acide
+64999	Marais d'Acide
+65008	Régénération Défenses.
+65017	Régénération d'Attaques
+65022	Peur
+65025	Régénération d'Attaques
+65034	Régénération de Rapidités
+65043	MP Regeneration Stopped
+65053	Empoisonné
+65059	MP Regeneration Stopped
+65064	Imposture Divine
+65074	Invocation de Monstres
+65085	Coup Etincelant
+65101	Potion Apaisante
+65112	Drain Magique
+65125	Invocation de Monstres Mutants
+65084	Boomerang Eclair
+65065	Parchemin d'invocation de Volcanos
+65066	Invocation de Monstres
+65067	Boule de Feu
+65068	Invocation de Monstres
+65069	Invocation de Monstres
+65070	Invocation de Monstres
+65071	Invocation de Monstres
+65072	Invocation de Monstres
+65075	Invocation de Monstres
+65076	Invocation de Monstres
+65077	Invocation de Monstres
+65078	Invocation de Monstres
+65079	Invocation de Monstres
+65080	Invocation de Monstres
+65081	Pluie d'Eclairs
+65082	Eclair Cyclonique
+65083	Coup Etincelant
+65086	Boomerang Eclair
+65087	Pluie d'Eclairs
+65088	Création d'Espace
+65089	Invocation de Monstres
+65090	Invocation de Monstres
+65091	Invocation de Monstres
+65092	Invocation de Monstres
+65093	Invocation de Monstres
+65094	Invocation de Monstres
+65100	Potion Revitalisante
+65102	Potion Revitalisante et Apaisante
+65103	Parchemin Revitalisant
+65104	Parchemin Apaisant
+65105	Parchemin Revitalisant et Apaisant
+65106	Invocation des Adeptes de la Sorcière
+65107	Invocation de Monstres Mutants
+65108	Invocation de Monstres Mutants
+65109	Invocation de Monstres Mutants
+65110	Frères de Sang
+65113	Venin
+65114	Congélation
+65115	Prélèvement Sanguin
+65116	Pétrification
+65117	Armageddon
+65118	Glace de 
+65119	Feu de 
+65120	Lumière de
+65121	Invocation des Adeptes de la Sorcière
+65122	Invocation des Adeptes de la Sorcière
+65123	Invocation de Monstres Mutants
+65126	Invocation de Monstres Mutants
+65127	Invocation de Monstres Mutants
+65128	Invocation de Monstres Mutants
+65129	Invocation de Pierrot
+65130	Invocation de Pierrot
+65131	Invocation de Pierrot
+65132	Invocation de Pierrot
+65042	Régénération de Rapidités
+65111	Drain Sanguin
+65024	Régénération Défenses.
+65000	Régénération Défenses.
+65001	Régénération d'Attaques
+65002	Régénération de Rapidités
+65003	MP Regeneration Stopped
+65004	Petrifaction
+65005	Empoisonné
+65006	Peur
+64992	Régénération Défenses.
+64993	Régénération d'Attaques
+64994	Régénération de Rapidités
+64995	MP Regeneration Stopped
+64996	Petrifaction
+64997	Empoisonné
+65009	Régénération d'Attaques
+65010	Régénération de Rapidités
+65011	MP Regeneration Stopped
+65012	Petrifaction
+65013	Empoisonné
+65014	Peur
+65015	Marais d'Acide
+65018	Régénération de Rapidités
+65019	MP Regeneration Stopped
+65020	Petrifaction
+65023	Marais d'Acide
+65026	Régénération de Rapidités
+65027	MP Regeneration Stopped
+65028	Petrifaction
+65029	Empoisonné
+65030	Peur
+65031	Marais d'Acide
+65032	Régénération Défenses.
+64985	Régénération d'Attaques
+65035	MP Regeneration Stopped
+65036	Petrifaction
+65037	Empoisonné
+65038	Peur
+65039	Marais d'Acide
+65040	Régénération Défenses.
+65041	Régénération d'Attaques
+65044	Petrifaction
+65045	Empoisonné
+65046	Peur
+65047	Marais d'Acide
+65048	Régénération Défenses.
+65049	Régénération d'Attaques
+65050	Régénération de Rapidités
+65051	MP Regeneration Stopped
+64949	Empoisonné
+64950	Horrible
+64951	Marais d'Acide Card
+64952	Réduction Défense
+64953	Réduction d'Attaque
+64954	Réduction de Rapidité
+64955	Régénération de MP Suspendue
+64956	Pétrification
+64958	Horrible
+64959	Marais d'Acide Card
+64960	Réduction Défense
+64961	Réduction d'Attaque
+64962	Réduction de Rapidité
+64963	Régénération de MP Suspendue
+64964	Pétrification
+64966	Horrible
+64967	Marais d'Acide Card
+64968	Réduction Défense
+64969	Réduction d'Attaque
+64970	Réduction de Rapidité
+64971	Régénération de MP Suspendue
+64974	Horrible
+64975	Marais d'Acide Card
+64976	Réduction Défense
+64977	Réduction d'Attaque
+64978	Réduction de Rapidité
+64972	Pétrification
+64981	Empoisonné
+64982	Horrible
+64983	Marais d'Acide Card
+64984	Régénération Défenses.
+64934	Horrible
+64947	Régénération de MP Suspendue
+64998	Peur
+65007	Marais d'Acide
+65033	Régénération d'Attaques
+65063	Imposture Divine
+65073	Invocation de Monstres
+65124	Invocation de Monstres Mutants
+64923	Régénération de MP Suspendue
+64943	Marais d'Acide Card
+64987	MP Regeneration Stopped
+64988	Petrifaction
+64989	Empoisonné
+64979	Régénération de MP Suspendue
+64990	Peur
+65016	Régénération Défenses.
+65052	Petrifaction
+65054	Peur
+65055	Marais d'Acide
+65056	Régénération Défenses.
+65057	Régénération d'Attaques
+64903	Marais d'Acide Card
+64904	Réduction Défense
+64905	Réduction d'Attaque
+64906	Réduction de Rapidité
+64909	Empoisonné
+64910	Horrible
+64911	Marais d'Acide Card
+64914	Réduction de Rapidité
+64915	Régénération de MP Suspendue
+64916	Pétrification
+64919	Marais d'Acide Card
+64920	Réduction Défense
+64921	Réduction d'Attaque
+64922	Réduction de Rapidité
+64901	Empoisonné
+64907	Régénération de MP Suspendue
+64925	Empoisonné
+64926	Horrible
+64927	Marais d'Acide Card
+64895	Marais d'Acide Card
+64912	Réduction Défense
+64928	Réduction Défense
+64930	Réduction de Rapidité
+64931	Régénération de MP Suspendue
+64932	Pétrification
+64933	Empoisonné
+64936	Réduction Défense
+64937	Réduction d'Attaque
+64938	Réduction de Rapidité
+64889	Réduction d'Attaque
+64917	Empoisonné
+64939	Régénération de MP Suspendue
+64941	Empoisonné
+64942	Horrible
+64867	Régénération de MP Suspendue
+64945	Réduction d'Attaque
+64946	Réduction de Rapidité
+65021	Empoisonné
+65058	Régénération de Rapidités
+65060	Furie
+65061	Parchemin d'invocation de monstre
+65062	Parchemin d'invocation de monstre
+64844	Pétrification
+64845	Empoisonné
+64846	Horrible
+64847	Marais d'Acide Card
+64848	Réduction Défense
+64849	Réduction d'Attaque
+64850	Réduction de Rapidité
+64853	Empoisonné
+64854	Horrible
+64855	Marais d'Acide Card
+64856	Réduction Défense
+64859	Régénération de MP Suspendue
+64860	Pétrification
+64861	Empoisonné
+64862	Horrible
+64863	Marais d'Acide Card
+64864	Réduction Défense
+64865	Réduction d'Attaque
+64866	Réduction de Rapidité
+64869	Empoisonné
+64870	Horrible
+64871	Marais d'Acide Card
+64872	Réduction Défense
+64873	Réduction d'Attaque
+64874	Réduction de Rapidité
+64825	Réduction de Rapidité d'Attaque
+64875	Régénération de MP Suspendue
+64877	Empoisonné
+64878	Horrible
+64879	Marais d'Acide Card
+64882	Réduction de Rapidité
+64883	Régénération de MP Suspendue
+64884	Pétrification
+64885	Empoisonné
+64887	Marais d'Acide Card
+64888	Réduction Défense
+64842	Réduction de Rapidité
+64851	Régénération de MP Suspendue
+64891	Régénération de MP Suspendue
+64892	Pétrification
+64893	Empoisonné
+64894	Horrible
+64202	Guérison Créature
+64818	Repaire des Ours
+64834	Réduction de Rapidité d'Attaque
+64857	Réduction d'Attaque
+64880	Réduction Défense
+64897	Réduction d'Attaque
+64898	Réduction de Rapidité
+64899	Régénération de MP Suspendue
+64900	Pétrification
+63431	Soutien Magique
+63432	Vitesse de la Lumière
+63433	Armure Scintillante
+63434	Régénération Massive de HP
+63435	Régénération Massive de MP
+63436	Bénédiction Massive d'Armure
+63437	Bénédiction Massive d'Arme
+63438	Bénédiction Massive d'Armure Magique
+63439	Bénédiction Massive de Pouvoir
+63443	Folie Furieuse
+63444	Puissance des Ténèbres
+63445	Bouclier du Cauchemar
+63601	Marais d'Acide
+63604	Menace Spirituelle
+63605	Corruption
+63801	Piège Explosif
+63802	Piège Electrisant
+64001	Harmonie de la Vie
+64002	Déguisement de la Bête
+64201	Créature Transfert de Vie
+64204	Créature Restauration
+64401	Suralimentation de Force
+64402	Suralimentation de Vitalité
+64403	Suralimentation d'Intelligence
+64404	Suralimentation de Sagesse
+64405	Créature Aura de Force
+64406	Créature Aura de l'Esprit
+64407	Créature Aura Maitresse
+64801	Fureur de l'Esprit
+64802	Créature Extraction HP
+64803	Cri d'Outre-tombe
+64804	Sang d'Outre-tombe
+63401	Bénédiction
+64805	Pacte d'Outre-tombe
+64807	Arbre de Régénération
+64808	Bouteille de Shampouagne
+64811	Premiers Soins
+64812	Création : Boîte d'Acier Aléatoire
+64813	Namur leaf Addiction 
+64814	Namur Skin Bleeding
+64815	Arbre de Vie
+64816	Champ de Bataille
+64817	Champ de Bataille Libre
+64820	Intoxication 
+64821	Peur
+64822	Sommeil
+64823	Réduction de Défense
+64824	Réduction d'Attaque
+63429	Arme de Vent
+63441	Réflexion de l'Ame
+64827	Retour*
+64828	Pétrification
+64829	Intoxication 
+64830	Peur
+63014	Glissade Enneigée
+63416	Résistance Élémentaire
+63602	Sceau Abyssal
+64809	Bombe à Ours
+64831	Sommeil
+64833	Réduction d'Attaque
+61003	Maîtrise d'Arme du Clerc
+61004	Maîtrise d'Arme de l'Assassin
+61005	Maîtrise d'Arme de Charmeur
+61006	Maîtrise d'Arme du Mage
+61007	Maîtrise d'Arme de l'Invocateur
+61008	Maîtrise d'Armes du Paladin
+61009	Entraînement Mental
+61010	Expert des Doubles Armes
+61013	Maîtrise d'Arme du Mystique
+61014	Maîtrise de la Longue Portée
+61015	Maîtrise des Doubles Haches
+61016	Maîtrise de la Hache à deux mains
+61017	Maîtrise de Longue Portée Accélérée
+61018	Sorcellerie Naturelle
+61019	Blocage en Croix
+62001	Bouclier Offensif
+62002	Frappe de Bouclier
+62003	Restriction
+62004	Croix Sacrée
+61001	Entraînement Offensif
+61011	Défense Psychologique
+62007	Charge Sacrée
+62008	Ecrasement Puissant
+62009	Vague Perçante
+62010	Vent Electrisant
+62011	Croisé Sonique
+62012	Onde de Choc Animale
+62301	Coup Double
+62302	Flèches Perforantes
+62303	Flèches Perçantes
+62304	Flèche Maudite
+57002	Flash
+62005	Torrent Sauvage
+62307	Tir Rapide
+62501	Rage Barbare
+63001	Lance Terrestre
+63002	Impact Glacial
+63003	Croisé Lumineux
+63004	Lance des Cieux
+63005	Champ Electrique
+64836	Pétrification
+64837	Empoisonné
+64838	Horrible
+64839	Marais d'Acide Card
+64840	Réduction Défense
+64841	Réduction d'Attaque
+54012	Transfert de Douleur
+62305	Pluie de Flèches
+63008	Eclair Foudroyant
+63009	Flash Divin
+63010	Explosion de Lumière
+63011	Jugement de la Déesse
+63012	Eboulement
+63013	Tremblement de Terre
+63016	Explosion Volcanique
+63017	Pluie Météorique
+63201	Protection Eternelle
+63202	Offrande Céleste
+63203	Absorption des HP d'un Cadavre
+63204	Guérison Massive
+63205	Caresse de la Déesse
+63206	Miracle
+63403	Bouclier de Vengeance
+63404	Bénédiction de Vitalité
+63405	Bénédiction d'Intelligence
+63406	Bénédiction de Sagesse
+63407	Bénédiction de Force
+53433	Armure Lumineuse
+53608	Esprit en Crise
+63006	Tempête de Feu
+63408	Armure Lumineuse
+63410	Soutien de Puissance
+63411	Soutien de Vitalité
+63412	Soutien d'Intelligence
+63413	Résistance Bionique
+63414	Résistance Inorganique
+63415	Résistance Spirituelle
+63418	Flèche Empoisonnée
+63419	Débordement du Feu Infernal
+63420	Débordement d'Eclairs
+63421	Débordement des Puissances Terrestres
+63422	Débordement des Forces de l'Eau
+63423	Union de Force
+63424	Union de Vitalité
+63425	Union Psychique
+63426	Union d'Intelligence
+63427	Fureur Sauvage
+63428	Esprit du Feu
+53436	Bénédiction Massive d'Armure
+53437	Bénédiction Massive d'Arme
+53438	Bénédiction Massive d'Armure Magique
+53439	Bénédiction Massive de Pouvoir
+53443	Folie Furieuse
+53409	Bouclier Divin
+53426	Enchantement d'Arme : Feu
+53427	Fureur Sauvage
+53428	Esprit du Feu
+53429	Arme de Vent
+53432	Vitesse de la Lumière
+52649	Poussière Aveuglante
+52656	Foudre de Spiracles
+52661	Spiracles d'Invincibilité
+52668	Energie Mystérieuse
+52671	Style Brûlant
+52676	Camouflage d'Hostilité
+52678	Flèche Spirale
+52679	Flèches de Bourrasque
+52681	Bouclier de Spiracles
+53002	Impact Glacial
+53003	Croisé Lumineux
+53004	Illumination Divine
+53005	Pluie Acide
+53009	Flash Divin
+53014	Glissade Enneigée
+53015	Flèches des Ténèbres
+53017	Pluie Météorique
+53021	Flamme Ecorchante
+53040	Super Nova
+53151	Explosion Pétrifiante
+53203	Absorption des HP d'un Cadavre
+53204	Guérison Massive
+53205	Caresse de la Déesse
+53222	Eau Régénératrice
+53401	Bénédiction
+53404	Bénédiction de Vitalité
+53405	Bénédiction d'Intelligence
+53406	Bénédiction de Sagesse
+53407	Bénédiction de Force
+53419	Débordement du Feu Infernal
+53420	Débordement d'Eclairs
+53421	Débordement des Puissances Terrestres
+53422	Débordement des Forces de l'Eau
+53423	Vitesse du Vent
+52641	Spiracle Energisant
+52672	Style Agile
+53454	Arme Etincelante
+53458	Peau d'Armure
+53460	Force d'Illumination Mentale
+53461	Magie Soudaine
+53492	Bain de Lumière
+53601	Cauchemar
+53605	Corruption
+52331	Coup Empoisonné
+53010	Explosion de Lumière
+53752	Amplification de Gravité
+53803	Gisement de Cadavres
+53806	Interruption de Sorts
+53810	Piège de Terreur
+53815	Champ d'Attraction
+53901	Esprit de Restauration
+54002	Déguisement de la Bête
+52008	Ecrasement Puissant
+53424	Energie de la Pierre
+53444	Puissance des Ténèbres
+54614	Griffe du Lion
+54802	Flèche Sanglante
+54805	Pacte d'Outre-tombe
+52077	Vague Funeste
+53210	Restauration
+57012	Masse Etourdissante
+57203	Soins Immédiats
+57501	Double Fureur
+58014	Absorption de Vie
+58427	Enchantement d'Arme : Eau
+58428	Enchantement d'Arme : Electricité
+58429	Enchantement d'Arme : Terre
+51012	Maîtrise du Combat du Mercenaire
+51014	Maîtrise de la Longue Portée
+51018	Sorcellerie Naturelle
+51019	Blocage en Croix
+51082	Maîtrise des Spiracles
+51411	Maîtrise de l'Eloquence
+52003	Restriction
+52005	Torrent Sauvage
+52007	Charge Sacrée
+52010	Vent Electrisant
+52012	Onde de Choc Animale
+52019	Charge de Bouclier
+52020	Briseur d'Attaque
+52021	Briseur de Défense
+52022	Briseur de Mental
+52032	Triple Assaut
+52041	Frappe Centrifuge
+52043	Spiracle de Zeus
+52052	Convulsion Terrestre
+52053	Fissure Spatiale
+52055	Rafale de Spiracles
+52056	Bombe de Spiracles
+52063	Briseur de Physique
+52074	Frappe de l'Ombre
+52075	Charge de l'Ombre
+52076	Blessure de l'Ombre
+51811	Stimulation de Créature
+52304	Flèches Critiques
+52305	Pluie de Flèches
+52312	Flèche Ardente
+52313	Impact de Spiracle
+52315	Flèche de Spiracle Givrée
+52321	Echo d'Onde de Choc
+52326	Tirs Successifs
+52044	Pourfendeur
+52501	Rage Barbare
+52502	Fureur de l'Assassin
+52611	Garde Active
+52626	Flèche Vampirique
+52635	Provocation
+52638	Attaque de l'Ombre
+50302	Résilience
+50303	Roue du Destin
+50401	Grâce de Gaïa
+50202	Endurance de Surate
+48529	Compétence Unique Active de Soins : Unité
+48509	Bienfait d'Intelligence : Ame de Créature
+48525	Compétence Unique Active de Longuee Distance : Double Unité
+48465	Compétence Passive Magique : Mana
+48466	Compétence Active Magique : Attaque Basique
+48467	Compétence Active Magique : Attaque Améliorée
+48468	Compétence Passive Magique : Armure
+48469	Compétence Passive Magique : Statistiques de Carte
+48470	Compétence Active Magique : + Menace
+48471	Compétence Active Magique : - Menace
+48472	Compétence Active Magique : Unité
+48474	Compétence Passive Magique : Armes
+48475	Compétence Active Magique : Inspiration
+48476	Compétence Active Magique : Spécial
+48477	Compétence Active Magique : Secret
+48478	Compétence Passive Magique : Régénération
+48479	Compétence Active Magique : Renforcement des Compétences
+48481	Compétence Passive Magique : Statistiques
+48491	Compétence Raciale : Résistance aux dégâts
+48450	Compétence Passive de Longue Distance : Renforcement de Statistiques
+48494	Spécial : Compétence Passive
+48492	Compétence Raciale : Augmentation des dégâts
+48503	Bénédiction Spirituelle : Ame de Créature
+48504	Bienfait de Force : Ame de Créature
+48505	Bienfait de Force : Ame de Créature
+48506	Bienfait de Force : Ame de Créature
+48507	Bienfait d'Intelligence : Ame de Créature
+48508	Bienfait d'Intelligence : Ame de Créature
+48511	Bienfait d'Agilité : Ame de Créature
+48512	Bienfait d'Agilité : Ame de Créature
+48513	Bienfait de Vitalité : Ame de Créature
+48514	Bienfait de Vitalité : Ame de Créature
+48515	Bienfait de Vitalité : Ame de Créature
+48447	Compétence Active de Longue Distance : Secret
+48518	Bienfait de Dextérité : Ame de Créature
+48519	Bienfait de Sagesse : Ame de Créature
+48520	Bienfait de Sagesse : Ame de Créature
+48521	Bienfait de Sagesse : Ame de Créature
+48522	Compétence Unique Active de Tank : Double Unité
+48523	Compétence Unique Active de Courte Distance : Double Unité
+48524	Compétence Unique Active de Soins : Double Unité
+48433	Compétence Passive de Longue Distance : Expert en Objets
+48501	Bénédiction Spirituelle : Ame de Créature
+48527	Compétence Unique Active de Tank : Unité
+48528	Compétence Unique Active de Courte Distance : Unité
+48406	Compétence Active de Courte Distance : Attaque Basique
+48407	Compétence Active de Courte Distance : Attaque Améliorée
+48408	Compétence Passive de Courte Distance : Armure
+48409	Compétence Passive de Courte Distance : Statistiques de Carte
+48410	Compétence Active de Courte Distance : Menace +
+48516	Bienfait de Dextérité : Ame de Créature
+48531	Compétence Unique Active d'Attaque Magique : Unité
+48532	Compétence Passive d'Unité : Mercenaire
+48533	Compétence Passive d'Unité : Sorcier
+50101	Restauration Angélique
+50102	Adresse Divine
+50201	Vivacité Sinistre
+48413	Compétence Active de Courte Distance : Régénération
+48414	Compétence Passive de Courte Distance : Armes
+48415	Compétence Active de Courte Distance : Inspiration
+48416	Compétence Active de Courte Distance : Spécial
+48417	Compétence Active de Courte Distance : Secret
+48418	Compétence Passive de Courte Distance : Régénération
+48421	Compétence Passive de Courte Distance : Statistiques
+48422	Compétence Passive de Créature Unique : Statistiques
+48431	Compétence Passive de Longue Distance : Puissance Offensive
+48432	Compétence Passive de Longue Distance : Puissance Défensive
+48435	Compétence Passive de Longue Distance : Mana
+48436	Compétence Active de Longue Distance : Attaque Basique
+48437	Compétence Active de Longue Distance : Attaque Améliorée
+48438	Compétence Passive de Longue Distance : Armure
+48439	Compétence Passive de Longue Distance : Statistiques de Carte
+48440	Compétence Active de Longue Distance : + Menace
+48404	Compétence Passive de Courte Distance : Vitalité
+48411	Compétence Active de Courte Distance : Menace -
+48443	Compétence Active de Longue Distance : Régénération
+48444	Compétence Passive de Longue Distance : Armes
+48445	Compétence Active de Longue Distance : Inspiration
+48446	Compétence Active de Longue Distance : Spécial
+48395	Compétence Active Apaisante : Coup Secret
+48441	Compétence Active de Longue Distance : - Menace
+48449	Compétence Active de Longue Distance : Renforcement des Compétences 
+48373	Compétence Active Magique : Encouragement
+48419	Compétence Active de Courte Distance : Renforcement des Compétences
+48461	Compétence Passive Magique : Puissance Offensive
+48462	Compétence Passive Magique : Puissance Défensive
+48361	Compétence Passive Magique : Puissance Défensive
+48390	Compétence Active Apaisante : Unité
+48463	Compétence Passive Magique : Expert en Objets
+48375	Compétence Active Magique : Coup Secret
+48376	Compétence Passive Magique : Régénération
+48377	Compétence Active Magique : Compétence Enchantée
+48380	Compétence Passive Apaisante : Puissance Offensive
+48347	Compétence Passive de Longue Distance : Armure
+48368	Compétence Passive Magique : Carte Exponentielle
+48369	Compétence Active Magique : Niveau de Menace
+48370	Compétence Active Magique : Unité
+48371	Compétence Active Magique : Régénération
+48372	Compétence Passive Magique : Port d'Armes
+48383	Compétence Passive Apaisante : Vitalité
+48384	Compétence Passive Apaisante : Mana
+48385	Compétence Active Apaisante : Attaque Basique
+48386	Compétence Active Apaisante : Attaque Renforcée
+48387	Compétence Passive Apaisante : Armure
+48388	Compétence Passive Apaisante : Carte Exponentielle
+48389	Compétence Active Apaisante : Niveau de Menace
+48331	Compétence Active de Courte Distance : Régénération
+48332	Compétence Passive de Courte Distance : Port d'Armes
+48333	Compétence Active de Courte Distance : Encouragement
+48336	Compétence Passive de Courte Distance : Régénération
+48337	Compétence Active de Courte Distance : Compétence Enchantée
+48340	Compétence Passive de Longue Distance : Puissance Offensive
+48343	Compétence Passive de Longue Distance : Vitalité
+48344	Compétence Passive de Longue Distance : Mana
+48345	Compétence Active de Longue Distance : Attaque Basique
+48346	Compétence Active de Longue Distance : Attaque Renforcée
+48349	Compétence Active de Longue Distance : Niveau de Menace
+48350	Compétence Active de Longue Distance : Unité
+48351	Compétence Active de Longue Distance : Régénération
+48352	Compétence Passive de Longue Distance : Port d'Armes
+48353	Compétence Active de Longue Distance : Encouragement
+48314	Compétence Active pour Tank : Spécial
+48354	Compétence Active de Longue Distance : Spécial
+48356	Compétence Passive de Longue Distance : Régénération
+48357	Compétence Active de Longue Distance : Compétence Enchantée
+48360	Compétence Passive Magique : Puissance Offensive
+48329	Compétence Active de Courte Distance : Niveau de Menace
+48334	Compétence Active de Courte Distance : Spécial
+48363	Compétence Passive Magique : Vitalité
+48364	Compétence Passive Magique : Mana
+48365	Compétence Active Magique : Attaque Basique
+48325	Compétence Active de Courte Distance : Attaque Basique
+48341	Compétence Passive de Longue Distance : Puissance Défensive
+48366	Compétence Active Magique : Attaque Renforcée
+48392	Compétence Passive Apaisante : Port d'Armes
+48393	Compétence Active Apaisante : Encouragement
+48394	Compétence Active Apaisante : Spécial
+48381	Compétence Passive Apaisante : Puissance Défensive
+48397	Compétence Active Apaisante : Compétence Enchantée
+48401	Compétence Passive de Courte Distance : Puissance Offensive
+48402	Compétence Passive de Courte Distance : Puissance Défensive
+48403	Compétence Passive de Courte Distance : Expert en Objets
+48254	Absorption de Pierre Spirituelle
+48255	Magie Linguistique
+48256	Hibernation
+48257	Peur Draconique
+48258	Flèche de Glace
+48259	Flèches de Destruction
+48260	Percée : Entraînement Magique
+48300	Compétence Passive pour Tank : Puissance Offensive
+48252	Echange Spirituel
+48301	Compétence Passive pour Tank : Puissance Défensive
+48303	Compétence Passive pour Tank : Vitalité
+48304	Compétence Passive pour Tank : Mana
+48240	Croyance Absolue
+48305	Compétence Active pour Tank : Attaque Basique
+48307	Compétence Passive pour Tank : Armure
+48308	Compétence Passive pour Tank : Carte Exponentielle
+48309	Compétence Active pour Tank : Niveau de Menace
+48232	Peau Indestructible
+48310	Compétence Active pour Tank : Unité
+48312	Compétence Passive pour Tank : Port d'Armes
+48313	Compétence Active pour Tank : Encouragement
+48316	Compétence Passive pour Tank : Régénération
+48317	Compétence Active pour Tank : Compétence Enchantée
+48320	Compétence Passive de Courte Distance : Puissance Offensive
+48321	Compétence Passive de Courte Distance : Puissance Défensive
+48323	Compétence Passive de Courte Distance : Vitalité
+48324	Compétence Passive de Courte Distance : Mana
+48223	Tornade Blanche
+48327	Compétence Passive de Courte Distance : Armure
+48328	Compétence Passive de Courte Distance : Carte Exponentielle
+48140	Croyances Suprêmes du Chevalier : Bienfait Spirituel Renforcé
+48141	?? ??: ??
+48142	?? ??: ??
+48143	?? ??: ??
+48138	Croyances du Chevalier : Bienfait Corporel
+48144	???? ??
+48146	??? ??: ??
+48151	Rose Rouge
+48152	Transfusion Démoniaque
+48153	Destin Ardent
+48154	Unité : Mephisto
+48155	Création : Essence de Démon
+48156	Don d'Immortalité
+48157	Unité : Sang Coagulé
+48158	Chauve qui peut
+48159	True Blood
+48160	Création : Potion de Mephisto
+48129	Apaisement
+48161	Dictat
+48163	Flammes Vengeresses
+48171	Ronces Magiques
+48172	Convulsion de Douleur
+48173	Flamme Dansante
+48174	Unité : Amarylis
+48175	Création : Graine de Fureur
+48176	Esprit Flamboyant
+48177	Energie Mystique
+48178	Traumatisme
+48179	Création : Potion d'Amarylis
+48180	Transcendance
+48181	Démonologue
+48202	Explosion Vocale
+48203	Instinct de Survie
+48204	Œil Pénétrant
+48205	Instinct Guerrier
+48206	Injection de Mana
+48207	Recherche Offensive
+48208	Tir Supersonique
+48209	Coup Précis
+48210	Analyse du Parchemin Magique
+48096	Hymne à la Vie
+48200	Provocation
+48213	Coup Venteux
+48214	Coup Terrestre
+48215	Détermination
+48216	Couverture
+48217	Prière du Désir
+48218	Marché Equitable
+48220	Viabilité
+48221	Echapper à la crise
+48222	Couverture Venteuse
+48225	Bubulle
+48226	Génie Terrestre
+48227	Echo Terrestre
+48228	Eveil Surnaturel
+48229	Manifestation de Puissance
+48230	Ailes Divines
+48231	Plumes Volantes
+48234	Adaptation Territoriale
+48235	Oblivion
+48236	Instinct Bestial
+48237	Faim de Loup
+48238	Absorption des Ténèbres
+48239	Main Obscure
+48061	Coup Lumineux
+48211	Coup Enflammé
+48242	Volonté de Survie
+48243	Greffe d'Organes
+48244	Protection Divine
+48245	Châtiment Divin
+48246	Pacte avec le Diable
+48247	Piège Démoniaque
+48248	Mutation Corporelle
+48249	Champ Ténébreux
+48250	Huile de Massage
+48251	Reconstitution
+46032	Pansement des Plaies
+47001	Corps Immuable
+47002	Cuirasse Absorbante
+47003	Frénésie
+47004	Force de l'Esprit
+47005	Assaut Sanguinaire
+47006	Imprégnation Cadavérique
+47007	Bouclier de Feu
+47008	Favoritisme de la Fée
+47009	Le Baiser de la Bonté
+46030	Bénédiction de la Reine de Glace
+47010	Eruption Sauvage
+47012	Attaque de Choc
+47013	Incarnation de Flammes
+47014	Coordination Divine
+47015	Sphère de Récupération Totale
+47016	Acharnement Perpétuel
+47017	Hymne Céleste
+47018	Attaque Opportune
+47019	Sang-Froid
+47020	Drain de Mana
+46021	Pansement des Plaies
+47021	Souffle Sulfureux
+47023	Tornade
+47024	Bouclier de Mana
+47025	Dés Diaboliques
+47026	Requiem
+47027	Sociabilité du Clown
+47028	Reine de Glace
+47029	Charge d'Energie
+47030	Esprit Sauvage
+48001	Caresse de Chaman
+48004	Unité : Baphomet
+48005	Création : Totem de Baphomet
+48006	Kahuna Déferlant
+48007	Ancien Savoir de Kahuna
+48008	Onde de Vie
+48009	Vague Fulgurante : Vitesse d'Incantation
+48010	Vague Fulgurante : Restauration de MP
+48012	Création : Potion de Baphomet
+48013	Forces de l'Au-delà
+48031	Insomnia
+48032	Soupir des Ténèbres
+46009	Bénédiction Féerique
+48002	Déferlement
+48035	Cristal Obscur du Boucher
+48036	Boucher Visionnaire
+48037	Rage Extrême
+48038	Bouclier Maudit
+48039	Instinct du Boucher
+48040	Création : Potion du Boucher
+48041	Neutralisation
+48063	Souffle Destructeur
+48064	Unité : Mécanymphe
+48065	Création : Cristal de Neutralisation
+48066	Hymne à la Vie
+48067	Attaque Divine
+48068	Pouvoir Coercitif
+48069	Création : Potion de Neutralisation
+48070	Purge Vitale
+48091	Radiation
+48092	Collecteur d'Ames
+48093	Oscillation
+48094	Unité : Minotaure
+48095	Création : Vestige d'Ame
+48098	Vague Sismique
+48099	Création : Potion du Minotaure 
+48100	Collecteur d'Ames Ultime
+48121	Coup de Pick
+48122	Position d'Assaut : Animal
+48123	Chasse à l'Homme
+48124	Destruction Massive
+48125	Position Glacée : Vengeance
+48126	Pick Rotatif
+48127	Enlisement
+48128	Position de Sentinelle : Soins
+45970	Unité Unique : Relique d'Ondine
+48033	Folie de l'Infini
+48131	Position de Maître : Harmonie
+48132	Unité : Pick
+48133	Création : Lampe de Pick
+48134	Canevas de Pick
+48135	Création : Potion de Pick
+48136	Unité : Chevalier d'Acier
+48137	Croyances du Chevalier : Bienfait Corporel
+45934	Unité : Esprit du Volatile
+45935	Unité : Esprit de Carbuncle
+45936	Unité : Esprit de la Harpie
+45937	Unité : Esprit de la Licorne Blanche
+45938	unité : Esprit de la Licorne Noire
+45932	Unité : Esprit de Soulseeker
+45939	Unité : Esprit de la Panthère
+45941	Unité : Esprit de Tafari
+45942	Unité : Relique de la Salamandre
+45943	Unité : Relique d'Ange
+45944	Unité : Relique de Cerbère
+45945	Unité : Relique du Craken
+45920	Création : Potion de Craken
+45946	Bienfait de Force (Unique basique)
+45948	Bienfait d'Agilité (Unique basique)
+45949	Bienfait de Vitalité (Unique basique)
+45950	Bienfait de Dextérité (Unique basique)
+45951	Bienfait de Sagesse (Unique basique)
+45952	Bienfait de Force (Unique intermédiaire)
+45953	Bienfait d'Intelligence (Unique intermédiaire)
+45956	Bienfait de Dextérité (Unique intermédiaire)
+45957	Bienfait de Sagesse (Unique intermédiaire)
+45958	Unité : Relique de la Tortue
+45959	Unité : Relique du Cube
+45960	Unité : Relique de l'Eimus
+45961	Unité Unique : Relique du Loup
+45913	Création : Potion d'Ange
+45954	Bienfait d'Agilité (Unique intermédiaire)
+45964	Unité Unique : Relique de la Sirène
+45965	Unité Unique : Relique de la Kainen
+45966	Unité Unique : Relique du Génie Mystique
+45967	Unité Unique : Relique de la Licorne Blanche
+45968	Unité Unique : Relique de la Fée Bleue
+45969	Unité Unique : Relique de Baphomet
+45825	Création : Crinière de Licorne Infernale
+45972	Bénédiction Spirituelle Unique : Ame de Créature
+45973	Bénédiction Spirituelle Unique : Ame de Créature
+46001	Survie Animale
+46002	Survie Animale
+46003	Survie Animale
+46004	Hymne à la Vie
+46005	Hymne à la Vie
+46006	Hymne à la Vie
+46007	Rage Vampirique
+46008	Bénédiction Féerique
+46011	Hymne à la Vie
+46012	Hymne à la Vie
+46013	Ange Gardien
+46014	Survie Animale
+46015	Protection Draconique
+46016	Collecte d'Objets 
+46017	Collecte d'Objets 
+46018	Collecte d'Objets 
+46019	Hymne à la vie
+46020	Hymne à la Vie
+45742	Stimulation : Force, Agilité
+45743	?? ??: ?, ??
+45744	?? ??: ?, ??
+45745	Stimulation : Vitalité
+45746	Stimulation : Vitalité
+45751	Encouragement : Défense
+45752	Encouragement : Esquive
+45753	Encouragement : Attaque
+45754	Encouragement : Taux de Critique
+45755	Encouragement : Rapidité d'Attaque
+45756	Encouragement : Précision Magique
+45757	Encouragement : Vitesse d'Incantation
+45758	Encouragement : Sagesse
+45801	Création : Croc de Panthère
+45802	Création : Plume de Volatile
+45803	Création : Carapace de Tortue
+45804	Création : Bave d'Orc
+45805	Création : Fourrure de Yéti
+45806	Création : Os Spongieux
+45807	Création : Chaleur de Fée
+45808	Création : Eau de Fée Purifiée
+45809	Création : Mèche de Cheveux
+45810	Création : Queue de Salamandre
+45811	Création : Sang d'Homme-Faucon
+45814	Création : Croc de Cerbère
+45815	Création :  Écaille de Dragon Blanc
+45816	Création : Fourrure de Koala
+45817	Création : Plume de Chantevent
+45818	Création : Griffe de Loup
+45819	Création : Crinière d'Eimus
+45820	Création : Ventouse Morbide
+45821	Création : Écaille de Tafari
+45822	Création : Souffle de Génie
+45823	Création : Souffle de Génie Mystique
+45824	Création : Crinière de Licorne Sacrée
+45827	Création : Larme de Kainen
+45828	Création : Cube de Cristal Magique
+45829	Création : Croc de Lydian
+45901	Création : Potion de Panthère
+45902	Création : Potion de Volatile
+45903	Création : Potion de Tortue
+45904	Création : Potion d'Orc
+45705	Stimulation : Agilité
+45905	Création : Potion de Yéti
+45962	Unité Unique : Relique du Tyran de la Mort
+46023	Pansement des Plaies
+46024	Bénédiction Féerique
+46025	Bénédiction Féerique
+46026	Bénéfiction Féerique
+46027	Guérison Accélérée
+46028	Guérison Accélérée
+46029	Revanche Sanguinaire
+45740	Stimulation : Dextérité, Sagesse
+45759	Encouragement : Attaque Magique
+45907	Création : Potion de Fée Rouge
+45908	Création : Potion de Fée Bleue
+45909	Création : Potion de Sirène
+45910	Création : Potion de Salamandre
+45911	Création : Potion d'Homme-Faucon
+45912	Création : Potion de Centaure
+45663	Unité : Relique de la Kainen
+45728	Stimulation : Vitalité, Intelligence
+45812	Création : Queue de Centaure
+45915	Création : Potion de Dragon Blanc
+45916	Création : Potion de Carbuncle
+45917	Création : Potion de Chantevent
+45918	Création : Potion de Loup
+45919	Création : Potion d'Eimus
+45922	Création : Potion de Génie
+45923	Création : Potion de Génie Mystique
+45924	Création : Potion de Licorne Sacrée
+45925	Création : Potion de Licorne Infernale
+45926	Création : Potion de Tyran de La Mort
+45927	Création : Potion de Kainen
+45928	Création : Cube
+45929	Création : Potion de Lydian
+45930	Unité : Esprit d'Alizea
+45931	Unité : Esprit de Likirus
+45628	Unité : Cube
+45629	Unité : Lydian
+45650	Unité : Relique de la Tortue
+45651	Unité : Relique du Cube
+45652	Unité : Relique de l'Eimus
+45653	Unité : Relique du Yéti
+45654	Unité : Relique de la Licorne Noire
+45655	Unité : Relique de l'Orc
+45656	Unité : Relique du Loup
+45614	Unité : Cerbère
+45615	Unité : Dragon Blanc
+45616	Unité : Carbuncle
+45617	Unité : Harpie
+45618	Unité : Loup
+45619	Unité : Eimus
+45620	Unité : Craken
+45621	Unité : Tafari
+45622	Unité : Génie
+45623	Unité : Génie Mystique
+45624	Unité : Licorne Sacrée
+45625	Unité : Licorne Infernale
+45659	Unité : Relique du Tyran de la Mort
+45660	Unité : Relique de la Harpie
+45661	Unité : Relique de Pick
+45662	Unité : Relique de la Sirène
+45665	Unité : Relique de la Licorne Blanche
+45666	Unité : Relique de la Tafari
+45667	Unité : Relique de la Fée Bleue
+45668	Unité : Relique de Baphomet
+45669	Unité : Relique d'Ondine
+45529	Immersion Guerrière
+45700	Stimulation : Force, Vitalité
+45702	Stimulation : Force
+45703	Stimulation : Force
+45704	Stimulation : Force
+45612	Unité : Ange
+45626	Unité : Tyran de la Mort
+45707	Stimulation : Agilité
+45708	Stimulation : Agilité
+45709	Stimulation : Vitalité
+45710	Stimulation : Vitalité
+45711	Stimulation : Vitalité
+45712	Stimulation : Vitalité
+45713	Stimulation : Intelligence
+45714	Stimulation : Intelligence
+45715	Stimulation : Intelligence
+45716	Stimulation : Intelligence
+45657	Unité : Relique du Centaure
+45717	Stimulation : Dextérité
+45719	Stimulation : Dextérité
+45720	Stimulation : Dextérité
+45721	Stimulation : Force, Intelligence
+45722	Stimulation : Force, Intelligence
+45723	Stimulation : Force, Intelligence
+45724	Stimulation : Force, Intelligence
+45725	Stimulation : Vitalité, Intelligence
+45726	Stimulation : Vitalité, Intelligence
+45727	Stimulation : Vitalité, Intelligence
+45412	Blast de Centaure
+45413	Blast d'Ange
+45414	Blast de Cerbère
+45415	Choc de Glace
+45416	Triple Tir
+45417	Souffle Canin
+45418	Souffles Rapides
+45419	Choc Mental
+45420	Vision Sonique
+45421	Cœur de Terre
+45422	Rafale de Poignard
+45423	Avalanche de Foudre
+45424	Lumière de Vie
+45425	Vœu de Survie
+45426	Sombre Injection
+45427	Dignité Absolue
+45410	Blast de Salamandre
+45428	Charge Implacable
+45430	Activation Cellulaire
+45431	Analyse des Faiblesses
+45432	Fureur Frénétique
+45433	Blessure Mortelle
+45501	Tempête Fatale
+45502	Malédiction de Garuda
+45503	Coup Spécial Tortue
+45504	Fracas Surpuissant
+45505	Paralysie Critique
+45506	Lame de Chevalier du Chaos
+45325	Corne Infernale
+45507	Phoenix
+45509	Danse Macabre
+45510	Tempête de Flamme
+45511	Tempête des Ruines
+45512	Tempête de Lumière
+45513	Coup spécial
+45514	Tempête du Chaos
+45515	Souffle de Glace
+45516	Swing Megatone
+45517	Pluie d'Hémoglobine
+45520	Champ Démoniaque
+45521	Colère de la Terre
+45522	Puissance Terrestre
+45523	Puissance des Vents
+45524	Dévouement au Maître
+45525	Magma Infernal
+45526	Mot de Brutalité
+45527	Mot de Pouvoir
+45528	Cœur de Glace
+45309	Corps de Furie
+45518	Saccage de Fenrir
+45217	Tir de Charge
+45602	Unité : Volatile
+45603	Unité : Tortue
+45604	Unité : Orc
+45605	Unité : Yéti
+45606	Unité : Squelette
+45607	Unité : Fée Rouge
+45608	Unité : Fée Bleue
+45609	Unité : Sirène
+45610	Unité : Salamandre
+45611	Unité : Homme-Faucon
+45730	Stimulation : Force, Vitalité
+45731	Stimulation : Force, Vitalité
+45732	Stimulation : Force, Vitalité
+45733	Stimulation : Intelligence, Sagesse
+45734	Stimulation : Intelligence, Sagesse
+45735	Stimulation : Intelligence, Sagesse
+45736	Stimulation : Intelligence, Sagesse
+45737	Stimulation : Force
+45738	Stimulation : Vitalité, Intelligence
+45739	Stimulation : Vitalité, Intelligence
+45119	Tourbillon
+45120	Fouet Tentaculesque
+45121	Vague Sonique
+45122	Vent de Nord
+45123	Poignard des Vents
+45124	Lumière de Soin
+45125	Corne Perforeuse
+45126	Dispersion Spirituelle
+45127	Aiguilles de Glace
+45128	Intention du Diable
+45129	Martyr
+45130	Damnation Eternelle
+45131	Réconfort du Maître
+45132	Don de Sang
+45133	Rayon Gamma
+45134	Griffes Sanglantes
+45201	Fracas Sanglant
+45202	Griffe Perforante
+45203	Choc Fracassant
+45204	Concentration Sauvage
+45205	Frappe Concentrée
+45206	Fracas du Chaos
+45207	Sphère de Feu
+45210	Conflagration
+45211	Rafale Puissante
+45212	Confiance
+45213	Lumière du Jugement Dernier
+45214	Fracas Outrageant
+45215	Flèche de Glace
+45216	Jet de Dés
+45219	Bouclier Réflecteur
+45220	Soif de Sang
+45221	Chute de Pierres
+45222	Abattre
+45223	Brise Mystique
+45224	Flash Eblouissant
+45225	Charge Eblouissante
+45226	Assaut du Revenant
+45227	Engelures
+45228	Restauration Cellulaire
+45229	Charge Farouche
+45301	Morsure Etourdissante
+45302	Frappe Assourdissante
+45303	Rush de Tortue
+45025	Frappe Aveuglante
+45117	Double Jet
+45135	Mur de Feu
+45304	Corps de Furie
+45306	Choc de Mana
+45307	Tranquillité de l'Esprit
+45308	Choc de Flammes
+45112	Attaque Continue
+45208	Prière Céleste
+45311	Choc de l'Âme
+45312	Cerbère Constricteur
+45313	Commotion Spirituelle
+45314	Swing Géant
+45315	Tir Paralysant
+45316	Attaque Roulante
+45317	Attaque de Contrôle Mental
+45318	Maladie Sanguine
+45319	Regard de Pierre
+45320	Arrêt du Vortex
+45321	Floraison
+45322	Emprise du Vent
+45323	Putréfaction
+45324	Aura de Vent
+45327	Epée de Sura
+45328	Effondrement Glacial
+45329	Rayon Gamma Renforcé
+45330	Rest. Cellulaire Renforcée
+45331	Rugissement du Lion
+45401	Blast de Panthère
+45402	Blast de Volatile
+45403	Blast de Tortue
+45404	Croix de Valhalla
+45405	Charge du Yéti
+45406	Frappes Fourbes
+45407	Flamme Tumultueuse
+45408	Appel de Seraph
+45409	Aura Douloureuse
+42001	Carte : Vitesse d'Incantation
+42002	Carte : Vitesse d'Incantation
+42003	Carte : Vitesse d'Incantation
+42004	Carte : Vitesse d'Incantation
+42005	Carte : Vitesse d'Incantation
+42006	Carte : Vitesse d'Incantation
+44001	Expert en Objet de Créature
+44002	Expert en Objet de Créature
+41526	Energie Sauvage
+44003	Expert en Objet de Créature
+44005	Expert en Objet de Créature
+44006	Expert en Objet de Créature
+44007	Expert en Objet de Créature
+44008	Expert en Objet de Créature
+44009	Expert en Objet de Créature
+45001	Infusion Provocatrice
+45004	Infusion Provocatrice
+45005	Infusion Provocatrice
+45006	Infusion Provocatrice
+45011	Illusion de l'Ombre
+45012	Illusion de l'Ombre
+45013	Illusion de l'Ombre
+45014	llusion de l'Ombre
+45015	Illusion de l'Ombre
+45016	Illusion de l'Ombre
+45021	Frappe Aveuglante
+45022	Frappe Aveuglante
+45023	Frappe Aveuglante
+45024	Frappe Aveuglante
+45002	Infusion Provocatrice
+45032	Cri de Guerre
+45033	Cri de Guerre
+45034	Rugissement
+45035	Hurlement
+45036	Cri de Guerre
+45038	Cri de Guerre
+45039	Cri de Guerre
+45041	Rugissement
+45101	Ecorchage
+45102	Coups de Bec
+45103	Morsure Profonde
+45104	Double Entaille
+45105	Transmission de Menace
+45106	Furie des Os
+45107	Sphères Jumelles
+45108	Prière
+45109	Cri Strident
+45110	Combustion
+45111	Double Entaille
+45114	Morsure
+45115	Souffle Glacial
+45116	Swing Complet
+41502	Harmonie Interdite de Vie
+41503	Harmonie Interdite de Vie Renforcée
+41506	Cri de Menace
+41507	Empreinte du Dompteur
+41420	Bienfait du Kahuna
+41430	Abysses d'Emeraude
+41510	Instinct de Créature Maligne
+41512	Puissance du Métamorphe Renforcée
+41513	Bête Féroce
+41517	Parfaite Force de Vitalité
+41409	Entraînement d'Endurance
+41520	Rapidité de la Bête
+41521	Chance Naturelle
+41522	Chance Naturelle
+41523	Faveur de la Bête
+41528	Force Sauvage Ultime
+41529	Menace Sauvage
+41315	Souffle Faucheur
+41316	Transmission d'Intelligence
+41317	Magie Naturelle de Combat
+41318	Profondeurs Scellées
+41319	Enchantement Céleste
+41320	Force des Eléments
+41321	Force des Eléments Renforcée
+41301	Cérémonie Magique
+41329	Cercle de Magie
+41330	Soutien des Vents
+41331	Reflet de l'Irrésistible Apôtre
+41332	Souffle d'Energie
+41402	Souffle d'Angoisse
+41403	Souffle d'Angoisse Renforcé
+41406	Préparation Circulaire
+41407	Harmonie Magique
+41408	Bonne Fortune
+41411	Magie Perforante
+41412	Magie Perforante Renforcée
+41413	Frappe Tellurique
+41415	Magicien du Souffle
+41416	Fureur de la Nature
+41417	Harmonie de la Nature
+41419	Bienfait du Kahuna
+41201	Second Souffle
+41202	Mouvement de Spiracles
+41203	Mouvement de Spiracles Renforcé
+41207	Diffusion de Spiracles
+41208	Coordination Extrême
+41211	Bénédiction de l'Archer
+41212	Bénédiction de l'Archer Renforcée
+41224	Spiracles de Dextérité
+41225	Spiracles d'Agilité
+41209	Armure de Glace
+41217	Entraînement Poussé
+41006	Résistance au Chaos
+41007	Etreinte des Ténèbres
+41101	Garde Défensive
+41102	Souffle de Gaïa
+41103	Souffle de Gaïa Renforcé
+41004	Résistance à l'Ordre
+41107	Coup Coupe-vent
+41109	Unité Défensive Totale
+41110	Energie Berserker
+41111	Magie de Lumière et d'Ombre
+40907	Bénédiction de Sagesse
+41112	Magie de Lumière et d'Ombre Renforcée
+41119	Spiracle Fatal
+41124	Spiracles de Force
+40902	Bénédiction de Force
+41120	Charge de Spiracle Ultime
+40841	Ceinture de Précision
+40842	Ceinture de Précision
+40843	Ceinture de Précision
+40844	Ceinture de Précision
+40861	Ceinture de Précision Magique
+40862	Ceinture de Précision Magique
+40863	Ceinture de Précision Magique
+40864	Ceinture de Précision Magique
+40871	Ceinture de Précision Magique
+40881	Ceinture de Rapidité d'Attaque
+40882	Ceinture de Rapidité d'Attaque
+40826	Ceinture de Défense & Attaque Magique
+40883	Ceinture de Rapidité d'Attaque
+40885	Carte : Taux de Critique
+40886	Carte : Taux de Critique
+40888	Carte : Taux de Critique
+40889	Carte : Esquive
+40890	Carte : Esquive
+40891	Carte : Esquive
+41303	Soins Boomerang Renforcés
+41306	Esprit de la Providence
+41308	Culture Magique
+41309	Soutien de l'Esprit de Bénédiction
+41310	Jugement Dernier
+41311	Unité Ardente
+41312	Unité Ardente Renforcée
+40803	Ceinture d'Attaque Physique & Magique
+40892	Carte : Esquive
+40894	Carte : Restauration de HP
+40895	Carte : MP Restauration
+40896	Carte :  Attaque Magique, Esquive
+40897	Carte : Attaque et Rapidité d'Attaque
+40898	Carte : Défense, Défense Magique
+40901	Bénédiction d'Eden
+40904	Bénédiction d'Agilité
+40905	Bénédiction de Vitalité
+40906	Bénédiction de Dextérité
+40909	Bénédiction d'Intelligence (adulte)
+40910	Bénédiction d'Agilité (adulte)
+40911	Bénédiction de Vitalité (adulte)
+40912	Bénédiction de Dextérité (adulte)
+40913	Bénédiction de Sagesse (adulte)
+41001	Force de l'Ordre
+41002	Force de la Nature
+41003	Force du Chaos
+40685	Carte : Vitalité, Intelligence
+40686	Carte : Vitalité, Intelligence
+40687	Carte: Force, Dextérité
+40688	Carte: Force, Vitalité
+40689	Carte: Force, Vitalité
+40690	?? ??: ??
+40691	?? ??: ??
+40692	?? ??: ??
+40693	Carte : Chance
+40683	Carte : Vitalité, Intelligence
+40694	Carte : Force, Vitalité
+40696	Carte : Force, Vitalité
+40697	Carte : Vitalité, Sagesse
+40701	Ceinture de Défense
+40702	Ceinture de Défense
+40703	Ceinture de Défense
+40705	Carte : Défense Physique
+40706	Carte : Défense
+40721	Ceinture d'Attaque
+40722	Ceinture d'Attaque
+40723	Ceinture d'Attaque
+40724	Ceinture d'Attaque
+40741	Ceinture de Défense Magique
+40742	Ceinture de Défense Magique
+40743	Ceinture de Défense Magique
+40744	Ceinture de Défense Magique
+40763	Ceinture Magique d'Attaque 
+40764	Ceinture Magique d'Attaque 
+40781	Ceinture d'Attaque & Défense
+40782	Ceinture d'Attaque & Défense
+40783	Ceinture d'Attaque & Défense
+40784	Ceinture d'Attaque & Défense
+40785	Carte : Attaque, Défense
+40786	Carte : Attaque, Défense
+40801	Ceinture d'Attaque Physique & Magique
+40802	Ceinture d'Attaque Physique & Magique
+40761	Ceinture Magique d'Attaque 
+40805	Carte : Attaque, Attaque Magique
+40643	Carte : Intelligence
+40806	Carte : Attaque, Attaque Magique
+40561	Carte: Force
+40562	Carte: Force
+40563	Carte: Force
+40566	Carte : Force
+40581	Carte : Vitalité
+40582	Carte : Vitalité
+40583	Carte : Vitalité
+40584	Carte : Vitalité
+40585	Carte : Vitalité
+40586	Carte : Vitalité
+40601	Carte : Agilité
+40602	Carte : Agilité
+40603	Carte : Agilité
+40604	Carte : Agilité
+40621	Carte: Dextérité
+40622	Carte: Dextérité
+40623	Carte: Dextérité
+40641	Carte : Intelligence
+40642	Carte : Intelligence
+40645	Carte : Intelligence
+40646	Carte : Intelligence
+40822	Ceinture de Défense & Attaque Magique
+40823	Ceinture de Défense & Attaque Magique
+40824	Ceinture de Défense & Attaque Magique
+40825	Ceinture de Défense & Attaque Magique
+40483	Eveil de Restauration de MP
+40548	Renforcement Spirituel
+40564	Carte: Force
+40661	Carte: Force, Intelligence
+40524	Renforcement Corporel
+40624	Carte: Dextérité
+40663	Carte: Force, Intelligence
+40664	Carte: Force, Intelligence
+40665	Carte : Force, Intelligence
+40666	Carte : Force, Intelligence
+40681	Carte : Vitalité, Intelligence
+40682	Carte : Vitalité, Intelligence
+40383	Vision Améliorée
+40384	Vision Améliorée
+40385	Vision Améliorée
+40386	Vision Améliorée
+40401	Ciblage Magique
+40402	Ciblage Magique
+40403	Ciblage Magique
+40404	Ciblage Magique
+40421	Ciblage
+40422	Ciblage
+40423	Ciblage
+40424	Ciblage
+40425	Défense Impénétrable
+40426	Ciblage
+40441	Eveil d'Esquive
+40442	Eveil d'Esquive
+40381	Vision Améliorée
+40405	Ciblage Magique
+40461	Eveil de Restauration de HP
+40462	Eveil de Restauration de HP
+40443	Eveil d'Esquive
+40465	Eveil de Restauration de HP
+40466	Eveil de Restauration de HP
+40481	Eveil de Restauration de MP
+40482	Eveil de Restauration de MP
+40372	Unité du Mercenaire : Armes de Mêlée
+40485	Eveil de Restauration de MP
+40486	Eveil de Restauration de MP
+40501	Eveil de Restauration de HP & MP
+40502	Eveil de Restauration de HP & MP
+40287	Unité Intellectuelle : Costume de Magicien
+40301	Expertise : Masse & Bâton
+40302	Expertise : Masse & Bâton
+40303	Expertise : Masse & Bâton
+40285	Expertise : Armure de Magicien
+40304	Expertise : Masse & Bâton
+40306	Expertise : Masse & Bâton
+40321	Expertise : Arme de Mêlée
+40322	Expertise : Arme de Mêlée
+40323	Expertise : Expertise : Arme de Mêlée
+40324	Expertise : Arme de Mêlée
+40262	Armure d'Invocateur
+40325	Expertise : Arme de Mêlée
+40463	Eveil de Restauration de HP
+40505	Eveil de Restauration de HP & MP
+40506	Eveil de Restauration de HP & MP
+40512	Eveil Critique
+40521	Renforcement Corporel
+40522	Renforcement Corporel
+40523	Renforcement Corporel
+40327	?? ???: ??? ??
+40328	Spécialité Chasseur : Arme à Distance 
+40329	Spécialité Chasseur : Arme à Distance
+40330	Spécialité Chasseur : Arme à Distance 
+40331	Spécialité Chasseur : Arme à Distance 
+40332	Spécialité Chasseur : Arme à Distance 
+40341	Expertise : Dague
+40342	Expertise : Dague
+40243	Armure de Chasseur
+40361	Expertise : Masse
+40362	Expertise : Masse
+40363	Expertise : Masse
+40364	Expertise : Masse
+40365	Expertise : Masse
+40366	Expertise : Masse
+40370	Unité du Mercenaire : Armes de Mêlée
+40371	Unité du Mercenaire : Armes de Mêlée
+40173	Bouclier de Lumine
+40343	Expertise : Dague
+40374	Unité du Chasseur : Armes à Distance
+40375	Unité du Chasseur : Armes à Distance
+40376	Unité du Sorcier : Masse et Bâton
+40377	Unité du Sorcier : Masse et Bâton
+40378	Unité du Sorcier : Masse et Bâton
+40503	Eveil de Restauration de HP & MP
+40526	Renforcement Corporel
+40527	Ouverture Corporelle
+40541	Renforcement Spirituel
+40542	Renforcement Spirituel
+40543	Renforcement Spirituel
+40544	Renforcement Spirituel
+40547	Renforcement Spirituel
+40121	Bouclier d'Ifrit
+40122	Bouclier d'Ifrit
+40123	Bouclier d'Ifrit
+40124	Bouclier d'Ifrit
+40125	Bouclier d'Ifrit
+40126	Bouclier d'Ifrit
+40131	Bouclier d'Ondine
+40132	Bouclier d'Ondine
+40133	Bouclier d'Ondine
+40134	Bouclier d'Ondine
+40135	Bouclier d'Ondine
+40136	Bouclier d'Ondine
+40141	Bouclier de Gnome
+40142	Bouclier de Gnome
+40145	Bouclier de Gnome
+40146	Bouclier de Gnome
+40153	Bouclier de Sylphe
+40154	Bouclier de Sylphe
+40155	Bouclier de Sylphe
+40156	Bouclier de Sylphe
+40161	Bouclier de Shade
+40162	Bouclier de Shade
+40163	Bouclier de Shade
+40164	Bouclier de Shade
+40165	Bouclier de Shade
+40166	Bouclier de Shade
+40171	Bouclier de Lumine
+40172	Bouclier de Lumine
+40081	Eveil d'Attaque Magique
+40175	Bouclier de Lumine
+40176	Bouclier de Lumine
+40191	Méditation
+40192	Méditation
+40193	Méditation
+40194	Méditation
+40195	Méditation
+40196	Méditation
+40201	Clarté
+40202	Clarté
+40203	Clarté
+40204	Clarté
+40205	Clarté
+40105	Eveil d'Attaque Totale
+40143	Bouclier de Gnome
+40206	Clarté
+40222	Armure de Guerrier
+40223	Armure de Guerrier
+40224	Armure de Guerrier
+40225	Armure de Guerrier
+40226	Armure de Guerrier
+40227	Unité Vitale : Costume de Guerrier
+40241	Armure de Chasseur
+40242	Armure de Chasseur
+40151	Bouclier de Sylphe
+40245	Unité Vitale : Costume de Chasseur
+40246	Unité Vitale : Costume de Chasseur
+40261	Armure d'Invocateur
+40042	Eveil d'Attaque
+40043	Eveil d'Attaque
+40044	Eveil d'Attaque
+40045	Eveil d'Attaque
+40046	Eveil d'Attaque
+40047	Compétence d'Eveil Offensif : Attaque
+40048	Compétence d'Eveil Offensif : Force
+40049	Compétence d'Eveil Offensif : Attaque + Force
+40050	Compétence d'Eveil Offensif : Force + Agilité
+40051	Compétence d'Eveil Offensif : Agilité
+40052	Compétence d'Eveil Offensif : Dextérité
+40053	Compétence d'Eveil Offensif : Attaque + Agilité
+40055	Compétence d'Eveil Offensif : Intelligence
+40056	Compétence d'Eveil Offensif : Attaque Magique + Intelligence
+40057	Compétence d'Eveil Offensif : Attaque Magique + Sagesse
+40058	Compétence d'Eveil Offensif : Intelligence + Sagesse
+40063	Eveil de Défense Magique
+40064	Eveil de Défense Magique
+40065	Eveil de Défense Magique
+40066	Eveil de Défense Magique
+40001	Eveil de Défense
+40061	Eveil de Défense Magique
+40083	Eveil d'Attaque Magique
+40084	Eveil d'Attaque Magique
+40086	Eveil d'Attaque Magique
+40101	Eveil d'Attaque Totale
+40102	Eveil d'Attaque Totale
+40103	Eveil d'Attaque Totale
+40104	Eveil d'Attaque Totale
+40264	Armure d'Invocateur
+40265	Unité Vitale : Costume d'Invocateur
+40281	Armure de Magicien
+40282	Armure de Magicien
+40283	Armure de Magicien
+40284	Armure de Magicien
+40026	Eveil de Défense Totale
+40003	Eveil de Défense
+40004	Eveil de Défense
+40005	Eveil de Défense
+40006	Eveil de Défense
+40007	Compétence d'Eveil Défensif : Défense
+40008	Compétence d'Eveil Défensif : Défense Magique
+40009	Compétence d'Eveil Défensif : Défense + Défense Magique
+40010	Compétence d'Eveil Défensif : Esquive
+40011	Compétence d'Eveil Défensif : Défense + Esquive
+40012	Compétence d'Eveil Défensif : Esquive Magique
+40013	Compétence d'Eveil Défensif : Vitalité + Défense
+40021	Eveil de Défense Totale
+40022	Eveil de Défense Totale
+40023	Eveil de Défense Totale
+40024	Eveil de Défense Totale
+40025	Eveil de Défense Totale
+31520	Double Impact Eclair
+31521	Mana Extrême
+31522	Mana Extrême Améliorée
+31526	Vivacité Bestiale
+31535	Crête de Force
+31518	Crête d'Intelligence
+31524	Tornade de Dagues Aiguisées
+31412	Crâne Percé Renforcé
+31502	Régénération Miraculeuse
+31504	Aura Bestiale
+31505	Affection Divine
+31508	Empreinte de Gilgamesh
+31511	Convergence d'Intelligence
+31512	Météore de Feu
+31513	Météore de Feu Renforcé
+31329	Esprit de Lumière
+31324	Guerrier du Temps
+31401	Frayeur Eternelle
+31402	Ténèbres Immortelles
+31403	Ténèbres Immortelles Renforcées
+31407	Force de l'Ombre
+31408	Nuage de Faiblesse
+31409	Faiblesse Mortelle
+31410	Mana Vampirique
+31411	Crâne Percé
+31421	Cercle Vicieux
+31422	Magie Noire
+31423	Pénétration Mentale
+31424	Pénétration Mentale Renforcée
+31301	Ombre des Apôtres
+31302	Rêves de Surate
+31303	Rêves de Surate Renforcés
+31308	Tentacules d'Ombre
+31309	Magie Vampirique
+31310	Endurance Silencieuse
+31311	Aura de Cristal
+31312	Chaîne de Lumière
+31313	Chaîne de Lumière Renforcée
+31314	Flèche Incandescente
+31319	Cristal de Mana
+31320	Sagesse de la Salamandre
+31201	Instinct Sauvage
+31323	Inversion du Temps
+31204	Flèche Lente
+31207	Concentration du Faucon
+31208	Expertise du Traqueur
+31209	Expert de l'Esquive
+31210	Harmonie de Combat
+31202	Imprévisible
+31217	Vision de l'Aigle
+31218	Expert de la Chasse
+31219	Volonté d'Acier
+31220	Acuité
+31211	Maître Circulaire
+31227	Position Défensive : Chien de Chasse
+31228	Position Défensive : Hyène
+31121	Tornade d'Assassin Renforcé
+31221	Acuité Renforcée
+21524	Maîtrise de Résistance
+31102	Aveuglement Héroïque
+31103	Aveuglement Héroïque Renforcé
+31105	Apocalypse des Ténèbres
+31110	Incision des Ténèbres
+31111	Lame d'Assassin
+31112	Lame d'Assassin Renforcée
+31116	Démolition Double
+31117	Attaque Magique d'Ombre
+31118	Mouvement d'Assassin
+31119	Attaque de l'Ombre Avancée
+31120	Tornade d'Assassin
+21504	Soins Ricochet
+31124	Torsion de Furie
+31125	Règne de Terreur
+31126	Impact de Surate
+31127	Force de Célérité
+31128	Ruse d'Exécution
+21501	Maître de l'Infini
+21502	Guérison Néophyte
+21503	Guérison Néophyte Renforcée
+21506	Noble Rétablissement
+21507	Empreinte du Bestiaire
+21510	Marais Magique
+21511	Lance de Glace
+21512	Lance de Glace Renforcée
+31108	Pénitence
+21517	Magie Corporelle
+21518	Chambre des Conflits
+21519	Intelligence Vitale
+21520	Créature Eclair
+21521	Echange Equitable
+21522	Echange Equitable Renforcé
+21526	Maîtrise de Soutien
+21527	Appuis Solides
+21528	Amélioration des Capacités Physiques
+21318	Serpent de Glace
+21319	Formule Soignante
+21320	Chaîne de Soins
+21321	Aura de Protection Renforcée
+21322	Aura de Protection
+21316	Paralysie Temporelle
+21401	Ange de la Résurrection
+21402	Libération Divine
+21403	Libération Divine Renforcée
+21407	Epanouissement d'Energie
+21408	Energie Progressive
+21409	Voie de l'Oracle
+21410	Malice d'Ange(version:7.3)>
+21411	Lumière Débordante
+21412	Lumière Débordante Renforcée
+21208	Liens Sacrés : Armure Bestiale
+21417	Cycles Circulaires
+21418	Aura Protectrice Divine
+21419	Bénédiction du Ciel
+21420	Dés Machiavéliques
+21421	Dés Machiavéliques Renforcés
+21119	Maîtrise des Lances
+21120	Charge de Bouclier Avancée
+21121	Bénédiction de la Providence
+21122	Bénédiction de la Providence Renforcée
+21126	Maîtrise de Force
+21127	Maîtrise de Vitalité
+21128	Energie Bienfaisante
+21129	Bouclier d'Epines
+21202	Souffle Mortel Putride
+21203	Souffle Mortel Putride Renforcé
+21207	Liens Sacrés : Croyance Ultime
+21210	Duo Fatal
+21211	Force d'Immortalité
+21212	Force d'Immortalité Renforcée
+21216	Guide de Lumière
+21217	Force Inébranlable
+21218	Œil de Lynx
+21219	Charge Sacrée Avancée
+21220	Charge Rayonnante
+21301	Masque Magique
+21302	Vague de Lumière
+21303	Voie de l'Erudit Renforcée
+21304	Rafale d'Energie
+10009	Petite Boule de Neige
+21117	Maîtrise des Epées
+21221	Charge Rayonnante Renforcée
+9963	??_???????
+9964	??_??? ???? ????
+9965	??_?? ??? ???
+9966	??_??? ???? ??
+9967	??_??? ???
+9968	??_??? ???? ???
+9969	??_??????
+9970	??_??? ??
+9971	??_??? ???
+9972	??_?? ??? ??
+9973	??_?????
+9974	??_??? ???
+9975	??_??? ??
+9976	??_???? ???
+9977	??_?? ????
+9978	??_?? ?????
+9979	??_??? ?? ???
+9982	??_??? ??
+9983	??_??? ?? ???
+9984	??_?? ?????
+9985	??_?? ?? ???
+9986	??_?????? ??
+9987	??_????
+9988	??_?? ???????
+9989	??_??? ????
+9990	??_??? ??
+9991	??_??? ????
+9992	??_?? ????
+9993	??_? ?? ???
+9994	??_?? ??? ??
+9995	??_????? ???
+9998	??_??? ??
+9999	??_??? ???
+10000	??_??? ??
+10001	??_??? ?
+10002	??_???? ??
+10003	??_?? ??
+10004	??_??? ??
+10005	??_??? ??
+10006	??_???? ??
+10007	??_??? ??
+10008	??_??? ??
+21113	Maître Perçant Renforcé
+21308	Magie Synchrone
+21309	Voie de l'Erudit
+21310	Trou Noir
+21311	Flèches d'Ondine
+21312	Flèches d'Ondine Renforcées
+10011	Empoisonnement
+10012	Puissant Esprit
+10013	Aura d'Oppression
+10014	Nouilles Epicées
+10015	Nouilles Noires
+10016	? ?? ?? ???
+11001	Chevaucher Créature
+14001	Créature Guerrière
+21102	Cœur de Prière
+9695	?? ???
+9961	??_???? ????
+9980	??_? ???
+21108	Défense Eclair
+21109	Maîtrise de Défense
+21110	Formation Défensive
+21111	Lame Mystérieuse
+21112	Maître Perçant
+9681	Vague Destructrice
+9682	Tempête de Météorites
+9685	Flèche Ténébreuse
+9686	Rupture
+9687	Flèche de Vulcain
+9688	Mélodie Cauchemardesque
+9689	Fatalité
+9690	Appel Insistant
+9691	????? ??
+9692	?? ??
+9693	??? ?
+9694	??? ???
+9697	??? ??
+9698	??? ??
+9699	?? ???
+9700	?? ???
+9701	?? ???
+9702	????
+9659	Bienfait de Folie
+9703	????
+9705	?? ???
+9706	??? ??
+9707	?? ??
+9708	???? ??
+9901	Démonstration_Tornade de Poignard
+9902	Démonstration_Jugement Divin
+9903	Démonstration_Assaut Divin
+9904	Démonstration_Marteau Givrant
+9905	Démonstration_Danse Funeste
+9906	Démonstration_Coups Multiple
+9953	Démonstration_Mur de Feu
+9996	??_?? ?? ???
+21103	Sceau de Vindicte
+9641	Feu Eternel
+9909	Démonstration_Coups Flambants en Série
+9910	Démonstration_Dance de l'Epée Enflammée
+9911	Démonstration_Vent Electrisant
+9912	Démonstration_Fissure Spatiale
+9951	Démonstration_Pluie de Cristal
+9952	Démonstration_Grêle Frappante
+9632	Invocation de Monstres Stade 3
+9633	Parchemin de Pétrification
+9634	Slam 
+9635	Hurlement du Guerrier
+9636	Réalisation Destructrice
+9639	Pilier de Lumière
+9640	Essoufflement Mortel 
+9643	??? ?
+9644	Feinte de Tir
+9645	Terre Tremblante
+9646	Vague Sanglante
+9679	Cri de Résistance
+9683	Mur de Feu
+9907	Démonstration_Apocalypse
+9955	Démonstration_Calvaire de Feu
+9956	Démonstration_Bombe de l'Ombre
+9957	Démonstration_Explosion de Feu
+9958	Démonstration_Invoque Soins de
+9959	Démonstration_Invoque Mana de
+9960	??_??? ??? ???
+9648	Peur Tétanisante
+9649	Champ Destructeur
+9650	Terre Fragmentée
+9651	Brûlure de Mana
+9652	Silencieuse Rivière
+9653	Lumière Bienfaisante
+9654	Flammes de l'Enfer
+9655	Brûlure Sanguine
+9656	Hurlement du Berserker
+9657	Coup Ahurissant
+9658	Bienfait Guérisseur
+9661	Poison Fatal
+9662	Œil de Terreur
+9663	Marais d'Acide
+9664	Réduction de Défense
+9665	Réduction d'Attaque
+9666	Réduction de Rapidité d'Attaque
+9667	Grève de Mana
+9668	Déluge Météorique
+9669	Pilier de Feu
+9587	Parfum de Lame
+9585	Message de Mort
+9588	Dent de Scie Sanglante
+9590	Essoufflement Mortel
+9600	Incarnation de l'Œil du Jugement
+9601	Sombre Pieu
+9602	Mains Lestes
+9603	Lumière de l'inquisition
+9604	Brume de l'inquisition
+9579	Réduction de Défense
+9605	Cristal Eblouissant
+9630	Invocation de Monstres Stade 1
+9670	Rush
+9672	Epée Assommante
+9673	Psychose
+9674	Danse de l'Epéiste
+9675	Affaiblissement des Ténèbres
+9676	Enorme Coup
+9677	Champ d'Eclairs
+9678	Volonté Inébranlable
+9607	Collecteur
+9608	Voix de la Sorcière
+9609	Maîtres d'Armes Antique
+9610	Maître d'Armes Antique
+9611	Fine Lame Antique
+9612	Fine Lame Antique
+9613	Souffle de Dragon des Glaces
+9614	Dragon de Glace
+9615	Magie du Dragon des Glaces
+9616	Jongle avec les Flammes
+9570	Lame Sonique
+9619	Jeu Dangereux
+9620	Imposture Divine
+9621	Imposture Divine
+9622	Imposture Divine
+9623	Imposture Divine
+9624	Fanatiques
+9625	Fanatiques
+9626	Death Peters
+9553	Jet de Dés
+9617	Jongle avec les Eclairs
+9627	Parchemin Briseur de Sorts
+9629	Parchemin de Pétrification
+9538	Réduction de Défense Magique
+9539	Consecutive slashes Attk 
+9540	Brûlure de Mana
+9541	Assommer
+9542	Cristalliser
+9543	Réduction de Défense 
+9544	Rotation 
+9545	Silence 
+9546	Solidité
+9549	Double Jet
+9550	Soins
+9551	Pincement Brumeux
+9552	Maladie Sanguine
+9555	Reflet d'Or
+9556	Reflet d'Or
+9557	Sarbacane Engourdissante
+9558	Bénédiction des Dieux
+9559	Sarbacane Choquante
+9560	Invocation de Génie Niv. 2
+9517	Cri de Célérité
+9536	Empoisonné
+9561	Invocation de Génie Niv. 1
+9563	Invocation de deux Génies Niv. 1
+9564	Invocation de 5 Génies Niv. 1
+9565	Attaque de mêlée pour Eimus
+9566	Attaque de mêlée pour Génie Mystique
+9567	Sarbacane Engourdissante
+9568	Sarbacane Choquante
+9569	Sortie d'Espoir
+9530	Battement Adorable 
+9547	Rage de Puissance
+9572	Ferveur de Conviction
+9573	Piège Retournant
+9574	Lame Sonique
+9575	Coup Double
+9576	Coup Double
+9577	Brûlure de Mana
+9578	Réduction de Rapidité
+9581	Invocation de Fanatiques
+9582	Danse de l'Ombre
+9583	Slasher en Chaine
+9584	Transformation en Yak
+9207	S_Incantation Successives_Divers Projectiles Verticaux
+9208	S_Incantation_Tirs Individuels Multiples Longue Portée
+9209	S_Attaque Magique_Portée Spéciale
+9210	S_Incantation Absorbante_Contre les Cibles Vivantes
+9211	S_FX_Test_Projectile parcourant la surface
+9212	S_FX_Test_Portée Auto Centré
+9205	S_Incantation Successives_Projectile Vertical
+9301	S_Dégâts d'Incantation Durable
+9303	S_Incantation Absorbante_Contre les Cadavres
+9304	S_Incantation de Resurrection_Restauration de Scène
+9401	S_Sacrifice de Créature
+9402	S_Aura Créature_Joueur
+9403	S_Aura Créature_Groupe
+9405	S_Requiem
+9501	Cauchemar
+9502	Affaiblissement des Ténèbres
+9503	Ensanglantement
+9504	Souffle d'Oforia
+9507	Souffle d'Abhuva
+9508	Coup de Pied d'Abhuva
+9509	Impact d'Abhuva
+9510	Attaque d'Ongle
+9511	Frappe de Hache
+9512	Soins
+9513	Orbe de Feu
+9514	Orbe de Glace
+9515	Mangling
+9516	Cri de Colère
+9505	Terreur d'Oforia
+9519	Sanglots de Flamme 
+9520	Rage de Bloodymos 
+9521	Cri Résonnant 
+9522	Flèche Rageuse
+9523	Coupure de pleine volonté
+9524	Possession par le Démon
+9525	Poing de Flamme
+9526	Nausé
+9152	S_Attaque de Flèche_Type de Charge
+9527	Pour Test Possession par le Démon
+9529	Saccage du Wyvern Niv. 1 
+9001	Premiers Soins 
+9002	Rapidité Légendaire 
+9101	S_Attaque Chargée
+9102	S_Attaque Rapide
+9105	S_3 Mouvement Divisé_Plusieurs Coups Consécutifs
+9106	S_Attaque Dirigée_Arrière
+9107	S_Attaque de Bouclier_Augmente la Menace
+9108	S_Dégâts Longue Portée Ciblé
+9111	S_Attaque_Absorbtion
+9112	S_Attaque Chargée de Bouclier_Poussée-arrière
+9113	S_Attaque Corporelle Chargée_Poussée-arrière
+9151	S_Attaque de Flèche_Sans Délai
+9154	S_Attaque de Flèche_Type de Portée
+9155	S_Attaque de Flèche_Absorbtion
+9156	S_Attaque de Flèche_Repousse
+9157	S_Attaque de Flèche Longue Portée_Repousse
+9532	Coup Double
+9533	Réduction de Vitesse
+9534	Bébé Flamboyant
+9535	Saignement
+6905	Contrôle des Environs
+8004	Chute de Rocher 
+9103	S_Mouvement Unique Instantané à Coups Successifs
+9201	S_Attaque Magique_Missile Impact Simple
+7008	Clash
+9109	S_Dégâts Longue Portée Ciblé_Coups Successifs
+9203	S_Attaque Magique_Missile Impacts Multiple
+9204	S_Attaque Magique_Impact Multiple Concurrentiel
+6158	Pierre de Vitalité Purifiée
+6159	Pierre de Dextérité Purifiée
+6160	Pierre d'Agilité Purifiée
+6161	Pierre d'Intelligence Purifiée
+6156	Pierre de Sagesse Purifiée
+6164	Pierre de Vitalité Ancestrale
+6165	Pierre de Dextérité Ancestrale
+6166	Pierre d'Agilité Ancestrale
+6167	Pierre d'Intelligence Ancestrale
+6094	Pierre de Dextérité Séculaire
+6162	Pierre de Sagesse Purifiée
+6902	Ramasser
+6903	Gérance
+6904	Activation
+6907	Shopping de Créature
+6908	Apprivoisement
+6909	En cours
+6910	Ouverture de trésor
+7001	Assaut Critique 
+7002	Spiracle de Zeus 
+6082	??? ???? ??
+6168	Pierre de Sagesse Ancestrale
+7005	Masse Etourdissante 
+7006	Brise Crâne 
+7007	Sprint
+6046	Thé noir
+7003	Briseur de Défense 
+8001	Flamme Brûlante 
+8002	Pluie Acide 
+8003	Flèches des Ténèbres 
+6014	Pierre de Force Purifiée
+6015	Pierre de Vitalité Purifiée
+6016	Pierre de Dextérité Purifiée
+6017	Pierre d'Agilité Purifiée
+6018	Pierre d'Intelligence Purifiée
+6021	Plume de Retour
+6022	Parchemin de Restauration Niv.1
+6023	Parchemin de Restauration Niv.2
+6024	Parchemin de Restauration Niv.3
+6025	Parchemin de Restauration Niv.4
+6026	Parchemin de Restauration Niv.5
+6027	Parchemin de Restauration Niv.6
+6028	Parchemin de Restauration Niv.7
+6029	Parchemin de Restauration Niv.8
+6030	Parchemin de Guérison Niv.1
+6031	Parchemin de Guérison Niv.2
+6032	Parchemin de Guérison Niv.3
+6035	Parchemin de Guérison Niv.6
+6036	Parchemin de Guérison Niv.7
+6037	Parchemin de Guérison Niv.8
+6038	Parchemin de Restauration Mana Niv.1
+6039	Parchemin de Restauration Mana Niv.2
+6040	Parchemin de Restauration Mana Niv.3
+6041	Parchemin de Restauration Mana Niv.4
+6042	Parchemin de Restauration Mana Niv.5
+6043	Parchemin de Restauration Mana Niv.6
+6044	Parchemin de Restauration Mana Niv.7
+6045	Parchemin de Restauration Mana Niv.8
+6048	Parchemin de Vent de Créature Niv. 2
+6049	Parchemin de Vent de Créature Niv. 3
+6061	Pierres de Force Purifiées
+6062	Pierres de Vitalité Purifiées
+6063	Pierres de Dextérité Purifiées
+6064	Pierres d'Agilité Purifiées
+6065	Pierres d'Intelligence Purifiées
+6066	Pierres de Sagesse Purifiées
+6067	Pierre de Force Ancestrale
+6068	Pierre de Vitalité Ancestrale
+6069	Pierre de Dextérité Ancestrale
+6072	Pierre de Sagesse Ancestrale
+6073	Reliques de Force 
+6074	Reliques de Vitalité 
+6075	Reliques de Dextérité 
+6076	Reliques d'Agilité 
+6077	Reliques d'Intelligence 
+6078	Reliques de Sagesse 
+6079	Fragment de Force Renforcé
+6080	Fragment d'Esprit Renforcé
+6081	Fragment de Lune Renforcé
+3811	Flammes de l'Ombre
+6012	Bouteille d'Eau Bénite de Fée
+6019	Pierre de Sagesse Purifiée
+6070	Pierre d'Agilité Ancestrale
+6084	??? ??? ??
+6085	??? ??? ??
+6086	??? ??? ??
+6087	??? ??? ??
+6088	??? ??? ??
+6089	??? ??? ??
+6090	??? ??? ??
+6091	??? ??? ??
+6092	Pierre de Force Séculaire
+6093	Pierre de Vitalité Séculaire
+3402	Arme Lumineuse
+3411	Préservation des Ténèbres
+3412	Force des Ténèbres
+3423	Vitesse du Vent
+3424	Energie de la Pierre
+3425	Force du Feu Sacré
+3426	Enchantement d'Arme : Feu
+3427	Enchantement d'Arme : Eau
+3428	Enchantement d'Arme : Electricité
+3429	Enchantement d'Arme : Terre
+3430	Bouclier de Feu
+3454	Arme Etincelante
+3458	Peau d'Armure
+3460	Force d'Illumination Mentale
+3461	Magie Soudaine
+3472	Sorcellerie de l'Ame
+3492	Bain de Lumière
+3601	Cauchemar
+3602	Tremblements du Vent
+3603	Peau Fragile
+3607	Dissiper Magie
+3608	Esprit en Crise
+3613	Faiblesse Enfumée
+4802	Flèche Sanglante
+6033	Parchemin de Guérison Niv.4
+6096	Pierre d'Intelligence Séculaire
+6097	Pierre de Sagesse Séculaire
+6101	Booster - Attaque Sautée
+6102	??? - ??
+6151	Pierre de Force Purifiée
+6152	Pierre de Vitalité Purifiée
+6153	Pierre de Dextérité Purifiée
+6154	Pierre d'Agilité Purifiée
+6155	Pierre d'Intelligence Purifiée
+3621	Colère Divine
+3622	Sceau de Gaïa
+3750	Atrophie de l'Ombre
+3751	Pétrification Désespérée
+3752	Amplification de Gravité
+3753	Fumée Pétrifiante
+3754	Avènement de Yak
+3803	Gisement de Cadavres
+3806	Interruption de Sorts
+3810	Piège de Terreur
+3022	Rafale de Vent
+3224	Energie Restauratrice
+3431	Soutien des Vents
+3815	Champ d'Attraction
+3901	Esprit de Restauration
+4001	Invocation de Créature
+4002	Rappel de Créature
+4003	Apprivoisement
+4004	Apprivoisement
+4012	Transfert de Douleur
+4201	Soins Créature
+3205	Résurrection
+3614	Tremblements du Vent Puissant
+4211	Créature Transfert d'Ame
+4402	Soutien Mental
+4412	Soutien de Force
+4413	Soutien de Combat
+4612	Créature Intimidation
+4613	Créature Stabilité
+4614	Griffe du Lion
+4801	Créature Extraction de MP
+4202	Créature Résurrection
+6001	Parchemin de Résurrection
+6005	Parchemin de Contrepoison
+6006	Parchemin de Recharge
+6007	Retour
+6008	Fragment de Force
+6009	Fragment d'Esprit
+6010	Fragment de Lune
+6011	Bouteille d'Eau de Fée
+2622	Rythme Accéléré
+2623	Poussière Soporifique
+2624	Oubli
+2626	Flèche Vampirique
+2630	Hâte Soudaine
+2631	Charge de Spiracle
+2635	Provocation
+2637	Distorsion de la Rage
+2638	Attaque de l'Ombre
+2639	Cape de l'Ombre
+2620	Visée
+2641	Spiracle Energisant
+2645	Charge Contraignante
+2649	Poussière Aveuglante
+2655	Spiracles Brûlants
+2656	Foudre de Spiracles
+2661	Spiracles d'Invincibilité
+2662	Piège Affaiblissant
+2663	Piège de Flammes
+2664	Œil du Prédateur
+2334	Tir Aveuglant
+2668	Energie Mystérieuse
+2672	Style Agile
+2673	Style du Crépuscule
+2676	Camouflage d'Hostilité
+2677	Flèche Spirale
+2678	Bourrasque de Flèches
+2679	Flèches de Bourrasque
+2681	Bouclier de Spiracles
+2682	Double invocation
+3003	Prison de Givre
+3004	Illumination Divine
+3005	Pluie Acide
+3011	Eclat de Lumière
+3012	Boule de Feu
+3013	Flamme Brûlante
+3014	Absorption de Vie
+3015	Flèches des Ténèbres
+3016	Eclairs
+3017	Eclaboussure d'Eclairs
+3021	Flamme Ecorchante
+3001	Flamme Divine
+3024	Sphères d'Eau Cristallisée
+3025	Chute de Rocher
+3027	Sombre Spirale
+3030	Brûlure de Mana
+3033	Pourfendeur d'Eclair
+3035	Mur de Paix
+3037	Etincelle Glacée
+3040	Super Nova
+3103	Tempête Electrique
+3151	Explosion Pétrifiante
+2312	Flèche Ardente
+3156	Explosion de Feu
+3183	Feu Eternel
+3185	Mur de Feu
+3186	Paradis Perturbé
+3187	Pluie des Esprits
+3188	Choc Aspirant
+3201	Premiers Soins
+3202	Soins
+3203	Soins Immédiats
+3204	Antidote
+2022	Briseur de Mental
+2031	Frappe Précise
+2032	Triple Assaut
+2033	Lame Sanglante
+2034	Brise Crâne
+2041	Frappe Centrifuge
+2043	Spiracle de Zeus
+2046	Avalanche de Pierres
+2051	Tornade de Poignard
+2052	Convulsion Terrestre
+2056	Bombe de Spiracles
+2058	Feu des Enfers
+2060	Danse Funeste
+2061	Déluge de Lames
+2063	Briseur de Physique
+2064	Briseur d'Ame
+2067	Fureur Divine
+2068	Jugement Divin
+2070	Tranchant Sonique
+1002	Test
+1003	Entraînement Défensif
+1004	Entraînement Physique
+1082	Maîtrise des Spiracles
+1111	Maîtrise de l'Arbalète
+1151	Expert de l'Arme à deux mains
+1157	Expert de l'Arbalète
+1181	Expert des Doubles Epées
+1201	Maîtrise de l'Armure
+1202	Défense Physique
+1211	Maîtrise du Bouclier
+2020	Briseur d'Attaque
+2044	Pourfendeur
+2075	Charge de l'Ombre
+2076	Blessure de l'Ombre
+2077	Vague Funeste
+2078	Turbulence Pourpre
+2082	Flamme Déchaînée
+2303	Tir Provocateur
+2304	Flèches Critiques
+2311	Flèche Anesthésiante
+1831	Renforcement de Créature
+2053	Fissure Spatiale
+2315	Flèche de Spiracle Givré
+2321	Echo d'Onde de Choc
+2322	Tir Perçant
+2326	Coups Successifs
+2328	Pilier de Feu
+2331	Coup Empoisonné
+2332	Flèches de Destruction
+2333	Rayon Etourdissant
+3210	Restauration
+3211	Transfert de Vie
+3212	Absorption des MP d'un Cadavre
+3220	Sorcellerie de Résurrection
+3222	Eau Régénératrice
+2071	Apocalypse
+2339	Pluie Infernale
+2340	Cascade des Ténèbres
+2501	Double Fureur
+2502	Fureur de l'Assassin
+2503	Fureur du Chasseur
+2601	Esquive Ultime
+2602	Concentration Mentale
+2611	Garde Active
+2616	Piège Réfrigérant
+2617	Piège d'Eclairs
+1411	Maîtrise de l'Eloquence
+1451	Rafraîchisseur de Compétences
+1801	Contrôle de Créature
+1811	Stimulation de Créature
+1821	Sagesse de Créature
+1851	Régénération de Créature
+1881	Invocation Double
+1891	Essence des Eléments
+2001	Frappe Centrée
+2011	Impact Lumineux
+2012	Masse Etourdissante
+2013	Masse Assommante
+2014	Croix Divine
+2018	Reflet du Bouclier
+2019	Charge de Bouclier

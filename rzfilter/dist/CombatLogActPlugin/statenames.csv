@@ -1,0 +1,1960 @@
+1001	Gain Max HP
+1002	Gain Max MP
+1003	Régénération de HP
+1004	Récupération HP
+1005	Régénération de MP
+1006	Récupération MP
+1007	Attaque Renforcée
+1008	Gain Atq. M.
+1009	Gain Défense
+1010	Gain Déf. M.
+1011	Attaque Rapide
+1012	Magie Rapide
+1013	Course Rapide
+1014	Gain Précision
+1015	Gain Esquive
+1016	Gain M. Précision
+1017	Gain Esquive M.
+1018	Gain Critique%
+1019	Gain Dégâts Critique
+1021	Gain Blocage%
+1031	Bonus de vitesse de déplacement
+1051	Attaque augmentée
+1052	Attaque Magique augmentée
+1053	Défense augmentée
+1054	Défense Magique augmentée
+1055	Rapidité d'Attaque augmentée
+1056	Vitesse d'Incantation augmentée
+1057	Vitesse de Déplacement augmentée
+1058	Augmentation Puissance d'attaque
+1059	Augmentation Puissance Magique
+1060	Augmentation Défense
+1061	Augmentation Défense Magique
+1062	Augmentation Rapidité d'Attaque
+1063	Augmentation Vitesse d'Incantation
+1064	Augmentation Vitesse
+1065	Régénération de HP
+1066	Bienfait du Village Caché
+1067	Protection de Luciad
+1068	Bienfait de Luciad
+1069	Souffle Miraculeux
+1101	Gain Max HP-MP
+1201	Berserker
+1202	Provoquer
+1301	??? ??
+1302	?? ??
+1303	Peine Perpétuelle
+1501	Gain Force
+1502	Gain Vitalité
+1503	Gain Dextérité
+1504	Gain Agilité
+1505	Gain Intelligence
+1506	Gain Sagesse
+1507	Gain Chance
+1508	Arrêt du HP Régén.
+1509	Arrêt du MP Régén.
+1510	Vitesse de Déplacement
+1511	Gain Défense 
+1512	Gain Attaque
+1513	Gain Max HP 
+1514	Gain Déf. M.
+1515	Gain Atq. M.
+1516	Bénédiction Massive d'Armure
+1517	Bénédiction Massive d'Arme
+1518	Bénédiction Massive d'Armure Magique
+1519	Bénédiction Massive de Pouvoir
+2002	Absorption MP
+2003	Absorption HP
+2031	Rage Accélérée
+2051	Chasse aux Cartes
+2501	Dégâts de Feu
+2502	Dégâts d'Eau
+2503	Dégâts de Vent
+2504	Dégâts de Terre
+2505	Arme Etincelante
+2506	Force des Ténèbres
+2507	Arme bien entretenue
+2508	Sombre intention: Compétences/ dégâts Augmentées
+2509	Bénédiction des Dieux
+2601	Menace Augmentée
+2602	Menace Réduite
+2603	Dégâts sur la durée
+2604	Putting Poison
+2605	Puissant Esprit
+4001	Potion Restauration HP
+4002	Potion Restauration MP
+4003	Economiseur d'Energie
+4004	Potion de Vivacité
+4005	Potion de Célérité
+4006	Potion d'Incantation
+4007	Potion de Défense
+4008	Œuf de Volaille Rôti
+4009	Cuisse de Volaille
+4010	Beignet de Tortue
+4011	Steak de Panthère
+4012	Fulmar Grillé
+4013	Œuf Kabob Baveux
+4014	Côte de Yak
+4015	Pizza au Wyverne
+4016	Eau de Source Pure
+4017	Thé Glacé
+4018	Thé Vert
+4019	Limonade
+4020	Thé Sucré
+4021	Soda Léger
+4022	Soda Sucré
+4023	Punch aux Fruits Frais
+4024	Pain d'Épice
+4025	Pot de Miel
+4026	Potion d'Attaque
+4027	Eau Glacée
+4028	Pain d'Epice du Colisée
+4029	Pot de Miel du Colisée
+4031	Potion de Panthère
+4032	Potion de Volatile
+4033	Potion de Tortue
+4034	Effet Potion d'Orc
+4035	Potion de Yéti
+4036	Potion de Squelette
+4037	Potion de Fée Rouge
+4038	Potion de Fée Bleue
+4039	Potion de Sirène
+4040	Potion de Salamandre
+4041	Effet Potion d'Homme-Faucon
+4042	Potion de Centaure
+4043	Effet Potion d'Ange
+4044	Potion de Cerbère
+4045	Potion de Dragon Blanc
+4046	Potion de Carbuncle
+4047	Potion de Chantevent
+4048	Potion de Loup
+4049	Potion d'Eimus
+4050	Potion de Craken
+4051	Potion de Tafari
+4052	Potion de Génie
+4053	Pomme Rouge
+4054	Banane Fraîche
+4055	Gâteau de Riz
+4056	Crumble à la Rubarde
+4057	Cookie au Chocolat
+4058	Mousse au Chocolat
+4059	Curry de Ceriu
+4060	Donut Maison
+4061	Sushi de la Vallée de Cristal
+4062	Sushi de la Vallée de Cristal
+4063	Thé Vert d'Horizon
+4064	Saucisse de Yak
+4065	Hamburger de Katan
+4066	Paquet de Gâteaux Salés
+4067	Nouilles aux Haricots Rouges
+4068	Légumes Vapeur
+4069	Soupe Epicée
+4070	Kiwi du Lac Messi
+4071	Jus de Kiwi Acide
+4072	Café au Lait
+4073	Ravioli de Laksy
+4074	Melon Jaune
+4075	Raviole Géante
+4076	Soupe Fraîche
+4077	Omelette Légère
+4078	Orange Acide
+4079	Jus d'Orange Pur Jus
+4080	Pancake de Rondo
+4081	Glace Menthe-Choco
+4082	Ananas Extra
+4083	Pizza
+4084	Plateau Complet
+4085	Fondant à la Fraise
+4086	Gâteaux Salés à la Crevette
+4087	Spaghettis Froids
+4088	Fraise Sauvage du Lac Lenka
+4089	Gâteau de Baies Sauvages
+4090	Gâteau à la Fraise
+4091	Gâteaux de Riz Epicé
+4092	Udon Salé
+4093	??? ?? ?? ????
+4094	 Coup de Fouet
+4095	Very Aromatic Latte Effect
+4096	Petit Bol d'Udon Salé
+4097	Grand Bol d'Udon Salé
+4098	Potion de Licorne Sacrée
+4099	Potion de Licorne Infernale
+4100	Potion de Tyran de la Mort
+4101	Potion de Kainen
+4102	Potion de Croissance Miraculeuse
+4103	Potion de Lydian
+4104	Potion de Vivacité Améliorée
+4105	Potion de Célérité Améliorée
+4106	Potion d'Incantation Améliorée
+4107	Potion de Baphomet
+4108	Potion du Boucher
+4109	Potion de Mécanymphe
+4110	Effet Potion Miraculeuse
+4111	Effet Potion Miraculeuse
+4112	Effet Potion Miraculeuse
+4113	Effet Potion Miraculeuse Deluxe
+4114	Potion du Minotaure
+4115	Potion de Pick
+4116	Effet Potion Miraculeuse Ultime
+4117	Potion de Mephisto
+4118	Potion d'Amarylis
+4119	Croissance Miraculeuse
+4120	Potion Miraculeuse d'Apprenti
+4154	Potion de Vivacité Extrême
+4155	Potion de Célérité Extrême
+4156	Potion d'Incantation Extrême
+4204	Potion de Vivacité Enchantée
+4205	Potion de Célérité Enchantée
+4206	Potion d'Incantation Enchantée
+4207	Potion de Vivacité Suprême
+4208	Potion de Célérité Suprême
+4209	Potion d'Incantation Suprême
+4251	Appuis Solides
+4501	Colère
+4502	Halo de Lumière
+4503	Frénésie
+4504	Création de Spiracle
+4505	Transformation 
+4506	Transformation 
+4507	Transformation
+4508	Déguisement 
+4509	Déguisement 
+4510	Bénédiction de la Déesse
+4511	Potion de Restauration de HP-MP
+4512	Marque du Criminel
+4513	Thé de Pin Noir
+4514	?? ???? ???
+4515	? ??
+4516	?? ??
+4517	?? ??
+4518	?? ??
+4519	?? ??
+4520	?? ??
+4521	?? ??
+4522	Air Pur
+4523	Eau Pure
+4524	Terre élémentaire
+4525	Feu élémentaire
+4526	Amour Eternel
+4527	Coup de Chaleur
+4528	Transformation
+4529	Transformation
+4530	Transformation
+4531	Transformation
+4532	Transformation
+4533	Transformation
+4534	Transformation
+4535	Transformation
+4536	Transformation
+4537	Transformation
+4538	Transformation
+4539	Transformation
+4540	Transformation
+4541	Transformation
+4542	Transformation
+4543	Transformation
+4544	Pain de Pâques
+4545	Œuf de Pâques
+4546	Steak de Pâques
+4547	Potion de HP de Pâques
+4548	Potion de MP de Pâques
+4549	Dinde de Pâques
+4550	Potion de Transformation - Spectre
+4551	??? ?? ?? ??
+4552	Energie du Cristal Antique
+4553	Effet Potion Miraculeuse(+)
+4554	Energie Furieuse
+4555	Transformation
+4556	Transformation
+4557	Transformation
+4558	
+4559	
+5001	Réduction Max HP
+5002	Réduction Max MP
+5003	Réduction Puissance d'Attaque
+5004	Réduction Puissance Magique
+5005	Réduction Défense
+5006	Réduction Défense Magique
+5007	Réduction Rapidité d'Attaque
+5008	Réduction Rapidité
+5009	Réduction Vitesse
+5010	Réduction Précision
+5011	Réduction Esquive
+5012	Réduction M. Précision
+5013	Réduction Esquive M.
+5014	Réduction Critique%
+5015	Réduction Critique
+5101	Réduction Force
+5102	Réduction Vitalité
+5103	Réduction Dextérité
+5104	Réduction d'Agilité
+5105	Réduction d'Intelligence
+5106	Réduction Sagesse
+5107	Réduction Chance
+5108	Lumière Salvatrice
+5109	Bienfait Bingo : Attaque augmentée 1
+5110	Bienfait Bingo : Attaque augmentée 2
+5111	Bienfait Bingo : Attaque Magique augmentée 1
+5112	Bienfait Bingo : Attaque Magique augmentée 2
+5113	Bienfait Bingo : Attaque et Attaque Magique augmentées 1
+5114	Bienfait Bingo : Attaque et Attaque Magique augmentées 2
+5115	Bienfait Bingo : Défense Augmentée 1
+5116	Bienfait Bingo : Défense Augmentée 2
+5117	Bienfait Bingo : Défense Magique augmentée 1
+5118	Bienfait Bingo : Défense Magique augmentée 2
+5119	Bienfait Bingo : Défense et Défense Magique augmentées 1
+5120	Bienfait Bingo : Défense et Défense Magique augmentées 2
+5121	Bienfait Bingo : Rapidité d'Attaque augmentée 1
+5122	Bienfait Bingo : Rapidité d'Attaque augmentée 2
+5123	Bienfait Bingo : Vitesse d'Incantation augmentée 1
+5124	Bienfait Bingo : Vitesse d'Incantation augmentée 2
+5125	Bienfait Bingo : Attaque et Vitesse d'Incantation augmentées 1
+5126	Bienfait Bingo : Attaque et Vitesse d'Incantation augmentées 2
+5127	Bienfait Bingo : Vitesse de Déplacement augmentée 1
+5128	Bienfait Bingo : Vitesse de Déplacement augmentée 2
+5129	Bienfait Bingo : Esquive augmentée 1
+5130	Bienfait Bingo : Esquive augmentée 2
+5131	Bienfait Bingo : Précision augmentée 1
+5132	Bienfait Bingo : Précision augmentée 2
+5133	Bienfait Bingo : Précision Magique augmentée 1
+5134	Bienfait Bingo : Précision Magique augmentée 2
+5135	Bienfait Bingo : Précision et Précision Magique augmentées 1
+5136	Bienfait Bingo : Précision et Précision Magique augmentées 2
+5137	Bienfait Bingo : Esquive Magique augmentée 1
+5138	Bienfait Bingo : Esquive Magique augmentée 2
+5139	Taux de Critique augmenté Niv. 1
+5140	Taux de Critique augmenté Niv. 2
+5141	Coups Critiques augmentés Niv. 1
+5142	Coups Critiques augmentés Niv. 2
+5143	Restauration de HP Niv. 1
+5144	Restauration de HP Niv. 2
+5145	Max HP-MP augmenté Niv. 1
+5146	Max HP-MP augmenté Niv. 2
+5501	Réduction Blocage%
+5997	Fléau des Abysses
+5998	Pénalité de Poids
+5999	Fléau
+6001	Régén.HP Suspendue
+6002	Régén.MP Suspendue
+6003	Empoisonnement
+6004	Saignement
+6005	Endormissement
+6006	Étourdissement
+6007	Immobilisation
+6008	Peur
+6009	Gel
+6010	Illusion
+6011	Berserker
+6012	Pétrification
+6013	Muet
+6014	Aveuglement
+6015	Poison Mortel
+6016	Dissimulation
+6017	Ralentissement d'Attaque
+6018	Scellé
+6019	Pétrification
+6020	Enchantement d'Arme de Terre : Poison
+6021	Flèches Perçantes
+6022	Poison Mortel
+6500	Ralentissement
+6501	Débordement des Forces de l'Eau
+6502	Manipulation de l'Eau 
+6503	Manipulation de l'Electricité 
+6504	Manipulation de la Terre 
+6505	Puissance des Ténèbres 
+6506	Flèches de Bourrasque 
+6507	Protection Divine 
+6508	Style Brûlant 
+6509	Probabilité Critiques 
+6510	Bombe Bionique 
+6511	Fureur de l'Esprit
+6512	Pacte d'Outre-tombe
+6513	Harmonie de la Vie
+6514	Vitesse Réduite
+6515	Poison
+6516	Berserk
+6517	Serre Acérée
+6518	Régénération Accélérée
+6519	Union élémentaire
+6520	Style Agile
+6521	Enchantement d'Arme : Eau
+6522	Harmonie Interdite de Vie
+6523	?? ??
+7001	Monture Ornitho
+7002	Monture Ornitho
+7003	Monture Ornitho
+7004	Monture Ornitho 
+7005	Monture Ornitho 
+7006	Monture Ornitho 
+7007	Monture Lydian rapide
+7008	Monture Lydian rapide
+7009	Monture Lydian rapide
+7010	Monture Ornitho 
+7011	Monture Ornitho 
+7012	Monture Lydian rapide
+7013	Monture Lydian rapide
+7014	Monture Oryx Sacré
+7015	Lydian
+7016	Ornitho
+7017	Ornitho
+7018	Lydian
+7019	Lydian
+7020	Lydian
+7021	Lydian
+7022	Tigre Blanc
+7050	Petite Boule de Neige
+7051	Boule de Neige
+9001	Blessure due à la Chute
+9002	Aura de MJ
+9003	Marque de MJ
+9004	Passeport du Village Caché
+9005	Rappelz Bonus
+9006	Rappelz Bonus +10%
+9007	Négligence
+9901	Fragment de Force
+9902	Fragment d'Esprit
+9903	Fragment de Lune
+9904	Pierre de Force Purifiée
+9905	Pierre de Vitalité Purifiée
+9906	Pierre de Dextérité Purifiée
+9907	Pierre d'Agilité Purifiée
+9908	Pierre d'Intelligence Purifiée
+9909	Pierre de Sagesse Purifiée
+9910	Pierre de Force Purifiée
+9911	Pierre de Vitalité Purifiée
+9912	Pierre de Dextérité Purifiée
+9913	Pierres d'Agilité Purifiées
+9914	Pierres d'Intelligence Purifiées
+9915	Pierre de Sagesse Purifiée
+9916	Pierre de Force Ancestrale
+9917	Pierre de Vitalité Ancestrale
+9918	Pierre de Dextérité Ancestrale
+9919	Pierre d'Agilité Ancestrale
+9920	Pierre d'Intelligence Ancestrale
+9921	Pierre de Sagesse Ancestrale
+9922	Fiole de Bonheur
+9923	Toast d'Avoine
+9924	Toast d'Avoine
+9925	Reliques de Force 
+9926	Reliques de Vitalité 
+9927	Reliques de Dextérité 
+9928	Reliques d'Agilité 
+9929	Reliques d'Intelligence 
+9930	Reliques de Sagesse 
+9931	Fragment Altéré de Vitalité
+9932	Fragment Altéré d'Esprit
+9933	Fragment Altéré de Fourberie
+9934	Fragment Altéré de Gardien
+9935	Fragment Altéré de Concentration
+9936	Fragment Altéré de Mur d'Acier
+9937	Fragment Altéré de Vision
+9938	Fragment Altéré de Rage
+9939	Fragment Altéré de Foi
+9940	Fragment Altéré de Puissance
+9941	Fragment Altéré de Pouvoir
+9942	Fragment Altéré de Lucidité
+9943	Fragment Altéré d'Intuition
+9944	Fragment de Lune Offensif
+9945	Fragment de Lune Défensif
+9946	Bienfait pour tous : Chant de Bataille
+9947	Bienfait pour tous : Trèfle à Quatre Feuilles
+9948	Bienfait pour tous : Bénédiction
+9949	Cristal de Force du Colisée
+9950	Cristal de Vitalité du Colisée
+9951	Cristal de Dextérité du Colisée
+9952	Cristal d'Agilité du Colisée
+9953	Cristal d'Intelligence du Colisée
+9954	Cristal de Sagesse du Colisée
+9955	Tsantzas
+9956	Pierre de Force Séculaire
+9957	Pierre de Vitalité Séculaire
+9958	Pierre de Dextérité Séculaire
+9959	Pierre d'Agilité Séculaire
+9960	Pierre d'Intelligence Séculaire
+9961	Pierre de Sagesse Séculaire
+9962	Bienfait de groupe : Chant de Bataille
+9963	Bienfait de groupe : Trèfle à quatre feuilles
+9964	Bienfait de groupe : Bénédiction
+9965	Bienfait de guilde : Chant de Bataille
+9966	Bienfait de guilde : Trèfle à quatre feuilles
+9967	Bienfait de guilde : Bénédiction
+9968	Fragment de Lune Offensif
+9969	Fragment de Lune Défensif
+9970	Pierre Extrême (Amplification)
+9971	Pierre Extrême (Amélioration)
+9972	Pierre de Force Purifiée
+9973	Pierre de Vitalité Purifiée
+9974	Pierre de Dextérité Purifiée
+9975	Pierre d'Agilité Purifiée
+9976	Pierre d'Intelligence Purifiée
+9977	Pierre de Sagesse Purifiée
+9978	Pierre de Force Ancestrale
+9979	Pierre de Vitalité Ancestrale
+9980	Pierre de Dextérité Ancestrale
+9981	Pierre d'Agilité Ancestrale
+9982	Pierre d'Intelligence Ancestrale
+9983	Pierre de Sagesse Ancestrale
+12018	Reflet du Bouclier
+12020	Briseur d'Attaque
+12021	Briseur de Défense
+12022	Briseur de Mental
+12044	Pourfendeur
+12045	Coupure du Vent
+12046	Coup Coupe-vent
+12047	Hachoir
+12048	Rupture
+12049	Saignement
+12050	Flamme Brûlante
+12051	Rage de Puissance
+12052	Hachoir
+12053	Affaiblissement des Ténèbres
+12054	Solidité
+12055	Esquive augmentée
+12056	Esquive magique augmentée
+12057	Onde Destructrice Temporelle
+12058	Onde de Magie Maudite : Vitesse de Déplacement Diminuée
+12059	Rupture
+12060	Soutien de Force
+12061	Déluge de Lames
+12063	Briseur de Physique
+12064	Briseur d'Ame
+12076	Blessure de l'Ombre
+12311	Flèche Anesthésiante
+12312	Flèche Ardente
+12501	Double Fureur
+12502	Fureur de l'Assassin
+12503	Fureur du Chasseur
+12504	Rage de l'Assassin
+12505	Mouvement de Rapidité
+12506	Lame Electrisante
+12507	Tornade de l'Assassin
+12601	Esquive Ultime
+12602	Concentration Mentale
+12611	Garde Active
+12615	Protection Divine
+12620	Visée
+12622	Rythme Accéléré
+12624	Oubli
+12626	Flèche Vampirique
+12630	Hâte Soudaine
+12635	Provocation
+12636	Provocation : niveau de menace augmenté
+12655	Spiracles Brûlants
+12656	Foudre de Spiracles
+12661	Spiracles d'Invincibilité
+12662	Piège Affaiblissant
+12664	Œil du Prédateur
+12668	Energie Mystérieuse
+12671	Style du Crépuscule
+12672	Mouvements Fluides
+12673	Style Brûlant
+12674	Style Brûlant : en Retrait
+12676	Camouflage d'Hostilité
+12678	Bourrasque de Flèches
+12679	Flèches de Bourrasque
+12681	Bouclier de Spiracles
+12682	Double invocation
+12683	Bourrasque de Flèches
+12684	Aura de Protection
+12685	Bienfait de Protection
+13003	Prison de Givre
+13005	Pluie Acide
+13006	Force Terrestre
+13007	Brûlure
+13012	Boule de Feu
+13013	Flamme Brûlante
+13021	Flamme Ecorchante
+13022	Rafale de Vent
+13023	Enracinement
+13024	Souffle Faucheur
+13035	Mur de Paix
+13037	Etincelle Glacée
+13151	Explosion Pétrifiante
+13155	Vague Déferlante
+13181	Racines de Mère Nature
+13182	Pluie de Cristal
+13204	Antidote
+13210	Restauration
+13211	Préparation Circulaire : Régénération de MP
+13212	Préparation Circulaire : Consommation de HP
+13222	Eau Régénératrice
+13224	Energie Restauratrice
+13401	Eclat Divin
+13411	Préservation des Ténèbres
+13423	Vitesse du Vent
+13424	Energie de la Pierre
+13425	Force du Feu Sacré
+13426	Enchantement de Feu
+13427	Enchantement d'Arme : Eau
+13428	Enchantement de l'Air
+13429	Enchantement de Terre
+13430	Protection de Feu
+13431	Soutien des Vents
+13432	Rocher Incandescent
+13433	Cercle de Magie
+13434	Sphère de Protection
+13435	Neutralisation Magique
+13442	Soutien Flamboyant
+13451	Armure Bénie Supérieure
+13452	Arme Bénie Supérieure
+13458	Peau d'Armure
+13460	Force d'Illumination Mentale
+13461	Magie Soudaine
+13467	Armure de Pierre
+13471	Supplément de Puissance
+13472	Sorcellerie de l'Ame
+13492	Bain de Lumière
+13493	Lumière Salvatrice : Aveuglement Persistant
+13494	Lumière Salvatrice : Aveuglement Total
+13601	Maximisation Critique
+13602	Tremblements du Vent
+13604	Affaiblissement des Ténèbres
+13608	Esprit en Crise
+13613	Faiblesse Enfumée
+13614	Tremblements du Vent Puissant
+13621	Annulation des Effets de Créature
+13622	Sceau de Gaïa
+13750	Atrophie de l'Ombre
+13752	Amplification de Gravité
+13754	Avènement de Yak
+13815	Champ d'Attraction
+14012	Transfert de Douleur
+14402	Soutien Mental
+14412	Soutien de Force
+14413	Soutien de Combat
+14426	Soutien Vital Supérieur
+14430	Soutien de Force Supérieur
+14432	Aura de Célérité
+14433	Aura d'Oppression
+14614	Griffe du Lion
+15000	Restauration
+23492	Bain de Lumière
+23493	Lumière Salvatrice : Aveuglement Total
+23494	Bain de Lumière
+110011	Maîtrise des Spiracles Gaïa
+111011	Maîtrise des Spiracles Gaïa
+112011	Récupération MP
+113011	Récupération MP
+114011	Fureur de la Bête
+114012	Fureur de la Bête Royale
+114013	Force de la Fée Cruelle
+114014	Puissance de la Douleur Déchirante
+140518	Baiser Angélique
+140519	Percée : Entraînement Magique
+145001	Infusion Provocatrice
+145002	Provocation
+145003	Instinct de Survie
+145004	Instinct Guerrier
+145005	Injection de Mana
+145006	Marché Equitable
+145007	Echapper à la crise
+145008	Oblivion
+145009	Instinct Bestial
+145010	Greffe d'Organes
+145011	Illusion de l'Ombre
+145012	Champ Ténébreux
+145013	Faim de Loup
+145014	Piège Démoniaque
+145015	Echo Terrestre
+145016	Manifestation de Puissance
+145017	Peur Draconique
+145109	Cri Strident
+145110	Combustion
+145111	Explosion Vocale
+145201	Fracas Sanglant
+145202	Griffe Perforante
+145203	Choc Fracassant
+145204	Concentration Sauvage
+145205	Frappe Concentrée
+145206	Fracas du Chaos
+145207	Sphère de Feu
+145208	Prière Céleste
+145209	Paroles de Frustration
+145210	Conflagration
+145211	Rafale Puissante
+145212	Confiance
+145213	Lumière du Jugement Dernier
+145214	Fracas Outrageant
+145215	Flèche de Glace
+145216	Tir de Charge
+145217	Impact Cruel
+145218	Bouclier Réflecteur
+145219	Soif de Sang
+145220	Chute de Pierres
+145221	Vision Sonique
+145222	Graine Cyclonique
+145223	Arrêt du Vortex
+145224	Brise Mystique
+145225	Aura de Vent
+145226	Lumière de Vie
+145227	Vœu de Survie
+145228	Corne Infernale
+145229	Corne Majestueuse
+145230	Putréfaction
+145231	Malédiction du Revenant
+145232	Engelures
+145233	Damnation Eternelle
+145234	Rayon Gamma Renforcé
+145235	Restauration Cellulaire Renforcée
+145236	Activation Cellulaire
+145237	Analyse des Faiblesses
+145238	Immersion Guerrière
+145239	Fureur Frénétique
+145240	Lame Coupe-vent
+145241	Graine Cyclonique Harmonieuse
+145409	Aura Douloureuse
+145501	Tempête Fatale
+145502	Malédiction de Garuda
+145504	Fracas Surpuissant
+145507	Phoenix
+145509	Danse Macabre
+145510	Tempête de Flamme
+145511	Tempête des Ruines
+145512	Tempête de Lumière
+145513	Coup spécial
+145514	Tempête du Chaos
+145515	Souffle de Glace
+145516	Pluie d'Hémoglobine
+145517	Saccage de Fenrir
+145518	Tempête de Stress
+145519	Colère de la Terre
+145521	Puissance des Vents
+145522	Dévouement au Maître
+145523	Dévouement au Maître
+145524	Magma Infernal
+145525	Mot de Brutalité
+145526	Réveil Spirituel
+145527	Cœur de Glace
+145601	Unité : Panthère
+145602	Unité : Volatile
+145603	Unité : Tortue
+145604	Unité : Orc
+145605	Unité : Yéti
+145606	Unité : Squelette
+145607	Unité : Fée Rouge
+145608	Unité : Fée Bleue
+145609	Unité : Sirène
+145610	Unité : Salamandre
+145611	Unité : Homme-Faucon
+145612	Unité : Ange
+145613	Unité : Centaure
+145614	Unité : Cerbère
+145615	Unité : Dragon Blanc
+145616	Unité : Carbuncle
+145617	Unité : Chantevent
+145618	Unité : Loup
+145619	Unité : Eimus
+145620	Unité : Craken
+145621	Unité : Tafari
+145622	Unité : Génie
+145623	Unité : Génie Mystique
+145624	Unité : Licorne Sacrée
+145625	Unité : Licorne Infernale
+145626	Unité : Tyran de la Mort
+145627	Unité: Kainen
+145628	Unité : Cube
+145629	Unité : Lydian
+145650	Unité : Relique de la Tortue
+145651	Unité : Relique du Cube
+145652	Unité : Relique de l'Eimus
+145653	Unité : Relique du Yéti
+145654	Unité : Relique de la Licorne Noire
+145655	Unité : Relique de l'Orc
+145656	Unité : Relique du Loup
+145657	Unité : Relique du Centaure
+145658	Unité : Relique de la Panthère
+145659	Unité : Relique du Tyran de la Mort
+145660	Unité : Relique de la Harpie
+145661	Unité : Relique de Pick
+145662	Unité : Relique de la Sirène
+145663	Unité : Relique de la Kainen
+145664	Unité : Relique du Génie Mystique
+145665	Unité : Relique de la Licorne Blanche
+145666	Unité : Relique de la Tafari
+145667	Unité : Relique de la Fée Bleue
+145668	Unité : Relique de Baphomet
+145669	Unité : Relique d'Ondine
+145701	Stimulation : Force
+145705	Stimulation : Agilité
+145709	Stimulation : Vitalité
+145713	Stimulation : Intelligence
+145717	Stimulation : Dextérité
+145720	Puissance Terrestre
+145721	Stimulation : Force, Intelligence
+145725	Stimulation : Vitalité, Intelligence
+145729	Stimulation : Force, Vitalité
+145733	Stimulation : Intelligence, Sagesse
+145740	Stimulation : Intelligence, Dextérité
+145741	Trèfle de Bonne Fortune
+145742	Stimulation : Force, Agilité
+145751	Encouragement : Défense
+145752	Encouragement : Esquive
+145753	Encouragement : Attaque
+145754	Encouragement : Taux de Critique
+145755	Encouragement : Rapidité d'Attaque
+145756	Encouragement : Précision Magique
+145757	Encouragement : Vitesse d'Incantation
+145758	Encouragement : Sagesse
+145759	Encouragement : Attaque Magique
+145760	Encouragement : Régénération de MP
+146001	Guérison Accélérée
+146002	Protection Draconique
+146007	Rage Vampirique
+146008	Bénédiction Féerique
+146009	Ange Gardien
+147001	Diminution des Dégâts
+147002	Frénésie
+147003	Force de l'Esprit
+147004	Augmentation d'Attaque Physique
+147005	Bouclier de Feu
+147006	Augmentaton de Défense Physique
+147007	Favoritisme de la Fée
+147008	Régénération
+147009	Le baiser de la Bonté
+147010	Eruption Sauvage
+147011	Implantation d'Insectes
+147012	Attaque de Choc
+147013	Incarnation de Flammes
+147014	Douleur Intolérable
+147015	Attaque Opportune
+147016	Souffle Sulfureux
+147017	Bouclier de Vent
+147018	Bouclier de Mana
+147019	Sphère de Récupération
+147020	Ralentissement
+147021	Nuée d'Insectes
+147022	Sang-Froid
+147023	Assaut Sanguinaire
+147024	Reine de Glace
+147025	Charge d'Energie
+147026	Eveil Spirituel
+147027	Immersion Sauvage
+147028	Analyse des Faiblesses : Explosion
+147029	Impulsion : Restauration
+147101	Caresse de Chaman
+147102	Déferlement
+147103	Unité : Baphomet
+147104	Kahuna Déferlant
+147105	Ancien Savoir de Kahuna
+147106	Onde de Vie
+147107	Vague Fulgurante : Vitesse d'Incantation
+147108	Vague Fulgurante : Restauration de MP
+147109	Forces de l'Au-delà : Restauration de HP
+147110	Forces de l'Au-delà : Restauration de MP
+147121	Insomnia
+147122	Soupir des Ténèbres
+147123	Energie Eternelle
+147124	Unité : Boucher
+147125	Boucher Visionnaire
+147126	Rage Extrême
+147127	Bouclier Maudit
+147128	Instinct du Boucher
+147129	Neutralisation
+147130	Folie de l'Infini
+147141	Souffle Fatal
+147142	Unité : Mécanymphe
+147144	Purge Vitale
+147161	Oscillation
+147162	Unité : Minotaure
+147163	Force Séculaire
+147164	Collecteur d'Ames
+147165	Position de Sentinelle : Apaisement
+147166	Unité : Pick
+147167	Canevas de Pick
+147168	Position d'Assaut
+147169	Aura d'Assaut
+147170	Position d'Assaut
+147171	Aura d'Assaut
+147172	Position Glacée
+147173	Aura Glacée
+147174	Position Glacée
+147175	Aura Glacée
+147176	Position de Sentinelle
+147177	Aura de Sentinelle
+147178	Position de Sentinelle
+147179	Aura de Sentinelle
+147180	Position de Maître
+147181	Aura de Maître
+147182	Unité : Chevalier d'Acier
+147183	Bienfait Corporel
+147184	Bienfait Spirituel
+147185	Bienfait Corporel Renforcé
+147186	Bienfait Spirituel Renforcé
+147187	??? ??
+147188	Transfusion Démoniaque
+147189	Destin Ardent
+147190	Unité : Mephisto
+147191	Unité : Sang Coagulé
+147192	Unité : Sang Coagulé : Faiblesse
+147193	Chauve qui peut
+147194	True Blood
+147195	Dictat
+147196	Proclamation d'Immortalité
+147197	Flammes Vengeresses
+147198	Ronces Magiques
+147199	Flamme Dansante
+147200	Unité : Amarylis
+147201	Energie Mystique
+147202	Traumatisme
+147203	Flamme Dansante
+147204	Don d'Immortalité
+147205	Esprit Flamboyant
+147206	Unité : Esprit de Carbuncle
+147207	Unité : Esprit d'Alizea
+147208	Unité : Esprit de Soulseeker
+147209	Unité : Esprit de Likirus
+147210	Unité : Esprit de la Veuve Noire
+147211	Unité : Esprit du Volatile
+147212	Unité : Esprit de la Harpie
+147213	Unité : Esprit de la Licorne Blanche
+147214	Unité : Esprit de la Licorne Noire
+147215	Unité : Esprit de la Panthère
+147216	Unité : Relique de Pick
+147217	Unité : Esprit de la Tafari
+147218	Unité : Esprit de la Tortue
+147219	Unité : Esprit du Cube
+147220	Unité : Esprit de l'Eimus
+147221	Unité : Relique du Loup
+147222	Unité : Relique du Tyran de la Mort
+147223	Unité : Relique de la Harpie
+147224	Unité : Relique de la Sirène
+147225	Unité : Relique de la Kainen
+147226	Unité : Relique du Génie Mystique
+147227	Unité : Relique de la Licorne Blanche
+147228	Unité : Relique de la Fée Bleue
+147229	Unité : Relique de Baphomet
+147230	Unité : Relique d'Ondine
+147231	Unité : Salamandre
+147232	Unité : Ange
+147233	Unité : Cerbère
+147234	Unité : Craken
+162001	Bouclier Offensif
+162005	Torrent Sauvage
+162010	Vent Electrisant
+162304	Flèche Maudite
+162501	Rage Barbare
+163002	Impact Glacial
+163006	Tempête de Feu
+163011	Jugement de la Déesse
+163013	Tremblement de Terre
+163016	Explosion Volcanique
+163201	Protection Eternelle
+163205	Caresse de la Déesse
+163402	Bouclier Déflecteur
+163403	Bouclier de Vengeance
+163404	Bénédiction de Vitalité
+163405	Bénédiction d'Intelligence
+163406	Bénédiction de Sagesse
+163407	Bénédiction de Force
+163408	Bénédiction du Maître
+163409	Bouclier Divin
+163410	Soutien de Puissance
+163411	Soutien de Vitalité
+163412	Soutien d'Intelligence
+163413	Résistance Organique
+163414	Résistance Inorganique
+163415	Résistance Spirituelle
+163416	Résistance Élémentaire
+163417	Griffe Divine
+163418	Flèche Empoisonnée
+163419	Débordement du Feu Infernal
+163420	Débordement d'Eclairs
+163421	Débordement des Puissances Terrestres
+163422	Débordement des Forces de l'Eau
+163423	Union de Force
+163424	Union de Vitalité
+163425	Union Psychique
+163426	Union d'Intelligence
+163427	Fureur Sauvage
+163428	Esprit du Feu
+163429	Arme de Vent
+163430	Soutien Spirituel
+163431	Soutien Magique
+163432	Vitesse de la Lumière
+163433	Armure Scintillante
+163434	Régénération Massive de HP
+163435	Régénération Massive de MP
+163436	Peau Dure
+163437	Mastery Support
+163438	Frappe Vicieuse
+163439	Autorité du Maître
+163440	Bénédiction de l'Archer
+163441	Réflexion de l'Ame
+163442	Réflexion du Corps
+163443	Folie Furieuse
+163444	Puissance des Ténèbres
+163445	Bouclier du Cauchemar
+163446	Bénédiction Massive de Coordination
+163447	Mess bless Regeneration Master
+163448	Force des Eléments
+163449	Bienfait du Kahuna
+163450	Affection Divine
+163601	Marais d'Acide
+163605	Corruption
+163701	Lumière Débordante
+163702	Lumière Débordante : Faiblesse
+163703	Régénération
+163704	Affinité Magique
+163705	Dégât des Eaux
+163706	Engelures
+163707	Esprit de Foudre
+163801	Piège Explosif
+164001	Harmonie de la Vie
+164002	Déguisement de la Bête
+164003	Harmonie Interdite de Vie
+164202	Guérison Créature
+164204	Créature Restauration
+164205	Noble Rétablissement
+164401	Suralimentation de Force
+164402	Suralimentation de Vitalité
+164403	Suralimentation d'Intelligence
+164404	Suralimentation de Sagesse
+164405	Créature Aura de Force
+164406	Créature Aura de l'Esprit
+164407	Créature Aura Maitresse
+164408	Maîtrise de Bénédiction
+164409	Aura Bestiale
+164410	Faveur de la Bête
+164411	Aura Bestiale
+164801	Fureur de l'Esprit
+164804	Sang d'Outre-tombe
+164805	Pacte d'Outre-tombe
+200001	Potion de Puissance d'Ours
+200002	Potion d'Essence Magique
+200003	Elixir d'Ecaille de Tortue
+200004	Potion de Hâte
+200005	Potion de Concentration
+200006	Elixir du Guépard
+200007	Elixir d'Œil de Lynx
+200008	Elixir de Sang de Singe
+200009	Bombe à Ours
+201001	Réduction Max HP 
+201002	Réduction Max MP
+201003	Réduction Attaque
+201004	Réduction Attaque Magique
+201005	Réduction Défense
+201006	Réduction Défense
+201007	Réduction Défense Magique
+201008	Réduction Rapidité
+201009	Réduction Vitesse d'Incantation
+201010	Réduction Vitesse
+201011	Réduction Précision
+201012	Réduction Esquive
+201013	Réduction Précision Magique
+201014	Réduction Esquive Magique
+201015	Réduction Taux de Critique 
+201016	Réduction Dégâts Critiques
+201017	Réduction Froce
+201018	Réduction Vitalité
+201019	Réduction Dextérité
+201020	Réduction Agilité
+201021	Réduction Intelligence
+201022	Réduction Sagesse
+201023	Réduction Chance
+201024	Réduction Taux de Blocage
+201025	Fléau
+201026	Pénalité de Poids
+201027	Fléau
+201028	Régénération HP Suspendue
+201029	Régénération MP Suspendue
+201030	Empoisonné
+201031	Saignement
+201032	Sommeil
+201033	Assommé
+201034	Maintien
+201035	Peur
+201036	Glacé
+201037	Illusion
+201038	Berserker
+201039	Pétrification
+201040	Silence
+201041	Cécité
+201042	Poison Mortel
+201043	Camouflé
+201044	Rapidité
+201045	Scellé
+201046	Calmant
+201047	Armure Fracassée
+201048	Solidité
+201049	Rage de Puissance
+201050	Impuretés de Folie
+201051	Réduction Rapidité d'Attaque
+201052	Assomé
+201053	Empoisoné
+201054	Saignement
+201055	Réduction Vitesse d'Incantation
+201056	Esquive
+201057	Augmentation Défense Magique
+201058	Réduction Vitesse d'Incantation
+201059	Réduction Vitesse
+201060	Réduction Rapidité d'Attaque
+201061	Potion de Restauration Rouge Niv.2
+201062	Potion de Restauration Rouge  Niv.1
+201063	Potion de Restauration Bleue Niv.2
+201064	Potion de Restauration Bleue Niv.1
+201065	Attaque Améliorée
+201066	Attaque Magique Améliorée
+201067	Défense Améliorée
+201068	Rapidité d'Attaque Améliorée
+201069	Vitesse d'Incantation Améliorée
+201070	Vitesse Améliorée
+201071	Précision Améliorée
+201072	Esquive Améliorée
+201073	Attaque Intensifiée
+201074	Attaque Magique Intensifiée
+201075	Défense Intensifiée
+201076	Rapidité d'Attaque Intensifiée
+201077	Vitesse d'Incantation Intensifiée
+201078	Vitesse Intensifiée
+201079	Précision Intensifiée
+201080	Esquive Intensifiée
+201081	Absorption
+201082	Bouclier Réflecteur
+201083	Vision Perçante
+201084	Traçe du Fugitif
+201085	Aura de Protection
+201086	Cocktail Amélioré
+201087	Cocktail Intensifié
+201088	Vitesse Soudaine Améliorée
+202000	Poison  
+202001	Marais d'Acide
+202002	Réduction de Défense   
+202003	Réduction d'Attaque 
+202004	Réduction de Rapidité d'Attaque  
+202005	Régénération de MP Suspendue  
+203001	Hurlement du Guerrier : Enchantement
+203003	Onde Destructrice Temporelle
+203005	Onde de Magie Maudite : Attaque Magique Affaiblie
+203006	Soins Progressifs 
+203007	Pilier de Lumière
+203008	Pilier de Lumière Temporel
+210011	Bain de Lumière
+211011	Bain de Lumière
+212011	Récupération MP
+213011	Récupération de MP
+214011	Double Invocation
+307001	Support du Dragon Blanc
+307002	Etreinte du Dragon Blanc
+307003	Sagacité de la Griffe-Noire
+307004	Autorité de Brise-Dune
+307005	Liens Sacrés : Croyance Ultime
+307006	Liens Sacrés : Armure Bestiale
+307007	Liens Sacrés : Destin Scellé
+310011	Requiem de l'Assassin
+311001	Augmentation Défense
+311002	Augmentation Attaque
+311003	Berserker
+311004	Augmentation Attaque Magique
+311005	Augmentation Régénération MP
+311006	Magie Synchrone
+311007	Magie Synchrone
+311011	Flèche Vampirique
+312001	Essence de Deva 
+312011	Magie Soudaine
+312101	Essence d'Asura 
+312201	Essence de Gaïa 
+313001	Essence de Deva Guerrier 
+313002	Essence de Deva Magicien 
+313003	Essence de Deva Invocateur 
+313011	Atrophie de l'Ombre
+313101	Essence d'Asura Guerrier 
+313102	Essence d'Asura Chasseur 
+313103	Essence d'Asura Magicien 
+313104	Essence d'Asura Invocateur 
+313201	Essence de Gaïa Guerrier 
+313202	Essence de Gaïa Chasseur 
+313203	Essence de Gaïa Magicien 
+313204	Essence de Gaïa Invocateur 
+313205	Malédiction du Repaire
+314011	Double Invocation
+314012	Maître de l'Infini
+314015	Immortalité
+314016	Adresse Divine
+314017	Vivacité Sinistre
+314018	Instinct Naturel
+314019	Epanouissement d'Energie
+314020	Energie Progressive
+314021	Maître Perçant
+314022	Mort Subite
+314023	Duo Fatal
+314024	Voie de l'Erudit
+314025	Flèches d'Ondine
+314026	Serpent de Glace
+314027	Libération Divine : Providence
+314028	Libération Divine : Bénédiction
+314029	Voie de l'Oracle
+314030	Chambre des Conflits
+314031	Vitesse d'Attaque et d'Incantation Améliorée
+314032	Créature Eclair
+314033	Prière de Surate
+314034	Pénitence
+314035	Lame d'Assassin
+314036	Maître Circulaire
+314037	Blocage en Croix
+314038	Vision de l'Aigle
+314039	Acuité
+314040	Position Défensive : Chien de Chasse
+314041	Position Défensive : Hyène
+314042	Prière de Surate
+314043	Ténèbres Immortelles
+314044	Magie Noire
+314045	Force de l'Ombre
+314046	Nuage de Faiblesse
+314047	Réaction en Chaîne
+314049	Sagesse d'Esprit
+314050	Régénération Miraculeuse : Santé
+314051	Régénération Miraculeuse : Mana
+314052	Mana Extrême
+314053	Vivacité Bestiale
+314054	Garde Défensive : Menace
+314055	Garde Défensive : Solidité
+314056	Ténacité Naturelle
+314057	Unité Défensive Totale
+314058	Magie de Lumière et d'Ombre : Bénédiction
+314059	Magie de Lumière et d'Ombre : Malédiction
+314060	Bénédiction de Rapidité d'Attaque
+314061	Malédiction d'Attaque Magique
+314062	Mouvement de Spiracles
+314063	Mouvement de Spiracles : Attaque Renforcée
+314064	Energie de Mana
+314065	Bonne Fortune
+314066	Entraînement d'Endurance
+314067	Créature Magique
+314068	Magie Perforante
+314069	Magie Perforante
+314070	Bénédiction de la Providence
+314071	Protection Divine
+314072	Unité Séculaire : Vitalité
+314073	Unité Séculaire : Menace
+314074	Souffle Mortel Putride
+314075	Restriction
+314076	Malice d'Ange
+314077	Caresse d'Ange
+314078	Caresse d'Ange
+314079	Caresse d'Ange
+314080	Dérision du Démon
+314081	Dérision du Démon
+314082	Dérision du Démon
+314083	Expertise du Traqueur
+314084	Ange de la Résurrection
+314085	Souffle Miraculeux
+314086	Sagesse de la Salamandre
+314087	Restauration Angélique
+314088	Maître Perçant : Circulation
+314089	Aveuglement Héroïque
+314090	Ruse d'Exécution
+314091	Flèche Lente
+314092	Flèche Lente : Traqueur
+314093	Déduction de la Vitesse de Déplacement
+314094	Flèche Lente : Traqueur
+314095	Formule Soignante
+314096	Diminution de la Vitesse de Déplacement
+314097	Marais Magique
+314098	Instinct de Créature Maligne
+314099	Chance Naturelle
+314100	Puissance du Métamorphe
+314101	Grâce de Gaïa
+314102	Bête Féroce
+314103	Diminution de la Vitesse de Déplacement
+314104	Diminution de la Vitesse de Déplacement
+314105	Boule de Feu
+314106	Provocation 
+314107	Précision Accrue
+314108	Augmentation de la Précision Magique
+314110	Rpd. Atq. augmentée
+314111	Saignement
+314112	Embrasement
+314113	Congélation
+314114	Vitesse de Déplacement diminuée
+314115	Scellage
+314116	Réflexion de Dégâts
+314117	Aura de Défense
+314118	Défense renforcée
+314119	Précision augmentée
+314120	Silence
+314121	Attaque renforcée
+314122	Taux de Coups Critiques augmenté
+314123	Coups Critiques augmentés
+314124	Attaque renforcée
+314125	Aura de Restauration de HP
+314126	Restauration de HP augmentée
+314127	Attaque renforcée
+314128	Vitesse de Déplacement diminuée
+314129	Défense renforcée
+314130	Rpd. Atq. diminuée
+314131	Résistance à la Peur
+314132	Blocage augmenté
+314133	Double Attaque
+314134	Expérience de Créature augmentée
+314135	Restauration Démoniaque
+320004	Misère de Foi
+320005	Insémination de Colonie d'Insectes
+320006	Grandeur
+320007	Trèfle de Bonne Fortune
+320008	Soif de Sang
+320009	Sang-Froid
+320010	Bouclier Réflecteur
+320011	Discipline
+321001	Dextérité du Pouvoirien
+321002	Encéphallogramme Plat
+321003	Distorsion Temporelle
+41102017	Heaume Rang II - 200% Effet
+41102018	Heaume Rang II - 200% Effet
+41102019	Heaume Rang II - 200% Effet
+41102020	Heaume Rang II - 200% Effet
+41102021	Heaume Rang II - 200% Effet
+41102022	Heaume Rang II - 200% Effet
+41102023	Heaume Rang II - 200% Effet
+41102024	Heaume Rang II - 200% Effet
+41102025	Heaume Rang II - 200% Effet
+41102026	Heaume Rang II - 200% Effet
+41102027	Heaume Rang II - 200% Effet
+41102028	Heaume Rang III - 200% Effet
+41102029	Heaume Rang III - 200% Effet
+41102030	Heaume Rang III - 200% Effet
+41102031	Heaume Rang III - 200% Effet
+41102032	Heaume Rang III - 200% Effet
+41102033	Heaume Rang III - 200% Effet
+41102034	Heaume Rang III - 200% Effet
+41102035	Heaume Rang III - 200% Effet
+41102036	Heaume Rang III - 200% Effet
+41102037	Heaume Rang III - 200% Effet
+41102038	Heaume Rang III - 200% Effet
+41102039	Heaume Rang IV - 200% Effet
+41102040	Heaume Rang IV - 200% Effet
+41102041	Heaume Rang IV - 200% Effet
+41102042	Heaume Rang IV - 200% Effet
+41102043	Heaume Rang IV - 200% Effet
+41102044	Heaume Rang IV - 200% Effet
+41102045	Heaume Rang IV - 200% Effet
+41102046	Heaume Rang IV - 200% Effet
+41102047	Heaume Rang IV - 200% Effet
+41102048	Heaume Rang IV - 200% Effet
+41102049	Heaume Rang IV - 200% Effet
+41102050	Heaume Rang V - 200% Effet
+41102051	Heaume Rang V - 200% Effet
+41102052	Heaume Rang V - 200% Effet
+41102053	Heaume Rang V - 200% Effet
+41102054	Heaume Rang V - 200% Effet
+41102055	Heaume Rang V - 200% Effet
+41102056	Heaume Rang V - 200% Effet
+41102057	Heaume Rang V - 200% Effet
+41102058	Heaume Rang V - 200% Effet
+41102059	Heaume Rang V - 200% Effet
+41102060	Heaume Rang V - 200% Effet
+41102061	Heaume Rang VI - 200% Effet
+41102062	Heaume Rang VI - 200% Effet
+41102063	Heaume Rang VI - 200% Effet
+41102064	Heaume Rang VI - 200% Effet
+41102065	Heaume Rang VI - 200% Effet
+41102066	Heaume Rang VI - 200% Effet
+41102067	Heaume Rang VI - 200% Effet
+41102068	Heaume Rang VI - 200% Effet
+41102069	Heaume Rang VI - 200% Effet
+41102070	Heaume Rang VI - 200% Effet
+41102071	Heaume Rang VI - 200% Effet
+41102072	Heaume Rang VII - 200% Effet
+41102073	Heaume Rang VII - 200% Effet
+41102074	Heaume Rang VII - 200% Effet
+41102075	Heaume Rang VII - 200% Effet
+41102076	Heaume Rang VII - 200% Effet
+41102077	Heaume Rang VII - 200% Effet
+41102078	Heaume Rang VII - 200% Effet
+41102079	Heaume Rang VII - 200% Effet
+41102080	Heaume Rang VII - 200% Effet
+41102081	Heaume Rang VII - 200% Effet
+41102082	Heaume Rang VII - 200% Effet
+41102215	Cape Rang II - 110% Effet
+41102216	Cape Rang II - 110% Effet
+41102217	Cape Rang II - 110% Effet
+41102218	Cape Rang II - 110% Effet
+41102219	Cape Rang II - 110% Effet
+41102220	Cape Rang II - 110% Effet
+41102221	Cape Rang II - 110% Effet
+41102222	Cape Rang II - 110% Effet
+41102223	Cape Rang II - 110% Effet
+41102224	Cape Rang II - 110% Effet
+41102225	Cape Rang II - 110% Effet
+41102226	Cape Rang III - 110% Effet
+41102227	Cape Rang III - 110% Effet
+41102228	Cape Rang III - 110% Effet
+41102229	Cape Rang III - 110% Effet
+41102230	Cape Rang III - 110% Effet
+41102231	Cape Rang III - 110% Effet
+41102232	Cape Rang III - 110% Effet
+41102233	Cape Rang III - 110% Effet
+41102234	Cape Rang III - 110% Effet
+41102235	Cape Rang III - 110% Effet
+41102236	Cape Rang III - 110% Effet
+41102237	Cape Rang IV - 110% Effet
+41102238	Cape Rang IV - 110% Effet
+41102239	Cape Rang IV - 110% Effet
+41102240	Cape Rang IV - 110% Effet
+41102241	Cape Rang IV - 110% Effet
+41102242	Cape Rang IV - 110% Effet
+41102243	Cape Rang IV - 110% Effet
+41102244	Cape Rang IV - 110% Effet
+41102245	Cape Rang IV - 110% Effet
+41102246	Cape Rang IV - 110% Effet
+41102247	Cape Rang IV - 110% Effet
+41102248	Cape Rang V - 110% Effet
+41102249	Cape Rang V - 110% Effet
+41102250	Cape Rang V - 110% Effet
+41102251	Cape Rang V - 110% Effet
+41102252	Cape Rang V - 110% Effet
+41102253	Cape Rang V - 110% Effet
+41102254	Cape Rang V - 110% Effet
+41102255	Cape Rang V - 110% Effet
+41102256	Cape Rang V - 110% Effet
+41102257	Cape Rang V - 110% Effet
+41102258	Cape Rang V - 110% Effet
+41102259	Cape Rang VI - 110% Effet
+41102260	Cape Rang VI - 110% Effet
+41102261	Cape Rang VI - 110% Effet
+41102262	Cape Rang VI - 110% Effet
+41102263	Cape Rang VI - 110% Effet
+41102264	Cape Rang VI - 110% Effet
+41102265	Cape Rang VI - 110% Effet
+41102266	Cape Rang VI - 110% Effet
+41102267	Cape Rang VI - 110% Effet
+41102268	Cape Rang VI - 110% Effet
+41102269	Cape Rang VI - 110% Effet
+41102270	Cape Rang VII - 110% Effet
+41102271	Cape Rang VII - 110% Effet
+41102272	Cape Rang VII - 110% Effet
+41102273	Cape Rang VII - 110% Effet
+41102274	Cape Rang VII - 110% Effet
+41102275	Cape Rang VII - 110% Effet
+41102276	Cape Rang VII - 110% Effet
+41102277	Cape Rang VII - 110% Effet
+41102278	Cape Rang VII - 110% Effet
+41102279	Cape Rang VII - 110% Effet
+41102280	Cape Rang VII - 110% Effet
+41102347	Effet de Masque 
+41102348	Effet de Masque 
+41102349	Effet de Masque 
+41102350	Effet de Masque 
+41102351	Effet de Masque 
+41102352	Effet de Masque 
+41102353	Effet de Masque 
+41102354	Effet de Masque 
+41102355	Effet de Masque 
+41102356	Effet de Masque 
+41102357	Effet de Masque 
+41102369	Effet d'Ailes
+41102370	Effet d'Ailes
+41102371	Effet d'Ailes
+41102372	Effet d'Ailes
+41102373	Effet d'Ailes
+41102374	Effet d'Ailes
+41102375	Effet d'Ailes
+41102376	Effet d'Ailes
+41102377	Effet d'Ailes
+41102378	Effet d'Ailes
+41102379	Effet d'Ailes
+41102393	Effet Décoratif d'Arme
+41102394	Effet Décoratif d'Arme
+41102395	Puissance Offensive
+41102396	Aura Offensive
+41102397	Adresse Défensive
+41102398	Aura Protectrice
+41102399	Fléau
+41102400	Fléau
+41102401	Aura de Sylarion
+41102402	Détermination de Sylarion
+41102403	Aura de Selaim
+41102404	Flamme de Selaim
+41102405	Aura de Brise
+41102406	Paroles de Brise
+41102407	Aura Apaisante
+41102408	Magie Apaisante
+41102409	Anneau de Baldur
+41102410	Chaos d'Arnessa
+41102411	Seiren l'Obscur
+41102412	Ensemble de Lumière Etincelante
+41102413	Ensemble du Prophète
+41102414	Ensemble du Héros Opportuniste
+41102415	Anneau d'Endieron
+41102416	Casque de Maître Rang 7 Effet 1
+41102417	Casque de Maître Rang 7 Effet 1
+41102418	Casque de Maître Rang 7 Effet 1
+41102419	Casque de Maître Rang 7 Effet 1
+41102420	Casque de Maître Rang 7 Effet 1
+41102421	Casque de Maître Rang 7 Effet 1
+41102422	Casque de Maître Rang 7 Effet 1
+41102423	Casque de Maître Rang 7 Effet 1
+41102424	Casque de Maître Rang 7 Effet 2
+41102425	Casque de Maître Rang 7 Effet 2
+41102426	Casque de Maître Rang 7 Effet 2
+41102427	Casque de Maître Rang 7 Effet 2
+41102428	Casque de Maître Rang 7 Effet 2
+41102429	Casque de Maître Rang 7 Effet 2
+41102430	Casque de Maître Rang 7 Effet 2
+41102431	Casque de Maître Rang 7 Effet 2
+41102432	Casque de Maître Rang 7 Effet 3
+41102433	Casque de Maître Rang 7 Effet 3
+41102434	Casque de Maître Rang 7 Effet 3
+41102435	Casque de Maître Rang 7 Effet 3
+41102436	Casque de Maître Rang 7 Effet 3
+41102437	Casque de Maître Rang 7 Effet 3
+41102438	Casque de Maître Rang 7 Effet 3
+41102439	Casque de Maître Rang 7 Effet 3
+41102440	Folie de l'Infini
+41102441	Parchemin Revitalisant
+41102442	Parchemin Apaisant
+41102443	Parchemin Revitalisant
+41102444	Parchemin Miraculeux
+41102445	Pizza des Têtards Ninja
+41102446	Maître de donjon : Expérience augmentée
+41102447	Maître de donjon : Aptitudes améliorées
+41102448	Bienfait de Cherif
+41102451	Monture Spectre d'Oryx Sacré
+41102452	Monture Spectre de Tigre Blanc
+41102453	Monture Spectre de Lydian
+41102455	Ancien Dragon Noir - Lasiquide
+41102456	Ancien Dragon Rouge - Searena
+41102457	Bénédiction de la Médaille Olympique
+41102460	Vitesse de Déplacement diminuée
+41102461	Bénédiction des Anciens
+41102462	Malédiction Divine
+41102463	Bienfait Protecteur
+41102464	Bienfait Sacré : Résistance à l'étourdissement
+41102465	Bienfait Sacré : Résistance à la pétrification
+41102466	Bienfait Sacré : Résistance à l'emprisonnement
+41102467	Messager Divin
+41102468	Annonce de la Déclaration d'Indépendance
+41102469	Gloire à la Corée Indépendante
+41102500	Tristesse de Rudolphe
+41102501	Angoisse de Rudolphe
+41102502	Solitude de Rudolphe
+41102503	Désespoir de Rudolphe
+41102504	Soupe de Gâteau de Riz
+41102505	Fortune
+41102506	Jus d'Abeille
+41102507	Tomate 1
+41102508	Tomate 2
+41102509	Tomate 3
+41102510	Tomate 4
+41102511	Tomate 5
+41102512	Puissance Offensive
+41102513	Aura Offensive
+41102514	Puissance Défensive
+41102515	Aura Défensive
+41102516	??
+41102517	?? ??
+41102518	Fourberie de Pluton
+41102519	Avarice de Pluton
+41102520	Célébrité de Pluton
+41102521	Défaillance de Pluton
+41102522	Fourberie de Pluton
+41102523	Avarice de Pluton
+41102524	Célébrité de Pluton
+41102525	Défaillance de Pluton
+41102526	Double-face
+41102527	Energie et esprit d'Alizea
+41102528	Bienfait d'Alizea
+41102529	?? ? ??
+41102530	??? ??
+41102531	?? plus PC? ?? ??
+41102532	Jouet d'Alizea
+41102533	Bienfait du Médailler d'Or
+41102534	Bienfait du Médailler d'Argent
+41102535	Bienfait du Médailler de Bronze
+41102536	Gardien de Gaïa
+41102537	Bénédiction de la prêtresse
+41102538	??? ?? ? ??
+41102539	Bienfait de l'Œuf Bleu
+41102540	Bienfait de l'Œuf Vert
+41102541	Bienfait de l'Œuf Blanc
+41102542	Bienfait de l'Œuf Rose
+41102543	Bienfait de l'Œuf Jaune
+41102544	Tomate (Supérieure) 1
+41102545	Tomate (Supérieure) 2
+41102546	Tomate (Supérieure) 3
+41102547	Tomate (Supérieure) 4
+41102548	Tomate (Supérieure) 5
+41102549	Energie Dorée (Supérieure) 1
+41102550	Energie Dorée (Supérieure) 2
+41102551	Energie Dorée (Supérieure) 3
+41102552	Energie Dorée (Supérieure) 4
+41102553	Energie Dorée (Supérieure) 5
+41102554	Chevauchée Divine
+41102555	Licorne Sacrée
+41102556	Licorne Infernale
+41102557	Lydian Empereur
+41102558	? ?? ??
+41102559	Paquet de Bonbons d'Halloween
+41102560	Paquet de Cookies d'Halloween
+41102561	?? ??? ???
+41103001	Aura d'Unité de Protection
+41103002	Unité de Protection
+41103003	Aura de la Lame Tranchante
+41103004	Lame Tranchante
+41103005	Aura de l'Esprit Taciturne
+41103006	Esprit Taciturne
+41103007	Aura du Vent Sifflotant
+41103008	Vent Sifflotant
+41103009	Boule de Feu
+41103010	Provocation
+41103011	Précision augmentée
+41103012	Précision Magique augmentée
+41103013	Secours d'Urgence
+41103014	Sorcellerie Arachnide Niv. 1
+41103015	Sorcellerie Arachnide Niv. 2
+41103016	Sorcellerie Arachnide Niv. 3
+41103017	Sorcellerie Arachnide Niv. 4
+41103018	Sorcellerie Arachnide Niv. 5
+41103019	Régénération Perpétuelle
+41103020	Magie Arachnide Niv. 1
+41103021	Magie Arachnide Niv. 2
+41103022	Magie Arachnide Niv. 3
+41103023	Magie Arachnide Niv. 4
+41103024	Magie Arachnide Niv. 5
+41103025	Energie et Magie Spirituelle
+41103026	Festival de Danse Rouge
+41103027	Energie ardente 
+41103028	Energie venteuse 
+41103029	Energie liquide 
+41103030	Energie Dorée 1 
+41103031	Energie Dorée 2 
+41103032	Energie Dorée 3 
+41103033	Energie Dorée 4 
+41103034	Energie Dorée 5 
+41103035	Esprit des Vacances
+41103036	Sahara
+41103037	???
+41103038	??
+41103039	???
+41103040	??
+41103041	???
+41103042	???
+41103043	??
+41103044	PNJ d'Evénement : Résistance à l'étourdissement améliorée
+41103045	PNJ d'Evénement : Résistance à la pétrification améliorée
+41103046	PNJ d'Evénement : Résistance à l'emprisonnement améliorée
+41103047	Cristal d'Attaque
+41103048	Cristal du Nirvana
+41103049	Cristal de Célérité
+41103050	Cristal de Chance
+41103051	Cristal d'Expérience
+41103052	Clémence d'Attaque
+41103053	Clémence du Nirvana
+41103054	Clémence de Célérité
+41103055	Clémence de Chance
+41103056	Clémence d'Expérience
+41103057	? ?? ???
+41103058	Bénédiction Angélique
+41103059	Bénédiction de l'Empereur
+41103060	Bénédiction du Maître
+41103061	Don de l'Ange
+41103062	Don de l'Empereur
+41103063	Don du Maître
+41103064	Antidote
+41103065	Cerveau Curatif
+41103066	Nectar de solidarité
+41103067	Pigeon protecteur
+41103068	Tambour déchiré
+41103069	Oiseau chantant une berceuse
+41103070	Mouton Rouge
+41103071	Mouton Bleu
+41103072	??
+41103073	Passeport de l'espérance
+41103074	Vœux Sincères
+41103075	??? ??
+41103076	??? ??
+41103077	??? ??
+41103078	??? ??
+41103079	Sac Porte-Bonheur Blanc
+41103080	Club des Célibataires Invincibles
+41110000	Effet de la Coquille d'Œuf Bleue
+41110001	Effet de la Coquille d'Œuf Verte
+41110002	Effet de la Coquille d'Œuf Blanche
+41110003	Effet de la Coquille d'Œuf Rose
+41110004	Effet de la Coquille d'Œuf Jaune
+41110005	Bouclier d'Expérience
+41110006	Bienfait Tempo Cadeau
+41110007	Permis de Réinvestigation de l'Espace Déformé
+41110008	??? ? ?? ??
+41110009	??? ?? ?? ??
+41110010	??? ???? ??? ? ?? ??
+41110011	??? : ?? ??
+41110012	??? : ??? ? ?? ??
+41110013	??? : ??? ? ?? ??
+41110014	??? : ??? ? ?? ??
+41110015	??? : ??? ? ?? ??
+41110016	??? : ??? ? ?? ??
+42102017	Heaume Rang II - 160% Effet
+42102018	Heaume Rang II - 160% Effet
+42102019	Heaume Rang II - 160% Effet
+42102020	Heaume Rang II - 160% Effet
+42102021	Heaume Rang II - 160% Effet
+42102022	Heaume Rang II - 160% Effet
+42102023	Heaume Rang II - 160% Effet
+42102024	Heaume Rang II - 160% Effet
+42102025	Heaume Rang II - 160% Effet
+42102026	Heaume Rang II - 160% Effet
+42102027	Heaume Rang II - 160% Effet
+42102028	Heaume Rang III - 160% Effet
+42102029	Heaume Rang III - 160% Effet
+42102030	Heaume Rang III - 160% Effet
+42102031	Heaume Rang III - 160% Effet
+42102032	Heaume Rang III - 160% Effet
+42102033	Heaume Rang III - 160% Effet
+42102034	Heaume Rang III - 160% Effet
+42102035	Heaume Rang III - 160% Effet
+42102036	Heaume Rang III - 160% Effet
+42102037	Heaume Rang III - 160% Effet
+42102038	Heaume Rang III - 160% Effet
+42102039	Heaume Rang IV - 160% Effet
+42102040	Heaume Rang IV - 160% Effet
+42102041	Heaume Rang IV - 160% Effet
+42102042	Heaume Rang IV - 160% Effet
+42102043	Heaume Rang IV - 160% Effet
+42102044	Heaume Rang IV - 160% Effet
+42102045	Heaume Rang IV - 160% Effet
+42102046	Heaume Rang IV - 160% Effet
+42102047	Heaume Rang IV - 160% Effet
+42102048	Heaume Rang IV - 160% Effet
+42102049	Heaume Rang IV - 160% Effet
+42102050	Heaume Rang V - 160% Effet
+42102051	Heaume Rang V - 160% Effet
+42102052	Heaume Rang V - 160% Effet
+42102053	Heaume Rang V - 160% Effet
+42102054	Heaume Rang V - 160% Effet
+42102055	Heaume Rang V - 160% Effet
+42102056	Heaume Rang V - 160% Effet
+42102057	Heaume Rang V - 160% Effet
+42102058	Heaume Rang V - 160% Effet
+42102059	Heaume Rang V - 160% Effet
+42102060	Heaume Rang V - 160% Effet
+42102061	Heaume Rang VI - 160% Effet
+42102062	Heaume Rang VI - 160% Effet
+42102063	Heaume Rang VI - 160% Effet
+42102064	Heaume Rang VI - 160% Effet
+42102065	Heaume Rang VI - 160% Effet
+42102066	Heaume Rang VI - 160% Effet
+42102067	Heaume Rang VI - 160% Effet
+42102068	Heaume Rang VI - 160% Effet
+42102069	Heaume Rang VI - 160% Effet
+42102070	Heaume Rang VI - 160% Effet
+42102071	Heaume Rang VI - 160% Effet
+42102072	Heaume Rang VII - 160% Effet
+42102073	Heaume Rang VII - 160% Effet
+42102074	Heaume Rang VII - 160% Effet
+42102075	Heaume Rang VII - 160% Effet
+42102076	Heaume Rang VII - 160% Effet
+42102077	Heaume Rang VII - 160% Effet
+42102078	Heaume Rang VII - 160% Effet
+42102079	Heaume Rang VII - 160% Effet
+42102080	Heaume Rang VII - 160% Effet
+42102081	Heaume Rang VII - 160% Effet
+42102082	Heaume Rang VII - 160% Effet
+42102215	Cape Rang II - 160% Effet
+42102216	Cape Rang II - 160% Effet
+42102217	Cape Rang II - 160% Effet
+42102218	Cape Rang II - 160% Effet
+42102219	Cape Rang II - 160% Effet
+42102220	Cape Rang II - 160% Effet
+42102221	Cape Rang II - 160% Effet
+42102222	Cape Rang II - 160% Effet
+42102223	Cape Rang II - 160% Effet
+42102224	Cape Rang II - 160% Effet
+42102225	Cape Rang II - 160% Effet
+42102226	Cape Rang III - 160% Effet
+42102227	Cape Rang III - 160% Effet
+42102228	Cape Rang III - 160% Effet
+42102229	Cape Rang III - 160% Effet
+42102230	Cape Rang III - 160% Effet
+42102231	Cape Rang III - 160% Effet
+42102232	Cape Rang III - 160% Effet
+42102233	Cape Rang III - 160% Effet
+42102234	Cape Rang III - 160% Effet
+42102235	Cape Rang III - 160% Effet
+42102236	Cape Rang III - 160% Effet
+42102237	Cape Rang IV - 160% Effet
+42102238	Cape Rang IV - 160% Effet
+42102239	Cape Rang IV - 160% Effet
+42102240	Cape Rang IV - 160% Effet
+42102241	Cape Rang IV - 160% Effet
+42102242	Cape Rang IV - 160% Effet
+42102243	Cape Rang IV - 160% Effet
+42102244	Cape Rang IV - 160% Effet
+42102245	Cape Rang IV - 160% Effet
+42102246	Cape Rang IV - 160% Effet
+42102247	Cape Rang IV - 160% Effet
+42102248	Cape Rang V - 160% Effet
+42102249	Cape Rang V - 160% Effet
+42102250	Cape Rang V - 160% Effet
+42102251	Cape Rang V - 160% Effet
+42102252	Cape Rang V - 160% Effet
+42102253	Cape Rang V - 160% Effet
+42102254	Cape Rang V - 160% Effet
+42102255	Cape Rang V - 160% Effet
+42102256	Cape Rang V - 160% Effet
+42102257	Cape Rang V - 160% Effet
+42102258	Cape Rang V - 160% Effet
+42102259	Cape Rang VI - 160% Effet
+42102260	Cape Rang VI - 160% Effet
+42102261	Cape Rang VI - 160% Effet
+42102262	Cape Rang VI - 160% Effet
+42102263	Cape Rang VI - 160% Effet
+42102264	Cape Rang VI - 160% Effet
+42102265	Cape Rang VI - 160% Effet
+42102266	Cape Rang VI - 160% Effet
+42102267	Cape Rang VI - 160% Effet
+42102268	Cape Rang VI - 160% Effet
+42102269	Cape Rang VI - 160% Effet
+42102270	Cape Rang VII - 160% Effet
+42102271	Cape Rang VII - 160% Effet
+42102272	Cape Rang VII - 160% Effet
+42102273	Cape Rang VII - 160% Effet
+42102274	Cape Rang VII - 160% Effet
+42102275	Cape Rang VII - 160% Effet
+42102276	Cape Rang VII - 160% Effet
+42102277	Cape Rang VII - 160% Effet
+42102278	Cape Rang VII - 160% Effet
+42102279	Cape Rang VII - 160% Effet
+42102280	Cape Rang VII - 160% Effet
+42102369	Effet d'Ailes
+42102370	Effet d'Ailes
+42102371	Effet d'Ailes
+42102372	Effet d'Ailes
+42102373	Effet d'Ailes
+42102374	Effet d'Ailes
+42102375	Effet d'Ailes
+42102376	Effet d'Ailes
+42102377	Effet d'Ailes
+42102378	Effet d'Ailes
+42102379	Effet d'Ailes
+43102017	Heaume Rang II - 120% Effet
+43102018	Heaume Rang II - 120% Effet
+43102019	Heaume Rang II - 120% Effet
+43102020	Heaume Rang II - 120% Effet
+43102021	Heaume Rang II - 120% Effet
+43102022	Heaume Rang II - 120% Effet
+43102023	Heaume Rang II - 120% Effet
+43102024	Heaume Rang II - 120% Effet
+43102025	Heaume Rang II - 120% Effet
+43102026	Heaume Rang II - 120% Effet
+43102027	Heaume Rang II - 120% Effet
+43102028	Heaume Rang III - 120% Effet
+43102029	Heaume Rang III - 120% Effet
+43102030	Heaume Rang III - 120% Effet
+43102031	Heaume Rang III - 120% Effet
+43102032	Heaume Rang III - 120% Effet
+43102033	Heaume Rang III - 120% Effet
+43102034	Heaume Rang III - 120% Effet
+43102035	Heaume Rang III - 120% Effet
+43102036	Heaume Rang III - 120% Effet
+43102037	Heaume Rang III - 120% Effet
+43102038	Heaume Rang III - 120% Effet
+43102039	Heaume Rang IV - 120% Effet
+43102040	Heaume Rang IV - 120% Effet
+43102041	Heaume Rang IV - 120% Effet
+43102042	Heaume Rang IV - 120% Effet
+43102043	Heaume Rang IV - 120% Effet
+43102044	Heaume Rang IV - 120% Effet
+43102045	Heaume Rang IV - 120% Effet
+43102046	Heaume Rang IV - 120% Effet
+43102047	Heaume Rang IV - 120% Effet
+43102048	Heaume Rang IV - 120% Effet
+43102049	Heaume Rang IV - 120% Effet
+43102050	Heaume Rang V - 120% Effet
+43102051	Heaume Rang V - 120% Effet
+43102052	Heaume Rang V - 120% Effet
+43102053	Heaume Rang V - 120% Effet
+43102054	Heaume Rang V - 120% Effet
+43102055	Heaume Rang V - 120% Effet
+43102056	Heaume Rang V - 120% Effet
+43102057	Heaume Rang V - 120% Effet
+43102058	Heaume Rang V - 120% Effet
+43102059	Heaume Rang V - 120% Effet
+43102060	Heaume Rang V - 120% Effet
+43102061	Heaume Rang VI - 120% Effet
+43102062	Heaume Rang VI - 120% Effet
+43102063	Heaume Rang VI - 120% Effet
+43102064	Heaume Rang VI - 120% Effet
+43102065	Heaume Rang VI - 120% Effet
+43102066	Heaume Rang VI - 120% Effet
+43102067	Heaume Rang VI - 120% Effet
+43102068	Heaume Rang VI - 120% Effet
+43102069	Heaume Rang VI - 120% Effet
+43102070	Heaume Rang VI - 120% Effet
+43102071	Heaume Rang VI - 120% Effet
+43102072	Heaume Rang VII - 120% Effet
+43102073	Heaume Rang VII - 120% Effet
+43102074	Heaume Rang VII - 120% Effet
+43102075	Heaume Rang VII - 120% Effet
+43102076	Heaume Rang VII - 120% Effet
+43102077	Heaume Rang VII - 120% Effet
+43102078	Heaume Rang VII - 120% Effet
+43102079	Heaume Rang VII - 120% Effet
+43102080	Heaume Rang VII - 120% Effet
+43102081	Heaume Rang VII - 120% Effet
+43102082	Heaume Rang VII - 120% Effet
+43102215	Cape Rang II - 200% Effet
+43102216	Cape Rang II - 200% Effet
+43102217	Cape Rang II - 200% Effet
+43102218	Cape Rang II - 200% Effet
+43102219	Cape Rang II - 200% Effet
+43102220	Cape Rang II - 200% Effet
+43102221	Cape Rang II - 200% Effet
+43102222	Cape Rang II - 200% Effet
+43102223	Cape Rang II - 200% Effet
+43102224	Cape Rang II - 200% Effet
+43102225	Cape Rang II - 200% Effet
+43102226	Cape Rang III - 200% Effet
+43102227	Cape Rang III - 200% Effet
+43102228	Cape Rang III - 200% Effet
+43102229	Cape Rang III - 200% Effet
+43102230	Cape Rang III - 200% Effet
+43102231	Cape Rang III - 200% Effet
+43102232	Cape Rang III - 200% Effet
+43102233	Cape Rang III - 200% Effet
+43102234	Cape Rang III - 200% Effet
+43102235	Cape Rang III - 200% Effet
+43102236	Cape Rang III - 200% Effet
+43102237	Cape Rang IV - 200% Effet
+43102238	Cape Rang IV - 200% Effet
+43102239	Cape Rang IV - 200% Effet
+43102240	Cape Rang IV - 200% Effet
+43102241	Cape Rang IV - 200% Effet
+43102242	Cape Rang IV - 200% Effet
+43102243	Cape Rang IV - 200% Effet
+43102244	Cape Rang IV - 200% Effet
+43102245	Cape Rang IV - 200% Effet
+43102246	Cape Rang IV - 200% Effet
+43102247	Cape Rang IV - 200% Effet
+43102248	Cape Rang V - 200% Effet
+43102249	Cape Rang V - 200% Effet
+43102250	Cape Rang V - 200% Effet
+43102251	Cape Rang V - 200% Effet
+43102252	Cape Rang V - 200% Effet
+43102253	Cape Rang V - 200% Effet
+43102254	Cape Rang V - 200% Effet
+43102255	Cape Rang V - 200% Effet
+43102256	Cape Rang V - 200% Effet
+43102257	Cape Rang V - 200% Effet
+43102258	Cape Rang V - 200% Effet
+43102259	Cape Rang VI - 200% Effet
+43102260	Cape Rang VI - 200% Effet
+43102261	Cape Rang VI - 200% Effet
+43102262	Cape Rang VI - 200% Effet
+43102263	Cape Rang VI - 200% Effet
+43102264	Cape Rang VI - 200% Effet
+43102265	Cape Rang VI - 200% Effet
+43102266	Cape Rang VI - 200% Effet
+43102267	Cape Rang VI - 200% Effet
+43102268	Cape Rang VI - 200% Effet
+43102269	Cape Rang VI - 200% Effet
+43102270	Cape Rang VII - 200% Effet
+43102271	Cape Rang VII - 200% Effet
+43102272	Cape Rang VII - 200% Effet
+43102273	Cape Rang VII - 200% Effet
+43102274	Cape Rang VII - 200% Effet
+43102275	Cape Rang VII - 200% Effet
+43102276	Cape Rang VII - 200% Effet
+43102277	Cape Rang VII - 200% Effet
+43102278	Cape Rang VII - 200% Effet
+43102279	Cape Rang VII - 200% Effet
+43102280	Cape Rang VII - 200% Effet
