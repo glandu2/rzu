@@ -52,13 +52,15 @@ int main(int argc, char** argv) {
 	gameEpic = CONFIG_GET()->server.epic;
 	Object::logStatic(Object::LL_Info,
 	                  "main",
-	                  "Client epic: %d.%d.%d, Server epic: %d.%d.%d\n",
+	                  "Client epic: %d.%d.%d (0x%06X), Server epic: %d.%d.%d (0x%06X)\n",
 	                  clientEpic >> 16,
 	                  (clientEpic >> 8) & 0xFF,
 	                  clientEpic & 0xFF,
+	                  clientEpic,
 	                  gameEpic >> 16,
 	                  (gameEpic >> 8) & 0xFF,
-	                  gameEpic & 0xFF);
+	                  gameEpic & 0xFF,
+	                  gameEpic);
 	Object::logStatic(Object::LL_Info,
 	                  "main",
 	                  "Target auth: %s:%d\n",
