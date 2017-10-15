@@ -383,7 +383,7 @@ void PacketFilter::sendCombatLogLine(const PacketFilter::SwingData& data) {
 	        data.critical ? "!" : "",
 	        data.damageElement.c_str());
 
-	Object::logStatic(Object::LL_Info, "rzfilter_module", "Damage: %s\n", buffer);
+	Object::logStatic(Object::LL_Info, "rzfilter_combatlog", "Damage: %s\n", buffer);
 
 	chatRqst.message = buffer;
 	if(chatRqst.message.size() > 32766)
@@ -403,11 +403,11 @@ template<class Packet> void PacketFilter::showPacketJson(const Packet* packet, i
 	jsonWriter.finalize();
 	std::string jsonData = jsonWriter.toString();
 
-	Object::logStatic(Object::LL_Info, "rzfilter_module", "%s packet:\n%s\n", Packet::getName(), jsonData.c_str());
+	Object::logStatic(Object::LL_Info, "rzfilter_combatlog", "%s packet:\n%s\n", Packet::getName(), jsonData.c_str());
 }
 
 IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter) {
-	Object::logStatic(Object::LL_Info, "rzfilter_module", "Loaded filter from data: %p\n", oldFilter);
+	Object::logStatic(Object::LL_Info, "rzfilter_combatlog", "Loaded filter from data: %p\n", oldFilter);
 	return new PacketFilter(client, server, (PacketFilter*) oldFilter);
 }
 

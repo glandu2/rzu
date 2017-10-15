@@ -426,7 +426,7 @@ void PacketFilter::printAuthPacketJson(const TS_MESSAGE* packet, int version, bo
 			break;
 
 		default:
-			Object::logStatic(Object::LL_Warning, "rzfilter_module", "packet id %d unknown\n", packet->id);
+			Object::logStatic(Object::LL_Warning, "rzfilter_json", "packet id %d unknown\n", packet->id);
 			break;
 	}
 }
@@ -712,7 +712,7 @@ void PacketFilter::printGamePacketJson(const TS_MESSAGE* packet, int version, bo
 			break;
 
 		default:
-			Object::logStatic(Object::LL_Warning, "rzfilter_module", "packet id %d unknown\n", packet->id);
+			Object::logStatic(Object::LL_Warning, "rzfilter_json", "packet id %d unknown\n", packet->id);
 			break;
 	}
 }
@@ -753,7 +753,7 @@ void PacketFilter::onChatMessage(const TS_SC_CHAT* packet) {
 }
 
 IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter) {
-	Object::logStatic(Object::LL_Info, "rzfilter_module", "Loaded filter from data: %p\n", oldFilter);
+	Object::logStatic(Object::LL_Info, "rzfilter_json", "Loaded filter from data: %p\n", oldFilter);
 	return new PacketFilter(client, server, (PacketFilter*) oldFilter);
 }
 
@@ -767,5 +767,5 @@ template<class Packet> void PacketFilter::showPacketJson(const Packet* packet, i
 	jsonWriter.finalize();
 	std::string jsonData = jsonWriter.toString();
 
-	Object::logStatic(Object::LL_Info, "rzfilter_module", "%s packet:\n%s\n", Packet::getName(), jsonData.c_str());
+	Object::logStatic(Object::LL_Info, "rzfilter_json", "%s packet:\n%s\n", Packet::getName(), jsonData.c_str());
 }
