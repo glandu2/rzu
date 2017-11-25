@@ -115,6 +115,7 @@ int main(int argc, char** argv) {
 	DbQueryJob<AuthServer::DB_SecurityNoCheckData>::deinit();
 	DbQueryJob<AuthServer::DB_AccountData>::deinit();
 	EventLoop::getInstance()->deleteObjects();
+	LibRzuDeInit();
 
 	return 0;
 }
