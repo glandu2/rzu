@@ -121,7 +121,7 @@ endif()
 
 if(CLANG_TIDY_EXE AND USE_CLANG_TIDY)
   message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-  set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*")
+  set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}" "-fix-errors" "-checks=*,-google-readability-braces-around-statements,-hicpp-braces-around-statements,-readability-braces-around-statements")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/librzu/CMakeLists.txt")
