@@ -244,7 +244,7 @@ TEST(TS_GA_LOGIN, gs_connect__auth_connect__auth_disconnect__gs_disconnect__auth
 	});
 
 	// Auth GS login
-	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
 		EXPECT_EQ(1, packet->server_idx);
@@ -299,7 +299,7 @@ TEST(TS_GA_LOGIN, gs_connect__auth_connect__account_list__auth_disconnect__gs_di
 	});
 
 	// Auth GS login
-	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_LOGIN_WITH_LOGOUT_EXT* packet = AGET_PACKET(TS_GA_LOGIN_WITH_LOGOUT_EXT);
 
 		EXPECT_EQ(1, packet->server_idx);
