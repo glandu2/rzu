@@ -15,7 +15,8 @@
 
 ClientSession::ClientSession(bool authMode)
     : serverSession(this), packetFilter(nullptr), version(CONFIG_GET()->client.epic.get()), authMode(authMode) {
-	packetFilter = FilterManager::getInstance()->createFilter(this, &serverSession);
+	packetFilter = FilterManager::getInstance()->createFilter(
+	    this, &serverSession, authMode ? IFilter::ST_Auth : IFilter::ST_Game);
 }
 
 ClientSession::~ClientSession() {
@@ -61,7 +62,7 @@ void ClientSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 
 EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	// log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
-	if(packetFilter->onClientPacket(packet, authMode ? IFilter::ST_Auth : IFilter::ST_Game))
+	if(packetFilter->onClientPacket(packet))
 		serverSession.sendPacket(packet);
 
 	return PacketSession::onPacketReceived(packet);
@@ -69,7 +70,7 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	// log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
-	if(packetFilter->onServerPacket(packet, authMode ? IFilter::ST_Auth : IFilter::ST_Game)) {
+	if(packetFilter->onServerPacket(packet)) {
 		sendPacket(packet);
 	}
 }

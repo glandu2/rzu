@@ -32,5 +32,6 @@ core.log.level:info
 
 # Filter module to use
 # - rzfilter_version_converter: convert packets version
-# - rzfilter_module: dump packet in json format
-filter.modulename:rzfilter_version_converter
+# - rzfilter_lua_module: execute rzfilter.lua to filter packets
+filter.modulename:rzfilter_lua_module
+#filter.modulename:rzfilter_version_converter

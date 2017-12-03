@@ -37,10 +37,10 @@ protected:
 	};
 
 public:
-	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter* data);
+	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType, PacketFilter* data);
 	~PacketFilter();
 
-	virtual bool onServerPacket(const TS_MESSAGE* packet, ServerType serverType);
+	virtual bool onServerPacket(const TS_MESSAGE* packet) override;
 
 protected:
 private:
@@ -68,7 +68,10 @@ private:
 };
 
 extern "C" {
-SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter);
+SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
+                                    IFilterEndpoint* server,
+                                    IFilter::ServerType serverType,
+                                    IFilter* oldFilter);
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 

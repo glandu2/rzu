@@ -5,8 +5,11 @@
 #include "Packet/JSONWriter.h"
 #include <sstream>
 
-PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter* oldFilter)
-    : IFilter(client, server) {
+PacketFilter::PacketFilter(IFilterEndpoint* client,
+                           IFilterEndpoint* server,
+                           ServerType serverType,
+                           PacketFilter* oldFilter)
+    : IFilter(client, server, serverType) {
 	if(oldFilter) {
 		data = oldFilter->data;
 		oldFilter->data = nullptr;
@@ -23,7 +26,7 @@ PacketFilter::~PacketFilter() {
 		delete data;
 }
 
-bool PacketFilter::onServerPacket(const TS_MESSAGE* packet, ServerType serverType) {
+bool PacketFilter::onServerPacket(const TS_MESSAGE* packet) {
 	clientp = client;
 	serverVersion = server->getPacketVersion();
 
@@ -407,9 +410,12 @@ template<class Packet> void PacketFilter::showPacketJson(const Packet* packet, i
 	Object::logStatic(Object::LL_Info, "rzfilter_combatlog", "%s packet:\n%s\n", Packet::getName(), jsonData.c_str());
 }
 
-IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter) {
+IFilter* createFilter(IFilterEndpoint* client,
+                      IFilterEndpoint* server,
+                      IFilter::ServerType serverType,
+                      IFilter* oldFilter) {
 	Object::logStatic(Object::LL_Info, "rzfilter_combatlog", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketFilter(client, server, (PacketFilter*) oldFilter);
+	return new PacketFilter(client, server, serverType, (PacketFilter*) oldFilter);
 }
 
 void destroyFilter(IFilter* filter) {

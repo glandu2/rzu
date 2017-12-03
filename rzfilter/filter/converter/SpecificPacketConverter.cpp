@@ -36,7 +36,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 				pkt.szVersion = "200609280";
 			else if(server->getPacketVersion() <= EPIC_9_1)
 				pkt.szVersion = "200701120";
-			else if(server->getPacketVersion() <= EPIC_9_4)
+			else if(server->getPacketVersion() <= EPIC_9_5_1)
 				pkt.szVersion = "201507080";
 			else
 				pkt.szVersion = "205001120";

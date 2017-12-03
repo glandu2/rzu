@@ -41,7 +41,9 @@ public:
 
 	// Write functions /////////////////////////
 
-	void writeHeader(uint32_t size, uint16_t id) { write<uint16_t>("id", id); }
+	void writeHeader(uint32_t size, uint16_t id) {
+		// written outside of this writer
+	}
 
 	// Primitives
 	template<typename T>
@@ -193,6 +195,13 @@ public:
 
 		val = static_cast<U>(lua_tonumber(L, -1));
 		lua_pop(L, 1);
+	}
+
+	// Encoded values
+	template<typename T, typename U> void read(const char* fieldName, EncodedInt<U>& val) {
+		uint32_t internalVal;
+		read<uint32_t>(fieldName, internalVal);
+		val = internalVal;
 	}
 
 	// Objects
