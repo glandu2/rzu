@@ -1,9 +1,9 @@
 #include "PacketFilter.h"
+#include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 #include "GameClient/TS_SC_CHAT.h"
 #include "Packet/JSONWriter.h"
 #include <sstream>
-#include "Core/PrintfFormats.h"
 
 PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter* oldFilter)
     : IFilter(client, server) {
@@ -359,7 +359,7 @@ void PacketFilter::sendCombatLogLine(const PacketFilter::SwingData& data) {
 
 	if(this->data->file) {
 		fprintf(this->data->file,
-		        "%" PRIu64 "\t%s\t%s\t%s\t%s\t%s\t%" PRIi64 "\t%s\t%s\n",
+		        "%" PRIu64 "\t%s\t%s\t%s\t%s\t%s\t%" PRId64 "\t%s\t%s\n",
 		        data.time,
 		        data.attacker.c_str(),
 		        data.victim.c_str(),
@@ -373,7 +373,7 @@ void PacketFilter::sendCombatLogLine(const PacketFilter::SwingData& data) {
 	}
 
 	sprintf(buffer,
-	        "%s->%s: %s(%s%s%s) = %" PRIi64 "%s(%s)",
+	        "%s->%s: %s(%s%s%s) = %" PRId64 "%s(%s)",
 	        data.attacker.c_str(),
 	        data.victim.c_str(),
 	        data.attackName.c_str(),
