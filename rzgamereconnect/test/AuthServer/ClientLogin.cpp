@@ -128,7 +128,7 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_disconnect) {
 		game.closeSession();
 	});
 
-	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_LOGOUT* packet = AGET_PACKET(TS_GA_LOGOUT);
 		channel->closeSession();
 	});
@@ -246,7 +246,7 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_auth_disconnect_client_disconnect) {
 		game.closeSession();
 	});
 
-	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_LOGOUT* packet = AGET_PACKET(TS_GA_LOGOUT);
 		channel->closeSession();
 	});
@@ -296,7 +296,7 @@ TEST(TS_GA_CLIENT_LOGIN, auth_disconnect_client_kick_failed_auth_connect) {
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
 	});
 
-	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_ACCOUNT_LIST* packet = AGET_PACKET(TS_GA_ACCOUNT_LIST);
 		EXPECT_EQ(0, packet->count);
 		EXPECT_TRUE(packet->final_packet);
@@ -341,7 +341,7 @@ TEST(TS_GA_CLIENT_LOGIN, auth_disconnect_client_kick_failed_auth_connect) {
 		game.closeSession();
 	});
 
-	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_LOGOUT* packet = AGET_PACKET(TS_GA_LOGOUT);
 		channel->closeSession();
 	});
@@ -439,7 +439,7 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 		});
 	}
 
-	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Disconnection, event.type);
 
 		channel->start();
@@ -605,7 +605,7 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_failed) {
 		game.closeSession();
 	});
 
-	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_LOGOUT* packet = AGET_PACKET(TS_GA_LOGOUT);
 		channel->closeSession();
 	});
