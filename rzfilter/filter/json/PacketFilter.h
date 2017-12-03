@@ -13,7 +13,7 @@ struct TS_SC_CHAT;
 
 class PacketFilter : public IFilter {
 public:
-	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketFilter* data);
+	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType, PacketFilter* data);
 	~PacketFilter();
 
 	void sendChatMessage(IFilterEndpoint* client,
@@ -21,8 +21,8 @@ public:
 	                     const char* sender = "Filter",
 	                     TS_CHAT_TYPE type = CHAT_WHISPER);
 
-	virtual bool onServerPacket(const TS_MESSAGE* packet, ServerType serverType);
-	virtual bool onClientPacket(const TS_MESSAGE* packet, ServerType serverType);
+	virtual bool onServerPacket(const TS_MESSAGE* packet);
+	virtual bool onClientPacket(const TS_MESSAGE* packet);
 
 protected:
 private:
@@ -46,7 +46,10 @@ private:
 };
 
 extern "C" {
-SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter);
+SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
+                                    IFilterEndpoint* server,
+                                    IFilter::ServerType serverType,
+                                    IFilter* oldFilter);
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 

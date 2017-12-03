@@ -7,11 +7,14 @@
 
 class PacketConverterFilter : public IFilter {
 public:
-	PacketConverterFilter(IFilterEndpoint* client, IFilterEndpoint* server, PacketConverterFilter* data);
+	PacketConverterFilter(IFilterEndpoint* client,
+	                      IFilterEndpoint* server,
+	                      ServerType serverType,
+	                      PacketConverterFilter* data);
 	~PacketConverterFilter();
 
-	virtual bool onServerPacket(const TS_MESSAGE* packet, ServerType serverType);
-	virtual bool onClientPacket(const TS_MESSAGE* packet, ServerType serverType);
+	virtual bool onServerPacket(const TS_MESSAGE* packet) override;
+	virtual bool onClientPacket(const TS_MESSAGE* packet) override;
 
 protected:
 	bool convertAuthPacketAndSend(IFilterEndpoint* client,
@@ -25,7 +28,10 @@ private:
 };
 
 extern "C" {
-SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter);
+SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
+                                    IFilterEndpoint* server,
+                                    IFilter::ServerType serverType,
+                                    IFilter* oldFilter);
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 

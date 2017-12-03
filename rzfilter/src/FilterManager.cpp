@@ -1,4 +1,5 @@
 #include "FilterManager.h"
+#include "Console/ConsoleCommands.h"
 #include "Core/EventLoop.h"
 #include "FilterProxy.h"
 #include "GlobalConfig.h"
@@ -24,6 +25,9 @@ FilterManager::FilterManager()
 
 	updateFilterTimer.unref();
 	updateFilterTimer.start(this, &FilterManager::onUpdateFilter, 2000, 2000);
+
+	ConsoleCommands::get()->addCommand(
+	    "filter.reload", "freload", 0, 0, &reloadFiltersCommand, "Reload filter for all connections");
 }
 
 FilterManager::~FilterManager() {
@@ -40,10 +44,12 @@ FilterManager* FilterManager::getInstance() {
 	return &filterManager;
 }
 
-FilterProxy* FilterManager::createFilter(IFilterEndpoint* client, IFilterEndpoint* server) {
-	FilterProxy* filterProxy = new FilterProxy(this, client, server);
+FilterProxy* FilterManager::createFilter(IFilterEndpoint* client,
+                                         IFilterEndpoint* server,
+                                         IFilter::ServerType serverType) {
+	FilterProxy* filterProxy = new FilterProxy(this, client, server, serverType);
 	if(filterModuleLoaded) {
-		filterProxy->setFilterModule(createFilterFunction(client, server, nullptr));
+		filterProxy->recreateFilterModule(createFilterFunction, nullptr);
 	}
 
 	packetFilters.push_back(std::unique_ptr<FilterProxy>(filterProxy));
@@ -90,10 +96,28 @@ static int getFileSize(const char* name) {
 		return 0;
 }
 
+void FilterManager::reloadAllFilters(IFilter::CreateFilterFunction createFilterFunction,
+                                     IFilter::DestroyFilterFunction destroyOldFilterFunction) {
+	auto it = packetFilters.begin();
+	auto itEnd = packetFilters.end();
+	for(; it != itEnd; ++it) {
+		FilterProxy* filterProxy = it->get();
+
+		filterProxy->recreateFilterModule(createFilterFunction, destroyOldFilterFunction);
+	}
+}
+
+void FilterManager::reloadFiltersCommand(IWritableConsole* console, const std::vector<std::string>&) {
+	FilterManager* self = FilterManager::getInstance();
+	self->reloadAllFilters(self->createFilterFunction, self->destroyFilterFunction);
+	std::string filterName = CONFIG_GET()->filter.filterModuleName.get();
+	console->writef("Filter %s reloaded, %d connection affected\r\n", filterName.c_str(), self->packetFilters.size());
+}
+
 void FilterManager::loadModule() {
 	uv_lib_t filterModule;
-	CreateFilterFunction createFilterFunction;
-	DestroyFilterFunction destroyFilterFunction;
+	IFilter::CreateFilterFunction createFilterFunction;
+	IFilter::DestroyFilterFunction destroyFilterFunction;
 
 	int err;
 	const char* moduleName;
@@ -153,16 +177,7 @@ void FilterManager::loadModule() {
 		return;
 	}
 
-	auto it = packetFilters.begin();
-	auto itEnd = packetFilters.end();
-	for(; it != itEnd; ++it) {
-		FilterProxy* filterProxy = it->get();
-		IFilter* oldFilter = filterProxy->getFilterModule();
-		filterProxy->setFilterModule(
-		    createFilterFunction(filterProxy->getClientEndpoint(), filterProxy->getServerEndpoint(), oldFilter));
-		if(oldFilter && this->destroyFilterFunction)
-			this->destroyFilterFunction(oldFilter);
-	}
+	reloadAllFilters(createFilterFunction, this->destroyFilterFunction);
 
 	unloadModule();
 	unlink(usedModuleName.c_str());

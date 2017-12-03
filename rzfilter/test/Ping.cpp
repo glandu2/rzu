@@ -58,7 +58,8 @@ public:
 		ASSERT_NE(-1, outputServerSocket);
 
 		memset(&sin, 0, sizeof(sin));
-		sin.sin_addr.s_addr = inet_addr(CONFIG_GET()->output.ip.get().c_str());
+
+		uv_inet_pton(AF_INET, CONFIG_GET()->output.ip.get().c_str(), &sin.sin_addr.s_addr);
 		sin.sin_port = htons(CONFIG_GET()->output.port.get());
 		sin.sin_family = AF_INET;
 
@@ -70,7 +71,7 @@ public:
 		ASSERT_NE(-1, inputSocket);
 
 		memset(&sin, 0, sizeof(sin));
-		sin.sin_addr.s_addr = inet_addr(CONFIG_GET()->input.ip.get().c_str());
+		uv_inet_pton(AF_INET, CONFIG_GET()->input.ip.get().c_str(), &sin.sin_addr.s_addr);
 		sin.sin_port = htons(CONFIG_GET()->input.port.get());
 		sin.sin_family = AF_INET;
 

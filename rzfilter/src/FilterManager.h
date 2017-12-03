@@ -9,20 +9,15 @@
 #include <memory>
 
 class FilterProxy;
+class IWritableConsole;
 
 class FilterManager : public Object {
 	DECLARE_CLASSNAME(FilterManager, 0)
-private:
-	typedef void (*DestroyFilterFunction)(IFilter* filter);
-	typedef IFilter* (*CreateFilterFunction)(IFilterEndpoint* client, IFilterEndpoint* server, IFilter* oldFilter);
 
 public:
-	FilterManager();
-	~FilterManager();
-
 	static FilterManager* getInstance();
 
-	FilterProxy* createFilter(IFilterEndpoint* client, IFilterEndpoint* server);
+	FilterProxy* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter::ServerType serverType);
 	void destroyFilter(FilterProxy* filter);
 
 protected:
@@ -36,16 +31,23 @@ protected:
 	static void onFsStatDone(uv_fs_t* req);
 	static void onFsRemoveDone(uv_fs_t* req);
 	static void onFsMoveDone(uv_fs_t* req);
+	void reloadAllFilters(IFilter::CreateFilterFunction createFilterFunction,
+	                      IFilter::DestroyFilterFunction destroyOldFilterFunction);
+
+	static void reloadFiltersCommand(IWritableConsole* console, const std::vector<std::string>&);
 
 private:
 	uv_lib_t filterModule;
 	bool filterModuleLoaded;
 	std::list<std::unique_ptr<FilterProxy> > packetFilters;
-	CreateFilterFunction createFilterFunction;
-	DestroyFilterFunction destroyFilterFunction;
+	IFilter::CreateFilterFunction createFilterFunction;
+	IFilter::DestroyFilterFunction destroyFilterFunction;
 
 	Timer<FilterManager> updateFilterTimer;
 	int lastFileSize;
+
+	FilterManager();
+	~FilterManager();
 };
 
 #endif  // FILTERMANAGER_H
