@@ -1,6 +1,7 @@
 #include "GameSession.h"
 #include "AuctionWorker.h"
 #include "AuthSession.h"
+#include "Cipher/RzHashReversible256.h"
 #include "Config/ConfigParamVal.h"
 #include "Core/EventLoop.h"
 #include <algorithm>
@@ -147,6 +148,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 
 	loginPkt.name = playername;
 	loginPkt.race = 0;
+	RzHashReversible256::generatePayload(loginPkt);
 	sendPacket(loginPkt, version.get());
 }
 
