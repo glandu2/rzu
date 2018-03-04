@@ -26,7 +26,7 @@ void onTerminate(void* instance) {
 }
 
 int main(int argc, char** argv) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
 	AuthServer::AuthSession::init();
 
@@ -68,7 +68,7 @@ void runServers(Log* trafficLogger) {
 	                                                            trafficLogger);
 
 	serverManager.addServer("auth.gameserver", &authGameServer, &CONFIG_GET()->game.listener.autoStart);
-	ConsoleSession::start(&serverManager);
+	ConsoleServer consoleServer(&serverManager);
 
 	serverManager.start();
 
