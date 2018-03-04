@@ -65,7 +65,7 @@ void LobbyHandler::onCharacterWearInfoResult(DbQueryJob<CharacterWearInfoBinding
 	auto it = characters.begin();
 	auto itEnd = characters.end();
 	for(; it != itEnd; ++it) {
-		LOBBY_CHARACTER_INFO characterInfo = {0};
+		LOBBY_CHARACTER_INFO characterInfo = {};
 		const CharacterLight* dbCharacterInfo = it->get();
 
 		characterInfo.sex = dbCharacterInfo->sex;
