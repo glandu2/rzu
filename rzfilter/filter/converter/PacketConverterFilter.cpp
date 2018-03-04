@@ -331,7 +331,7 @@ bool PacketConverterFilter::onClientPacket(const TS_MESSAGE* packet) {
 }
 
 template<typename Packet> bool sendPacket(IFilterEndpoint* target, const TS_MESSAGE* packet, int version) {
-	Packet pkt = {0};
+	Packet pkt = {};
 	if(packet->process(pkt, version)) {
 		if(packet->id != Packet::getId(version))
 			Object::logStatic(Object::LL_Warning,

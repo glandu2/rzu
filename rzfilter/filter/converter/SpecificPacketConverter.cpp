@@ -97,6 +97,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 
 				server->sendPacket(pkt);
 			}
+		} else {
+			return true;
 		}
 	} else if(packet->id == TS_CA_IMBC_ACCOUNT::packetID) {
 		TS_CA_IMBC_ACCOUNT pkt;
@@ -129,6 +131,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 
 				server->sendPacket(pkt);
 			}
+		} else {
+			return true;
 		}
 	} else if(packet->id == TS_AC_AES_KEY_IV::packetID) {
 		TS_AC_AES_KEY_IV pkt;
@@ -169,6 +173,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 
 				memset(&account.password[0], 0, account.password.size());
 			}
+		} else {
+			return true;
 		}
 	} else if(packet->id == TS_AC_ACCOUNT_NAME::packetID) {
 		if(client->getPacketVersion() >= EPIC_9_4)
@@ -209,6 +215,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 				pkt.one_time_key = otp;
 				client->sendPacket(pkt);
 			}
+		} else {
+			return true;
 		}
 	} else if(packet->id == TS_AC_RESULT_WITH_STRING::packetID) {
 		TS_AC_RESULT_WITH_STRING pkt;
@@ -222,6 +230,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 				resultPkt.login_flag = pkt.login_flag;
 				client->sendPacket(resultPkt);
 			}
+		} else {
+			return true;
 		}
 	} else {
 		return true;
@@ -264,6 +274,8 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 			}
 
 			target->sendPacket(pkt);
+		} else {
+			return true;
 		}
 	} else if(packet->id == TS_CS_CHECK_ILLEGAL_USER::packetID) {
 		return false;
