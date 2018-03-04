@@ -52,7 +52,7 @@ static void init() {
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	init();
 	ConfigInfo::get()->init(argc, argv);
 
