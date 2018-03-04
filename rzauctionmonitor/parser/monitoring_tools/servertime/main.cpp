@@ -20,7 +20,7 @@ struct TrafficDump {
 	TrafficDump()
 	    : enable(CFG_CREATE("trafficdump.enable", false)),
 	      dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
-	      file(CFG_CREATE("trafficdump.file", "chatgateway.log")),
+	      file(CFG_CREATE("trafficdump.file", "rzservertime.log")),
 	      level(CFG_CREATE("trafficdump.level", "debug")),
 	      consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal")) {
 		Utils::autoSetAbsoluteDir(dir);
