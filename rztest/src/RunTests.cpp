@@ -1,13 +1,11 @@
 #include "RunTests.h"
 #include "Config/GlobalCoreConfig.h"
 #include "Core/Log.h"
-#include "LibRzuInit.h"
 #include "RzuGtestPrettyUnitTestResultPrinter.h"
 #include "TestGlobalConfig.h"
 #include "gtest/gtest.h"
 
 TestRunner::TestRunner(int argc, char** argv, ConfigInitCallback configInit) {
-	LibRzuInit();
 	TestGlobalConfig::init();
 	if(configInit)
 		configInit();
