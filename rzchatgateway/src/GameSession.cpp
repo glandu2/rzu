@@ -1,5 +1,6 @@
 #include "GameSession.h"
 #include "ChatAuthSession.h"
+#include "Cipher/RzHashReversible256.h"
 #include "IrcClient.h"
 #include <algorithm>
 #include <time.h>
@@ -121,6 +122,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	TS_CS_LOGIN loginPkt;
 	loginPkt.name = playername;
 	loginPkt.race = 0;
+	RzHashReversible256::generatePayload(loginPkt);
 	sendPacket(loginPkt, EPIC_LATEST);
 
 	TS_TIMESYNC timeSyncPkt;
