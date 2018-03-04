@@ -44,7 +44,7 @@ struct AuctionFile {
 
 cval<std::string>& stateFile = CFG_CREATE("statefile", "");
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	DbConnectionPool dbConnectionPool;
 	DbBindingLoader::get()->initAll(&dbConnectionPool);
 

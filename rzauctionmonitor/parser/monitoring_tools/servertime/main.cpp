@@ -44,7 +44,7 @@ static void init() {
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	init();
 	ConfigInfo::get()->init(argc, argv);
 
@@ -94,4 +94,6 @@ int main(int argc, char* argv[]) {
 	authSession->connect();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+
+	return 0;
 }

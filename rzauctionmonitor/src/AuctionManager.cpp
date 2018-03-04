@@ -25,6 +25,7 @@ AuctionManager::AuctionManager()
 		ConsoleCommands::get()->addCommand("client.reload_accounts",
 		                                   "reload",
 		                                   0,
+		                                   0,
 		                                   &AuctionManager::onReloadAccounts,
 		                                   "Restart clients and reload accounts from accounts file");
 		instance = this;

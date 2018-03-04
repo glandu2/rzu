@@ -18,7 +18,7 @@ static void onTerminate(void* instance) {
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
 
 	DbConnectionPool dbConnectionPool;

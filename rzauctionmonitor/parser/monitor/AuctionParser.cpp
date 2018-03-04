@@ -105,14 +105,18 @@ void AuctionParser::onScandir(uv_fs_t* req) {
 
 	auto it = orderedFiles.begin();
 	auto itEnd = orderedFiles.end();
-	for(; it != itEnd && !thisInstance->aggregator->isFull(); ++it) {
+
+	for(size_t i = 0; it != itEnd && !thisInstance->aggregator->isFull(); ++it) {
 		const std::string& filename = *it;
 		if(strcmp(thisInstance->lastParsedFile.c_str(), filename.c_str()) < 0) {
 			uv_fs_t statReq;
 			std::string fullFilename = thisInstance->auctionsPath.get() + "/" + filename;
 
 			uv_fs_stat(EventLoop::getLoop(), &statReq, fullFilename.c_str(), nullptr);
+			uv_fs_req_cleanup(&statReq);
+
 			time_t timeLimit = time(nullptr) - waitChangeSeconds;
+
 			if(statReq.statbuf.st_mtim.tv_sec > timeLimit || statReq.statbuf.st_ctim.tv_sec > timeLimit ||
 			   statReq.statbuf.st_birthtim.tv_sec > timeLimit) {
 				thisInstance->log(LL_Trace,
@@ -132,6 +136,13 @@ void AuctionParser::onScandir(uv_fs_t* req) {
 			}
 			if(strcmp(maxFile.c_str(), filename.c_str()) < 0)
 				maxFile = filename;
+
+			i++;
+
+			if(i > 10000) {
+				// After 10000 file, exit loop to avoid too much pending resource delete in uv loop
+				break;
+			}
 		}
 	}
 
