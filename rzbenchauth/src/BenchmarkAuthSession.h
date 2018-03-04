@@ -8,7 +8,6 @@
 struct BenchmarkConfig {
 	uint16_t port;
 	ClientAuthSession::AuthCipherMethod method;
-	std::string version;
 	int delay;
 	int recoDelay;
 	int connectionsDone;

@@ -60,7 +60,6 @@ void benchmarkAuthentication() {
 	config.delay = CFG_GET("delay")->getInt();
 	config.recoDelay = CFG_GET("recodelay")->getInt();
 	config.method = CFG_GET("use_rsa")->getBool() ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES;
-	config.version = "205001120";
 
 	if(count > config.connectionTargetCount)
 		count = config.connectionTargetCount;
@@ -118,7 +117,7 @@ void startBenchConnections(int usecBetweenConnection) {
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	init();
 	ConfigInfo::get()->init(argc, argv);
 

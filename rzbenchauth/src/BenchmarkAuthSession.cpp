@@ -14,7 +14,7 @@ void BenchmarkAuthSession::connect(const std::string& ip, const std::string& acc
 	doReconnect = false;
 
 	config->connectionsStarted++;
-	ClientAuthSession::connect(ip, config->port, account, password, config->method, config->version);
+	ClientAuthSession::connect(ip, config->port, account, password, config->method);
 }
 
 void BenchmarkAuthSession::onAuthDisconnected() {
@@ -26,14 +26,14 @@ void BenchmarkAuthSession::onAuthDisconnected() {
 			if(config->recoDelay > 0) {
 				recoDelayTimer.start(this, &BenchmarkAuthSession::onAuthRecoDelayExpired, config->recoDelay, 0);
 			} else {
-				ClientAuthSession::connect(ip, config->port, account, password, config->method, config->version);
+				ClientAuthSession::connect(ip, config->port, account, password, config->method);
 			}
 		}
 	}
 }
 
 void BenchmarkAuthSession::onAuthRecoDelayExpired() {
-	ClientAuthSession::connect(ip, config->port, account, password, config->method, config->version);
+	ClientAuthSession::connect(ip, config->port, account, password, config->method);
 }
 
 void BenchmarkAuthSession::onAuthResult(TS_ResultCode result, const std::string& resultString) {
