@@ -15,7 +15,7 @@ static void onTerminate(void* instance) {
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
 
 	ConfigInfo::get()->init(argc, argv);

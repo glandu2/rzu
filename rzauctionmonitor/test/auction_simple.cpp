@@ -72,9 +72,10 @@ static void expectAuction(AUCTION_SIMPLE_FILE* auctionFile, AuctionSimpleOuputTe
 		EXPECT_EQ(auctionOutput.category, auction.category);
 
 		EXPECT_EQ(auctionOutput.expectedData.size(), auction.data.size());
-		if(auctionOutput.expectedData.size() == auction.data.size())
+		if(auctionOutput.expectedData.size() == auction.data.size()) {
 			EXPECT_EQ(0, memcmp(auction.data.data(), auctionOutput.expectedData.data(), auction.data.size()))
 			    << "auction.data est différent de l'attendu";
+		}
 	}
 
 	EXPECT_TRUE(auctionFound) << "Auction " << auctionOutput.uid << " not found";

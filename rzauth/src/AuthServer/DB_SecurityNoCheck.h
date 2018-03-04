@@ -30,7 +30,7 @@ class DB_SecurityNoCheck : public DbQueryJobCallback<DB_SecurityNoCheckData, Gam
 	DECLARE_CLASS(AuthServer::DB_SecurityNoCheck)
 
 public:
-	static bool init();
+	static void init();
 	static void deinit();
 
 	DB_SecurityNoCheck(GameServerSession* clientInfo, DbCallback callback);

@@ -25,9 +25,8 @@ namespace AuthServer {
 
 cval<std::string>* DB_SecurityNoCheck::securityNoSalt = nullptr;
 
-bool DB_SecurityNoCheck::init() {
+void DB_SecurityNoCheck::init() {
 	securityNoSalt = &(CFG_CREATE("auth.securityno.salt", "2011"));
-	return true;
 }
 
 void DB_SecurityNoCheck::deinit() {

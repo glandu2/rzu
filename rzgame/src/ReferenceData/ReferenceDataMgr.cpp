@@ -27,7 +27,7 @@ ReferenceDataMgr::ReferenceDataMgr() {
 	loaders.push_back(&titleConditionSidBinding);
 
 	ConsoleCommands::get()->addCommand(
-	    "game.reload", "reload", 0, &commandReload, "Reload Arcadia", "reload : reload reference data from arcadia");
+	    "game.reload", "reload", 0, 0, &commandReload, "Reload Arcadia", "reload : reload reference data from arcadia");
 }
 
 void ReferenceDataMgr::load(OnReferenceDataLoaded callback, void* data) {

@@ -194,7 +194,7 @@ void Character::sendPacketStats() {
 }
 
 void Character::sendEquip() {
-	TS_SC_WEAR_INFO wearInfo = {0};
+	TS_SC_WEAR_INFO wearInfo = {};
 	wearInfo.handle = handle;
 	for(size_t i = 0; i < Utils_countOf(wearInfo.item_code); i++) {
 		const Item* item = inventory.getEquipedItem((Inventory::ItemWearType) i);
@@ -222,7 +222,7 @@ void Character::synchronizeWithClient() {
 
 	inventory.sendInventory();
 
-	TS_EQUIP_SUMMON equipSummon = {0};
+	TS_EQUIP_SUMMON equipSummon = {};
 	session->sendPacket(equipSummon);
 
 	sendEquip();
@@ -265,7 +265,7 @@ void Character::synchronizeWithClient() {
 	rangeUpdate.detect_range = 0;
 	session->sendPacket(rangeUpdate);
 
-	TS_SC_BELT_SLOT_INFO beltSlotInfo = {0};
+	TS_SC_BELT_SLOT_INFO beltSlotInfo = {};
 	session->sendPacket(beltSlotInfo);
 
 	TimeManager::sendGameTime(session);

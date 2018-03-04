@@ -20,7 +20,7 @@ struct TrafficDump {
 	TrafficDump()
 	    : enable(CFG_CREATE("trafficdump.enable", false)),
 	      dir(CFG_CREATE("trafficdump.dir", "traffic_log")),
-	      file(CFG_CREATE("trafficdump.file", "chatgateway.log")),
+	      file(CFG_CREATE("trafficdump.file", "rzservertime.log")),
 	      level(CFG_CREATE("trafficdump.level", "debug")),
 	      consoleLevel(CFG_CREATE("trafficdump.consolelevel", "fatal")) {
 		Utils::autoSetAbsoluteDir(dir);
@@ -44,7 +44,7 @@ static void init() {
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	init();
 	ConfigInfo::get()->init(argc, argv);
 
@@ -94,4 +94,6 @@ int main(int argc, char* argv[]) {
 	authSession->connect();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
+
+	return 0;
 }

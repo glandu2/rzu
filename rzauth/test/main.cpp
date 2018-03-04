@@ -11,6 +11,7 @@ int main(int argc, char** argv) {
 	TestRunner testRunner(argc, argv, &initConfigs);
 	Environment* env = new Environment;
 
+	// gtest takes ownership
 	::testing::AddGlobalTestEnvironment(env);
 
 	env->testGameReconnect = false;

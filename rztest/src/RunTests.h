@@ -2,6 +2,7 @@
 #define RUNTESTS_H
 
 #include "Extern.h"
+#include "LibRzuInit.h"
 
 typedef void (*ConfigInitCallback)();
 
@@ -16,6 +17,7 @@ public:
 
 private:
 	Log* mainLogger;
+	LibRzuScopedUse useLibRzu;
 };
 
 #endif

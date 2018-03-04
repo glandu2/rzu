@@ -25,6 +25,7 @@ AuctionManager::AuctionManager()
 		ConsoleCommands::get()->addCommand("client.reload_accounts",
 		                                   "reload",
 		                                   0,
+		                                   0,
 		                                   &AuctionManager::onReloadAccounts,
 		                                   "Restart clients and reload accounts from accounts file");
 		instance = this;
@@ -93,13 +94,13 @@ void AuctionManager::loadAccounts() {
 	char *p, *lastP;
 	int lineNumber = 0;
 
-	FILE* file = fopen(accountFile.c_str(), "rt");
+	std::unique_ptr<FILE, int (*)(FILE*)> file(fopen(accountFile.c_str(), "rt"), &fclose);
 	if(!file) {
 		log(LL_Error, "Cannot find account file %s\n", accountFile.c_str());
 		return;
 	}
 
-	while(fgets(line, sizeof(line), file) != NULL) {
+	while(fgets(line, sizeof(line), file.get()) != NULL) {
 		std::string account, password, playerName;
 
 		lineNumber++;

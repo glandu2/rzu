@@ -95,7 +95,7 @@ void ClientSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH* packet) {
 
 void ClientSession::lobbyExitResult(TS_ResultCode result, std::unique_ptr<CharacterLight> characterData) {
 	if(!characterData || result != TS_RESULT_SUCCESS) {
-		TS_SC_LOGIN_RESULT loginResult = {0};
+		TS_SC_LOGIN_RESULT loginResult = {};
 		loginResult.result = result;
 		sendPacket(loginResult);
 		abortSession();

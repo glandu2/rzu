@@ -28,7 +28,7 @@ void onTerminate(void* instance) {
 }
 
 int main(int argc, char** argv) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
 	BanManager::registerConfig();
 
@@ -82,7 +82,7 @@ static void runServers(Log* trafficLogger) {
 
 	banManager.loadFile();
 
-	ConsoleSession::start(&serverManager);
+	ConsoleServer consoleServer(&serverManager);
 
 	serverManager.addServer("game.clients", &clientsServer, &CONFIG_GET()->game.clients.autoStart);
 

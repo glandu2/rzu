@@ -67,11 +67,7 @@ void DbQueryJob<DbMappingClass>::addColumn(const char* columnName,
 	                                  nullIndicator ? (size_t)(&(((OutputType*) 0)->*nullIndicator)) : (size_t) -1));
 }
 
-template<class DbMappingClass> void DbQueryJob<DbMappingClass>::deinit() {
-	DbQueryBinding* binding = dbBinding;
-	dbBinding = nullptr;
-	delete binding;
-}
+template<class DbMappingClass> void DbQueryJob<DbMappingClass>::deinit() {}
 
 template<class DbMappingClass>
 void DbQueryJob<DbMappingClass>::createBinding(DbConnectionPool* dbConnectionPool,
@@ -83,11 +79,11 @@ void DbQueryJob<DbMappingClass>::createBinding(DbConnectionPool* dbConnectionPoo
 	sprintf(enableConfigName, "sql.%s.enable", SQL_CONFIG_NAME);
 	sprintf(queryConfigName, "sql.%s.query", SQL_CONFIG_NAME);
 	assert(dbBinding == nullptr);
-	dbBinding = new DbQueryBinding(dbConnectionPool,
-	                               ConfigInfo::get()->createValue<cval>(enableConfigName, true, true),
-	                               connectionString,
-	                               ConfigInfo::get()->createValue<cval>(queryConfigName, query, true),
-	                               executeMode);
+	dbBinding.reset(new DbQueryBinding(dbConnectionPool,
+	                                   ConfigInfo::get()->createValue<cval>(enableConfigName, true, true),
+	                                   connectionString,
+	                                   ConfigInfo::get()->createValue<cval>(queryConfigName, query, true),
+	                                   executeMode));
 }
 
 template<class DbMappingClass> void DbQueryJob<DbMappingClass>::executeNoResult(const InputType& input) {
@@ -130,7 +126,7 @@ template<class DbMappingClass> void DbQueryJob<DbMappingClass>::onProcessStatic(
 }
 
 template<class DbMappingClass> void DbQueryJob<DbMappingClass>::onProcess() {
-	DbQueryBinding* binding = dbBinding;
+	DbQueryBinding* binding = dbBinding.get();
 	outputLines.clear();
 
 	// check enabled here so onDone is called

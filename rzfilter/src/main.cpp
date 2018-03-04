@@ -24,7 +24,7 @@ void onTerminate(void* instance) {
 }
 
 int main(int argc, char** argv) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
 
 	ConfigInfo::get()->init(argc, argv);
@@ -88,7 +88,7 @@ void runServers(Log* trafficLogger) {
 
 	serverManager.addServer("clients", &clientSessionServer, &CONFIG_GET()->client.listener.autoStart);
 	serverManager.addServer("gameClientSessionManager", &gameClientSessionManager, nullptr);
-	ConsoleSession::start(&serverManager);
+	ConsoleServer consoleServer(&serverManager);
 
 	serverManager.start();
 

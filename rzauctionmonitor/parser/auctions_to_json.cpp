@@ -19,7 +19,7 @@ template<class AUCTION_FILE> int writeJson(const AUCTION_FILE& auctionFile) {
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 
 	ConfigInfo::get()->init(argc, argv);
 

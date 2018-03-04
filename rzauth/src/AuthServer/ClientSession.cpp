@@ -111,7 +111,6 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 }
 
 void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
-	TS_AC_AES_KEY_IV* aesKeyMessage = nullptr;
 	std::unique_ptr<RSA, void (*)(RSA*)> rsaCipher(nullptr, &RSA_free);
 	std::unique_ptr<BIO, int (*)(BIO*)> bio(nullptr, &BIO_free);
 
@@ -136,7 +135,8 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 		return;
 	}
 
-	aesKeyMessage = TS_MESSAGE_WNA::create<TS_AC_AES_KEY_IV, unsigned char>(RSA_size(rsaCipher.get()));
+	std::unique_ptr<TS_AC_AES_KEY_IV, void (*)(TS_MESSAGE*)> aesKeyMessage(
+	    TS_MESSAGE_WNA::create<TS_AC_AES_KEY_IV, unsigned char>(RSA_size(rsaCipher.get())), &TS_MESSAGE_WNA::destroy);
 
 	for(int i = 0; i < 32; i++)
 		aesKey[i] = rand() & 0xFF;
@@ -152,9 +152,7 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 	aesKeyMessage->data_size = blockSize;
 
 	useRsaAuth = true;
-	sendPacket(aesKeyMessage);
-	if(aesKeyMessage)
-		TS_MESSAGE_WNA::destroy(aesKeyMessage);
+	sendPacket(aesKeyMessage.get());
 }
 
 void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {

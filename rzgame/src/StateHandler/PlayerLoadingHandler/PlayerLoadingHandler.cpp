@@ -25,7 +25,7 @@ void PlayerLoadingHandler::onPacketReceived(const TS_MESSAGE* packet) {}
 
 void PlayerLoadingHandler::onCharacterResult(DbQueryJob<DB_CharacterBinding>* query) {
 	auto& results = query->getResults();
-	TS_SC_LOGIN_RESULT loginResult = {0};
+	TS_SC_LOGIN_RESULT loginResult = {};
 
 	if(!results.empty()) {
 		character.reset(new Character(session, query->getInput()->sid, session->getAccount(), results[0].get()));

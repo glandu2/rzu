@@ -76,7 +76,7 @@ void Inventory::sendInventory() {
 	auto it = items.begin();
 	auto itEnd = items.end();
 	for(; it != itEnd; ++it) {
-		TS_ITEM_INFO itemInfo = {0};
+		TS_ITEM_INFO itemInfo = {};
 		Item* item = it->second.get();
 
 		item->fillInventoryItem(itemInfo);
@@ -96,7 +96,7 @@ void Inventory::sendInventoryForItems(Item** items, size_t count) {
 	TS_SC_INVENTORY inventory;
 
 	for(size_t i = 0; i < count; i++) {
-		TS_ITEM_INFO itemInfo = {0};
+		TS_ITEM_INFO itemInfo = {};
 		Item* item = items[i];
 		if(!item)
 			continue;

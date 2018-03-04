@@ -19,7 +19,7 @@ static void onTerminate(void* instance) {
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
 	ConfigInfo::get()->init(argc, argv);
 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 
 	ServersManager serverManager;
 	AuctionManager auctionManager;
-	ConsoleSession::start(&serverManager);
+	ConsoleServer consoleServer(&serverManager);
 
 	serverManager.addServer("auction.monitor", &auctionManager, nullptr);
 

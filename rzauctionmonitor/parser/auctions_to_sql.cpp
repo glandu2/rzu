@@ -23,7 +23,7 @@ template<class AUCTION_FILE> void writeSql(const AUCTION_FILE& auctionFile, std:
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	DbConnectionPool dbConnectionPool;
 	DbBindingLoader::get()->initAll(&dbConnectionPool);
 
