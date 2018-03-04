@@ -132,9 +132,10 @@ static void expectAuction(AUCTION_FILE* auctionFile, AuctionOuputTestData& aucti
 
 		if(expectData) {
 			EXPECT_EQ(auctionOutput.expectedData.size(), auction.data.size());
-			if(auctionOutput.expectedData.size() == auction.data.size())
+			if(auctionOutput.expectedData.size() == auction.data.size()) {
 				EXPECT_EQ(0, memcmp(auction.data.data(), auctionOutput.expectedData.data(), auction.data.size()))
 				    << "auction.data est différent de l'attendu";
+			}
 		} else {
 			EXPECT_EQ(0, auction.data.size());
 		}

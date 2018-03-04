@@ -25,6 +25,9 @@ AuctionWorker::AuctionWorker(AuctionManager* auctionManager,
 	    serverIdx.get(),
 	    ip.get().c_str(),
 	    port.get());
+	auctionDelayTimer.unref();
+	auctionSearchTimer.unref();
+	reconnectTimer.unref();
 }
 
 void AuctionWorker::start() {
