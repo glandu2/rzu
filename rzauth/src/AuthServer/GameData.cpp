@@ -11,7 +11,7 @@ std::unordered_map<uint16_t, GameData*> GameData::servers;
 
 void GameData::init() {
 	ConsoleCommands::get()->addCommand(
-	    "gameserver.list", "list", 0, &commandList, "List all game servers", "list : list all game servers");
+	    "gameserver.list", "list", 0, 0, &commandList, "List all game servers", "list : list all game servers");
 }
 
 GameData::GameData(GameServerSession* gameServerSession,

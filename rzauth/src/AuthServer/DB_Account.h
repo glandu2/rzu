@@ -72,7 +72,7 @@ struct DB_AccountData {
 class DB_Account : public DbQueryJobCallback<DB_AccountData, ClientSession, DB_Account> {
 	DECLARE_CLASS(AuthServer::DB_Account)
 public:
-	static bool init(cval<std::string>& desKeyStr);
+	static void init(cval<std::string>& desKeyStr);
 	static void deinit();
 
 	DB_Account(ClientSession* clientInfo, DbQueryJobCallback::DbCallback callback);
@@ -85,7 +85,7 @@ protected:
 	void setPasswordMD5(unsigned char givenPasswordMd5[16]);
 
 private:
-	static DesPasswordCipher* desCipher;  // cached DES cipher
+	static std::unique_ptr<DesPasswordCipher> desCipher;  // cached DES cipher
 	static std::string currentDesKey;
 	static cval<bool>* restrictCharacters;
 };

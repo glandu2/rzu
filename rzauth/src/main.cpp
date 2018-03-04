@@ -70,17 +70,15 @@ void onTerminate(void* instance) {
 }
 
 int main(int argc, char** argv) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
 	BanManager::registerConfig();
 
 	DbConnectionPool dbConnectionPool;
 
 	DbBindingLoader::get()->initAll(&dbConnectionPool);
-	if(!AuthServer::DB_Account::init(CONFIG_GET()->auth.client.desKey))
-		return 1;
-	if(!AuthServer::DB_SecurityNoCheck::init())
-		return 1;
+	AuthServer::DB_Account::init(CONFIG_GET()->auth.client.desKey);
+	AuthServer::DB_SecurityNoCheck::init();
 	AuthServer::GameData::init();
 
 	ConfigInfo::get()->init(argc, argv);
@@ -115,7 +113,6 @@ int main(int argc, char** argv) {
 	DbQueryJob<AuthServer::DB_SecurityNoCheckData>::deinit();
 	DbQueryJob<AuthServer::DB_AccountData>::deinit();
 	EventLoop::getInstance()->deleteObjects();
-	LibRzuDeInit();
 
 	return 0;
 }
@@ -164,7 +161,7 @@ void runServers(Log* trafficLogger) {
 	serverManager.addServer("upload.iconserver", &uploadIconServer, &CONFIG_GET()->upload.icons.listener.autoStart);
 	serverManager.addServer("upload.gameserver", &uploadGameServer, &CONFIG_GET()->upload.game.listener.autoStart);
 
-	ConsoleSession::start(&serverManager);
+	ConsoleServer consoleServer(&serverManager);
 
 	serverManager.start();
 

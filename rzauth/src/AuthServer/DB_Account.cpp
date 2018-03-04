@@ -30,21 +30,19 @@ DECLARE_DB_BINDING(AuthServer::DB_AccountData, "db_account");
 
 namespace AuthServer {
 
-DesPasswordCipher* DB_Account::desCipher = nullptr;
+std::unique_ptr<DesPasswordCipher> DB_Account::desCipher;
 std::string DB_Account::currentDesKey;
 cval<bool>* DB_Account::restrictCharacters = nullptr;
 
-bool DB_Account::init(cval<std::string>& desKeyStr) {
+void DB_Account::init(cval<std::string>& desKeyStr) {
 	currentDesKey = desKeyStr.get();
-	desCipher = new DesPasswordCipher(desKeyStr.get().c_str());
+	desCipher.reset(new DesPasswordCipher(desKeyStr.get().c_str()));
 	restrictCharacters = &(CFG_CREATE("auth.clients.restrictchars", true));
-
-	return true;
 }
 
 void DB_Account::deinit() {
-	delete desCipher;
-	currentDesKey = "";
+	// delete desCipher;
+	// currentDesKey = "";
 	restrictCharacters = nullptr;
 }
 
