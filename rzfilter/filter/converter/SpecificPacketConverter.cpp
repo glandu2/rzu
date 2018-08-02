@@ -2,6 +2,9 @@
 #include <functional>
 
 #include "Cipher/DesPasswordCipher.h"
+#include "Cipher/RzHashReversible256.h"
+#include "Config/GlobalCoreConfig.h"
+#include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 #include <algorithm>
 
@@ -16,14 +19,22 @@
 #include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
 #include "AuthClient/TS_CA_VERSION.h"
 
+#include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
 #include "GameClient/TS_CS_CHECK_ILLEGAL_USER.h"
+#include "GameClient/TS_CS_LOGIN.h"
 #include "GameClient/TS_CS_REGION_UPDATE.h"
+#include "GameClient/TS_CS_REPORT.h"
 #include "GameClient/TS_CS_VERSION.h"
+#include "GameClient/TS_SC_CHANGE_LOCATION.h"
 #include "GameClient/TS_SC_ENTER.h"
 #include "GameClient/TS_SC_LOGIN_RESULT.h"
 #include "GameClient/TS_SC_MOVE.h"
 #include "GameClient/TS_SC_MOVE_ACK.h"
+#include "GameClient/TS_SC_NPC_TRADE_INFO.h"
 #include "GameClient/TS_SC_STATE.h"
+#include "GameClient/TS_SC_WEAR_INFO.h"
+
+#include "GameClient/TS_SC_BONUS_EXP_JP.h"
 
 bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
                                                        IFilterEndpoint* server,
@@ -39,7 +50,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 			else if(server->getPacketVersion() <= EPIC_9_5_1)
 				pkt.szVersion = "201507080";
 			else
-				pkt.szVersion = "205001120";
+				pkt.szVersion = GlobalCoreConfig::get()->client.authVersion;
+
 			server->sendPacket(pkt);
 		}
 	} else if(packet->id == TS_CA_RSA_PUBLIC_KEY::packetID) {
@@ -58,6 +70,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 			memset(aesKey.data(), 0, aesKey.size());
 
 			client->sendPacket(aesPkt);
+		} else {
+			return true;
 		}
 	} else if(packet->id == TS_CA_ACCOUNT::packetID) {
 		TS_CA_ACCOUNT pkt;
@@ -246,16 +260,42 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
                                                        bool) {
 	if(packet->id == TS_CS_VERSION::getId(version)) {
 		TS_CS_VERSION pkt;
+
+		// Ignore existing as it is completly replaced
+
+		if(target->getPacketVersion() <= EPIC_3)
+			pkt.szVersion = "200609280";
+		else if(target->getPacketVersion() <= EPIC_9_1)
+			pkt.szVersion = "200701120";
+		else if(target->getPacketVersion() <= EPIC_9_4)
+			pkt.szVersion = "201507080";
+		else if(target->getPacketVersion() < EPIC_9_5_2)
+			pkt.szVersion = "205001120";
+		else
+			pkt.szVersion = GlobalCoreConfig::get()->client.gameVersion;
+
+		if(target->getPacketVersion() >= EPIC_9_5_2) {
+			RzHashReversible256::generatePayload(pkt);
+		}
+
+		target->sendPacket(pkt);
+
+		// TS_CS_REPORT is required in 9.5.2+
+		if(target->getPacketVersion() >= EPIC_9_5_2) {
+			TS_CS_REPORT reportMsg;
+			reportMsg.report =
+			    "\x8D\x07\x72\xCA\x29\x47Windows (6.2.9200)|Intel(R) HD Graphics 4000Drv Version : 10.18.10.4425";
+			target->sendPacket(reportMsg);
+		}
+	} else if(packet->id == TS_CS_LOGIN::getId(version)) {
+		TS_CS_LOGIN pkt;
 		if(packet->process(pkt, version)) {
-			if(target->getPacketVersion() <= EPIC_3)
-				pkt.szVersion = "200609280";
-			else if(target->getPacketVersion() <= EPIC_9_1)
-				pkt.szVersion = "200701120";
-			else if(target->getPacketVersion() <= EPIC_9_4)
-				pkt.szVersion = "201507080";
-			else
-				pkt.szVersion = "205001120";
+			if(target->getPacketVersion() >= EPIC_9_5_2 && version < EPIC_9_5_2)
+				RzHashReversible256::generatePayload(pkt);
+
 			target->sendPacket(pkt);
+		} else {
+			return true;
 		}
 	} else if(packet->id == TS_SC_LOGIN_RESULT::getId(version)) {
 		TS_SC_LOGIN_RESULT pkt;
@@ -325,6 +365,13 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 				                                        (pkt.bIsStopMessage != 0 ? 10 : 0));
 			}
 			target->sendPacket(pkt);
+		} else {
+			return true;
+		}
+	} else if(packet->id == TS_CS_REPORT::getId(version)) {
+		if(target->getPacketVersion() >= EPIC_9_5_2) {
+			// Already sent with version
+			return false;
 		} else {
 			return true;
 		}

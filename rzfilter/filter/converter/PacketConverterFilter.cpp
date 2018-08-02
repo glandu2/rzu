@@ -346,7 +346,8 @@ template<typename Packet> bool sendPacket(IFilterEndpoint* target, const TS_MESS
 	} else {
 		Object::logStatic(Object::LL_Warning,
 		                  "rzfilter_version_converter",
-		                  "Can't parse packet id %d with version 0x%X\n",
+		                  "Can't parse packet %s id %d with version 0x%X\n",
+		                  Packet::getName(),
 		                  packet->id,
 		                  version);
 		return true;  // packet not sent, need to forward the original

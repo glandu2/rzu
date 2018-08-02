@@ -53,6 +53,8 @@ protected:
 
 	~ClientSession();
 
+	int getServerPacketVersion() { return serverSession.getPacketVersion(); }
+
 private:
 	ServerSession serverSession;
 	FilterProxy* packetFilter;

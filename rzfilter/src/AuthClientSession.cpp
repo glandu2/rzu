@@ -26,7 +26,7 @@ EventChain<PacketSession> AuthClientSession::onPacketReceived(const TS_MESSAGE* 
 void AuthClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == TS_AC_SERVER_LIST::packetID) {
 		TS_AC_SERVER_LIST serverListPkt;
-		if(packet->process(serverListPkt, getPacketVersion())) {
+		if(packet->process(serverListPkt, getServerPacketVersion())) {
 			std::string listenIp = CONFIG_GET()->client.listener.listenIp.get();
 			std::vector<TS_SERVER_INFO*> serversOrdered;
 
