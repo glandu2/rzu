@@ -27,11 +27,14 @@ trafficdump.dir:traffic_log
 trafficdump.file:rzfilter_auth.log
 
 # Log config
-core.log.file:rzfilter_auth.log
+core.log.file:rzfilter.log
 core.log.level:info
 
 # Filter module to use
-# - rzfilter_version_converter: convert packets version
-# - rzfilter_lua_module: execute rzfilter.lua to filter packets
+# - rzfilter_lua_module: execute rzfilter.lua to filter packets (see rzfilter.lua for available tools like combatlog, json dump and chat timestamps)
+# - rzfilter_combatlog_module: output a log file containing combat log. To be used with AdvancedCombatTracker that can do statistics on it
+# - rzfilter_json: log packets in json
+# Note: the version_converter filter is integrated into rzfilter and will always be enabled to allow combination of a normal filter + epic convertion filter
+
 filter.modulename:rzfilter_lua_module
-#filter.modulename:rzfilter_version_converter
+

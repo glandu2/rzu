@@ -9,3 +9,4 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/filter" filter)
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/test" test)
 
 install(DIRECTORY dist/ DESTINATION ./)
+install(DIRECTORY include/ DESTINATION ./include)
