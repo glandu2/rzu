@@ -2,6 +2,7 @@
 #include "ClientSession.h"
 #include "Core/EventLoop.h"
 #include "GlobalConfig.h"
+#include "Packet/PacketStructsName.h"
 #include <stdlib.h>
 
 ServerSession::ServerSession(ClientSession* clientSession)
@@ -28,6 +29,8 @@ EventChain<SocketSession> ServerSession::onConnected() {
 		free(message);
 	}
 	pendingMessages.clear();
+
+	setDirtyObjectName();
 
 	return PacketSession::onConnected();
 }
@@ -60,11 +63,14 @@ void ServerSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 	if(!CONFIG_GET()->trafficDump.enableServer.get())
 		return;
 
-	const char* packetName = clientSession->getPacketName(msg->id);
+	const char* packetName =
+	    ::getPacketName(msg->id,
+	                    clientSession->isAuthMode() ? SessionType::AuthClient : SessionType::GameClient,
+	                    outgoing ? SessionPacketOrigin::Client : SessionPacketOrigin::Server);
 
 	log(LL_Debug,
 	    "%s packet id: %5d, name %s, size: %d\n",
-	    (outgoing) ? "SERV->CLI" : "CLI->SERV",
+	    (!outgoing) ? "SERV->CLI" : "CLI->SERV",
 	    msg->id,
 	    packetName,
 	    int(msg->size - sizeof(TS_MESSAGE)));
@@ -73,8 +79,18 @@ void ServerSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 	                       reinterpret_cast<const unsigned char*>(msg) + sizeof(TS_MESSAGE),
 	                       (int) msg->size - sizeof(TS_MESSAGE),
 	                       "%s packet id: %5d, name %s, size: %d\n",
-	                       (outgoing) ? "SERV->CLI" : "CLI->SERV",
+	                       (!outgoing) ? "SERV->CLI" : "CLI->SERV",
 	                       msg->id,
 	                       packetName,
 	                       int(msg->size - sizeof(TS_MESSAGE)));
+}
+
+void ServerSession::updateObjectName() {
+	size_t streamNameSize;
+	if(getStream()) {
+		const char* streamName = getStream()->getObjectName(&streamNameSize);
+		setObjectName(8 + (int) streamNameSize, "Server[%s]", streamName);
+	} else {
+		Object::updateObjectName();
+	}
 }

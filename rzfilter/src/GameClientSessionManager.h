@@ -11,7 +11,7 @@ class GameClientSessionManager : public Object, public StartableObject {
 	DECLARE_CLASS(GameClientSessionManager)
 
 public:
-	GameClientSessionManager();
+	GameClientSessionManager(FilterManager* filterManager, FilterManager* converterFilterManager);
 	~GameClientSessionManager();
 
 	uint16_t ensureListening(
@@ -38,6 +38,8 @@ private:
 
 	std::unordered_map<std::string, std::unique_ptr<ServerFilter>> gameClientServers;
 	bool started;
+	FilterManager* filterManager;
+	FilterManager* converterFilterManager;
 
 	GameClientSessionManager(const GameClientSessionManager&);
 	GameClientSessionManager& operator=(const GameClientSessionManager&);

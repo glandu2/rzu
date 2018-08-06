@@ -6,8 +6,9 @@
 #include <algorithm>
 #include <vector>
 
-AuthClientSession::AuthClientSession(GameClientSessionManager* gameClientSessionManager)
-    : ClientSession(true), gameClientSessionManager(gameClientSessionManager) {}
+AuthClientSession::AuthClientSession(InputParameters parameters)
+    : ClientSession(true, parameters.filterManager, parameters.converterFilterManager),
+      gameClientSessionManager(parameters.gameClientSessionManager) {}
 
 AuthClientSession::~AuthClientSession() {}
 

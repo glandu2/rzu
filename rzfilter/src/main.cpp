@@ -45,7 +45,6 @@ int main(int argc, char** argv) {
 	                  GlobalCoreConfig::get()->log.maxQueueSize);
 
 	ConfigInfo::get()->dump();
-	FilterManager::getInstance();  // initialize instance
 
 	int clientEpic, gameEpic;
 	clientEpic = CONFIG_GET()->client.epic;
@@ -67,6 +66,7 @@ int main(int argc, char** argv) {
 	                  CONFIG_GET()->server.ip.get().c_str(),
 	                  CONFIG_GET()->server.port.get());
 
+	FilterManager::init();
 	runServers(&trafficLogger);
 
 	// Make valgrind happy
@@ -77,10 +77,15 @@ int main(int argc, char** argv) {
 
 void runServers(Log* trafficLogger) {
 	ServersManager serverManager;
-	GameClientSessionManager gameClientSessionManager;
+	FilterManager filterManager(CONFIG_GET()->filter.filterModuleName);
+	FilterManager converterFilterManager(CONFIG_GET()->filter.converterFilterModuleName);
+	GameClientSessionManager gameClientSessionManager(&filterManager, &converterFilterManager);
 
-	SessionServerWithParameter<AuthClientSession, GameClientSessionManager*> clientSessionServer(
-	    &gameClientSessionManager,
+	AuthClientSession::InputParameters parameters = {
+	    &gameClientSessionManager, &filterManager, &converterFilterManager};
+
+	SessionServerWithParameter<AuthClientSession, AuthClientSession::InputParameters> clientSessionServer(
+	    parameters,
 	    CONFIG_GET()->client.listener.listenIp,
 	    CONFIG_GET()->client.listener.port,
 	    &CONFIG_GET()->client.listener.idleTimeout,

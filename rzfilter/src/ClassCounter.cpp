@@ -14,3 +14,6 @@ DECLARE_CLASSCOUNT_STATIC(GameClientSession)
 
 #include "GameClientSessionManager.h"
 DECLARE_CLASSCOUNT_STATIC(GameClientSessionManager)
+
+#include "FilterManager.h"
+DECLARE_CLASSCOUNT_STATIC(FilterManager)

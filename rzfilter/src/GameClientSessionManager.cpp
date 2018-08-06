@@ -1,7 +1,8 @@
 #include "GameClientSessionManager.h"
 #include "Core/Utils.h"
 
-GameClientSessionManager::GameClientSessionManager() {}
+GameClientSessionManager::GameClientSessionManager(FilterManager* filterManager, FilterManager* converterFilterManager)
+    : filterManager(filterManager), converterFilterManager(converterFilterManager) {}
 
 GameClientSessionManager::~GameClientSessionManager() {}
 
@@ -21,6 +22,8 @@ uint16_t GameClientSessionManager::ensureListening(
 	} else {
 		serverFilter->serverParameters.serverIp = serverIp;
 		serverFilter->serverParameters.serverPort = serverPort;
+		serverFilter->serverParameters.filterManager = filterManager;
+		serverFilter->serverParameters.converterFilterManager = converterFilterManager;
 		serverFilter->listenIp.set(listenIp);
 		serverFilter->listenPort.set(listenPort);
 		serverFilter->sessionServer.start();

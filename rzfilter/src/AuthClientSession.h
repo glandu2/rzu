@@ -5,12 +5,19 @@
 #include "GameClientSession.h"
 
 class GameClientSessionManager;
+class FilterManager;
 
 class AuthClientSession : public ClientSession {
 	DECLARE_CLASS(ClientSession)
+public:
+	struct InputParameters {
+		GameClientSessionManager* gameClientSessionManager;
+		FilterManager* filterManager;
+		FilterManager* converterFilterManager;
+	};
 
 public:
-	AuthClientSession(GameClientSessionManager* gameClientSessionManager);
+	AuthClientSession(InputParameters parameters);
 
 	virtual void onServerPacketReceived(const TS_MESSAGE* packet);
 
