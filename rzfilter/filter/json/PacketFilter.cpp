@@ -333,65 +333,11 @@ PacketFilter::~PacketFilter() {
 		delete data;
 }
 
-void PacketFilter::sendChatMessage(IFilterEndpoint* client, const char* msg, const char* sender, TS_CHAT_TYPE type) {
-	TS_SC_CHAT chatRqst;
-
-	chatRqst.message = msg;
-	if(chatRqst.message.size() > 32766)
-		chatRqst.message.resize(32766);
-	chatRqst.message.append(1, '\0');
-
-	chatRqst.szSender = sender;
-	chatRqst.type = type;
-
-	client->sendPacket(chatRqst);
-}
-
 bool PacketFilter::onServerPacket(const TS_MESSAGE* packet) {
 	if(serverType == ST_Game)
 		printGamePacketJson(packet, server->getPacketVersion(), true);
 	else
 		printAuthPacketJson(packet, server->getPacketVersion(), true);
-
-	// if(serverType != ST_Game)
-	return true;
-
-	switch(packet->id) {
-			//		case TS_SC_STATE_RESULT::packetID: {
-			//			TS_SC_STATE_RESULT stateResult;
-			//			bool ok = packet->process(stateResult, EPIC_LATEST);
-			//			char buffer[1024];
-
-			//			sprintf(buffer, "DOT(caster 0x%08X, target 0x%08X, id %d Lv%d, result %d, value %d, targetval
-			//%d,  total %d, final %d)", 					stateResult.caster_handle,
-			//					stateResult.target_handle,
-			//					stateResult.code,
-			//					stateResult.level,
-			//					stateResult.result_type,
-			//					stateResult.value,
-			//					stateResult.target_value,
-			//					stateResult.total_amount,
-			//					stateResult.final);
-			//			sendChatMessage(client, buffer);
-
-			//			break;
-			//		}
-
-		case TS_SC_CHAT::packetID: {
-			TS_SC_CHAT chatPacket;
-			if(packet->process(chatPacket, server->getPacketVersion())) {
-				onChatMessage(&chatPacket);
-				return false;
-			}
-			break;
-		}
-
-			case_packet_is(TS_SC_ENTER) { break; }
-
-		case TS_SC_WEAR_INFO::packetID: {
-			break;
-		}
-	}
 
 	return true;
 }
@@ -718,41 +664,6 @@ void PacketFilter::printGamePacketJson(const TS_MESSAGE* packet, int version, bo
 			Object::logStatic(Object::LL_Warning, "rzfilter_json", "packet id %d unknown\n", packet->id);
 			break;
 	}
-}
-
-void PacketFilter::onChatMessage(const TS_SC_CHAT* packet) {
-	// 9:38:23
-	// 2017-01-29 17:26:22
-	struct tm currentTime;
-	char newMessage[32767];
-	Utils::getGmTime(time(nullptr), &currentTime);
-
-	if(packet->szSender[0] == '@') {
-		if(packet->szSender == "@PARTY" || packet->szSender == "@GUILD")
-			return;
-		snprintf(newMessage,
-		         sizeof(newMessage),
-		         "<b>%02d:%02d:%02d</b>: Next message: %s",
-		         currentTime.tm_hour,
-		         currentTime.tm_min,
-		         currentTime.tm_sec,
-		         packet->szSender.c_str());
-		newMessage[sizeof(newMessage) - 1] = '\0';
-		sendChatMessage(client, newMessage);
-		client->sendPacket(*packet);
-		return;
-	}
-
-	snprintf(newMessage,
-	         sizeof(newMessage),
-	         "<b>%02d:%02d:%02d</b>: %s",
-	         currentTime.tm_hour,
-	         currentTime.tm_min,
-	         currentTime.tm_sec,
-	         packet->message.c_str());
-	newMessage[sizeof(newMessage) - 1] = '\0';
-
-	sendChatMessage(client, newMessage, packet->szSender.c_str(), packet->type);
 }
 
 IFilter* createFilter(IFilterEndpoint* client,
