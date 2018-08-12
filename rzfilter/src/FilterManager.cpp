@@ -46,7 +46,7 @@ void FilterManager::init() {
 }
 
 std::unique_ptr<FilterProxy> FilterManager::createFilter(IFilter::ServerType serverType) {
-	std::unique_ptr<FilterProxy> filterProxy = std::make_unique<FilterProxy>(this, serverType);
+	std::unique_ptr<FilterProxy> filterProxy = std::unique_ptr<FilterProxy>(new FilterProxy(this, serverType));
 
 	packetFilters.push_back(filterProxy.get());
 
