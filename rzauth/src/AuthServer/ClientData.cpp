@@ -43,7 +43,7 @@ ClientData* ClientData::tryAddClient(ClientSession* clientInfo,
                                      uint32_t age,
                                      uint32_t event_code,
                                      uint32_t pcBang,
-                                     uint32_t ip,
+                                     const char ip[INET6_ADDRSTRLEN],
                                      ClientData** oldClientPtr) {
 	std::pair<std::unordered_map<uint32_t, ClientData*>::iterator, bool> result;
 	std::pair<std::unordered_map<std::string, ClientData*>::iterator, bool> resultForName;
@@ -69,7 +69,7 @@ ClientData* ClientData::tryAddClient(ClientSession* clientInfo,
 		newClient->age = age;
 		newClient->eventCode = event_code;
 		newClient->pcBang = pcBang;
-		newClient->ip = ip;
+		memcpy(newClient->ip, ip, INET6_ADDRSTRLEN);
 		resultForName = connectedClientsByName.insert(std::pair<std::string, ClientData*>(toLower(account), newClient));
 		if(resultForName.second == false) {
 			newClient->log(LL_Error, "Duplicated account name with different ID: %s\n", account.c_str());
