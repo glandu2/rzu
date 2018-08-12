@@ -55,8 +55,6 @@ private:
 	Timer<PacketFilter> reloadCheckTimer;
 	time_t currentLuaFileMtime;
 	time_t newLuaFileMtime;
-
-	static constexpr const char* LUA_MAIN_FILE = "rzfilter.lua";
 };
 
 extern "C" {

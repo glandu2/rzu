@@ -5,6 +5,8 @@
 #include "LuaUtils.h"
 #include "PacketTemplates.h"
 
+static const char* LUA_MAIN_FILE = "rzfilter.lua";
+
 template<class T> struct SendPacketFromLuaCallback {
 	void operator()(lua_State* L, IFilterEndpoint* endpoint, bool* ok) {
 		bool result = LuaEndpointMetaTable::sendPacketFromLua<T>(L, endpoint);
