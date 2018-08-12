@@ -171,7 +171,7 @@ void AuthSession::onClientLoginResult(const TS_AG_CLIENT_LOGIN_EXTENDED* packet)
 		TS_GA_ACCOUNT_LIST::AccountInfo accountInfo;
 
 		memcpy(accountInfo.account, packet->account, sizeof(accountInfo.account));
-		accountInfo.ip = packet->ip;
+		memcpy(accountInfo.ip, packet->ip, INET6_ADDRSTRLEN);
 		accountInfo.loginTime = packet->loginTime;
 		accountInfo.nAccountID = packet->nAccountID;
 		accountInfo.nAge = packet->nAge;
@@ -348,16 +348,14 @@ void AuthSession::commandList(IWritableConsole* console, const std::vector<std::
 		auto itEnd = accountList.end();
 		for(; it != itEnd; ++it) {
 			const TS_GA_ACCOUNT_LIST::AccountInfo& accountInfo = *it;
-			char ipStr[16];
 			struct tm loginTimeTm;
 
-			uv_inet_ntop(AF_INET, &accountInfo.ip, ipStr, sizeof(ipStr));
 			Utils::getGmTime(accountInfo.loginTime, &loginTimeTm);
 
 			console->writef("Account id: %d, name: %s, ip: %s, login time: %d-%02d-%02d %02d:%02d:%02d\r\n",
 			                accountInfo.nAccountID,
 			                accountInfo.account,
-			                ipStr,
+			                accountInfo.ip,
 			                loginTimeTm.tm_year,
 			                loginTimeTm.tm_mon,
 			                loginTimeTm.tm_mday,
