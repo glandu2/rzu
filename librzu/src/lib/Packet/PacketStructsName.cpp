@@ -1,3 +1,5 @@
+#include "PacketStructsName.h"
+
 struct PacketNameInfo {
 	unsigned short id;
 	const char* name;
@@ -335,16 +337,17 @@ static void initPacketName() {
 	}
 }
 
-static const char* getPacketName(unsigned int id, bool isAuth) {
+const char* getPacketName(unsigned int id, SessionType sessionType, SessionPacketOrigin packetDir) {
 	if(gamePacketNamesArray[0] == nullptr)
 		initPacketName();
 
-	const char* name;
+	const char* name = nullptr;
 
-	if(isAuth)
-		name = authPacketNamesArray[id];
-	else
+	if(sessionType == SessionType::GameClient || sessionType == SessionType::Any)
 		name = gamePacketNamesArray[id];
 
-	return name ? name : "UnknownPacket";
+	if(sessionType == SessionType::AuthClient || (sessionType == SessionType::Any && name == nullptr))
+		name = authPacketNamesArray[id];
+
+	return name;
 }

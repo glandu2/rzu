@@ -1,6 +1,7 @@
 #ifndef PACKETFILTER_H
 #define PACKETFILTER_H
 
+#include "Core/Timer.h"
 #include "IFilter.h"
 #include "LibGlobal.h"
 #include <lua.hpp>
@@ -42,12 +43,18 @@ protected:
 	void pushEndpoint(lua_State* L, LuaEndpointMetaTable* endpoint);
 	bool pushPacket(lua_State* L, const TS_MESSAGE* packet, int version, bool isServer);
 
+	void onCheckReload();
+
 private:
 	lua_State* L = nullptr;
-	int lua_onServerPacketFunction;
-	int lua_onClientPacketFunction;
+	int lua_onServerPacketFunction = LUA_NOREF;
+	int lua_onClientPacketFunction = LUA_NOREF;
 	LuaEndpointMetaTable clientEndpoint;
 	LuaEndpointMetaTable serverEndpoint;
+
+	Timer<PacketFilter> reloadCheckTimer;
+	time_t currentLuaFileMtime;
+	time_t newLuaFileMtime;
 };
 
 extern "C" {

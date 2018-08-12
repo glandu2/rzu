@@ -2,25 +2,40 @@
 #define FILTERPROXY_H
 
 #include "Core/Object.h"
+#include "FilterEndpoint.h"
 #include "IFilter.h"
+#include "IFilterEndpoint.h"
 
 class FilterManager;
 
-class FilterProxy : public IFilter {
+class FilterProxy {
 public:
-	FilterProxy(FilterManager* filterManager, IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType);
-	virtual ~FilterProxy();
-	virtual bool onServerPacket(const TS_MESSAGE* packet);
-	virtual bool onClientPacket(const TS_MESSAGE* packet);
+	FilterProxy(FilterManager* filterManager, IFilter::ServerType serverType);
+	~FilterProxy();
+
+	void onServerPacket(const TS_MESSAGE* packet);
+	void onClientPacket(const TS_MESSAGE* packet);
+
+	void bindEndpoints(IFilterEndpoint* client, IFilterEndpoint* server);
+	IFilterEndpoint* getToClientEndpoint() { return &toClientEndpoint; }
+	IFilterEndpoint* getToServerEndpoint() { return &toServerEndpoint; }
+
+	int getPacketVersion() { return server->getPacketVersion(); }
 
 protected:
-	void recreateFilterModule(CreateFilterFunction createFilterFunction, DestroyFilterFunction destroyFilterFunction);
+	void recreateFilterModule(IFilter::CreateFilterFunction createFilterFunction,
+	                          IFilter::DestroyFilterFunction destroyFilterFunction);
 
 	friend class FilterManager;
 
 private:
 	FilterManager* filterManager;
 	IFilter* filterModule;
+	IFilter::ServerType serverType;
+	IFilterEndpoint* client;
+	IFilterEndpoint* server;
+	FilterEndpoint toServerEndpoint;
+	FilterEndpoint toClientEndpoint;
 };
 
 #endif  // FILTERPROXY_H

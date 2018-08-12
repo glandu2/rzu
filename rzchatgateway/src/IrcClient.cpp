@@ -23,6 +23,10 @@ void IrcClient::connect(std::string servername) {
 	SocketSession::connect(ip.c_str(), port);
 }
 
+void IrcClient::onReconnect() {
+	connect(servername);
+}
+
 EventChain<SocketSession> IrcClient::onStateChanged(Stream::State oldState,
                                                     Stream::State newState,
                                                     bool causedByRemote) {
@@ -50,7 +54,8 @@ EventChain<SocketSession> IrcClient::onStateChanged(Stream::State oldState,
 		write(loginText, strlen(loginText));
 	} else if(newState == Stream::UnconnectedState) {
 		joined = false;
-		connect(servername);
+		log(LL_Info, "Disconnected, reconnecting in 5s\n");
+		reconnectTimer.start(this, &IrcClient::onReconnect, 5000, 0);
 	}
 
 	return SocketSession::onStateChanged(oldState, newState, causedByRemote);

@@ -354,11 +354,14 @@ TEST(TS_GA_CLIENT_LOGIN, auth_disconnect_client_kick_failed_auth_connect) {
 }
 
 // GS connect, connect to auth, account list, client connection x200, auth disconnect, auth connect, 200 accounts in 2
-// packets (195 + 5)
+// packets (128 + 72)
 TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 	RzTest test;
 	TestConnectionChannel game(TestConnectionChannel::Client, CONFIG_GET()->game.ip, CONFIG_GET()->game.port, false);
 	TestConnectionChannel auth(TestConnectionChannel::Server, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, false);
+	static const int MAX_PACKET_SIZE = 16000;
+	static const int MAX_COUNT_PER_PACKET =
+	    (MAX_PACKET_SIZE - sizeof(TS_GA_ACCOUNT_LIST)) / sizeof(TS_GA_ACCOUNT_LIST::AccountInfo);
 
 	game.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
@@ -420,7 +423,7 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 			strcpy(clientLoginPacket.account, accountName);
 			clientLoginPacket.nAccountID = i;
 			clientLoginPacket.result = TS_RESULT_SUCCESS;
-			clientLoginPacket.ip = i + 1;
+			sprintf(clientLoginPacket.ip, "::ffff:192.168.1.%d", i + 1);
 			clientLoginPacket.loginTime = i;
 			channel->sendPacket(&clientLoginPacket);
 		});
@@ -460,33 +463,37 @@ TEST(TS_GA_CLIENT_LOGIN, client_connect_x200_auth_reconnect) {
 
 	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_ACCOUNT_LIST* packet = AGET_PACKET(TS_GA_ACCOUNT_LIST);
-		EXPECT_EQ(195, packet->count);
+		EXPECT_EQ(MAX_COUNT_PER_PACKET, packet->count);
 		EXPECT_FALSE(packet->final_packet);
 
 		for(int i = 0; i < packet->count; i++) {
 			const TS_GA_ACCOUNT_LIST::AccountInfo* accountInfo = &packet->accountInfo[i];
 			char accountName[61];
+			char ip[INET6_ADDRSTRLEN];
 			sprintf(accountName, "account%d", i);
+			sprintf(ip, "::ffff:192.168.1.%d", i + 1);
 
 			EXPECT_STREQ(accountName, accountInfo->account);
-			EXPECT_EQ(i + 1, accountInfo->ip);
+			EXPECT_STREQ(ip, accountInfo->ip);
 			EXPECT_EQ(i, accountInfo->loginTime);
 		}
 	});
 
 	auth.addCallback([&game](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_GA_ACCOUNT_LIST* packet = AGET_PACKET(TS_GA_ACCOUNT_LIST);
-		EXPECT_EQ(5, packet->count);
+		EXPECT_EQ(200 - MAX_COUNT_PER_PACKET, packet->count);
 		EXPECT_TRUE(packet->final_packet);
 
 		for(int i = 0; i < packet->count; i++) {
 			const TS_GA_ACCOUNT_LIST::AccountInfo* accountInfo = &packet->accountInfo[i];
 			char accountName[61];
-			sprintf(accountName, "account%d", i + 195);
+			char ip[INET6_ADDRSTRLEN];
+			sprintf(accountName, "account%d", i + MAX_COUNT_PER_PACKET);
+			sprintf(ip, "::ffff:192.168.1.%d", i + 1 + MAX_COUNT_PER_PACKET);
 
 			EXPECT_STREQ(accountName, accountInfo->account);
-			EXPECT_EQ(i + 1 + 195, accountInfo->ip);
-			EXPECT_EQ(i + 195, accountInfo->loginTime);
+			EXPECT_STREQ(ip, accountInfo->ip);
+			EXPECT_EQ(i + MAX_COUNT_PER_PACKET, accountInfo->loginTime);
 		}
 
 		game.closeSession();

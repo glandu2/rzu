@@ -5,11 +5,13 @@
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
 #include "ServerSession.h"
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <unordered_map>
 
 class FilterProxy;
+class FilterManager;
 
 /**
  * @brief The ClientSession class
@@ -19,7 +21,7 @@ class ClientSession : public EncryptedSession<PacketSession>, public IFilterEndp
 	DECLARE_CLASS(ClientSession)
 
 public:
-	ClientSession(bool authMode);
+	ClientSession(bool authMode, FilterManager* filterManager, FilterManager* converterFilterManager);
 
 	void sendPacket(MessageBuffer& buffer) {
 		if(buffer.checkPacketFinalSize() == false) {
@@ -40,8 +42,10 @@ public:
 
 	const char* getPacketName(int16_t id);
 
+	void logPacket(bool toClient, const TS_MESSAGE* msg);
+	bool isAuthMode() { return authMode; }
+
 protected:
-	void logPacket(bool outgoing, const TS_MESSAGE* msg);
 	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
 	EventChain<SocketSession> onConnected();
 	EventChain<SocketSession> onDisconnected(bool causedByRemote);
@@ -53,9 +57,12 @@ protected:
 
 	~ClientSession();
 
+	int getServerPacketVersion() { return serverSession.getPacketVersion(); }
+
 private:
 	ServerSession serverSession;
-	FilterProxy* packetFilter;
+	std::unique_ptr<FilterProxy> packetFilter;
+	std::unique_ptr<FilterProxy> packetConverterFilter;
 	int version;
 	bool authMode;
 };

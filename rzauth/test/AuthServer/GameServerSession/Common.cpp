@@ -145,7 +145,7 @@ void sendGameConnectedAccounts(TestConnectionChannel* channel, std::vector<Accou
 			accountInfo->nPCBangUser = accountItem.nPCBangUser;
 			accountInfo->nEventCode = accountItem.nEventCode;
 			accountInfo->nAge = accountItem.nAge;
-			accountInfo->ip = accountItem.ip;
+			memcpy(accountInfo->ip, accountItem.ip, INET6_ADDRSTRLEN);
 			accountInfo->loginTime = accountItem.loginTime;
 		}
 

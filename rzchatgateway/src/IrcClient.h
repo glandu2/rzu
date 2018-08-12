@@ -1,6 +1,7 @@
 #ifndef IRCCLIENT_H
 #define IRCCLIENT_H
 
+#include "Core/Timer.h"
 #include "NetSession/SocketSession.h"
 #include <unordered_map>
 
@@ -31,6 +32,7 @@ protected:
 	static const char* getChatColor(int type);
 
 private:
+	void onReconnect();
 	EventChain<SocketSession> onStateChanged(Stream::State oldState, Stream::State newState, bool causedByRemote);
 	EventChain<SocketSession> onDataReceived();
 	void onIrcLine(const std::string& line);
@@ -51,6 +53,8 @@ private:
 	std::vector<char> buffer;
 	std::unordered_map<std::string, std::string> mpGsToIrc;
 	std::unordered_map<std::string, std::string> mpIrcToGs;
+
+	Timer<IrcClient> reconnectTimer;
 };
 
 #endif  // IRCCLIENT_H

@@ -36,7 +36,7 @@ struct AccountInfo {
 	char nPCBangUser;
 	int32_t nEventCode;
 	int32_t nAge;
-	uint32_t ip;
+	char ip[INET6_ADDRSTRLEN];
 	uint32_t loginTime;
 };
 

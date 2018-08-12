@@ -306,9 +306,6 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 
 		client->connectedToGame();
 
-		char ipStr[INET_ADDRSTRLEN] = "";
-		uv_inet_ntop(AF_INET, &client->ip, ipStr, sizeof(ipStr));
-
 		LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_LOGIN,
 		                         client->accountId,
 		                         client->pcBang,
@@ -323,7 +320,7 @@ void GameServerSession::onClientLogin(const TS_GA_CLIENT_LOGIN* packet) {
 		                         0,
 		                         client->account.c_str(),
 		                         -1,
-		                         ipStr,
+		                         client->ip,
 		                         -1,
 		                         0,
 		                         0,
@@ -352,9 +349,6 @@ void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 	if(!clientData)
 		return;
 
-	char ipStr[INET_ADDRSTRLEN];
-	uv_inet_ntop(AF_INET, &clientData->ip, ipStr, sizeof(ipStr));
-
 	LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_LOGOUT,
 	                         clientData->accountId,
 	                         0,
@@ -369,7 +363,7 @@ void GameServerSession::onClientLogout(const TS_GA_CLIENT_LOGOUT* packet) {
 	                         time(nullptr) - clientData->loginTime,
 	                         clientData->account.c_str(),
 	                         -1,
-	                         ipStr,
+	                         clientData->ip,
 	                         -1,
 	                         0,
 	                         0,
@@ -520,10 +514,10 @@ void GameServerSession::fillClientLoginExtendedResult(TS_AG_CLIENT_LOGIN_EXTENDE
                                                       ClientData* clientData) {
 	fillClientLoginResult(packet, account, result, clientData);
 	if(result == TS_RESULT_SUCCESS && clientData) {
-		packet->ip = clientData->ip;
+		memcpy(packet->ip, clientData->ip, INET6_ADDRSTRLEN);
 		packet->loginTime = (uint32_t) clientData->loginTime;
 	} else {
-		packet->ip = 0;
+		packet->ip[0] = '\0';
 		packet->loginTime = 0;
 	}
 }

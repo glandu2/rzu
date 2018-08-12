@@ -12,6 +12,8 @@ public:
 	struct Parameter {
 		std::string serverIp;
 		uint16_t serverPort;
+		FilterManager* filterManager;
+		FilterManager* converterFilterManager;
 	};
 
 public:

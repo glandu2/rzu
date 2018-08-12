@@ -195,7 +195,7 @@ void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
 	log(LL_Debug, "Login request for account %s\n", account.c_str());
 
 	DB_AccountData::Input input(account,
-	                            getStream()->getRemoteIpStr(),
+	                            getStream()->getRemoteAddress(),
 	                            useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_DES,
 	                            cryptedPassword,
 	                            aesKey);
@@ -244,7 +244,7 @@ void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
 		log(LL_Debug, "IMBC Login request for account %s\n", account.c_str());
 
 		DB_AccountData::Input input(account,
-		                            getStream()->getRemoteIpStr(),
+		                            getStream()->getRemoteAddress(),
 		                            useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_None,
 		                            cryptedPassword,
 		                            aesKey);
@@ -281,23 +281,18 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 		log(LL_Info, "Client connection already authenticated with account %s\n", clientData->account.c_str());
 	} else {
 		ClientData* oldClient;
-		clientData = ClientData::tryAddClient(this,
-		                                      input->account,
-		                                      output->account_id,
-		                                      output->age,
-		                                      output->event_code,
-		                                      output->pcbang,
-		                                      getStream()->getRemoteIp(),
-		                                      &oldClient);
+		char ip[INET6_ADDRSTRLEN];
+
+		getStream()->getRemoteAddress().getName(ip, sizeof(ip));
+
+		clientData = ClientData::tryAddClient(
+		    this, input->account, output->account_id, output->age, output->event_code, output->pcbang, ip, &oldClient);
 		if(clientData == nullptr) {
 			result.result = TS_RESULT_ALREADY_EXIST;
 			result.login_flag = 0;
 			log(LL_Info, "Client %s already connected\n", input->account.c_str());
 
-			char ipStr[INET_ADDRSTRLEN];
 			GameData* oldCientGameData = oldClient->getGameServer();
-
-			uv_inet_ntop(AF_INET, &oldClient->ip, ipStr, sizeof(ipStr));
 
 			if(!oldCientGameData) {
 				LogServerClient::sendLog(LogServerClient::LM_ACCOUNT_DUPLICATE_AUTH_LOGIN,
@@ -314,9 +309,9 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 				                         0,
 				                         input->account.c_str(),
 				                         -1,
-				                         getStream()->getRemoteIpStr(),
+				                         ip,
 				                         -1,
-				                         ipStr,
+				                         oldClient->ip,
 				                         -1,
 				                         0,
 				                         0);
@@ -337,9 +332,9 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 				                         0,
 				                         input->account.c_str(),
 				                         -1,
-				                         getStream()->getRemoteIpStr(),
+				                         ip,
 				                         -1,
-				                         ipStr,
+				                         oldClient->ip,
 				                         -1,
 				                         0,
 				                         0);

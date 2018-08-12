@@ -5,6 +5,8 @@
 #include "LuaUtils.h"
 #include "PacketTemplates.h"
 
+static const char* LUA_MAIN_FILE = "rzfilter.lua";
+
 template<class T> struct SendPacketFromLuaCallback {
 	void operator()(lua_State* L, IFilterEndpoint* endpoint, bool* ok) {
 		bool result = LuaEndpointMetaTable::sendPacketFromLua<T>(L, endpoint);
@@ -112,8 +114,17 @@ template<class T> bool LuaEndpointMetaTable::sendPacketFromLua(lua_State* L, IFi
 PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType, PacketFilter*)
     : IFilter(client, server, serverType),
       clientEndpoint(client, false, serverType),
-      serverEndpoint(server, true, serverType) {
+      serverEndpoint(server, true, serverType),
+      currentLuaFileMtime(0),
+      newLuaFileMtime(0) {
+	struct stat info;
+	int ret = stat(LUA_MAIN_FILE, &info);
+	if(ret == 0 && (info.st_mode & S_IFREG))
+		newLuaFileMtime = currentLuaFileMtime = info.st_mtime;
+
 	initLuaVM();
+
+	reloadCheckTimer.start(this, &PacketFilter::onCheckReload, 5000, 5000);
 }
 
 PacketFilter::~PacketFilter() {
@@ -214,7 +225,7 @@ void PacketFilter::initLuaVM() {
 
 	lua_pushcfunction(L, &luaMessageHandler);
 
-	const char* const filename = "rzfilter.lua";
+	const char* const filename = LUA_MAIN_FILE;
 	int result = luaL_loadfilex(L, filename, nullptr);
 	if(result) {
 		Object::logStatic(
@@ -304,6 +315,23 @@ bool PacketFilter::pushPacket(lua_State* L, const TS_MESSAGE* packet, int versio
 		ok = processAuthPacket<LuaSerializePackerCallback>(packet->id, L, version, packet, &serializationSucess);
 
 	return ok && serializationSucess;
+}
+
+void PacketFilter::onCheckReload() {
+	struct stat info;
+	int ret = stat(LUA_MAIN_FILE, &info);
+	if(ret == 0 && (info.st_mode & S_IFREG)) {
+		// If different time as current and has not changed since previous check, do reload
+		if(newLuaFileMtime != currentLuaFileMtime && newLuaFileMtime == info.st_mtime) {
+			Object::logStatic(Object::LL_Info, "rzfilter_lua_module", "Reloading %s\n", LUA_MAIN_FILE);
+			initLuaVM();
+			currentLuaFileMtime = info.st_mtime;
+		} else if(currentLuaFileMtime != info.st_mtime) {
+			Object::logStatic(
+			    Object::LL_Info, "rzfilter_lua_module", "%s changed, will reload next time\n", LUA_MAIN_FILE);
+		}
+		newLuaFileMtime = info.st_mtime;
+	}
 }
 
 IFilter* createFilter(IFilterEndpoint* client,

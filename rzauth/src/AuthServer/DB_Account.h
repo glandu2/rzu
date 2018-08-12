@@ -2,6 +2,7 @@
 #define AUTHSERVER_DB_ACCOUNT_H
 
 #include "Database/DbQueryJobRef.h"
+#include "Stream/StreamAddress.h"
 #include <stdint.h>
 #include <string.h>
 #include <string>
@@ -18,7 +19,7 @@ struct DB_AccountData {
 
 	struct Input {
 		std::string account;
-		char ip[INET_ADDRSTRLEN];
+		char ip[INET6_ADDRSTRLEN];
 		std::vector<unsigned char> cryptedPassword;
 		EncryptMode cryptMode;
 		unsigned char aesKey[32];
@@ -28,13 +29,12 @@ struct DB_AccountData {
 
 		Input() {}
 		Input(const std::string& account,
-		      const char* ip,
+		      const StreamAddress& ip,
 		      EncryptMode cryptMode,
 		      const std::vector<unsigned char>& cryptedPassword,
 		      unsigned char aesKey[32])
 		    : account(account), cryptedPassword(cryptedPassword), cryptMode(cryptMode) {
-			strncpy(this->ip, ip, INET_ADDRSTRLEN);
-			this->ip[INET_ADDRSTRLEN - 1] = 0;
+			ip.getName(this->ip, sizeof(this->ip));
 
 			memcpy(this->aesKey, aesKey, sizeof(this->aesKey));
 		}

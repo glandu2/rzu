@@ -2,6 +2,7 @@
 #define AUTHSERVER_CLIENTDATA_H
 
 #include "Core/Object.h"
+#include "Stream/StreamAddress.h"
 #include "uv.h"
 #include <stdint.h>
 #include <string>
@@ -25,7 +26,7 @@ public:
 	uint32_t eventCode;
 	uint64_t oneTimePassword;
 	uint32_t pcBang;
-	uint32_t ip;
+	char ip[INET6_ADDRSTRLEN];
 	time_t loginTime;
 	bool kickRequested;
 
@@ -40,7 +41,7 @@ public:
 	                                uint32_t age,
 	                                uint32_t event_code,
 	                                uint32_t pcBang,
-	                                uint32_t ip,
+	                                const char ip[INET6_ADDRSTRLEN],
 	                                ClientData** oldClient = nullptr);
 	static bool removeClient(uint32_t accountId);
 	static bool removeClient(const std::string& account);

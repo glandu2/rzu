@@ -44,16 +44,16 @@ EventChain<PacketSession> GameServerSession::onPacketReceived(const TS_MESSAGE* 
 
 void GameServerSession::onLogin(const TS_SU_LOGIN* packet) {
 	TS_US_LOGIN_RESULT result;
+	StreamAddress remoteAddress = getStream()->getRemoteAddress();
+	char ip[INET6_ADDRSTRLEN];
+
 	TS_MESSAGE::initMessage<TS_US_LOGIN_RESULT>(&result);
 	typedef std::unordered_map<std::string, GameServerSession*>::iterator ServerIterator;
 
 	std::string serverName = Utils::convertToString(packet->server_name, sizeof(packet->server_name) - 1);
+	remoteAddress.getName(ip, sizeof(ip));
 
-	log(LL_Info,
-	    "Server Login: %s from %s:%d\n",
-	    serverName.c_str(),
-	    getStream()->getRemoteIpStr(),
-	    getStream()->getRemotePort());
+	log(LL_Info, "Server Login: %s from %s:%d\n", serverName.c_str(), ip, remoteAddress.port);
 
 	if(!IconServerSession::checkName(serverName.c_str(), serverName.size())) {
 		// Forbidden character used in servername

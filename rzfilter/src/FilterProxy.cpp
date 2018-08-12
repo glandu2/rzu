@@ -1,33 +1,47 @@
 #include "FilterProxy.h"
 #include "FilterManager.h"
 
-FilterProxy::FilterProxy(FilterManager* filterManager,
-                         IFilterEndpoint* client,
-                         IFilterEndpoint* server,
-                         ServerType serverType)
-    : IFilter(client, server, serverType), filterManager(filterManager), filterModule(nullptr) {}
+FilterProxy::FilterProxy(FilterManager* filterManager, IFilter::ServerType serverType)
+    : filterManager(filterManager),
+      filterModule(nullptr),
+      serverType(serverType),
+      client(nullptr),
+      server(nullptr),
+      toServerEndpoint(this, false),
+      toClientEndpoint(this, true) {}
 
 FilterProxy::~FilterProxy() {
+	filterManager->unregisterFilter(this);
 	if(filterModule)
 		filterManager->destroyInternalFilter(filterModule);
 }
 
-bool FilterProxy::onServerPacket(const TS_MESSAGE* packet) {
+void FilterProxy::onServerPacket(const TS_MESSAGE* packet) {
+	bool forwardPacket = true;
 	if(filterModule)
-		return filterModule->onServerPacket(packet);
-	else
-		return IFilter::onServerPacket(packet);
+		forwardPacket = filterModule->onServerPacket(packet);
+
+	if(forwardPacket)
+		client->sendPacket(packet);
 }
 
-bool FilterProxy::onClientPacket(const TS_MESSAGE* packet) {
+void FilterProxy::onClientPacket(const TS_MESSAGE* packet) {
+	bool forwardPacket = true;
 	if(filterModule)
-		return filterModule->onClientPacket(packet);
-	else
-		return IFilter::onClientPacket(packet);
+		forwardPacket = filterModule->onClientPacket(packet);
+
+	if(forwardPacket)
+		server->sendPacket(packet);
 }
 
-void FilterProxy::recreateFilterModule(CreateFilterFunction createFilterFunction,
-                                       DestroyFilterFunction destroyFilterFunction) {
+void FilterProxy::bindEndpoints(IFilterEndpoint* client, IFilterEndpoint* server) {
+	this->client = client;
+	this->server = server;
+	filterManager->reloadFilter(this);
+}
+
+void FilterProxy::recreateFilterModule(IFilter::CreateFilterFunction createFilterFunction,
+                                       IFilter::DestroyFilterFunction destroyFilterFunction) {
 	IFilter* oldFilter = filterModule;
 	filterModule = createFilterFunction(client, server, serverType, oldFilter);
 	if(oldFilter && destroyFilterFunction)

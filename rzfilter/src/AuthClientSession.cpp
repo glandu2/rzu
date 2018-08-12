@@ -6,8 +6,9 @@
 #include <algorithm>
 #include <vector>
 
-AuthClientSession::AuthClientSession(GameClientSessionManager* gameClientSessionManager)
-    : ClientSession(true), gameClientSessionManager(gameClientSessionManager) {}
+AuthClientSession::AuthClientSession(InputParameters parameters)
+    : ClientSession(true, parameters.filterManager, parameters.converterFilterManager),
+      gameClientSessionManager(parameters.gameClientSessionManager) {}
 
 AuthClientSession::~AuthClientSession() {}
 
@@ -26,7 +27,7 @@ EventChain<PacketSession> AuthClientSession::onPacketReceived(const TS_MESSAGE* 
 void AuthClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == TS_AC_SERVER_LIST::packetID) {
 		TS_AC_SERVER_LIST serverListPkt;
-		if(packet->process(serverListPkt, getPacketVersion())) {
+		if(packet->process(serverListPkt, getServerPacketVersion())) {
 			std::string listenIp = CONFIG_GET()->client.listener.listenIp.get();
 			std::vector<TS_SERVER_INFO*> serversOrdered;
 
@@ -47,7 +48,8 @@ void AuthClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 				    baseListenPort,
 				    server.server_ip,
 				    server.server_port,
-				    this->getStream() ? this->getStream()->getPacketLogger() : nullptr);
+				    this->getStream() ? this->getStream()->getPacketLogger() : nullptr,
+				    this->getServer()->getBanManager());
 				if(!listenPort) {
 					log(LL_Error,
 					    "Failed to listen on %s for server %s:%d\n",

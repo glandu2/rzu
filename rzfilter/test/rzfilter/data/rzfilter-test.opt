@@ -1,0 +1,2 @@
+core.log.dir=./log
+trafficdump.dir=./traffic_log

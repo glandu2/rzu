@@ -46,11 +46,15 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 	TS_MESSAGE::initMessage<TS_UC_LOGIN_RESULT>(&result);
 
 	std::string serverName = Utils::convertToString(packet->raw_server_name, sizeof(packet->raw_server_name) - 1);
+	StreamAddress remoteAddress = getStream()->getRemoteAddress();
+	char ip[INET6_ADDRSTRLEN];
+
+	remoteAddress.getName(ip, sizeof(ip));
 
 	log(LL_Debug,
 	    "Upload from client %s:%d, client id %u with account id %u for guild id %u on server %s\n",
-	    getStream()->getRemoteIpStr(),
-	    getStream()->getRemotePort(),
+	    ip,
+	    remoteAddress.port,
 	    packet->client_id,
 	    packet->account_id,
 	    packet->guild_id,
@@ -72,15 +76,16 @@ void ClientSession::onLogin(const TS_CU_LOGIN* packet) {
 void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	TS_UC_UPLOAD result;
 	char filename[128];
-	TS_MESSAGE::initMessage<TS_UC_UPLOAD>(&result);
+	StreamAddress remoteAddress = getStream()->getRemoteAddress();
+	char ip[INET6_ADDRSTRLEN];
 
-	log(LL_Debug, "Upload from client %s:%d\n", getStream()->getRemoteIpStr(), getStream()->getRemotePort());
+	TS_MESSAGE::initMessage<TS_UC_UPLOAD>(&result);
+	remoteAddress.getName(ip, sizeof(ip));
+
+	log(LL_Debug, "Upload from client %s:%d\n", ip, remoteAddress.port);
 
 	if(currentRequest == nullptr) {
-		log(LL_Warning,
-		    "Upload attempt without a request from %s:%d\n",
-		    getStream()->getRemoteIpStr(),
-		    getStream()->getRemotePort());
+		log(LL_Warning, "Upload attempt without a request from %s:%d\n", ip, remoteAddress.port);
 		result.result = TS_RESULT_NOT_EXIST;
 	} else if(packet->file_length != packet->size - sizeof(TS_CU_UPLOAD)) {
 		log(LL_Warning,

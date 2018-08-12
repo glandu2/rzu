@@ -16,18 +16,12 @@ public:
 	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType, PacketFilter* data);
 	~PacketFilter();
 
-	void sendChatMessage(IFilterEndpoint* client,
-	                     const char* msg,
-	                     const char* sender = "Filter",
-	                     TS_CHAT_TYPE type = CHAT_WHISPER);
-
 	virtual bool onServerPacket(const TS_MESSAGE* packet);
 	virtual bool onClientPacket(const TS_MESSAGE* packet);
 
 protected:
 private:
 	template<class Packet> void showPacketJson(const Packet* packet, int version);
-	void onChatMessage(const TS_SC_CHAT* packet);
 
 	void printAuthPacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
 	void printGamePacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
@@ -39,9 +33,7 @@ private:
 		uint64_t uid;
 		uint64_t count;
 	};
-	struct Data {
-		std::unordered_map<uint32_t, Item> items;
-	};
+	struct Data {};
 	Data* data;
 };
 

@@ -1,6 +1,9 @@
 #ifndef PACKETDECLARATION_H
 #define PACKETDECLARATION_H
 
+// To see the generated C++ code, use:
+// gcc -E TS_*.h -DDEBUG_PREPROCESSOR -I../../lib | clang-format-6.0 -style llvm -
+
 #ifndef DEBUG_PREPROCESSOR
 #include "PacketEpics.h"
 #include <limits>
@@ -80,7 +83,7 @@ template<typename T> uint32_t getClampedCount(size_t realSize) {
 	};
 #define DEFINITION_F_padmarker(...)
 #define DEFINITION_F_pad(...)
-#define DEFINITION_F_endstring(name, size, ...) std::string name;
+#define DEFINITION_F_endstring(name, hasNullTerminator, ...) std::string name;
 #define DEFINITION_F_endarray(type, name, ...) std::vector<type> name;
 
 // Local fields
@@ -94,7 +97,7 @@ template<typename T> uint32_t getClampedCount(size_t realSize) {
 #define LOCAL_DEFINITION_F_dynstring(name, hasNullTerminator, ...)
 #define LOCAL_DEFINITION_F_padmarker(...)
 #define LOCAL_DEFINITION_F_pad(...)
-#define LOCAL_DEFINITION_F_endstring(name, size, ...)
+#define LOCAL_DEFINITION_F_endstring(name, hasNullTerminator, ...)
 #define LOCAL_DEFINITION_F_endarray(type, name, ...)
 
 // Size function

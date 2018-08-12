@@ -12,42 +12,49 @@ class FilterProxy;
 class IWritableConsole;
 
 class FilterManager : public Object {
-	DECLARE_CLASSNAME(FilterManager, 0)
+	DECLARE_CLASS(FilterManager)
 
 public:
-	static FilterManager* getInstance();
+	FilterManager(cval<std::string>& filterModuleName);
+	~FilterManager();
 
-	FilterProxy* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, IFilter::ServerType serverType);
-	void destroyFilter(FilterProxy* filter);
+	static void init();
+
+	std::unique_ptr<FilterProxy> createFilter(IFilter::ServerType serverType);
+	std::string getName();
 
 protected:
+	void unregisterFilter(FilterProxy* filter);
 	void destroyInternalFilter(IFilter* filterModule);
+	void reloadFilter(FilterProxy* filterProxy);
 	friend class FilterProxy;
 
 protected:
 	bool unloadModule();
 	void loadModule();
 	void onUpdateFilter();
-	static void onFsStatDone(uv_fs_t* req);
-	static void onFsRemoveDone(uv_fs_t* req);
-	static void onFsMoveDone(uv_fs_t* req);
 	void reloadAllFilters(IFilter::CreateFilterFunction createFilterFunction,
 	                      IFilter::DestroyFilterFunction destroyOldFilterFunction);
+
+	int getNextUsedIndex();
+	std::string getUsedModuleName(int usedIndex);
+	void findUsedIndexOnDisk();
 
 	static void reloadFiltersCommand(IWritableConsole* console, const std::vector<std::string>&);
 
 private:
+	cval<std::string>& filterModuleName;
 	uv_lib_t filterModule;
 	bool filterModuleLoaded;
-	std::list<std::unique_ptr<FilterProxy> > packetFilters;
+	int currentUsedIndex;
+	std::list<FilterProxy*> packetFilters;
 	IFilter::CreateFilterFunction createFilterFunction;
 	IFilter::DestroyFilterFunction destroyFilterFunction;
 
 	Timer<FilterManager> updateFilterTimer;
 	int lastFileSize;
 
-	FilterManager();
-	~FilterManager();
+	static std::list<FilterManager*> instance;
 };
 
 #endif  // FILTERMANAGER_H

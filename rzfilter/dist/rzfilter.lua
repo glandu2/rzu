@@ -1,11 +1,13 @@
 local combatlog = require("combatlog")
+local chattimestamps = require("chattimestamps")
 local packetlogger = require("packetlogger")
 
 local filterImplementation = combatlog
+-- local filterImplementation = chattimestamps
+-- local filterImplementation = packetlogger
+
 
 function onServerPacket(client, server, packet, serverType)
-	--print("Received Server packet id " .. packet.id .. " (" .. packet.__name .. ")")
-	--print(json.encode(packet))
 	if filterImplementation and
 	   filterImplementation.onServerPacket and
 	   filterImplementation.onServerPacket(client, server, packet, serverType) ~= false
@@ -20,6 +22,7 @@ function onServerPacket(client, server, packet, serverType)
 	client:sendPacket(packet)
 	return false
 	--]]
+	return true
 end
 
 
@@ -30,9 +33,8 @@ function onClientPacket(client, server, packet, serverType)
 	then
 		return not server:sendPacket(packet)
 	end
---[[
-	--print("Received Client packet id " .. packet.id)
-	--print(json.encode(packet))
+
+	--[[
 	if packet.id == TS_CS_GAME_GUARD_AUTH_ANSWER then
 		return false
 	end

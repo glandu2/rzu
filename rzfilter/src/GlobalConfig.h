@@ -37,8 +37,11 @@ struct GlobalConfig {
 
 	struct FilterConfig {
 		cval<std::string>& filterModuleName;
+		cval<std::string>& converterFilterModuleName;
 
-		FilterConfig() : filterModuleName(CFG_CREATE("filter.modulename", "rzfilter_module")) {}
+		FilterConfig()
+		    : filterModuleName(CFG_CREATE("filter.modulename", "rzfilter_module")),
+		      converterFilterModuleName(CFG_CREATE("filter.convertermodulename", "rzfilter_version_converter")) {}
 	} filter;
 
 	struct TrafficDump {
