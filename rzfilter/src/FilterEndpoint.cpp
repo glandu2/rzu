@@ -16,3 +16,23 @@ void FilterEndpoint::sendPacket(const TS_MESSAGE* packet) {
 void FilterEndpoint::sendPacket(MessageBuffer& packet) {
 	sendPacket(reinterpret_cast<const TS_MESSAGE*>(packet.getData()));
 }
+
+void FilterEndpoint::close() {
+	if(toClient) {
+		filter->getClientEndpoint()->close();
+	} else {
+		filter->getServerEndpoint()->close();
+	}
+}
+
+StreamAddress FilterEndpoint::getAddress() {
+	if(toClient) {
+		return filter->getClientEndpoint()->getAddress();
+	} else {
+		return filter->getServerEndpoint()->getAddress();
+	}
+}
+
+void FilterEndpoint::banAddress(StreamAddress address) {
+	filter->getClientEndpoint()->banAddress(address);
+}

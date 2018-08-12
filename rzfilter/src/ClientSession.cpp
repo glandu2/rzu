@@ -2,6 +2,8 @@
 #include "ClientSession.h"
 #include "Core/PrintfFormats.h"
 #include "GlobalConfig.h"
+#include "NetSession/BanManager.h"
+#include "NetSession/SessionServer.h"
 #include "Packet/PacketStructsName.h"
 #include <algorithm>
 #include <string.h>
@@ -20,6 +22,18 @@ ClientSession::ClientSession(bool authMode, FilterManager* filterManager, Filter
 
 	packetFilter->bindEndpoints(packetConverterFilter->getToClientEndpoint(), &serverSession);
 	packetConverterFilter->bindEndpoints(this, packetFilter->getToServerEndpoint());
+}
+
+StreamAddress ClientSession::getAddress() {
+	if(getStream())
+		return getStream()->getRemoteAddress();
+	else
+		return StreamAddress{};
+}
+
+void ClientSession::banAddress(StreamAddress address) {
+	if(getServer() && getServer()->getBanManager())
+		getServer()->getBanManager()->banIp(address);
 }
 
 ClientSession::~ClientSession() {}

@@ -52,8 +52,12 @@ template<class T> struct LuaSerializePackerCallback {
 };
 
 const char* const LuaEndpointMetaTable::NAME = "rzfilter.IFilterEndpoint";
-const luaL_Reg LuaEndpointMetaTable::FUNCTIONS[] = {
-    {"getPacketVersion", &getPacketVersion}, {"sendPacket", &sendPacket}, {NULL, NULL}};
+const luaL_Reg LuaEndpointMetaTable::FUNCTIONS[] = {{"getPacketVersion", &getPacketVersion},
+                                                    {"sendPacket", &sendPacket},
+                                                    {"close", &close},
+                                                    {"getIp", &getIp},
+                                                    {"banIp", &banIp},
+                                                    {NULL, NULL}};
 
 int LuaEndpointMetaTable::getPacketVersion(lua_State* L) {
 	LuaEndpointMetaTable* self = (LuaEndpointMetaTable*) luaL_checkudata(L, 1, NAME);
@@ -95,6 +99,45 @@ int LuaEndpointMetaTable::sendPacket(lua_State* L) {
 	}
 
 	return 1;
+}
+
+int LuaEndpointMetaTable::close(lua_State* L) {
+	LuaEndpointMetaTable* self = (LuaEndpointMetaTable*) luaL_checkudata(L, 1, NAME);
+	if(!self || !self->endpoint)
+		return 0;
+
+	self->endpoint->close();
+	return 0;
+}
+
+int LuaEndpointMetaTable::getIp(lua_State* L) {
+	LuaEndpointMetaTable* self = (LuaEndpointMetaTable*) luaL_checkudata(L, 1, NAME);
+	if(!self || !self->endpoint)
+		return 0;
+
+	StreamAddress address = self->endpoint->getAddress();
+	char ip[108];
+	address.getName(ip, sizeof(ip));
+	lua_pushstring(L, ip);
+	return 1;
+}
+
+int LuaEndpointMetaTable::banIp(lua_State* L) {
+	LuaEndpointMetaTable* self = (LuaEndpointMetaTable*) luaL_checkudata(L, 1, NAME);
+
+	if(!self || !self->endpoint)
+		return 0;
+
+	luaL_checktype(L, 2, LUA_TSTRING);
+
+	const char* ipStr = lua_tostring(L, 2);
+	StreamAddress address;
+	address.port = 0;
+	address.setFromName(ipStr);
+
+	self->endpoint->banAddress(address);
+
+	return 0;
 }
 
 template<class T> bool LuaEndpointMetaTable::sendPacketFromLua(lua_State* L, IFilterEndpoint* endpoint) {

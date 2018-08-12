@@ -12,6 +12,9 @@ struct LuaEndpointMetaTable {
 
 	static int getPacketVersion(lua_State* L);
 	static int sendPacket(lua_State* L);
+	static int close(lua_State* L);
+	static int getIp(lua_State* L);
+	static int banIp(lua_State* L);
 
 	template<class T> static bool sendPacketFromLua(lua_State* L, IFilterEndpoint* endpoint);
 

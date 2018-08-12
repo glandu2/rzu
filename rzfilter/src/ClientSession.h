@@ -37,6 +37,9 @@ public:
 	}
 	void sendPacket(const TS_MESSAGE* data) { PacketSession::sendPacket(data); }
 	int getPacketVersion() { return version; }
+	void close() { EncryptedSession<PacketSession>::close(); }
+	StreamAddress getAddress();
+	void banAddress(StreamAddress address);
 
 	virtual void onServerPacketReceived(const TS_MESSAGE* packet);
 

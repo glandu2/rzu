@@ -52,6 +52,17 @@ void ServerSession::sendPacket(const TS_MESSAGE* message) {
 	}
 }
 
+StreamAddress ServerSession::getAddress() {
+	if(getStream())
+		return getStream()->getRemoteAddress();
+	else
+		return StreamAddress{};
+}
+
+void ServerSession::banAddress(StreamAddress address) {
+	clientSession->banAddress(address);
+}
+
 EventChain<PacketSession> ServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	// log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 	clientSession->onServerPacketReceived(packet);
