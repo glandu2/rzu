@@ -33,6 +33,9 @@ public:
 		}
 	}
 	int getPacketVersion() { return version; }
+	void close() { EncryptedSession<PacketSession>::close(); }
+	StreamAddress getAddress();
+	void banAddress(StreamAddress address);
 
 protected:
 	void logPacket(bool outgoing, const TS_MESSAGE* msg);

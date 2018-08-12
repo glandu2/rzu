@@ -19,6 +19,8 @@ public:
 	void bindEndpoints(IFilterEndpoint* client, IFilterEndpoint* server);
 	IFilterEndpoint* getToClientEndpoint() { return &toClientEndpoint; }
 	IFilterEndpoint* getToServerEndpoint() { return &toServerEndpoint; }
+	IFilterEndpoint* getClientEndpoint() { return client; }
+	IFilterEndpoint* getServerEndpoint() { return server; }
 
 	int getPacketVersion() { return server->getPacketVersion(); }
 
