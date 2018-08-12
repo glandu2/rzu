@@ -14,8 +14,12 @@ public:
 	GameClientSessionManager(FilterManager* filterManager, FilterManager* converterFilterManager);
 	~GameClientSessionManager();
 
-	uint16_t ensureListening(
-	    std::string listenIp, uint16_t listenPort, std::string serverIp, uint16_t serverPort, Log* trafficLogger);
+	uint16_t ensureListening(std::string listenIp,
+	                         uint16_t listenPort,
+	                         std::string serverIp,
+	                         uint16_t serverPort,
+	                         Log* trafficLogger,
+	                         BanManager* banManager);
 
 	virtual bool start();
 	virtual void stop();
@@ -28,8 +32,8 @@ private:
 		cval<int> listenPort;
 		SessionServerWithParameter<GameClientSession, GameClientSession::Parameter*> sessionServer;
 
-		ServerFilter(Log* trafficLogger)
-		    : sessionServer(&serverParameters, listenIp, listenPort, nullptr, trafficLogger) {}
+		ServerFilter(Log* trafficLogger, BanManager* banManager)
+		    : sessionServer(&serverParameters, listenIp, listenPort, nullptr, trafficLogger, banManager) {}
 
 	private:
 		ServerFilter(const ServerFilter&);

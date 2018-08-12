@@ -26,6 +26,7 @@ void onTerminate(void* instance) {
 int main(int argc, char** argv) {
 	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
+	BanManager::registerConfig();
 
 	ConfigInfo::get()->init(argc, argv);
 
@@ -80,6 +81,7 @@ void runServers(Log* trafficLogger) {
 	FilterManager filterManager(CONFIG_GET()->filter.filterModuleName);
 	FilterManager converterFilterManager(CONFIG_GET()->filter.converterFilterModuleName);
 	GameClientSessionManager gameClientSessionManager(&filterManager, &converterFilterManager);
+	BanManager clientBanManager;
 
 	AuthClientSession::InputParameters parameters = {
 	    &gameClientSessionManager, &filterManager, &converterFilterManager};
@@ -89,7 +91,8 @@ void runServers(Log* trafficLogger) {
 	    CONFIG_GET()->client.listener.listenIp,
 	    CONFIG_GET()->client.listener.port,
 	    &CONFIG_GET()->client.listener.idleTimeout,
-	    trafficLogger);
+	    trafficLogger,
+	    &clientBanManager);
 
 	serverManager.addServer("clients", &clientSessionServer, &CONFIG_GET()->client.listener.autoStart);
 	serverManager.addServer("gameClientSessionManager", &gameClientSessionManager, nullptr);

@@ -48,7 +48,8 @@ void AuthClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 				    baseListenPort,
 				    server.server_ip,
 				    server.server_port,
-				    this->getStream() ? this->getStream()->getPacketLogger() : nullptr);
+				    this->getStream() ? this->getStream()->getPacketLogger() : nullptr,
+				    this->getServer()->getBanManager());
 				if(!listenPort) {
 					log(LL_Error,
 					    "Failed to listen on %s for server %s:%d\n",
