@@ -17,7 +17,7 @@ public:
 	                int serverIdx,
 	                int delayTime,
 	                int ggRecoTime,
-	                AuthCipherMethod method = ACM_DES);
+	                int epic);
 
 	void connect();
 	void delayedConnect();
@@ -42,7 +42,6 @@ private:
 	std::string account;
 	std::string password;
 	int serverIdx;
-	AuthCipherMethod method;
 
 	int delayTime;
 	int ggRecoTime;

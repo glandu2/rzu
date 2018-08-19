@@ -11,20 +11,19 @@ AutoAuthSession::AutoAuthSession(GameSession* gameSession,
                                  int serverIdx,
                                  int delayTime,
                                  int ggRecoTime,
-                                 AuthCipherMethod method)
-    : ClientAuthSession(gameSession, EPIC_LATEST),
+                                 int epic)
+    : ClientAuthSession(gameSession, epic),
       gameSession(gameSession),
       ip(ip),
       port(port),
       account(account),
       password(password),
       serverIdx(serverIdx),
-      method(method),
       delayTime(delayTime),
       ggRecoTime(ggRecoTime) {}
 
 void AutoAuthSession::connect() {
-	ClientAuthSession::connect(ip, port, account, password, method);
+	ClientAuthSession::connect(ip, port, account, password);
 }
 
 void AutoAuthSession::delayedConnect() {

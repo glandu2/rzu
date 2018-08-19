@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "Packet/PacketEpics.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -32,13 +33,13 @@ static void init() {
 	CFG_CREATE("game.port", 4500);
 
 	CFG_CREATE("game.account", "test1");
-	CFG_CREATE("game.password", "admin");
+	CFG_CREATE("game.password", "admin", true);
 	CFG_CREATE("game.gsindex", 1);
 	CFG_CREATE("game.playername", "Player");
 
-	CFG_CREATE("use_rsa", true);
 	CFG_CREATE("autoreco", 0);
 	CFG_CREATE("recodelay", 5000);
+	CFG_CREATE("server.epic", EPIC_LATEST);
 
 	trafficDump = new TrafficDump;
 }
@@ -66,7 +67,6 @@ int main(int argc, char* argv[]) {
 
 	ConfigInfo::get()->dump();
 
-	bool usersa = CFG_GET("use_rsa")->getBool();
 	std::string ip = CFG_GET("game.ip")->getString();
 	int port = CFG_GET("game.port")->getInt();
 	int autoReco = CFG_GET("autoreco")->getInt();
@@ -76,20 +76,13 @@ int main(int argc, char* argv[]) {
 	std::string password = CFG_GET("game.password")->getString();
 	int serverIdx = CFG_GET("game.gsindex")->getInt();
 	std::string playername = CFG_GET("game.playername")->getString();
+	int epic = CFG_GET("server.epic")->getInt();
 
-	Object::logStatic(Object::LL_Info, "main", "Starting server time monitor\n");
+	Object::logStatic(Object::LL_Info, "main", "Starting server time monitor on epic 0x%06X\n", epic);
 
-	GameSession* gameSession = new GameSession(playername, &trafficLogger);
+	GameSession* gameSession = new GameSession(playername, &trafficLogger, epic);
 	AutoAuthSession* authSession =
-	    new AutoAuthSession(gameSession,
-	                        ip,
-	                        port,
-	                        account,
-	                        password,
-	                        serverIdx,
-	                        recoDelay,
-	                        autoReco,
-	                        usersa ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES);
+	    new AutoAuthSession(gameSession, ip, port, account, password, serverIdx, recoDelay, autoReco, epic);
 
 	authSession->connect();
 
