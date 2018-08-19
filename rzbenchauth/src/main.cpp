@@ -5,6 +5,7 @@
 #include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 #include "LibRzuInit.h"
+#include "Packet/PacketEpics.h"
 #include "Stream/Socket.h"
 #include "TimingFunctions.h"
 #include "uv.h"
@@ -32,7 +33,7 @@ static void init() {
 	CFG_CREATE("count", 8);
 	CFG_CREATE("targetcount", 3000);
 	CFG_CREATE("password", "admin");
-	CFG_CREATE("use_rsa", false);
+	CFG_CREATE("epic", EPIC_LATEST);
 	CFG_CREATE("delay", 0);
 	CFG_CREATE("recodelay", 0);
 	CFG_CREATE("idxoffset", 0);
@@ -59,7 +60,7 @@ void benchmarkAuthentication() {
 	config.connectionTargetCount = CFG_GET("targetcount")->getInt();
 	config.delay = CFG_GET("delay")->getInt();
 	config.recoDelay = CFG_GET("recodelay")->getInt();
-	config.method = CFG_GET("use_rsa")->getBool() ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES;
+	config.epic = CFG_GET("epic")->getInt();
 
 	if(count > config.connectionTargetCount)
 		count = config.connectionTargetCount;

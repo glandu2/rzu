@@ -20,8 +20,8 @@
 #include "GameClient/TS_TIMESYNC.h"
 #include "Packet/PacketEpics.h"
 
-GameSession::GameSession(const std::string& playername, Log* packetLog)
-    : ClientGameSession(EPIC_LATEST),
+GameSession::GameSession(const std::string& playername, Log* packetLog, int epic)
+    : ClientGameSession(epic),
       playername(playername),
       connectedInGame(false),
       handle(0),
@@ -33,7 +33,7 @@ void GameSession::onGameConnected() {
 
 	TS_CS_CHARACTER_LIST charlistPkt;
 	charlistPkt.account = auth->getAccountName();
-	sendPacket(charlistPkt, EPIC_LATEST);
+	sendPacket(charlistPkt);
 }
 
 void GameSession::onGameDisconnected() {
@@ -51,7 +51,7 @@ void GameSession::onUpdatePacketExpired() {
 	updatPkt.time = getRappelzTime() + rappelzTimeOffset;
 	updatPkt.epoch_time = uint32_t(time(NULL) + epochTimeOffset);
 
-	sendPacket(updatPkt, EPIC_LATEST);
+	sendPacket(updatPkt);
 }
 
 void GameSession::onClockExpired() {
@@ -86,13 +86,13 @@ void GameSession::waitNextRappelzSecond() {
 void GameSession::onGamePacketReceived(const TS_MESSAGE* packet) {
 	switch(packet->id) {
 		case TS_SC_CHARACTER_LIST::packetID:
-			packet->process(this, &GameSession::onCharacterList, EPIC_LATEST);
+			packet->process(this, &GameSession::onCharacterList, version);
 			break;
 
-			case_packet_is(TS_SC_LOGIN_RESULT) packet->process(this, &GameSession::onCharacterLoginResult, EPIC_LATEST);
+			case_packet_is(TS_SC_LOGIN_RESULT) packet->process(this, &GameSession::onCharacterLoginResult, version);
 			break;
 
-			case_packet_is(TS_SC_ENTER) packet->process(this, &GameSession::onEnter, EPIC_LATEST);
+			case_packet_is(TS_SC_ENTER) packet->process(this, &GameSession::onEnter, version);
 			break;
 
 		case TS_SC_DISCONNECT_DESC::packetID:
@@ -101,11 +101,11 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		case TS_TIMESYNC::packetID:
-			packet->process(this, &GameSession::onTimeSync, EPIC_LATEST);
+			packet->process(this, &GameSession::onTimeSync, version);
 			break;
 
 		case TS_SC_GAME_TIME::packetID:
-			packet->process(this, &GameSession::onGameTime, EPIC_LATEST);
+			packet->process(this, &GameSession::onGameTime, version);
 			break;
 	}
 }
@@ -131,11 +131,11 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	loginPkt.name = playername;
 	loginPkt.race = 0;
 	RzHashReversible256::generatePayload(loginPkt);
-	sendPacket(loginPkt, EPIC_LATEST);
+	sendPacket(loginPkt);
 
 	TS_TIMESYNC timeSyncPkt;
 	timeSyncPkt.time = 0;
-	sendPacket(timeSyncPkt, EPIC_LATEST);
+	sendPacket(timeSyncPkt);
 
 	updateTimer.start(this, &GameSession::onUpdatePacketExpired, 5000, 5000);
 }
@@ -159,11 +159,11 @@ void GameSession::onTimeSync(const TS_TIMESYNC* packet) {
 
 	TS_TIMESYNC timeSyncPkt;
 	timeSyncPkt.time = packet->time;
-	sendPacket(timeSyncPkt, EPIC_LATEST);
+	sendPacket(timeSyncPkt);
 
 	if(epochTimeOffset == 0) {
 		TS_CS_GAME_TIME gameTimePkt;
-		sendPacket(gameTimePkt, EPIC_LATEST);
+		sendPacket(gameTimePkt);
 	}
 }
 

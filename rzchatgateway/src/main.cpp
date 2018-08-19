@@ -6,6 +6,7 @@
 #include "GameSession.h"
 #include "IrcClient.h"
 #include "LibRzuInit.h"
+#include "Packet/PacketEpics.h"
 #include "uv.h"
 #include <stdio.h>
 #include <string.h>
@@ -36,6 +37,7 @@ static void init() {
 	CFG_CREATE("game.password", "admin");
 	CFG_CREATE("game.gsindex", 1);
 	CFG_CREATE("game.playername", "Player");
+	CFG_CREATE("game.epic", EPIC_LATEST);
 
 	CFG_CREATE("irc.ip", "127.0.0.1");
 	CFG_CREATE("irc.host", "*");
@@ -43,7 +45,6 @@ static void init() {
 	CFG_CREATE("irc.channel", "");
 	CFG_CREATE("irc.nick", "");
 
-	CFG_CREATE("use_rsa", true);
 	CFG_CREATE("gateway", false);
 	CFG_CREATE("autoreco", 0);
 	CFG_CREATE("recodelay", 5000);
@@ -74,7 +75,7 @@ int main(int argc, char* argv[]) {
 
 	ConfigInfo::get()->dump();
 
-	bool usersa = CFG_GET("use_rsa")->getBool();
+	int epic = CFG_GET("game.epic")->getBool();
 	std::string ip = CFG_GET("game.ip")->getString();
 	int port = CFG_GET("game.port")->getInt();
 	bool enableGateway = CFG_GET("gateway")->getBool();
@@ -98,15 +99,7 @@ int main(int argc, char* argv[]) {
 	IrcClient* ircClient = new IrcClient(ircIp, ircPort, ircHost, ircChannel, ircNick, &trafficLogger);
 
 	ChatAuthSession* authSession =
-	    new ChatAuthSession(gameSession,
-	                        ip,
-	                        port,
-	                        account,
-	                        password,
-	                        serverIdx,
-	                        recoDelay,
-	                        autoReco,
-	                        usersa ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES);
+	    new ChatAuthSession(gameSession, ip, port, account, password, serverIdx, recoDelay, autoReco, epic);
 
 	gameSession->setIrcClient(ircClient);
 	ircClient->setGameSession(gameSession);

@@ -17,7 +17,7 @@ struct TS_SC_GAME_TIME;
 
 class GameSession : public ClientGameSession {
 public:
-	GameSession(const std::string& playername, Log* packetLog);
+	GameSession(const std::string& playername, Log* packetLog, int epic);
 
 	void onGameConnected();
 	void onGamePacketReceived(const TS_MESSAGE* packet);
