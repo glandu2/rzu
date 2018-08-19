@@ -7,12 +7,12 @@
 
 struct BenchmarkConfig {
 	uint16_t port;
-	ClientAuthSession::AuthCipherMethod method;
 	int delay;
 	int recoDelay;
 	int connectionsDone;
 	int connectionsStarted;
 	int connectionTargetCount;
+	int epic;
 };
 
 class BenchmarkAuthSession : public ClientAuthSession {
