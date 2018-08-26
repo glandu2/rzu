@@ -29,7 +29,6 @@ public:
 	              cval<int>& port,
 	              cval<int>& serverIdx,
 	              cval<int>& delayTime,
-	              cval<bool>& useRsa,
 	              cval<int>& autoRecoDelay,
 	              const std::string& account,
 	              const std::string& password,

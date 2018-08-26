@@ -17,7 +17,6 @@ public:
 	            cval<int>& port,
 	            cval<int>& serverIdx,
 	            cval<int>& delayTime,
-	            cval<bool>& useRsa,
 	            const std::string& account,
 	            const std::string& password,
 	            cval<int>& version);
@@ -49,7 +48,6 @@ private:
 	std::string password;
 	cval<int>& serverIdx;
 	cval<int>& delayTime;
-	cval<bool>& useRsa;
 
 	bool disconnectRequested;
 	bool connectedToGS;

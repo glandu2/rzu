@@ -88,7 +88,6 @@ void AuctionManager::loadAccounts() {
 	cval<int>& serverIdx = CONFIG_GET()->client.gsindex;
 	cval<int>& recoDelay = CONFIG_GET()->client.recoDelay;
 	cval<int>& autoRecoDelay = CONFIG_GET()->client.autoRecoDelay;
-	cval<bool>& useRsa = CONFIG_GET()->client.useRsa;
 
 	char line[1024];
 	char *p, *lastP;
@@ -136,8 +135,8 @@ void AuctionManager::loadAccounts() {
 			playerName = std::string(lastP, p - lastP);
 		}
 
-		AuctionWorker* auctionWorker = new AuctionWorker(
-		    this, ip, port, serverIdx, recoDelay, useRsa, autoRecoDelay, account, password, playerName);
+		AuctionWorker* auctionWorker =
+		    new AuctionWorker(this, ip, port, serverIdx, recoDelay, autoRecoDelay, account, password, playerName);
 		auctionWorker->start();
 		clients.push_back(std::unique_ptr<AuctionWorker>(auctionWorker));
 

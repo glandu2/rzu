@@ -50,12 +50,12 @@ void GameSession::onGameConnected() {
 
 	TS_CS_CHARACTER_LIST charlistPkt;
 	charlistPkt.account = auth->getAccountName();
-	sendPacket(charlistPkt, version.get());
+	sendPacket(charlistPkt);
 }
 
 void GameSession::close() {
 	TS_CS_LOGOUT logoutPkt;
-	sendPacket(logoutPkt, version.get());
+	sendPacket(logoutPkt);
 	closeSession();
 }
 
@@ -86,7 +86,7 @@ void GameSession::onUpdatePacketExpired() {
 	updatPkt.time = getRappelzTime() + rappelzTimeOffset;
 	updatPkt.epoch_time = uint32_t(time(NULL) + epochTimeOffset);
 
-	sendPacket(updatPkt, version.get());
+	sendPacket(updatPkt);
 }
 
 uint32_t GameSession::getRappelzTime() {
@@ -149,7 +149,7 @@ void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
 	loginPkt.name = playername;
 	loginPkt.race = 0;
 	RzHashReversible256::generatePayload(loginPkt);
-	sendPacket(loginPkt, version.get());
+	sendPacket(loginPkt);
 }
 
 void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet) {
@@ -169,11 +169,11 @@ void GameSession::onTimeSync(const TS_TIMESYNC* serverTime) {
 
 	TS_TIMESYNC timeSyncPkt;
 	timeSyncPkt.time = serverTime->time;
-	sendPacket(timeSyncPkt, version.get());
+	sendPacket(timeSyncPkt);
 
 	if(epochTimeOffset == 0) {
 		TS_CS_GAME_TIME gameTimePkt;
-		sendPacket(gameTimePkt, version.get());
+		sendPacket(gameTimePkt);
 	}
 }
 

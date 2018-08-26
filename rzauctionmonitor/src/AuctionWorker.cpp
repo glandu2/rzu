@@ -8,15 +8,13 @@ AuctionWorker::AuctionWorker(AuctionManager* auctionManager,
                              cval<int>& port,
                              cval<int>& serverIdx,
                              cval<int>& delayTime,
-                             cval<bool>& useRsa,
                              cval<int>& autoRecoDelay,
                              const std::string& account,
                              const std::string& password,
                              const std::string& playername)
     : auctionManager(auctionManager),
       gameSession(this, playername, autoRecoDelay, CONFIG_GET()->client.version),
-      authSession(
-          &gameSession, ip, port, serverIdx, delayTime, useRsa, account, password, CONFIG_GET()->client.version),
+      authSession(&gameSession, ip, port, serverIdx, delayTime, account, password, CONFIG_GET()->client.version),
       isConnected(false),
       idle(true) {
 	log(LL_Info,
