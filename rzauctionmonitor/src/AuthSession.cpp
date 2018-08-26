@@ -8,7 +8,6 @@ AuthSession::AuthSession(GameSession* gameSession,
                          cval<int>& port,
                          cval<int>& serverIdx,
                          cval<int>& delayTime,
-                         cval<bool>& useRsa,
                          const std::string& account,
                          const std::string& password,
                          cval<int>& version)
@@ -20,12 +19,11 @@ AuthSession::AuthSession(GameSession* gameSession,
       password(password),
       serverIdx(serverIdx),
       delayTime(delayTime),
-      useRsa(useRsa),
       disconnectRequested(false) {}
 
 void AuthSession::connect() {
 	disconnectRequested = false;
-	ClientAuthSession::connect(ip, port, account, password, useRsa.get() ? ACM_RSA_AES : ACM_DES);
+	ClientAuthSession::connect(ip, port, account, password);
 }
 
 void AuthSession::delayedConnect() {

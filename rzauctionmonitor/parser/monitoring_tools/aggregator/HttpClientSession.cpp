@@ -55,7 +55,7 @@ void HttpClientSession::onResolved(uv_getaddrinfo_t* resolver, int status, struc
 		return;
 	}
 
-	char addr[INET_ADDRSTRLEN] = {'\0'};
+	char addr[INET6_ADDRSTRLEN] = {'\0'};
 	uv_inet_ntop(AF_INET, &reinterpret_cast<struct sockaddr_in*>(res->ai_addr)->sin_addr, addr, sizeof(addr));
 
 	uv_freeaddrinfo(res);
