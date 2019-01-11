@@ -11,7 +11,7 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs instead of static")
 
 # Packaging
 
-set(CPACK_NSIS_DISPLAY_NAME "Rappelz Emu - Glandu2")
+set(CPACK_NSIS_DISPLAY_NAME "rzu - Glandu2")
 set(CPACK_PACKAGE_NAME "rzemu")
 set(CPACK_PACKAGE_VENDOR "Glandu2")
 set(CPACK_PACKAGE_VERSION "4.1" CACHE STRING "Version string")
