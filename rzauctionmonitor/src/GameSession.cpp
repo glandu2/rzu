@@ -31,7 +31,7 @@ GameSession::GameSession(AuctionWorker* auctionWorker,
       playername(playername),
       connectedInGame(false),
       handle(0),
-      rappelzTimeOffset(0),
+      gameTimeOffset(0),
       epochTimeOffset(0),
       ggRecoTime(ggRecoTime),
       version(version) {}
@@ -46,7 +46,7 @@ void GameSession::onGameConnected() {
 	}
 	shouldReconnect = false;
 
-	epochTimeOffset = rappelzTimeOffset = 0;
+	epochTimeOffset = gameTimeOffset = 0;
 
 	TS_CS_CHARACTER_LIST charlistPkt;
 	charlistPkt.account = auth->getAccountName();
@@ -83,13 +83,13 @@ void GameSession::onUpdatePacketExpired() {
 	TS_CS_UPDATE updatPkt;
 
 	updatPkt.handle = handle;
-	updatPkt.time = getRappelzTime() + rappelzTimeOffset;
+	updatPkt.time = getGameTime() + gameTimeOffset;
 	updatPkt.epoch_time = uint32_t(time(NULL) + epochTimeOffset);
 
 	sendPacket(updatPkt);
 }
 
-uint32_t GameSession::getRappelzTime() {
+uint32_t GameSession::getGameTime() {
 	return uint32_t(uv_hrtime() / (10 * 1000 * 1000));
 }
 
@@ -165,7 +165,7 @@ void GameSession::onResult(const TS_SC_RESULT* resultPacket) {
 }
 
 void GameSession::onTimeSync(const TS_TIMESYNC* serverTime) {
-	rappelzTimeOffset = serverTime->time - getRappelzTime();
+	gameTimeOffset = serverTime->time - getGameTime();
 
 	TS_TIMESYNC timeSyncPkt;
 	timeSyncPkt.time = serverTime->time;
@@ -181,7 +181,7 @@ void GameSession::onGameTime(const TS_SC_GAME_TIME* serverTime) {
 	if(epochTimeOffset == 0)
 		updateTimer.start(this, &GameSession::onUpdatePacketExpired, 5000, 5000);
 
-	rappelzTimeOffset = serverTime->t - getRappelzTime();
+	gameTimeOffset = serverTime->t - getGameTime();
 	epochTimeOffset = uint32_t(serverTime->game_time - time(NULL));
 }
 

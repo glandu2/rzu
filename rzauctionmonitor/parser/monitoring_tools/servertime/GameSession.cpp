@@ -25,11 +25,11 @@ GameSession::GameSession(const std::string& playername, Log* packetLog, int epic
       playername(playername),
       connectedInGame(false),
       handle(0),
-      rappelzTimeOffset(0),
+      gameTimeOffset(0),
       epochTimeOffset(0) {}
 
 void GameSession::onGameConnected() {
-	epochTimeOffset = rappelzTimeOffset = 0;
+	epochTimeOffset = gameTimeOffset = 0;
 
 	TS_CS_CHARACTER_LIST charlistPkt;
 	charlistPkt.account = auth->getAccountName();
@@ -48,38 +48,38 @@ void GameSession::onUpdatePacketExpired() {
 	TS_CS_UPDATE updatPkt;
 
 	updatPkt.handle = handle;
-	updatPkt.time = getRappelzTime() + rappelzTimeOffset;
+	updatPkt.time = getGameTime() + gameTimeOffset;
 	updatPkt.epoch_time = uint32_t(time(NULL) + epochTimeOffset);
 
 	sendPacket(updatPkt);
 }
 
 void GameSession::onClockExpired() {
-	uint64_t rappelzTime = (getRappelzTime() + rappelzTimeOffset) * 10;
+	uint64_t gameTime = (getGameTime() + gameTimeOffset) * 10;
 	int days, hour, minute, second, milisecond;
 
-	days = rappelzTime / (86400 * 1000);
-	rappelzTime %= 86400 * 1000;
+	days = gameTime / (86400 * 1000);
+	gameTime %= 86400 * 1000;
 
-	hour = rappelzTime / (3600 * 1000);
-	minute = (rappelzTime % (3600 * 1000)) / 60000;
-	second = (rappelzTime % 60000) / 1000;
-	milisecond = rappelzTime % 1000;
+	hour = gameTime / (3600 * 1000);
+	minute = (gameTime % (3600 * 1000)) / 60000;
+	second = (gameTime % 60000) / 1000;
+	milisecond = gameTime % 1000;
 
-	log(LL_Info, "Rappelz time: %d days %02d:%02d:%02d.%03d\n", days, hour, minute, second, milisecond);
-	waitNextRappelzSecond();
+	log(LL_Info, "Game time: %d days %02d:%02d:%02d.%03d\n", days, hour, minute, second, milisecond);
+	waitNextGameSecond();
 }
 
 void GameSession::onCheckAuctionExpired() {
 	//	auctionQueryWork.queue(this, d);
 }
 
-uint32_t GameSession::getRappelzTime() {
+uint32_t GameSession::getGameTime() {
 	return uint32_t(uv_hrtime() / (10 * 1000 * 1000));
 }
 
-void GameSession::waitNextRappelzSecond() {
-	uint32_t positionInSecond = ((getRappelzTime() + rappelzTimeOffset) * 10) % 1000;
+void GameSession::waitNextGameSecond() {
+	uint32_t positionInSecond = ((getGameTime() + gameTimeOffset) * 10) % 1000;
 	clockTimer.start(this, &GameSession::onClockExpired, 1000 - positionInSecond, 0);
 }
 
@@ -153,9 +153,9 @@ void GameSession::onEnter(const TS_SC_ENTER* packet) {
 }
 
 void GameSession::onTimeSync(const TS_TIMESYNC* packet) {
-	rappelzTimeOffset = packet->time - getRappelzTime();
+	gameTimeOffset = packet->time - getGameTime();
 	log(LL_Info, "Time synchronization\n");
-	waitNextRappelzSecond();
+	waitNextGameSecond();
 
 	TS_TIMESYNC timeSyncPkt;
 	timeSyncPkt.time = packet->time;
@@ -169,6 +169,6 @@ void GameSession::onTimeSync(const TS_TIMESYNC* packet) {
 
 void GameSession::onGameTime(const TS_SC_GAME_TIME* packet) {
 	log(LL_Info, "Time update\n");
-	rappelzTimeOffset = packet->t - getRappelzTime();
+	gameTimeOffset = packet->t - getGameTime();
 	epochTimeOffset = int32_t(packet->game_time - time(NULL));
 }

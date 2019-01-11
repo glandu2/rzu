@@ -34,16 +34,16 @@ protected:
 	void onTimeSync(const TS_TIMESYNC* packet);
 	void onGameTime(const TS_SC_GAME_TIME* packet);
 
-	uint32_t getRappelzTime();
+	uint32_t getGameTime();
 
-	void waitNextRappelzSecond();
+	void waitNextGameSecond();
 
 private:
 	std::string playername;
 	bool connectedInGame;
 
 	uint32_t handle;
-	int32_t rappelzTimeOffset;
+	int32_t gameTimeOffset;
 	int32_t epochTimeOffset;
 
 	Timer<GameSession> updateTimer;

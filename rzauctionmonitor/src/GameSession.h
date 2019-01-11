@@ -39,7 +39,7 @@ protected:
 	void onGameTime(const TS_SC_GAME_TIME* packet);
 
 	void setConnected(bool connected);
-	uint32_t getRappelzTime();
+	uint32_t getGameTime();
 
 private:
 	AuctionWorker* auctionWorker;
@@ -48,7 +48,7 @@ private:
 	bool shouldReconnect;
 
 	uint32_t handle;
-	int32_t rappelzTimeOffset;
+	int32_t gameTimeOffset;
 	int32_t epochTimeOffset;
 
 	Timer<GameSession> updateTimer;
