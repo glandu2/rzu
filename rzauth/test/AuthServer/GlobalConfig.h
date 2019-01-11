@@ -29,8 +29,7 @@ struct GlobalConfig {
 	      billing("auth.billing", 4503),
 	      authExecutable(CFG_CREATE("auth.exec", "rzauth")),
 	      gameReconnectExecutable(CFG_CREATE("gamereconnect.exec", "rzgamereconnect")),
-	      connectionString(
-	          CFG_CREATE("auth.db.connectionstring", "DRIVER={SQLite3 ODBC Driver};Database=RappelzAuthDatabase.db;")),
+	      connectionString(CFG_CREATE("auth.db.connectionstring", "DRIVER={SQLite3 ODBC Driver};Database=rzauth.db;")),
 	      doGameReconnectTest(CFG_CREATE("gamereconnect.enabletest", true))
 
 	{
