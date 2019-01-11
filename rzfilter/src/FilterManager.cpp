@@ -159,6 +159,7 @@ void FilterManager::loadModule() {
 
 	log(LL_Info, "Loading filter module %s\n", moduleName);
 
+	unlink(usedModuleName.c_str());
 	err = rename(moduleName, usedModuleName.c_str());
 	if(err) {
 		log(LL_Error,
