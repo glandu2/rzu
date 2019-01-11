@@ -41,7 +41,7 @@ EventChain<SocketSession> IrcClient::onStateChanged(Stream::State oldState,
 		lowerCaseServerName[0] = tolower(lowerCaseServerName[0]);
 
 		if(channelName.size() == 0)
-			channelName = "#rappelz-" + lowerCaseServerName;
+			channelName = "#rz-" + lowerCaseServerName;
 
 		sprintf(loginText,
 		        "NICK %s\r\nUSER gw-%s gw-%s %s :rzchatgateway %s\r\n",
