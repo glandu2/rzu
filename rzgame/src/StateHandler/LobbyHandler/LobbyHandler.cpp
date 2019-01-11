@@ -133,16 +133,16 @@ void LobbyHandler::onCheckCharacterName(const TS_CS_CHECK_CHARACTER_NAME* packet
 
 	if(name.size() > 18 || name.size() < 4) {
 		log(LL_Info, "Character name too long or too short: \"%s\"\n", name.c_str());
-		session->sendResult(packet->id, TS_RESULT_INVALID_TEXT, 0);
+		session->sendResult(packet->getReceivedId(), TS_RESULT_INVALID_TEXT, 0);
 	} else if(!checkTextAgainstEncoding(name)) {
 		log(LL_Info,
 		    "Character name contains invalid characters for encoding %s: \"%s\"\n",
 		    CharsetConverter::getEncoding().c_str(),
 		    name.c_str());
-		session->sendResult(packet->id, TS_RESULT_INVALID_TEXT, 0);
+		session->sendResult(packet->getReceivedId(), TS_RESULT_INVALID_TEXT, 0);
 	} else if(BannedWordsBinding::isWordBanned(name)) {
 		log(LL_Info, "Character name is banned: \"%s\"\n", name.c_str());
-		session->sendResult(packet->id, TS_RESULT_INVALID_TEXT, 0);
+		session->sendResult(packet->getReceivedId(), TS_RESULT_INVALID_TEXT, 0);
 	} else {
 		CheckCharacterNameBinding::Input input;
 		input.character_name = name;
