@@ -23,6 +23,7 @@ cd rzu-parent
 mkdir build
 cd build
 cmake ..
+cmake --build .
 ```
 
 Then a Visual Studio solution wil be generated in build/ directory.
