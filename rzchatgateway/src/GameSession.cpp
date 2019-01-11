@@ -27,12 +27,12 @@ GameSession::GameSession(const std::string& playername, bool enableGateway, Log*
       enableGateway(enableGateway),
       connectedInGame(false),
       handle(0),
-      rappelzTimeOffset(0),
+      gameTimeOffset(0),
       epochTimeOffset(0) {}
 
 void GameSession::onGameConnected() {
 	updateTimer.start(this, &GameSession::onUpdatePacketExpired, 5000, 5000);
-	epochTimeOffset = rappelzTimeOffset = 0;
+	epochTimeOffset = gameTimeOffset = 0;
 
 	TS_CS_CHARACTER_LIST charlistPkt;
 	charlistPkt.account = auth->getAccountName();
@@ -57,13 +57,13 @@ void GameSession::onUpdatePacketExpired() {
 	TS_CS_UPDATE updatPkt;
 
 	updatPkt.handle = handle;
-	updatPkt.time = getRappelzTime() + rappelzTimeOffset;
+	updatPkt.time = getGameTime() + gameTimeOffset;
 	updatPkt.epoch_time = uint32_t(time(NULL) + epochTimeOffset);
 
 	sendPacket(updatPkt);
 }
 
-uint32_t GameSession::getRappelzTime() {
+uint32_t GameSession::getGameTime() {
 	return uint32_t(uv_hrtime() / (10 * 1000 * 1000));
 }
 
@@ -167,7 +167,7 @@ void GameSession::onChat(const TS_SC_CHAT* packet) {
 }
 
 void GameSession::onTimeSync(const TS_TIMESYNC* packet) {
-	rappelzTimeOffset = packet->time - getRappelzTime();
+	gameTimeOffset = packet->time - getGameTime();
 
 	TS_TIMESYNC timeSyncPkt;
 
@@ -181,7 +181,7 @@ void GameSession::onTimeSync(const TS_TIMESYNC* packet) {
 }
 
 void GameSession::onGameTime(const TS_SC_GAME_TIME* packet) {
-	rappelzTimeOffset = packet->t - getRappelzTime();
+	gameTimeOffset = packet->t - getGameTime();
 	epochTimeOffset = int32_t(packet->game_time - time(NULL));
 }
 

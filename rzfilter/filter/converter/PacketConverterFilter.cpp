@@ -280,6 +280,7 @@
 #include "GameClient/TS_SC_UNSUMMON.h"
 #include "GameClient/TS_SC_UNSUMMON_NOTICE.h"
 #include "GameClient/TS_SC_UNSUMMON_PET.h"
+#include "GameClient/TS_SC_UPDATE_GUILD_ICON.h"
 #include "GameClient/TS_SC_UPDATE_ITEM_COUNT.h"
 #include "GameClient/TS_SC_URL_LIST.h"
 #include "GameClient/TS_SC_USE_ITEM_RESULT.h"
@@ -661,6 +662,7 @@ bool PacketConverterFilter::convertGamePacketAndSend(IFilterEndpoint* target,
 			PACKET_TO_JSON(TS_SC_UNSUMMON);
 			PACKET_TO_JSON(TS_SC_UNSUMMON_NOTICE);
 			PACKET_TO_JSON(TS_SC_UNSUMMON_PET);
+			PACKET_TO_JSON(TS_SC_UPDATE_GUILD_ICON);
 			PACKET_TO_JSON(TS_SC_UPDATE_ITEM_COUNT);
 			PACKET_TO_JSON(TS_SC_URL_LIST);
 			PACKET_TO_JSON(TS_SC_USE_ITEM_RESULT);
