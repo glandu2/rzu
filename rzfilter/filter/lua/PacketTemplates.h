@@ -281,6 +281,7 @@
 #include "GameClient/TS_SC_UNSUMMON.h"
 #include "GameClient/TS_SC_UNSUMMON_NOTICE.h"
 #include "GameClient/TS_SC_UNSUMMON_PET.h"
+#include "GameClient/TS_SC_UPDATE_GUILD_ICON.h"
 #include "GameClient/TS_SC_UPDATE_ITEM_COUNT.h"
 #include "GameClient/TS_SC_URL_LIST.h"
 #include "GameClient/TS_SC_USE_ITEM_RESULT.h"
@@ -611,6 +612,7 @@ bool processGamePacket(int packetId, bool isServerPacket, Args... args) {
 		SEND_PACKET(TS_SC_UNSUMMON);
 		SEND_PACKET(TS_SC_UNSUMMON_NOTICE);
 		SEND_PACKET(TS_SC_UNSUMMON_PET);
+		SEND_PACKET(TS_SC_UPDATE_GUILD_ICON);
 		SEND_PACKET(TS_SC_UPDATE_ITEM_COUNT);
 		SEND_PACKET(TS_SC_URL_LIST);
 		SEND_PACKET(TS_SC_USE_ITEM_RESULT);
@@ -916,6 +918,7 @@ template<template<typename> class Functor, typename... Args> void iterateAllPack
 	Functor<TS_SC_UNSUMMON>()(args...);
 	Functor<TS_SC_UNSUMMON_NOTICE>()(args...);
 	Functor<TS_SC_UNSUMMON_PET>()(args...);
+	Functor<TS_SC_UPDATE_GUILD_ICON>()(args...);
 	Functor<TS_SC_UPDATE_ITEM_COUNT>()(args...);
 	Functor<TS_SC_URL_LIST>()(args...);
 	Functor<TS_SC_USE_ITEM_RESULT>()(args...);
