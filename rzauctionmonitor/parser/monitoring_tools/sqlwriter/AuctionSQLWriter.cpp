@@ -31,7 +31,7 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 	              "\"endurance\", "
 	              "\"enhance\", "
 	              "\"level\", "
-	              "\"unknown3\", "
+	              "\"enhance_chance\", "
 	              "\"flag\", "
 	              "\"socket_0\", "
 	              "\"socket_1\", "
@@ -115,7 +115,7 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 	addParam("endurance", &InputType::endurance);
 	addParam("enhance", &InputType::enhance);
 	addParam("level", &InputType::level);
-	addParam("unknown3", &InputType::unknown3);
+	addParam("enhance_chance", &InputType::enhance_chance);
 	addParam("flag", &InputType::flag);
 	addParam("socket_0", &InputType::socket, 0);
 	addParam("socket_1", &InputType::socket, 1);
@@ -203,7 +203,7 @@ void DB_Item::fillItemInfo(DB_Item::Input& input, const std::vector<uint8_t>& da
 		input.endurance = item.auction_details.item_info.endurance;
 		input.enhance = item.auction_details.item_info.enhance;
 		input.level = item.auction_details.item_info.level;
-		input.unknown3 = item.auction_details.item_info.unknown3;
+		input.enhance_chance = item.auction_details.item_info.enhance_chance;
 		input.flag = item.auction_details.item_info.flag;
 		memcpy(input.socket, item.auction_details.item_info.socket, sizeof(input.socket));
 		memcpy(input.awaken_option_value,
@@ -301,7 +301,7 @@ bool DB_Item::createTable(DbConnectionPool* dbConnectionPool) {
 	                                        "    \"endurance\" int NOT NULL,\r\n"
 	                                        "    \"enhance\" smallint NOT NULL,\r\n"
 	                                        "    \"level\" smallint NOT NULL,\r\n"
-	                                        "    \"unknown3\" int NOT NULL,\r\n"
+	                                        "    \"enhance_chance\" int NOT NULL,\r\n"
 	                                        "    \"flag\" int NOT NULL,\r\n"
 	                                        "    \"socket_0\" int NOT NULL,\r\n"
 	                                        "    \"socket_1\" int NOT NULL,\r\n"

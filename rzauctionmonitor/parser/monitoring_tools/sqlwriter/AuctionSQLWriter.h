@@ -28,7 +28,7 @@ struct DB_Item {
 		uint32_t endurance;
 		uint8_t enhance;
 		uint8_t level;
-		uint16_t unknown3;
+		uint16_t enhance_chance;
 		uint32_t flag;
 		int32_t socket[4];
 		uint32_t awaken_option_value[5];
