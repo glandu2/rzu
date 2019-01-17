@@ -26,6 +26,7 @@ void BillingInterface::onCommand(const std::vector<std::string>& args) {
 	} else {
 		log(LL_Debug, "Unknown billing command: %s\n", args[0].c_str());
 		log(LL_Debug, "Usage: billing_notify blank <account_id>\n");
+		log(LL_Debug, "       billing_notify supply <account_id>\n");
 	}
 }
 
@@ -40,8 +41,16 @@ void BillingInterface::billingNotice(const std::string& cmd, const std::string& 
 		} else {
 			log(LL_Debug, "Billing notice for a not in-game client: %d\n", accountId);
 		}
+	} else if(cmd == "supply") {
+		AuthServer::ClientData* client = AuthServer::ClientData::getClientById(accountId);
+		if(client && client->getGameServer() && client->isConnectedToGame()) {
+			client->getGameServer()->sendNotifyItemSupplied(client);
+			log(LL_Debug, "Billing notice supply for client %s (id: %d)\n", client->account.c_str(), client->accountId);
+		} else {
+			log(LL_Debug, "Billing notice supply for a not in-game client: %d\n", accountId);
+		}
 	} else {
-		log(LL_Debug, "Billing notice error: only \"blank\" is supported. Received: %s\n", cmd.c_str());
+		log(LL_Debug, "Billing notice error: only \"blank\" or \"supply\" is supported. Received: %s\n", cmd.c_str());
 	}
 }
 

@@ -155,6 +155,17 @@ void GameData::sendNotifyItemPurchased(ClientData* client) {
 	}
 }
 
+void GameData::sendNotifyItemSupplied(ClientData* client) {
+	if(gameServerSession) {
+		gameServerSession->sendNotifyItemSupplied(client);
+	} else {
+		log(LL_Info,
+		    "Game server %s not reachable, not notifying account %s supply\n",
+		    serverName.c_str(),
+		    client->account.c_str());
+	}
+}
+
 void GameData::updateObjectName() {
 	setObjectName(10 + (int) serverName.size(), "GameData[%s]", serverName.c_str());
 }
