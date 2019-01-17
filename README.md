@@ -28,6 +28,3 @@ cmake --build .
 
 Then a Visual Studio solution wil be generated in build/ directory.
 
-Project for the [ElitePvPers](http://www.elitepvpers.com/forum/rappelz-private-server/) community,
-[original thread](http://www.elitepvpers.com/forum/rappelz-private-server/3704022-release-rappelz-auth-emu-v4-0-a.html)
-
