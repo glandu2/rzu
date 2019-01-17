@@ -10,6 +10,7 @@
 
 #include "AuthGame/TS_AG_CLIENT_LOGIN.h"
 #include "AuthGame/TS_AG_ITEM_PURCHASED.h"
+#include "AuthGame/TS_AG_ITEM_SUPPLIED.h"
 #include "AuthGame/TS_AG_KICK_CLIENT.h"
 #include "AuthGame/TS_AG_LOGIN_RESULT.h"
 #include "AuthGame/TS_AG_SECURITY_NO_CHECK.h"
@@ -29,6 +30,16 @@ void GameServerSession::sendNotifyItemPurchased(ClientData* client) {
 	itemPurchasedPacket.nAccountID = client->accountId;
 
 	sendPacket(&itemPurchasedPacket);
+}
+
+void GameServerSession::sendNotifyItemSupplied(ClientData* client) {
+	TS_AG_ITEM_SUPPLIED itemSuppliedPacket;
+	TS_MESSAGE::initMessage<TS_AG_ITEM_SUPPLIED>(&itemSuppliedPacket);
+
+	strncpy(itemSuppliedPacket.account, client->account.c_str(), 60);
+	itemSuppliedPacket.account[60] = 0;
+
+	sendPacket(&itemSuppliedPacket);
 }
 
 GameServerSession::~GameServerSession() {

@@ -39,6 +39,7 @@ public:
 
 	void kickClient(ClientData* client);
 	void sendNotifyItemPurchased(ClientData* client);
+	void sendNotifyItemSupplied(ClientData* client);
 
 	GameServerSession* getGameServer() { return gameServerSession; }
 	void setGameServer(GameServerSession* gameServerSession);

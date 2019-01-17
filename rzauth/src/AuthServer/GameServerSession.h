@@ -35,6 +35,7 @@ public:
 
 	void kickClient(ClientData* clientData);
 	void sendNotifyItemPurchased(ClientData* client);
+	void sendNotifyItemSupplied(ClientData* client);
 
 	void setGameData(GameData* gameData);
 
