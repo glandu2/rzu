@@ -100,7 +100,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 			if(server->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				TS_CA_RSA_PUBLIC_KEY rsaKeyPkt;
 
-				serverRsaCipher.generateKey();
+				if(!serverRsaCipher.isInitialized())
+					serverRsaCipher.generateKey();
 				serverRsaCipher.getPemPublicKey(rsaKeyPkt.key);
 
 				server->sendPacket(rsaKeyPkt);
@@ -142,7 +143,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 			if(server->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				TS_CA_RSA_PUBLIC_KEY rsaKeyPkt;
 
-				serverRsaCipher.generateKey();
+				if(!serverRsaCipher.isInitialized())
+					serverRsaCipher.generateKey();
 				serverRsaCipher.getPemPublicKey(rsaKeyPkt.key);
 
 				server->sendPacket(rsaKeyPkt);

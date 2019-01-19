@@ -17,12 +17,14 @@ struct GlobalConfig {
 	ConnectionConfig output;
 	cval<int>& count;
 	cval<std::string>& rzfilterExec;
+	cval<bool>& spawnRzfilter;
 
 	GlobalConfig()
 	    : input("input", 4500),
 	      output("output", 4800),
 	      count(CFG_CREATE("count", 10000)),
-	      rzfilterExec(CFG_CREATE("rzfilter.exec", "rzfilter")) {
+	      rzfilterExec(CFG_CREATE("rzfilter.exec", "rzfilter")),
+	      spawnRzfilter(CFG_CREATE("rzfilter.spawn", true)) {
 		Utils::autoSetAbsoluteDir(rzfilterExec);
 	}
 
