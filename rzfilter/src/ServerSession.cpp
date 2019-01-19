@@ -63,6 +63,10 @@ void ServerSession::banAddress(StreamAddress address) {
 	clientSession->banAddress(address);
 }
 
+bool ServerSession::isStrictForwardEnabled() {
+	return CONFIG_GET()->server.strictforward.get();
+}
+
 EventChain<PacketSession> ServerSession::onPacketReceived(const TS_MESSAGE* packet) {
 	// log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 	clientSession->onServerPacketReceived(packet);

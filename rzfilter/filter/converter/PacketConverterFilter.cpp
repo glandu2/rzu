@@ -296,9 +296,9 @@
 #define PACKET_TO_JSON(type_) \
 	case type_::packetID: \
 		(void) (sizeof(&type_::getSize)); \
-		return sendPacket<type_>(target, packet, version);
+		return sendPacket<type_>(source, target, packet, version);
 
-#define PACKET_TO_JSON_2(type_) case_packet_is(type_) return sendPacket<type_>(target, packet, version);
+#define PACKET_TO_JSON_2(type_) case_packet_is(type_) return sendPacket<type_>(source, target, packet, version);
 
 #define PACKET_TO_JSON_CLISERV(isServerMsg, type_serv, type_cli) \
 	case type_serv::packetID: \
@@ -306,9 +306,9 @@
 		(void) (sizeof(&type_serv::getSize)); \
 		(void) (sizeof(&type_cli::getSize)); \
 		if(isServerMsg) \
-			return sendPacket<type_serv>(target, packet, version); \
+			return sendPacket<type_serv>(source, target, packet, version); \
 		else \
-			return sendPacket<type_cli>(target, packet, version);
+			return sendPacket<type_cli>(source, target, packet, version);
 
 PacketConverterFilter::PacketConverterFilter(IFilterEndpoint* client,
                                              IFilterEndpoint* server,
@@ -320,19 +320,20 @@ PacketConverterFilter::~PacketConverterFilter() {}
 
 bool PacketConverterFilter::onServerPacket(const TS_MESSAGE* packet) {
 	if(serverType == ST_Game)
-		return convertGamePacketAndSend(client, packet, server->getPacketVersion(), true);
+		return convertGamePacketAndSend(server, client, packet, server->getPacketVersion(), true);
 	else
-		return convertAuthPacketAndSend(client, server, packet, true);
+		return convertAuthPacketAndSend(server, client, packet, server->getPacketVersion(), true);
 }
 
 bool PacketConverterFilter::onClientPacket(const TS_MESSAGE* packet) {
 	if(serverType == ST_Game)
-		return convertGamePacketAndSend(server, packet, client->getPacketVersion(), false);
+		return convertGamePacketAndSend(client, server, packet, client->getPacketVersion(), false);
 	else
-		return convertAuthPacketAndSend(client, server, packet, false);
+		return convertAuthPacketAndSend(client, server, packet, client->getPacketVersion(), false);
 }
 
-template<typename Packet> bool sendPacket(IFilterEndpoint* target, const TS_MESSAGE* packet, int version) {
+template<typename Packet>
+bool sendPacket(IFilterEndpoint* source, IFilterEndpoint* target, const TS_MESSAGE* packet, int version) {
 	Packet pkt = {};
 	if(packet->process(pkt, version)) {
 		if(packet->id != Packet::getId(version))
@@ -352,17 +353,13 @@ template<typename Packet> bool sendPacket(IFilterEndpoint* target, const TS_MESS
 		                  Packet::getName(),
 		                  packet->id,
 		                  version);
-		return true;  // packet not sent, need to forward the original
+		return !source->isStrictForwardEnabled();  // packet not sent, need to forward the original
 	}
 }
 
-bool PacketConverterFilter::convertAuthPacketAndSend(IFilterEndpoint* client,
-                                                     IFilterEndpoint* server,
-                                                     const TS_MESSAGE* packet,
-                                                     bool isServerMsg) {
+bool PacketConverterFilter::convertAuthPacketAndSend(
+    IFilterEndpoint* source, IFilterEndpoint* target, const TS_MESSAGE* packet, int version, bool isServerMsg) {
 	if(specificPacketConverter.convertAuthPacketAndSend(client, server, packet, isServerMsg)) {
-		int version = isServerMsg ? server->getPacketVersion() : client->getPacketVersion();
-		IFilterEndpoint* target = isServerMsg ? client : server;
 		switch(packet->id) {
 			PACKET_TO_JSON(TS_AC_ACCOUNT_NAME);
 			PACKET_TO_JSON(TS_AC_AES_KEY_IV);
@@ -381,6 +378,7 @@ bool PacketConverterFilter::convertAuthPacketAndSend(IFilterEndpoint* client,
 			PACKET_TO_JSON(TS_CA_VERSION);
 
 			case 9999:
+				return false;
 				break;
 			default:
 				Object::logStatic(
@@ -389,16 +387,14 @@ bool PacketConverterFilter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		}
 
 		// Unknown packet, forward the same raw packet
-		return true;
+		return !source->isStrictForwardEnabled();
 	}
 
 	return false;
 }
 
-bool PacketConverterFilter::convertGamePacketAndSend(IFilterEndpoint* target,
-                                                     const TS_MESSAGE* packet,
-                                                     int version,
-                                                     bool isServerMsg) {
+bool PacketConverterFilter::convertGamePacketAndSend(
+    IFilterEndpoint* source, IFilterEndpoint* target, const TS_MESSAGE* packet, int version, bool isServerMsg) {
 	if(specificPacketConverter.convertGamePacketAndSend(target, packet, version, isServerMsg)) {
 		switch(packet->id) {
 			PACKET_TO_JSON(TS_CS_ACCOUNT_WITH_AUTH);
@@ -679,6 +675,7 @@ bool PacketConverterFilter::convertGamePacketAndSend(IFilterEndpoint* target,
 			PACKET_TO_JSON_CLISERV(isServerMsg, TS_SC_SHOW_SOULSTONE_CRAFT_WINDOW, TS_CS_DONATE_REWARD);
 
 			case 9999:
+				return false;
 				break;
 
 			default:
@@ -687,7 +684,7 @@ bool PacketConverterFilter::convertGamePacketAndSend(IFilterEndpoint* target,
 				break;
 		}
 		// Unknown packet, forward the same raw packet
-		return true;
+		return !source->isStrictForwardEnabled();
 	}
 
 	return false;

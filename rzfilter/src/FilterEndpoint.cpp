@@ -36,3 +36,11 @@ StreamAddress FilterEndpoint::getAddress() {
 void FilterEndpoint::banAddress(StreamAddress address) {
 	filter->getClientEndpoint()->banAddress(address);
 }
+
+bool FilterEndpoint::isStrictForwardEnabled() {
+	if(toClient) {
+		return filter->getClientEndpoint()->isStrictForwardEnabled();
+	} else {
+		return filter->getServerEndpoint()->isStrictForwardEnabled();
+	}
+}

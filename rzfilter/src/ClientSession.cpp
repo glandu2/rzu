@@ -36,6 +36,10 @@ void ClientSession::banAddress(StreamAddress address) {
 		getServer()->getBanManager()->banIp(address);
 }
 
+bool ClientSession::isStrictForwardEnabled() {
+	return CONFIG_GET()->client.strictforward.get();
+}
+
 ClientSession::~ClientSession() {}
 
 EventChain<SocketSession> ClientSession::onConnected() {

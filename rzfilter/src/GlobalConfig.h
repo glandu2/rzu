@@ -11,11 +11,13 @@ struct GlobalConfig {
 		cval<std::string>& ip;
 		cval<int>& port;
 		cval<int>& epic;
+		cval<bool>& strictforward;
 
 		AuthConfig()
 		    : ip(CFG_CREATE("server.ip", "remote.auth.server.ip")),  // user must change this
 		      port(CFG_CREATE("server.port", 4500)),
-		      epic(CFG_CREATE("server.epic", EPIC_LATEST)) {}
+		      epic(CFG_CREATE("server.epic", EPIC_LATEST)),
+		      strictforward(CFG_CREATE("server.strictforward", false)) {}
 	} server;
 
 	struct GameConfig : IListener {
@@ -23,12 +25,14 @@ struct GlobalConfig {
 		cval<std::string>& gameExternalIp;
 		cval<int>& gameBasePort;
 		cval<int>& epic;
+		cval<bool>& strictforward;
 
 		GameConfig()
 		    : listener("client.listen", "127.0.0.1", 4500, true, 0),
 		      gameExternalIp(CFG_CREATE("client.externalip", "127.0.0.1")),
 		      gameBasePort(CFG_CREATE("client.gsbaseport", 0)),
-		      epic(CFG_CREATE("client.epic", EPIC_LATEST)) {
+		      epic(CFG_CREATE("client.epic", EPIC_LATEST)),
+		      strictforward(CFG_CREATE("client.strictforward", false)) {
 			listener.listenIp.addListener(this, &updateDefaultExternalIp);
 		}
 
@@ -40,8 +44,11 @@ struct GlobalConfig {
 		cval<std::string>& converterFilterModuleName;
 
 		FilterConfig()
-		    : filterModuleName(CFG_CREATE("filter.modulename", "rzfilter_module")),
-		      converterFilterModuleName(CFG_CREATE("filter.convertermodulename", "rzfilter_version_converter")) {}
+		    : filterModuleName(CFG_CREATE("filter.modulename", "rzfilter_lua_module")),
+		      converterFilterModuleName(CFG_CREATE("filter.convertermodulename", "rzfilter_version_converter")) {
+			Utils::autoSetAbsoluteDir(filterModuleName);
+			Utils::autoSetAbsoluteDir(converterFilterModuleName);
+		}
 	} filter;
 
 	struct TrafficDump {

@@ -17,6 +17,7 @@ public:
 	virtual void close() override;
 	virtual StreamAddress getAddress() override;
 	virtual void banAddress(StreamAddress address) override;
+	virtual bool isStrictForwardEnabled() override;
 
 private:
 	FilterProxy* filter;
