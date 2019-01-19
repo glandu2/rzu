@@ -185,7 +185,7 @@ bool PacketFilter::onClientPacket(const TS_MESSAGE* packet) {
 bool PacketFilter::luaCallPacket(
     int function, const char* functionName, const TS_MESSAGE* packet, int version, bool isServerPacket) {
 	if(packet->id == 9999)
-		return true;
+		return false;
 
 	if(function != LUA_REFNIL && function != LUA_NOREF) {
 		bool returnValue = true;
@@ -201,7 +201,7 @@ bool PacketFilter::luaCallPacket(
 			Object::logStatic(
 			    Object::LL_Error, "rzfilter_lua_module", "Cannot deserialize packet id: %d\n", packet->id);
 			lua_settop(L, topBeforeCall);
-			return true;
+			return luaCallUnknownPacket(packet, isServerPacket);
 		}
 		lua_pushinteger(L, serverType);
 
@@ -228,6 +228,46 @@ bool PacketFilter::luaCallPacket(
 	return true;
 }
 
+bool PacketFilter::luaCallUnknownPacket(const TS_MESSAGE* packet, bool isServerPacket) {
+	bool returnValue;
+
+	if(isServerPacket)
+		returnValue = !server->isStrictForwardEnabled();
+	else
+		returnValue = !client->isStrictForwardEnabled();
+
+	if(lua_onUnknownPacketFunction != LUA_REFNIL && lua_onUnknownPacketFunction != LUA_NOREF) {
+		int topBeforeCall = lua_gettop(L);
+
+		lua_pushcfunction(L, &luaMessageHandler);
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, lua_onUnknownPacketFunction);
+		pushEndpoint(L, &clientEndpoint);
+		pushEndpoint(L, &serverEndpoint);
+		lua_pushinteger(L, packet->id);
+		lua_pushinteger(L, serverType);
+		lua_pushboolean(L, isServerPacket);
+
+		int result = lua_pcall(L, 5, 1, -7);
+		if(result) {
+			Object::logStatic(Object::LL_Error,
+			                  "rzfilter_lua_module",
+			                  "Cannot run lua onUnknownPacket function: %d:%s\n",
+			                  result,
+			                  lua_tostring(L, -1));
+			lua_pop(L, 1);
+		} else {
+			if(lua_isboolean(L, -1)) {
+				returnValue = lua_toboolean(L, -1) != 0;
+			}
+		}
+
+		lua_settop(L, topBeforeCall);
+	}
+
+	return returnValue;
+}
+
 int PacketFilter::luaMessageHandler(lua_State* L) {
 	const char* msg = lua_tostring(L, 1);
 	luaL_traceback(L, L, msg, 1);
@@ -240,6 +280,7 @@ void PacketFilter::initLuaVM() {
 	L = luaL_newstate();
 	lua_onServerPacketFunction = LUA_NOREF;
 	lua_onClientPacketFunction = LUA_NOREF;
+	lua_onUnknownPacketFunction = LUA_NOREF;
 
 	luaL_openlibs(L);
 
@@ -313,6 +354,20 @@ void PacketFilter::initLuaVM() {
 		                  "packet, ServerType serverType)\n");
 	}
 	lua_pop(L, 1);
+
+	lua_getglobal(L, "onUnknownPacket");
+	if(lua_isfunction(L, -1)) {
+		lua_onUnknownPacketFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+		lua_pushnil(L);  // for the next pop as luaL_ref pop the value
+	} else {
+		lua_onUnknownPacketFunction = LUA_NOREF;
+		Object::logStatic(Object::LL_Info,
+		                  "rzfilter_lua_module",
+		                  "Lua register: onUnknownPacket must be a lua function matching its C counterpart: "
+		                  "bool onUnknownPacket(IFilterEndpoint* fromEndpoint, IFilterEndpoint* toEndpoint, int "
+		                  "packetId, ServerType serverType, bool isServerPacket)\n");
+	}
+	lua_pop(L, 1);
 }
 
 void PacketFilter::deinitLuaVM() {
@@ -324,6 +379,10 @@ void PacketFilter::deinitLuaVM() {
 		if(lua_onClientPacketFunction != LUA_NOREF) {
 			luaL_unref(L, LUA_REGISTRYINDEX, lua_onClientPacketFunction);
 			lua_onClientPacketFunction = LUA_NOREF;
+		}
+		if(lua_onUnknownPacketFunction != LUA_NOREF) {
+			luaL_unref(L, LUA_REGISTRYINDEX, lua_onUnknownPacketFunction);
+			lua_onUnknownPacketFunction = LUA_NOREF;
 		}
 		lua_close(L);
 		L = nullptr;

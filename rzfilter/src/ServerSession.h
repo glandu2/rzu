@@ -36,6 +36,7 @@ public:
 	void close() { EncryptedSession<PacketSession>::close(); }
 	StreamAddress getAddress();
 	void banAddress(StreamAddress address);
+	bool isStrictForwardEnabled();
 
 protected:
 	void logPacket(bool outgoing, const TS_MESSAGE* msg);

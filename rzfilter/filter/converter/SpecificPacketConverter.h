@@ -14,6 +14,9 @@ public:
 	                              bool isServerMsg);
 	bool convertGamePacketAndSend(IFilterEndpoint* target, const TS_MESSAGE* packet, int version, bool isServerMsg);
 
+protected:
+	static bool isNormalVersion(const std::string& version);
+
 private:
 	AesPasswordCipher clientAesCipher;
 	AesPasswordCipher serverAesCipher;

@@ -43,6 +43,7 @@ protected:
 
 	bool luaCallPacket(
 	    int function, const char* functionName, const TS_MESSAGE* packet, int version, bool isServerPacket);
+	bool luaCallUnknownPacket(const TS_MESSAGE* packet, bool isServerPacket);
 	void pushEndpoint(lua_State* L, LuaEndpointMetaTable* endpoint);
 	bool pushPacket(lua_State* L, const TS_MESSAGE* packet, int version, bool isServer);
 
@@ -52,6 +53,7 @@ private:
 	lua_State* L = nullptr;
 	int lua_onServerPacketFunction = LUA_NOREF;
 	int lua_onClientPacketFunction = LUA_NOREF;
+	int lua_onUnknownPacketFunction = LUA_NOREF;
 	LuaEndpointMetaTable clientEndpoint;
 	LuaEndpointMetaTable serverEndpoint;
 

@@ -17,11 +17,10 @@ public:
 	virtual bool onClientPacket(const TS_MESSAGE* packet) override;
 
 protected:
-	bool convertAuthPacketAndSend(IFilterEndpoint* client,
-	                              IFilterEndpoint* server,
-	                              const TS_MESSAGE* packet,
-	                              bool isServerMsg);
-	bool convertGamePacketAndSend(IFilterEndpoint* target, const TS_MESSAGE* packet, int version, bool isServerMsg);
+	bool convertAuthPacketAndSend(
+	    IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* packet, int version, bool isServerMsg);
+	bool convertGamePacketAndSend(
+	    IFilterEndpoint* source, IFilterEndpoint* target, const TS_MESSAGE* packet, int version, bool isServerMsg);
 
 private:
 	SpecificPacketConverter specificPacketConverter;
