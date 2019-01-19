@@ -4,6 +4,7 @@
 #include "FilterProxy.h"
 #include "GlobalConfig.h"
 #include "uv.h"
+#include <algorithm>
 #include <memory>
 #include <time.h>
 
@@ -156,6 +157,11 @@ void FilterManager::loadModule() {
 
 	std::string usedModuleName =
 	    filterModuleName.get() + std::string("_used.") + std::to_string(getNextUsedIndex()) + moduleSuffix;
+
+	// uv_dlopen require backslashes on windows
+#ifdef WIN32
+	std::replace(usedModuleName.begin(), usedModuleName.end(), '/', '\\');
+#endif
 
 	log(LL_Info, "Loading filter module %s\n", moduleName);
 
