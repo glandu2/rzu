@@ -43,14 +43,17 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 	if(packet->id == TS_CA_VERSION::packetID) {
 		TS_CA_VERSION pkt;
 		if(packet->process(pkt, client->getPacketVersion())) {
-			if(server->getPacketVersion() <= EPIC_3)
-				pkt.szVersion = "200609280";
-			else if(server->getPacketVersion() <= EPIC_9_1)
-				pkt.szVersion = "200701120";
-			else if(server->getPacketVersion() <= EPIC_9_5_1)
-				pkt.szVersion = "201507080";
-			else
-				pkt.szVersion = GlobalCoreConfig::get()->client.authVersion;
+			// Don't overwrite version if it is a request string and not a version
+			if(isNormalVersion(pkt.szVersion)) {
+				if(server->getPacketVersion() <= EPIC_3)
+					pkt.szVersion = "200609280";
+				else if(server->getPacketVersion() <= EPIC_9_1)
+					pkt.szVersion = "200701120";
+				else if(server->getPacketVersion() <= EPIC_9_5_1)
+					pkt.szVersion = "201507080";
+				else
+					pkt.szVersion = GlobalCoreConfig::get()->client.authVersion;
+			}
 
 			server->sendPacket(pkt);
 		}
@@ -79,7 +82,10 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 
 		if(packet->process(pkt, client->getPacketVersion())) {
 			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
-				clientAesCipher.decrypt(pkt.passwordAes.password, pkt.passwordAes.password_size, plainPassword);
+				clientAesCipher.decrypt(
+				    pkt.passwordAes.password,
+				    Utils::clamp(pkt.passwordAes.password_size, 0u, (unsigned int) sizeof(pkt.passwordAes.password)),
+				    plainPassword);
 			} else {
 				int size = (client->getPacketVersion() >= EPIC_5_1) ? 61 : 32;
 				plainPassword.resize(size);
@@ -106,7 +112,9 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 				int size = (server->getPacketVersion() >= EPIC_5_1) ? 61 : 32;
 				DesPasswordCipher desCipher("MERONG");
 				memset(pkt.passwordDes.password, 0, sizeof(pkt.passwordDes.password));
-				memcpy(pkt.passwordDes.password, plainPassword.data(), plainPassword.size());
+				memcpy(pkt.passwordDes.password,
+				       plainPassword.data(),
+				       std::min(sizeof(pkt.passwordDes.password), plainPassword.size()));
 				desCipher.encrypt(pkt.passwordDes.password, size);
 
 				server->sendPacket(pkt);
@@ -120,7 +128,10 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 
 		if(packet->process(pkt, client->getPacketVersion())) {
 			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
-				clientAesCipher.decrypt(pkt.passwordAes.password, pkt.passwordAes.password_size, plainPassword);
+				clientAesCipher.decrypt(
+				    pkt.passwordAes.password,
+				    Utils::clamp(pkt.passwordAes.password_size, 0u, (unsigned int) sizeof(pkt.passwordAes.password)),
+				    plainPassword);
 			} else {
 				plainPassword =
 				    Utils::convertToDataArray(pkt.passwordPlain.password, sizeof(pkt.passwordPlain.password));
@@ -157,12 +168,18 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 
 				std::vector<uint8_t> aesKey;
 				serverRsaCipher.privateDecrypt(pkt.data.data(), pkt.data.size(), aesKey);
-				serverAesCipher.init(aesKey.data());
+				if(aesKey.size() == 32)
+					serverAesCipher.init(aesKey.data());
+				else
+					Object::logStatic(
+					    Object::LL_Error, "rzfilter_version_converter", "Bad AES key size: %d\n", (int) aesKey.size());
 
 				std::vector<uint8_t> encryptedPassword;
 				serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
 				memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
-				memcpy(accountPkt.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
+				memcpy(accountPkt.passwordAes.password,
+				       encryptedPassword.data(),
+				       std::min(sizeof(accountPkt.passwordAes.password), encryptedPassword.size()));
 				accountPkt.passwordAes.password_size = (uint32_t) encryptedPassword.size();
 
 				server->sendPacket(accountPkt);
@@ -175,12 +192,18 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 
 				std::vector<uint8_t> aesKey;
 				serverRsaCipher.privateDecrypt(pkt.data.data(), pkt.data.size(), aesKey);
-				serverAesCipher.init(aesKey.data());
+				if(aesKey.size() == 32)
+					serverAesCipher.init(aesKey.data());
+				else
+					Object::logStatic(
+					    Object::LL_Error, "rzfilter_version_converter", "Bad AES key size: %d\n", (int) aesKey.size());
 
 				std::vector<uint8_t> encryptedPassword;
 				serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
 				memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
-				memcpy(accountPkt.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
+				memcpy(accountPkt.passwordAes.password,
+				       encryptedPassword.data(),
+				       std::min(sizeof(accountPkt.passwordAes.password), encryptedPassword.size()));
 				accountPkt.passwordAes.password_size = (uint32_t) encryptedPassword.size();
 
 				server->sendPacket(accountPkt);
@@ -200,7 +223,9 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		if(packet->process(pkt, server->getPacketVersion())) {
 			if(server->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				std::vector<uint8_t> plainOTP;
-				serverAesCipher.decrypt(pkt.encrypted_data, pkt.encrypted_data_size, plainOTP);
+				serverAesCipher.decrypt(pkt.encrypted_data,
+				                        Utils::clamp(pkt.encrypted_data_size, 0, (int) sizeof(pkt.encrypted_data)),
+				                        plainOTP);
 				if(plainOTP.size() >= sizeof(otp)) {
 					otp = *reinterpret_cast<uint64_t*>(plainOTP.data());
 				} else {
@@ -221,7 +246,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 				memcpy(plainOTP.data(), &otp, sizeof(otp));
 
 				clientAesCipher.encrypt(plainOTP.data(), plainOTP.size(), encryptedOTP);
-				memcpy(pkt.encrypted_data, encryptedOTP.data(), encryptedOTP.size());
+				memcpy(
+				    pkt.encrypted_data, encryptedOTP.data(), std::min(sizeof(pkt.encrypted_data), encryptedOTP.size()));
 				pkt.encrypted_data_size = (uint32_t) encryptedOTP.size();
 
 				client->sendPacket(pkt);
@@ -263,16 +289,19 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 
 		// Ignore existing as it is completly replaced
 
-		if(target->getPacketVersion() <= EPIC_3)
-			pkt.szVersion = "200609280";
-		else if(target->getPacketVersion() <= EPIC_9_1)
-			pkt.szVersion = "200701120";
-		else if(target->getPacketVersion() <= EPIC_9_4)
-			pkt.szVersion = "201507080";
-		else if(target->getPacketVersion() < EPIC_9_5_2)
-			pkt.szVersion = "205001120";
-		else
-			pkt.szVersion = GlobalCoreConfig::get()->client.gameVersion;
+		// Don't overwrite version if it is a request string and not a version
+		if(isNormalVersion(pkt.szVersion)) {
+			if(target->getPacketVersion() <= EPIC_3)
+				pkt.szVersion = "200609280";
+			else if(target->getPacketVersion() <= EPIC_9_1)
+				pkt.szVersion = "200701120";
+			else if(target->getPacketVersion() <= EPIC_9_4)
+				pkt.szVersion = "201507080";
+			else if(target->getPacketVersion() < EPIC_9_5_2)
+				pkt.szVersion = "205001120";
+			else
+				pkt.szVersion = GlobalCoreConfig::get()->client.gameVersion;
+		}
 
 		if(target->getPacketVersion() >= EPIC_9_5_2) {
 			RzHashReversible256::generatePayload(pkt);
@@ -380,4 +409,13 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 	}
 
 	return false;
+}
+
+bool SpecificPacketConverter::isNormalVersion(const std::string& version) {
+	for(char c : version) {
+		if(!Utils::isdigit(c))
+			return false;
+	}
+
+	return true;
 }
