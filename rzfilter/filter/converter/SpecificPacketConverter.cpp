@@ -49,7 +49,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 					pkt.szVersion = "200609280";
 				else if(server->getPacketVersion() <= EPIC_9_1)
 					pkt.szVersion = "200701120";
-				else if(server->getPacketVersion() <= EPIC_9_5_1)
+				else if(server->getPacketVersion() <= EPIC_10_1)
 					pkt.szVersion = "201507080";
 				else
 					pkt.szVersion = GlobalCoreConfig::get()->client.authVersion;
@@ -299,8 +299,14 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 				pkt.szVersion = "200701120";
 			else if(target->getPacketVersion() <= EPIC_9_4)
 				pkt.szVersion = "201507080";
-			else if(target->getPacketVersion() < EPIC_9_5_2)
+			else if(target->getPacketVersion() <= EPIC_9_5_1)
 				pkt.szVersion = "205001120";
+			else if(target->getPacketVersion() <= EPIC_9_5_2)
+				pkt.szVersion = "20180117";
+			else if(target->getPacketVersion() <= EPIC_9_5_3)
+				pkt.szVersion = "20181211";
+			else if(target->getPacketVersion() <= EPIC_10_1)
+				pkt.szVersion = "20190102";
 			else
 				pkt.szVersion = GlobalCoreConfig::get()->client.gameVersion;
 		}
