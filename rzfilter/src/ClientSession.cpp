@@ -16,12 +16,35 @@
 #include "FilterProxy.h"
 
 ClientSession::ClientSession(bool authMode, FilterManager* filterManager, FilterManager* converterFilterManager)
-    : serverSession(this), packetFilter(nullptr), version(CONFIG_GET()->client.epic.get()), authMode(authMode) {
-	packetFilter = filterManager->createFilter(authMode ? IFilter::ST_Auth : IFilter::ST_Game);
-	packetConverterFilter = converterFilterManager->createFilter(authMode ? IFilter::ST_Auth : IFilter::ST_Game);
+    : serverSession(this), version(CONFIG_GET()->client.epic.get()), authMode(authMode) {
+	if(filterManager)
+		packetFilter = filterManager->createFilter(authMode ? IFilter::ST_Auth : IFilter::ST_Game);
+	else
+		packetFilter = nullptr;
 
-	packetFilter->bindEndpoints(packetConverterFilter->getToClientEndpoint(), &serverSession);
-	packetConverterFilter->bindEndpoints(this, packetFilter->getToServerEndpoint());
+	if(converterFilterManager)
+		packetConverterFilter = converterFilterManager->createFilter(authMode ? IFilter::ST_Auth : IFilter::ST_Game);
+	else
+		packetConverterFilter = nullptr;
+
+	// Client <=> version conversion filter <=> user filter <=> Server
+	if(packetFilter && packetConverterFilter) {
+		packetFilter->bindEndpoints(packetConverterFilter->getToClientEndpoint(), &serverSession);
+		packetConverterFilter->bindEndpoints(this, packetFilter->getToServerEndpoint());
+		toServerBaseEndpoint = packetConverterFilter->getToServerEndpoint();
+		toClientBaseEndpoint = packetFilter->getToClientEndpoint();
+	} else if(packetFilter) {
+		packetFilter->bindEndpoints(this, &serverSession);
+		toServerBaseEndpoint = packetFilter->getToServerEndpoint();
+		toClientBaseEndpoint = packetFilter->getToClientEndpoint();
+	} else if(packetConverterFilter) {
+		packetConverterFilter->bindEndpoints(this, &serverSession);
+		toServerBaseEndpoint = packetConverterFilter->getToServerEndpoint();
+		toClientBaseEndpoint = packetConverterFilter->getToClientEndpoint();
+	} else {
+		toServerBaseEndpoint = &serverSession;
+		toClientBaseEndpoint = this;
+	}
 }
 
 StreamAddress ClientSession::getAddress() {
@@ -83,14 +106,14 @@ void ClientSession::logPacket(bool toClient, const TS_MESSAGE* msg) {
 
 EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	// log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
-	packetConverterFilter->onClientPacket(packet);
+	toServerBaseEndpoint->sendPacket(packet);
 
 	return PacketSession::onPacketReceived(packet);
 }
 
 void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
 	// log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
-	packetFilter->onServerPacket(packet);
+	toClientBaseEndpoint->sendPacket(packet);
 }
 
 void ClientSession::updateObjectName() {

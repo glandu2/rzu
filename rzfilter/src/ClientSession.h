@@ -67,6 +67,8 @@ private:
 	ServerSession serverSession;
 	std::unique_ptr<FilterProxy> packetFilter;
 	std::unique_ptr<FilterProxy> packetConverterFilter;
+	IFilterEndpoint* toServerBaseEndpoint;
+	IFilterEndpoint* toClientBaseEndpoint;
 	int version;
 	bool authMode;
 };

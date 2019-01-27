@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 	gameEpic = CONFIG_GET()->server.epic;
 	Object::logStatic(Object::LL_Info,
 	                  "main",
-	                  "Client epic: %d.%d.%d (0x%06X), Server epic: %d.%d.%d (0x%06X)\n",
+	                  "Client epic: %x.%x.%x (0x%06X), Server epic: %x.%x.%x (0x%06X)\n",
 	                  clientEpic >> 16,
 	                  (clientEpic >> 8) & 0xFF,
 	                  clientEpic & 0xFF,
@@ -78,13 +78,19 @@ int main(int argc, char** argv) {
 
 void runServers(Log* trafficLogger) {
 	ServersManager serverManager;
-	FilterManager filterManager(CONFIG_GET()->filter.filterModuleName);
-	FilterManager converterFilterManager(CONFIG_GET()->filter.converterFilterModuleName);
-	GameClientSessionManager gameClientSessionManager(&filterManager, &converterFilterManager);
+	std::unique_ptr<FilterManager> filterManager;
+	std::unique_ptr<FilterManager> converterFilterManager;
+
+	if(CONFIG_GET()->filter.filterModuleEnable)
+		filterManager.reset(new FilterManager(CONFIG_GET()->filter.filterModuleName));
+	if(CONFIG_GET()->filter.converterFilterModuleEnable)
+		converterFilterManager.reset(new FilterManager(CONFIG_GET()->filter.converterFilterModuleName));
+
+	GameClientSessionManager gameClientSessionManager(filterManager.get(), converterFilterManager.get());
 	BanManager clientBanManager;
 
 	AuthClientSession::InputParameters parameters = {
-	    &gameClientSessionManager, &filterManager, &converterFilterManager};
+	    &gameClientSessionManager, filterManager.get(), converterFilterManager.get()};
 
 	SessionServerWithParameter<AuthClientSession, AuthClientSession::InputParameters> clientSessionServer(
 	    parameters,

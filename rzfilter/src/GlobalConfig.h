@@ -42,10 +42,14 @@ struct GlobalConfig {
 	struct FilterConfig {
 		cval<std::string>& filterModuleName;
 		cval<std::string>& converterFilterModuleName;
+		cval<bool>& filterModuleEnable;
+		cval<bool>& converterFilterModuleEnable;
 
 		FilterConfig()
 		    : filterModuleName(CFG_CREATE("filter.modulename", "rzfilter_lua_module")),
-		      converterFilterModuleName(CFG_CREATE("filter.convertermodulename", "rzfilter_version_converter")) {
+		      converterFilterModuleName(CFG_CREATE("filter.convertermodulename", "rzfilter_version_converter")),
+		      filterModuleEnable(CFG_CREATE("filter.modulename.enable", true)),
+		      converterFilterModuleEnable(CFG_CREATE("filter.convertermodulename.enable", true)) {
 			Utils::autoSetAbsoluteDir(filterModuleName);
 			Utils::autoSetAbsoluteDir(converterFilterModuleName);
 		}
