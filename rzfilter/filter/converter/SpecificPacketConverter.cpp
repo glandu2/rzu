@@ -241,6 +241,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 				otp = pkt.one_time_key;
 			}
 
+			Object::logStatic(Object::LL_Debug, "rzfilter_version_converter", "OTP: 0x%08" PRIx64 "\n", otp);
+
 			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				std::vector<uint8_t> encryptedOTP;
 				std::vector<uint8_t> plainOTP;
@@ -409,6 +411,16 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 		if(target->getPacketVersion() >= EPIC_9_5_2) {
 			// Already sent with version
 			return false;
+		} else {
+			return true;
+		}
+	} else if(packet->id == TS_CS_ACCOUNT_WITH_AUTH::packetID) {
+		TS_CS_ACCOUNT_WITH_AUTH pkt;
+		if(packet->process(pkt, version)) {
+			Object::logStatic(
+			    Object::LL_Debug, "rzfilter_version_converter", "OTP: 0x%08" PRIx64 "\n", pkt.one_time_key);
+
+			target->sendPacket(pkt);
 		} else {
 			return true;
 		}
