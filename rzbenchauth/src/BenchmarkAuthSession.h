@@ -24,11 +24,11 @@ public:
 private:
 	using ClientAuthSession::connect;
 
-	virtual void onAuthDisconnected();
+	virtual void onAuthDisconnected(bool causedByRemote);
 	virtual void onAuthResult(TS_ResultCode result, const std::string& resultString);
 	virtual void onServerList(const std::vector<ServerInfo>& servers, uint16_t lastSelectedServerId);
 
-	virtual void onGameDisconnected();
+	virtual void onGameDisconnected(bool causedByRemote);
 	virtual void onGameResult(TS_ResultCode result);
 
 	void onAuthDelayExpired();
