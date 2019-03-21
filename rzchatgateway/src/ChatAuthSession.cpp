@@ -40,7 +40,7 @@ void ChatAuthSession::onDelayRecoExpired() {
 	connect();
 }
 
-void ChatAuthSession::onAuthDisconnected() {
+void ChatAuthSession::onAuthDisconnected(bool causedByRemote) {
 	delayedConnect();
 }
 
@@ -102,7 +102,7 @@ void ChatAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 	}
 }
 
-void ChatAuthSession::onGameDisconnected() {
+void ChatAuthSession::onGameDisconnected(bool causedByRemote) {
 	delayedConnect();
 }
 

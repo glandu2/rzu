@@ -49,7 +49,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 					pkt.szVersion = "200609280";
 				else if(server->getPacketVersion() <= EPIC_9_1)
 					pkt.szVersion = "200701120";
-				else if(server->getPacketVersion() <= EPIC_9_5_1)
+				else if(server->getPacketVersion() <= EPIC_9_6)
 					pkt.szVersion = "201507080";
 				else
 					pkt.szVersion = GlobalCoreConfig::get()->client.authVersion;
@@ -241,6 +241,8 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 				otp = pkt.one_time_key;
 			}
 
+			Object::logStatic(Object::LL_Debug, "rzfilter_version_converter", "OTP: 0x%08" PRIx64 "\n", otp);
+
 			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				std::vector<uint8_t> encryptedOTP;
 				std::vector<uint8_t> plainOTP;
@@ -299,8 +301,14 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 				pkt.szVersion = "200701120";
 			else if(target->getPacketVersion() <= EPIC_9_4)
 				pkt.szVersion = "201507080";
-			else if(target->getPacketVersion() < EPIC_9_5_2)
+			else if(target->getPacketVersion() <= EPIC_9_5_1)
 				pkt.szVersion = "205001120";
+			else if(target->getPacketVersion() <= EPIC_9_5_2)
+				pkt.szVersion = "20180117";
+			else if(target->getPacketVersion() <= EPIC_9_5_3)
+				pkt.szVersion = "20181211";
+			else if(target->getPacketVersion() <= EPIC_9_6)
+				pkt.szVersion = "20190102";
 			else
 				pkt.szVersion = GlobalCoreConfig::get()->client.gameVersion;
 		}
@@ -403,6 +411,16 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 		if(target->getPacketVersion() >= EPIC_9_5_2) {
 			// Already sent with version
 			return false;
+		} else {
+			return true;
+		}
+	} else if(packet->id == TS_CS_ACCOUNT_WITH_AUTH::packetID) {
+		TS_CS_ACCOUNT_WITH_AUTH pkt;
+		if(packet->process(pkt, version)) {
+			Object::logStatic(
+			    Object::LL_Debug, "rzfilter_version_converter", "OTP: 0x%08" PRIx64 "\n", pkt.one_time_key);
+
+			target->sendPacket(pkt);
 		} else {
 			return true;
 		}

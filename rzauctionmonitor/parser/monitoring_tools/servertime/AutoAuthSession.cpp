@@ -40,7 +40,7 @@ void AutoAuthSession::onDelayRecoExpired() {
 	connect();
 }
 
-void AutoAuthSession::onAuthDisconnected() {
+void AutoAuthSession::onAuthDisconnected(bool causedByRemote) {
 	delayedConnect();
 }
 
@@ -101,7 +101,7 @@ void AutoAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 	}
 }
 
-void AutoAuthSession::onGameDisconnected() {
+void AutoAuthSession::onGameDisconnected(bool causedByRemote) {
 	delayedConnect();
 }
 

@@ -23,7 +23,7 @@ public:
 
 	void onGameConnected();
 	void onGamePacketReceived(const TS_MESSAGE* packet);
-	void onGameDisconnected();
+	void onGameDisconnected(bool causedByRemote);
 
 	void auctionSearch(int category_id, int page);
 

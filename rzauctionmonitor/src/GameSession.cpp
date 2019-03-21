@@ -59,7 +59,7 @@ void GameSession::close() {
 	closeSession();
 }
 
-void GameSession::onGameDisconnected() {
+void GameSession::onGameDisconnected(bool) {
 	updateTimer.stop();
 	ggPreventionRecoTimer.stop();
 	ggRecoTimer.stop();

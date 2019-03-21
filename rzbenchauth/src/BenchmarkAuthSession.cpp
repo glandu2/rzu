@@ -17,7 +17,7 @@ void BenchmarkAuthSession::connect(const std::string& ip, const std::string& acc
 	ClientAuthSession::connect(ip, config->port, account, password);
 }
 
-void BenchmarkAuthSession::onAuthDisconnected() {
+void BenchmarkAuthSession::onAuthDisconnected(bool causedByRemote) {
 	if(doReconnect) {
 		doReconnect = false;
 		config->connectionsDone++;
@@ -72,6 +72,6 @@ void BenchmarkAuthSession::onServerList(const std::vector<ServerInfo>& servers, 
 	abortSession();
 }
 
-void BenchmarkAuthSession::onGameDisconnected() {}
+void BenchmarkAuthSession::onGameDisconnected(bool causedByRemote) {}
 
 void BenchmarkAuthSession::onGameResult(TS_ResultCode result) {}

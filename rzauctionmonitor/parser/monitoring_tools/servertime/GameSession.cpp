@@ -36,7 +36,7 @@ void GameSession::onGameConnected() {
 	sendPacket(charlistPkt);
 }
 
-void GameSession::onGameDisconnected() {
+void GameSession::onGameDisconnected(bool causedByRemote) {
 	updateTimer.stop();
 	connectedInGame = false;
 }
