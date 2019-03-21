@@ -21,7 +21,7 @@ public:
 
 	void onGameConnected();
 	void onGamePacketReceived(const TS_MESSAGE* packet);
-	void onGameDisconnected();
+	void onGameDisconnected(bool causedByRemote);
 
 protected:
 	void onUpdatePacketExpired();

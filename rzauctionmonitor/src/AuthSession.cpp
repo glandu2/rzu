@@ -50,8 +50,10 @@ void AuthSession::onDelayRecoExpired() {
 	connect();
 }
 
-void AuthSession::onAuthDisconnected() {
+void AuthSession::onAuthDisconnected(bool causedByRemote) {
 	if(disconnectRequested == false) {
+		if(causedByRemote)
+			log(LL_Error, "Unexpected disconnection from Auth\n");
 		delayedConnect();
 	} else {
 		log(LL_Info, "Disconnected from auth by request\n");
@@ -114,8 +116,10 @@ void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t 
 	connectedToGS = false;
 }
 
-void AuthSession::onGameDisconnected() {
+void AuthSession::onGameDisconnected(bool causedByRemote) {
 	if(disconnectRequested == false) {
+		if(causedByRemote)
+			log(LL_Error, "Unexpected disconnection from GS\n");
 		delayedConnect();
 	} else {
 		log(LL_Info, "Disconnected from GS by request\n");
