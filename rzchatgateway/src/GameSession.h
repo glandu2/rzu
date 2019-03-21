@@ -25,7 +25,7 @@ public:
 
 	void onGameConnected();
 	void onGamePacketReceived(const TS_MESSAGE* packet);
-	void onGameDisconnected();
+	void onGameDisconnected(bool causedByRemote);
 
 	void setGameServerName(std::string name);
 	void sendMsgToGS(int type, const char* sender, const char* target, std::string msg);

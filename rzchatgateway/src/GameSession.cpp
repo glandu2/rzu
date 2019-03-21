@@ -44,7 +44,7 @@ void GameSession::setGameServerName(std::string name) {
 		ircClient->connect(name);
 }
 
-void GameSession::onGameDisconnected() {
+void GameSession::onGameDisconnected(bool causedByRemote) {
 	updateTimer.stop();
 	connectedInGame = false;
 	ircClient->sendMessage("", "\001ACTION disconnected from the game server\001");
