@@ -62,9 +62,9 @@ void PacketFilter::onLoginResultMessage(const TS_SC_LOGIN_RESULT* packet) {
 
 void PacketFilter::onEnterMessage(const TS_SC_ENTER* packet) {
 	if(packet->objType == EOT_Player) {
-		data->players[packet->handle] = packet->playerInfo.szName;
+		data->players[packet->handle] = packet->playerInfo.name;
 	} else if(packet->objType == EOT_Summon) {
-		std::string name = packet->summonInfo.szName;
+		std::string name = packet->summonInfo.name;
 
 		if(data->players.count(packet->summonInfo.master_handle)) {
 			const std::string& masterName = data->players[packet->summonInfo.master_handle];

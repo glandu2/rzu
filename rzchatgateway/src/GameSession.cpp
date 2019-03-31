@@ -146,7 +146,7 @@ void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet) {
 
 void GameSession::onEnter(const TS_SC_ENTER* packet) {
 	if(packet->objType == EOT_Player) {
-		playerNames[packet->handle] = packet->playerInfo.szName;
+		playerNames[packet->handle] = packet->playerInfo.name;
 	}
 }
 
