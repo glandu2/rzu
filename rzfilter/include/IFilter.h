@@ -17,6 +17,8 @@ public:
 	virtual ~IFilter() {}
 	virtual bool onServerPacket(const TS_MESSAGE* packet) { return true; }
 	virtual bool onClientPacket(const TS_MESSAGE* packet) { return true; }
+	virtual void onServerDisconnected() { client->close(); }
+	virtual void onClientDisconnected() { server->close(); }
 
 protected:
 	IFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType)

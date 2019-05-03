@@ -1,7 +1,7 @@
 #include "GameClientSession.h"
 
 GameClientSession::GameClientSession(Parameter* serverAddress)
-    : ClientSession(false, serverAddress->filterManager, serverAddress->converterFilterManager),
+    : ClientSession(false, nullptr, serverAddress->filterManager, serverAddress->converterFilterManager),
       serverIp(serverAddress->serverIp),
       serverPort(serverAddress->serverPort) {}
 

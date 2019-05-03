@@ -13,15 +13,17 @@ struct ConnectionConfig {
 };
 
 struct GlobalConfig {
-	ConnectionConfig input;
-	ConnectionConfig output;
+	ConnectionConfig client;
+	ConnectionConfig server;
+	ConnectionConfig gameServer;
 	cval<int>& count;
 	cval<std::string>& rzfilterExec;
 	cval<bool>& spawnRzfilter;
 
 	GlobalConfig()
-	    : input("input", 4500),
-	      output("output", 4800),
+	    : client("client", 4500),
+	      server("server", 4800),
+	      gameServer("gameServer", 4814, "127.0.0.2"),
 	      count(CFG_CREATE("count", 10000)),
 	      rzfilterExec(CFG_CREATE("rzfilter.exec", "rzfilter")),
 	      spawnRzfilter(CFG_CREATE("rzfilter.spawn", true)) {

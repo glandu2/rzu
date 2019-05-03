@@ -193,6 +193,12 @@ bool PacketFilter::onClientPacket(const TS_MESSAGE* packet) {
 	return luaCallPacket(lua_onClientPacketFunction, "onClientPacket", packet, client->getPacketVersion(), false);
 }
 
+void PacketFilter::onClientDisconnected() {
+	if(!luaCallOnDisconnected(lua_onClientDisconnectedFunction, "onClientDisconnected")) {
+		IFilter::onClientDisconnected();
+	}
+}
+
 bool PacketFilter::luaCallPacket(
     int function, const char* functionName, const TS_MESSAGE* packet, int version, bool isServerPacket) {
 	if(packet->id == 9999)
@@ -279,6 +285,34 @@ bool PacketFilter::luaCallUnknownPacket(const TS_MESSAGE* packet, bool isServerP
 	return returnValue;
 }
 
+bool PacketFilter::luaCallOnDisconnected(int luaOnDisconnectedFunction, const char* functionName) {
+	if(luaOnDisconnectedFunction != LUA_REFNIL && luaOnDisconnectedFunction != LUA_NOREF) {
+		int topBeforeCall = lua_gettop(L);
+
+		lua_pushcfunction(L, &luaMessageHandler);
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, luaOnDisconnectedFunction);
+		pushEndpoint(L, &clientEndpoint);
+		pushEndpoint(L, &serverEndpoint);
+
+		int result = lua_pcall(L, 2, 0, -4);
+		if(result) {
+			Object::logStatic(Object::LL_Error,
+			                  "rzfilter_lua_module",
+			                  "Cannot run lua %s function: %d:%s\n",
+			                  functionName,
+			                  result,
+			                  lua_tostring(L, -1));
+			lua_pop(L, 1);
+		}
+
+		lua_settop(L, topBeforeCall);
+		return true;
+	}
+
+	return false;
+}
+
 int PacketFilter::luaMessageHandler(lua_State* L) {
 	const char* msg = lua_tostring(L, 1);
 	luaL_traceback(L, L, msg, 1);
@@ -292,6 +326,7 @@ void PacketFilter::initLuaVM() {
 	lua_onServerPacketFunction = LUA_NOREF;
 	lua_onClientPacketFunction = LUA_NOREF;
 	lua_onUnknownPacketFunction = LUA_NOREF;
+	lua_onClientDisconnectedFunction = LUA_NOREF;
 
 	luaL_openlibs(L);
 
@@ -379,6 +414,19 @@ void PacketFilter::initLuaVM() {
 		                  "packetId, ServerType serverType, bool isServerPacket)\n");
 	}
 	lua_pop(L, 1);
+
+	lua_getglobal(L, "onClientDisconnected");
+	if(lua_isfunction(L, -1)) {
+		lua_onClientDisconnectedFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+		lua_pushnil(L);  // for the next pop as luaL_ref pop the value
+	} else {
+		lua_onClientDisconnectedFunction = LUA_NOREF;
+		Object::logStatic(Object::LL_Info,
+		                  "rzfilter_lua_module",
+		                  "Lua register: onClientDisconnected must be a lua function matching its C counterpart: "
+		                  "bool onClientDisconnected(IFilterEndpoint* client, IFilterEndpoint* server)\n");
+	}
+	lua_pop(L, 1);
 }
 
 void PacketFilter::deinitLuaVM() {
@@ -394,6 +442,10 @@ void PacketFilter::deinitLuaVM() {
 		if(lua_onUnknownPacketFunction != LUA_NOREF) {
 			luaL_unref(L, LUA_REGISTRYINDEX, lua_onUnknownPacketFunction);
 			lua_onUnknownPacketFunction = LUA_NOREF;
+		}
+		if(lua_onClientDisconnectedFunction != LUA_NOREF) {
+			luaL_unref(L, LUA_REGISTRYINDEX, lua_onClientDisconnectedFunction);
+			lua_onClientDisconnectedFunction = LUA_NOREF;
 		}
 		lua_close(L);
 		L = nullptr;

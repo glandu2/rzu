@@ -4,6 +4,7 @@
 #include "IFilterEndpoint.h"
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
+#include "NetSession/SessionServer.h"
 #include "ServerSession.h"
 #include <memory>
 #include <stdint.h>
@@ -21,7 +22,10 @@ class ClientSession : public EncryptedSession<PacketSession>, public IFilterEndp
 	DECLARE_CLASS(ClientSession)
 
 public:
-	ClientSession(bool authMode, FilterManager* filterManager, FilterManager* converterFilterManager);
+	ClientSession(bool authMode,
+	              GameClientSessionManager* gameClientSessionManager,
+	              FilterManager* filterManager,
+	              FilterManager* converterFilterManager);
 
 	void sendPacket(MessageBuffer& buffer) {
 		if(buffer.checkPacketFinalSize() == false) {
@@ -42,12 +46,13 @@ public:
 	void banAddress(StreamAddress address);
 	bool isStrictForwardEnabled();
 
-	virtual void onServerPacketReceived(const TS_MESSAGE* packet);
-
 	const char* getPacketName(int16_t id);
 
+	BanManager* getBanManager() { return getServer()->getBanManager(); }
+
 	void logPacket(bool toClient, const TS_MESSAGE* msg);
-	bool isAuthMode() { return authMode; }
+
+	void detachServer();
 
 protected:
 	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
@@ -61,16 +66,10 @@ protected:
 
 	~ClientSession();
 
-	int getServerPacketVersion() { return serverSession.getPacketVersion(); }
-
 private:
-	ServerSession serverSession;
-	std::unique_ptr<FilterProxy> packetFilter;
-	std::unique_ptr<FilterProxy> packetConverterFilter;
-	IFilterEndpoint* toServerBaseEndpoint;
-	IFilterEndpoint* toClientBaseEndpoint;
-	int version;
+	ServerSession* serverSession;
 	bool authMode;
+	int version;
 };
 
 #endif  // CLIENTSESSION_H

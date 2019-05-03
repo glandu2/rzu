@@ -33,6 +33,7 @@ public:
 
 	virtual bool onServerPacket(const TS_MESSAGE* packet) override;
 	virtual bool onClientPacket(const TS_MESSAGE* packet) override;
+	virtual void onClientDisconnected() override;
 
 	static int luaMessageHandler(lua_State* L);
 
@@ -44,6 +45,7 @@ protected:
 	bool luaCallPacket(
 	    int function, const char* functionName, const TS_MESSAGE* packet, int version, bool isServerPacket);
 	bool luaCallUnknownPacket(const TS_MESSAGE* packet, bool isServerPacket);
+	bool luaCallOnDisconnected(int luaOnDisconnectedFunction, const char* functionName);
 	void pushEndpoint(lua_State* L, LuaEndpointMetaTable* endpoint);
 	bool pushPacket(lua_State* L, const TS_MESSAGE* packet, int version, bool isServer);
 
@@ -54,6 +56,7 @@ private:
 	int lua_onServerPacketFunction = LUA_NOREF;
 	int lua_onClientPacketFunction = LUA_NOREF;
 	int lua_onUnknownPacketFunction = LUA_NOREF;
+	int lua_onClientDisconnectedFunction = LUA_NOREF;
 	LuaEndpointMetaTable clientEndpoint;
 	LuaEndpointMetaTable serverEndpoint;
 

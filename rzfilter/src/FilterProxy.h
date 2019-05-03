@@ -15,6 +15,8 @@ public:
 
 	void onServerPacket(const TS_MESSAGE* packet);
 	void onClientPacket(const TS_MESSAGE* packet);
+	void onServerDisconnected();
+	void onClientDisconnected();
 
 	void bindEndpoints(IFilterEndpoint* client, IFilterEndpoint* server);
 	IFilterEndpoint* getToClientEndpoint() { return &toClientEndpoint; }
