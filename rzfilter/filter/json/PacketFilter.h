@@ -7,6 +7,7 @@
 #include "GameClient/TS_SC_INVENTORY.h"
 #include "IFilter.h"
 #include "LibGlobal.h"
+#include "Packet/PacketStructsName.h"
 #include <unordered_map>
 
 struct TS_SC_CHAT;
@@ -23,8 +24,11 @@ protected:
 private:
 	template<class Packet> void showPacketJson(const Packet* packet, int version);
 
-	void printAuthPacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
-	void printGamePacketJson(const TS_MESSAGE* packet, int version, bool isServerMsg);
+	void printPacketJson(SessionType sessionType, const TS_MESSAGE* packet, int version, bool isServerMsg);
+
+	template<class Packet> struct PrintPacketFunctor {
+		bool operator()(PacketFilter* filter, const TS_MESSAGE* packet, int version);
+	};
 
 private:
 	struct Item {
