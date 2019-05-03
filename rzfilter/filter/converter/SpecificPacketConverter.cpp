@@ -291,40 +291,42 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 	if(packet->id == TS_CS_VERSION::getId(version)) {
 		TS_CS_VERSION pkt;
 
-		// Ignore existing as it is completly replaced
+		if(packet->process(pkt, version)) {
+			// Don't overwrite version if it is a request string and not a version
+			if(isNormalVersion(pkt.szVersion)) {
+				if(target->getPacketVersion() <= EPIC_3)
+					pkt.szVersion = "200609280";
+				else if(target->getPacketVersion() <= EPIC_9_1)
+					pkt.szVersion = "200701120";
+				else if(target->getPacketVersion() <= EPIC_9_4)
+					pkt.szVersion = "201507080";
+				else if(target->getPacketVersion() <= EPIC_9_5_1)
+					pkt.szVersion = "205001120";
+				else if(target->getPacketVersion() <= EPIC_9_5_2)
+					pkt.szVersion = "20180117";
+				else if(target->getPacketVersion() <= EPIC_9_5_3)
+					pkt.szVersion = "20181211";
+				else if(target->getPacketVersion() <= EPIC_9_6)
+					pkt.szVersion = "20190102";
+				else
+					pkt.szVersion = GlobalCoreConfig::get()->client.gameVersion;
+			}
 
-		// Don't overwrite version if it is a request string and not a version
-		if(isNormalVersion(pkt.szVersion)) {
-			if(target->getPacketVersion() <= EPIC_3)
-				pkt.szVersion = "200609280";
-			else if(target->getPacketVersion() <= EPIC_9_1)
-				pkt.szVersion = "200701120";
-			else if(target->getPacketVersion() <= EPIC_9_4)
-				pkt.szVersion = "201507080";
-			else if(target->getPacketVersion() <= EPIC_9_5_1)
-				pkt.szVersion = "205001120";
-			else if(target->getPacketVersion() <= EPIC_9_5_2)
-				pkt.szVersion = "20180117";
-			else if(target->getPacketVersion() <= EPIC_9_5_3)
-				pkt.szVersion = "20181211";
-			else if(target->getPacketVersion() <= EPIC_9_6)
-				pkt.szVersion = "20190102";
-			else
-				pkt.szVersion = GlobalCoreConfig::get()->client.gameVersion;
-		}
+			if(target->getPacketVersion() >= EPIC_9_5_2) {
+				RzHashReversible256::generatePayload(pkt);
+			}
 
-		if(target->getPacketVersion() >= EPIC_9_5_2) {
-			RzHashReversible256::generatePayload(pkt);
-		}
+			target->sendPacket(pkt);
 
-		target->sendPacket(pkt);
-
-		// TS_CS_REPORT is required in 9.5.2+
-		if(target->getPacketVersion() >= EPIC_9_5_2) {
-			TS_CS_REPORT reportMsg;
-			reportMsg.report =
-			    "\x8D\x07\x72\xCA\x29\x47Windows (6.2.9200)|Intel(R) HD Graphics 4000Drv Version : 10.18.10.4425";
-			target->sendPacket(reportMsg);
+			// TS_CS_REPORT is required in 9.5.2+
+			if(target->getPacketVersion() >= EPIC_9_5_2) {
+				TS_CS_REPORT reportMsg;
+				reportMsg.report =
+				    "\x8D\x07\x72\xCA\x29\x47Windows (6.2.9200)|Intel(R) HD Graphics 4000Drv Version : 10.18.10.4425";
+				target->sendPacket(reportMsg);
+			}
+		} else {
+			return true;
 		}
 	} else if(packet->id == TS_CS_LOGIN::getId(version)) {
 		TS_CS_LOGIN pkt;
