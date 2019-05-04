@@ -69,8 +69,17 @@ public:
 	typedef std::function<void(TestConnectionChannel* channel, Event event)> EventCallback;
 	typedef std::function<void(TestConnectionChannel* channel)> YieldCallback;
 
+	template<class T>
+	typename std::enable_if<!std::is_pointer<T>::value, void>::type sendPacket(const T& data,
+	                                                                           packet_version_t version) {
+		MessageBuffer buffer(data.getSize(version), version);
+		data.serialize(&buffer);
+		sendPacket((const TS_MESSAGE*) buffer.getData());
+	}
+
 public:
 	TestConnectionChannel(Type type, cval<std::string>& host, cval<int>& port, bool encrypted);
+	TestConnectionChannel(const TestConnectionChannel&) = delete;
 	~TestConnectionChannel();
 
 	void setTest(RzTest* test) { this->test = test; }
@@ -108,7 +117,7 @@ public:
 	 * Used by RzTest when callbacks are still pending after a test,
 	 * to print the port associated with the channel (to identify in logs which channel still have callbacks pending
 	 * after a test)
-	 * @return
+	 * @return associated port
 	 */
 	int getPort();
 
@@ -146,6 +155,12 @@ public:
 	 * close the channel (and stop the server if applicable)
 	 */
 	void closeSession();
+
+	/**
+	 * @brief abortTest
+	 * remove all callbacks and close the channel
+	 */
+	void abortTest();
 
 	/**
 	 * @brief registerSession

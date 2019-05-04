@@ -100,6 +100,11 @@ void TestConnectionChannel::closeSession() {
 		server->stop();
 }
 
+void TestConnectionChannel::abortTest() {
+	eventCallbacks.clear();
+	closeSession();
+}
+
 void TestConnectionChannel::onEventReceived(PacketSession* session, Event::Type type) {
 	Event event;
 	event.type = type;
@@ -139,8 +144,6 @@ void TestConnectionChannel::callEventCallback(Event event, PacketSession* sessio
 	}
 	if(::testing::Test::HasFatalFailure()) {
 		log(LL_Debug, "Got fatal error, aborting test\n");
-		eventCallbacks.clear();
-		closeSession();
 		if(test)
 			test->abortTest();
 	}
