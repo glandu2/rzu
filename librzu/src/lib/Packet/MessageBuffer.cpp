@@ -2,13 +2,13 @@
 #include "Core/Utils.h"
 #include <algorithm>
 
-MessageBuffer::MessageBuffer(size_t size, int version) : StructSerializer(version) {
+MessageBuffer::MessageBuffer(size_t size, packet_version_t version) : StructSerializer(version) {
 	buffer = Stream::WriteRequest::create(size);
 	p = buffer->buffer.base;
 	bufferOverflow = false;
 }
 
-MessageBuffer::MessageBuffer(const void* data, size_t size, int version) : StructSerializer(version) {
+MessageBuffer::MessageBuffer(const void* data, size_t size, packet_version_t version) : StructSerializer(version) {
 	buffer = Stream::WriteRequest::createFromExisting(const_cast<char*>(static_cast<const char*>(data)), size);
 	p = buffer->buffer.base;
 	bufferOverflow = false;
@@ -29,8 +29,8 @@ Stream::WriteRequest* MessageBuffer::getWriteRequest() {
 bool MessageBuffer::checkFinalSize() {
 	if(bufferOverflow) {
 		log(LL_Error,
-		    "Serialization overflow: version: %d, buffer size: %d, offset: %d, field: %s\n",
-		    getVersion(),
+		    "Serialization overflow: version: 0x%x, buffer size: %d, offset: %d, field: %s\n",
+		    getVersion().getAsInt(),
 		    getSize(),
 		    uint32_t(p - buffer->buffer.base),
 		    getFieldInOverflow().c_str());

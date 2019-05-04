@@ -21,7 +21,7 @@ void FilterProxy::onServerPacket(const TS_MESSAGE* packet) {
 	if(filterModule)
 		forwardPacket = filterModule->onServerPacket(packet);
 
-	if(forwardPacket)
+	if(forwardPacket && client)
 		client->sendPacket(packet);
 }
 
@@ -32,6 +32,20 @@ void FilterProxy::onClientPacket(const TS_MESSAGE* packet) {
 
 	if(forwardPacket)
 		server->sendPacket(packet);
+}
+
+void FilterProxy::onServerDisconnected() {
+	if(filterModule)
+		filterModule->onServerDisconnected();
+	else
+		client->close();
+}
+
+void FilterProxy::onClientDisconnected() {
+	if(filterModule)
+		filterModule->onClientDisconnected();
+	else
+		server->close();
 }
 
 void FilterProxy::bindEndpoints(IFilterEndpoint* client, IFilterEndpoint* server) {

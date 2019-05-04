@@ -19,9 +19,9 @@ void FilterEndpoint::sendPacket(MessageBuffer& packet) {
 
 void FilterEndpoint::close() {
 	if(toClient) {
-		filter->getClientEndpoint()->close();
+		filter->onServerDisconnected();
 	} else {
-		filter->getServerEndpoint()->close();
+		filter->onClientDisconnected();
 	}
 }
 

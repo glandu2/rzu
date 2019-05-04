@@ -3,15 +3,13 @@
 #include "LuaTableWriter.h"
 #include "LuaTimer.h"
 #include "LuaUtils.h"
-#include "PacketTemplates.h"
+#include "PacketIterator.h"
 
 static const char* LUA_MAIN_FILE = "rzfilter.lua";
 
 template<class T> struct SendPacketFromLuaCallback {
-	void operator()(lua_State* L, IFilterEndpoint* endpoint, bool* ok) {
-		bool result = LuaEndpointMetaTable::sendPacketFromLua<T>(L, endpoint);
-		if(ok)
-			*ok = result;
+	bool operator()(lua_State* L, IFilterEndpoint* endpoint) {
+		return LuaEndpointMetaTable::sendPacketFromLua<T>(L, endpoint);
 	}
 };
 static void pushEnum(lua_State* L, const char* name, int value) {
@@ -24,7 +22,7 @@ template<class T> struct LuaDeclarePacketTypeNameCallback {
 };
 
 template<class T> struct LuaSerializePackerCallback {
-	void operator()(lua_State* L, int version, const TS_MESSAGE* packet, bool* serializationSucess) {
+	bool operator()(lua_State* L, int version, const TS_MESSAGE* packet) {
 		T deserializedPacket;
 		MessageBuffer buffer((void*) packet, packet->size, version);
 
@@ -42,11 +40,9 @@ template<class T> struct LuaSerializePackerCallback {
 			lua_pushinteger(L, T::getId(EPIC_LATEST));
 			lua_setfield(L, -2, "id");
 
-			if(serializationSucess)
-				*serializationSucess = true;
+			return true;
 		} else {
-			if(serializationSucess)
-				*serializationSucess = false;
+			return false;
 		}
 	}
 };
@@ -86,12 +82,27 @@ int LuaEndpointMetaTable::sendPacket(lua_State* L) {
 	lua_pop(L, 1);
 
 	bool ok = true;
-	if(self->serverType == IFilter::ST_Auth)
-		processAuthPacket<SendPacketFromLuaCallback>(packetId, L, endpoint, &ok);
-	else
-		processGamePacket<SendPacketFromLuaCallback>(packetId, self->isServerEndpoint, L, endpoint, &ok);
+	SessionType sessionType;
+	SessionPacketOrigin origin;
 
-	if(!ok) {
+	if(self->serverType == IFilter::ST_Auth)
+		sessionType = SessionType::AuthClient;
+	else
+		sessionType = SessionType::GameClient;
+
+	if(self->isServerEndpoint)
+		origin = SessionPacketOrigin::Client;
+	else
+		origin = SessionPacketOrigin::Server;
+
+	if(!processPacket<SendPacketFromLuaCallback>(sessionType, origin, packetId, ok, L, endpoint)) {
+		luaL_error(L,
+		           "Packet id unknown: %d for session type %s and origin %s\n",
+		           packetId,
+		           sessionType == SessionType::AuthClient ? "AuthClient" : "GameClient",
+		           origin == SessionPacketOrigin::Client ? "Client" : "Server");
+		lua_pushboolean(L, false);
+	} else if(!ok) {
 		luaL_error(L, "Couln't send packet %d", packetId);
 		lua_pushboolean(L, false);
 	} else {
@@ -182,6 +193,12 @@ bool PacketFilter::onClientPacket(const TS_MESSAGE* packet) {
 	return luaCallPacket(lua_onClientPacketFunction, "onClientPacket", packet, client->getPacketVersion(), false);
 }
 
+void PacketFilter::onClientDisconnected() {
+	if(!luaCallOnDisconnected(lua_onClientDisconnectedFunction, "onClientDisconnected")) {
+		IFilter::onClientDisconnected();
+	}
+}
+
 bool PacketFilter::luaCallPacket(
     int function, const char* functionName, const TS_MESSAGE* packet, int version, bool isServerPacket) {
 	if(packet->id == 9999)
@@ -268,6 +285,34 @@ bool PacketFilter::luaCallUnknownPacket(const TS_MESSAGE* packet, bool isServerP
 	return returnValue;
 }
 
+bool PacketFilter::luaCallOnDisconnected(int luaOnDisconnectedFunction, const char* functionName) {
+	if(luaOnDisconnectedFunction != LUA_REFNIL && luaOnDisconnectedFunction != LUA_NOREF) {
+		int topBeforeCall = lua_gettop(L);
+
+		lua_pushcfunction(L, &luaMessageHandler);
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, luaOnDisconnectedFunction);
+		pushEndpoint(L, &clientEndpoint);
+		pushEndpoint(L, &serverEndpoint);
+
+		int result = lua_pcall(L, 2, 0, -4);
+		if(result) {
+			Object::logStatic(Object::LL_Error,
+			                  "rzfilter_lua_module",
+			                  "Cannot run lua %s function: %d:%s\n",
+			                  functionName,
+			                  result,
+			                  lua_tostring(L, -1));
+			lua_pop(L, 1);
+		}
+
+		lua_settop(L, topBeforeCall);
+		return true;
+	}
+
+	return false;
+}
+
 int PacketFilter::luaMessageHandler(lua_State* L) {
 	const char* msg = lua_tostring(L, 1);
 	luaL_traceback(L, L, msg, 1);
@@ -281,6 +326,7 @@ void PacketFilter::initLuaVM() {
 	lua_onServerPacketFunction = LUA_NOREF;
 	lua_onClientPacketFunction = LUA_NOREF;
 	lua_onUnknownPacketFunction = LUA_NOREF;
+	lua_onClientDisconnectedFunction = LUA_NOREF;
 
 	luaL_openlibs(L);
 
@@ -288,7 +334,7 @@ void PacketFilter::initLuaVM() {
 	lua_pushcfunction(L, &PacketFilter::luaPrintToLogs);
 	lua_setglobal(L, "print");
 
-	iterateAllPacketTypes<LuaDeclarePacketTypeNameCallback>(L);
+	iteratePackets<LuaDeclarePacketTypeNameCallback>(L);
 	pushEnum(L, "ST_Auth", ST_Auth);
 	pushEnum(L, "ST_Game", ST_Game);
 
@@ -368,6 +414,19 @@ void PacketFilter::initLuaVM() {
 		                  "packetId, ServerType serverType, bool isServerPacket)\n");
 	}
 	lua_pop(L, 1);
+
+	lua_getglobal(L, "onClientDisconnected");
+	if(lua_isfunction(L, -1)) {
+		lua_onClientDisconnectedFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+		lua_pushnil(L);  // for the next pop as luaL_ref pop the value
+	} else {
+		lua_onClientDisconnectedFunction = LUA_NOREF;
+		Object::logStatic(Object::LL_Info,
+		                  "rzfilter_lua_module",
+		                  "Lua register: onClientDisconnected must be a lua function matching its C counterpart: "
+		                  "bool onClientDisconnected(IFilterEndpoint* client, IFilterEndpoint* server)\n");
+	}
+	lua_pop(L, 1);
 }
 
 void PacketFilter::deinitLuaVM() {
@@ -383,6 +442,10 @@ void PacketFilter::deinitLuaVM() {
 		if(lua_onUnknownPacketFunction != LUA_NOREF) {
 			luaL_unref(L, LUA_REGISTRYINDEX, lua_onUnknownPacketFunction);
 			lua_onUnknownPacketFunction = LUA_NOREF;
+		}
+		if(lua_onClientDisconnectedFunction != LUA_NOREF) {
+			luaL_unref(L, LUA_REGISTRYINDEX, lua_onClientDisconnectedFunction);
+			lua_onClientDisconnectedFunction = LUA_NOREF;
 		}
 		lua_close(L);
 		L = nullptr;
@@ -409,12 +472,21 @@ void PacketFilter::pushEndpoint(lua_State* L, LuaEndpointMetaTable* endpoint) {
 bool PacketFilter::pushPacket(lua_State* L, const TS_MESSAGE* packet, int version, bool isServer) {
 	bool ok;
 	bool serializationSucess = false;
+	SessionType sessionType;
+	SessionPacketOrigin origin;
 
-	if(serverType == ST_Game)
-		ok = processGamePacket<LuaSerializePackerCallback>(
-		    packet->id, isServer, L, version, packet, &serializationSucess);
+	if(serverType == IFilter::ST_Auth)
+		sessionType = SessionType::AuthClient;
 	else
-		ok = processAuthPacket<LuaSerializePackerCallback>(packet->id, L, version, packet, &serializationSucess);
+		sessionType = SessionType::GameClient;
+
+	if(isServer)
+		origin = SessionPacketOrigin::Server;
+	else
+		origin = SessionPacketOrigin::Client;
+
+	ok = processPacket<LuaSerializePackerCallback>(
+	    sessionType, origin, packet->id, serializationSucess, L, version, packet);
 
 	return ok && serializationSucess;
 }

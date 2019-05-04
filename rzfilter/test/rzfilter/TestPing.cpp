@@ -10,9 +10,16 @@
 #endif
 
 #pragma pack(push, 1)
+struct TS_SMALL : public TS_MESSAGE {
+	static const uint16_t packetID = 10026;
+};
+struct TS_MID : public TS_MESSAGE {
+	char account[122];
+	static const uint16_t packetID = 10026;
+};
 struct TS_BIG : public TS_MESSAGE {
 	char account[1024];
-	static const uint16_t packetID = 10010;
+	static const uint16_t packetID = 10026;
 };
 #pragma pack(pop)
 
@@ -59,8 +66,8 @@ public:
 
 		memset(&sin, 0, sizeof(sin));
 
-		uv_inet_pton(AF_INET, CONFIG_GET()->output.ip.get().c_str(), &sin.sin_addr.s_addr);
-		sin.sin_port = htons(CONFIG_GET()->output.port.get());
+		uv_inet_pton(AF_INET, CONFIG_GET()->server.ip.get().c_str(), &sin.sin_addr.s_addr);
+		sin.sin_port = htons(CONFIG_GET()->server.port.get());
 		sin.sin_family = AF_INET;
 
 		ASSERT_NE(-1, bind(outputServerSocket, (struct sockaddr*) &sin, sizeof(sin)));
@@ -71,8 +78,8 @@ public:
 		ASSERT_NE(-1, inputSocket);
 
 		memset(&sin, 0, sizeof(sin));
-		uv_inet_pton(AF_INET, CONFIG_GET()->input.ip.get().c_str(), &sin.sin_addr.s_addr);
-		sin.sin_port = htons(CONFIG_GET()->input.port.get());
+		uv_inet_pton(AF_INET, CONFIG_GET()->client.ip.get().c_str(), &sin.sin_addr.s_addr);
+		sin.sin_port = htons(CONFIG_GET()->client.port.get());
 		sin.sin_family = AF_INET;
 
 		ASSERT_NE(-1, connect(inputSocket, (struct sockaddr*) &sin, sizeof(sin)));
@@ -99,7 +106,11 @@ public:
 		}
 		endTime = uv_hrtime();
 
-		printf("Ping duration: %f ns\n", (endTime - startTime) / (float) PING_LOOPS);
+		printf("Ping duration: %f ns\n", (endTime - startTime) / (double) PING_LOOPS);
+
+		closesocket(inputSocket);
+		closesocket(outputSocket);
+		closesocket(outputServerSocket);
 
 		for(int i = 0; i < PING_LOOPS; i++) {
 			char* buffer = buffers[i];
@@ -124,14 +135,14 @@ public:
 };
 
 TEST_F(Ping_Test, latency_0_bytes_paquet) {
-	TS_CA_SERVER_LIST packet;
+	TS_SMALL packet;
 	TS_MESSAGE::initMessage(&packet);
 
 	doTest(&packet);
 }
 
 TEST_F(Ping_Test, latency_122_bytes_paquet) {
-	TS_CA_ACCOUNT packet;
+	TS_MID packet;
 	TS_MESSAGE::initMessage(&packet);
 
 	doTest(&packet);

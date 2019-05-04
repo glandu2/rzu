@@ -3,7 +3,6 @@
 #include "Core/PrintfFormats.h"
 #include "GlobalConfig.h"
 #include "NetSession/BanManager.h"
-#include "NetSession/SessionServer.h"
 #include "Packet/PacketStructsName.h"
 #include <algorithm>
 #include <string.h>
@@ -12,40 +11,13 @@
 #include "Packet/PacketEpics.h"
 #include "PacketEnums.h"
 
-#include "FilterManager.h"
-#include "FilterProxy.h"
-
-ClientSession::ClientSession(bool authMode, FilterManager* filterManager, FilterManager* converterFilterManager)
-    : serverSession(this), version(CONFIG_GET()->client.epic.get()), authMode(authMode) {
-	if(filterManager)
-		packetFilter = filterManager->createFilter(authMode ? IFilter::ST_Auth : IFilter::ST_Game);
-	else
-		packetFilter = nullptr;
-
-	if(converterFilterManager)
-		packetConverterFilter = converterFilterManager->createFilter(authMode ? IFilter::ST_Auth : IFilter::ST_Game);
-	else
-		packetConverterFilter = nullptr;
-
-	// Client <=> version conversion filter <=> user filter <=> Server
-	if(packetFilter && packetConverterFilter) {
-		packetFilter->bindEndpoints(packetConverterFilter->getToClientEndpoint(), &serverSession);
-		packetConverterFilter->bindEndpoints(this, packetFilter->getToServerEndpoint());
-		toServerBaseEndpoint = packetConverterFilter->getToServerEndpoint();
-		toClientBaseEndpoint = packetFilter->getToClientEndpoint();
-	} else if(packetFilter) {
-		packetFilter->bindEndpoints(this, &serverSession);
-		toServerBaseEndpoint = packetFilter->getToServerEndpoint();
-		toClientBaseEndpoint = packetFilter->getToClientEndpoint();
-	} else if(packetConverterFilter) {
-		packetConverterFilter->bindEndpoints(this, &serverSession);
-		toServerBaseEndpoint = packetConverterFilter->getToServerEndpoint();
-		toClientBaseEndpoint = packetConverterFilter->getToClientEndpoint();
-	} else {
-		toServerBaseEndpoint = &serverSession;
-		toClientBaseEndpoint = this;
-	}
-}
+ClientSession::ClientSession(bool authMode,
+                             GameClientSessionManager* gameClientSessionManager,
+                             FilterManager* filterManager,
+                             FilterManager* converterFilterManager)
+    : serverSession(new ServerSession(authMode, this, gameClientSessionManager, filterManager, converterFilterManager)),
+      authMode(authMode),
+      version(CONFIG_GET()->client.epic.get()) {}
 
 StreamAddress ClientSession::getAddress() {
 	if(getStream())
@@ -68,7 +40,8 @@ ClientSession::~ClientSession() {}
 EventChain<SocketSession> ClientSession::onConnected() {
 	log(LL_Info, "Client connected, connecting server session\n");
 
-	serverSession.connect(getServerIp(), getServerPort());
+	if(serverSession)
+		serverSession->connect(getServerIp(), getServerPort());
 	setDirtyObjectName();
 	getStream()->setNoDelay(true);
 
@@ -77,7 +50,10 @@ EventChain<SocketSession> ClientSession::onConnected() {
 
 EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 	log(LL_Info, "Client disconnected, disconnecting server session\n");
-	serverSession.closeSession();
+	if(serverSession) {
+		serverSession->detachClient();
+		serverSession->onClientDisconnected();
+	}
 
 	return PacketSession::onDisconnected(causedByRemote);
 }
@@ -104,16 +80,15 @@ void ClientSession::logPacket(bool toClient, const TS_MESSAGE* msg) {
 	                       int(msg->size - sizeof(TS_MESSAGE)));
 }
 
-EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
-	// log(LL_Debug, "Received packet id %d from client, forwarding to server\n", packet->id);
-	toServerBaseEndpoint->sendPacket(packet);
-
-	return PacketSession::onPacketReceived(packet);
+void ClientSession::detachServer() {
+	serverSession = nullptr;
 }
 
-void ClientSession::onServerPacketReceived(const TS_MESSAGE* packet) {
-	// log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
-	toClientBaseEndpoint->sendPacket(packet);
+EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
+	if(serverSession)
+		serverSession->onClientPacketReceived(packet);
+
+	return PacketSession::onPacketReceived(packet);
 }
 
 void ClientSession::updateObjectName() {

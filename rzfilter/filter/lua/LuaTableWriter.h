@@ -25,7 +25,7 @@ protected:
 	}
 
 public:
-	LuaTableWriter(lua_State* L, int version) : StructSerializer(version) {
+	LuaTableWriter(lua_State* L, packet_version_t version) : StructSerializer(version) {
 		this->L = L;
 		ok = true;
 	}

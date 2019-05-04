@@ -1,11 +1,16 @@
 #ifndef AUTHSESSION_H
 #define AUTHSESSION_H
 
+#include "EndpointProxy.h"
 #include "IFilterEndpoint.h"
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
+#include <memory>
 
 class ClientSession;
+class FilterProxy;
+class FilterManager;
+class GameClientSessionManager;
 
 /**
  * @brief The ServerSession class
@@ -14,7 +19,11 @@ class ClientSession;
 class ServerSession : public EncryptedSession<PacketSession>, public IFilterEndpoint {
 	DECLARE_CLASS(ServerSession)
 public:
-	ServerSession(ClientSession* clientSession);
+	ServerSession(bool authMode,
+	              ClientSession* clientSession,
+	              GameClientSessionManager* gameClientSessionManager,
+	              FilterManager* filterManager,
+	              FilterManager* converterFilterManager);
 	~ServerSession();
 
 	void connect(std::string ip, uint16_t port);
@@ -37,6 +46,12 @@ public:
 	StreamAddress getAddress();
 	void banAddress(StreamAddress address);
 	bool isStrictForwardEnabled();
+	bool isAuthMode() { return authMode; }
+
+	void onClientPacketReceived(const TS_MESSAGE* packet);
+	void onClientDisconnected();
+
+	void detachClient();
 
 protected:
 	void logPacket(bool outgoing, const TS_MESSAGE* msg);
@@ -50,7 +65,15 @@ protected:
 private:
 	using SocketSession::connect;
 
+	bool authMode;
 	ClientSession* clientSession;
+	GameClientSessionManager* gameClientSessionManager;
+
+	EndpointProxy clientEndpointProxy;
+	std::unique_ptr<FilterProxy> packetFilter;
+	std::unique_ptr<FilterProxy> packetConverterFilter;
+	IFilterEndpoint* toServerBaseEndpoint;
+	IFilterEndpoint* toClientBaseEndpoint;
 
 	std::vector<TS_MESSAGE*> pendingMessages;
 	int version;

@@ -19,17 +19,12 @@ public:
 public:
 	AuthClientSession(InputParameters parameters);
 
-	virtual void onServerPacketReceived(const TS_MESSAGE* packet);
-
 protected:
-	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
-
 	virtual std::string getServerIp();
 	virtual uint16_t getServerPort();
 
 private:
 	~AuthClientSession();
-	GameClientSessionManager* gameClientSessionManager;
 };
 
 #endif  // CLIENTSESSION_H
