@@ -1,5 +1,6 @@
 #include "RzTest.h"
 #include "Core/EventLoop.h"
+#include "Core/Utils.h"
 #include "NetSession/EncryptedSession.h"
 #include "Packet/PacketBaseMessage.h"
 #include "TestPacketServer.h"
