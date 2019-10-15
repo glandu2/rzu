@@ -11,3 +11,5 @@ if(BUILD_SHARED_LIBS)
 	INTERFACE USING_RZAUCTIONWATCHER_SHARED
   )
 endif()
+
+add_exe(rzpipelinetest test/test.cpp rzauctionwatcher)
