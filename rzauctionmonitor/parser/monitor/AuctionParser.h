@@ -9,6 +9,35 @@
 #include "NetSession/StartableObject.h"
 #include <string>
 
+struct AuctionFile {
+	std::string filename;
+	size_t alreadyExistingAuctions;
+	size_t addedAuctionsInFile;
+	AUCTION_SIMPLE_FILE auctions;
+	bool isFull;
+
+	AuctionFile() {
+		isFull = true;
+		alreadyExistingAuctions = 0;
+		addedAuctionsInFile = 0;
+	}
+
+	void adjustDetectedType(AuctionComplexDiffWriter* auctionWriter) {
+		for(size_t i = 0; i < auctions.auctions.size(); i++) {
+			const AUCTION_SIMPLE_INFO& auctionData = auctions.auctions[i];
+			if(auctionData.diffType != D_Added && auctionData.diffType != D_Base)
+				isFull = false;
+			if(auctionData.diffType == D_Added && auctionWriter->hasAuction(AuctionUid(auctionData.uid)))
+				alreadyExistingAuctions++;
+			if(auctionData.diffType == D_Added || auctionData.diffType == D_Base)
+				addedAuctionsInFile++;
+		}
+
+		if(alreadyExistingAuctions == 0 && addedAuctionsInFile < auctionWriter->getAuctionCount() / 2)
+			isFull = false;
+	}
+};
+
 class RZAUCTIONWATCHER_EXTERN AuctionParser : public Object, public StartableObject {
 	DECLARE_CLASSNAME(AuctionParser, 0)
 public:
