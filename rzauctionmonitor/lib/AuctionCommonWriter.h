@@ -17,6 +17,7 @@ public:
 	void beginCategory(size_t category, time_t time) { categoryTimeManager.beginCategory(category, time); }
 	void endCategory(size_t category, time_t time) { categoryTimeManager.endCategory(category, time); }
 	time_t getLastEndCategoryTime() { return categoryTimeManager.getLastEndCategoryTime(); }
+	CategoryTimeManager& getCategoryTimeManager() { return categoryTimeManager; }
 
 	void writeAuctionDataToFile(std::string auctionsDir,
 	                            std::string auctionsFile,
