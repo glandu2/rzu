@@ -7,6 +7,8 @@ AuctionComplexDiffWriter::AuctionComplexDiffWriter(size_t categoryCount)
     : AuctionGenericWriter(categoryCount), diffMode(false) {}
 
 void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction) {
+	uint32_t epic;
+
 	if(auction->category >= categoryTimeManager.getCategoryNumber()) {
 		log(LL_Error,
 		    "Auction diff with invalid category: uid: 0x%08X, diffType: %d, category: %d, category number: %d\n",
@@ -31,6 +33,8 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 		estimatedTruePreviousTime = categoryTimeManager.getEstimatedPreviousCategoryBeginTime(auction->category);
 	}
 
+	epic = parseEpic(auction->epic, auction->time);
+
 	switch(diffType) {
 		case D_Base:
 		case D_Added:
@@ -47,7 +51,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 					auctionInfo->setTimeMin(estimatedTruePreviousTime);
 				}
 
-				auctionInfo->update(auction->time, auction->data.data(), auction->data.size());
+				auctionInfo->update(auction->time, epic, auction->data.data(), auction->data.size());
 			} else {
 				if(diffType == D_Updated) {
 					log(LL_Error, "Updated auction not found: 0x%08X\n", auction->uid);
@@ -69,6 +73,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 				                                  previousTimeToUse,
 				                                  auction->time,
 				                                  auction->category,
+				                                  epic,
 				                                  auction->data.data(),
 				                                  auction->data.size()));
 			}
@@ -171,4 +176,14 @@ void AuctionComplexDiffWriter::importDump(const AUCTION_FILE* auctionFile) {
 		addAuction(AuctionComplexData::createFromDump(&auctionInfo));
 	}
 	log(LL_Info, "Imported %d auctions\n", (int) getAuctionCount());
+}
+
+uint32_t AuctionComplexDiffWriter::parseEpic(uint32_t inputEpic, int64_t timestamp) {
+	if(inputEpic != 0xFFFFFF)
+		return inputEpic;
+
+	if(timestamp < 1552986000)  // 2019-03-19T09:00:00.000Z
+		return EPIC_9_5_3;
+	else
+		return EPIC_9_6;
 }

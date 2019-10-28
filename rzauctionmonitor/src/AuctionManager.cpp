@@ -215,11 +215,9 @@ std::unique_ptr<AuctionWorker::AuctionRequest> AuctionManager::getNextRequest() 
 	}
 }
 
-void AuctionManager::addAuctionInfo(const AuctionWorker::AuctionRequest* request,
-                                    uint32_t uid,
-                                    const uint8_t* data,
-                                    int len) {
-	auctionWriter.addAuctionInfo(AuctionUid(uid), time(nullptr), request->category, data, len);
+void AuctionManager::addAuctionInfo(
+    const AuctionWorker::AuctionRequest* request, uint32_t uid, uint32_t epic, const uint8_t* data, int len) {
+	auctionWriter.addAuctionInfo(AuctionUid(uid), time(nullptr), request->category, epic, data, len);
 }
 
 void AuctionManager::onAuctionSearchCompleted(bool success,

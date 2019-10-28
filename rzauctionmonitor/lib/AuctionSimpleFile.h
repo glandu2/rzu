@@ -42,6 +42,7 @@ enum AuctionFileVersion {
 	AUCTION_V3 = 3,
 	AUCTION_V4 = 4,  // add auction meta data in struct format (like prices, seller)
 	AUCTION_V5 = 5,  // fix category time (as serialized after endProcess, must have previous times only)
+	AUCTION_V6 = 6,  // add epic to be able to deserialize data with the right version
 	AUCTION_VERSION_NUM,
 	AUCTION_LATEST = AUCTION_VERSION_NUM - 1
 };
@@ -67,6 +68,7 @@ CREATE_STRUCT(AUCTION_HEADER);
 	_(simple)  (int64_t, previousTime) \
 	_(simple)  (uint16_t, diffType) \
 	_(simple)  (uint16_t, category) \
+	_(simple)  (uint32_t, epic, version >= AUCTION_V6, 0xFFFFFF) \
 	_(count)   (uint16_t, data) \
 	_(dynarray)(uint8_t, data)
 CREATE_STRUCT(AUCTION_SIMPLE_INFO);

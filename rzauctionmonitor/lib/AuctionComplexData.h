@@ -26,10 +26,15 @@ public:
 	};
 
 public:
-	AuctionComplexData(
-	    uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t* data, size_t len);
+	AuctionComplexData(uint32_t uid,
+	                   uint64_t timeMin,
+	                   uint64_t timeMax,
+	                   uint16_t category,
+	                   uint32_t epic,
+	                   const uint8_t* data,
+	                   size_t len);
 
-	bool update(uint64_t time, const uint8_t* data, size_t len);
+	bool update(uint64_t time, uint32_t epic, const uint8_t* data, size_t len);
 	void remove(uint64_t time);
 
 	virtual void beginProcess();
@@ -47,7 +52,7 @@ protected:
 	void unmodified(uint64_t time);
 	void maybeStillDeleted();
 
-	bool parseData(const uint8_t* data, size_t len);
+	bool parseData(uint32_t epic, const uint8_t* data, size_t len);
 	void postParseData(bool newData);
 	uint32_t durationTypeToSecond(DurationType durationType);
 	void setStatus(ProcessStatus status, uint64_t time);
@@ -67,6 +72,7 @@ private:
 	int64_t price;
 
 	// updatable data
+	uint32_t rawDataEpic;
 	std::vector<uint8_t> rawData;
 	DynamicData dynamicData;
 	DynamicData oldDynamicData;

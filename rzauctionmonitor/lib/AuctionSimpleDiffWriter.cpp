@@ -4,13 +4,13 @@
 AuctionSimpleDiffWriter::AuctionSimpleDiffWriter(size_t categoryCount) : AuctionGenericWriter(categoryCount) {}
 
 void AuctionSimpleDiffWriter::addAuctionInfo(
-    AuctionUid uid, uint64_t time, uint16_t category, const uint8_t* data, size_t len) {
+    AuctionUid uid, uint64_t time, uint16_t category, uint32_t epic, const uint8_t* data, size_t len) {
 	AuctionSimpleData* auctionData = getAuction(uid);
 	if(auctionData)
-		auctionData->doUpdate(time, data, len);
+		auctionData->doUpdate(time, epic, data, len);
 	else
 		addAuction(new AuctionSimpleData(
-		    uid, categoryTimeManager.getEstimatedPreviousCategoryBeginTime(category), time, category, data, len));
+		    uid, categoryTimeManager.getEstimatedPreviousCategoryBeginTime(category), time, category, epic, data, len));
 	categoryTimeManager.adjustCategoryTimeRange(category, time);
 }
 

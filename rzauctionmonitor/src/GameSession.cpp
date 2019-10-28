@@ -104,7 +104,7 @@ void GameSession::onGamePacketReceived(const TS_MESSAGE* packet) {
 			break;
 
 		case TS_SC_AUCTION_SEARCH::packetID:
-			auctionWorker->onAuctionSearchResult((const TS_SC_AUCTION_SEARCH*) packet);
+			auctionWorker->onAuctionSearchResult((const TS_SC_AUCTION_SEARCH*) packet, version.get());
 			if(shouldReconnect)
 				abortSession();
 			break;

@@ -41,7 +41,7 @@ public:
 
 	bool hasRequest() { return request.get() != nullptr; }
 	void wakeUp();
-	void onAuctionSearchResult(const TS_SC_AUCTION_SEARCH* packet);
+	void onAuctionSearchResult(const TS_SC_AUCTION_SEARCH* packet, uint32_t epic);
 	void onAuctionSearchFailed(int resultCode);
 
 protected:
