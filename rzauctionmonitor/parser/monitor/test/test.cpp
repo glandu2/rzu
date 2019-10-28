@@ -45,13 +45,12 @@ struct Data {
 
 using WorkData = std::unique_ptr<Data>;
 
-class Sleeper : public PipelineStep<WorkData, WorkData, int> {
+class Sleeper : public PipelineStep<WorkData, WorkData> {
 public:
-	using typename PipelineStep<WorkData, WorkData, int>::WorkItem;
-	using typename PipelineStep<WorkData, WorkData, int>::CommitItem;
+	using typename PipelineStep<WorkData, WorkData>::WorkItem;
 
 	Sleeper(int maxSize, std::string name, int waitDelaySecond)
-	    : PipelineStep<WorkData, WorkData, int>(maxSize, 10), name(name), waitDelaySecond(waitDelaySecond) {
+	    : PipelineStep<WorkData, WorkData>(maxSize, 10), name(name), waitDelaySecond(waitDelaySecond) {
 		printf("%s: task duration: %d ms\n", name.c_str(), waitDelaySecond);
 	}
 
@@ -59,7 +58,7 @@ public:
 		printf("%s: start work on %d\n", name.c_str(), item->getSource()->data);
 		schedule_timeout(
 		    [this, item]() mutable {
-			    this->addResult(item, std::make_unique<Data>(item->getSource()->data * 2), item->getSource()->data * 2);
+			    this->addResult(item, std::make_unique<Data>(item->getSource()->data * 2));
 			    // this->addResult(item, std::make_unique<Data>(item->getSource()->data * 3), item->getSource()->data *
 			    // 3);
 
@@ -68,19 +67,9 @@ public:
 			           item->getSource()->data,
 			           item->getSource()->data * 2,
 			           item->getSource()->data * 3);
-			    this->workDone(item, 0);
+			    this->workDone(item);
 		    },
 		    waitDelaySecond);
-	}
-	virtual void doCommit(std::unique_ptr<CommitItem>& item, int status) override {
-		printf("%s: commit %d (%d -> %d) with status %d)\n",
-		       name.c_str(),
-		       item->getCommitData(),
-		       item->getRealWork()->getSource()->data,
-		       item->getData()->data,
-		       status);
-
-		this->commitDone(item, status);
 	}
 
 private:
@@ -88,20 +77,17 @@ private:
 	const int waitDelaySecond;
 };
 
-class Aggregator : public PipelineStep<WorkData, WorkData, int> {
+class Aggregator : public PipelineStep<WorkData, void> {
 public:
-	using typename PipelineStep<WorkData, WorkData, int>::WorkItem;
-	using typename PipelineStep<WorkData, WorkData, int>::CommitItem;
+	using typename PipelineStep<WorkData, void>::WorkItem;
 
 	Aggregator(int maxSize, std::string name, int waitDelaySecond)
-	    : PipelineStep<WorkData, WorkData, int>(maxSize, 4), name(name), waitDelaySecond(waitDelaySecond) {
+	    : PipelineStep<WorkData, void>(maxSize), name(name), waitDelaySecond(waitDelaySecond) {
 		result = 0;
 		printf("%s: task duration: %d ms\n", name.c_str(), waitDelaySecond);
 	}
 
-	virtual bool doCheckMergeInput(const std::vector<PipelineSourceRef<WorkData>>& input) override {
-		return input.size() != 1;
-	}
+	virtual bool doCheckMergeInput(const std::vector<WorkData>& input) override { return input.size() != 1; }
 
 	virtual void doWork(std::shared_ptr<WorkItem> item) override {
 		printf("%s: start work on:\n", name.c_str());
@@ -118,23 +104,10 @@ public:
 
 			    result += output;
 
-			    this->addResult(item, std::make_unique<Data>(output), output);
-
 			    printf("%s: done %d -> %d (commit data: %d)\n", name.c_str(), item->getSource()->data, output, output);
-			    this->workDone(item, 0);
+			    this->workDone(item);
 		    },
 		    waitDelaySecond);
-	}
-
-	virtual void doCommit(std::unique_ptr<CommitItem>& item, int status) override {
-		printf("%s: commit %d (%d -> %d) with status %d)\n",
-		       name.c_str(),
-		       item->getCommitData(),
-		       item->getRealWork()->getSource()->data,
-		       item->getData()->data,
-		       status);
-
-		this->commitDone(item, status);
 	}
 
 	static int result;
@@ -167,7 +140,7 @@ static int doTest() {
 	int expectedResult = 0;
 
 	for(int i = 0; i < 50; i++) {
-		sleepers.front().queue(std::make_unique<Data>(i));
+		sleepers.front().queue(WorkData(new Data{i}));
 	}
 	for(int i = 0; i < 50; i++) {
 		expectedResult += i * (int) pow(2, sleepers.size());

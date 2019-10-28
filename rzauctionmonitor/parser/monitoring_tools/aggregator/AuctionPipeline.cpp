@@ -6,12 +6,11 @@
 #include <time.h>
 #include <uv.h>
 
-#define PIPELINE_STATE_VERSION 1
+#define PIPELINE_STATE_VERSION AUCTION_LATEST
 
 // clang-format off
 #define PIPELINE_STATE_DEF(_) \
 	_(simple)  (uint16_t, file_version) \
-	_(simple)  (uint64_t, currentDate) \
 	_(count)   (uint8_t, lastParsedFile) \
 	_(dynstring)(lastParsedFile, false) \
 	_(simple)  (AUCTION_FILE, auctionData)
@@ -21,23 +20,23 @@ CREATE_STRUCT(PIPELINE_STATE);
 AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
                                  cval<int>& changeWaitSeconds,
                                  cval<std::string>& statesPath,
-                                 cval<std::string>& auctionStateFile,
-                                 cval<std::string>& ip,
-                                 cval<int>& port,
-                                 cval<std::string>& url,
-                                 cval<std::string>& pwd)
+                                 cval<std::string>& auctionStateFile)
     : auctionsPath(auctionsPath),
       changeWaitSeconds(changeWaitSeconds),
       statesPath(statesPath),
       auctionStateFile(auctionStateFile),
       started(false),
-      sendToWebServerStep(ip, port, url, pwd),
+      scanAuctionStep(this, auctionsPath, changeWaitSeconds),
+      sendToWebServerStep(),
       commitStep(this) {
-	readAuctionStep.plug(&parseAuctionStep)
+	readAuctionStep.plug(&deserializeAuctionStep)
+	    ->plug(&parseAuctionStep)
 	    ->plug(&aggregateStatsStep)
 	    ->plug(&computeStatsStep)
 	    ->plug(&sendToWebServerStep)
 	    ->plug(&commitStep);
+	uv_fs_event_init(EventLoop::getLoop(), &fsEvent);
+	fsEvent.data = this;
 }
 
 bool AuctionPipeline::start() {
@@ -45,7 +44,9 @@ bool AuctionPipeline::start() {
 		started = true;
 		importState();
 		log(LL_Info, "Starting watching auctions directory %s\n", auctionsPath.get().c_str());
-		dirWatchTimer.start(this, &AuctionPipeline::onTimeout, 1000, 10000);
+		// dirWatchTimer.start(this, &AuctionPipeline::onTimeout, 1000, 0);
+		uv_fs_event_start(&fsEvent, &AuctionPipeline::onFsEvent, auctionsPath.get().c_str(), 0);
+		onTimeout();
 	}
 
 	return true;
@@ -54,18 +55,13 @@ bool AuctionPipeline::start() {
 void AuctionPipeline::stop() {
 	log(LL_Info, "Stop watching auctions\n");
 	started = false;
+	uv_fs_event_stop(&fsEvent);
 	dirWatchTimer.stop();
 	readAuctionStep.cancel();
 }
 
 bool AuctionPipeline::isStarted() {
 	return started;
-}
-
-void AuctionPipeline::commit(std::unique_ptr<IPipelineOutput<std::pair<std::string, std::string> > > item, int status) {
-	log(LL_Info, "File %s processed with status %d\n", item->getData().first.c_str(), status);
-	if(status != 0)
-		stop();
 }
 
 void AuctionPipeline::importState() {
@@ -81,6 +77,12 @@ void AuctionPipeline::importState() {
 
 	if(AuctionWriter::readAuctionDataFromFile(aggregationStateFile, data)) {
 		PIPELINE_STATE aggregationState;
+
+		if(data.size() < 2) {
+			log(LL_Info, "Auction state file %s is too small\n", aggregationStateFile.c_str());
+			return;
+		}
+
 		uint16_t version = *reinterpret_cast<const uint16_t*>(data.data());
 		MessageBuffer buffer(data.data(), data.size(), version);
 		aggregationState.deserialize(&buffer);
@@ -105,7 +107,7 @@ void AuctionPipeline::importState() {
 	}
 }
 
-int AuctionPipeline::exportState(const std::string& fullFilename, time_t timestamp, const AUCTION_FILE& auctionFile) {
+int AuctionPipeline::exportState(std::string& fullFilename, AUCTION_FILE& auctionFile) {
 	// Executed in thread
 	PIPELINE_STATE aggregationState;
 
@@ -115,9 +117,9 @@ int AuctionPipeline::exportState(const std::string& fullFilename, time_t timesta
 		return 0;
 	}
 
-	aggregationStateFile = statesPath.get() + "/" + aggregationStateFile;
+	log(LL_Info, "Writing auction state file %s\n", aggregationStateFile.c_str());
 
-	log(LL_Info, "Writting auction state file %s\n", aggregationStateFile.c_str());
+	aggregationStateFile = statesPath.get() + "/" + aggregationStateFile;
 
 	std::string filename;
 	size_t lastSlash = fullFilename.find_last_of('/');
@@ -128,9 +130,8 @@ int AuctionPipeline::exportState(const std::string& fullFilename, time_t timesta
 	}
 
 	aggregationState.file_version = PIPELINE_STATE_VERSION;
-	aggregationState.lastParsedFile = fullFilename;
-	aggregationState.currentDate = timestamp;
-	aggregationState.auctionData = auctionFile;
+	aggregationState.lastParsedFile = std::move(filename);
+	aggregationState.auctionData = std::move(auctionFile);
 
 	std::vector<uint8_t> data;
 	data.resize(aggregationState.getSize(aggregationState.file_version));
@@ -150,10 +151,15 @@ int AuctionPipeline::exportState(const std::string& fullFilename, time_t timesta
 }
 
 void AuctionPipeline::onTimeout() {
+	//	if(readAuctionStep.isFull()) {
+	//		log(LL_Debug, "Pipeline input is still full, not checking new files this time\n");
+	//	} else {
 	scandirReq.data = this;
 	std::string path = auctionsPath.get();
 	log(LL_Debug, "Checking %s for new files since file \"%s\"\n", path.c_str(), lastQueuedFile.c_str());
+
 	uv_fs_scandir(EventLoop::getLoop(), &scandirReq, path.c_str(), 0, &AuctionPipeline::onScandir);
+	//	}
 }
 
 void AuctionPipeline::onScandir(uv_fs_t* req) {
@@ -173,9 +179,9 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 
 	std::vector<std::string> orderedFiles;
 
-	// Get all file names and order by name
+	// Get all file names after lastQueuedFile and order by name
 	while(UV_EOF != uv_fs_scandir_next(req, &dent)) {
-		if(dent.type != UV_DIRENT_DIR)
+		if(dent.type != UV_DIRENT_DIR && strcmp(thisInstance->lastQueuedFile.c_str(), dent.name) < 0)
 			orderedFiles.push_back(dent.name);
 	}
 
@@ -188,29 +194,19 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 
 	for(; it != itEnd; ++it) {
 		const std::string& filename = *it;
-		if(strcmp(thisInstance->lastQueuedFile.c_str(), filename.c_str()) < 0) {
-			uv_fs_t statReq;
-			std::string fullFilename = thisInstance->auctionsPath.get() + "/" + filename;
 
-			uv_fs_stat(EventLoop::getLoop(), &statReq, fullFilename.c_str(), nullptr);
-			uv_fs_req_cleanup(&statReq);
+		std::string fullFilename = thisInstance->auctionsPath.get() + "/" + filename;
 
-			time_t timeLimit = time(nullptr) - waitChangeSeconds;
-
-			if(statReq.statbuf.st_mtim.tv_sec > timeLimit || statReq.statbuf.st_ctim.tv_sec > timeLimit ||
-			   statReq.statbuf.st_birthtim.tv_sec > timeLimit) {
-				thisInstance->log(LL_Trace,
-				                  "File %s too new before parsing (modified less than %d seconds: %ld)\n",
-				                  filename.c_str(),
-				                  waitChangeSeconds,
-				                  statReq.statbuf.st_mtim.tv_sec);
-				// don't parse file after this one if it is a new file (avoid parsing file in wrong order)
-				break;
-			}
-
-			thisInstance->log(LL_Info, "Found new auction file %s\n", filename.c_str());
-			thisInstance->lastQueuedFile = filename;
-			thisInstance->readAuctionStep.queue(std::make_pair(filename, fullFilename), thisInstance);
-		}
+		thisInstance->lastQueuedFile = filename;
+		thisInstance->readAuctionStep.queue(std::make_pair(std::move(filename), std::move(fullFilename)));
 	}
+}
+
+void AuctionPipeline::onFsEvent(uv_fs_event_t* handle, const char* filename, int events, int status) {
+	AuctionPipeline* thisInstance = (AuctionPipeline*) handle->data;
+
+	int waitChangeSeconds = thisInstance->changeWaitSeconds.get();
+	thisInstance->log(
+	    LL_Info, "Change in auctions input directory detected, triggering scandir in %ds\n", waitChangeSeconds);
+	thisInstance->dirWatchTimer.start(thisInstance, &AuctionPipeline::onTimeout, waitChangeSeconds * 1000, 0);
 }

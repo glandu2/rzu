@@ -7,11 +7,25 @@
 #include "P3AggregateStats.h"
 #include <stdint.h>
 
+#include "Packet/PacketDeclaration.h"
+
+// clang-format off
+#define AUCTION_INFO_PER_DAY_DEF(_) \
+	_(simple)(uint32_t, code) \
+	_(simple)(int64_t, estimatedSoldNumber) \
+	_(simple)(int64_t, minEstimatedSoldPrice) \
+	_(simple)(int64_t, maxEstimatedSoldPrice) \
+	_(simple)(int64_t, avgEstimatedSoldPrice) \
+	_(simple)(int64_t, itemNumber) \
+	_(simple)(int64_t, minPrice) \
+	_(simple)(int64_t, maxPrice) \
+	_(simple)(int64_t, avgPrice)
+CREATE_STRUCT(AUCTION_INFO_PER_DAY);
+// clang-format on
+
 class P4ComputeStats
     : public PipelineStep<std::tuple<std::string, time_t, AUCTION_FILE, std::unordered_map<uint32_t, AuctionSummary>>,
-                          std::tuple<std::string, time_t, AUCTION_FILE, std::string>,
-                          char>,
-      public Object {
+                          std::tuple<std::string, time_t, AUCTION_FILE, std::vector<AUCTION_INFO_PER_DAY>>> {
 	DECLARE_CLASSNAME(P4ComputeStats, 0)
 public:
 	P4ComputeStats();
@@ -28,8 +42,9 @@ private:
 			int64_t minPrice;
 			int64_t maxPrice;
 			int64_t avgPrice;
+			int64_t priceSum;
 
-			PriceInfo() : itemNumber(0), minPrice(-1), maxPrice(-1), avgPrice(-1) {}
+			PriceInfo() : itemNumber(0), minPrice(-1), maxPrice(-1), avgPrice(-1), priceSum(0) {}
 			void updateAggregatedStats(const AuctionSummary& summary);
 		};
 

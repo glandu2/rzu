@@ -23,9 +23,7 @@ struct AuctionSummary {
 
 class P3AggregateStats
     : public PipelineStep<std::unique_ptr<AuctionDumpToAggregate>,
-                          std::tuple<std::string, time_t, AUCTION_FILE, std::unordered_map<uint32_t, AuctionSummary>>,
-                          char>,
-      public Object {
+                          std::tuple<std::string, time_t, AUCTION_FILE, std::unordered_map<uint32_t, AuctionSummary>>> {
 	DECLARE_CLASSNAME(P3AggregateStats, 0)
 public:
 	P3AggregateStats();

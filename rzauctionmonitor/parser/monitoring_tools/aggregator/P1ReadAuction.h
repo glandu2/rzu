@@ -7,8 +7,7 @@
 #include "IPipeline.h"
 
 class P1ReadAuction
-    : public PipelineStep<std::pair<std::string, std::string>, std::unique_ptr<AuctionFile>, std::string>,
-      public Object {
+    : public PipelineStep<std::pair<std::string, std::string>, std::pair<std::string, std::vector<uint8_t>>> {
 	DECLARE_CLASSNAME(P1ReadAuction, 0)
 public:
 	P1ReadAuction();

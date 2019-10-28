@@ -1,11 +1,14 @@
 #include "Aggregator.h"
 #include "AuctionParser.h"
 #include "AuctionPipeline.h"
+#include "Console/ConsoleSession.h"
 #include "Core/CrashHandler.h"
 #include "Core/EventLoop.h"
+#include "Database/DbConnectionPool.h"
 #include "GlobalConfig.h"
 #include "LibRzuInit.h"
 #include "NetSession/ServersManager.h"
+#include "P5InsertToSqlServer.h"
 
 static void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
@@ -18,6 +21,11 @@ static void onTerminate(void* instance) {
 int main(int argc, char* argv[]) {
 	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
+
+	DbConnectionPool dbConnectionPool;
+
+	DbBindingLoader::get()->initAll(&dbConnectionPool);
+	PipelineStepMonitor::init();
 
 	ConfigInfo::get()->init(argc, argv);
 
@@ -51,13 +59,11 @@ int main(int argc, char* argv[]) {
 	AuctionPipeline auctionParser(CONFIG_GET()->input.auctionsPath,
 	                              CONFIG_GET()->input.changeWaitSeconds,
 	                              CONFIG_GET()->states.statesPath,
-	                              CONFIG_GET()->states.auctionStateFile,
-	                              CONFIG_GET()->webserver.ip,
-	                              CONFIG_GET()->webserver.port,
-	                              CONFIG_GET()->webserver.url,
-	                              CONFIG_GET()->webserver.pwd);
+	                              CONFIG_GET()->states.auctionStateFile);
 
 	serverManager.addServer("auction.monitor", &auctionParser, nullptr);
+
+	ConsoleServer consoleServer(&serverManager);
 
 	serverManager.start();
 

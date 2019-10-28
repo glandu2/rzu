@@ -9,7 +9,7 @@
 
 class AuctionPipeline;
 
-class P6Commit : public PipelineStep<std::tuple<std::string, time_t, AUCTION_FILE>, char, char>, public Object {
+class P6Commit : public PipelineStep<std::tuple<std::string, time_t, AUCTION_FILE>, void> {
 	DECLARE_CLASSNAME(P6Commit, 0)
 public:
 	P6Commit(AuctionPipeline* auctionPipeline);

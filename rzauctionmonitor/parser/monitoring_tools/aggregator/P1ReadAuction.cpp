@@ -2,7 +2,7 @@
 #include "AuctionWriter.h"
 
 P1ReadAuction::P1ReadAuction()
-    : PipelineStep<std::pair<std::string, std::string>, std::unique_ptr<AuctionFile>, std::string>(2),
+    : PipelineStep<std::pair<std::string, std::string>, std::pair<std::string, std::vector<uint8_t>>>(10000, 1, 10),
       work(this, &P1ReadAuction::processWork, &P1ReadAuction::afterWork) {}
 
 void P1ReadAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
@@ -10,34 +10,22 @@ void P1ReadAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 }
 
 int P1ReadAuction::processWork(std::shared_ptr<WorkItem> item) {
-	const std::pair<std::string, std::string>& filenames = item->getSource();
-	const std::string& filename = filenames.first;
-	const std::string& fullFilename = filenames.second;
-	std::vector<uint8_t> data;
-	int version;
-	AuctionFileFormat fileFormat;
-	std::unique_ptr<AuctionFile> auctionFile{new AuctionFile};
+	auto sources = std::move(item->getSources());
+	for(std::pair<std::string, std::string>& filenames : sources) {
+		std::string& filename = filenames.first;
+		std::string fullFilename = std::move(filenames.second);
+		std::vector<uint8_t> data;
 
-	log(LL_Debug, "Reading file %s\n", filename.c_str());
+		item->setName(filename);
+		log(LL_Info, "Reading file %s\n", filename.c_str());
 
-	if(!AuctionWriter::readAuctionDataFromFile(fullFilename, data)) {
-		log(LL_Error, "Cant read file %s\n", filename.c_str());
-		return EIO;
+		if(!AuctionWriter::readAuctionDataFromFile(fullFilename, data)) {
+			log(LL_Error, "Cant read file %s\n", filename.c_str());
+			return EIO;
+		}
+
+		addResult(item, std::make_pair(std::move(filename), std::move(data)));
 	}
-
-	if(!AuctionWriter::getAuctionFileFormat(data, &version, &fileFormat)) {
-		log(LL_Error, "Invalid file, unrecognized header signature: %s\n", filename.c_str());
-		return EBADMSG;
-	}
-
-	if(!AuctionWriter::deserialize(&auctionFile->auctions, data)) {
-		log(LL_Error, "Can't deserialize file %s\n", filename.c_str());
-		return EILSEQ;
-	}
-
-	auctionFile->filename = filename;
-
-	addResult(item, std::move(auctionFile), fullFilename);
 
 	return 0;
 }

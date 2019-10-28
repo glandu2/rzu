@@ -8,9 +8,7 @@
 #include <stdint.h>
 
 class P5SendToWebServer : public PipelineStep<std::tuple<std::string, time_t, AUCTION_FILE, std::string>,
-                                              std::tuple<std::string, time_t, AUCTION_FILE>,
-                                              char>,
-                          public Object {
+                                              std::tuple<std::string, time_t, AUCTION_FILE>> {
 	DECLARE_CLASSNAME(P5SendToWebServer, 0)
 public:
 	P5SendToWebServer(cval<std::string>& ip, cval<int>& port, cval<std::string>& url, cval<std::string>& pwd);
