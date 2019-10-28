@@ -22,7 +22,14 @@ struct AuctionFile {
 		addedAuctionsInFile = 0;
 	}
 
-	void adjustDetectedType(AuctionComplexDiffWriter* auctionWriter) {
+	static bool isFileFullType(const AUCTION_SIMPLE_FILE& auctions,
+	                           AuctionComplexDiffWriter* auctionWriter,
+	                           size_t* outAlreadyExistingAuctions = nullptr,
+	                           size_t* outAddedAuctionsInFile = nullptr) {
+		bool isFull = true;
+		size_t alreadyExistingAuctions = 0;
+		size_t addedAuctionsInFile = 0;
+
 		for(size_t i = 0; i < auctions.auctions.size(); i++) {
 			const AUCTION_SIMPLE_INFO& auctionData = auctions.auctions[i];
 			if(auctionData.diffType != D_Added && auctionData.diffType != D_Base)
@@ -35,6 +42,18 @@ struct AuctionFile {
 
 		if(alreadyExistingAuctions == 0 && addedAuctionsInFile < auctionWriter->getAuctionCount() / 2)
 			isFull = false;
+
+		if(outAlreadyExistingAuctions)
+			*outAlreadyExistingAuctions = alreadyExistingAuctions;
+
+		if(outAddedAuctionsInFile)
+			*outAddedAuctionsInFile = addedAuctionsInFile;
+
+		return isFull;
+	}
+
+	void adjustDetectedType(AuctionComplexDiffWriter* auctionWriter) {
+		isFull = isFileFullType(auctions, auctionWriter, &alreadyExistingAuctions, &addedAuctionsInFile);
 	}
 };
 
