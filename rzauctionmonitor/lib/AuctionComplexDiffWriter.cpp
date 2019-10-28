@@ -1,5 +1,6 @@
 #include "AuctionComplexDiffWriter.h"
 #include "Core/PrintfFormats.h"
+#include <algorithm>
 #include <time.h>
 
 AuctionComplexDiffWriter::AuctionComplexDiffWriter(size_t categoryCount)
@@ -114,10 +115,22 @@ void AuctionComplexDiffWriter::beginProcess() {
 }
 
 void AuctionComplexDiffWriter::endProcess() {
-	AuctionGenericWriter::endProcess([this](AuctionComplexData* data) {
-		data->endProcess(categoryTimeManager.getEstimatedCategoryBeginTime(data->getCategory()),
-		                 categoryTimeManager.getEstimatedCategoryEndTime(data->getCategory()),
-		                 diffMode);
+	struct CategoryTimeInfo {
+		uint64_t begin;
+		uint64_t end;
+	};
+
+	// Cache category times to have faster lookups (getEstimatedXXX compute each time the result)
+	std::vector<CategoryTimeInfo> categoryTimeInfo;
+	categoryTimeInfo.resize(categoryTimeManager.getCategoryNumber());
+	for(size_t i = 0; i < categoryTimeInfo.size(); i++) {
+		categoryTimeInfo[i].begin = categoryTimeManager.getEstimatedCategoryBeginTime(i);
+		categoryTimeInfo[i].end = categoryTimeManager.getEstimatedCategoryEndTime(i);
+	}
+
+	AuctionGenericWriter::endProcess([this, &categoryTimeInfo](AuctionComplexData* data) {
+		data->endProcess(
+		    categoryTimeInfo[data->getCategory()].begin, categoryTimeInfo[data->getCategory()].end, diffMode);
 	});
 }
 
@@ -142,10 +155,9 @@ AUCTION_FILE AuctionComplexDiffWriter::exportDump(bool doFullDump, bool alwaysWi
 		if(!doFullDump && !auctionInfo->outputInPartialDump())
 			return;
 
-		AUCTION_INFO auctionItem;
+		auctionFile.auctions.emplace_back();
+		AUCTION_INFO& auctionItem = auctionFile.auctions.back();
 		auctionInfo->serialize(&auctionItem, alwaysWithData);
-
-		auctionFile.auctions.push_back(auctionItem);
 	});
 
 	return auctionFile;

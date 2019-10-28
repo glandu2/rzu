@@ -307,7 +307,7 @@ bool AuctionWriter::deserialize(AUCTION_SIMPLE_FILE* file, const std::vector<uin
 			file->auctions.reserve(complexFile.auctions.size());
 			for(size_t i = 0; i < complexFile.auctions.size(); i++) {
 				const AUCTION_INFO& auctionInfo = complexFile.auctions[i];
-				file->auctions.emplace_back(AUCTION_SIMPLE_INFO());
+				file->auctions.emplace_back();
 				AUCTION_SIMPLE_INFO& auctionSimpleInfo = file->auctions.back();
 
 				auctionSimpleInfo.uid = auctionInfo.uid;
