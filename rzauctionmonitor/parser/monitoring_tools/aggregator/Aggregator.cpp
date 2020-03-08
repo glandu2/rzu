@@ -61,7 +61,7 @@ bool Aggregator::sendToWebServer(const std::string& data) {
 	                    pwd.get().c_str());
 
 	log(LL_Info, "Sending data to url %s\n", fullUrl.c_str());
-	httpClientSession.sendData(fullUrl, data);
+	httpClientSession.sendData(fullUrl, data, []() {});
 
 	return true;
 }

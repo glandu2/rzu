@@ -13,6 +13,9 @@ struct AuctionInputTestData {
 		category = rand() % 18;
 		duration_type = durationType;
 		price = rand();
+		epic = rand();
+		if(epic == 0xFFFFFF)  // avoid special 'not set' value
+			epic = 0;
 	}
 
 	uint32_t uid;
@@ -26,6 +29,7 @@ struct AuctionInputTestData {
 	std::string seller;
 	BidFlag bid_flag;
 
+	uint32_t epic;
 	std::vector<uint8_t> rawData;
 	std::vector<uint8_t> expectedData;
 
@@ -41,6 +45,9 @@ struct AuctionInputTestData {
 		auctionData.price = price;
 		strcpy(auctionData.seller, seller.c_str());
 
+		epic = rand();
+		if(epic == 0xFFFFFF)  // avoid special 'not set' value
+			epic = 0;
 		rawData.resize(rand() % 1024 + sizeof(auctionData));
 		for(size_t i = 0; i < rawData.size(); i++)
 			rawData[i] = i & 0xFF;
@@ -70,6 +77,7 @@ static void addAuction(AuctionComplexDiffWriter* auctionWriter, AuctionInputTest
 	auctionInfo.previousTime = testData.previousTime;
 	auctionInfo.diffType = D_Base;
 	auctionInfo.category = testData.category;
+	auctionInfo.epic = testData.epic;
 	auctionInfo.data = testData.rawData;
 
 	auctionWriter->addAuctionInfo(&auctionInfo);
@@ -84,6 +92,7 @@ static void addAuctionDiff(AuctionComplexDiffWriter* auctionWriter, AuctionOuput
 	auctionInfo.previousTime = testData.previousTime;
 	auctionInfo.diffType = testData.diffType;
 	auctionInfo.category = testData.category;
+	auctionInfo.epic = testData.epic;
 	auctionInfo.data = testData.rawData;
 
 	auctionWriter->addAuctionInfo(&auctionInfo);
@@ -129,6 +138,7 @@ static void expectAuction(AUCTION_FILE* auctionFile, AuctionOuputTestData& aucti
 		EXPECT_EQ(auctionOutput.duration_type, auction.duration_type);
 		EXPECT_EQ(auctionOutput.price, auction.price);
 		EXPECT_STREQ(auctionOutput.seller.c_str(), auction.seller.c_str());
+		EXPECT_EQ(auctionOutput.epic, auction.epic);
 
 		if(expectData) {
 			EXPECT_EQ(auctionOutput.expectedData.size(), auction.data.size());

@@ -90,9 +90,9 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 
 	createBinding(dbConnectionPool,
 	              DB_Item::connectionString,
-	              "{ CALL add_auctions (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+	              "{ CALL add_auctions2 (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
 	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }",
+	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }",
 	              DbQueryBinding::EM_NoRow);
 
 	addParam("uid", &InputType::uid);
@@ -168,12 +168,13 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 	addParam("elemental_effect_magic_point", &InputType::elemental_effect_magic_point);
 	addParam("appearance_code", &InputType::appearance_code);
 	addParam("summon_code", &InputType::summon_code);
+	addParam("item_effect_id", &InputType::item_effect_id);
 }
 DECLARE_DB_BINDING(DB_Item, "db_item");
 
 void DB_Item::fillItemInfo(DB_Item::Input& input, const std::vector<uint8_t>& data) {
 	TS_SEARCHED_AUCTION_INFO item;
-	MessageBuffer structBuffer(data.data(), data.size(), EPIC_LATEST);
+	MessageBuffer structBuffer(data.data(), data.size(), EPIC_9_5_3);
 
 	item.deserialize(&structBuffer);
 	if(!structBuffer.checkFinalSize()) {
@@ -222,6 +223,7 @@ void DB_Item::fillItemInfo(DB_Item::Input& input, const std::vector<uint8_t>& da
 		input.elemental_effect_magic_point = item.auction_details.item_info.elemental_effect_magic_point;
 		input.appearance_code = item.auction_details.item_info.appearance_code;
 		input.summon_code = item.auction_details.item_info.summon_code;
+		input.item_effect_id = item.auction_details.item_info.item_effect_id;
 	}
 }
 

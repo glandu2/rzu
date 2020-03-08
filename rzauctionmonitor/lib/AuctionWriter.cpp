@@ -273,6 +273,7 @@ bool AuctionWriter::deserializeOldFile(const std::vector<uint8_t>& data, AUCTION
 		auctionInfo.previousTime = header->getPreviousTime();
 		auctionInfo.diffType = header->getFlag();
 		auctionInfo.category = header->getCategory();
+		auctionInfo.epic = 0xFFFFFF;
 		auctionInfo.data = std::vector<uint8_t>(rawData, rawData + dataSize);
 
 		p += sizeof(*header) + header->getSize();
@@ -307,7 +308,7 @@ bool AuctionWriter::deserialize(AUCTION_SIMPLE_FILE* file, const std::vector<uin
 			file->auctions.reserve(complexFile.auctions.size());
 			for(size_t i = 0; i < complexFile.auctions.size(); i++) {
 				const AUCTION_INFO& auctionInfo = complexFile.auctions[i];
-				file->auctions.emplace_back(AUCTION_SIMPLE_INFO());
+				file->auctions.emplace_back();
 				AUCTION_SIMPLE_INFO& auctionSimpleInfo = file->auctions.back();
 
 				auctionSimpleInfo.uid = auctionInfo.uid;
@@ -315,6 +316,7 @@ bool AuctionWriter::deserialize(AUCTION_SIMPLE_FILE* file, const std::vector<uin
 				auctionSimpleInfo.previousTime = auctionInfo.previousTime;
 				auctionSimpleInfo.diffType = auctionInfo.diffType;
 				auctionSimpleInfo.category = auctionInfo.category;
+				auctionSimpleInfo.epic = auctionInfo.epic;
 				auctionSimpleInfo.data = auctionInfo.data;
 			}
 			break;

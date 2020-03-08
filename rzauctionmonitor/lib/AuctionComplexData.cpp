@@ -1,11 +1,12 @@
 #include "AuctionComplexData.h"
+#include "AuctionWriter.h"
 #include "CategoryTimeManager.h"
 #include "Core/Object.h"
 #include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 
 AuctionComplexData::AuctionComplexData(
-    uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t* data, size_t len)
+    uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, uint32_t epic, const uint8_t* data, size_t len)
     : IAuctionData(AuctionUid(uid), category, timeMin, timeMax),
       processStatus(PS_Added),
       deleted(false),
@@ -14,15 +15,15 @@ AuctionComplexData::AuctionComplexData(
       estimatedEndTimeFromAdded(true),
       estimatedEndTimeMin(0),
       estimatedEndTimeMax(0) {
-	parseData(data, len);
+	parseData(epic, data, len);
 	postParseData(true);
 
 	if(data == nullptr || len == 0)
 		log(LL_Error, "Auction added without data: 0x%08X\n", getUid().get());
 }
 
-bool AuctionComplexData::update(uint64_t time, const uint8_t* data, size_t len) {
-	bool dataModified = parseData(data, len);
+bool AuctionComplexData::update(uint64_t time, uint32_t epic, const uint8_t* data, size_t len) {
+	bool dataModified = parseData(epic, data, len);
 	if(dataModified && processStatus != PS_Added) {
 		setStatus(PS_Updated, time);
 	} else if(!dataModified && processStatus != PS_Added && processStatus != PS_Updated) {
@@ -105,9 +106,7 @@ bool AuctionComplexData::outputInPartialDump() {
 		          processStatus,
 		          getUid().get());
 
-	if(diffType == D_Unmodified || diffType == D_MaybeDeleted)
-		return false;
-	return true;
+	return AuctionWriter::diffTypeInPartialDump(diffType);
 }
 
 bool AuctionComplexData::isInFinalState() const {
@@ -119,6 +118,7 @@ AuctionComplexData* AuctionComplexData::createFromDump(const AUCTION_INFO* aucti
 	                                                     auctionInfo->previousTime,
 	                                                     auctionInfo->time,
 	                                                     auctionInfo->category,
+	                                                     auctionInfo->epic,
 	                                                     auctionInfo->data.data(),
 	                                                     auctionInfo->data.size());
 
@@ -163,11 +163,13 @@ void AuctionComplexData::serialize(AUCTION_INFO* auctionInfo, bool alwaysWithDat
 	auctionInfo->estimatedEndTimeFromAdded = estimatedEndTimeFromAdded;
 	auctionInfo->estimatedEndTimeMin = estimatedEndTimeMin;
 	auctionInfo->estimatedEndTimeMax = estimatedEndTimeMax;
+	auctionInfo->epic = rawDataEpic;
 
-	if(alwaysWithData || auctionInfo->diffType == D_Added)
+	if(alwaysWithData || auctionInfo->diffType == D_Added) {
 		auctionInfo->data = rawData;
-	else
+	} else {
 		auctionInfo->data.clear();
+	}
 }
 
 DiffType AuctionComplexData::getAuctionDiffType() const {
@@ -224,7 +226,7 @@ void AuctionComplexData::setStatus(ProcessStatus status, uint64_t time) {
 	processStatus = status;
 }
 
-bool AuctionComplexData::parseData(const uint8_t* data, size_t len) {
+bool AuctionComplexData::parseData(uint32_t epic, const uint8_t* data, size_t len) {
 	bool hasChanged;
 
 	if(data == nullptr || len == 0) {
@@ -250,11 +252,13 @@ bool AuctionComplexData::parseData(const uint8_t* data, size_t len) {
 		}
 		hasChanged = rawData.size() != len || memcmp(rawData.data(), data, len) != 0;
 
+		rawDataEpic = epic;
 		rawData.assign(data, data + len);
 
 		return hasChanged;
 	}
 
+	rawDataEpic = epic;
 	rawData.assign(data, data + len);
 
 	seller = Utils::convertToString(auctionDataEnd->seller, sizeof(auctionDataEnd->seller) - 1);

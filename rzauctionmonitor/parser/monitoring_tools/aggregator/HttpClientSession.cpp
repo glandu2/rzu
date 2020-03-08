@@ -7,7 +7,9 @@ HttpClientSession::HttpClientSession(cval<std::string>& ip, cval<int>& port) : s
 	resolver.data = this;
 }
 
-void HttpClientSession::sendData(std::string url, const std::string& data) {
+void HttpClientSession::sendData(const std::string& url,
+                                 const std::string& data,
+                                 const std::function<void()>& callback) {
 	if(sending) {
 		log(LL_Warning, "Already sending %d data\n", (int) dataToSend.size());
 	}
@@ -15,6 +17,7 @@ void HttpClientSession::sendData(std::string url, const std::string& data) {
 	Data request;
 	request.data = data;
 	request.url = url;
+	request.callback = callback;
 
 	dataToSend.push_back(request);
 
@@ -99,6 +102,8 @@ EventChain<SocketSession> HttpClientSession::onDataReceived() {
 	log(LL_Debug, "Received: %s\n", str.c_str());
 
 	if(strncmp(str.c_str(), HTTP_STATUS_OK, sizeof(HTTP_STATUS_OK) - 1) == 0) {
+		const Data& data = dataToSend.front();
+		data.callback();
 		dataToSend.pop_front();
 		log(LL_Info, "Data sent\n");
 	} else {

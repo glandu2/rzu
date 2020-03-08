@@ -15,7 +15,8 @@ class RZAUCTION_EXTERN AuctionSimpleDiffWriter : public AuctionGenericWriter<Auc
 public:
 	AuctionSimpleDiffWriter(size_t categoryCount);
 
-	void addAuctionInfo(AuctionUid uid, uint64_t time, uint16_t category, const uint8_t* data, size_t len);
+	void addAuctionInfo(
+	    AuctionUid uid, uint64_t time, uint16_t category, uint32_t epic, const uint8_t* data, size_t len);
 	void beginProcess();
 	void endProcess();
 

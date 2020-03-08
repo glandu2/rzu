@@ -14,6 +14,7 @@
 	_(simple)  (int64_t, estimatedEndTimeMax) \
 	_(simple)  (uint16_t, diffType) \
 	_(simple)  (uint16_t, category) \
+	_(simple)  (uint32_t, epic, version >= AUCTION_V6, 0xFFFFFF) \
 	_(count)   (uint16_t, data) \
 	_(dynarray)(uint8_t, data) \
 	_(simple)  (int8_t, duration_type, version >= AUCTION_V4) \
@@ -30,5 +31,6 @@ CREATE_STRUCT(AUCTION_INFO);
 	_(count)   (uint32_t, auctions) \
 	_(dynarray)(AUCTION_INFO, auctions)
 CREATE_STRUCT(AUCTION_FILE);
+// clang-format on
 
 #endif  // AUCTIONFILE_H

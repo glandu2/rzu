@@ -9,6 +9,9 @@ struct AuctionSimpleInputTestData {
 		uid = rand();
 		time = rand();
 		category = rand() % 18;
+		epic = rand();
+		if(epic == 0xFFFFFF)  // avoid special 'not set' value
+			epic = 0;
 	}
 
 	uint32_t uid;
@@ -16,6 +19,7 @@ struct AuctionSimpleInputTestData {
 	uint16_t diffType;
 	uint16_t category;
 
+	uint32_t epic;
 	std::vector<uint8_t> rawData;
 	std::vector<uint8_t> expectedData;
 
@@ -23,6 +27,9 @@ struct AuctionSimpleInputTestData {
 		if(rawData.size() > 0)
 			return;
 
+		epic = rand();
+		if(epic == 0xFFFFFF)  // avoid special 'not set' value
+			epic = 0;
 		rawData.resize(rand() % 1024 + 1);
 		for(size_t i = 0; i < rawData.size(); i++)
 			rawData[i] = rand() & 0xFF;
@@ -39,8 +46,12 @@ struct AuctionSimpleOuputTestData : public AuctionSimpleInputTestData {
 
 static void addAuction(AuctionSimpleDiffWriter* auctionWriter, AuctionSimpleInputTestData& testData) {
 	testData.updateRawData();
-	auctionWriter->addAuctionInfo(
-	    AuctionUid(testData.uid), testData.time, testData.category, testData.rawData.data(), testData.rawData.size());
+	auctionWriter->addAuctionInfo(AuctionUid(testData.uid),
+	                              testData.time,
+	                              testData.category,
+	                              testData.epic,
+	                              testData.rawData.data(),
+	                              testData.rawData.size());
 }
 
 static void dumpAuctions(AuctionSimpleDiffWriter* auctionWriter, AUCTION_SIMPLE_FILE* auctionFile, bool doFulldump) {
@@ -70,6 +81,7 @@ static void expectAuction(AUCTION_SIMPLE_FILE* auctionFile, AuctionSimpleOuputTe
 
 		EXPECT_EQ(auctionOutput.diffType, auction.diffType);
 		EXPECT_EQ(auctionOutput.category, auction.category);
+		EXPECT_EQ(auctionOutput.epic, auction.epic);
 
 		EXPECT_EQ(auctionOutput.expectedData.size(), auction.data.size());
 		if(auctionOutput.expectedData.size() == auction.data.size()) {

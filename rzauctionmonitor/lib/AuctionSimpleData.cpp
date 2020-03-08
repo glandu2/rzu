@@ -2,14 +2,19 @@
 #include "Core/Object.h"
 #include "Core/Utils.h"
 
-AuctionSimpleData::AuctionSimpleData(
-    AuctionUid uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t* data, size_t len)
+AuctionSimpleData::AuctionSimpleData(AuctionUid uid,
+                                     uint64_t timeMin,
+                                     uint64_t timeMax,
+                                     uint16_t category,
+                                     uint32_t epic,
+                                     const uint8_t* data,
+                                     size_t len)
     : IAuctionData(uid, category, timeMin, timeMax), processStatus(PS_Added) {
-	parseData(data, len);
+	parseData(epic, data, len);
 }
 
-bool AuctionSimpleData::doUpdate(uint64_t timeMax, const uint8_t* data, size_t len) {
-	bool dataModified = parseData(data, len);
+bool AuctionSimpleData::doUpdate(uint64_t timeMax, uint32_t epic, const uint8_t* data, size_t len) {
+	bool dataModified = parseData(epic, data, len);
 	if(dataModified && processStatus != PS_Added) {
 		setStatus(PS_Updated, timeMax);
 	} else if(!dataModified && processStatus != PS_Added && processStatus != PS_Updated) {
@@ -69,6 +74,7 @@ AuctionSimpleData* AuctionSimpleData::createFromDump(const AUCTION_SIMPLE_INFO* 
 	                                          auctionInfo->previousTime,
 	                                          auctionInfo->time,
 	                                          auctionInfo->category,
+	                                          auctionInfo->epic,
 	                                          auctionInfo->data.data(),
 	                                          auctionInfo->data.size());
 	ProcessStatus processStatus = getAuctionProcessStatus((DiffType) auctionInfo->diffType);
@@ -92,6 +98,7 @@ void AuctionSimpleData::serialize(AUCTION_SIMPLE_INFO* auctionInfo) const {
 	auctionInfo->diffType = getAuctionDiffType();
 	auctionInfo->category = getCategory();
 
+	auctionInfo->epic = rawDataEpic;
 	auctionInfo->data = rawData;
 }
 
@@ -135,7 +142,7 @@ AuctionSimpleData::ProcessStatus AuctionSimpleData::getAuctionProcessStatus(Diff
 	return PS_NotProcessed;
 }
 
-bool AuctionSimpleData::parseData(const uint8_t* data, size_t len) {
+bool AuctionSimpleData::parseData(uint32_t epic, const uint8_t* data, size_t len) {
 	if(data == nullptr || len == 0) {
 		log(LL_Error, "No auction data, uid: 0x%08X\n", getUid().get());
 		return false;
@@ -143,6 +150,7 @@ bool AuctionSimpleData::parseData(const uint8_t* data, size_t len) {
 
 	bool hasChanged = rawData.size() != len || memcmp(rawData.data(), data, len) != 0;
 
+	rawDataEpic = epic;
 	rawData.assign(data, data + len);
 
 	return hasChanged;

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-file(GLOB SOURCE_FILES *.cpp *.h)
+file(GLOB_RECURSE SOURCE_FILES *.cpp *.h *.hpp)
 
 add_lib(rzauctionwriter "${SOURCE_FILES}" rzu z)
 target_include_directories(rzauctionwriter PUBLIC .)

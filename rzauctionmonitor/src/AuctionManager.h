@@ -28,7 +28,8 @@ public:
 	void loadAccounts();
 
 	std::unique_ptr<AuctionWorker::AuctionRequest> getNextRequest();
-	void addAuctionInfo(const AuctionWorker::AuctionRequest* request, uint32_t uid, const uint8_t* data, int len);
+	void addAuctionInfo(
+	    const AuctionWorker::AuctionRequest* request, uint32_t uid, uint32_t epic, const uint8_t* data, int len);
 	void onAuctionSearchCompleted(bool success,
 	                              int pageTotal,
 	                              std::unique_ptr<AuctionWorker::AuctionRequest> auctionRequest);

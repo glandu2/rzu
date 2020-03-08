@@ -4,15 +4,17 @@
 #include "Config/ConfigParamVal.h"
 #include "Core/Timer.h"
 #include "NetSession/SocketSession.h"
+#include <functional>
 #include <list>
 #include <string>
 
 class HttpClientSession : public SocketSession {
 	DECLARE_CLASSNAME(HttpClientSession, 0)
+
 public:
 	HttpClientSession(cval<std::string>& ip, cval<int>& port);
 
-	void sendData(std::string url, const std::string& data);
+	void sendData(const std::string& url, const std::string& data, const std::function<void()>& callback);
 	size_t getPendingNumber() { return dataToSend.size(); }
 
 protected:
@@ -35,6 +37,7 @@ private:
 	struct Data {
 		std::string url;
 		std::string data;
+		std::function<void()> callback;
 	};
 
 	std::list<Data> dataToSend;

@@ -111,6 +111,9 @@ void CategoryTimeManager::serializeHeader(AUCTION_HEADER& header, DumpType dumpT
 	header.categories.reserve(categoryTime.size());
 	for(size_t i = 0; i < categoryTime.size(); i++) {
 		AUCTION_CATEGORY_INFO categoryInfo;
+		// endProcess is expected to have been called
+		// so the beginTime and endTime of categories has been moved to previous{Begin,End}
+		// so read these.
 		categoryInfo.beginTime = categoryTime[i].previousBegin;
 		categoryInfo.endTime = categoryTime[i].previousEnd;
 		header.categories.push_back(categoryInfo);

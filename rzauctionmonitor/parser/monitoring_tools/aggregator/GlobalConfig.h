@@ -23,10 +23,12 @@ struct GlobalConfig {
 	struct InputConfig {
 		cval<std::string>& auctionsPath;
 		cval<int>& changeWaitSeconds;
+		cval<bool>& autoStart;
 
 		InputConfig()
 		    : auctionsPath(CFG_CREATE("input.auctionpath", "auctions")),
-		      changeWaitSeconds(CFG_CREATE("input.waitchangeseconds", 30)) {
+		      changeWaitSeconds(CFG_CREATE("input.waitchangeseconds", 30)),
+		      autoStart(CFG_CREATE("input.autostart", true)) {
 			Utils::autoSetAbsoluteDir(auctionsPath);
 		}
 	} input;

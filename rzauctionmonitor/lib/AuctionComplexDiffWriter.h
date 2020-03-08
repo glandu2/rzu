@@ -25,6 +25,9 @@ public:
 	void importDump(const AUCTION_FILE* auctionFile);
 
 private:
+	uint32_t parseEpic(uint32_t inputEpic, int64_t timestamp);
+
+private:
 	bool diffMode;
 };
 

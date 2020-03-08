@@ -1,11 +1,14 @@
 #include "AuctionComplexDiffWriter.h"
 #include "Core/PrintfFormats.h"
+#include <algorithm>
 #include <time.h>
 
 AuctionComplexDiffWriter::AuctionComplexDiffWriter(size_t categoryCount)
     : AuctionGenericWriter(categoryCount), diffMode(false) {}
 
 void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction) {
+	uint32_t epic;
+
 	if(auction->category >= categoryTimeManager.getCategoryNumber()) {
 		log(LL_Error,
 		    "Auction diff with invalid category: uid: 0x%08X, diffType: %d, category: %d, category number: %d\n",
@@ -30,6 +33,8 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 		estimatedTruePreviousTime = categoryTimeManager.getEstimatedPreviousCategoryBeginTime(auction->category);
 	}
 
+	epic = parseEpic(auction->epic, auction->time);
+
 	switch(diffType) {
 		case D_Base:
 		case D_Added:
@@ -46,7 +51,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 					auctionInfo->setTimeMin(estimatedTruePreviousTime);
 				}
 
-				auctionInfo->update(auction->time, auction->data.data(), auction->data.size());
+				auctionInfo->update(auction->time, epic, auction->data.data(), auction->data.size());
 			} else {
 				if(diffType == D_Updated) {
 					log(LL_Error, "Updated auction not found: 0x%08X\n", auction->uid);
@@ -68,6 +73,7 @@ void AuctionComplexDiffWriter::addAuctionInfo(const AUCTION_SIMPLE_INFO* auction
 				                                  previousTimeToUse,
 				                                  auction->time,
 				                                  auction->category,
+				                                  epic,
 				                                  auction->data.data(),
 				                                  auction->data.size()));
 			}
@@ -114,10 +120,22 @@ void AuctionComplexDiffWriter::beginProcess() {
 }
 
 void AuctionComplexDiffWriter::endProcess() {
-	AuctionGenericWriter::endProcess([this](AuctionComplexData* data) {
-		data->endProcess(categoryTimeManager.getEstimatedCategoryBeginTime(data->getCategory()),
-		                 categoryTimeManager.getEstimatedCategoryEndTime(data->getCategory()),
-		                 diffMode);
+	struct CategoryTimeInfo {
+		uint64_t begin;
+		uint64_t end;
+	};
+
+	// Cache category times to have faster lookups (getEstimatedXXX compute each time the result)
+	std::vector<CategoryTimeInfo> categoryTimeInfo;
+	categoryTimeInfo.resize(categoryTimeManager.getCategoryNumber());
+	for(size_t i = 0; i < categoryTimeInfo.size(); i++) {
+		categoryTimeInfo[i].begin = categoryTimeManager.getEstimatedCategoryBeginTime(i);
+		categoryTimeInfo[i].end = categoryTimeManager.getEstimatedCategoryEndTime(i);
+	}
+
+	AuctionGenericWriter::endProcess([this, &categoryTimeInfo](AuctionComplexData* data) {
+		data->endProcess(
+		    categoryTimeInfo[data->getCategory()].begin, categoryTimeInfo[data->getCategory()].end, diffMode);
 	});
 }
 
@@ -133,19 +151,19 @@ void AuctionComplexDiffWriter::dumpAuctions(std::vector<uint8_t>& output, bool d
 AUCTION_FILE AuctionComplexDiffWriter::exportDump(bool doFullDump, bool alwaysWithData) {
 	AUCTION_FILE auctionFile;
 
-	log(LL_Info, "Exporting %d auctions\n", (int) getAuctionCount());
-
 	categoryTimeManager.serializeHeader(auctionFile.header, doFullDump ? DT_Full : DT_Diff);
 
-	auctionFile.auctions.reserve(getAuctionCount());
+	size_t auctionCount = getAuctionCount();
+	log(LL_Info, "Exporting %d auctions\n", (int) auctionCount);
+	auctionFile.auctions.reserve(auctionCount);
+
 	forEachAuction([&auctionFile, doFullDump, alwaysWithData](AuctionComplexData* auctionInfo) {
 		if(!doFullDump && !auctionInfo->outputInPartialDump())
 			return;
 
-		AUCTION_INFO auctionItem;
+		auctionFile.auctions.emplace_back();
+		AUCTION_INFO& auctionItem = auctionFile.auctions.back();
 		auctionInfo->serialize(&auctionItem, alwaysWithData);
-
-		auctionFile.auctions.push_back(auctionItem);
 	});
 
 	return auctionFile;
@@ -159,4 +177,14 @@ void AuctionComplexDiffWriter::importDump(const AUCTION_FILE* auctionFile) {
 		addAuction(AuctionComplexData::createFromDump(&auctionInfo));
 	}
 	log(LL_Info, "Imported %d auctions\n", (int) getAuctionCount());
+}
+
+uint32_t AuctionComplexDiffWriter::parseEpic(uint32_t inputEpic, int64_t timestamp) {
+	if(inputEpic != 0xFFFFFF)
+		return inputEpic;
+
+	if(timestamp < 1552986000)  // 2019-03-19T09:00:00.000Z
+		return EPIC_9_5_3;
+	else
+		return EPIC_9_6;
 }

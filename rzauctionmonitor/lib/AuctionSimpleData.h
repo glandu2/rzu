@@ -23,10 +23,15 @@ private:
 	enum ProcessStatus { PS_NotProcessed, PS_Unmodifed, PS_Added, PS_Updated, PS_Deleted };
 
 public:
-	AuctionSimpleData(
-	    AuctionUid uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, const uint8_t* data, size_t len);
+	AuctionSimpleData(AuctionUid uid,
+	                  uint64_t timeMin,
+	                  uint64_t timeMax,
+	                  uint16_t category,
+	                  uint32_t epic,
+	                  const uint8_t* data,
+	                  size_t len);
 
-	virtual bool doUpdate(uint64_t timeMax, const uint8_t* data, size_t len);
+	virtual bool doUpdate(uint64_t timeMax, uint32_t epic, const uint8_t* data, size_t len);
 	virtual void beginProcess();
 	virtual void endProcess(uint64_t categoryEndTime);
 	virtual bool isInFinalState() const;
@@ -39,12 +44,13 @@ public:
 	void setStatus(ProcessStatus status, uint64_t time);
 
 private:
-	bool parseData(const uint8_t* data, size_t len);
+	bool parseData(uint32_t epic, const uint8_t* data, size_t len);
 	DiffType getAuctionDiffType() const;
 	static ProcessStatus getAuctionProcessStatus(DiffType diffType);
 
 private:
 	ProcessStatus processStatus;
+	uint32_t rawDataEpic;
 	std::vector<uint8_t> rawData;
 };
 
