@@ -5,6 +5,7 @@
 #include "Core/Object.h"
 #include "IPipeline.h"
 #include "P2ParseAuction.h"
+#include "PipelineState.h"
 #include <stdint.h>
 
 struct AUCTION_FILE;
@@ -22,14 +23,16 @@ struct AuctionSummary {
 };
 
 class P3AggregateStats
-    : public PipelineStep<std::unique_ptr<AuctionDumpToAggregate>,
-                          std::tuple<std::string, time_t, AUCTION_FILE, std::unordered_map<uint32_t, AuctionSummary>>> {
+    : public PipelineStep<std::pair<PipelineState, std::vector<AUCTION_FILE>>,
+                          std::pair<PipelineAggregatedState, std::unordered_map<uint32_t, AuctionSummary>>> {
 	DECLARE_CLASSNAME(P3AggregateStats, 0)
 public:
 	P3AggregateStats();
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
 
 private:
+	int aggregateStats(const std::vector<AUCTION_FILE>& auctions,
+	                   std::unordered_map<uint32_t, AuctionSummary>& auctionsByUid);
 	int processWork(std::shared_ptr<WorkItem> item);
 	void afterWork(std::shared_ptr<WorkItem> item, int status);
 
@@ -60,8 +63,6 @@ private:
 
 private:
 	BackgroundWork<P3AggregateStats, std::shared_ptr<WorkItem>> work;
-
-	std::unordered_map<uint32_t, AuctionSummary> auctionsByUid;
 };
 
 #endif

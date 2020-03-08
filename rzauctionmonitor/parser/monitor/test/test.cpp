@@ -17,15 +17,16 @@ template<class T> void schedule_timeout(T callback, int delayms) {
 
 	timer->data = new CallbackFunction(callback);
 	uv_timer_init(EventLoop::getLoop(), timer);
-	uv_timer_start(timer,
-	               [](uv_timer_t* timer) {
-		               CallbackFunction* function = static_cast<CallbackFunction*>(timer->data);
-		               (*function)();
-		               delete function;
-		               uv_close((uv_handle_t*) timer, [](uv_handle_t* timer) { delete(uv_timer_t*) timer; });
-	               },
-	               delayms,
-	               delayms);
+	uv_timer_start(
+	    timer,
+	    [](uv_timer_t* timer) {
+		    CallbackFunction* function = static_cast<CallbackFunction*>(timer->data);
+		    (*function)();
+		    delete function;
+		    uv_close((uv_handle_t*) timer, [](uv_handle_t* timer) { delete(uv_timer_t*) timer; });
+	    },
+	    delayms,
+	    delayms);
 }
 
 // 1MiB data size

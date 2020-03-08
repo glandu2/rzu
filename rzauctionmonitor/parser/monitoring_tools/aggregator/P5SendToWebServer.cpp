@@ -5,20 +5,19 @@ P5SendToWebServer::P5SendToWebServer(cval<std::string>& ip,
                                      cval<int>& port,
                                      cval<std::string>& url,
                                      cval<std::string>& pwd)
-    : PipelineStep<std::tuple<std::string, time_t, AUCTION_FILE, std::string>,
-                   std::tuple<std::string, time_t, AUCTION_FILE>>(10, 2),
+    : PipelineStep<std::pair<PipelineAggregatedState, std::string>, PipelineAggregatedState>(3, 2),
       httpClientSession(ip, port),
       url(url),
       pwd(pwd) {}
 
 void P5SendToWebServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
-	std::tuple<std::string, time_t, AUCTION_FILE, std::string> jsonData = std::move(item->getSource());
+	std::pair<PipelineAggregatedState, std::string> jsonData = std::move(item->getSource());
 	std::string fullUrl;
 	struct tm currentDateTm;
 
-	item->setName(std::to_string(std::get<1>(jsonData)));
+	item->setName(std::to_string(jsonData.first.base.timestamp));
 
-	Utils::getGmTime(std::get<1>(jsonData), &currentDateTm);
+	Utils::getGmTime(jsonData.first.base.timestamp, &currentDateTm);
 
 	Utils::stringFormat(fullUrl,
 	                    "%s/%04d%02d%02d/%s",
@@ -30,10 +29,7 @@ void P5SendToWebServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 
 	log(LL_Info, "Sending data to url %s\n", fullUrl.c_str());
 
-	addResult(
-	    item,
-	    std::make_tuple(
-	        std::move(std::get<0>(jsonData)), std::move(std::get<1>(jsonData)), std::move(std::get<2>(jsonData))));
+	addResult(item, std::move(jsonData.first));
 
 	// httpClientSession.sendData(fullUrl, std::get<3>(jsonData), [this, item]() { workDone(item, 0); });
 	workDone(item, 0);

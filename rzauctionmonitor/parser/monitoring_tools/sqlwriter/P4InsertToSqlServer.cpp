@@ -1,96 +1,69 @@
-#include "AuctionSQLWriter.h"
+#include "P4InsertToSqlServer.h"
 #include "Database/DbConnection.h"
 #include "Database/DbConnectionPool.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
+#include "GlobalConfig.h"
 #include "Packet/MessageBuffer.h"
+#include <numeric>
 
-cval<std::string>& DB_Item::connectionString =
+struct DB_InsertItem {
+	static cval<std::string>& connectionString;
+	struct Input {
+		int32_t uid;
+		int16_t diff_flag;
+		DbDateTime previous_time;
+		DbDateTime time;
+		DbDateTime estimatedEndMin;
+		DbDateTime estimatedEndMax;
+		int16_t category;
+		int8_t duration_type;
+		int64_t bid_price;
+		int64_t price;
+		std::string seller;
+		int8_t bid_flag;
+
+		uint32_t handle;
+		int32_t code;
+		int64_t item_uid;
+		int64_t count;
+		int32_t ethereal_durability;
+		uint32_t endurance;
+		uint8_t enhance;
+		uint8_t level;
+		uint16_t enhance_chance;
+		uint32_t flag;
+		int32_t socket[4];
+		uint32_t awaken_option_value[5];
+		int32_t awaken_option_data[5];
+		uint32_t random_type[10];
+		int64_t random_value_1[10];
+		int64_t random_value_2[10];
+		int32_t remain_time;
+		uint8_t elemental_effect_type;
+		int32_t elemental_effect_remain_time;
+		int32_t elemental_effect_attack_point;
+		int32_t elemental_effect_magic_point;
+		int32_t appearance_code;
+		uint32_t summon_code;
+		uint32_t item_effect_id;
+	};
+
+	struct Output {};
+
+	static void addAuction(std::vector<DB_InsertItem::Input>& auctions, const AUCTION_INFO& auctionInfo);
+	static bool createTable(DbConnectionPool* dbConnectionPool);
+
+protected:
+	static void fillItemInfo(Input& input, uint32_t epic, const std::vector<uint8_t>& auctionInfo);
+};
+
+cval<std::string>& DB_InsertItem::connectionString =
     CFG_CREATE("connectionstring", "DRIVER=SQLite3 ODBC Driver;Database=auctions.sqlite3;");
 
-template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
-	/*createBinding(dbConnectionPool,
-	              DB_Item::connectionString,
-	              "INSERT INTO auctions ("
-	              "\"uid\", "
-	              "\"diff_flag\", "
-	              "\"previous_time\", "
-	              "\"time\", "
-	              "\"estimated_end_min\", "
-	              "\"estimated_end_max\", "
-	              "\"category\", "
-	              "\"duration_type\", "
-	              "\"bid_price\", "
-	              "\"price\", "
-	              "\"seller\", "
-	              "\"bid_flag\", "
-	              "\"handle\", "
-	              "\"code\", "
-	              "\"item_uid\", "
-	              "\"count\", "
-	              "\"ethereal_durability\", "
-	              "\"endurance\", "
-	              "\"enhance\", "
-	              "\"level\", "
-	              "\"enhance_chance\", "
-	              "\"flag\", "
-	              "\"socket_0\", "
-	              "\"socket_1\", "
-	              "\"socket_2\", "
-	              "\"socket_3\", "
-	              "\"awaken_option_value_0\", "
-	              "\"awaken_option_value_1\", "
-	              "\"awaken_option_value_2\", "
-	              "\"awaken_option_value_3\", "
-	              "\"awaken_option_value_4\", "
-	              "\"awaken_option_data_0\", "
-	              "\"awaken_option_data_1\", "
-	              "\"awaken_option_data_2\", "
-	              "\"awaken_option_data_3\", "
-	              "\"awaken_option_data_4\", "
-	              "\"random_type_0\", "
-	              "\"random_type_1\", "
-	              "\"random_type_2\", "
-	              "\"random_type_3\", "
-	              "\"random_type_4\", "
-	              "\"random_type_5\", "
-	              "\"random_type_6\", "
-	              "\"random_type_7\", "
-	              "\"random_type_8\", "
-	              "\"random_type_9\", "
-	              "\"random_value_1_0\", "
-	              "\"random_value_1_1\", "
-	              "\"random_value_1_2\", "
-	              "\"random_value_1_3\", "
-	              "\"random_value_1_4\", "
-	              "\"random_value_1_5\", "
-	              "\"random_value_1_6\", "
-	              "\"random_value_1_7\", "
-	              "\"random_value_1_8\", "
-	              "\"random_value_1_9\", "
-	              "\"random_value_2_0\", "
-	              "\"random_value_2_1\", "
-	              "\"random_value_2_2\", "
-	              "\"random_value_2_3\", "
-	              "\"random_value_2_4\", "
-	              "\"random_value_2_5\", "
-	              "\"random_value_2_6\", "
-	              "\"random_value_2_7\", "
-	              "\"random_value_2_8\", "
-	              "\"random_value_2_9\", "
-	              "\"remain_time\", "
-	              "\"elemental_effect_type\", "
-	              "\"elemental_effect_remain_time\", "
-	              "\"elemental_effect_attack_point\", "
-	              "\"elemental_effect_magic_point\", "
-	              "\"appearance_code\", "
-	              "\"summon_code\") "
-	              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-	   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-	   ?, ?, ?, ?);", DbQueryBinding::EM_NoRow);*/
-
+template<> void DbQueryJob<DB_InsertItem>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-	              DB_Item::connectionString,
-	              "{ CALL add_auctions2 (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+	              DB_InsertItem::connectionString,
+	              "{ CALL add_auctions (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
 	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
 	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }",
 	              DbQueryBinding::EM_NoRow);
@@ -170,11 +143,11 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 	addParam("summon_code", &InputType::summon_code);
 	addParam("item_effect_id", &InputType::item_effect_id);
 }
-DECLARE_DB_BINDING(DB_Item, "db_item");
+DECLARE_DB_BINDING(DB_InsertItem, "db_auctions");
 
-void DB_Item::fillItemInfo(DB_Item::Input& input, const std::vector<uint8_t>& data) {
+void DB_InsertItem::fillItemInfo(DB_InsertItem::Input& input, uint32_t epic, const std::vector<uint8_t>& data) {
 	TS_SEARCHED_AUCTION_INFO item;
-	MessageBuffer structBuffer(data.data(), data.size(), EPIC_9_5_3);
+	MessageBuffer structBuffer(data.data(), data.size(), epic);
 
 	item.deserialize(&structBuffer);
 	if(!structBuffer.checkFinalSize()) {
@@ -227,8 +200,8 @@ void DB_Item::fillItemInfo(DB_Item::Input& input, const std::vector<uint8_t>& da
 	}
 }
 
-void DB_Item::addAuction(std::vector<DB_Item::Input>& auctions, const AUCTION_INFO& auctionInfo) {
-	DB_Item::Input input = {};
+void DB_InsertItem::addAuction(std::vector<DB_InsertItem::Input>& auctions, const AUCTION_INFO& auctionInfo) {
+	DB_InsertItem::Input input = {};
 
 	input.uid = auctionInfo.uid;
 	input.diff_flag = auctionInfo.diffType;
@@ -244,40 +217,13 @@ void DB_Item::addAuction(std::vector<DB_Item::Input>& auctions, const AUCTION_IN
 	input.seller = auctionInfo.seller;
 	input.bid_flag = auctionInfo.bid_flag;
 
-	fillItemInfo(input, auctionInfo.data);
+	fillItemInfo(input, auctionInfo.epic, auctionInfo.data);
 
 	auctions.push_back(input);
 }
 
-void DB_Item::addAuction(std::vector<DB_Item::Input>& auctions, const AUCTION_SIMPLE_INFO& auctionInfo) {
-	DB_Item::Input input = {};
-
-	input.uid = auctionInfo.uid;
-	input.diff_flag = auctionInfo.diffType;
-	input.previous_time.setUnixTime(auctionInfo.previousTime);
-	input.time.setUnixTime(auctionInfo.time);
-	input.estimatedEndMin.setUnixTime(0);
-	input.estimatedEndMax.setUnixTime(0);
-	input.category = auctionInfo.category;
-
-	if(auctionInfo.data.size() > sizeof(AuctionDataEnd)) {
-		const AuctionDataEnd* auctionDataEnd =
-		    (const AuctionDataEnd*) (auctionInfo.data.data() + auctionInfo.data.size() - sizeof(AuctionDataEnd));
-
-		input.duration_type = auctionDataEnd->duration_type;
-		input.bid_price = auctionDataEnd->bid_price;
-		input.price = auctionDataEnd->price;
-		input.seller = auctionDataEnd->seller;
-		input.bid_flag = auctionDataEnd->bid_flag;
-	}
-
-	fillItemInfo(input, auctionInfo.data);
-
-	auctions.push_back(input);
-}
-
-bool DB_Item::createTable(DbConnectionPool* dbConnectionPool) {
-	DbConnection* connection = dbConnectionPool->getConnection(DB_Item::connectionString.get().c_str());
+bool DB_InsertItem::createTable(DbConnectionPool* dbConnectionPool) {
+	DbConnection* connection = dbConnectionPool->getConnection(DB_InsertItem::connectionString.get().c_str());
 	if(!connection) {
 		Object::logStatic(Object::LL_Error, "DB_Item", "Failed to open DB connection\n");
 		return false;
@@ -356,6 +302,7 @@ bool DB_Item::createTable(DbConnectionPool* dbConnectionPool) {
 	                                        "    \"elemental_effect_magic_point\" int NOT NULL,\r\n"
 	                                        "    \"appearance_code\" int NOT NULL,\r\n"
 	                                        "    \"summon_code\" int NOT NULL,\r\n"
+	                                        "    \"item_effect_id\" int NOT NULL,\r\n"
 	                                        "    PRIMARY KEY (\r\n"
 	                                        "        \"time\" ASC,\r\n"
 	                                        "        \"uid\" ASC\r\n"
@@ -367,4 +314,29 @@ bool DB_Item::createTable(DbConnectionPool* dbConnectionPool) {
 	}
 
 	return true;
+}
+
+P4InsertToSqlServer::P4InsertToSqlServer()
+    : PipelineStep<std::pair<PipelineState, AUCTION_FILE>, PipelineState>(10, 2) {}
+
+void P4InsertToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
+	std::vector<std::pair<PipelineState, AUCTION_FILE>> inputData = std::move(item->getSources());
+	std::vector<DB_InsertItem::Input> dbInputs;
+
+	dbInputs.reserve(std::accumulate(inputData.begin(),
+	                                 inputData.end(),
+	                                 (size_t) 0,
+	                                 [](size_t sum, const std::pair<PipelineState, AUCTION_FILE>& input) {
+		                                 return input.second.auctions.size() + sum;
+	                                 }));
+	for(auto& input : inputData) {
+		for(size_t i = 0; i < input.second.auctions.size(); i++) {
+			const AUCTION_INFO& auctionInfo = input.second.auctions[i];
+			DB_InsertItem::addAuction(dbInputs, auctionInfo);
+		}
+
+		addResult(item, std::move(input.first));
+	}
+
+	dbQuery.executeDbQuery<DB_InsertItem>([this, item](auto, int status) { workDone(item, status); }, dbInputs);
 }

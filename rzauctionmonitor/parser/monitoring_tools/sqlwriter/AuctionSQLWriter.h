@@ -43,6 +43,7 @@ struct DB_Item {
 		int32_t elemental_effect_magic_point;
 		int32_t appearance_code;
 		uint32_t summon_code;
+		uint32_t item_effect_id;
 	};
 
 	struct Output {};

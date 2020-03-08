@@ -27,14 +27,10 @@ AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
       auctionStateFile(auctionStateFile),
       started(false),
       scanAuctionStep(this, auctionsPath, changeWaitSeconds),
-      sendToWebServerStep(),
       commitStep(this) {
 	readAuctionStep.plug(&deserializeAuctionStep)
 	    ->plug(&parseAuctionStep)
-	    ->plug(&aggregateStatsStep)
-	    ->plug(&computeStatsStep)
-	    ->plug(&sendHistoryToSqlStep)
-	    ->plug(&sendToWebServerStep)
+	    ->plug(&insertToSqlServerStep)
 	    ->plug(&commitStep);
 	uv_fs_event_init(EventLoop::getLoop(), &fsEvent);
 	fsEvent.data = this;
@@ -184,8 +180,6 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 	while(UV_EOF != uv_fs_scandir_next(req, &dent)) {
 		if(dent.type != UV_DIRENT_DIR && strcmp(thisInstance->lastQueuedFile.c_str(), dent.name) < 0)
 			orderedFiles.push_back(dent.name);
-		if(orderedFiles.size() > 10000)
-			break;
 	}
 
 	std::sort(orderedFiles.begin(), orderedFiles.end(), [](const std::string& a, const std::string& b) {

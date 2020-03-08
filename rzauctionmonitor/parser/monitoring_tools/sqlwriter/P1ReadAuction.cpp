@@ -2,7 +2,7 @@
 #include "AuctionWriter.h"
 
 P1ReadAuction::P1ReadAuction()
-    : PipelineStep<std::pair<std::string, std::string>, std::pair<PipelineState, std::vector<uint8_t>>>(10000, 1, 1),
+    : PipelineStep<std::pair<std::string, std::string>, std::pair<PipelineState, std::vector<uint8_t>>>(10000, 1, 10),
       work(this, &P1ReadAuction::processWork, &P1ReadAuction::afterWork) {}
 
 void P1ReadAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
@@ -24,9 +24,9 @@ int P1ReadAuction::processWork(std::shared_ptr<WorkItem> item) {
 			return EIO;
 		}
 
-		PipelineState state;
-		state.lastFilenameParsed = std::move(filename);
-		addResult(item, std::make_pair(std::move(state), std::move(data)));
+		PipelineState pipelineState;
+		pipelineState.lastFilenameParsed = std::move(filename);
+		addResult(item, std::make_pair(std::move(pipelineState), std::move(data)));
 	}
 
 	return 0;

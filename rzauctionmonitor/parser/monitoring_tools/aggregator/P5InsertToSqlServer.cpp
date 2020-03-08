@@ -25,7 +25,7 @@ struct DB_AuctionSummary {
 };
 
 cval<std::string>& DB_AuctionSummary::connectionString =
-    CFG_CREATE("connectionstring", "DRIVER=SQLite3 ODBC Driver;Database=auctions.sqlite3;");
+    CFG_CREATE("db_auctions.connectionstring", "DRIVER=SQLite3 ODBC Driver;Database=auctions.sqlite3;");
 
 template<> void DbQueryJob<DB_AuctionSummary>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
@@ -62,15 +62,14 @@ template<> void DbQueryJob<DB_AuctionSummary>::init(DbConnectionPool* dbConnecti
 DECLARE_DB_BINDING(DB_AuctionSummary, "db_auctions");
 
 P5InsertToSqlServer::P5InsertToSqlServer()
-    : PipelineStep<std::tuple<std::string, time_t, AUCTION_FILE, std::vector<AUCTION_INFO_PER_DAY>>,
-                   std::tuple<std::string, time_t, AUCTION_FILE>>(10, 2) {}
+    : PipelineStep<std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>, PipelineAggregatedState>(3,
+                                                                                                                   1) {}
 
 void P5InsertToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
-	std::tuple<std::string, time_t, AUCTION_FILE, std::vector<AUCTION_INFO_PER_DAY>> inputData =
-	    std::move(item->getSource());
+	std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>> inputData = std::move(item->getSource());
 
-	time_t currentDayTime = std::get<1>(inputData);
-	const std::vector<AUCTION_INFO_PER_DAY>& inputAuctions = std::get<3>(inputData);
+	time_t currentDayTime = inputData.first.base.timestamp;
+	const std::vector<AUCTION_INFO_PER_DAY>& inputAuctions = inputData.second;
 	std::vector<DB_AuctionSummary::Input> dataToWrite;
 	struct tm currentDay;
 	Utils::getGmTime(currentDayTime, &currentDay);
@@ -106,10 +105,7 @@ void P5InsertToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 		dataToWrite.push_back(data);
 	}
 
-	addResult(
-	    item,
-	    std::make_tuple(
-	        std::move(std::get<0>(inputData)), std::move(std::get<1>(inputData)), std::move(std::get<2>(inputData))));
+	addResult(item, std::move(inputData.first));
 
 	dbQuery.executeDbQuery<DB_AuctionSummary>([this, item](auto, int status) { workDone(item, status); }, dataToWrite);
 

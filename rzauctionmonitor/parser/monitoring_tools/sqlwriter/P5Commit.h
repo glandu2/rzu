@@ -4,15 +4,15 @@
 #include "Core/BackgroundWork.h"
 #include "Core/Object.h"
 #include "IPipeline.h"
-#include "P3AggregateStats.h"
+#include "PipelineState.h"
 #include <stdint.h>
 
 class AuctionPipeline;
 
-class P6Commit : public PipelineStep<PipelineAggregatedState, void> {
-	DECLARE_CLASSNAME(P6Commit, 0)
+class P5Commit : public PipelineStep<PipelineState, void> {
+	DECLARE_CLASSNAME(P5Commit, 0)
 public:
-	P6Commit(AuctionPipeline* auctionPipeline);
+	P5Commit(AuctionPipeline* auctionPipeline);
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
 
 private:
@@ -21,7 +21,7 @@ private:
 
 private:
 	AuctionPipeline* auctionPipeline;
-	BackgroundWork<P6Commit, std::shared_ptr<WorkItem>> work;
+	BackgroundWork<P5Commit, std::shared_ptr<WorkItem>> work;
 };
 
 #endif

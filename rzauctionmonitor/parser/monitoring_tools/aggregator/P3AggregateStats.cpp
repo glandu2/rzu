@@ -1,52 +1,21 @@
 #include "P3AggregateStats.h"
 #include "Core/Utils.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
+#include "errno.h"
 
 P3AggregateStats::P3AggregateStats()
-    : PipelineStep<std::unique_ptr<AuctionDumpToAggregate>,
-                   std::tuple<std::string, time_t, AUCTION_FILE, std::unordered_map<uint32_t, AuctionSummary>>>(
-          10, 1, 100),
+    : PipelineStep<std::pair<PipelineState, std::vector<AUCTION_FILE>>,
+                   std::pair<PipelineAggregatedState, std::unordered_map<uint32_t, AuctionSummary>>>(0, 1, 1),
       work(this, &P3AggregateStats::processWork, &P3AggregateStats::afterWork) {}
 
 void P3AggregateStats::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	work.run(item);
 }
 
-int P3AggregateStats::processWork(std::shared_ptr<WorkItem> workItem) {
-	auto sources = std::move(workItem->getSources());
-	for(std::unique_ptr<AuctionDumpToAggregate>& auctionFileToAggregate : sources) {
-		std::unordered_map<uint32_t, AuctionSummary> auctionsByUidOfPreviousDay;
-
-		workItem->setName(std::to_string(auctionFileToAggregate->timestamp));
-
-		if(auctionFileToAggregate->dumpType == DAT_NewDay) {
-			if(!auctionsByUid.empty()) {
-				struct tm previousDay;
-				Utils::getGmTime(auctionFileToAggregate->previousTimestamp, &previousDay);
-				log(LL_Info,
-				    "Computing statistics of %d auctions for day %02d/%02d/%04d\n",
-				    (int) auctionsByUid.size(),
-				    previousDay.tm_mday,
-				    previousDay.tm_mon,
-				    previousDay.tm_year);
-				auctionsByUidOfPreviousDay = std::move(auctionsByUid);
-				auctionsByUid.clear();
-			} else {
-				log(LL_Info,
-				    "Not computing statistics for day %d, no auction\n",
-				    (int) auctionFileToAggregate->previousTimestamp);
-			}
-		} else if(auctionFileToAggregate->dumpType == DAT_InitialDump && !auctionsByUid.empty()) {
-			log(LL_Warning, "Initial dump but auctionsByUid is not empty\n");
-		}
-
-		log(LL_Debug,
-		    "Aggregating stats for %d auctions for date %d\n",
-		    (int) auctionFileToAggregate->auctionFile.auctions.size(),
-		    (int) auctionFileToAggregate->timestamp);
-
-		for(size_t i = 0; i < auctionFileToAggregate->auctionFile.auctions.size(); i++) {
-			const AUCTION_INFO& auctionInfo = auctionFileToAggregate->auctionFile.auctions[i];
+int P3AggregateStats::aggregateStats(const std::vector<AUCTION_FILE>& auctions,
+                                     std::unordered_map<uint32_t, AuctionSummary>& auctionsByUid) {
+	for(const AUCTION_FILE& auctionFile : auctions) {
+		for(const AUCTION_INFO& auctionInfo : auctionFile.auctions) {
 			if(!auctionInfo.data.data())
 				continue;
 
@@ -56,7 +25,7 @@ int P3AggregateStats::processWork(std::shared_ptr<WorkItem> workItem) {
 			item.deserialize(&structBuffer);
 			if(!structBuffer.checkFinalSize()) {
 				log(LL_Error, "Invalid item data content for uid %u, can't deserialize\n", auctionInfo.uid);
-				return false;
+				return -ENOENT;
 			} else if(structBuffer.getParsedSize() != auctionInfo.data.size()) {
 				log(LL_Error,
 				    "Invalid item data size for uid %u, can't deserialize safely: expected size: %d, got %d, epic: "
@@ -65,7 +34,7 @@ int P3AggregateStats::processWork(std::shared_ptr<WorkItem> workItem) {
 				    structBuffer.getParsedSize(),
 				    auctionInfo.data.size(),
 				    auctionInfo.epic);
-				return false;
+				return -EBADF;
 			}
 
 			if(skipItem(auctionInfo, item.auction_details.item_info))
@@ -97,14 +66,52 @@ int P3AggregateStats::processWork(std::shared_ptr<WorkItem> workItem) {
 				}
 			}
 		}
+	}
 
-		if(!auctionsByUidOfPreviousDay.empty()) {
-			// Send in the end to be able to move inputs
-			addResult(workItem,
-			          std::make_tuple(std::move(auctionFileToAggregate->filename),
-			                          std::move(auctionFileToAggregate->previousTimestamp),
-			                          std::move(auctionFileToAggregate->auctionFile),
-			                          std::move(auctionsByUidOfPreviousDay)));
+	return 0;
+}
+
+int P3AggregateStats::processWork(std::shared_ptr<WorkItem> workItem) {
+	auto sources = std::move(workItem->getSources());
+	for(std::pair<PipelineState, std::vector<AUCTION_FILE>>& input : sources) {
+		std::unordered_map<uint32_t, AuctionSummary> auctionsByUid;
+		std::string timestampStr;
+		struct tm timestampTm;
+
+		Utils::getGmTime(input.first.timestamp, &timestampTm);
+		Utils::stringFormat(
+		    timestampStr, "%02d/%02d/%04d", timestampTm.tm_mday, timestampTm.tm_mon, timestampTm.tm_year);
+
+		workItem->setName(timestampStr);
+
+		log(LL_Info,
+		    "Aggregating statistics of %d auctions for day %s\n",
+		    (int) auctionsByUid.size(),
+		    timestampStr.c_str());
+
+		if(input.second.empty()) {
+			log(LL_Error, "No auction file to aggregate for day %s, skipping\n", timestampStr.c_str());
+			continue;
+		} else if(input.second[0].header.dumpType != DT_Full) {
+			log(LL_Error,
+			    "First dump is not a full dump for day %s, this is required to store last valid state\n",
+			    timestampStr.c_str());
+			continue;
+		}
+
+		// Value estimated from real data (max at 2815)
+		auctionsByUid.reserve(3000);
+		if(aggregateStats(input.second, auctionsByUid) != 0)
+			continue;
+
+		if(!input.second.empty()) {
+			PipelineAggregatedState aggregatedState;
+			aggregatedState.base = std::move(input.first);
+			aggregatedState.dumps = std::move(input.second);
+
+			addResult(workItem, std::make_pair(std::move(aggregatedState), std::move(auctionsByUid)));
+		} else {
+			log(LL_Warning, "No auction for day %s\n", timestampStr.c_str());
 		}
 	}
 

@@ -1,4 +1,5 @@
 #include "AuctionComplexData.h"
+#include "AuctionWriter.h"
 #include "CategoryTimeManager.h"
 #include "Core/Object.h"
 #include "Core/PrintfFormats.h"
@@ -105,9 +106,7 @@ bool AuctionComplexData::outputInPartialDump() {
 		          processStatus,
 		          getUid().get());
 
-	if(diffType == D_Unmodified || diffType == D_MaybeDeleted)
-		return false;
-	return true;
+	return AuctionWriter::diffTypeInPartialDump(diffType);
 }
 
 bool AuctionComplexData::isInFinalState() const {

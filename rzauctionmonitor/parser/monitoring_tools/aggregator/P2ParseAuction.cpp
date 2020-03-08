@@ -6,7 +6,8 @@
 #include "Core/Utils.h"
 
 P2ParseAuction::P2ParseAuction()
-    : PipelineStep<std::unique_ptr<AuctionFile>, std::unique_ptr<AuctionDumpToAggregate>>(100, 1, 10),
+    : PipelineStep<std::pair<PipelineState, AUCTION_SIMPLE_FILE>, std::pair<PipelineState, std::vector<AUCTION_FILE>>>(
+          10, 1, 1),
       work(this, &P2ParseAuction::processWork, &P2ParseAuction::afterWork),
       auctionWriter(19),
       currentDate(-1),
@@ -19,45 +20,35 @@ void P2ParseAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 
 void P2ParseAuction::importState(const AUCTION_FILE* auctionData) {
 	auctionWriter.importDump(auctionData);
+	aggregatedDumps.clear();
+	aggregatedDumps.emplace_back(*auctionData);
 }
 
 int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 	auto sources = std::move(item->getSources());
-	for(std::unique_ptr<AuctionFile>& auctionFile : sources) {
+	for(std::pair<PipelineState, AUCTION_SIMPLE_FILE>& input : sources) {
+		const std::string& filename = input.first.lastFilenameParsed;
 		time_t dumpBeginTime;
+		bool isFull;
 
-		item->setName(auctionFile->filename);
-		log(LL_Debug, "Parsing file %s\n", auctionFile->filename.c_str());
+		item->setName(filename);
+		log(LL_Debug, "Parsing file %s\n", filename.c_str());
 
-		if(currentDate == -1)
-			doDump(item,
-			       std::string(),
-			       DAT_InitialDump,
-			       0,
-			       auctionWriter.getCategoryTimeManager().getEstimatedPreviousCategoryBeginTime(0));
+		isFull = AuctionFile::isFileFullType(input.second, &auctionWriter);
 
-		auctionFile->adjustDetectedType(&auctionWriter);
+		log(LL_Debug, "Processing file %s, detected type: %s\n", filename.c_str(), isFull ? "full" : "diff");
 
-		log(LL_Debug,
-		    "Processing file %s, detected type: %s, alreadyExistingAuctions: %d/%d, addedAuctionsInFile: %d/%d\n",
-		    auctionFile->filename.c_str(),
-		    auctionFile->isFull ? "full" : "diff",
-		    (int) auctionFile->alreadyExistingAuctions,
-		    (int) auctionWriter.getAuctionCount(),
-		    (int) auctionFile->addedAuctionsInFile,
-		    (int) auctionWriter.getAuctionCount());
-
-		for(size_t i = 0; i < auctionFile->auctions.header.categories.size(); i++) {
-			const AUCTION_CATEGORY_INFO& category = auctionFile->auctions.header.categories[i];
+		for(size_t i = 0; i < input.second.header.categories.size(); i++) {
+			const AUCTION_CATEGORY_INFO& category = input.second.header.categories[i];
 			auctionWriter.beginCategory(i, category.beginTime);
 			auctionWriter.endCategory(i, category.endTime);
 		}
 
-		auctionWriter.setDiffInputMode(!auctionFile->isFull);
+		auctionWriter.setDiffInputMode(!isFull);
 		auctionWriter.beginProcess();
 
-		for(size_t auction = 0; auction < auctionFile->auctions.auctions.size(); auction++) {
-			const AUCTION_SIMPLE_INFO& auctionData = auctionFile->auctions.auctions[auction];
+		for(size_t auction = 0; auction < input.second.auctions.size(); auction++) {
+			const AUCTION_SIMPLE_INFO& auctionData = input.second.auctions[auction];
 			auctionWriter.addAuctionInfo(&auctionData);
 		}
 
@@ -66,18 +57,27 @@ int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 		dumpBeginTime = auctionWriter.getCategoryTimeManager().getEstimatedPreviousCategoryBeginTime(0);
 
 		if(dumpBeginTime == 0) {
-			log(LL_Warning, "Begin time of first category is 0 after parsing file %s\n", auctionFile->filename.c_str());
+			log(LL_Warning, "Begin time of first category is 0 after parsing file %s\n", filename.c_str());
 			dumpBeginTime = currentDate;
 		}
 
+		AUCTION_FILE auctionFile;
 		// full dump if its a new day
-		if(previousWasNewDay)
-			doDump(item, auctionFile->filename, DAT_NewDay, previousTime, currentDate);
-		else
-			doDump(item, auctionFile->filename, DAT_Diff, currentDate, currentDate);
+		if(previousWasNewDay) {
+			input.first.timestamp = previousTime;
+			addResult(item, std::make_pair(std::move(input.first), std::move(aggregatedDumps)));
+
+			aggregatedDumps.clear();
+		}
+
+		if(aggregatedDumps.empty()) {
+			aggregatedDumps.emplace_back(auctionWriter.exportDump(true, true));
+		} else {
+			aggregatedDumps.emplace_back(auctionWriter.exportDump(false, true));
+		}
 
 		previousTime = currentDate;
-		previousWasNewDay = isNewDay(auctionFile->filename, dumpBeginTime);
+		previousWasNewDay = isNewDay(filename, dumpBeginTime);
 	}
 
 	return 0;
@@ -101,29 +101,6 @@ bool P2ParseAuction::isNewDay(const std::string& filename, time_t dumpBeginTime)
 	}
 
 	return result;
-}
-
-int P2ParseAuction::doDump(std::shared_ptr<WorkItem> item,
-                           const std::string& filename,
-                           enum DumpToAggregateType dumpType,
-                           time_t previousTimestamp,
-                           time_t timestamp) {
-	std::unique_ptr<AuctionDumpToAggregate> auctionFileDump = std::make_unique<AuctionDumpToAggregate>();
-
-	auctionFileDump->dumpType = dumpType;
-	auctionFileDump->filename = filename;
-	auctionFileDump->previousTimestamp = previousTimestamp;
-	auctionFileDump->timestamp = timestamp;
-	auctionFileDump->auctionFile = auctionWriter.exportDump(dumpType != DAT_Diff, true);
-
-	if(auctionFileDump->auctionFile.auctions.empty()) {
-		log(LL_Debug, "No new auction to parse\n");
-		return 0;
-	}
-
-	addResult(item, std::move(auctionFileDump));
-
-	return 0;
 }
 
 int P2ParseAuction::compareWithCurrentDate(time_t other) {

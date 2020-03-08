@@ -13,15 +13,11 @@
 #include <vector>
 
 #include "P0ScanAuctions.h"
-#include "P12DeserializeAuction.h"
 #include "P1ReadAuction.h"
-#include "P2ParseAuction.h"
-#include "P3AggregateStats.h"
-#include "P4ComputeStats.h"
-#include "P5InsertToSqlServer.h"
-#include "P5SendToWebServer.h"
-#include "P6Commit.h"
-#include "P6InsertHistoryToSqlServer.h"
+#include "P2DeserializeAuction.h"
+#include "P3ParseAuction.h"
+#include "P4InsertToSqlServer.h"
+#include "P5Commit.h"
 
 /* scandir (disk, fast) => strings
  * readFile(disk) => AuctionComplexDiffWriter
@@ -62,13 +58,10 @@ private:
 
 	P0ScanAuctions scanAuctionStep;
 	P1ReadAuction readAuctionStep;
-	P12DeserializeAuction deserializeAuctionStep;
-	P2ParseAuction parseAuctionStep;
-	P3AggregateStats aggregateStatsStep;
-	P4ComputeStats computeStatsStep;
-	P5InsertToSqlServer sendToWebServerStep;
-	P6InsertHistoryToSqlServer sendHistoryToSqlStep;
-	P6Commit commitStep;
+	P2DeserializeAuction deserializeAuctionStep;
+	P3ParseAuction parseAuctionStep;
+	P4InsertToSqlServer insertToSqlServerStep;
+	P5Commit commitStep;
 };
 
 #endif

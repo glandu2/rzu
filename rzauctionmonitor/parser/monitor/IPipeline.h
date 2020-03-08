@@ -6,9 +6,8 @@
 #include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 #include <algorithm>
+#include <deque>
 #include <memory>
-#include <queue>
-#include <unordered_set>
 #include <vector>
 
 template<class T> class IPipelineProducer;
@@ -18,7 +17,7 @@ public:
 	virtual ~IPipelineConsumer() {}
 	virtual void queue(T data) = 0;
 	virtual void cancel() = 0;
-	virtual bool isFull() = 0;
+	virtual size_t inputAvailable() = 0;
 
 	virtual void setProducer(IPipelineProducer<T>* producer) = 0;
 };
@@ -26,6 +25,7 @@ public:
 template<class T> class IPipelineProducer {
 public:
 	virtual ~IPipelineProducer() {}
+	virtual void cancel() = 0;
 	virtual void notifyOutputAvailable() = 0;
 
 	virtual void setConsumer(IPipelineConsumer<T>* consumer) = 0;
@@ -143,7 +143,7 @@ public:
 	virtual size_t getInputQueueSize() { return inputQueue.size(); }
 	virtual size_t getBlockSize() { return maxBlockSize; }
 
-	virtual bool isFull() override { return inputQueue.size() >= maxSize; }
+	virtual size_t inputAvailable() override { return maxSize - getRunningWorkNumber() - inputQueue.size(); }
 
 	virtual void queue(Input inputToMove) override {
 		inputQueue.emplace_back(std::move(inputToMove));
@@ -157,6 +157,8 @@ public:
 			work->cancelWork();
 		for(const std::shared_ptr<WorkItem>& work : workInProgress)
 			doCancelWork(work);
+		if(prev)
+			prev->cancel();
 	}
 
 	void clear() { inputQueue.clear(); }
@@ -177,7 +179,8 @@ protected:
 
 private:
 	void workDone(std::shared_ptr<WorkItem> item, int status) {
-		// log(LL_Info, "%s: Work done in %" PRIu64 "ms\n", item->getName().c_str(), item->getWorkDuration());
+		if(status)
+			log(LL_Error, "%s: Work done with status %d\n", item->getName().c_str(), status);
 		workInProgress.erase(std::remove(workInProgress.begin(), workInProgress.end(), item));
 		notifyWorkDone();
 	}
@@ -198,10 +201,10 @@ private:
 				workInProgress.push_back(work);
 				doWork(std::move(work));
 			}
+		}
 
-			if(!isFull() && prev) {
-				prev->notifyOutputAvailable();
-			}
+		if(inputAvailable() && prev) {
+			prev->notifyOutputAvailable();
 		}
 	}
 
@@ -210,9 +213,9 @@ private:
 private:
 	friend class PipelineStep<Input, Output>;
 
-	size_t maxSize;
-	size_t maxParallelWork;
-	size_t maxBlockSize;
+	const size_t maxSize;
+	const size_t maxParallelWork;
+	const size_t maxBlockSize;
 	IPipelineProducer<Input>* prev;
 	std::deque<Input> inputQueue;
 	std::vector<Input> pendingNextWorkQueue;
@@ -249,6 +252,13 @@ public:
 		return nextPipeline;
 	}
 
+	virtual size_t inputAvailable() override {
+		if(next)
+			return PipelineStepBase<Input, Output>::inputAvailable() + next->inputAvailable();
+		else
+			return PipelineStepBase<Input, Output>::inputAvailable();
+	}
+
 	virtual void cancel() override {
 		PipelineStepBase<Input, Output>::cancel();
 		if(next)
@@ -272,7 +282,7 @@ protected:
 	}
 
 private:
-	virtual bool isNextFull() final { return next && next->isFull(); }
+	virtual bool isNextFull() final { return next && !next->inputAvailable(); }
 
 private:
 	IPipelineConsumer<Output>* next;

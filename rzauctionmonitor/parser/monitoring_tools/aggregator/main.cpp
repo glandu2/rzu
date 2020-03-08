@@ -9,6 +9,7 @@
 #include "LibRzuInit.h"
 #include "NetSession/ServersManager.h"
 #include "P5InsertToSqlServer.h"
+#include <Windows.h>
 
 static void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
@@ -61,7 +62,7 @@ int main(int argc, char* argv[]) {
 	                              CONFIG_GET()->states.statesPath,
 	                              CONFIG_GET()->states.auctionStateFile);
 
-	serverManager.addServer("auction.monitor", &auctionParser, nullptr);
+	serverManager.addServer("auction.monitor", &auctionParser, &CONFIG_GET()->input.autoStart);
 
 	ConsoleServer consoleServer(&serverManager);
 

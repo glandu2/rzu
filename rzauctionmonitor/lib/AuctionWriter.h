@@ -21,6 +21,10 @@ public:
 	static bool deserialize(AUCTION_SIMPLE_FILE* file, const std::vector<uint8_t>& data);
 	static bool deserialize(AUCTION_FILE* file, const std::vector<uint8_t>& data);
 
+	static inline constexpr bool diffTypeInPartialDump(DiffType diffType) {
+		return diffType != D_Unmodified && diffType != D_MaybeDeleted;
+	}
+
 private:
 	template<class T> static bool deserializeFile(const std::vector<uint8_t>& buffer, T* auctionFile);
 	template<class AuctionHeader>

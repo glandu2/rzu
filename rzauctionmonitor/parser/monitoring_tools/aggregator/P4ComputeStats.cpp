@@ -15,8 +15,8 @@ struct AuctionByCodeKeyHasher {
 };
 
 P4ComputeStats::P4ComputeStats()
-    : PipelineStep<std::tuple<std::string, time_t, AUCTION_FILE, std::unordered_map<uint32_t, AuctionSummary>>,
-                   std::tuple<std::string, time_t, AUCTION_FILE, std::vector<AUCTION_INFO_PER_DAY>>>(10, 1, 10),
+    : PipelineStep<std::pair<PipelineAggregatedState, std::unordered_map<uint32_t, AuctionSummary>>,
+                   std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>>(0, 1, 1),
       work(this, &P4ComputeStats::processWork, &P4ComputeStats::afterWork) {}
 
 void P4ComputeStats::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
@@ -25,15 +25,14 @@ void P4ComputeStats::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 
 int P4ComputeStats::processWork(std::shared_ptr<WorkItem> workItem) {
 	auto sources = std::move(workItem->getSources());
-	for(std::tuple<std::string, time_t, AUCTION_FILE, std::unordered_map<uint32_t, AuctionSummary>>& auctionSummary :
-	    sources) {
-		const std::unordered_map<uint32_t, AuctionSummary>& auctionsByUid = std::get<3>(auctionSummary);
+	for(std::pair<PipelineAggregatedState, std::unordered_map<uint32_t, AuctionSummary>>& input : sources) {
+		const std::unordered_map<uint32_t, AuctionSummary>& auctionsByUid = input.second;
 		std::vector<AUCTION_INFO_PER_DAY> auctionsInfo;
 		struct tm currentDay;
 
-		workItem->setName(std::to_string(std::get<1>(auctionSummary)));
+		workItem->setName(std::to_string(input.first.base.timestamp));
 
-		Utils::getGmTime(std::get<1>(auctionSummary), &currentDay);
+		Utils::getGmTime(input.first.base.timestamp, &currentDay);
 
 		log(LL_Info,
 		    "Computing statistics of %d auctions for day %02d/%02d/%04d\n",
@@ -43,8 +42,6 @@ int P4ComputeStats::processWork(std::shared_ptr<WorkItem> workItem) {
 		    currentDay.tm_year);
 
 		std::unordered_map<AuctionByCodeKey, DayAggregation, AuctionByCodeKeyHasher> auctionsByItemCode;
-		JSONWriter jsonWriter(0, true);
-		jsonWriter.clear();
 
 		auto itUid = auctionsByUid.begin();
 		for(; itUid != auctionsByUid.end(); ++itUid) {
@@ -79,16 +76,9 @@ int P4ComputeStats::processWork(std::shared_ptr<WorkItem> workItem) {
 			dayAggregation.avgEstimatedSoldPrice = aggregation.soldItems.avgPrice;
 
 			auctionsInfo.push_back(dayAggregation);
-			//		jsonWriter.start();
-			//		dayAggregation.serialize(&jsonWriter);
-			//		jsonWriter.finalize();
 		}
 
-		addResult(workItem,
-		          std::make_tuple(std::move(std::get<0>(auctionSummary)),
-		                          std::move(std::get<1>(auctionSummary)),
-		                          std::move(std::get<2>(auctionSummary)),
-		                          std::move(auctionsInfo)));
+		addResult(workItem, std::make_pair(std::move(input.first), std::move(auctionsInfo)));
 	}
 	return 0;
 }

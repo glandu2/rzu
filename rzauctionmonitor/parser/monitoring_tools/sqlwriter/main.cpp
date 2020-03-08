@@ -1,4 +1,5 @@
 #include "AuctionParser.h"
+#include "AuctionPipeline.h"
 #include "AuctionSQLWriter.h"
 #include "Core/CrashHandler.h"
 #include "Core/EventLoop.h"
@@ -44,6 +45,11 @@ int main(int argc, char* argv[]) {
 	                            CONFIG_GET()->states.statesPath,
 	                            CONFIG_GET()->states.auctionStateFile,
 	                            CONFIG_GET()->states.aggregationStateFile);
+
+	//	AuctionPipeline auctionParser(CONFIG_GET()->input.auctionsPath,
+	//	                              CONFIG_GET()->input.changeWaitSeconds,
+	//	                              CONFIG_GET()->states.statesPath,
+	//	                              CONFIG_GET()->states.auctionStateFile);
 
 	serverManager.addServer("auction.monitor", &auctionParser, nullptr);
 

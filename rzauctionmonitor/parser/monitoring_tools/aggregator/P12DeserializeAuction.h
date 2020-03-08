@@ -5,9 +5,10 @@
 #include "Core/BackgroundWork.h"
 #include "Core/Object.h"
 #include "IPipeline.h"
+#include "PipelineState.h"
 
-class P12DeserializeAuction
-    : public PipelineStep<std::pair<std::string, std::vector<uint8_t>>, std::unique_ptr<AuctionFile>> {
+class P12DeserializeAuction : public PipelineStep<std::pair<PipelineState, std::vector<uint8_t>>,
+                                                  std::pair<PipelineState, AUCTION_SIMPLE_FILE>> {
 	DECLARE_CLASSNAME(P12DeserializeAuction, 0)
 public:
 	P12DeserializeAuction();

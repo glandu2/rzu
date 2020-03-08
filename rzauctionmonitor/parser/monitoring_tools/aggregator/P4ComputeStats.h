@@ -5,6 +5,7 @@
 #include "Core/Object.h"
 #include "IPipeline.h"
 #include "P3AggregateStats.h"
+#include "PipelineState.h"
 #include <stdint.h>
 
 #include "Packet/PacketDeclaration.h"
@@ -24,8 +25,8 @@ CREATE_STRUCT(AUCTION_INFO_PER_DAY);
 // clang-format on
 
 class P4ComputeStats
-    : public PipelineStep<std::tuple<std::string, time_t, AUCTION_FILE, std::unordered_map<uint32_t, AuctionSummary>>,
-                          std::tuple<std::string, time_t, AUCTION_FILE, std::vector<AUCTION_INFO_PER_DAY>>> {
+    : public PipelineStep<std::pair<PipelineAggregatedState, std::unordered_map<uint32_t, AuctionSummary>>,
+                          std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>> {
 	DECLARE_CLASSNAME(P4ComputeStats, 0)
 public:
 	P4ComputeStats();

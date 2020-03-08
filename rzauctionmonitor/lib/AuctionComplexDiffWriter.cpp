@@ -151,11 +151,12 @@ void AuctionComplexDiffWriter::dumpAuctions(std::vector<uint8_t>& output, bool d
 AUCTION_FILE AuctionComplexDiffWriter::exportDump(bool doFullDump, bool alwaysWithData) {
 	AUCTION_FILE auctionFile;
 
-	log(LL_Info, "Exporting %d auctions\n", (int) getAuctionCount());
-
 	categoryTimeManager.serializeHeader(auctionFile.header, doFullDump ? DT_Full : DT_Diff);
 
-	auctionFile.auctions.reserve(getAuctionCount());
+	size_t auctionCount = getAuctionCount();
+	log(LL_Info, "Exporting %d auctions\n", (int) auctionCount);
+	auctionFile.auctions.reserve(auctionCount);
+
 	forEachAuction([&auctionFile, doFullDump, alwaysWithData](AuctionComplexData* auctionInfo) {
 		if(!doFullDump && !auctionInfo->outputInPartialDump())
 			return;
