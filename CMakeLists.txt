@@ -196,4 +196,8 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rztestgs/CMakeLists.txt")
   add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rztestgs" rztestgs)
 endif()
 
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzrequester/CMakeLists.txt")
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzrequester" rzrequester)
+endif()
+
 include(CPack OPTIONAL)
