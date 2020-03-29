@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.13)
 project(rzu-parent)
 enable_testing()
 
@@ -111,7 +111,16 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
+  set(BUILD_GMOCK OFF)
+  set(INSTALL_GTEST OFF)
+  set(gtest_hide_internal_symbols ON)
   add_subdirectory(gtest EXCLUDE_FROM_ALL)
+  if(BUILD_SHARED_LIBS)
+    target_compile_definitions(gtest
+      PRIVATE GTEST_CREATE_SHARED_LIBRARY=1
+      INTERFACE GTEST_LINKED_AS_SHARED_LIBRARY=1
+    )
+  endif()
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/liblua/CMakeLists.txt")
