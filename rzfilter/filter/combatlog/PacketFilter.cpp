@@ -313,7 +313,7 @@ void PacketFilter::onStateResultMessage(const TS_SC_STATE_RESULT* packet) {
 	sendCombatLogLine(swingData);
 }
 
-std::string PacketFilter::getHandleName(uint32_t handle) {
+std::string PacketFilter::getHandleName(ar_handle_t handle) {
 	if(data->players.count(handle)) {
 		return data->players[handle];
 	} else {

@@ -50,7 +50,7 @@ private:
 	void onSkillMessage(const TS_SC_SKILL* packet);
 	void onStateResultMessage(const TS_SC_STATE_RESULT* packet);
 
-	std::string getHandleName(uint32_t handle);
+	std::string getHandleName(ar_handle_t handle);
 
 	void sendCombatLogLine(const SwingData& data);
 
@@ -58,7 +58,7 @@ private:
 
 private:
 	struct Data {
-		std::unordered_map<uint32_t, std::string> players;
+		std::unordered_map<ar_handle_t, std::string> players;
 		FILE* file = nullptr;
 	};
 	Data* data;

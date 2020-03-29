@@ -32,7 +32,7 @@ private:
 
 private:
 	struct Item {
-		uint32_t handle;
+		ar_handle_t handle;
 		uint32_t code;
 		uint64_t uid;
 		uint64_t count;
