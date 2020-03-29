@@ -29,7 +29,12 @@
 namespace AuthServer {
 
 ClientSession::ClientSession()
-    : useRsaAuth(false), isEpic2(false), lastLoginServerId(1), serverIdxOffset(0), clientData(nullptr) {}
+    : EncryptedSession<PacketSession>(SessionType::AuthClient, SessionPacketOrigin::Server, EPIC_LATEST),
+      useRsaAuth(false),
+      isEpic2(false),
+      lastLoginServerId(1),
+      serverIdxOffset(0),
+      clientData(nullptr) {}
 
 ClientSession::~ClientSession() {
 	if(clientData)
@@ -106,6 +111,7 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		sendPacket(result, EPIC_LATEST);
 	} else if(!memcmp(packet->szVersion, "200609280", 9) || !memcmp(packet->szVersion, "Creer", 5)) {
 		isEpic2 = true;
+		packetVersion = EPIC_2;
 		log(LL_Debug, "Client is epic 2\n");
 	}
 }

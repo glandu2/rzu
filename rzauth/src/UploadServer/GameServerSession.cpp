@@ -14,7 +14,8 @@ namespace UploadServer {
 
 std::unordered_map<std::string, GameServerSession*> GameServerSession::servers;
 
-GameServerSession::GameServerSession() {}
+GameServerSession::GameServerSession()
+    : PacketSession(SessionType::UploadGame, SessionPacketOrigin::Server, EPIC_LATEST) {}
 
 GameServerSession::~GameServerSession() {
 	if(this->serverName.empty() == false) {
