@@ -41,7 +41,7 @@ void TestProcessBase::TearDown() {
 	}
 }
 
-void TestProcessBase::spawnProcess(int portCheck, const char* exeFile, int argNumber, va_list argsList) {
+void TestProcessBase::vspawnProcess(int portCheck, const char* exeFile, int argNumber, va_list argsList) {
 	if(TestGlobalConfig::get()->enableExecutableSpawn.get() == false) {
 		log(LL_Info, "Ignoring spawn process request: config disabled process spawning\n");
 		return;
@@ -95,7 +95,7 @@ void TestProcessBase::spawnProcess(int portCheck, const char* exeFile, int argNu
 void TestProcessBase::spawnProcess(int portCheck, const char* exeFile, int argNumber, ...) {
 	va_list argsList;
 	va_start(argsList, argNumber);
-	spawnProcess(portCheck, exeFile, argNumber, argsList);
+	vspawnProcess(portCheck, exeFile, argNumber, argsList);
 	va_end(argsList);
 }
 

@@ -16,7 +16,7 @@ public:
 	// Override this to define how to tear down the environment.
 	void TearDown();
 
-	void spawnProcess(int portCheck, const char* exeFile, int argNumber, va_list args);
+	void vspawnProcess(int portCheck, const char* exeFile, int argNumber, va_list args);
 	void spawnProcess(int portCheck, const char* exeFile, int argNumber, ...);
 	void stop(int port);
 
@@ -66,7 +66,7 @@ protected:
 	static void spawnProcess(int portCheck, const char* exeFile, int argNumber, ...) {
 		va_list argsList;
 		va_start(argsList, argNumber);
-		testProcessBase.spawnProcess(portCheck, exeFile, argNumber, argsList);
+		testProcessBase.vspawnProcess(portCheck, exeFile, argNumber, argsList);
 		va_end(argsList);
 	}
 	static void stop(int port) { testProcessBase.stop(port); }
