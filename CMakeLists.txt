@@ -96,26 +96,26 @@ endif()
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "deps")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libuv" libuv)
+  add_subdirectory(libuv)
   install_pdb("uv")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libiconv/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libiconv" libiconv)
+  add_subdirectory(libiconv)
   install_pdb("iconv")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/zlib" zlib)
+  add_subdirectory(zlib)
   install_pdb("z")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/gtest" gtest)
+  add_subdirectory(gtest EXCLUDE_FROM_ALL)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/liblua/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/liblua" liblua)
+  add_subdirectory(liblua)
 endif()
 
 
@@ -125,79 +125,79 @@ if(CLANG_TIDY_EXE AND USE_CLANG_TIDY)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/librzu/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/librzu" librzu)
+  add_subdirectory(librzu)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rztest/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rztest" rztest)
+  add_subdirectory(rztest)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzauth")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzauth/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzauth" rzauth)
+  add_subdirectory(rzauth)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzgame")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzgame/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzgame" rzgame)
+  add_subdirectory(rzgame)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzplayercount")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzplayercount/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzplayercount" rzplayercount)
+  add_subdirectory(rzplayercount)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzbenchauth")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzbenchauth/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzbenchauth" rzbenchauth)
+  add_subdirectory(rzbenchauth)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzchatgateway")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzchatgateway/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzchatgateway" rzchatgateway)
+  add_subdirectory(rzchatgateway)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzgamereconnect")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzgamereconnect/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzgamereconnect" rzgamereconnect)
+  add_subdirectory(rzgamereconnect)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzlog")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzlog/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzlog" rzlog)
+  add_subdirectory(rzlog)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzbenchlog")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzbenchlog/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzbenchlog" rzbenchlog)
+  add_subdirectory(rzbenchlog)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzfilter")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzfilter/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzfilter" rzfilter)
+  add_subdirectory(rzfilter)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzauctionmonitor")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzauctionmonitor/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzauctionmonitor" rzauctionmonitor)
+  add_subdirectory(rzauctionmonitor)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rztestgs/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rztestgs" rztestgs)
+  add_subdirectory(rztestgs)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzrequester/CMakeLists.txt")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/rzrequester" rzrequester)
+  add_subdirectory(rzrequester)
 endif()
 
 include(CPack OPTIONAL)
