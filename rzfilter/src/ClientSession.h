@@ -40,7 +40,7 @@ public:
 		}
 	}
 	void sendPacket(const TS_MESSAGE* data) { PacketSession::sendPacket(data); }
-	int getPacketVersion() { return version; }
+	int getPacketVersion() { return packetVersion.getAsInt(); }
 	void close() { EncryptedSession<PacketSession>::close(); }
 	StreamAddress getAddress();
 	void banAddress(StreamAddress address);
@@ -69,7 +69,6 @@ protected:
 private:
 	ServerSession* serverSession;
 	bool authMode;
-	int version;
 };
 
 #endif  // CLIENTSESSION_H

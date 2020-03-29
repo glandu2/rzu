@@ -15,9 +15,11 @@ ClientSession::ClientSession(bool authMode,
                              GameClientSessionManager* gameClientSessionManager,
                              FilterManager* filterManager,
                              FilterManager* converterFilterManager)
-    : serverSession(new ServerSession(authMode, this, gameClientSessionManager, filterManager, converterFilterManager)),
-      authMode(authMode),
-      version(CONFIG_GET()->client.epic.get()) {}
+    : EncryptedSession<PacketSession>(authMode ? SessionType::AuthClient : SessionType::GameClient,
+                                      SessionPacketOrigin::Server,
+                                      CONFIG_GET()->client.epic.get()),
+      serverSession(new ServerSession(authMode, this, gameClientSessionManager, filterManager, converterFilterManager)),
+      authMode(authMode) {}
 
 StreamAddress ClientSession::getAddress() {
 	if(getStream())
