@@ -25,6 +25,9 @@ project*/
 releases/
 data
 
+# CMake file api directory
+/.cmake/
+
 #############
 ## Windows detritus
 #############
