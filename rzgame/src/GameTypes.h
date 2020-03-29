@@ -1,9 +1,10 @@
 #ifndef GAMETYPES
 #define GAMETYPES
 
+#include "Packet/GameTypes.h"
 #include <stdint.h>
 
-typedef uint32_t game_handle_t;
+typedef ar_handle_t game_handle_t;
 typedef uint64_t game_sid_t;
 
 #endif  // GAMETYPES

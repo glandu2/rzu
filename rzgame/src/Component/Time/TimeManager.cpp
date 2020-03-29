@@ -7,7 +7,7 @@ namespace GameServer {
 
 rztime_t TimeManager::getRzTime() {
 	static uint64_t baseTime = Utils::getTimeInMsec();
-	return static_cast<uint32_t>((Utils::getTimeInMsec() - baseTime) / 10);
+	return static_cast<rztime_t>((Utils::getTimeInMsec() - baseTime) / 10);
 }
 
 void TimeManager::sendGameTime(ClientSession* session) {
