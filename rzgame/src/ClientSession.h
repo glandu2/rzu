@@ -28,7 +28,7 @@ public:
 
 	uint32_t getAccountId() { return accountId; }
 	std::string getAccount() { return account; }
-	int getVersion() { return version; }
+	int getVersion() { return packetVersion.getAsInt(); }
 
 	void onAccountLoginResult(uint16_t result,
 	                          std::string account,
@@ -41,10 +41,7 @@ public:
 	void lobbyExitResult(TS_ResultCode result, std::unique_ptr<CharacterLight> characterData);
 	void playerLoadingResult(TS_ResultCode result, std::unique_ptr<Character> character);
 
-	template<typename T> typename std::enable_if<!std::is_pointer<T>::value, void>::type sendPacket(const T& packet) {
-		PacketSession::sendPacket(packet, version);
-	}
-
+	using EncryptedSession<PacketSession>::sendPacket;
 	void sendPacket(const TS_MESSAGE* packet) { PacketSession::sendPacket(packet); }
 	void sendResult(uint16_t id, uint16_t result, int32_t value);
 	void sendResult(const TS_MESSAGE* originalPacket, uint16_t result, int32_t value);
@@ -61,7 +58,6 @@ protected:
 	void setConnectionHandler(ConnectionHandler* newConnectionHandler);
 
 private:
-	int version;
 	bool authReceived;
 	std::string account;
 	uint32_t accountId;

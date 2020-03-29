@@ -20,42 +20,19 @@
 #include "GameClient/TS_TIMESYNC.h"
 #include "Packet/PacketEpics.h"
 
-GameSession::GameSession(const std::string& playername, Log* packetLog, int epic)
-    : ClientGameSession(epic),
-      playername(playername),
-      connectedInGame(false),
-      handle(0),
-      gameTimeOffset(0),
-      epochTimeOffset(0) {}
-
-void GameSession::onGameConnected() {
-	epochTimeOffset = gameTimeOffset = 0;
-
-	TS_CS_CHARACTER_LIST charlistPkt;
-	charlistPkt.account = auth->getAccountName();
-	sendPacket(charlistPkt);
-}
-
-void GameSession::onGameDisconnected(bool causedByRemote) {
-	updateTimer.stop();
-	connectedInGame = false;
-}
-
-void GameSession::onUpdatePacketExpired() {
-	if(!connectedInGame)
-		return;
-
-	TS_CS_UPDATE updatPkt;
-
-	updatPkt.handle = handle;
-	updatPkt.time = getGameTime() + gameTimeOffset;
-	updatPkt.epoch_time = uint32_t(time(NULL) + epochTimeOffset);
-
-	sendPacket(updatPkt);
-}
+GameSession::GameSession(const std::string& ip,
+                         uint16_t port,
+                         const std::string& account,
+                         const std::string& password,
+                         int serverIdx,
+                         const std::string& playername,
+                         int epic,
+                         int delayTime,
+                         int ggRecoTime)
+    : AutoClientSession(ip, port, account, password, serverIdx, playername, epic, true, delayTime, ggRecoTime) {}
 
 void GameSession::onClockExpired() {
-	uint64_t gameTime = (getGameTime() + gameTimeOffset) * 10;
+	uint32_t gameTime = getGameTime() * 10;
 	int days, hour, minute, second, milisecond;
 
 	days = gameTime / (86400 * 1000);
@@ -74,76 +51,20 @@ void GameSession::onCheckAuctionExpired() {
 	//	auctionQueryWork.queue(this, d);
 }
 
-uint32_t GameSession::getGameTime() {
-	return uint32_t(uv_hrtime() / (10 * 1000 * 1000));
-}
-
 void GameSession::waitNextGameSecond() {
-	uint32_t positionInSecond = ((getGameTime() + gameTimeOffset) * 10) % 1000;
+	uint32_t positionInSecond = (getGameTime() * 10) % 1000;
 	clockTimer.start(this, &GameSession::onClockExpired, 1000 - positionInSecond, 0);
 }
 
-void GameSession::onGamePacketReceived(const TS_MESSAGE* packet) {
+void GameSession::onPacketReceived(const TS_MESSAGE* packet, EventTag<AutoClientSession>) {
 	switch(packet->id) {
-		case TS_SC_CHARACTER_LIST::packetID:
-			packet->process(this, &GameSession::onCharacterList, version);
-			break;
-
-			case_packet_is(TS_SC_LOGIN_RESULT) packet->process(this, &GameSession::onCharacterLoginResult, version);
-			break;
-
-			case_packet_is(TS_SC_ENTER) packet->process(this, &GameSession::onEnter, version);
-			break;
-
-		case TS_SC_DISCONNECT_DESC::packetID:
-			connectedInGame = false;
-			abortSession();
-			break;
+		case_packet_is(TS_SC_ENTER) packet->process(this, &GameSession::onEnter, packetVersion);
+		break;
 
 		case TS_TIMESYNC::packetID:
-			packet->process(this, &GameSession::onTimeSync, version);
-			break;
-
-		case TS_SC_GAME_TIME::packetID:
-			packet->process(this, &GameSession::onGameTime, version);
+			packet->process(this, &GameSession::onTimeSync, packetVersion);
 			break;
 	}
-}
-
-void GameSession::onCharacterList(const TS_SC_CHARACTER_LIST* packet) {
-	bool characterInList = false;
-
-	log(LL_Debug, "Character list: \n");
-	for(size_t i = 0; i < packet->characters.size(); i++) {
-		log(LL_Debug, " - %s\n", packet->characters[i].name.c_str());
-		if(playername == packet->characters[i].name)
-			characterInList = true;
-	}
-
-	if(!characterInList) {
-		log(LL_Warning, "Character \"%s\" not in character list: \n", playername.c_str());
-		for(size_t i = 0; i < packet->characters.size(); i++) {
-			log(LL_Warning, " - %s\n", packet->characters[i].name.c_str());
-		}
-	}
-
-	TS_CS_LOGIN loginPkt;
-	loginPkt.name = playername;
-	loginPkt.race = 0;
-	RzHashReversible256::generatePayload(loginPkt);
-	sendPacket(loginPkt);
-
-	TS_TIMESYNC timeSyncPkt;
-	timeSyncPkt.time = 0;
-	sendPacket(timeSyncPkt);
-
-	updateTimer.start(this, &GameSession::onUpdatePacketExpired, 5000, 5000);
-}
-
-void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet) {
-	handle = packet->handle;
-	connectedInGame = true;
-	log(LL_Info, "Connected with character %s\n", playername.c_str());
 }
 
 void GameSession::onEnter(const TS_SC_ENTER* packet) {
@@ -153,22 +74,6 @@ void GameSession::onEnter(const TS_SC_ENTER* packet) {
 }
 
 void GameSession::onTimeSync(const TS_TIMESYNC* packet) {
-	gameTimeOffset = packet->time - getGameTime();
 	log(LL_Info, "Time synchronization\n");
 	waitNextGameSecond();
-
-	TS_TIMESYNC timeSyncPkt;
-	timeSyncPkt.time = packet->time;
-	sendPacket(timeSyncPkt);
-
-	if(epochTimeOffset == 0) {
-		TS_CS_GAME_TIME gameTimePkt;
-		sendPacket(gameTimePkt);
-	}
-}
-
-void GameSession::onGameTime(const TS_SC_GAME_TIME* packet) {
-	log(LL_Info, "Time update\n");
-	gameTimeOffset = packet->t - getGameTime();
-	epochTimeOffset = int32_t(packet->game_time - time(NULL));
 }

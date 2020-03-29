@@ -16,7 +16,7 @@ public:
 	void fillInventoryItem(TS_ITEM_INFO& item);
 
 public:
-	int32_t summon_id;
+	ar_handle_t summon_id;
 	int32_t idx;
 	int32_t code;
 	int64_t count;

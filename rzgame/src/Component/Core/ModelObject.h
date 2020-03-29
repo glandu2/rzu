@@ -10,13 +10,13 @@ namespace GameServer {
 
 class ClientSession;
 
-template<class ModelType, game_handle_t HANDLE_MASK> class ModelObject : public Object {
+template<class ModelType, uint32_t HANDLE_MASK> class ModelObject : public Object {
 public:
 	~ModelObject() {
 		freeHandles.push_back(handle);
 		dataObjectsByHandle.erase(handle);
 		dataObjectsBySid.erase(sid);
-		handle = 0;
+		handle = game_handle_t{};
 		sid = 0;
 	}
 
@@ -61,7 +61,7 @@ protected:
 	ModelObject() : sid(0), handle(allocHandle()) {}
 
 private:
-	static game_handle_t allocHandle() {
+	static uint32_t allocHandle() {
 		if(freeHandles.empty()) {
 			nextHandle = (nextHandle + 1) & 0x0FFFFFFF;
 			return nextHandle | (HANDLE_MASK << 28);
@@ -74,19 +74,19 @@ private:
 
 	static std::unordered_map<game_sid_t, ModelType*> dataObjectsBySid;
 	static std::unordered_map<game_handle_t, ModelType*> dataObjectsByHandle;
-	static game_handle_t nextHandle;
+	static uint32_t nextHandle;
 	static std::vector<game_handle_t> freeHandles;
 };
 
-template<class ModelType, game_handle_t HANDLE_MASK>
+template<class ModelType, uint32_t HANDLE_MASK>
 std::unordered_map<game_sid_t, ModelType*> ModelObject<ModelType, HANDLE_MASK>::dataObjectsBySid;
 
-template<class ModelType, game_handle_t HANDLE_MASK>
+template<class ModelType, uint32_t HANDLE_MASK>
 std::unordered_map<game_handle_t, ModelType*> ModelObject<ModelType, HANDLE_MASK>::dataObjectsByHandle;
 
-template<class ModelType, game_handle_t HANDLE_MASK> game_handle_t ModelObject<ModelType, HANDLE_MASK>::nextHandle = 0;
+template<class ModelType, uint32_t HANDLE_MASK> uint32_t ModelObject<ModelType, HANDLE_MASK>::nextHandle = 0;
 
-template<class ModelType, game_handle_t HANDLE_MASK>
+template<class ModelType, uint32_t HANDLE_MASK>
 std::vector<game_handle_t> ModelObject<ModelType, HANDLE_MASK>::freeHandles;
 
 }  // namespace GameServer

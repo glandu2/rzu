@@ -1,4 +1,3 @@
-#include "AutoAuthSession.h"
 #include "Config/ConfigInfo.h"
 #include "Config/GlobalCoreConfig.h"
 #include "Core/EventLoop.h"
@@ -80,11 +79,8 @@ int main(int argc, char* argv[]) {
 
 	Object::logStatic(Object::LL_Info, "main", "Starting server time monitor on epic 0x%06X\n", epic);
 
-	GameSession* gameSession = new GameSession(playername, &trafficLogger, epic);
-	AutoAuthSession* authSession =
-	    new AutoAuthSession(gameSession, ip, port, account, password, serverIdx, recoDelay, autoReco, epic);
-
-	authSession->connect();
+	GameSession gameSession(ip, port, account, password, serverIdx, playername, epic, recoDelay, autoReco);
+	gameSession.connect();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 

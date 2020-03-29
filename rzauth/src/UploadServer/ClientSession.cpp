@@ -14,7 +14,8 @@
 
 namespace UploadServer {
 
-ClientSession::ClientSession() {
+ClientSession::ClientSession()
+    : EncryptedSession<PacketSession>(SessionType::UploadClient, SessionPacketOrigin::Server, EPIC_LATEST) {
 	currentRequest = nullptr;
 }
 
@@ -105,7 +106,7 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	} else {
 		struct tm timeinfo;
 
-		Utils::getGmTime(time(NULL), &timeinfo);
+		Utils::getGmTime(time(nullptr), &timeinfo);
 
 		snprintf(filename,
 		         sizeof(filename),

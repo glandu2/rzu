@@ -186,8 +186,8 @@ void Character::updateStats() {
 }
 
 void Character::sendPacketStats() {
-	statBase.sendPacket(session, handle, StatBase::Base);
-	statBuffs.sendPacket(session, handle, StatBase::Buff);
+	statBase.sendPacket(session, handle, TS_STAT_INFO__TYPE::SIT_Total);
+	statBuffs.sendPacket(session, handle, TS_STAT_INFO__TYPE::SIT_ByItem);
 
 	session->sendProperty(handle, "max_chaos", maxChaos);
 	session->sendProperty(handle, "max_stamina", maxStamina);
@@ -285,7 +285,7 @@ void Character::synchronizeWithClient() {
 
 	TS_SC_STATUS_CHANGE statusChange;
 	statusChange.handle = handle;
-	statusChange.status = 0;
+	statusChange.status = (TS_CREATURE_STATUS) 0;
 	session->sendPacket(statusChange);
 
 	TS_SC_QUEST_LIST questList;

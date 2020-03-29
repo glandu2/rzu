@@ -1,11 +1,12 @@
 #ifndef TIMEMANAGER_H
 #define TIMEMANAGER_H
 
+#include "GameTypes.h"
 #include <stdint.h>
 
 namespace GameServer {
 
-typedef uint32_t rztime_t;  // unit [10ms] since first call
+typedef ar_time_t rztime_t;  // unit [10ms] since first call
 class ClientSession;
 
 class TimeManager {

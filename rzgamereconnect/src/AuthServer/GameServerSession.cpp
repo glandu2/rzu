@@ -13,7 +13,10 @@
 
 namespace AuthServer {
 
-GameServerSession::GameServerSession() : authSession(nullptr), serverIdx(UINT16_MAX) {}
+GameServerSession::GameServerSession()
+    : PacketSession(SessionType::AuthGame, SessionPacketOrigin::Server, EPIC_LATEST),
+      authSession(nullptr),
+      serverIdx(UINT16_MAX) {}
 
 GameServerSession::~GameServerSession() {
 	if(authSession)

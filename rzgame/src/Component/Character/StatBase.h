@@ -2,6 +2,7 @@
 #define STATBASE_H
 
 #include "Core/Object.h"
+#include "GameClient/TS_SC_STAT_INFO.h"
 #include "GameTypes.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -13,7 +14,7 @@ class ClientSession;
 
 class StatBase {
 public:
-	enum Type { Base = 0, Buff = 1 };
+	typedef TS_STAT_INFO__TYPE Type;
 
 public:
 	int32_t stat_id;

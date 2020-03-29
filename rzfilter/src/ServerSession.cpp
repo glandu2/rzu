@@ -18,11 +18,13 @@ ServerSession::ServerSession(bool authMode,
                              GameClientSessionManager* gameClientSessionManager,
                              FilterManager* filterManager,
                              FilterManager* converterFilterManager)
-    : authMode(authMode),
+    : EncryptedSession<PacketSession>(authMode ? SessionType::AuthClient : SessionType::GameClient,
+                                      SessionPacketOrigin::Client,
+                                      CONFIG_GET()->server.epic.get()),
+      authMode(authMode),
       clientSession(clientSession),
       gameClientSessionManager(gameClientSessionManager),
-      clientEndpointProxy(clientSession),
-      version(CONFIG_GET()->server.epic.get()) {
+      clientEndpointProxy(clientSession) {
 	if(filterManager)
 		packetFilter = filterManager->createFilter(authMode ? IFilter::ST_Auth : IFilter::ST_Game);
 	else

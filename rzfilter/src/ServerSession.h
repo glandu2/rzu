@@ -41,7 +41,7 @@ public:
 			sendPacket((const TS_MESSAGE*) buffer.getData());
 		}
 	}
-	int getPacketVersion() { return version; }
+	int getPacketVersion() { return packetVersion.getAsInt(); }
 	void close() { EncryptedSession<PacketSession>::close(); }
 	StreamAddress getAddress();
 	void banAddress(StreamAddress address);
@@ -76,7 +76,6 @@ private:
 	IFilterEndpoint* toClientBaseEndpoint;
 
 	std::vector<TS_MESSAGE*> pendingMessages;
-	int version;
 };
 
 #endif  // AUTHSESSION_H

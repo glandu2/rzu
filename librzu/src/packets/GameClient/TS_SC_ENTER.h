@@ -6,6 +6,8 @@
 #include "Packet/EncodingScrambled.h"
 #include "Packet/PacketDeclaration.h"
 
+#include "TS_SC_STATUS_CHANGE.h"
+
 enum TS_SC_ENTER__OBJ_TYPE : uint8_t {
 	EOT_Player = 0,
 	EOT_NPC = 1,
@@ -17,9 +19,15 @@ enum TS_SC_ENTER__OBJ_TYPE : uint8_t {
 	EOT_Pet = 7
 };
 
+enum TS_SC_ENTER__TYPE : uint8_t {
+	ET_Player = 0,
+	ET_NPC = 1,
+	ET_StaticObject = 2,
+};
+
 #define TS_SC_ENTER__ITEM_PICK_UP_ORDER_DEF(_) \
-	_(simple) (uint32_t, drop_time) \
-	_(array)  (uint32_t, hPlayer, 3) \
+	_(simple) (ar_time_t, drop_time) \
+	_(array)  (ar_handle_t, hPlayer, 3) \
 	_(array)  (int32_t, nPartyID, 3)
 CREATE_STRUCT(TS_SC_ENTER__ITEM_PICK_UP_ORDER);
 
@@ -32,8 +40,8 @@ CREATE_STRUCT(TS_SC_ENTER__ITEM_PICK_UP_ORDER);
 CREATE_STRUCT(TS_SC_ENTER__ITEM_INFO);
 
 #define TS_SC_ENTER__SKILL_INFO_DEF(_) \
-	_(simple) (uint32_t, casterHandle, version >= EPIC_4_1) \
-	_(simple) (uint32_t, startTime) \
+	_(simple) (ar_handle_t, casterHandle, version >= EPIC_4_1) \
+	_(simple) (ar_time_t, startTime) \
 	_(simple) (uint32_t, skillId)
 CREATE_STRUCT(TS_SC_ENTER__SKILL_INFO);
 
@@ -51,7 +59,7 @@ CREATE_STRUCT(TS_SC_ENTER__SKILL_INFO);
 CREATE_STRUCT(TS_SC_ENTER__FIELD_PROP_INFO);
 
 #define TS_SC_ENTER__CREATURE_INFO_DEF(_) \
-	_(simple) (uint32_t, status) \
+	_(simple) (TS_CREATURE_STATUS, status) \
 	_(simple) (float, face_direction) \
 	_(simple) (int32_t, hp) \
 	_(simple) (int32_t, max_hp) \
@@ -72,7 +80,7 @@ CREATE_STRUCT(TS_SC_ENTER__MONSTER_INFO);
 
 #define TS_SC_ENTER__SUMMON_INFO_DEF(_) \
 	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
-	_(simple) (uint32_t, master_handle) \
+	_(simple) (ar_handle_t, master_handle) \
 	_(simple) (EncodedInt<EncodingRandomized>, summon_code) \
 	_(def)(string)(name, 20) \
 	  _(impl)(string)(name, 19, version >= EPIC_3 && version < EPIC_9_6) \
@@ -98,7 +106,7 @@ CREATE_STRUCT(TS_SC_ENTER__NPC_INFO);
 	  _(impl)(string)(name, 19, version < EPIC_9_6) \
 	  _(impl)(string)(name, 20, version >= EPIC_9_6) \
 	_(simple) (uint16_t, job_id) \
-	_(simple) (uint32_t, ride_handle) \
+	_(simple) (ar_handle_t, ride_handle) \
 	_(simple) (uint32_t, guild_id) \
 	_(simple) (uint32_t, title_code, version >= EPIC_8_1) \
 	_(simple) (uint32_t, back_board, version >= EPIC_9_3) \
@@ -107,7 +115,7 @@ CREATE_STRUCT(TS_SC_ENTER__PLAYER_INFO);
 
 #define TS_SC_ENTER__PET_INFO_DEF(_) \
 	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
-	_(simple) (uint32_t, master_handle) \
+	_(simple) (ar_handle_t, master_handle) \
 	_(simple) (EncodedInt<EncodingRandomized>, pet_code) \
 	_(def)(string)(name, 20) \
 	  _(impl)(string)(name, 19, version < EPIC_9_6) \
@@ -115,8 +123,8 @@ CREATE_STRUCT(TS_SC_ENTER__PLAYER_INFO);
 CREATE_STRUCT(TS_SC_ENTER__PET_INFO);
 
 #define TS_SC_ENTER_DEF(_) \
-	_(simple) (uint8_t, type) /* 0 = static object, 1 = movable object, 2 = client object (ArObject::ObjectType) */ \
-	_(simple) (uint32_t, handle) \
+	_(simple) (TS_SC_ENTER__TYPE, type) \
+	_(simple) (ar_handle_t, handle) \
 	_(simple) (float, x) \
 	_(simple) (float, y) \
 	_(simple) (float, z) \

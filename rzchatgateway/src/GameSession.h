@@ -2,8 +2,9 @@
 #define GAMESESSION_H
 
 #include "Core/Timer.h"
-#include "NetSession/ClientGameSession.h"
+#include "NetSession/AutoClientSession.h"
 #include "NetSession/PacketSession.h"
+#include "Packet/GameTypes.h"
 #include <unordered_map>
 #include <vector>
 
@@ -17,43 +18,37 @@ struct TS_SC_CHAT;
 struct TS_TIMESYNC;
 struct TS_SC_GAME_TIME;
 
-class GameSession : public ClientGameSession {
+class GameSession : public AutoClientSession {
 public:
-	GameSession(const std::string& playername, bool enableGateway, Log* packetLog);
+	GameSession(bool enableGateway,
+	            const std::string& ip,
+	            uint16_t port,
+	            const std::string& account,
+	            const std::string& password,
+	            int serverIdx,
+	            const std::string& playername,
+	            int epic,
+	            int delayTime = 5000,
+	            int ggRecoTime = 280);
 
 	void setIrcClient(IrcClient* ircClient) { this->ircClient = ircClient; }
 
-	void onGameConnected();
-	void onGamePacketReceived(const TS_MESSAGE* packet);
-	void onGameDisconnected(bool causedByRemote);
+	virtual void onConnected(EventTag<AutoClientSession>) override final;
+	virtual void onPacketReceived(const TS_MESSAGE* packet, EventTag<AutoClientSession>) override final;
+	virtual void onDisconnected(EventTag<AutoClientSession>) override final;
 
 	void setGameServerName(std::string name);
 	void sendMsgToGS(int type, const char* sender, const char* target, std::string msg);
 
 protected:
-	void onUpdatePacketExpired();
-
-	void onCharacterList(const TS_SC_CHARACTER_LIST* packet);
 	void onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet);
 	void onEnter(const TS_SC_ENTER* packet);
 	void onChatLocal(const TS_SC_CHAT_LOCAL* packet);
 	void onChat(const TS_SC_CHAT* packet);
-	void onTimeSync(const TS_TIMESYNC* packet);
-	void onGameTime(const TS_SC_GAME_TIME* packet);
-
-	uint32_t getGameTime();
 
 private:
-	std::string playername;
 	IrcClient* ircClient;
 	bool enableGateway;
-	bool connectedInGame;
-
-	uint32_t handle;
-	int32_t gameTimeOffset;
-	int32_t epochTimeOffset;
-
-	Timer<GameSession> updateTimer;
 
 	std::vector<TS_CS_CHAT_REQUEST> messageQueue;
 	std::unordered_map<unsigned int, std::string> playerNames;

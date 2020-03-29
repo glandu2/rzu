@@ -1,4 +1,3 @@
-#include "ChatAuthSession.h"
 #include "Config/ConfigInfo.h"
 #include "Config/GlobalCoreConfig.h"
 #include "Core/EventLoop.h"
@@ -95,16 +94,14 @@ int main(int argc, char* argv[]) {
 
 	Object::logStatic(Object::LL_Info, "main", "Starting chat gateway\n");
 
-	GameSession* gameSession = new GameSession(playername, enableGateway, &trafficLogger);
+	GameSession* gameSession =
+	    new GameSession(enableGateway, ip, port, account, password, serverIdx, playername, epic, recoDelay, autoReco);
 	IrcClient* ircClient = new IrcClient(ircIp, ircPort, ircHost, ircChannel, ircNick, &trafficLogger);
-
-	ChatAuthSession* authSession =
-	    new ChatAuthSession(gameSession, ip, port, account, password, serverIdx, recoDelay, autoReco, epic);
 
 	gameSession->setIrcClient(ircClient);
 	ircClient->setGameSession(gameSession);
 
-	authSession->connect();
+	gameSession->connect();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }

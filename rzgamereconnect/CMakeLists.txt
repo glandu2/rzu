@@ -3,5 +3,5 @@ project(rzgamereconnect)
 
 set(TARGET_NAME rzgamereconnect)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/src" src)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/test" test)
+add_subdirectory(src)
+add_subdirectory(test)

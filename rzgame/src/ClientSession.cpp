@@ -26,9 +26,11 @@ void ClientSession::init() {}
 
 void ClientSession::deinit() {}
 
-ClientSession::ClientSession() : authReceived(false), accountId(UINT32_MAX) {
-	version = CONFIG_GET()->game.clients.epic.get();
-}
+ClientSession::ClientSession()
+    : EncryptedSession<PacketSession>(
+          SessionType::GameClient, SessionPacketOrigin::Server, CONFIG_GET()->game.clients.epic.get()),
+      authReceived(false),
+      accountId(UINT32_MAX) {}
 
 ClientSession::~ClientSession() {
 	log(LL_Info, "Account %s disconnected\n", account.c_str());
@@ -70,7 +72,7 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 	if(accountId == UINT32_MAX) {
 		switch(packet->id) {
 			case TS_CS_ACCOUNT_WITH_AUTH::packetID:
-				packet->process(this, &ClientSession::onAccountWithAuth, version);
+				packet->process(this, &ClientSession::onAccountWithAuth, packetVersion);
 				break;
 		}
 	} else if(connectionHandler) {

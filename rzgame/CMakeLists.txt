@@ -3,4 +3,4 @@ project(rzgame)
 
 set(TARGET_NAME rzgame)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/src" src)
+add_subdirectory(src)

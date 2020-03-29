@@ -45,7 +45,8 @@ void AuthServerSession::deinit() {
 	delete config;
 }
 
-AuthServerSession::AuthServerSession() {
+AuthServerSession::AuthServerSession()
+    : PacketSession(SessionType::AuthGame, SessionPacketOrigin::Client, EPIC_LATEST) {
 	instance = this;
 }
 

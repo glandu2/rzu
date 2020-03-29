@@ -18,7 +18,11 @@
 
 namespace AuthServer {
 
-GameServerSession::GameServerSession() : gameData(nullptr), useAutoReconnectFeature(false), securityNoSendMode(true) {}
+GameServerSession::GameServerSession()
+    : PacketSession(SessionType::AuthGame, SessionPacketOrigin::Server, EPIC_LATEST),
+      gameData(nullptr),
+      useAutoReconnectFeature(false),
+      securityNoSendMode(true) {}
 
 void GameServerSession::sendNotifyItemPurchased(ClientData* client) {
 	TS_AG_ITEM_PURCHASED itemPurchasedPacket;

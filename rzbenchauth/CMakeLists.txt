@@ -3,4 +3,4 @@ project(rzbenchauth)
 
 set(TARGET_NAME rzbenchauth)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/src" src)
+add_subdirectory(src)

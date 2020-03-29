@@ -5,7 +5,7 @@
 namespace GameServer {
 
 Item::Item(DB_Item* dbItem) {
-	summon_id = dbItem->summon_id;
+	summon_id = ar_handle_t(dbItem->summon_id);
 	idx = dbItem->idx;
 	code = dbItem->code;
 	count = dbItem->count;

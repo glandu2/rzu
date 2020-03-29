@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/aggregator" aggregator)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/sqlwriter" sqlwriter)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/servertime" servertime)
+add_subdirectory(aggregator)
+add_subdirectory(sqlwriter)
+add_subdirectory(servertime)

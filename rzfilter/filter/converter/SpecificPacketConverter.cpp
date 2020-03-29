@@ -402,8 +402,8 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 		TS_CS_REGION_UPDATE pkt;
 		if(packet->process(pkt, version)) {
 			if(version >= EPIC_9_3 && target->getPacketVersion() < EPIC_9_3) {
-				pkt.update_time = static_cast<uint32_t>((Utils::getTimeInMsec() - startTime) / 10 +
-				                                        (pkt.bIsStopMessage != 0 ? 10 : 0));
+				pkt.update_time = static_cast<ar_time_t>(static_cast<uint32_t>(
+				    (Utils::getTimeInMsec() - startTime) / 10 + (pkt.bIsStopMessage != 0 ? 10 : 0)));
 			}
 			target->sendPacket(pkt);
 		} else {
