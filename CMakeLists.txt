@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.1)
 project(rzu-parent)
 enable_testing()
 
@@ -14,7 +14,7 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs instead of static")
 set(CPACK_NSIS_DISPLAY_NAME "rzu - Glandu2")
 set(CPACK_PACKAGE_NAME "rzemu")
 set(CPACK_PACKAGE_VENDOR "Glandu2")
-set(CPACK_PACKAGE_VERSION "4.1" CACHE STRING "Version string")
+set(CPACK_PACKAGE_VERSION "5.0" CACHE STRING "Version string")
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_STRIP_FILES ON)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
@@ -28,6 +28,7 @@ get_filename_component(BUILD_DIR_NAME ${CMAKE_BINARY_DIR} NAME)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
+set(CMAKE_PDB_OUTPUT_DIRECTORY     "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -111,9 +112,9 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
-  set(BUILD_GMOCK OFF)
-  set(INSTALL_GTEST OFF)
-  set(gtest_hide_internal_symbols ON)
+  set(BUILD_GMOCK OFF CACHE BOOL "")
+  set(INSTALL_GTEST OFF CACHE BOOL "")
+  set(gtest_hide_internal_symbols ON CACHE BOOL "")
   add_subdirectory(gtest EXCLUDE_FROM_ALL)
   if(BUILD_SHARED_LIBS)
     target_compile_definitions(gtest
@@ -121,6 +122,12 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
       INTERFACE GTEST_LINKED_AS_SHARED_LIBRARY=1
     )
   endif()
+  set_target_properties(gtest
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}"
+    PDB_OUTPUT_DIRECTORY "${CMAKE_PDB_OUTPUT_DIRECTORY}")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/liblua/CMakeLists.txt")
@@ -175,6 +182,12 @@ set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzgamereconnect")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzgamereconnect/CMakeLists.txt")
   add_subdirectory(rzgamereconnect)
+endif()
+
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzclientreconnect")
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzclientreconnect/CMakeLists.txt")
+  add_subdirectory(rzclientreconnect)
 endif()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzlog")
