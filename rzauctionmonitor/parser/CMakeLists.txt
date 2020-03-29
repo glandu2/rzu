@@ -5,5 +5,5 @@ add_exe(rzauctionsql "auctions_to_sql.cpp;AuctionSQLWriter.cpp;AuctionSQLWriter.
 add_exe(rzauctionjson auctions_to_json.cpp rzu rzauctionwriter)
 #add_exe(rzauctionaggregator auctions_aggregator.cpp rzu rzauctionwriter)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/monitor" monitor)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/monitoring_tools" monitoring_tools)
+add_subdirectory(monitor)
+add_subdirectory(monitoring_tools)

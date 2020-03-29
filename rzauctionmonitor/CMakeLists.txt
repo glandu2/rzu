@@ -3,8 +3,8 @@ project(rzauctionmonitor)
 
 set(TARGET_NAME rzauctionmonitor)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/src" src)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/test" test)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/lib" lib)
+add_subdirectory(src)
+add_subdirectory(test)
+add_subdirectory(lib)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/parser" parser)
+add_subdirectory(parser)
