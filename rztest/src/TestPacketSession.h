@@ -4,6 +4,7 @@
 //#include "NetSession/PacketSession.h"
 #include "Core/EventChain.h"
 #include "Extern.h"
+#include "Packet/PacketStructsName.h"
 #include "TestConnectionChannel.h"
 
 class TestPacketServer;
@@ -23,7 +24,9 @@ private:
 	TestConnectionChannel* channel;
 };
 
-template<class T> TestPacketSession<T>::TestPacketSession(TestConnectionChannel* channel) : channel(channel) {
+template<class T>
+TestPacketSession<T>::TestPacketSession(TestConnectionChannel* channel)
+    : T(SessionType::Any, SessionPacketOrigin::Any, EPIC_LATEST), channel(channel) {
 	channel->registerSession(this);
 }
 
