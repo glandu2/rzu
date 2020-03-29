@@ -4,6 +4,7 @@
 #include "Core/Timer.h"
 #include "NetSession/ClientGameSession.h"
 #include "NetSession/PacketSession.h"
+#include "Packet/GameTypes.h"
 #include <unordered_map>
 #include <vector>
 
@@ -47,7 +48,7 @@ private:
 	bool connectedInGame;
 	bool shouldReconnect;
 
-	uint32_t handle;
+	ar_handle_t handle;
 	int32_t gameTimeOffset;
 	int32_t epochTimeOffset;
 

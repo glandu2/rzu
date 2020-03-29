@@ -83,8 +83,8 @@ void GameSession::onUpdatePacketExpired() {
 	TS_CS_UPDATE updatPkt;
 
 	updatPkt.handle = handle;
-	updatPkt.time = getGameTime() + gameTimeOffset;
-	updatPkt.epoch_time = uint32_t(time(NULL) + epochTimeOffset);
+	updatPkt.time = ar_time_t{getGameTime() + gameTimeOffset};
+	updatPkt.epoch_time = uint32_t(time(nullptr) + epochTimeOffset);
 
 	sendPacket(updatPkt);
 }
@@ -182,7 +182,7 @@ void GameSession::onGameTime(const TS_SC_GAME_TIME* serverTime) {
 		updateTimer.start(this, &GameSession::onUpdatePacketExpired, 5000, 5000);
 
 	gameTimeOffset = serverTime->t - getGameTime();
-	epochTimeOffset = uint32_t(serverTime->game_time - time(NULL));
+	epochTimeOffset = uint32_t(serverTime->game_time - time(nullptr));
 }
 
 void GameSession::setConnected(bool connected) {
