@@ -30,7 +30,7 @@ StatBase::StatBase(const StatResource* statResource) {
 void StatBase::sendPacket(ClientSession* session, game_handle_t handle, Type type) {
 	TS_SC_STAT_INFO statPacket;
 	statPacket.handle = handle;
-	statPacket.type = (int8_t) type;
+	statPacket.type = type;
 
 	statPacket.stat.stat_id = stat_id;
 	statPacket.stat.strength = (int16_t) base.strength;
