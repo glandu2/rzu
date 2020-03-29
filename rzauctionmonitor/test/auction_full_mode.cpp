@@ -26,10 +26,10 @@ struct AuctionInputTestData {
 	DurationType duration_type;
 	int64_t bid_price;
 	int64_t price;
+	uint32_t epic;
 	std::string seller;
 	BidFlag bid_flag;
 
-	uint32_t epic;
 	std::vector<uint8_t> rawData;
 	std::vector<uint8_t> expectedData;
 
@@ -45,9 +45,6 @@ struct AuctionInputTestData {
 		auctionData.price = price;
 		strcpy(auctionData.seller, seller.c_str());
 
-		epic = rand();
-		if(epic == 0xFFFFFF)  // avoid special 'not set' value
-			epic = 0;
 		rawData.resize(rand() % 1024 + sizeof(auctionData));
 		for(size_t i = 0; i < rawData.size(); i++)
 			rawData[i] = i & 0xFF;
@@ -186,7 +183,7 @@ TEST(auction_full_mode, no_auction) {
 	dumpAuctions(&auctionWriter, &auctionFile, true, false);
 
 	EXPECT_EQ(0, memcmp("RAH", auctionFile.header.signature, 4));
-	EXPECT_EQ(AUCTION_V5, auctionFile.header.file_version);
+	EXPECT_EQ(AUCTION_V6, auctionFile.header.file_version);
 	EXPECT_EQ(DT_Full, auctionFile.header.dumpType);
 	EXPECT_EQ(18, auctionFile.header.categories.size());
 	EXPECT_EQ(categoryBegin, auctionFile.header.categories[auctionData.category].beginTime);
@@ -357,6 +354,7 @@ TEST(auction_full_mode, added_update_unmodified_removed) {
 	ASSERT_EQ(0, auctionFile.auctions.size());
 
 	// MaybeDeleted auction
+	// Copy updated data from actionData3 as auctionData4 is never added
 	auctionData4.rawData = auctionData3.rawData;
 	auctionData4.expectedData = auctionData3.expectedData;
 
