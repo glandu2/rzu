@@ -16,6 +16,7 @@ struct AuctionInputTestData {
 		epic = rand();
 		if(epic == 0xFFFFFF)  // avoid special 'not set' value
 			epic = 0;
+		seller = std::to_string(rand());
 	}
 
 	uint32_t uid;
