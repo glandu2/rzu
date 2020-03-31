@@ -48,7 +48,7 @@
 [submodule "gtest"]
 	path = gtest
 	url = ../gtest
-	branch = master
+	branch = upstream
 [submodule "libiconv"]
 	path = libiconv
 	url = ../libiconv
