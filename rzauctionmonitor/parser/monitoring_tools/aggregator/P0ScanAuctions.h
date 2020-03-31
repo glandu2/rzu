@@ -11,7 +11,7 @@ class AuctionPipeline;
 class P0ScanAuctions : public PipelineStep<std::pair<std::string, std::string>, std::pair<std::string, std::string>> {
 	DECLARE_CLASSNAME(P0ScanAuctions, 0)
 public:
-	P0ScanAuctions(AuctionPipeline* auctionPipeline, cval<std::string>& auctionsPath, cval<int>& changeWaitSeconds);
+	P0ScanAuctions(cval<int>& changeWaitSeconds);
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
 
 private:
@@ -19,9 +19,7 @@ private:
 	void onFsStat(uv_fs_t* req);
 
 private:
-	AuctionPipeline* auctionPipeline;
 	uv_fs_t statReq;
-	cval<std::string>& auctionsPath;
 	cval<int>& changeWaitSeconds;
 
 	std::shared_ptr<PipelineStep::WorkItem> currentItem;

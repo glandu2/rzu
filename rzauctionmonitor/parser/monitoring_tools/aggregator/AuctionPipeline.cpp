@@ -26,7 +26,7 @@ AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
       statesPath(statesPath),
       auctionStateFile(auctionStateFile),
       started(false),
-      scanAuctionStep(this, auctionsPath, changeWaitSeconds),
+      scanAuctionStep(changeWaitSeconds),
       sendToWebServerStep(),
       commitStep(this) {
 	readAuctionStep.plug(&deserializeAuctionStep)
@@ -175,8 +175,6 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 		                  (int) req->result);
 		return;
 	}
-
-	int waitChangeSeconds = thisInstance->changeWaitSeconds.get();
 
 	std::vector<std::string> orderedFiles;
 

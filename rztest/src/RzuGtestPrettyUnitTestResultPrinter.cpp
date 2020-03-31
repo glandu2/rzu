@@ -81,6 +81,8 @@ void RzuTestPrinter::OnTestStart(const testing::TestInfo& test_info) {
 
 static const char* getResultTypeName(testing::TestPartResult::Type type) {
 	switch(type) {
+		case testing::TestPartResult::kSkip:
+			return "Skipped";
 		case testing::TestPartResult::kSuccess:
 			return "Success";
 

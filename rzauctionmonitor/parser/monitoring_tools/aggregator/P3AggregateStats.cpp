@@ -32,7 +32,7 @@ int P3AggregateStats::aggregateStats(const std::vector<AUCTION_FILE>& auctions,
 				    "0x%X\n",
 				    auctionInfo.uid,
 				    structBuffer.getParsedSize(),
-				    auctionInfo.data.size(),
+				    (int) auctionInfo.data.size(),
 				    auctionInfo.epic);
 				return -EBADF;
 			}

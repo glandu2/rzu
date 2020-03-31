@@ -64,7 +64,7 @@ class PipelineWork : public PipelineWorkBase<SourceData, OutputData> {
 };
 
 template<class SourceData, class OutputData>
-class PipelineWork<SourceData, OutputData, std::enable_if_t<!std::is_void_v<OutputData>>>
+class PipelineWork<SourceData, OutputData, std::enable_if_t<!std::is_void<OutputData>::value>>
     : public PipelineWorkBase<SourceData, OutputData> {
 public:
 	using PipelineWorkBase<SourceData, OutputData>::PipelineWorkBase;
@@ -177,7 +177,6 @@ protected:
 
 	virtual void doCancelWork(std::shared_ptr<WorkItem> item) {}
 
-private:
 	void workDone(std::shared_ptr<WorkItem> item, int status) {
 		if(status)
 			log(LL_Error, "%s: Work done with status %d\n", item->getName().c_str(), status);
@@ -208,6 +207,7 @@ private:
 		}
 	}
 
+private:
 	virtual bool isNextFull() = 0;
 
 private:
@@ -230,7 +230,7 @@ public:
 protected:
 	void workDone(std::shared_ptr<WorkItem> item, int status = 0) {
 		PipelineStepBase<Input, Output>::workDone(item, status);
-		doNextWork();
+		PipelineStepBase<Input, Output>::doNextWork();
 	}
 
 private:
@@ -238,8 +238,8 @@ private:
 };
 
 template<class Input, class Output>
-class PipelineStep<Input, Output, std::enable_if_t<!std::is_void_v<Output>>> : public PipelineStepBase<Input, Output>,
-                                                                               public IPipelineProducer<Output> {
+class PipelineStep<Input, Output, std::enable_if_t<!std::is_void<Output>::value>>
+    : public PipelineStepBase<Input, Output>, public IPipelineProducer<Output> {
 public:
 	using typename PipelineStepBase<Input, Output>::WorkItem;
 
@@ -265,7 +265,7 @@ public:
 			next->cancel();
 	}
 
-	virtual void notifyOutputAvailable() override { doNextWork(); }
+	virtual void notifyOutputAvailable() override { PipelineStepBase<Input, Output>::doNextWork(); }
 	virtual void setConsumer(IPipelineConsumer<Output>* consumer) override { next = consumer; }
 
 protected:
@@ -278,7 +278,7 @@ protected:
 		if(!item->isCanceled() && next && !status) {
 			item->queueToNext(next);
 		}
-		doNextWork();
+		PipelineStepBase<Input, Output>::doNextWork();
 	}
 
 private:
