@@ -4,12 +4,8 @@
 #include "Config/ConfigParamVal.h"
 #include <errno.h>
 
-P0ScanAuctions::P0ScanAuctions(AuctionPipeline* auctionPipeline,
-                               cval<std::string>& auctionsPath,
-                               cval<int>& changeWaitSeconds)
+P0ScanAuctions::P0ScanAuctions(cval<int>& changeWaitSeconds)
     : PipelineStep<std::pair<std::string, std::string>, std::pair<std::string, std::string>>(10000, 1),
-      auctionPipeline(auctionPipeline),
-      auctionsPath(auctionsPath),
       changeWaitSeconds(changeWaitSeconds) {
 	statReq.data = this;
 }

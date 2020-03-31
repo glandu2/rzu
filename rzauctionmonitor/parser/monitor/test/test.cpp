@@ -1,5 +1,6 @@
 #include "Core/Timer.h"
 #include "IPipeline.h"
+#include <math.h>
 #include <stdlib.h>
 #include <string>
 #include <time.h>

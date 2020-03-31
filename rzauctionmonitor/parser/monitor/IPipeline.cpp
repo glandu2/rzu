@@ -79,9 +79,9 @@ void PipelineStepMonitor::commandDumpStats(IWritableConsole* console, const std:
 		                "%10.3f, processed items: %" PRIu64 "\r\n",
 		                (int) classNameMaxSize,
 		                monitor->getClassName(),
-		                monitor->getInputQueueSize(),
-		                monitor->getBlockSize(),
-		                monitor->running,
+		                (int) monitor->getInputQueueSize(),
+		                (int) monitor->getBlockSize(),
+		                (int) monitor->running,
 		                (double) monitor->getActiveToIdleTimeRatio() * 100.0,
 		                (double) monitor->getItemPerSecond(),
 		                (uint64_t) monitor->processedInputs);
@@ -90,7 +90,7 @@ void PipelineStepMonitor::commandDumpStats(IWritableConsole* console, const std:
 
 void PipelineStepMonitor::commandResetStats(IWritableConsole* console, const std::vector<std::string>& args) {
 	for(PipelineStepMonitor* monitor : monitors) {
-		if(args.size() < 1 || strcmp(monitor->getClassName(), args[0].c_str())) {
+		if(args.size() < 1 || monitor->getClassName() == args[0]) {
 			monitor->resetStats();
 			console->writef("%s: stats reseted\r\n", monitor->getClassName());
 		}
