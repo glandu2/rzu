@@ -1,3 +1,4 @@
+#include "Cipher/RzHashReversible256.h"
 #include "Environment.h"
 #include "GlobalConfig.h"
 #include "RzTest.h"
@@ -128,6 +129,7 @@ TEST(Filter_Test, auth_to_gs_connection) {
 
 	TS_CS_VERSION gameVersionPacket;
 	gameVersionPacket.szVersion = "20180102359826482657";
+	RzHashReversible256::generatePayload(gameVersionPacket);
 
 	TS_SC_RESULT resultPacket;
 	resultPacket.request_msg_id = 500;
@@ -528,6 +530,7 @@ TEST(Filter_Test, auth_to_gs_connection_no_close_in_lua_keep_client) {
 		// Sending packet from the client while not having the server connected should not crash the filter
 		TS_CS_VERSION versionPacket;
 		versionPacket.szVersion = "20190102";
+		RzHashReversible256::generatePayload(versionPacket);
 		gameClient.sendPacket(versionPacket, EPIC_LATEST);
 	});
 

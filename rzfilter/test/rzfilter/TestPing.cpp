@@ -64,6 +64,10 @@ public:
 		outputServerSocket = socket(AF_INET, SOCK_STREAM, 0);
 		ASSERT_NE(-1, outputServerSocket);
 
+		// Allow to bind to socket in TIME_WAIT state
+		int val = 1;
+		setsockopt(outputServerSocket, SOL_SOCKET, SO_REUSEADDR, (const char*) &val, sizeof(val));
+
 		memset(&sin, 0, sizeof(sin));
 
 		uv_inet_pton(AF_INET, CONFIG_GET()->server.ip.get().c_str(), &sin.sin_addr.s_addr);
