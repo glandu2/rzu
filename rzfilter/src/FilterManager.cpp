@@ -10,10 +10,8 @@
 
 #ifdef _WIN32
 static const char* moduleSuffix = ".dll";
-#elif defined(__APPLE__)
-#include <unistd.h>
-static const char* moduleSuffix = ".dylib";
 #else
+// MacOS uses .dylib for shared libs only, dynamically loaded modules use .so
 #include <unistd.h>
 static const char* moduleSuffix = ".so";
 #endif
