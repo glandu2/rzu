@@ -20,10 +20,12 @@ std::list<FilterManager*> FilterManager::instance;
 
 FilterManager::FilterManager(cval<std::string>& filterModuleName)
     : filterModuleName(filterModuleName),
+      filterModuleArgument(nullptr),
       filterModuleLoaded(false),
       currentUsedIndex(0),
       createFilterFunction(nullptr),
       destroyFilterFunction(nullptr),
+      destroyGlobalFilterFunction(nullptr),
       lastFileSize(-1) {
 	onUpdateFilter();
 
@@ -75,10 +77,15 @@ void FilterManager::destroyInternalFilter(IFilter* filterModule) {
 bool FilterManager::unloadModule() {
 	if(filterModuleLoaded) {
 		log(LL_Info, "Unloading filter module\n");
+		if(destroyGlobalFilterFunction) {
+			destroyGlobalFilterFunction(filterModuleArgument);
+		}
 		uv_dlclose(&filterModule);
 		filterModuleLoaded = false;
 		createFilterFunction = nullptr;
 		destroyFilterFunction = nullptr;
+		destroyGlobalFilterFunction = nullptr;
+		filterModuleArgument = nullptr;
 		return true;
 	}
 
@@ -130,6 +137,9 @@ void FilterManager::loadModule() {
 	uv_lib_t filterModule;
 	IFilter::CreateFilterFunction createFilterFunction;
 	IFilter::DestroyFilterFunction destroyFilterFunction;
+	IFilter::InitializeGlobalFilterFunction initializeGlobalFilterFunction;
+	IFilter::DestroyGlobalFilterFunction destroyGlobalFilterFunction;
+	void* filterModuleArgument;
 
 	int err;
 	const char* moduleName;
@@ -201,6 +211,30 @@ void FilterManager::loadModule() {
 		uv_dlclose(&filterModule);
 		return;
 	}
+	err = uv_dlsym(&filterModule, "initializeGlobalFilter", (void**) &initializeGlobalFilterFunction);
+	if(err) {
+		log(LL_Debug,
+		    "Can't find function initializeGlobalFilter in library %s: %s (%d)\n",
+		    usedModuleName.c_str(),
+		    uv_strerror(err),
+		    err);
+		initializeGlobalFilterFunction = nullptr;
+	}
+	err = uv_dlsym(&filterModule, "destroyGlobalFilter", (void**) &destroyGlobalFilterFunction);
+	if(err) {
+		log(LL_Debug,
+		    "Can't find function destroyGlobalFilter in library %s: %s (%d)\n",
+		    usedModuleName.c_str(),
+		    uv_strerror(err),
+		    err);
+		destroyGlobalFilterFunction = nullptr;
+	}
+
+	if(initializeGlobalFilterFunction) {
+		filterModuleArgument = initializeGlobalFilterFunction();
+	} else {
+		filterModuleArgument = nullptr;
+	}
 
 	reloadAllFilters(createFilterFunction, this->destroyFilterFunction);
 
@@ -212,6 +246,8 @@ void FilterManager::loadModule() {
 	this->currentUsedIndex = getNextUsedIndex();
 	this->createFilterFunction = createFilterFunction;
 	this->destroyFilterFunction = destroyFilterFunction;
+	this->destroyGlobalFilterFunction = destroyGlobalFilterFunction;
+	this->filterModuleArgument = filterModuleArgument;
 	log(LL_Info, "Loaded new filter %s\n", newModuleName.c_str());
 }
 
