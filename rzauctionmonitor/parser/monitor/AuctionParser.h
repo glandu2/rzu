@@ -3,6 +3,7 @@
 
 #include "./Extern.h"
 #include "AuctionComplexDiffWriter.h"
+#include "Config/ConfigParamVal.h"
 #include "Core/Object.h"
 #include "Core/Timer.h"
 #include "IParser.h"
