@@ -1,6 +1,7 @@
 #ifndef FILTERMANAGER_H
 #define FILTERMANAGER_H
 
+#include "Config/ConfigParamVal.h"
 #include "Core/Object.h"
 #include "Core/Timer.h"
 #include "IFilter.h"

@@ -1,5 +1,4 @@
 #include "LuaTimer.h"
-#include "Core/Utils.h"
 #include "PacketFilter.h"
 
 const char* const LuaTimer::NAME = "LuaTimer";
