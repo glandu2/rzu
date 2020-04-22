@@ -1,5 +1,4 @@
-#ifndef AUCTIONFILE_H
-#define AUCTIONFILE_H
+#pragma once
 
 #include "AuctionSimpleFile.h"
 #include "Packet/PacketDeclaration.h"
@@ -32,5 +31,3 @@ CREATE_STRUCT(AUCTION_INFO);
 	_(dynarray)(AUCTION_INFO, auctions)
 CREATE_STRUCT(AUCTION_FILE);
 // clang-format on
-
-#endif  // AUCTIONFILE_H

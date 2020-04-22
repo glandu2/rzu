@@ -1,5 +1,4 @@
-#ifndef GAMESESSION_H
-#define GAMESESSION_H
+#pragma once
 
 #include "Core/Timer.h"
 #include "NetSession/ClientGameSession.h"
@@ -60,4 +59,3 @@ private:
 	Timer<GameSession> ggRecoTimer;
 };
 
-#endif  // GAMESESSION_H

@@ -1,5 +1,4 @@
-#ifndef P1READAUCTION_H
-#define P1READAUCTION_H
+#pragma once
 
 #include "AuctionParser.h"
 #include "Core/BackgroundWork.h"
@@ -22,4 +21,3 @@ private:
 	BackgroundWork<P1ReadAuction, std::shared_ptr<WorkItem>> work;
 };
 
-#endif

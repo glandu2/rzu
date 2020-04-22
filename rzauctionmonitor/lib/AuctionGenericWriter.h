@@ -1,5 +1,4 @@
-#ifndef AUCTIONGENERICWRITER_H
-#define AUCTIONGENERICWRITER_H
+#pragma once
 
 #include "AuctionUid.h"
 #include "Packet/MessageBuffer.h"
@@ -122,4 +121,3 @@ private:
 	fc::flat_map<std::deque<std::pair<uint32_t, std::unique_ptr<AuctionData>>>> auctions;
 };
 
-#endif  // AUCTIONSIMPLEDIFF_H

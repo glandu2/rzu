@@ -1,5 +1,4 @@
-#ifndef P4COMPUTESTATS_H
-#define P4COMPUTESTATS_H
+#pragma once
 
 #include "Core/BackgroundWork.h"
 #include "Core/Object.h"
@@ -56,5 +55,3 @@ private:
 private:
 	BackgroundWork<P4ComputeStats, std::shared_ptr<WorkItem>> work;
 };
-
-#endif

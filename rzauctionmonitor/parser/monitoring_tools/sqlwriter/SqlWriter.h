@@ -1,5 +1,4 @@
-#ifndef SQLWRITER_H
-#define SQLWRITER_H
+#pragma once
 
 #include "AuctionSQLWriter.h"
 #include "Core/Object.h"
@@ -24,4 +23,3 @@ private:
 	std::vector<DB_Item::Input> dbInputs;
 };
 
-#endif

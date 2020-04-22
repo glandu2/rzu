@@ -1,5 +1,4 @@
-#ifndef P2DESERIALIZEAUCTION_H
-#define P2DESERIALIZEAUCTION_H
+#pragma once
 
 #include "AuctionParser.h"
 #include "AuctionSimpleFile.h"
@@ -23,4 +22,3 @@ private:
 	BackgroundWork<P2DeserializeAuction, std::shared_ptr<WorkItem>> work;
 };
 
-#endif

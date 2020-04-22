@@ -1,5 +1,4 @@
-#ifndef AUCTIONWRITER_H
-#define AUCTIONWRITER_H
+#pragma once
 
 #include "AuctionFile.h"
 #include "Core/Object.h"
@@ -38,4 +37,3 @@ private:
 	                          const char*& msg);
 };
 
-#endif

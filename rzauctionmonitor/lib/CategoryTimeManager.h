@@ -1,5 +1,4 @@
-#ifndef CATEGORYTIMEMANAGER_H
-#define CATEGORYTIMEMANAGER_H
+#pragma once
 
 #include "AuctionFile.h"
 #include "Core/Object.h"
@@ -51,4 +50,3 @@ private:
 	std::vector<CategoryTime> categoryTime;
 };
 
-#endif  // AUCTIONSIMPLEDIFF_H

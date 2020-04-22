@@ -1,5 +1,4 @@
-#ifndef AUCTIONSQLWRITER_H
-#define AUCTIONSQLWRITER_H
+#pragma once
 
 #include "AuctionFile.h"
 #include "Database/DbQueryJobRef.h"
@@ -73,4 +72,3 @@ struct DB_Item {
 	static bool createTable(DbConnectionPool* dbConnectionPool);
 };
 
-#endif

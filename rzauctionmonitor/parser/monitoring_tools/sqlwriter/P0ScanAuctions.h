@@ -1,5 +1,4 @@
-#ifndef P0SCANAUCTIONS_H
-#define P0SCANAUCTIONS_H
+#pragma once
 
 #include "AuctionParser.h"
 #include "Core/BackgroundWork.h"
@@ -25,4 +24,3 @@ private:
 	std::shared_ptr<PipelineStep::WorkItem> currentItem;
 };
 
-#endif

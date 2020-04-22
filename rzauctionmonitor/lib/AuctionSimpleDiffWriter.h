@@ -1,5 +1,4 @@
-#ifndef AUCTIONSIMPLEDIFF_H
-#define AUCTIONSIMPLEDIFF_H
+#pragma once
 
 #include "AuctionGenericWriter.h"
 #include "AuctionSimpleData.h"
@@ -25,4 +24,3 @@ public:
 	void importDump(const AUCTION_SIMPLE_FILE* auctionFile);
 };
 
-#endif  // AUCTIONSIMPLEDIFF_H

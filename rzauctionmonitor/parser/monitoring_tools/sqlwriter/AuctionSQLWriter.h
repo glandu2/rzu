@@ -1,5 +1,4 @@
-#ifndef AUCTIONSQLWRITER_H
-#define AUCTIONSQLWRITER_H
+#pragma once
 
 #include "AuctionFile.h"
 #include "Database/DbQueryJobRef.h"
@@ -56,4 +55,3 @@ protected:
 	static void fillItemInfo(Input& input, const std::vector<uint8_t>& auctionInfo);
 };
 
-#endif

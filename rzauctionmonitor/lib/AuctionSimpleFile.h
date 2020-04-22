@@ -1,5 +1,4 @@
-#ifndef AUCTIONSIMPLEFILE_H
-#define AUCTIONSIMPLEFILE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -79,4 +78,3 @@ CREATE_STRUCT(AUCTION_SIMPLE_INFO);
 	_(dynarray)(AUCTION_SIMPLE_INFO, auctions)
 CREATE_STRUCT(AUCTION_SIMPLE_FILE);
 
-#endif  // AUCTIONSIMPLEFILE_H

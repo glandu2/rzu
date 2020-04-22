@@ -1,5 +1,4 @@
-#ifndef P5SENDTOWEBSERVER_H
-#define P5SENDTOWEBSERVER_H
+#pragma once
 
 #include "AuctionFile.h"
 #include "Core/Object.h"
@@ -21,4 +20,3 @@ private:
 	cval<std::string>& pwd;
 };
 
-#endif
