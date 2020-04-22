@@ -1,5 +1,4 @@
-#ifndef INVENTORY_H
-#define INVENTORY_H
+#pragma once
 
 #include "GameTypes.h"
 #include "Item.h"
@@ -75,4 +74,3 @@ private:
 
 }  // namespace GameServer
 
-#endif  // INVENTORY_H

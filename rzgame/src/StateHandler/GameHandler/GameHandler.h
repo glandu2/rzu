@@ -1,5 +1,4 @@
-#ifndef GAMEHANDLER_H
-#define GAMEHANDLER_H
+#pragma once
 
 #include "Component/Character/Character.h"
 #include "ConnectionHandler.h"
@@ -30,4 +29,3 @@ private:
 
 }  // namespace GameServer
 
-#endif  // GAMEHANDLER_H

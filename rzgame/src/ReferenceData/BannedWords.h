@@ -1,5 +1,4 @@
-#ifndef BANNEDWORDS_H
-#define BANNEDWORDS_H
+#pragma once
 
 #include "Database/DbQueryJob.h"
 #include "Database/DbQueryJobRef.h"
@@ -34,4 +33,3 @@ private:
 
 }  // namespace GameServer
 
-#endif  // BANNEDWORDS_H

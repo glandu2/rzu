@@ -1,5 +1,4 @@
-#ifndef ITEM_H
-#define ITEM_H
+#pragma once
 
 #include "Component/Core/ModelObject.h"
 #include "Core/Timer.h"
@@ -40,4 +39,3 @@ public:
 
 }  // namespace GameServer
 
-#endif  // ITEM_H

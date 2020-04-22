@@ -1,5 +1,4 @@
-#ifndef ICONNECTIONHANDLER_H
-#define ICONNECTIONHANDLER_H
+#pragma once
 
 #include "Core/Object.h"
 #include "Packet/PacketBaseMessage.h"
@@ -20,4 +19,3 @@ protected:
 
 }  // namespace GameServer
 
-#endif  // ICONNECTIONHANDLER_H

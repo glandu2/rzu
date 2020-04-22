@@ -1,5 +1,4 @@
-#ifndef REFDATALOADER_H
-#define REFDATALOADER_H
+#pragma once
 
 #include "Core/Object.h"
 #include "Database/DbQueryJobRef.h"
@@ -73,4 +72,3 @@ std::unordered_map<int32_t, const std::unique_ptr<RefDataStruct>>
 
 }  // namespace GameServer
 
-#endif  // REFDATALOADER_H

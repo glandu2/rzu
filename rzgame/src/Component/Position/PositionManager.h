@@ -1,5 +1,4 @@
-#ifndef POSITIONMANAGER_H
-#define POSITIONMANAGER_H
+#pragma once
 
 #include "Core/Object.h"
 #include "Core/Timer.h"
@@ -56,4 +55,3 @@ private:
 
 }  // namespace GameServer
 
-#endif  // POSITIONMANAGER_H

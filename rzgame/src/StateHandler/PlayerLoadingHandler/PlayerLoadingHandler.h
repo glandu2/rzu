@@ -1,5 +1,4 @@
-#ifndef PLAYERLOADINGHANDLER_H
-#define PLAYERLOADINGHANDLER_H
+#pragma once
 
 #include "ConnectionHandler.h"
 #include "Database/DB_Character.h"
@@ -29,4 +28,3 @@ private:
 
 }  // namespace GameServer
 
-#endif  // PLAYERLOADINGHANDLER_H

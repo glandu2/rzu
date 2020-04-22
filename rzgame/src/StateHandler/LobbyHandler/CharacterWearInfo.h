@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_CHARACTER_WEAR_INFO_H
-#define AUTHSERVER_CHARACTER_WEAR_INFO_H
+#pragma once
 
 #include "Database/DbQueryJob.h"
 #include "GameTypes.h"
@@ -29,4 +28,3 @@ struct CharacterWearInfoBinding {
 
 }  // namespace GameServer
 
-#endif  // AUTHSERVER_CHARACTER_WEAR_INFO_H

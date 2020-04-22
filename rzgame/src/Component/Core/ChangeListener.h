@@ -1,5 +1,4 @@
-#ifndef CHANGELISTENER
-#define CHANGELISTENER
+#pragma once
 
 #include <stdint.h>
 
@@ -54,4 +53,3 @@ public:
 	void resetChanged() { this->hasChanged_ = false; }
 };
 
-#endif  // CHANGELISTENER

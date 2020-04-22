@@ -1,5 +1,4 @@
-#ifndef DBSTORAGEITEM_H
-#define DBSTORAGEITEM_H
+#pragma once
 
 #include "Database/DbQueryJob.h"
 #include "GameTypes.h"
@@ -43,4 +42,3 @@ struct DB_StorageBinding {
 
 }  // namespace GameServer
 
-#endif  // DBSTORAGEITEM_H

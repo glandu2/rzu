@@ -1,5 +1,4 @@
-#ifndef GAMESERVER_CLIENTSESSION_H
-#define GAMESERVER_CLIENTSESSION_H
+#pragma once
 
 #include "ConnectionHandler.h"
 #include "GameTypes.h"
@@ -67,4 +66,3 @@ private:
 
 }  // namespace GameServer
 
-#endif  // GAMESERVER_CLIENTSESSION_H

@@ -1,5 +1,4 @@
-#ifndef MODELOBJECT_H
-#define MODELOBJECT_H
+#pragma once
 
 #include "Core/Object.h"
 #include "GameTypes.h"
@@ -90,5 +89,3 @@ template<class ModelType, uint32_t HANDLE_MASK>
 std::vector<game_handle_t> ModelObject<ModelType, HANDLE_MASK>::freeHandles;
 
 }  // namespace GameServer
-
-#endif  // MODELOBJECT_H

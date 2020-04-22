@@ -1,5 +1,4 @@
-#ifndef STATBASE_H
-#define STATBASE_H
+#pragma once
 
 #include "Core/Object.h"
 #include "GameClient/TS_SC_STAT_INFO.h"
@@ -94,4 +93,3 @@ protected:
 
 }  // namespace GameServer
 
-#endif  // STATBASE_H

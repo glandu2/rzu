@@ -1,5 +1,4 @@
-#ifndef DBCHARACTER_H
-#define DBCHARACTER_H
+#pragma once
 
 #include "Database/DbQueryJob.h"
 #include "GameTypes.h"
@@ -83,4 +82,3 @@ struct DB_CharacterBinding {
 
 }  // namespace GameServer
 
-#endif  // DBCHARACTER_H
