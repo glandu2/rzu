@@ -1,24 +1,22 @@
 #include "Config/GlobalCoreConfig.h"
 #include "Core/CrashHandler.h"
 #include "Core/EventLoop.h"
+#include "Core/Log.h"
 #include "Database/DbConnectionPool.h"
 #include "GlobalConfig.h"
 #include "LibRzuInit.h"
 
+#include "Console/ConsoleSession.h"
 #include "NetSession/BanManager.h"
 #include "NetSession/ServersManager.h"
 #include "NetSession/SessionServer.h"
 
-#include "AuthServer/AuthSession.h"
-#include "AuthServer/GameServerSession.h"
-
-#include "Console/ConsoleSession.h"
-
-#include <stdlib.h>
+#include "AuthClientSession.h"
+#include "GameClientSession.h"
 
 void runServers(Log* trafficLogger);
 
-void onTerminate(void* instance) {
+static void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
 
 	if(serverManager)
@@ -28,9 +26,7 @@ void onTerminate(void* instance) {
 int main(int argc, char** argv) {
 	LibRzuScopedUse useLibRzu;
 	GlobalConfig::init();
-	AuthServer::AuthSession::init();
-
-	srand(time(nullptr) ^ (time_t) argv);
+	BanManager::registerConfig();
 
 	ConfigInfo::get()->init(argc, argv);
 
@@ -51,6 +47,12 @@ int main(int argc, char** argv) {
 
 	ConfigInfo::get()->dump();
 
+	Object::logStatic(Object::LL_Info,
+	                  "main",
+	                  "Target auth: %s:%d\n",
+	                  CONFIG_GET()->server.ip.get().c_str(),
+	                  CONFIG_GET()->server.port.get());
+
 	runServers(&trafficLogger);
 
 	// Make valgrind happy
@@ -61,13 +63,22 @@ int main(int argc, char** argv) {
 
 void runServers(Log* trafficLogger) {
 	ServersManager serverManager;
+	BanManager clientBanManager;
 
-	SessionServer<AuthServer::GameServerSession> authGameServer(CONFIG_GET()->game.listener.listenIp,
-	                                                            CONFIG_GET()->game.listener.port,
-	                                                            &CONFIG_GET()->game.listener.idleTimeout,
-	                                                            trafficLogger);
+	SessionServer<AuthClientSession> authSessionServer(CONFIG_GET()->client.listener.listenIp,
+	                                                   CONFIG_GET()->client.listener.port,
+	                                                   &CONFIG_GET()->client.listener.idleTimeout,
+	                                                   trafficLogger,
+	                                                   &clientBanManager);
 
-	serverManager.addServer("auth.gameserver", &authGameServer, &CONFIG_GET()->game.listener.autoStart);
+	SessionServer<GameClientSession> gameSessionServer(CONFIG_GET()->client.listener.listenIp,
+	                                                   CONFIG_GET()->client.gamePort,
+	                                                   &CONFIG_GET()->client.listener.idleTimeout,
+	                                                   trafficLogger,
+	                                                   &clientBanManager);
+
+	serverManager.addServer("auth", &authSessionServer, &CONFIG_GET()->client.listener.autoStart);
+	serverManager.addServer("game", &gameSessionServer, &CONFIG_GET()->client.listener.autoStart);
 	ConsoleServer consoleServer(&serverManager);
 
 	serverManager.start();

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(rzgamereconnect)
+project(rzclientreconnect)
 
-set(TARGET_NAME rzgamereconnect)
+set(TARGET_NAME rzclientreconnect)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/src" src)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/test" test)
+add_subdirectory(src)

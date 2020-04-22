@@ -1,7 +1,10 @@
 #include "ClassCounter.h"
 
-#include "AuthServer/AuthSession.h"
-DECLARE_CLASSCOUNT_STATIC(AuthServer::AuthSession)
+#include "AuthClientSession.h"
+DECLARE_CLASSCOUNT_STATIC(AuthClientSession)
 
-#include "AuthServer/GameServerSession.h"
-DECLARE_CLASSCOUNT_STATIC(AuthServer::GameServerSession)
+#include "GameClientSession.h"
+DECLARE_CLASSCOUNT_STATIC(GameClientSession)
+
+#include "ConnectionToServer.h"
+DECLARE_CLASSCOUNT_STATIC(ConnectionToServer)
