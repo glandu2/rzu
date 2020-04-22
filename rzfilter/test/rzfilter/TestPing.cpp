@@ -5,10 +5,6 @@
 
 #include "Cipher/RC4Cipher.h"
 
-#ifndef _WIN32
-#define closesocket close
-#endif
-
 #pragma pack(push, 1)
 struct TS_SMALL : public TS_MESSAGE {
 	static const uint16_t packetID = 10026;
@@ -29,6 +25,14 @@ public:
 		outputSocket = outputServerSocket = inputSocket = -1;
 		errno = 0;
 		inputCipher.prepare("}h79q~B%al;k'y $E");
+	}
+
+	void closesocket(int s) {
+#ifndef _WIN32
+		close(s);
+#else
+		::closesocket(s);
+#endif
 	}
 
 	virtual void TearDown() {
