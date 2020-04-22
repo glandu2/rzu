@@ -15,6 +15,7 @@
 	_(dynstring)(lastParsedFile, false) \
 	_(simple)  (AUCTION_FILE, auctionData)
 CREATE_STRUCT(PIPELINE_STATE);
+#undef PIPELINE_STATE_DEF
 // clang-format on
 
 AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,

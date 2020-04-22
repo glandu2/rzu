@@ -24,10 +24,12 @@
 	_(simple)  (bool, deleted, version >= AUCTION_V4) \
 	_(simple)  (uint8_t, deletedCount, version >= AUCTION_V4 && deleted, 0)
 CREATE_STRUCT(AUCTION_INFO);
+#undef AUCTION_INFO_DEF
 
 #define AUCTION_FILE_DEF(_) \
 	_(simple)  (AUCTION_HEADER, header) \
 	_(count)   (uint32_t, auctions) \
 	_(dynarray)(AUCTION_INFO, auctions)
 CREATE_STRUCT(AUCTION_FILE);
+#undef AUCTION_FILE_DEF
 // clang-format on

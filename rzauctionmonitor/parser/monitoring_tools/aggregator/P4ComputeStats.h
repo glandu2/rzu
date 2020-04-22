@@ -21,6 +21,7 @@
 	_(simple)(int64_t, maxPrice) \
 	_(simple)(int64_t, avgPrice)
 CREATE_STRUCT(AUCTION_INFO_PER_DAY);
+#undef AUCTION_INFO_PER_DAY_DEF
 // clang-format on
 
 class P4ComputeStats

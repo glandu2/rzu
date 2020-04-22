@@ -9,6 +9,4 @@ struct GlobalConfig {
 	static void init();
 };
 
-#ifndef CONFIG_GET
 #define CONFIG_GET() GlobalConfig::get()
-#endif
