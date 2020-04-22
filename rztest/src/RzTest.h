@@ -1,5 +1,4 @@
-#ifndef RZTEST_H
-#define RZTEST_H
+#pragma once
 
 #include "Core/Object.h"
 #include "Core/Timer.h"
@@ -29,4 +28,3 @@ private:
 	Timer<RzTest> timeoutTimer;
 };
 
-#endif  // RZTEST_H

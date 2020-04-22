@@ -1,5 +1,4 @@
-#ifndef TERMINATOR_H
-#define TERMINATOR_H
+#pragma once
 
 #include "Core/Timer.h"
 #include "Extern.h"
@@ -24,4 +23,3 @@ private:
 	Timer<Terminator> timeoutTimer;
 };
 
-#endif  // TERMINATOR_H

@@ -1,5 +1,4 @@
-#ifndef RUNTESTS_H
-#define RUNTESTS_H
+#pragma once
 
 #include "Extern.h"
 #include "LibRzuInit.h"
@@ -20,4 +19,3 @@ private:
 	LibRzuScopedUse useLibRzu;
 };
 
-#endif

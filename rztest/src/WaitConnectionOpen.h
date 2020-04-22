@@ -1,5 +1,4 @@
-#ifndef WAITCONNECTIONOPEN_H
-#define WAITCONNECTIONOPEN_H
+#pragma once
 
 #include "Core/Timer.h"
 #include "Extern.h"
@@ -28,4 +27,3 @@ private:
 	bool stop;
 };
 
-#endif  // WAITCONNECTIONOPEN_H

@@ -1,5 +1,4 @@
-#ifndef TESTCONNECTIONCHANNEL_H
-#define TESTCONNECTIONCHANNEL_H
+#pragma once
 
 #include <list>
 #include <string>
@@ -205,4 +204,3 @@ private:
 	RzTest* test;
 };
 
-#endif  // TESTCONNECTIONCHANNEL_H

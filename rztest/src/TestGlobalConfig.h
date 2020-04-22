@@ -1,5 +1,4 @@
-#ifndef TESTGLOBALCONFIG_H
-#define TESTGLOBALCONFIG_H
+#pragma once
 
 #include "Config/ConfigInfo.h"
 
@@ -12,4 +11,3 @@ struct TestGlobalConfig {
 	static void init();
 };
 
-#endif  // TESTGLOBALCONFIG_H

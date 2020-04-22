@@ -1,5 +1,4 @@
-#ifndef TESTPACKETSESSION_H
-#define TESTPACKETSESSION_H
+#pragma once
 
 //#include "NetSession/PacketSession.h"
 #include "Core/EventChain.h"
@@ -49,4 +48,3 @@ template<class T> EventChain<PacketSession> TestPacketSession<T>::onPacketReceiv
 	return T::onPacketReceived(packet);
 }
 
-#endif  // TESTPACKETSESSION_H
