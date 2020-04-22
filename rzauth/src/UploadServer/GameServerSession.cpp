@@ -1,4 +1,3 @@
-#define __STDC_LIMIT_MACROS
 #include "GameServerSession.h"
 #include "Core/Utils.h"
 #include "IconServerSession.h"

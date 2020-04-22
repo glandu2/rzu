@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 	if(result)
 		return result;
 
-	if(CONFIG_GET()->doGameReconnectTest.get()) {
+	if(AuthServer::CONFIG_GET()->doGameReconnectTest.get()) {
 		env->testGameReconnect = true;
 		return testRunner.runTests();
 	} else {

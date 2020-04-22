@@ -28,7 +28,7 @@ struct SqlTest {
 
 template<> void DbQueryJob<SqlTest>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-	              CONFIG_GET()->connectionString,
+	              AuthServer::CONFIG_GET()->connectionString,
 	              "select account from account where account_id = ?;",
 	              DbQueryBinding::EM_OneRow);
 

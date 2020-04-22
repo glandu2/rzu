@@ -6,9 +6,9 @@
 Environment* Environment::instance = nullptr;
 
 void Environment::beforeTests() {
-	std::string authExec = CONFIG_GET()->authExecutable.get();
-	std::string gameReconnectExec = CONFIG_GET()->gameReconnectExecutable.get();
-	std::string connectionString = CONFIG_GET()->connectionString.get();
+	std::string authExec = AuthServer::CONFIG_GET()->authExecutable.get();
+	std::string gameReconnectExec = AuthServer::CONFIG_GET()->gameReconnectExecutable.get();
+	std::string connectionString = AuthServer::CONFIG_GET()->connectionString.get();
 
 	DbConnectionPool dbConnectionPool;
 	DbConnection* connection = dbConnectionPool.getConnection(connectionString.c_str());

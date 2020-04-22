@@ -40,9 +40,8 @@ struct GlobalConfig {
 	static void init();
 };
 
+auto inline CONFIG_GET() {
+	return AuthServer::GlobalConfig::get();
+}
+
 }  // namespace AuthServer
-
-#ifndef CONFIG_GET
-#define CONFIG_GET() AuthServer::GlobalConfig::get()
-#endif
-
