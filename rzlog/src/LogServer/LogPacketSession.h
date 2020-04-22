@@ -1,5 +1,4 @@
-#ifndef LOGSERVER_LOGPACKETSESSION_H
-#define LOGSERVER_LOGPACKETSESSION_H
+#pragma once
 
 #include "LS_11N4S.h"
 #include "NetSession/SocketSession.h"
@@ -54,4 +53,3 @@ private:
 
 }  // namespace LogServer
 
-#endif  // PACKETSESSION_H
