@@ -31,6 +31,4 @@ struct GlobalConfig {
 
 }  // namespace AuthServer
 
-#ifndef CONFIG_GET
 #define CONFIG_GET() AuthServer::GlobalConfig::get()
-#endif
