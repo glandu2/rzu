@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_PARTYMATCH_LIST_H
-#define PACKETS_TS_SC_PARTYMATCH_LIST_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -12,6 +11,7 @@
 	_(simple)(int16_t, max_player_num) \
 	_(string)(description, 32)
 CREATE_STRUCT(TS_GROUP_FINDER_GROUP);
+#undef TS_GROUP_FINDER_GROUP_DEF
 
 #define TS_SC_PARTYMATCH_LIST_DEF(_) \
 	_(simple)(int32_t, page_num) \
@@ -19,5 +19,5 @@ CREATE_STRUCT(TS_GROUP_FINDER_GROUP);
 	_(array)(TS_GROUP_FINDER_GROUP, groups, 10)
 
 CREATE_PACKET(TS_SC_PARTYMATCH_LIST, 7001);
+#undef TS_SC_PARTYMATCH_LIST_DEF
 
-#endif // PACKETS_TS_SC_PARTYMATCH_LIST_H

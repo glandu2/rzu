@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_CREATE_CHARACTER_H
-#define AUTHSERVER_CREATE_CHARACTER_H
+#pragma once
 
 #include "Database/DbQueryJob.h"
 #include "GameTypes.h"
@@ -46,4 +45,3 @@ struct CreateCharacterBinding {
 
 }  // namespace GameServer
 
-#endif  // AUTHSERVER_CREATE_CHARACTER_H

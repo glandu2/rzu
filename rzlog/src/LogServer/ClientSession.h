@@ -1,5 +1,4 @@
-#ifndef UPLOADSERVER_CLIENTSESSION_H
-#define UPLOADSERVER_CLIENTSESSION_H
+#pragma once
 
 #include "LogPacketSession.h"
 #include <sql.h>
@@ -46,4 +45,3 @@ private:
 
 }  // namespace LogServer
 
-#endif  // UPLOADSERVER_CLIENTSESSION_H

@@ -1,5 +1,4 @@
-#ifndef JOBLEVELBONUS_H
-#define JOBLEVELBONUS_H
+#pragma once
 
 #include "Database/DbQueryJobRef.h"
 #include "RefDataLoader.h"
@@ -37,4 +36,3 @@ class JobLevelBonusBinding : public RefDataLoaderHelper<JobLevelBonus, JobLevelB
 
 }  // namespace GameServer
 
-#endif  // JOBLEVELBONUS_H

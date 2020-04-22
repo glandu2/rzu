@@ -1,5 +1,4 @@
-#ifndef UPLOADSERVER_ICONSERVERSESSION_H
-#define UPLOADSERVER_ICONSERVERSESSION_H
+#pragma once
 
 #include "NetSession/SocketSession.h"
 #include <sstream>
@@ -33,4 +32,3 @@ private:
 
 }  // namespace UploadServer
 
-#endif  // UPLOADSERVER_ICONSERVERSESSION_H

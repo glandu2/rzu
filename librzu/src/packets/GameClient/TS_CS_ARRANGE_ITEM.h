@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_ARRANGE_ITEM_H
-#define PACKETS_TS_CS_ARRANGE_ITEM_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -7,5 +6,5 @@
 	_(simple)(bool, bIsStorage)
 
 CREATE_PACKET(TS_CS_ARRANGE_ITEM, 219);
+#undef TS_CS_ARRANGE_ITEM_DEF
 
-#endif // PACKETS_TS_CS_ARRANGE_ITEM_H

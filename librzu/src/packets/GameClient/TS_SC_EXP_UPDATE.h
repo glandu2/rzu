@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_EXP_UPDATE_H
-#define PACKETS_TS_SC_EXP_UPDATE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -11,5 +10,5 @@
 	_(impl)(simple)(uint32_t, jp, version < EPIC_7_3)
 
 CREATE_PACKET(TS_SC_EXP_UPDATE, 1003);
+#undef TS_SC_EXP_UPDATE_DEF
 
-#endif // PACKETS_TS_SC_EXP_UPDATE_H

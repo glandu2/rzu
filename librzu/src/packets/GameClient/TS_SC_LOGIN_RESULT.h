@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_LOGIN_RESULT_H
-#define PACKETS_TS_SC_LOGIN_RESULT_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 #include "PacketEnums.h"
@@ -45,5 +44,5 @@
 	X(64, version >= EPIC_9_2)
 
 CREATE_PACKET_VER_ID(TS_SC_LOGIN_RESULT);
+#undef TS_SC_LOGIN_RESULT_DEF
 
-#endif // PACKETS_TS_SC_LOGIN_RESULT_H

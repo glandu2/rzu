@@ -1,9 +1,6 @@
-#ifndef STREAM_H
-#define STREAM_H
+#pragma once
 
 #include "Core/IDelegate.h"
-#include "Core/IListener.h"
-#include "Core/Log.h"
 #include "Core/Object.h"
 #include "StreamAddress.h"
 #include "uv.h"
@@ -11,6 +8,9 @@
 
 #include <string>
 #include <vector>
+
+class IListener;
+class Log;
 
 class RZU_EXTERN Stream : public Object {
 public:
@@ -150,4 +150,3 @@ private:
 	bool closeCausedByRemote;
 };
 
-#endif  // STREAM_H

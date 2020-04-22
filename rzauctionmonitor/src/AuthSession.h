@@ -1,5 +1,4 @@
-#ifndef CHATAUTHSESSION_H
-#define CHATAUTHSESSION_H
+#pragma once
 
 #include "Core/Timer.h"
 #include "NetSession/ClientAuthSession.h"
@@ -56,4 +55,3 @@ private:
 	Callback<DisconnectedCallback> disconnectedCallback;
 };
 
-#endif  // CHATAUTHSESSION_H

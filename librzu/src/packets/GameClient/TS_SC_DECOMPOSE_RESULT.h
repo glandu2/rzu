@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_DECOMPOSE_RESULT_H
-#define PACKETS_TS_SC_DECOMPOSE_RESULT_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,6 +7,7 @@
 	_(simple)(uint32_t, count)
 
 CREATE_STRUCT(TS_DECOMPOSE_INFO);
+#undef TS_DECOMPOSE_INFO_DEF
 
 #define TS_SC_DECOMPOSE_RESULT_DEF(_) \
 	_(count)(uint32_t, decompositions) \
@@ -15,5 +15,5 @@ CREATE_STRUCT(TS_DECOMPOSE_INFO);
 
 // Since EPIC_8_1
 CREATE_PACKET(TS_SC_DECOMPOSE_RESULT, 266);
+#undef TS_SC_DECOMPOSE_RESULT_DEF
 
-#endif // PACKETS_TS_SC_DECOMPOSE_RESULT_H

@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_CHANGE_LOCATION_H
-#define PACKETS_TS_SC_CHANGE_LOCATION_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(simple) (uint32_t, cur_location_id)
 
 CREATE_PACKET(TS_SC_CHANGE_LOCATION, 901);
+#undef TS_SC_CHANGE_LOCATION_DEF
 
-#endif // PACKETS_TS_SC_CHANGE_LOCATION_H

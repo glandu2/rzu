@@ -1,5 +1,4 @@
-#ifndef AUCTIONPIPELINE_H
-#define AUCTIONPIPELINE_H
+#pragma once
 
 #include "AuctionComplexDiffWriter.h"
 #include "Config/ConfigParamVal.h"
@@ -71,4 +70,3 @@ private:
 	P6Commit commitStep;
 };
 
-#endif

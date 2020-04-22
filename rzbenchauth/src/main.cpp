@@ -2,6 +2,7 @@
 #include "Config/ConfigInfo.h"
 #include "Config/GlobalCoreConfig.h"
 #include "Core/EventLoop.h"
+#include "Core/Log.h"
 #include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 #include "LibRzuInit.h"

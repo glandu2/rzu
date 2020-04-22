@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_CANT_ATTACK_H
-#define PACKETS_TS_SC_CANT_ATTACK_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -9,5 +8,5 @@
 	_(simple)(int32_t, reason)
 
 CREATE_PACKET(TS_SC_CANT_ATTACK, 102);
+#undef TS_SC_CANT_ATTACK_DEF
 
-#endif // PACKETS_TS_SC_CANT_ATTACK_H

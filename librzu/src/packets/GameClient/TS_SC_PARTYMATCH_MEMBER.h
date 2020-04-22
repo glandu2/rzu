@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_PARTYMATCH_MEMBER_H
-#define PACKETS_TS_SC_PARTYMATCH_MEMBER_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -11,6 +10,7 @@
 	_(simple)(ar_handle_t, handle) \
 	_(string)(name, 20)
 CREATE_STRUCT(TS_GROUP_FINDER_DETAIL);
+#undef TS_GROUP_FINDER_DETAIL_DEF
 
 #define TS_SC_PARTYMATCH_MEMBER_DEF(_) \
 	_(simple)(int32_t, index) \
@@ -18,5 +18,5 @@ CREATE_STRUCT(TS_GROUP_FINDER_DETAIL);
 	_(array)(TS_GROUP_FINDER_DETAIL, members, 10)
 
 CREATE_PACKET(TS_SC_PARTYMATCH_MEMBER, 7002);
+#undef TS_SC_PARTYMATCH_MEMBER_DEF
 
-#endif // PACKETS_TS_SC_PARTYMATCH_MEMBER_H

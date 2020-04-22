@@ -1,5 +1,4 @@
-#ifndef TIMEMANAGER_H
-#define TIMEMANAGER_H
+#pragma once
 
 #include "GameTypes.h"
 #include <stdint.h>
@@ -17,4 +16,3 @@ public:
 
 }  // namespace GameServer
 
-#endif  // TIMEMANAGER_H

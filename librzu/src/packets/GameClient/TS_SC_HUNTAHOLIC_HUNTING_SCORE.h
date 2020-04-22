@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_HUNTAHOLIC_HUNTING_SCORE_H
-#define PACKETS_TS_SC_HUNTAHOLIC_HUNTING_SCORE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -15,5 +14,5 @@
 	_(simple)(int8_t, result_type)
 
 CREATE_PACKET(TS_SC_HUNTAHOLIC_HUNTING_SCORE, 4006);
+#undef TS_SC_HUNTAHOLIC_HUNTING_SCORE_DEF
 
-#endif // PACKETS_TS_SC_HUNTAHOLIC_HUNTING_SCORE_H

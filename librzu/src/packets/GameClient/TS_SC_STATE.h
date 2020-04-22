@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_STATE_H
-#define PACKETS_TS_SC_STATE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -17,5 +16,5 @@
 	_(string)(state_string_value, 32, version >= EPIC_4_1 && version < EPIC_9_5_2)
 
 CREATE_PACKET(TS_SC_STATE, 505);
+#undef TS_SC_STATE_DEF
 
-#endif // PACKETS_TS_SC_STATE_H

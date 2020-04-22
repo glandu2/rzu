@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_DISCONNECT_DESC_H
-#define PACKETS_TS_SC_DISCONNECT_DESC_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -19,5 +18,5 @@ enum TS_SC_DISCONNECT_TYPE : uint8_t
 	_(simple)(TS_SC_DISCONNECT_TYPE, desc_id)
 
 CREATE_PACKET(TS_SC_DISCONNECT_DESC, 28);
+#undef TS_SC_DISCONNECT_DESC_DEF
 
-#endif // PACKETS_TS_SC_DISCONNECT_DESC_H

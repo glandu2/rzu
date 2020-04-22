@@ -1,5 +1,4 @@
-#ifndef IPARSER_H
-#define IPARSER_H
+#pragma once
 
 #include <string>
 
@@ -15,4 +14,3 @@ public:
 	virtual void importState(std::string filename, std::string& lastParsedFile) = 0;
 };
 
-#endif

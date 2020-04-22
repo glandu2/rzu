@@ -1,8 +1,8 @@
-#ifndef AESPASSWORDCIPHER_H
-#define AESPASSWORDCIPHER_H
+#pragma once
 
 #include "../Extern.h"
 #include <memory>
+#include <stddef.h>  // for size_t
 #include <stdint.h>
 #include <vector>
 
@@ -25,4 +25,3 @@ private:
 	std::unique_ptr<EVP_CIPHER_CTX, void (*)(EVP_CIPHER_CTX*)> evpCipher;
 };
 
-#endif  // AESPASSWORDCIPHER_H

@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_SET_PROPERTY_H
-#define PACKETS_TS_CS_SET_PROPERTY_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(endstring)(string_value, true)
 
 CREATE_PACKET(TS_CS_SET_PROPERTY, 508);
+#undef TS_CS_SET_PROPERTY_DEF
 
-#endif // PACKETS_TS_CS_SET_PROPERTY_H

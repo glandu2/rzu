@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_REGION_ACK_H
-#define PACKETS_TS_SC_REGION_ACK_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(simple)(int32_t, ry)
 
 CREATE_PACKET(TS_SC_REGION_ACK, 11);
+#undef TS_SC_REGION_ACK_DEF
 
-#endif // PACKETS_TS_SC_REGION_ACK_H

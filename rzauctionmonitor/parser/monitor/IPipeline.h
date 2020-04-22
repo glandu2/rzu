@@ -1,5 +1,4 @@
-#ifndef IPIPELINE_H
-#define IPIPELINE_H
+#pragma once
 
 #include "./Extern.h"
 #include "Core/Object.h"
@@ -288,4 +287,3 @@ private:
 	IPipelineConsumer<Output>* next;
 };
 
-#endif

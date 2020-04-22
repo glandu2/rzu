@@ -1,11 +1,9 @@
-#ifndef SOCKETSESSION_H
-#define SOCKETSESSION_H
+#pragma once
 
 #include "Core/EventChain.h"
 #include "Core/IListener.h"
 #include "Core/Object.h"
 #include "Stream/Stream.h"
-#include <list>
 
 class SessionServerCommon;
 
@@ -71,4 +69,3 @@ private:
 	Log* packetLogger;
 };
 
-#endif  // SOCKETSESSION_H

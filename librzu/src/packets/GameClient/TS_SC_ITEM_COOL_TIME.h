@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_ITEM_COOL_TIME_H
-#define PACKETS_TS_SC_ITEM_COOL_TIME_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -9,5 +8,5 @@
 	_(impl)(array)(ar_time_t, cool_time, 20, version < EPIC_6_2)
 
 CREATE_PACKET(TS_SC_ITEM_COOL_TIME, 217);
+#undef TS_SC_ITEM_COOL_TIME_DEF
 
-#endif // PACKETS_TS_SC_ITEM_COOL_TIME_H

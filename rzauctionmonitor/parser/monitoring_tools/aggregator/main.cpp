@@ -1,9 +1,9 @@
-#include "Aggregator.h"
 #include "AuctionParser.h"
 #include "AuctionPipeline.h"
 #include "Console/ConsoleSession.h"
 #include "Core/CrashHandler.h"
 #include "Core/EventLoop.h"
+#include "Core/Log.h"
 #include "Database/DbConnectionPool.h"
 #include "GlobalConfig.h"
 #include "LibRzuInit.h"
@@ -48,13 +48,6 @@ int main(int argc, char* argv[]) {
 	ConfigInfo::get()->dump();
 
 	ServersManager serverManager;
-	//	Aggregator aggregator;
-	//	AuctionParser auctionParser(&aggregator,
-	//	                            CONFIG_GET()->input.auctionsPath,
-	//	                            CONFIG_GET()->input.changeWaitSeconds,
-	//	                            CONFIG_GET()->states.statesPath,
-	//	                            CONFIG_GET()->states.auctionStateFile,
-	//	                            CONFIG_GET()->states.aggregationStateFile);
 
 	AuctionPipeline auctionParser(CONFIG_GET()->input.auctionsPath,
 	                              CONFIG_GET()->input.changeWaitSeconds,

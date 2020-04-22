@@ -1,5 +1,4 @@
-#ifndef AUCTIONSIMPLEFILE_H
-#define AUCTIONSIMPLEFILE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -53,6 +52,7 @@ enum AuctionFileVersion {
 	_(simple)(int64_t, beginTime) \
 	_(simple)(int64_t, endTime)
 CREATE_STRUCT(AUCTION_CATEGORY_INFO);
+#undef AUCTION_CATEGORY_INFO_DEF
 
 #define AUCTION_HEADER_DEF(_) \
 	_(array)   (char, signature, 4) \
@@ -61,6 +61,7 @@ CREATE_STRUCT(AUCTION_CATEGORY_INFO);
 	_(count)   (uint16_t, categories) \
 	_(dynarray)(AUCTION_CATEGORY_INFO, categories)
 CREATE_STRUCT(AUCTION_HEADER);
+#undef AUCTION_HEADER_DEF
 
 #define AUCTION_SIMPLE_INFO_DEF(_) \
 	_(simple)  (uint32_t, uid) \
@@ -72,11 +73,12 @@ CREATE_STRUCT(AUCTION_HEADER);
 	_(count)   (uint16_t, data) \
 	_(dynarray)(uint8_t, data)
 CREATE_STRUCT(AUCTION_SIMPLE_INFO);
+#undef AUCTION_SIMPLE_INFO_DEF
 
 #define AUCTION_SIMPLE_FILE_DEF(_) \
 	_(simple)  (AUCTION_HEADER, header) \
 	_(count)   (uint32_t, auctions) \
 	_(dynarray)(AUCTION_SIMPLE_INFO, auctions)
 CREATE_STRUCT(AUCTION_SIMPLE_FILE);
+#undef AUCTION_SIMPLE_FILE_DEF
 
-#endif  // AUCTIONSIMPLEFILE_H

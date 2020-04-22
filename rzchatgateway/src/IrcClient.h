@@ -1,5 +1,4 @@
-#ifndef IRCCLIENT_H
-#define IRCCLIENT_H
+#pragma once
 
 #include "Core/Timer.h"
 #include "NetSession/SocketSession.h"
@@ -57,4 +56,3 @@ private:
 	Timer<IrcClient> reconnectTimer;
 };
 
-#endif  // IRCCLIENT_H

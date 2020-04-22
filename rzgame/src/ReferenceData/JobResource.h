@@ -1,5 +1,4 @@
-#ifndef JOBRESOURCE_H
-#define JOBRESOURCE_H
+#pragma once
 
 #include "Database/DbQueryJobRef.h"
 #include "RefDataLoader.h"
@@ -27,4 +26,3 @@ class JobResourceBinding : public RefDataLoaderHelper<JobResource, JobResourceBi
 
 }  // namespace GameServer
 
-#endif  // JOBRESOURCE_H

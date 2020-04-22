@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_XTRAP_CHECK_H
-#define PACKETS_TS_CS_XTRAP_CHECK_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -7,5 +6,5 @@
 	_(array)(uint8_t, pCheckBuffer, 128)
 
 CREATE_PACKET(TS_CS_XTRAP_CHECK, 59);
+#undef TS_CS_XTRAP_CHECK_DEF
 
-#endif // PACKETS_TS_CS_XTRAP_CHECK_H

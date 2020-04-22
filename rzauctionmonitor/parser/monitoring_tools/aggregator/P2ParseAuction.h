@@ -1,5 +1,4 @@
-#ifndef P2PARSEAUCTION_H
-#define P2PARSEAUCTION_H
+#pragma once
 
 #include "AuctionParser.h"
 #include "Core/BackgroundWork.h"
@@ -43,4 +42,3 @@ private:
 	time_t previousTime;
 };
 
-#endif

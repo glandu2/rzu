@@ -1,5 +1,4 @@
-#ifndef UPLOADSERVER_GAMESERVERSESSION_H
-#define UPLOADSERVER_GAMESERVERSESSION_H
+#pragma once
 
 #include "NetSession/PacketSession.h"
 #include <unordered_map>
@@ -33,4 +32,3 @@ private:
 
 }  // namespace UploadServer
 
-#endif  // UPLOADSERVER_GAMESERVERSESSION_H

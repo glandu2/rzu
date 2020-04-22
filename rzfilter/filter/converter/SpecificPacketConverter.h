@@ -1,5 +1,4 @@
-#ifndef SPECIFICPACKETCONVERTERFILTER_H
-#define SPECIFICPACKETCONVERTERFILTER_H
+#pragma once
 
 #include "AuthClient/TS_CA_ACCOUNT.h"
 #include "Cipher/AesPasswordCipher.h"
@@ -30,4 +29,3 @@ private:
 	int64_t startTime;
 };
 
-#endif  // SPECIFICPACKETCONVERTERFILTER_H

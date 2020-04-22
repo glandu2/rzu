@@ -1,5 +1,4 @@
-#ifndef STATRESOURCE_H
-#define STATRESOURCE_H
+#pragma once
 
 #include "Database/DbQueryJobRef.h"
 #include "RefDataLoader.h"
@@ -28,4 +27,3 @@ class StatResourceBinding : public RefDataLoaderHelper<StatResource, StatResourc
 
 }  // namespace GameServer
 
-#endif  // STATRESOURCE_H

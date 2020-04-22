@@ -1,5 +1,4 @@
-#ifndef AUCTIONSIMPLEDATA_H
-#define AUCTIONSIMPLEDATA_H
+#pragma once
 
 #include "AuctionSimpleFile.h"
 #include "AuctionUid.h"
@@ -54,4 +53,3 @@ private:
 	std::vector<uint8_t> rawData;
 };
 
-#endif

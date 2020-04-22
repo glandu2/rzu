@@ -1,5 +1,4 @@
-#ifndef CHARACTER_H
-#define CHARACTER_H
+#pragma once
 
 #include "Component/Core/ModelObject.h"
 #include "Database/DbQueryJob.h"
@@ -89,4 +88,3 @@ public:
 
 }  // namespace GameServer
 
-#endif  // CHARACTER_H

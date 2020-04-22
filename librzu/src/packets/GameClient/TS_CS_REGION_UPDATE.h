@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_REGION_UPDATE_H
-#define PACKETS_TS_CS_REGION_UPDATE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -15,5 +14,5 @@
 	X(67, version >= EPIC_9_2)
 
 CREATE_PACKET_VER_ID(TS_CS_REGION_UPDATE);
+#undef TS_CS_REGION_UPDATE_DEF
 
-#endif // PACKETS_TS_CS_REGION_UPDATE_H

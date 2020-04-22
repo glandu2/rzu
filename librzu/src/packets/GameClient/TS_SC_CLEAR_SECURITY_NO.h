@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_CLEAR_SECURITY_NO_H
-#define PACKETS_TS_SC_CLEAR_SECURITY_NO_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -7,5 +6,5 @@
 	_(simple)(bool, clearable) \
 
 CREATE_PACKET(TS_SC_CLEAR_SECURITY_NO, 9011);
+#undef TS_SC_CLEAR_SECURITY_NO_DEF
 
-#endif // PACKETS_TS_SC_CLEAR_SECURITY_NO_H

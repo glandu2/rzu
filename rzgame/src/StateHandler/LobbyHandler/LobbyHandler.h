@@ -1,5 +1,4 @@
-#ifndef LOBBYHANDLER_H
-#define LOBBYHANDLER_H
+#pragma once
 
 #include "CharacterLight.h"
 #include "CharacterWearInfo.h"
@@ -55,4 +54,3 @@ private:
 
 }  // namespace GameServer
 
-#endif  // LOBBYHANDLER_H

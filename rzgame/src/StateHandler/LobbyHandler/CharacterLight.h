@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_CHARACTER_LIGHT_H
-#define AUTHSERVER_CHARACTER_LIGHT_H
+#pragma once
 
 #include "Database/DbQueryJob.h"
 #include "GameTypes.h"
@@ -42,4 +41,3 @@ struct CharacterLightBinding {
 
 }  // namespace GameServer
 
-#endif  // AUTHSERVER_CHARACTER_LIGHT_H

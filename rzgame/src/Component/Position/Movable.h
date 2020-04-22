@@ -1,5 +1,4 @@
-#ifndef MOVABLE_H
-#define MOVABLE_H
+#pragma once
 
 namespace GameServer {
 
@@ -28,4 +27,3 @@ protected:
 
 }  // namespace GameServer
 
-#endif

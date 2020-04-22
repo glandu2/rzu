@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_WEAR_INFO_H
-#define PACKETS_TS_SC_WEAR_INFO_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -34,5 +33,5 @@
 	_(pad)(8, padding, version >= EPIC_9_3 && version < EPIC_9_5)
 
 CREATE_PACKET(TS_SC_WEAR_INFO, 202);
+#undef TS_SC_WEAR_INFO_DEF
 
-#endif // PACKETS_TS_SC_WEAR_INFO_H

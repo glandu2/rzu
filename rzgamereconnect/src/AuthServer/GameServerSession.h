@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_GAMESERVERSESSION_H
-#define AUTHSERVER_GAMESERVERSESSION_H
+#pragma once
 
 #include "NetSession/PacketSession.h"
 #include <stdint.h>
@@ -42,4 +41,3 @@ private:
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_GAMESERVERSESSION_H

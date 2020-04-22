@@ -1,10 +1,8 @@
-#ifndef CLIENTGAMESESSION_H
-#define CLIENTGAMESESSION_H
+#pragma once
 
 #include "EncryptedSession.h"
 #include "PacketSession.h"
 
-class ClientAuthSessionCommon;
 class ClientAuthSession;
 
 class RZU_EXTERN ClientGameSession : public EncryptedSession<PacketSession> {
@@ -27,4 +25,3 @@ protected:
 	ClientAuthSession* auth;
 };
 
-#endif  // CLIENTGAMESESSION_H

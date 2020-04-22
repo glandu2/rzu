@@ -3,6 +3,7 @@
 #include "AuctionSQLWriter.h"
 #include "Core/CrashHandler.h"
 #include "Core/EventLoop.h"
+#include "Core/Log.h"
 #include "Database/DbBindingLoader.h"
 #include "Database/DbConnectionPool.h"
 #include "GlobalConfig.h"

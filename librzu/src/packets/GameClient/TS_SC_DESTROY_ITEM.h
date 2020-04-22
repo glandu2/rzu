@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_DESTROY_ITEM_H
-#define PACKETS_TS_SC_DESTROY_ITEM_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -7,5 +6,5 @@
 	_(simple)(ar_handle_t, item_handle)
 
 CREATE_PACKET(TS_SC_DESTROY_ITEM, 254);
+#undef TS_SC_DESTROY_ITEM_DEF
 
-#endif // PACKETS_TS_SC_DESTROY_ITEM_H

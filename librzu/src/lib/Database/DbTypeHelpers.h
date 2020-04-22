@@ -1,13 +1,13 @@
-#ifndef DBTYPEHELPERS_H
-#define DBTYPEHELPERS_H
+#pragma once
 
 #include "../Extern.h"
-#include "DbString.h"
 #include <sstream>
 #include <string>
 #include <uv.h>
 
 #include <sqlext.h>
+
+template<size_t N> class DbString;
 
 struct RZU_EXTERN DbDateTime : public SQL_TIMESTAMP_STRUCT {
 	void setUnixTime(time_t t, uint32_t nanoFraction = 0);
@@ -108,4 +108,3 @@ template<typename T> struct IsStdString { static constexpr DbValueType value = D
 template<> struct IsStdString<std::string> { static constexpr DbValueType value = DVT_StdString; };
 template<size_t N> struct IsStdString<DbString<N>> { static constexpr DbValueType value = DVT_DbString; };
 
-#endif  // DBTYPEHELPERS_H

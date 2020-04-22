@@ -1,5 +1,4 @@
-#ifndef AUCTIONUID_H
-#define AUCTIONUID_H
+#pragma once
 
 #include <stdint.h>
 
@@ -19,4 +18,3 @@ private:
 	uint32_t uid;
 };
 
-#endif

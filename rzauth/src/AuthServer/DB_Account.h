@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_DB_ACCOUNT_H
-#define AUTHSERVER_DB_ACCOUNT_H
+#pragma once
 
 #include "Database/DbQueryJobRef.h"
 #include "Stream/StreamAddress.h"
@@ -92,4 +91,3 @@ private:
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_DB_ACCOUNT_H

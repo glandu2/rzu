@@ -1,9 +1,9 @@
-#ifndef DBQUERYJOBREF_H
-#define DBQUERYJOBREF_H
+#pragma once
 
-#include "DbQueryJob.h"
 #include "DbQueryJobCallback.h"
 #include "DbQueryJobLambda.h"
+
+template<class DbMappingClass> class DbQueryJob;
 
 class RZU_EXTERN DbQueryJobRef {
 public:
@@ -72,4 +72,3 @@ private:
 	DbQueryJobRef& operator=(const DbQueryJobRef& other);
 };
 
-#endif  // DBQUERYJOBREF_H

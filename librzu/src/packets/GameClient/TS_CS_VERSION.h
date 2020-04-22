@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_VERSION_H
-#define PACKETS_TS_CS_VERSION_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -12,5 +11,5 @@
 	X(51, version >= EPIC_7_4)
 
 CREATE_PACKET_VER_ID(TS_CS_VERSION);
+#undef TS_CS_VERSION_DEF
 
-#endif // PACKETS_TS_CS_VERSION_H

@@ -1,5 +1,4 @@
-#ifndef AUTHCLIENTSESSION_H
-#define AUTHCLIENTSESSION_H
+#pragma once
 
 #include "ClientSession.h"
 #include "GameClientSession.h"
@@ -27,4 +26,3 @@ private:
 	~AuthClientSession();
 };
 
-#endif  // CLIENTSESSION_H

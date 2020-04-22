@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_SET_PET_NAME_H
-#define PACKETS_TS_CS_SET_PET_NAME_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -10,5 +9,5 @@
 	  _(impl)(string)(name, 20, version >= EPIC_9_6)
 
 CREATE_PACKET(TS_CS_SET_PET_NAME, 354);
+#undef TS_CS_SET_PET_NAME_DEF
 
-#endif // PACKETS_TS_CS_SET_PET_NAME_H

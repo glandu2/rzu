@@ -1,5 +1,4 @@
-#ifndef PACKETFILTER_H
-#define PACKETFILTER_H
+#pragma once
 
 #include "IFilter.h"
 #include "LibGlobal.h"
@@ -75,4 +74,3 @@ SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 
-#endif  // PACKETFILTER_H

@@ -1,5 +1,4 @@
-#ifndef ENDPOINTPROXY_H
-#define ENDPOINTPROXY_H
+#pragma once
 
 #include "IFilterEndpoint.h"
 #include "Packet/PacketBaseMessage.h"
@@ -29,4 +28,3 @@ private:
 	bool cachedStrictForward;
 };
 
-#endif

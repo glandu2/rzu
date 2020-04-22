@@ -1,5 +1,4 @@
-#ifndef LOGSERVER_LS_11N4S_H
-#define LOGSERVER_LS_11N4S_H
+#pragma once
 
 #include <stdint.h>
 
@@ -19,4 +18,3 @@ struct LS_11N4S {
 };
 #pragma pack(pop)
 
-#endif  // LOGSERVER_LS_11N4S_H

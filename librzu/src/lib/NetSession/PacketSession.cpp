@@ -1,7 +1,7 @@
 #include "PacketSession.h"
 
 #include "Config/GlobalCoreConfig.h"
-#include "GameClient/TS_SC_RESULT.h"
+#include "Core/Log.h"
 #include "Packet/JSONWriter.h"
 #include "Packet/PacketBaseMessage.h"
 #include "Packet/PacketStructsName.h"
@@ -100,6 +100,13 @@ void PacketSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 
 		if(!packetProcessed) {
 			log(Object::LL_Debug, "Can't log json for packet id %d (unknown packet)\n", msg->id);
+			getStream()->packetLog(LL_Debug,
+			                       reinterpret_cast<const unsigned char*>(msg) + sizeof(TS_MESSAGE),
+			                       (int) msg->size - sizeof(TS_MESSAGE),
+			                       "Packet %s id: %5d (unknown), size: %d\n",
+			                       (outgoing) ? "out" : "in ",
+			                       msg->id,
+			                       int(msg->size - sizeof(TS_MESSAGE)));
 		}
 	}
 }

@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_DELETE_CHARACTER_H
-#define AUTHSERVER_DELETE_CHARACTER_H
+#pragma once
 
 #include "Database/DbQueryJob.h"
 #include "GameTypes.h"
@@ -17,4 +16,3 @@ struct DeleteCharacterBinding {
 
 }  // namespace GameServer
 
-#endif  // AUTHSERVER_DELETE_CHARACTER_H

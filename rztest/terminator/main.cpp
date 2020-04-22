@@ -13,7 +13,10 @@ int main(int argc, char* argv[]) {
 	ConfigInfo::get()->init(argc, argv);
 
 	Terminator terminator;
-	terminator.start(CFG_GET("ip")->getString(), CFG_GET("port")->getInt(), CFG_GET("command")->getString());
+	terminator.start(CFG_GET("ip")->getString(),
+	                 CFG_GET("port")->getInt(),
+	                 CFG_GET("command")->getString(),
+	                 CFG_GET("timeout")->getInt());
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);
 }
@@ -22,4 +25,5 @@ static void init() {
 	CFG_CREATE("ip", "127.0.0.1");
 	CFG_CREATE("port", 4501);
 	CFG_CREATE("command", "terminate");
+	CFG_CREATE("timeout", 0);
 }

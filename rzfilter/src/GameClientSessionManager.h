@@ -1,5 +1,4 @@
-#ifndef GAMECLIENTSESSIONMANAGER_H
-#define GAMECLIENTSESSIONMANAGER_H
+#pragma once
 
 #include "GameClientSession.h"
 #include "NetSession/SessionServer.h"
@@ -49,4 +48,3 @@ private:
 	GameClientSessionManager& operator=(const GameClientSessionManager&);
 };
 
-#endif  // GAMECLIENTSESSIONMANAGER_H

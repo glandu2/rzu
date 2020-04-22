@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_BUY_ITEM_H
-#define PACKETS_TS_CS_BUY_ITEM_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -10,5 +9,5 @@
 	_(impl)(simple)(uint8_t, buy_count, version < EPIC_4_1)
 
 CREATE_PACKET(TS_CS_BUY_ITEM, 251);
+#undef TS_CS_BUY_ITEM_DEF
 
-#endif // PACKETS_TS_CS_BUY_ITEM_H

@@ -1,5 +1,4 @@
-#ifndef ITEMRESOURCE_H
-#define ITEMRESOURCE_H
+#pragma once
 
 #include "Database/DbQueryJobRef.h"
 #include "RefDataLoader.h"
@@ -70,4 +69,3 @@ class ItemResourceBinding : public RefDataLoaderHelper<ItemResource, ItemResourc
 
 }  // namespace GameServer
 
-#endif  // ITEMRESOURCE_H

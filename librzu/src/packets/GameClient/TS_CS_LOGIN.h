@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_LOGIN_H
-#define PACKETS_TS_CS_LOGIN_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -16,5 +15,5 @@
 	X(62, version >= EPIC_9_4_2)
 
 CREATE_PACKET_VER_ID(TS_CS_LOGIN);
+#undef TS_CS_LOGIN_DEF
 
-#endif // PACKETS_TS_CS_LOGIN_H

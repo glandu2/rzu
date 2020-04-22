@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_REGEN_INFO_H
-#define PACKETS_TS_SC_REGEN_INFO_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -16,5 +15,5 @@
 	_(impl)(simple)(int16_t, mp_regen_point, version < EPIC_7_3) \
 
 CREATE_PACKET(TS_SC_REGEN_INFO, 510);
+#undef TS_SC_REGEN_INFO_DEF
 
-#endif // PACKETS_TS_SC_REGEN_INFO_H

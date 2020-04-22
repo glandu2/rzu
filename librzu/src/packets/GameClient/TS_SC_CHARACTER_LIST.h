@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_CHARACTER_LIST_H
-#define PACKETS_TS_SC_CHARACTER_LIST_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 #include "PacketEnums.h"
@@ -50,7 +49,8 @@
 	  _(impl)(array)(uint32_t, wear_appearance_code, 28, version >= EPIC_9_5 && version < EPIC_9_6) \
 	  _(impl)(array)(uint32_t, wear_appearance_code, 32, version >= EPIC_9_6) \
 
-CREATE_STRUCT(LOBBY_CHARACTER_INFO); // struct is 304 bytes long in epic2
+CREATE_STRUCT(LOBBY_CHARACTER_INFO);
+#undef LOBBY_CHARACTER_INFO_DEF // struct is 304 bytes long in epic2
 
 #define TS_SC_CHARACTER_LIST_DEF(_) \
 	_(simple)   (uint32_t, current_server_time) \
@@ -59,5 +59,5 @@ CREATE_STRUCT(LOBBY_CHARACTER_INFO); // struct is 304 bytes long in epic2
 	_(dynarray) (LOBBY_CHARACTER_INFO, characters)
 
 CREATE_PACKET(TS_SC_CHARACTER_LIST, 2004);
+#undef TS_SC_CHARACTER_LIST_DEF
 
-#endif // PACKETS_TS_SC_CHARACTER_LIST_H

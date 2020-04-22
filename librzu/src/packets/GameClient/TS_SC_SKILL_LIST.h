@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_SKILL_LIST_H
-#define PACKETS_TS_SC_SKILL_LIST_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -11,6 +10,7 @@
 	_(simple)(ar_time_t, remain_cool_time)
 
 CREATE_STRUCT(TS_SKILL_INFO);
+#undef TS_SKILL_INFO_DEF
 
 #define TS_SC_SKILL_LIST_DEF(_) \
 	_(simple)(ar_handle_t, target) \
@@ -19,7 +19,7 @@ CREATE_STRUCT(TS_SKILL_INFO);
 	_(dynarray)(TS_SKILL_INFO, skills)
 
 CREATE_PACKET(TS_SC_SKILL_LIST, 403);
+#undef TS_SC_SKILL_LIST_DEF
 
 // modification_type: if true then refresh
 
-#endif // PACKETS_TS_SC_SKILL_LIST_H

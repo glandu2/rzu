@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_SKILL_H
-#define PACKETS_TS_CS_SKILL_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -14,5 +13,5 @@
 	_(simple)(int8_t, skill_level)
 
 CREATE_PACKET(TS_CS_SKILL, 400);
+#undef TS_CS_SKILL_DEF
 
-#endif // PACKETS_TS_CS_SKILL_H

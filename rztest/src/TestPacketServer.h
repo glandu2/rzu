@@ -1,5 +1,4 @@
-#ifndef TESTPACKETSERVER_H
-#define TESTPACKETSERVER_H
+#pragma once
 
 #include "Extern.h"
 #include "NetSession/SessionServer.h"
@@ -26,4 +25,3 @@ private:
 	bool encryptedConnection;
 };
 
-#endif  // TESTPACKETSERVER_H

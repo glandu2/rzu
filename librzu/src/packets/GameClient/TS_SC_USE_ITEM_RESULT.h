@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_USE_ITEM_RESULT_H
-#define PACKETS_TS_SC_USE_ITEM_RESULT_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(simple)(ar_handle_t, target_handle)
 
 CREATE_PACKET(TS_SC_USE_ITEM_RESULT, 283);
+#undef TS_SC_USE_ITEM_RESULT_DEF
 
-#endif // PACKETS_TS_SC_USE_ITEM_RESULT_H

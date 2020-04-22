@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_JOB_LEVEL_UP_H
-#define PACKETS_TS_CS_JOB_LEVEL_UP_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -7,5 +6,5 @@
 	_(simple)(ar_handle_t, target)
 
 CREATE_PACKET(TS_CS_JOB_LEVEL_UP, 410);
+#undef TS_CS_JOB_LEVEL_UP_DEF
 
-#endif // PACKETS_TS_CS_JOB_LEVEL_UP_H

@@ -1,5 +1,4 @@
-#ifndef UPLOADSERVER_CLIENTSESSION_H
-#define UPLOADSERVER_CLIENTSESSION_H
+#pragma once
 
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
@@ -33,4 +32,3 @@ private:
 
 }  // namespace UploadServer
 
-#endif  // UPLOADSERVER_CLIENTSESSION_H

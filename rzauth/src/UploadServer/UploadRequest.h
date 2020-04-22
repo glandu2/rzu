@@ -1,5 +1,4 @@
-#ifndef UPLOADSERVER_UPLOADREQUEST_H
-#define UPLOADSERVER_UPLOADREQUEST_H
+#pragma once
 
 #include "Core/Object.h"
 #include "uv.h"
@@ -57,4 +56,3 @@ private:
 
 }  // namespace UploadServer
 
-#endif  // UPLOADSERVER_UPLOADREQUEST_H

@@ -1,11 +1,8 @@
-#ifndef EVENTLOOP_H
-#define EVENTLOOP_H
+#pragma once
 
 #include "Object.h"
 #include "uv.h"
 #include <list>
-#include <memory>
-#include <vector>
 
 class RZU_EXTERN EventLoop : public Object {
 	DECLARE_CLASS(EventLoop)
@@ -41,4 +38,3 @@ private:
 	static void initKey();
 };
 
-#endif  // EVENTLOOP_H

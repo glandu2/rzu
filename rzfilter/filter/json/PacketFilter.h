@@ -1,5 +1,4 @@
-#ifndef PACKETFILTER_H
-#define PACKETFILTER_H
+#pragma once
 
 #include "GameClient/TS_CS_CHAT_REQUEST.h"
 #include "GameClient/TS_SC_ATTACK_EVENT.h"
@@ -49,4 +48,3 @@ SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 
-#endif  // PACKETFILTER_H

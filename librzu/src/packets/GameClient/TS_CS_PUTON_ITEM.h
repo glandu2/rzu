@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_PUTON_ITEM_H
-#define PACKETS_TS_CS_PUTON_ITEM_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -9,5 +8,5 @@
 	_(simple) (ar_handle_t, target_handle)
 
 CREATE_PACKET(TS_CS_PUTON_ITEM, 200);
+#undef TS_CS_PUTON_ITEM_DEF
 
-#endif // PACKETS_TS_CS_PUTON_ITEM_H

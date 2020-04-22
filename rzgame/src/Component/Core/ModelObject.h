@@ -1,5 +1,4 @@
-#ifndef MODELOBJECT_H
-#define MODELOBJECT_H
+#pragma once
 
 #include "Core/Object.h"
 #include "GameTypes.h"
@@ -29,7 +28,7 @@ public:
 
 		auto result2 = dataObjectsByHandle.insert(std::pair<game_handle_t, ModelType*>(object->handle, model));
 		if(!result2.second) {
-			object->log(LL_Error, "Duplicate handle %d !!!\n", object->handle);
+			object->log(LL_Error, "Duplicate handle %d !!!\n", object->handle.get());
 			dataObjectsBySid.erase(sid);
 			return false;
 		}
@@ -90,5 +89,3 @@ template<class ModelType, uint32_t HANDLE_MASK>
 std::vector<game_handle_t> ModelObject<ModelType, HANDLE_MASK>::freeHandles;
 
 }  // namespace GameServer
-
-#endif  // MODELOBJECT_H

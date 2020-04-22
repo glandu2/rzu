@@ -43,10 +43,12 @@ struct ItemData {
 	        _(simple)(uint32_t, itemNumber) _(simple)(int64_t, minPrice) _(simple)(int64_t, maxPrice) \
 	            _(simple)(int64_t, avgPrice)
 CREATE_STRUCT(AUCTION_INFO_PER_DAY);
+#undef AUCTION_INFO_PER_DAY_DEF
 
 #define AUCTION_AGGREGATE_DEF(_) \
 	_(simple)(int64_t, date) _(count)(uint32_t, auctionNumber, auctions) _(dynarray)(AUCTION_INFO_PER_DAY, auctions)
 CREATE_STRUCT(AUCTION_AGGREGATE);
+#undef AUCTION_AGGREGATE_DEF
 
 struct AuctionSummary {
 	int64_t price;

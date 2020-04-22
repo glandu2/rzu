@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_ADDED_SKILL_LIST_H
-#define PACKETS_TS_SC_ADDED_SKILL_LIST_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,6 +7,7 @@
 	_(simple) (bool, restricted_to_type) \
 	_(simple) (uint8_t, added_skill_level)
 CREATE_STRUCT(TS_ADDED_SKILL_LIST);
+#undef TS_ADDED_SKILL_LIST_DEF
 
 #define TS_SC_ADDED_SKILL_LIST_DEF(_) \
 	_(simple)  (ar_handle_t, target) \
@@ -15,5 +15,5 @@ CREATE_STRUCT(TS_ADDED_SKILL_LIST);
 	_(dynarray)(TS_ADDED_SKILL_LIST, skills)
 
 CREATE_PACKET(TS_SC_ADDED_SKILL_LIST, 404);
+#undef TS_SC_ADDED_SKILL_LIST_DEF
 
-#endif // PACKETS_TS_SC_ADDED_SKILL_LIST_H

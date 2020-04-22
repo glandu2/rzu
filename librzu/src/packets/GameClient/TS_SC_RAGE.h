@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_RAGE_H
-#define PACKETS_TS_SC_RAGE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(simple)(int16_t, rage)
 
 CREATE_PACKET(TS_SC_RAGE, 506);
+#undef TS_SC_RAGE_DEF
 
-#endif // PACKETS_TS_SC_RAGE_H

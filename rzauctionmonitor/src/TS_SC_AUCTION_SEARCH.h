@@ -1,5 +1,4 @@
-#ifndef TS_SC_AUCTION_SEARCH_H
-#define TS_SC_AUCTION_SEARCH_H
+#pragma once
 
 #include "Packet/PacketBaseMessage.h"
 
@@ -19,4 +18,3 @@ struct TS_SC_AUCTION_SEARCH : public TS_MESSAGE {
 };
 #pragma pack(pop)
 
-#endif  // TS_SC_AUCTION_SEARCH_H

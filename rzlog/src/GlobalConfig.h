@@ -1,5 +1,4 @@
-#ifndef GLOBALCONFIG_H
-#define GLOBALCONFIG_H
+#pragma once
 
 #include "Config/ConfigInfo.h"
 #include "Config/GlobalCoreConfig.h"
@@ -38,4 +37,3 @@ struct GlobalConfig {
 
 #define CONFIG_GET() GlobalConfig::get()
 
-#endif  // GLOBALCONFIG_H

@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_GAME_GUARD_AUTH_ANSWER_H
-#define PACKETS_TS_CS_GAME_GUARD_AUTH_ANSWER_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 #include "TS_SC_GAME_GUARD_AUTH_QUERY.h"
@@ -8,5 +7,5 @@
 	_(simple)(TS_GAME_GUARD_AUTH, auth)
 
 CREATE_PACKET(TS_CS_GAME_GUARD_AUTH_ANSWER, 56);
+#undef TS_CS_GAME_GUARD_AUTH_ANSWER_DEF
 
-#endif // PACKETS_TS_CS_GAME_GUARD_AUTH_ANSWER_H

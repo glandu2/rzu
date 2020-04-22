@@ -1,5 +1,4 @@
-#ifndef IFILTER_H
-#define IFILTER_H
+#pragma once
 
 #include "IFilterEndpoint.h"
 #include "Packet/PacketBaseMessage.h"
@@ -8,6 +7,8 @@ class IFilter {
 public:
 	enum ServerType { ST_Auth, ST_Game };
 
+	typedef void (*DestroyGlobalFilterFunction)(void* argument);
+	typedef void* (*InitializeGlobalFilterFunction)();
 	typedef void (*DestroyFilterFunction)(IFilter* filter);
 	typedef IFilter* (*CreateFilterFunction)(IFilterEndpoint* client,
 	                                         IFilterEndpoint* server,
@@ -28,4 +29,3 @@ protected:
 	ServerType serverType;
 };
 
-#endif  // IFILTER_H

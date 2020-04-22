@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_COMMERCIAL_STORAGE_INFO_H
-#define PACKETS_TS_SC_COMMERCIAL_STORAGE_INFO_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(simple) (uint16_t, new_item_count)
 
 CREATE_PACKET(TS_SC_COMMERCIAL_STORAGE_INFO, 10003);
+#undef TS_SC_COMMERCIAL_STORAGE_INFO_DEF
 
-#endif // PACKETS_TS_SC_COMMERCIAL_STORAGE_INFO_H

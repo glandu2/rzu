@@ -1,11 +1,9 @@
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
 
 #include "../Extern.h"
 #include "UvHandle.h"
 #include "uv.h"
-#include <memory>
-#include <vector>
+#include <stdint.h>
 
 class RZU_EXTERN TimerBase {
 public:
@@ -17,6 +15,7 @@ public:
 	int again();
 	void setRepeat(uint64_t repeat);
 	uint64_t getRepeat() const;
+	bool isRunning() const;
 
 	void ref();
 	void unref();
@@ -46,6 +45,9 @@ public:
 	}
 
 private:
+	Timer(Timer&) = delete;
+	Timer& operator=(Timer&) = delete;
+
 	CallbackClass* instance;
 	TimeoutCallback callback;
 
@@ -60,4 +62,3 @@ private:
 	}
 };
 
-#endif  // TIMER_H

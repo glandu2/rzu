@@ -1,5 +1,4 @@
-#ifndef P3PARSEAUCTION_H
-#define P3PARSEAUCTION_H
+#pragma once
 
 #include "AuctionParser.h"
 #include "Core/BackgroundWork.h"
@@ -29,4 +28,3 @@ private:
 	size_t fileNumberProcessedSinceLastCommit;
 };
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_CLIENTSESSION_COMMON_H
-#define AUTHSERVER_CLIENTSESSION_COMMON_H
+#pragma once
 
 #include "AuthClient/Flat/TS_AC_AES_KEY_IV.h"
 #include "AuthClient/Flat/TS_CA_ACCOUNT.h"
@@ -49,4 +48,3 @@ void addClientLoginToServerListScenario(TestConnectionChannel& auth,
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_CLIENTSESSION_COMMON_H

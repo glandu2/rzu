@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_CHECK_CHARACTER_NAME_H
-#define PACKETS_TS_CS_CHECK_CHARACTER_NAME_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -9,5 +8,5 @@
 	  _(impl)(string)(name, 20, version >= EPIC_9_6)
 
 CREATE_PACKET(TS_CS_CHECK_CHARACTER_NAME, 2006);
+#undef TS_CS_CHECK_CHARACTER_NAME_DEF
 
-#endif // PACKETS_TS_CS_CHECK_CHARACTER_NAME_H

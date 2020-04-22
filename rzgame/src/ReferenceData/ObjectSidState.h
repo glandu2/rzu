@@ -1,5 +1,4 @@
-#ifndef OBJECTSIDSTATE_H
-#define OBJECTSIDSTATE_H
+#pragma once
 
 #include "Core/PrintfFormats.h"
 #include "Database/DbQueryJob.h"
@@ -86,4 +85,3 @@ class TitleConditionSidBinding : public ObjectSidStateBinding<TitleConditionSidB
 
 }  // namespace GameServer
 
-#endif  // OBJECTSIDSTATE_H

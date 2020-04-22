@@ -1,8 +1,7 @@
-#ifndef CONSOLECOMMANDS_H
-#define CONSOLECOMMANDS_H
+#pragma once
 
+#include "Console/IWritableConsole.h"
 #include "Core/Object.h"
-#include "IWritableConsole.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -84,4 +83,3 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<Command>> commands;
 };
 
-#endif  // CONSOLECOMMANDS_H

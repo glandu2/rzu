@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_LOGSERVERCLIENT_H
-#define AUTHSERVER_LOGSERVERCLIENT_H
+#pragma once
 
 #include "Config/ConfigParamVal.h"
 #include "NetSession/SocketSession.h"
@@ -79,4 +78,3 @@ private:
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_LOGSERVERCLIENT_H

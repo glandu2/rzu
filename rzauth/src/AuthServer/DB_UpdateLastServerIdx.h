@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_DB_UPDATELASTSERVERIDX_H
-#define AUTHSERVER_DB_UPDATELASTSERVERIDX_H
+#pragma once
 
 #include "Database/DbQueryJob.h"
 #include "uv.h"
@@ -24,4 +23,3 @@ struct DB_UpdateLastServerIdx {
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_DB_UPDATELASTSERVERIDX_H

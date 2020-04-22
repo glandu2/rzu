@@ -1,11 +1,8 @@
-#ifndef DBCONNECTION_H
-#define DBCONNECTION_H
+#pragma once
 
 #include "Core/Object.h"
 #include "uv.h"
-#include <assert.h>
 #include <sqlext.h>
-#include <string.h>
 #include <string>
 
 class DbConnectionPool;
@@ -68,4 +65,3 @@ private:
 	bool isUsed;  // workaround trylock in valgrind ...
 };
 
-#endif  // DBCONNECTION_H

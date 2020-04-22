@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_CHANGE_ALIAS_H
-#define PACKETS_TS_CS_CHANGE_ALIAS_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 
 // Since EPIC_8_1
 CREATE_PACKET(TS_CS_CHANGE_ALIAS, 31);
+#undef TS_CS_CHANGE_ALIAS_DEF
 
-#endif // PACKETS_TS_CS_CHANGE_ALIAS_H

@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_BELT_SLOT_INFO_H
-#define PACKETS_TS_SC_BELT_SLOT_INFO_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -9,5 +8,5 @@
 	  _(impl)(array) (ar_handle_t, handle, 8, version >= EPIC_9_5) \
 
 CREATE_PACKET(TS_SC_BELT_SLOT_INFO, 216);
+#undef TS_SC_BELT_SLOT_INFO_DEF
 
-#endif // PACKETS_TS_SC_BELT_SLOT_INFO_H

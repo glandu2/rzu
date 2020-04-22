@@ -1,5 +1,4 @@
-#ifndef AUCTIONMANAGER_H
-#define AUCTIONMANAGER_H
+#pragma once
 
 #include "AuctionSimpleDiffWriter.h"
 #include "AuctionWorker.h"
@@ -70,4 +69,3 @@ private:
 	std::vector<uint8_t> fileData;  // cache allocated memory
 };
 
-#endif  // AUCTIONMANAGER_H

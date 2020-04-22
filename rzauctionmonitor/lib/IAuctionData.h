@@ -1,5 +1,4 @@
-#ifndef IAUCTIONDATA_H
-#define IAUCTIONDATA_H
+#pragma once
 
 #include "AuctionUid.h"
 #include "Core/Object.h"
@@ -37,4 +36,3 @@ private:
 	uint64_t timeMax;
 };
 
-#endif

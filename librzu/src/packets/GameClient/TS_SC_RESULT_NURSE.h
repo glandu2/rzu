@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_RESULT_NURSE_H
-#define PACKETS_TS_SC_RESULT_NURSE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 
 // Since EPIC_7_3
 CREATE_PACKET(TS_SC_RESULT_NURSE, 6007);
+#undef TS_SC_RESULT_NURSE_DEF
 
-#endif // PACKETS_TS_SC_RESULT_NURSE_H

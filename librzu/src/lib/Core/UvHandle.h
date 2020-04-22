@@ -1,9 +1,10 @@
-#ifndef UVHANDLE_H
-#define UVHANDLE_H
+#pragma once
 
 #include "EventLoop.h"
 #include "Extern.h"
 #include "uv.h"
+#include <memory>
+#include <vector>
 
 template<typename HandleType> class RZU_EXTERN UvHandle {
 public:
@@ -23,10 +24,12 @@ public:
 	const uv_handle_t* operator->() const { return (uv_handle_t*) handle; }
 
 private:
+	UvHandle(UvHandle&) = delete;
+	UvHandle& operator=(UvHandle&) = delete;
+
 	static HandleType* get();
 	static void closeCallback(uv_handle_t* handle) { freeHandles.emplace_back((HandleType*) handle); }
 
 	static std::vector<std::unique_ptr<HandleType>> freeHandles;
 };
 
-#endif

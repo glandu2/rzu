@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_RESULT_FOSTER_H
-#define PACKETS_TS_SC_RESULT_FOSTER_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 
 // Since EPIC_7_3
 CREATE_PACKET(TS_SC_RESULT_FOSTER, 6003);
+#undef TS_SC_RESULT_FOSTER_DEF
 
-#endif // PACKETS_TS_SC_RESULT_FOSTER_H

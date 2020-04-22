@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_CLIENTDATA_H
-#define AUTHSERVER_CLIENTDATA_H
+#pragma once
 
 #include "Core/Object.h"
 #include "Stream/StreamAddress.h"
@@ -77,4 +76,3 @@ private:
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_CLIENTDATA_H

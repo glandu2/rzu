@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_HPMP_H
-#define PACKETS_TS_SC_HPMP_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -20,5 +19,5 @@
 	_(simple)(bool, need_to_display, version >= EPIC_4_1)
 
 CREATE_PACKET(TS_SC_HPMP, 509);
+#undef TS_SC_HPMP_DEF
 
-#endif // PACKETS_TS_SC_HPMP_H

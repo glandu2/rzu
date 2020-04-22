@@ -1,5 +1,4 @@
-#ifndef AUCTIONCOMPLEXDIFFWRITER_H
-#define AUCTIONCOMPLEXDIFFWRITER_H
+#pragma once
 
 #include "AuctionComplexData.h"
 #include "AuctionFile.h"
@@ -31,4 +30,3 @@ private:
 	bool diffMode;
 };
 
-#endif

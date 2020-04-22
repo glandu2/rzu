@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_STATUS_CHANGE_H
-#define PACKETS_TS_SC_STATUS_CHANGE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -41,5 +40,5 @@ enum TS_CREATURE_STATUS : uint32_t {
 	_(simple) (TS_CREATURE_STATUS, status)
 
 CREATE_PACKET(TS_SC_STATUS_CHANGE, 500);
+#undef TS_SC_STATUS_CHANGE_DEF
 
-#endif // PACKETS_TS_SC_STATUS_CHANGE_H

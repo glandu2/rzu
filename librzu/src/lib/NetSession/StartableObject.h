@@ -1,7 +1,6 @@
-#ifndef ISTARTABLESESSION_H
-#define ISTARTABLESESSION_H
+#pragma once
 
-#include "Core/IListener.h"
+#include "../Extern.h"
 
 class RZU_EXTERN StartableObject {
 public:
@@ -19,4 +18,3 @@ private:
 	char* name;
 };
 
-#endif  // ISTARTABLESESSION_H

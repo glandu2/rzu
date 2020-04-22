@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_PARTYMATCH_ACTION_H
-#define PACKETS_TS_CS_PARTYMATCH_ACTION_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -25,5 +24,5 @@ enum TS_GROUP_FINDER_REQUEST_TYPE : int32_t
 	_(string)(description, 32) /* only with GFRT_Add */
 
 CREATE_PACKET(TS_CS_PARTYMATCH_ACTION, 7000);
+#undef TS_CS_PARTYMATCH_ACTION_DEF
 
-#endif // PACKETS_TS_CS_PARTYMATCH_ACTION_H

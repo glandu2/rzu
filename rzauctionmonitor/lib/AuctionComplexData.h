@@ -1,5 +1,4 @@
-#ifndef AUCTIONCOMPLEXDATA_H
-#define AUCTIONCOMPLEXDATA_H
+#pragma once
 
 #include "AuctionFile.h"
 #include "Extern.h"
@@ -83,4 +82,3 @@ private:
 	uint64_t estimatedEndTimeMax;
 };
 
-#endif

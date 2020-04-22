@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_ADD_SUMMON_INFO_H
-#define PACKETS_TS_SC_ADD_SUMMON_INFO_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -14,5 +13,5 @@
 	_(simple)(int32_t, sp)
 
 CREATE_PACKET(TS_SC_ADD_SUMMON_INFO, 301);
+#undef TS_SC_ADD_SUMMON_INFO_DEF
 
-#endif // PACKETS_TS_SC_ADD_SUMMON_INFO_H

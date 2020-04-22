@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_COMPETE_ANSWER_H
-#define PACKETS_TS_CS_COMPETE_ANSWER_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(simple)(int8_t, answer_type)
 
 CREATE_PACKET(TS_CS_COMPETE_ANSWER, 4502);
+#undef TS_CS_COMPETE_ANSWER_DEF
 
-#endif // PACKETS_TS_CS_COMPETE_ANSWER_H

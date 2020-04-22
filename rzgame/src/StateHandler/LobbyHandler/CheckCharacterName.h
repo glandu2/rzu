@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_CHECK_CHARACTER_NAME_H
-#define AUTHSERVER_CHECK_CHARACTER_NAME_H
+#pragma once
 
 #include "Database/DbQueryJob.h"
 #include <stdint.h>
@@ -16,4 +15,3 @@ struct CheckCharacterNameBinding {
 
 }  // namespace GameServer
 
-#endif  // AUTHSERVER_CHECK_CHARACTER_NAME_H

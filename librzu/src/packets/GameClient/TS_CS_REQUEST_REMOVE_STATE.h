@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_REQUEST_REMOVE_STATE_H
-#define PACKETS_TS_CS_REQUEST_REMOVE_STATE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(simple)(int32_t, state_code)
 
 CREATE_PACKET(TS_CS_REQUEST_REMOVE_STATE, 408);
+#undef TS_CS_REQUEST_REMOVE_STATE_DEF
 
-#endif // PACKETS_TS_CS_REQUEST_REMOVE_STATE_H

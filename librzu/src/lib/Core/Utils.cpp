@@ -1,7 +1,8 @@
 #include "Utils.h"
 #include "Config/ConfigParamVal.h"
 #include <algorithm>
-#include <ctype.h>
+#include <errno.h>
+#include <sstream>
 #include <stdarg.h>
 #include <string.h>
 
@@ -34,12 +35,12 @@ uint64_t Utils::getTimeInMsec() {
 }
 
 // From ffmpeg http://www.ffmpeg.org/doxygen/trunk/cutils_8c-source.html
-#define ISLEAP(y) (((y) % 4 == 0) && (((y) % 100) != 0 || ((y) % 400) == 0))
-#define LEAPS_COUNT(y) ((y) / 4 - (y) / 100 + (y) / 400)
-
 struct tm* Utils::getGmTime(time_t secs, struct tm* tm) {
 	int days, y, ny, m;
 	int md[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+	auto isLeap = [](int y) { return ((y) % 4 == 0) && (((y) % 100) != 0 || ((y) % 400) == 0); };
+	auto leapsCount = [](int y) { return ((y) / 4 - (y) / 100 + (y) / 400); };
 
 	days = (int) (secs / 86400);
 	secs %= 86400;
@@ -51,17 +52,17 @@ struct tm* Utils::getGmTime(time_t secs, struct tm* tm) {
 	y = 1970; /* start "guessing" */
 	while(days > 365) {
 		ny = (y + days / 366);
-		days -= (ny - y) * 365 + LEAPS_COUNT(ny - 1) - LEAPS_COUNT(y - 1);
+		days -= (ny - y) * 365 + leapsCount(ny - 1) - leapsCount(y - 1);
 		y = ny;
 	}
-	if(days == 365 && !ISLEAP(y)) {
+	if(days == 365 && !isLeap(y)) {
 		days = 0;
 		y++;
 	}
 
 	tm->tm_yday = days;
 
-	md[1] = ISLEAP(y) ? 29 : 28;
+	md[1] = isLeap(y) ? 29 : 28;
 	for(m = 0; days >= md[m]; m++)
 		days -= md[m];
 
@@ -407,6 +408,51 @@ bool Utils::stringWildcardMatch(const char* pTameText, const char* pWildText) {
 			return false;  // "x" doesn't match "xy"
 		}
 	}
+}
+
+std::vector<std::string> Utils::parseCommand(const std::string& data) {
+	std::vector<std::string> args;
+	std::ostringstream arg;
+
+	const char* p;
+	bool insideQuotes = false;
+
+	for(p = data.c_str(); p < data.c_str() + data.size(); p++) {
+		if(*p == '\"') {
+			if(p + 1 < data.c_str() + data.size() && *(p + 1) == '\"') {
+				p++;
+				arg << '\"';
+			} else {
+				insideQuotes = !insideQuotes;
+			}
+		} else if(insideQuotes == false && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')) {
+			if(arg.tellp()) {
+				args.push_back(arg.str());
+				arg.str("");
+				arg.clear();
+			}
+		} else {
+			arg << *p;
+		}
+	}
+	if(arg.tellp())
+		args.push_back(arg.str());
+
+	return args;
+}
+
+std::vector<std::string> Utils::stringSplit(const std::string& data, char delim) {
+	std::vector<std::string> result;
+	size_t startOffset = 0;
+	size_t endOffset;
+	while((endOffset = data.find_first_of(delim, startOffset)) != std::string::npos) {
+		result.push_back(data.substr(startOffset, endOffset - startOffset));
+		startOffset = endOffset + 1;
+	}
+	if(startOffset < data.size())
+		result.push_back(data.substr(startOffset, std::string::npos));
+
+	return result;
 }
 
 void Utils::stringFormat(std::string& dest, const char* message, ...) {

@@ -1,5 +1,4 @@
-#ifndef FILTERPROXY_H
-#define FILTERPROXY_H
+#pragma once
 
 #include "Core/Object.h"
 #include "FilterEndpoint.h"
@@ -42,4 +41,3 @@ private:
 	FilterEndpoint toClientEndpoint;
 };
 
-#endif  // FILTERPROXY_H

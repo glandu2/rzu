@@ -1,4 +1,3 @@
-#define __STDC_LIMIT_MACROS
 #include "AuthServerSession.h"
 #include "ClientSession.h"
 #include "Config/ConfigInfo.h"

@@ -1,5 +1,4 @@
-#ifndef PIPELINESTATE_H
-#define PIPELINESTATE_H
+#pragma once
 
 #include "AuctionFile.h"
 #include <nonstd/optional.hpp>
@@ -16,4 +15,3 @@ struct PipelineAggregatedState {
 	std::vector<AUCTION_FILE> dumps;
 };
 
-#endif

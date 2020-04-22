@@ -1,5 +1,4 @@
-#ifndef P4INSERTTOSQLSERVER_H
-#define P4INSERTTOSQLSERVER_H
+#pragma once
 
 #include "AuctionFile.h"
 #include "Core/Object.h"
@@ -23,4 +22,3 @@ private:
 	DbQueryJobRef dbQuery;
 };
 
-#endif

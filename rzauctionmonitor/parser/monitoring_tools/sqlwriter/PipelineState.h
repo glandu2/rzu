@@ -1,5 +1,4 @@
-#ifndef PIPELINESTATE_H
-#define PIPELINESTATE_H
+#pragma once
 
 #include "AuctionFile.h"
 #include <nonstd/optional.hpp>
@@ -10,4 +9,3 @@ struct PipelineState {
 	nonstd::optional<AUCTION_FILE> fullDump;
 };
 
-#endif

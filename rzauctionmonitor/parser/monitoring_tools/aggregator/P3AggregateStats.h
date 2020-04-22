@@ -1,5 +1,4 @@
-#ifndef P3AGGREGATESTATS_H
-#define P3AGGREGATESTATS_H
+#pragma once
 
 #include "Core/BackgroundWork.h"
 #include "Core/Object.h"
@@ -65,4 +64,3 @@ private:
 	BackgroundWork<P3AggregateStats, std::shared_ptr<WorkItem>> work;
 };
 
-#endif

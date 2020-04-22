@@ -4,12 +4,9 @@
 #include <string.h>
 
 #include "Core/EventLoop.h"
+#include "Core/Log.h"
 #include "Pipe.h"
 #include "Socket.h"
-
-#ifndef SHUT_RDWR
-#define SHUT_RDWR 2
-#endif
 
 struct ReadBuffer {
 	char data[1024];

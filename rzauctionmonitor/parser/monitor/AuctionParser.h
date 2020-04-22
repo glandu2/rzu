@@ -1,8 +1,8 @@
-#ifndef AUCTIONPARSER_H
-#define AUCTIONPARSER_H
+#pragma once
 
 #include "./Extern.h"
 #include "AuctionComplexDiffWriter.h"
+#include "Config/ConfigParamVal.h"
 #include "Core/Object.h"
 #include "Core/Timer.h"
 #include "IParser.h"
@@ -95,4 +95,3 @@ private:
 	std::string lastParsedFile;
 };
 
-#endif

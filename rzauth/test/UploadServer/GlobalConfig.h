@@ -1,5 +1,4 @@
-#ifndef GLOBALCONFIG_H
-#define GLOBALCONFIG_H
+#pragma once
 
 #include "Config/ConfigInfo.h"
 
@@ -23,10 +22,8 @@ struct GlobalConfig {
 	static void init();
 };
 
+auto inline CONFIG_GET() {
+	return UploadServer::GlobalConfig::get();
+}
+
 }  // namespace UploadServer
-
-#ifndef CONFIG_GET
-#define CONFIG_GET() UploadServer::GlobalConfig::get()
-#endif
-
-#endif  // GLOBALCONFIG_H

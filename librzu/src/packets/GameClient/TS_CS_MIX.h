@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_MIX_H
-#define PACKETS_TS_CS_MIX_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,6 +7,7 @@
 	_(simple)(uint16_t, count)
 
 CREATE_STRUCT(TS_MIX_INFO);
+#undef TS_MIX_INFO_DEF
 
 #define TS_CS_MIX_DEF(_) \
 	_(simple)(TS_MIX_INFO, main_item) \
@@ -15,5 +15,5 @@ CREATE_STRUCT(TS_MIX_INFO);
 	_(dynarray)(TS_MIX_INFO, sub_items)
 
 CREATE_PACKET(TS_CS_MIX, 256);
+#undef TS_CS_MIX_DEF
 
-#endif // PACKETS_TS_CS_MIX_H

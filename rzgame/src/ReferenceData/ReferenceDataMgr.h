@@ -1,5 +1,4 @@
-#ifndef REFERENCEDATAMGR_H
-#define REFERENCEDATAMGR_H
+#pragma once
 
 #include "BannedWords.h"
 #include "Core/Object.h"
@@ -71,4 +70,3 @@ private:
 
 }  // namespace GameServer
 
-#endif  // REFERENCEDATAMGR_H

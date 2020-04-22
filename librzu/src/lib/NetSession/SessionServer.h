@@ -1,11 +1,10 @@
-#ifndef SESSIONSERVER_H
-#define SESSIONSERVER_H
+#pragma once
 
+#include "Config/ConfigParamVal.h"
 #include "Core/Object.h"
 #include "Core/Timer.h"
 #include "StartableObject.h"
 #include "Stream/Stream.h"
-#include <list>
 
 class SocketSession;
 class BanManager;
@@ -95,4 +94,3 @@ private:
 	Param parameter;
 };
 
-#endif  // SESSIONSERVER_H

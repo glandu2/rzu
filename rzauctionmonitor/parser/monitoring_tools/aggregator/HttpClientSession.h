@@ -1,5 +1,4 @@
-#ifndef HTTPCLIENTSESSION_H
-#define HTTPCLIENTSESSION_H
+#pragma once
 
 #include "Config/ConfigParamVal.h"
 #include "Core/Timer.h"
@@ -53,4 +52,3 @@ private:
 	int currentPort;
 };
 
-#endif

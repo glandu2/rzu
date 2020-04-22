@@ -1,5 +1,4 @@
-#ifndef P4COMPUTESTATS_H
-#define P4COMPUTESTATS_H
+#pragma once
 
 #include "Core/BackgroundWork.h"
 #include "Core/Object.h"
@@ -22,6 +21,7 @@
 	_(simple)(int64_t, maxPrice) \
 	_(simple)(int64_t, avgPrice)
 CREATE_STRUCT(AUCTION_INFO_PER_DAY);
+#undef AUCTION_INFO_PER_DAY_DEF
 // clang-format on
 
 class P4ComputeStats
@@ -56,5 +56,3 @@ private:
 private:
 	BackgroundWork<P4ComputeStats, std::shared_ptr<WorkItem>> work;
 };
-
-#endif

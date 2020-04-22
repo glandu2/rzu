@@ -1,5 +1,4 @@
-#ifndef AUCTIONWORKER_H
-#define AUCTIONWORKER_H
+#pragma once
 
 #include "AuthSession.h"
 #include "Core/IDelegate.h"
@@ -66,4 +65,3 @@ private:
 	Callback<StoppedCallback> stopCallback;
 };
 
-#endif  // AUCTIONMANAGER_H

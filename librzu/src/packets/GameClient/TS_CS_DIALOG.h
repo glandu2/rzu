@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_DIALOG_H
-#define PACKETS_TS_CS_DIALOG_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -10,5 +9,5 @@
 	_(dynstring)(trigger, false)
 
 CREATE_PACKET(TS_CS_DIALOG, 3001);
+#undef TS_CS_DIALOG_DEF
 
-#endif // PACKETS_TS_CS_DIALOG_H

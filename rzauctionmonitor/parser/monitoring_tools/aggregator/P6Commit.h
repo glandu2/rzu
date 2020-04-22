@@ -1,5 +1,4 @@
-#ifndef P6COMMIT_H
-#define P6COMMIT_H
+#pragma once
 
 #include "Core/BackgroundWork.h"
 #include "Core/Object.h"
@@ -24,4 +23,3 @@ private:
 	BackgroundWork<P6Commit, std::shared_ptr<WorkItem>> work;
 };
 
-#endif

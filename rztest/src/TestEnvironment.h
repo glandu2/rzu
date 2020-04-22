@@ -1,5 +1,4 @@
-#ifndef TESTENVIRONMENT_H
-#define TESTENVIRONMENT_H
+#pragma once
 
 #include "Core/Object.h"
 #include "Extern.h"
@@ -77,4 +76,3 @@ private:
 
 template<class Derived> TestProcessBase TestFixture<Derived>::testProcessBase;
 
-#endif

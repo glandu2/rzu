@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_HUNTAHOLIC_UPDATE_SCORE_H
-#define PACKETS_TS_SC_HUNTAHOLIC_UPDATE_SCORE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(simple)(int32_t, score)
 
 CREATE_PACKET(TS_SC_HUNTAHOLIC_UPDATE_SCORE, 4007);
+#undef TS_SC_HUNTAHOLIC_UPDATE_SCORE_DEF
 
-#endif // PACKETS_TS_SC_HUNTAHOLIC_UPDATE_SCORE_H

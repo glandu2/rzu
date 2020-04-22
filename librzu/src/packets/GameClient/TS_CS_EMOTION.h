@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_EMOTION_H
-#define PACKETS_TS_CS_EMOTION_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -7,5 +6,5 @@
 	_(simple)(int32_t, emotion)
 
 CREATE_PACKET(TS_CS_EMOTION, 1202);
+#undef TS_CS_EMOTION_DEF
 
-#endif // PACKETS_TS_CS_EMOTION_H

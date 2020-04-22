@@ -1,7 +1,7 @@
-#ifndef THREADWORK_H
-#define THREADWORK_H
+#pragma once
 
 #include "../Extern.h"
+#include "errno.h"
 #include "uv.h"
 #include <vector>
 
@@ -68,4 +68,3 @@ private:
 	}
 };
 
-#endif  // THREADWORK_H

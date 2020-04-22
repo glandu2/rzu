@@ -1,5 +1,4 @@
-#ifndef GAMESESSION_H
-#define GAMESESSION_H
+#pragma once
 
 #include "Core/Timer.h"
 #include "NetSession/AutoClientSession.h"
@@ -54,4 +53,3 @@ private:
 	std::unordered_map<unsigned int, std::string> playerNames;
 };
 
-#endif  // GAMESESSION_H

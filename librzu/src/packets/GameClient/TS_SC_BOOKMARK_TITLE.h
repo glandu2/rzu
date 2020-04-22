@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_BOOKMARK_TITLE_H
-#define PACKETS_TS_SC_BOOKMARK_TITLE_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -9,5 +8,5 @@
 
 // Since EPIC_8_1
 CREATE_PACKET(TS_SC_BOOKMARK_TITLE, 633);
+#undef TS_SC_BOOKMARK_TITLE_DEF
 
-#endif // PACKETS_TS_SC_BOOKMARK_TITLE_H

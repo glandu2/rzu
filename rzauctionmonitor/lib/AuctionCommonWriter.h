@@ -1,5 +1,4 @@
-#ifndef AUCTIONCOMMONWRITER_H
-#define AUCTIONCOMMONWRITER_H
+#pragma once
 
 #include "CategoryTimeManager.h"
 #include "Core/Object.h"
@@ -44,4 +43,3 @@ private:
 	int fileNumber;
 };
 
-#endif  // AUCTIONSIMPLEDIFF_H

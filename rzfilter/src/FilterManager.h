@@ -1,6 +1,6 @@
-#ifndef FILTERMANAGER_H
-#define FILTERMANAGER_H
+#pragma once
 
+#include "Config/ConfigParamVal.h"
 #include "Core/Object.h"
 #include "Core/Timer.h"
 #include "IFilter.h"
@@ -45,11 +45,13 @@ protected:
 private:
 	cval<std::string>& filterModuleName;
 	uv_lib_t filterModule;
+	void* filterModuleArgument;
 	bool filterModuleLoaded;
 	int currentUsedIndex;
 	std::list<FilterProxy*> packetFilters;
 	IFilter::CreateFilterFunction createFilterFunction;
 	IFilter::DestroyFilterFunction destroyFilterFunction;
+	IFilter::DestroyGlobalFilterFunction destroyGlobalFilterFunction;
 
 	Timer<FilterManager> updateFilterTimer;
 	int lastFileSize;
@@ -57,4 +59,3 @@ private:
 	static std::list<FilterManager*> instance;
 };
 
-#endif  // FILTERMANAGER_H

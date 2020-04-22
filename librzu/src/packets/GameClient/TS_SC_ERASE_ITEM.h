@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_ERASE_ITEM_H
-#define PACKETS_TS_SC_ERASE_ITEM_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,6 +7,7 @@
 	_(simple)(int64_t, count)
 
 CREATE_STRUCT(TS_ERASE_ITEM_INFO_RESULT);
+#undef TS_ERASE_ITEM_INFO_RESULT_DEF
 
 #define TS_SC_ERASE_ITEM_DEF(_) \
 	_(count)(int8_t, erased_items) \
@@ -15,5 +15,5 @@ CREATE_STRUCT(TS_ERASE_ITEM_INFO_RESULT);
 
 // Since EPIC_7_2, was TS_SC_RESULT before
 CREATE_PACKET(TS_SC_ERASE_ITEM, 209);
+#undef TS_SC_ERASE_ITEM_DEF
 
-#endif // PACKETS_TS_SC_ERASE_ITEM_H

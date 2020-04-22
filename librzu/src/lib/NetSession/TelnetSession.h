@@ -1,8 +1,6 @@
-#ifndef TELNETSESSION_H
-#define TELNETSESSION_H
+#pragma once
 
 #include "SocketSession.h"
-#include <sstream>
 #include <string>
 
 class RZU_EXTERN TelnetSession : public SocketSession {
@@ -32,4 +30,3 @@ private:
 	std::vector<char> buffer;
 };
 
-#endif  // TELNETSESSION_H

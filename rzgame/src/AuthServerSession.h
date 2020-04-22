@@ -1,5 +1,4 @@
-#ifndef GAMESERVER_AUTHSERVERSESSION_H
-#define GAMESERVER_AUTHSERVERSESSION_H
+#pragma once
 
 #include "AuthGame/TS_AG_CLIENT_LOGIN.h"
 #include "AuthGame/TS_AG_LOGIN_RESULT.h"
@@ -43,4 +42,3 @@ protected:
 
 }  // namespace GameServer
 
-#endif  // GAMESERVER_AUTHSERVERSESSION_H

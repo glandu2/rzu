@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_SC_UPDATE_GUILD_ICON_H
-#define PACKETS_TS_SC_UPDATE_GUILD_ICON_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -10,5 +9,5 @@
 	_(string)(raw_server_name, 32)
 
 CREATE_PACKET(TS_SC_UPDATE_GUILD_ICON, 652);
+#undef TS_SC_UPDATE_GUILD_ICON_DEF
 
-#endif // PACKETS_TS_SC_UPDATE_GUILD_ICON_H

@@ -1,12 +1,10 @@
-#ifndef SERVERSMANAGER_H
-#define SERVERSMANAGER_H
+#pragma once
 
 #include "Core/Object.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-class BanManager;
 class StartableObject;
 class IWritableConsole;
 template<typename T> class cval;
@@ -48,4 +46,3 @@ private:
 	static ServersManager* instance;
 };
 
-#endif  // SERVERSMANAGER_H

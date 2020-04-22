@@ -1,5 +1,4 @@
-#ifndef PACKETS_TS_CS_ACCOUNT_H
-#define PACKETS_TS_CS_ACCOUNT_H
+#pragma once
 
 #include "Packet/PacketDeclaration.h"
 
@@ -8,5 +7,5 @@
 	_(array)(uint8_t, password, 32)
 
 CREATE_PACKET(TS_CS_ACCOUNT, 2000);
+#undef TS_CS_ACCOUNT_DEF
 
-#endif // PACKETS_TS_CS_ACCOUNT_H

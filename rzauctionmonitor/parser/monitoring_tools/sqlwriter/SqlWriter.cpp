@@ -14,6 +14,7 @@
 	_(count)(uint8_t, lastParsedFile) \
 	_(dynstring)(lastParsedFile, false)
 CREATE_STRUCT(SQLWRITER_STATE);
+#undef SQLWRITER_STATE_DEF
 // clang-format on
 
 SqlWriter::SqlWriter() {}

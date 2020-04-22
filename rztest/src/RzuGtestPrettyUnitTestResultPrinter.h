@@ -1,5 +1,4 @@
-#ifndef RZUGTESTPRETTYUNITTESTRESULTPRINTER_H
-#define RZUGTESTPRETTYUNITTESTRESULTPRINTER_H
+#pragma once
 
 #include "Core/Object.h"
 #include "gtest/gtest.h"
@@ -29,4 +28,3 @@ private:
 	DECLARE_CLASS(RzuTestPrinter)
 };
 
-#endif  // RZUGTESTPRETTYUNITTESTRESULTPRINTER_H
