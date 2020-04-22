@@ -1,5 +1,4 @@
-#ifndef LUATABLEWRITER_H
-#define LUATABLEWRITER_H
+#pragma once
 
 #include "Core/Object.h"
 #include "Packet/EncodedInt.h"
@@ -307,4 +306,3 @@ public:
 	void discard(const char* fieldName, size_t size) {}
 };
 
-#endif /* LUATABLEWRITER_H */

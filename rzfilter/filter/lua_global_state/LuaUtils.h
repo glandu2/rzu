@@ -1,5 +1,4 @@
-#ifndef LUAUTILS_H
-#define LUAUTILS_H
+#pragma once
 
 #include <lua.hpp>
 
@@ -15,4 +14,3 @@ private:
 	static int getTimeInMsec(lua_State* L);
 };
 
-#endif  // LUAUTILS_H

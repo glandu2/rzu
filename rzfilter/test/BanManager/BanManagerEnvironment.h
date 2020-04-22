@@ -1,5 +1,4 @@
-#ifndef ENVIRONMENT_H
-#define ENVIRONMENT_H
+#pragma once
 
 #include "TestEnvironment.h"
 
@@ -10,4 +9,3 @@ public:
 	virtual void afterTests();
 };
 
-#endif

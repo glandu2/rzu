@@ -1,5 +1,4 @@
-#ifndef IFILTER_H
-#define IFILTER_H
+#pragma once
 
 #include "IFilterEndpoint.h"
 #include "Packet/PacketBaseMessage.h"
@@ -30,4 +29,3 @@ protected:
 	ServerType serverType;
 };
 
-#endif  // IFILTER_H

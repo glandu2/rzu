@@ -1,5 +1,4 @@
-#ifndef LUAENDPOINT_H
-#define LUAENDPOINT_H
+#pragma once
 
 #include "Core/Timer.h"
 #include "IFilter.h"
@@ -41,4 +40,3 @@ private:
 	IFilter::ServerType serverType;
 };
 
-#endif  // LUAENDPOINT_H

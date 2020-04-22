@@ -1,5 +1,4 @@
-#ifndef FILTERENDPOINT_H
-#define FILTERENDPOINT_H
+#pragma once
 
 #include "IFilterEndpoint.h"
 #include "Packet/PacketBaseMessage.h"
@@ -24,4 +23,3 @@ private:
 	bool toClient;
 };
 
-#endif

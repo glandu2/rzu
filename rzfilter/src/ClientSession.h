@@ -1,5 +1,4 @@
-#ifndef CLIENTSESSION_H
-#define CLIENTSESSION_H
+#pragma once
 
 #include "IFilterEndpoint.h"
 #include "NetSession/EncryptedSession.h"
@@ -71,4 +70,3 @@ private:
 	bool authMode;
 };
 
-#endif  // CLIENTSESSION_H

@@ -1,5 +1,4 @@
-#ifndef PACKETFILTER_H
-#define PACKETFILTER_H
+#pragma once
 
 #include "Core/Timer.h"
 #include "IFilter.h"
@@ -101,4 +100,3 @@ SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
 
-#endif  // PACKETFILTER_H

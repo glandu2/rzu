@@ -1,5 +1,4 @@
-#ifndef FILTERMANAGER_H
-#define FILTERMANAGER_H
+#pragma once
 
 #include "Config/ConfigParamVal.h"
 #include "Core/Object.h"
@@ -60,4 +59,3 @@ private:
 	static std::list<FilterManager*> instance;
 };
 
-#endif  // FILTERMANAGER_H

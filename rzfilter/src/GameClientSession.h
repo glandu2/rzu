@@ -1,5 +1,4 @@
-#ifndef GAMECLIENTSESSION_H
-#define GAMECLIENTSESSION_H
+#pragma once
 
 #include "ClientSession.h"
 
@@ -30,4 +29,3 @@ private:
 	uint16_t serverPort;
 };
 
-#endif  // GAMECLIENTSESSION_H

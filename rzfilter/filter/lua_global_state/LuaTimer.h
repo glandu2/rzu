@@ -1,5 +1,4 @@
-#ifndef LUATIMER_H
-#define LUATIMER_H
+#pragma once
 
 #include "Core/Timer.h"
 #include <lua.hpp>
@@ -33,4 +32,3 @@ private:
 	int callbackLuaFunction = LUA_NOREF;
 };
 
-#endif  // LUATIMER_H

@@ -1,5 +1,4 @@
-#ifndef IFILTERENDPOINT_H
-#define IFILTERENDPOINT_H
+#pragma once
 
 #include "Packet/PacketBaseMessage.h"
 
@@ -25,4 +24,3 @@ protected:
 	virtual void sendPacket(MessageBuffer& packet) = 0;
 };
 
-#endif  // IFILTERENDPOINT_H

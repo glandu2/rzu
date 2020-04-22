@@ -1,5 +1,4 @@
-#ifndef AUTHSESSION_H
-#define AUTHSESSION_H
+#pragma once
 
 #include "EndpointProxy.h"
 #include "IFilterEndpoint.h"
@@ -78,4 +77,3 @@ private:
 	std::vector<TS_MESSAGE*> pendingMessages;
 };
 
-#endif  // AUTHSESSION_H
