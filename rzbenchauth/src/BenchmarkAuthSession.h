@@ -1,5 +1,4 @@
-#ifndef BENCHMARKAUTHSESSION_H
-#define BENCHMARKAUTHSESSION_H
+#pragma once
 
 #include "Core/Timer.h"
 #include "NetSession/ClientAuthSession.h"
@@ -45,4 +44,3 @@ private:
 	Timer<BenchmarkAuthSession> recoDelayTimer;
 };
 
-#endif  // BENCHMARKAUTHSESSION_H

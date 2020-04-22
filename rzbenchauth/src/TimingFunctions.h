@@ -1,5 +1,4 @@
-#ifndef TIMINGFUNCTIONS_H
-#define TIMINGFUNCTIONS_H
+#pragma once
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -12,4 +11,3 @@
 	timeEndPeriod(1);
 #endif
 
-#endif  // TIMINGFUNCTIONS_H
