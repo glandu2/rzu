@@ -1,5 +1,4 @@
-#ifndef ENVIRONMENT_H
-#define ENVIRONMENT_H
+#pragma once
 
 #include "TestEnvironment.h"
 
@@ -18,4 +17,3 @@ private:
 	static Environment* instance;
 };
 
-#endif

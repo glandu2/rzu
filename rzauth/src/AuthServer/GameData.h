@@ -1,5 +1,4 @@
-#ifndef GAMEDATA_H
-#define GAMEDATA_H
+#pragma once
 
 #include "Core/Object.h"
 #include <array>
@@ -93,4 +92,3 @@ private:
 
 }  // namespace AuthServer
 
-#endif  // GAMEDATA_H

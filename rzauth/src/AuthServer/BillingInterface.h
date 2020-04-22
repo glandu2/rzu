@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_BILLINGINTERFACE_H
-#define AUTHSERVER_BILLINGINTERFACE_H
+#pragma once
 
 #include "Core/Object.h"
 #include "NetSession/TelnetSession.h"
@@ -18,4 +17,3 @@ protected:
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_BILLINGINTERFACE_H

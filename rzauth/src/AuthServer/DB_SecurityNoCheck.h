@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_DB_SECURITY_NO_CHECK_H
-#define AUTHSERVER_DB_SECURITY_NO_CHECK_H
+#pragma once
 
 #include "Database/DbQueryJobRef.h"
 #include "uv.h"
@@ -46,4 +45,3 @@ private:
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_DB_SECURITY_NO_CHECK_H

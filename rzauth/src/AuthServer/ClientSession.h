@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_CLIENTSESSION_H
-#define AUTHSERVER_CLIENTSESSION_H
+#pragma once
 
 #include "DB_Account.h"
 #include "DB_UpdateLastServerIdx.h"
@@ -52,4 +51,3 @@ private:
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_CLIENTSESSION_H

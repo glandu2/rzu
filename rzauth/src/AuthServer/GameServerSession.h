@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_GAMESERVERSESSION_H
-#define AUTHSERVER_GAMESERVERSESSION_H
+#pragma once
 
 #include "ClientData.h"
 #include "DB_SecurityNoCheck.h"
@@ -77,4 +76,3 @@ private:
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_GAMESERVERSESSION_H
