@@ -1,5 +1,4 @@
-#ifndef AUTHSERVER_GAMESERVERSESSION_COMMON_H
-#define AUTHSERVER_GAMESERVERSESSION_COMMON_H
+#pragma once
 
 #include "TestConnectionChannel.h"
 #include <stdint.h>
@@ -48,4 +47,3 @@ void addGameLoginScenario(TestConnectionChannel& game,
 
 }  // namespace AuthServer
 
-#endif  // AUTHSERVER_GAMESERVERSESSION_COMMON_H

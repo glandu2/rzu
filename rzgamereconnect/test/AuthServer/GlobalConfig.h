@@ -1,5 +1,4 @@
-#ifndef GLOBALCONFIG_H
-#define GLOBALCONFIG_H
+#pragma once
 
 #include "Config/ConfigInfo.h"
 #include "Core/Utils.h"
@@ -35,5 +34,3 @@ struct GlobalConfig {
 #ifndef CONFIG_GET
 #define CONFIG_GET() AuthServer::GlobalConfig::get()
 #endif
-
-#endif  // GLOBALCONFIG_H

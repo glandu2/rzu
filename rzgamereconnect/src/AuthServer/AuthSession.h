@@ -1,5 +1,4 @@
-#ifndef AUTHSESSION_H
-#define AUTHSESSION_H
+#pragma once
 
 #include "AuthGame/TS_GA_ACCOUNT_LIST.h"
 #include "Core/Timer.h"
@@ -99,4 +98,3 @@ private:
 
 }  // namespace AuthServer
 
-#endif  // AUTHSESSION_H
