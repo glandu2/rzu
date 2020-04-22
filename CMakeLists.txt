@@ -30,7 +30,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
 set(CMAKE_PDB_OUTPUT_DIRECTORY     "${CMAKE_BINARY_DIR}/../${BUILD_DIR_NAME}-bin")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 find_program(
   CLANG_TIDY_EXE
@@ -47,19 +47,21 @@ if(MSVC)
   if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
   endif()
-  add_compile_options(/wd4251 /wd4275)
+  add_compile_options(/wd4251 /wd4275 /bigobj)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -Wall")
 
   if(NOT CMAKE_SYSTEM_NAME MATCHES "AIX")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+	set(ALL_COMPILER_FLAGS "-fvisibility=hidden")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ALL_COMPILER_FLAGS} -fvisibility-inlines-hidden")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ALL_COMPILER_FLAGS}")
 	if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
-	  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
-	  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--as-needed")
-	  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed")
+	  set(ALL_LINKER_FLAGS "-Wl,--as-needed")
+	  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ALL_LINKER_FLAGS}")
+	  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${ALL_LINKER_FLAGS}")
+	  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${ALL_LINKER_FLAGS}")
 	endif()
   endif()
 
@@ -72,8 +74,9 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" S
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--add-stdcall-alias -static-libgcc")
   endif()
 
-  add_definitions(-D__STDC_FORMAT_MACROS)
 endif()
+add_definitions(-D__STDC_FORMAT_MACROS)
+add_definitions(-D__STDC_LIMIT_MACROS)
 
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
