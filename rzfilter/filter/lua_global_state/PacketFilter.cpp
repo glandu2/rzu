@@ -505,6 +505,7 @@ void destroyFilter(IFilter* filter) {
 }
 
 void* initializeGlobalFilter() {
+	GlobalLuaState::getInstance();
 	return nullptr;
 }
 
