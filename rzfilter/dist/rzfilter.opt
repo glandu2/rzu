@@ -32,6 +32,7 @@ core.log.level:info
 
 # Filter module to use
 # - rzfilter_lua_module: execute rzfilter.lua to filter packets (see rzfilter.lua for available tools like combatlog, json dump and chat timestamps)
+# - rzfilter_lua_global_state_module: same as rzfilter_lua_module, but with a global lua state for all connections
 # - rzfilter_combatlog_module: output a log file containing combat log. To be used with AdvancedCombatTracker that can do statistics on it
 # - rzfilter_json: log packets in json
 # Note: the version_converter filter is integrated into rzfilter and will always be enabled to allow combination of a normal filter + epic convertion filter
