@@ -14,6 +14,7 @@ public:
 
 	static int luaMessageHandler(lua_State* L);
 
+	bool onClientConnected(int clientEndpoint, int serverEndpoint);
 	bool onServerPacket(int clientEndpoint,
 	                    int serverEndpoint,
 	                    const TS_MESSAGE* packet,
@@ -52,7 +53,7 @@ private:
 	                          IFilter::ServerType serverType,
 	                          bool isStrictForwardEnabled);
 
-	bool luaCallOnDisconnected(int luaOnDisconnectedFunction,
+	bool luaCallOnConnectionEvent(int luaOnEventFunction,
 	                           const char* functionName,
 	                           int clientEndpoint,
 	                           int serverEndpoint);
@@ -66,6 +67,7 @@ private:
 	int lua_onServerPacketFunction = LUA_NOREF;
 	int lua_onClientPacketFunction = LUA_NOREF;
 	int lua_onUnknownPacketFunction = LUA_NOREF;
+	int lua_onClientConnectedFunction = LUA_NOREF;
 	int lua_onClientDisconnectedFunction = LUA_NOREF;
 
 	Timer<GlobalLuaState> reloadCheckTimer;

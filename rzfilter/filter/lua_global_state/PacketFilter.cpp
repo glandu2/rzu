@@ -161,16 +161,16 @@ bool GlobalLuaState::luaCallUnknownPacket(int clientEndpoint,
 	return returnValue;
 }
 
-bool GlobalLuaState::luaCallOnDisconnected(int luaOnDisconnectedFunction,
+bool GlobalLuaState::luaCallOnConnectionEvent(int luaOnEventFunction,
                                            const char* functionName,
                                            int clientEndpoint,
                                            int serverEndpoint) {
-	if(luaOnDisconnectedFunction != LUA_REFNIL && luaOnDisconnectedFunction != LUA_NOREF) {
+	if(luaOnEventFunction != LUA_REFNIL && luaOnEventFunction != LUA_NOREF) {
 		int topBeforeCall = lua_gettop(L);
 
 		lua_pushcfunction(L, &luaMessageHandler);
 
-		lua_rawgeti(L, LUA_REGISTRYINDEX, luaOnDisconnectedFunction);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, luaOnEventFunction);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, clientEndpoint);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, serverEndpoint);
 
@@ -196,6 +196,12 @@ int GlobalLuaState::luaMessageHandler(lua_State* L) {
 	const char* msg = lua_tostring(L, 1);
 	luaL_traceback(L, L, msg, 1);
 	return 1;
+}
+
+bool GlobalLuaState::onClientConnected(int clientEndpoint, int serverEndpoint)
+{
+	return luaCallOnConnectionEvent(
+	    lua_onClientConnectedFunction, "onClientConnected", clientEndpoint, serverEndpoint);
 }
 
 bool GlobalLuaState::onServerPacket(int clientEndpoint,
@@ -233,7 +239,7 @@ bool GlobalLuaState::onClientPacket(int clientEndpoint,
 }
 
 bool GlobalLuaState::onClientDisconnected(int clientEndpoint, int serverEndpoint) {
-	return luaCallOnDisconnected(
+	return luaCallOnConnectionEvent(
 	    lua_onClientDisconnectedFunction, "onClientDisconnected", clientEndpoint, serverEndpoint);
 }
 
@@ -244,6 +250,7 @@ void GlobalLuaState::initLuaVM() {
 	lua_onServerPacketFunction = LUA_NOREF;
 	lua_onClientPacketFunction = LUA_NOREF;
 	lua_onUnknownPacketFunction = LUA_NOREF;
+	lua_onClientConnectedFunction = LUA_NOREF;
 	lua_onClientDisconnectedFunction = LUA_NOREF;
 
 	luaL_openlibs(L);
@@ -328,6 +335,19 @@ void GlobalLuaState::initLuaVM() {
 	}
 	lua_pop(L, 1);
 
+	lua_getglobal(L, "onClientConnected");
+	if(lua_isfunction(L, -1)) {
+		lua_onClientConnectedFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+		lua_pushnil(L);  // for the next pop as luaL_ref pop the value
+	} else {
+		lua_onClientConnectedFunction = LUA_NOREF;
+		Object::logStatic(Object::LL_Info,
+		                  "rzfilter_lua_global_state_module",
+		                  "Lua register: onClientConnected must be a lua function matching its C counterpart: "
+		                  "bool onClientConnected(IFilterEndpoint* client, IFilterEndpoint* server)\n");
+	}
+	lua_pop(L, 1);
+
 	lua_getglobal(L, "onClientDisconnected");
 	if(lua_isfunction(L, -1)) {
 		lua_onClientDisconnectedFunction = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -355,6 +375,10 @@ void GlobalLuaState::deinitLuaVM() {
 		if(lua_onUnknownPacketFunction != LUA_NOREF) {
 			luaL_unref(L, LUA_REGISTRYINDEX, lua_onUnknownPacketFunction);
 			lua_onUnknownPacketFunction = LUA_NOREF;
+		}
+		if(lua_onClientConnectedFunction != LUA_NOREF) {
+			luaL_unref(L, LUA_REGISTRYINDEX, lua_onClientConnectedFunction);
+			lua_onClientConnectedFunction = LUA_NOREF;
 		}
 		if(lua_onClientDisconnectedFunction != LUA_NOREF) {
 			luaL_unref(L, LUA_REGISTRYINDEX, lua_onClientDisconnectedFunction);
@@ -426,6 +450,8 @@ PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, Ser
 	serverEndpoint =
 	    LuaEndpoint::createInstance(GlobalLuaState::getInstance()->getLuaState(), server, true, serverType);
 	lua_serverEndpointRef = luaL_ref(GlobalLuaState::getInstance()->getLuaState(), LUA_REGISTRYINDEX);
+
+	GlobalLuaState::getInstance()->onClientConnected(lua_clientEndpointRef, lua_serverEndpointRef);
 }
 
 PacketFilter::~PacketFilter() {
@@ -435,6 +461,7 @@ PacketFilter::~PacketFilter() {
 	}
 	serverEndpoint->detachEndpoint();
 	luaL_unref(GlobalLuaState::getInstance()->getLuaState(), LUA_REGISTRYINDEX, lua_serverEndpointRef);
+
 }
 
 bool PacketFilter::onServerPacket(const TS_MESSAGE* packet) {
