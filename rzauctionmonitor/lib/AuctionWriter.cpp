@@ -373,7 +373,7 @@ int AuctionWriter::compressGzip(std::vector<uint8_t>& compressedData,
 		return err;
 	}
 
-	compressedData.resize(deflateBound(&stream, sourceData.size()));
+	compressedData.resize(deflateBound(&stream, static_cast<uLong>(sourceData.size())));
 
 	stream.next_in = sourceData.data();
 	stream.avail_in = (uInt) sourceData.size();
@@ -409,13 +409,13 @@ int AuctionWriter::uncompressGzip(std::vector<uint8_t>& uncompressedData,
 	if(err != Z_OK)
 		return err;
 
-	stream.avail_in = compressedData.size();
+	stream.avail_in = static_cast<uLong>(compressedData.size());
 	stream.next_in = compressedData.data();
 
 	/* run inflate() on input until output buffer not full */
 	do {
 		uncompressedData.resize(uncompressedData.size() + 1024 * 1024);
-		stream.avail_out = uncompressedData.size() - outputIndex;
+		stream.avail_out = static_cast<uLong>(uncompressedData.size()) - outputIndex;
 		stream.next_out = &uncompressedData[outputIndex];
 		err = inflate(&stream, Z_NO_FLUSH);
 		switch(err) {

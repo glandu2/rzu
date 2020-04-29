@@ -3,7 +3,8 @@
 #include "Core/Timer.h"
 #include <lua.hpp>
 
-class LuaTimer {
+class LuaTimer : public Object {
+	DECLARE_CLASS(LuaTimer);
 public:
 	static int initLua(lua_State* L);
 

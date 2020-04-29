@@ -172,7 +172,7 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 		thisInstance->log(LL_Error,
 		                  "Failed to scan dir \"%s\", error: %s(%d)\n",
 		                  req->path,
-		                  uv_strerror(req->result),
+		                  uv_strerror(static_cast<int>(req->result)),
 		                  (int) req->result);
 		return;
 	}

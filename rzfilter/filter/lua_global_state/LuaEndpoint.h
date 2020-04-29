@@ -6,7 +6,8 @@
 
 class IFilterEndpoint;
 
-class LuaEndpoint {
+class LuaEndpoint : public Object {
+	DECLARE_CLASS(LuaEndpoint)
 public:
 	static LuaEndpoint* createInstance(lua_State* L,
 	                                   IFilterEndpoint* endpoint,
@@ -15,6 +16,7 @@ public:
 	void detachEndpoint();
 
 	static void initLua(lua_State* L);
+	static int gc(lua_State* L);
 
 private:
 	static const char* const NAME;

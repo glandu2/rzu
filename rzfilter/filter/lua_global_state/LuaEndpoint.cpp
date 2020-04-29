@@ -1,6 +1,9 @@
 #include "LuaEndpoint.h"
 #include "LuaTableWriter.h"
 #include "PacketIterator.h"
+#include "ClassCounter.h"
+
+DECLARE_CLASSCOUNT_STATIC(LuaEndpoint)
 
 const char* const LuaEndpoint::NAME = "rzfilter.IFilterEndpoint";
 const luaL_Reg LuaEndpoint::FUNCTIONS[] = {{"getPacketVersion", &getPacketVersion},
@@ -151,6 +154,9 @@ void LuaEndpoint::initLua(lua_State* L) {
 	// LuaEndpointMetaTable metatable wrapping IFilterEndpoint
 	luaL_newmetatable(L, LuaEndpoint::NAME);
 
+	lua_pushcfunction(L, &gc);
+	lua_setfield(L, -2, "__gc");
+
 	// set __index as a table with custom methods (like sendGamePacket)
 	lua_pushstring(L, "__index");
 	lua_newtable(L);
@@ -164,6 +170,17 @@ void LuaEndpoint::initLua(lua_State* L) {
 
 	// pop metatable
 	lua_pop(L, 1);
+}
+
+int LuaEndpoint::gc(lua_State* L) {
+	LuaEndpoint** userData = static_cast<LuaEndpoint**>(luaL_checkudata(L, 1, NAME));
+	if(!userData || !*userData)
+		return 0;
+
+	delete *userData;
+	*userData = nullptr;
+
+	return 0;
 }
 
 LuaEndpoint::~LuaEndpoint() {

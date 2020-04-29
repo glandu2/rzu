@@ -174,7 +174,11 @@ public:
 			ok = false;
 		}
 
-		val = static_cast<U>(lua_tointeger(L, -1));
+		if constexpr(is_strong_typed_primitive<T>::value) {
+			val = static_cast<U>(static_cast<typename U::underlying_type>(lua_tointeger(L, -1)));
+		} else {
+			val = static_cast<U>(lua_tointeger(L, -1));
+		}
 		lua_pop(L, 1);
 	}
 
@@ -305,4 +309,3 @@ public:
 
 	void discard(const char* fieldName, size_t size) {}
 };
-

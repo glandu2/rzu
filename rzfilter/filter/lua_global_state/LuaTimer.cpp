@@ -1,5 +1,8 @@
 #include "LuaTimer.h"
 #include "LuaUtils.h"
+#include "ClassCounter.h"
+
+DECLARE_CLASSCOUNT_STATIC(LuaTimer)
 
 const char* const LuaTimer::NAME = "LuaTimer";
 const luaL_Reg LuaTimer::FUNCTIONS[] = {{"start", &start},
