@@ -54,9 +54,9 @@ private:
 	                          bool isStrictForwardEnabled);
 
 	bool luaCallOnConnectionEvent(int luaOnEventFunction,
-	                           const char* functionName,
-	                           int clientEndpoint,
-	                           int serverEndpoint);
+	                              const char* functionName,
+	                              int clientEndpoint,
+	                              int serverEndpoint);
 
 	bool pushPacket(lua_State* L, const TS_MESSAGE* packet, int version, bool isServer, IFilter::ServerType serverType);
 
@@ -101,4 +101,3 @@ SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
                                     IFilter* oldFilter);
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
-

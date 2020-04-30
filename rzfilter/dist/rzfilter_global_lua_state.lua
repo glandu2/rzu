@@ -12,18 +12,18 @@ print("LUA script loaded")
 function onClientConnected(client, server)
 	print("Client connected")
 	
-	-- You can set arbitrary variables inside client.data and server.data.
+	-- You can set arbitrary variables inside client and server.
 	-- These variables will be stored alongside the endpoints.
 	-- Store data here when you need to store data associated with a client connection.
-	client.data.client_packet_io = 0
-	client.data.server_packet_io = 0
-	client.data.timer = timer:new()
+	client.client_packet_io = 0
+	client.server_packet_io = 0
+	client.timer = timer:new()
 	
 	function onTimerCallback(t)
-		client.data.server_packet_io = client.data.server_packet_io + 10000
-		print("Timer tick, counter at " .. client.data.server_packet_io)
+		client.server_packet_io = client.server_packet_io + 10000
+		print("Timer tick, counter at " .. client.server_packet_io)
 	end
-	client.data.timer:start(onTimerCallback, 1000, 5000)
+	client.timer:start(onTimerCallback, 1000, 5000)
 	
 	-- This will modify the global variable
 	-- Its new value will be visible for all connections
@@ -35,7 +35,7 @@ function onServerPacket(client, server, packet, serverType)
 	print("Received Server packet id " .. packet.id .. " (" .. packet.__name .. ")")
 	
 	-- Increment the per-connection counter
-	client.data.server_packet_io = client.data.server_packet_io + 1	
+	client.server_packet_io = client.server_packet_io + 1	
 	return not client:sendPacket(packet)
 end
 
@@ -43,15 +43,15 @@ function onClientPacket(client, server, packet, serverType)
 	print("Received Client packet id " .. packet.id .. " (" .. packet.__name .. ")")
 	
 	-- Increment the per-connection counter
-	client.data.client_packet_io = client.data.client_packet_io + 1
+	client.client_packet_io = client.client_packet_io + 1
 	return not server:sendPacket(packet)
 end
 
 function onUnknownPacket(fromEndpoint, toEndpoint, id, serverType, isServerPacket)
 	if isServerPacket then
-		client.data.server_packet_io = client.data.server_packet_io + 1	
+		client.server_packet_io = client.server_packet_io + 1	
 	else
-		client.data.client_packet_io = client.data.client_packet_io + 1
+		client.client_packet_io = client.client_packet_io + 1
 	end
 
 	print("Unknown packet " .. id)
@@ -59,7 +59,7 @@ function onUnknownPacket(fromEndpoint, toEndpoint, id, serverType, isServerPacke
 end
 
 function onClientDisconnected(client, server)
-	print("Client disconnected, client packets: " .. client.data.client_packet_io .. " server packets: " .. client.data.server_packet_io)
+	print("Client disconnected, client packets: " .. client.client_packet_io .. " server packets: " .. client.server_packet_io)
 	
 	-- You can create timer even if they run while the connection is closed.
 	-- The timer won't be killed if it is running.
@@ -67,7 +67,7 @@ function onClientDisconnected(client, server)
 		print("Stopping timer")
 		t:stop()
 	end
-	client.data.timer:start(onTimerCallback, 1000, 0)
+	client.timer:start(onTimerCallback, 1000, 0)
 
 	server:close()
 end

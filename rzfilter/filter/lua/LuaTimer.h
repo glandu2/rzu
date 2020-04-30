@@ -29,4 +29,3 @@ private:
 	int luaUserDataRef;
 	int callbackLuaFunction;
 };
-

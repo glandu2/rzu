@@ -1,7 +1,7 @@
 #include "LuaEndpoint.h"
+#include "ClassCounter.h"
 #include "LuaTableWriter.h"
 #include "PacketIterator.h"
-#include "ClassCounter.h"
 
 DECLARE_CLASSCOUNT_STATIC(LuaEndpoint)
 
@@ -135,6 +135,9 @@ LuaEndpoint* LuaEndpoint::createInstance(lua_State* L,
 	luaL_getmetatable(L, NAME);
 	lua_setmetatable(L, -2);
 
+	lua_newtable(L);
+	self->userdatatable = luaL_ref(L, LUA_REGISTRYINDEX);
+
 	return self;
 }
 
@@ -158,24 +161,59 @@ void LuaEndpoint::initLua(lua_State* L) {
 	lua_setfield(L, -2, "__gc");
 
 	// set __index as a table with custom methods (like sendGamePacket)
-	lua_pushstring(L, "__index");
 	lua_newtable(L);
 	luaL_setfuncs(L, LuaEndpoint::FUNCTIONS, 0);
+	lua_pushcclosure(L, &index, 1);
+	lua_setfield(L, -2, "__index");
 
-	// Add a field to the __index table with key "data" with an empty table so the user can store anything
-	lua_newtable(L);
-	lua_setfield(L, -2, "data");
-
-	lua_settable(L, -3);
+	lua_pushcfunction(L, &newindex);
+	lua_setfield(L, -2, "__newindex");
 
 	// pop metatable
 	lua_pop(L, 1);
+}
+
+int LuaEndpoint::index(lua_State* L) {
+	LuaEndpoint* self = check_userdata(L, 1);
+	if(!self || !self->endpoint)
+		return 0;
+
+	lua_pushvalue(L, 2); /* duplicate key */
+	lua_rawget(L, lua_upvalueindex(1));
+	if(!lua_isnil(L, -1))
+		return 1;
+	lua_pop(L, 1);
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, self->userdatatable);
+	lua_pushvalue(L, 2); /* duplicate key */
+	lua_rawget(L, -2);
+	lua_remove(L, -2);
+	return 1;
+}
+
+int LuaEndpoint::newindex(lua_State* L) {
+	LuaEndpoint* self = check_userdata(L, 1);
+	if(!self || !self->endpoint)
+		return 0;
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, self->userdatatable);
+
+	lua_pushvalue(L, 2); /* duplicate key */
+	lua_pushvalue(L, 3); /* duplicate value */
+	lua_rawset(L, -3);
+
+	// Pop userdatatable
+	lua_pop(L, 1);
+
+	return 0;
 }
 
 int LuaEndpoint::gc(lua_State* L) {
 	LuaEndpoint** userData = static_cast<LuaEndpoint**>(luaL_checkudata(L, 1, NAME));
 	if(!userData || !*userData)
 		return 0;
+
+	luaL_unref(L, LUA_REGISTRYINDEX, (*userData)->userdatatable);
 
 	delete *userData;
 	*userData = nullptr;

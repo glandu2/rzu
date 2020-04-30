@@ -162,9 +162,9 @@ bool GlobalLuaState::luaCallUnknownPacket(int clientEndpoint,
 }
 
 bool GlobalLuaState::luaCallOnConnectionEvent(int luaOnEventFunction,
-                                           const char* functionName,
-                                           int clientEndpoint,
-                                           int serverEndpoint) {
+                                              const char* functionName,
+                                              int clientEndpoint,
+                                              int serverEndpoint) {
 	if(luaOnEventFunction != LUA_REFNIL && luaOnEventFunction != LUA_NOREF) {
 		int topBeforeCall = lua_gettop(L);
 
@@ -198,10 +198,8 @@ int GlobalLuaState::luaMessageHandler(lua_State* L) {
 	return 1;
 }
 
-bool GlobalLuaState::onClientConnected(int clientEndpoint, int serverEndpoint)
-{
-	return luaCallOnConnectionEvent(
-	    lua_onClientConnectedFunction, "onClientConnected", clientEndpoint, serverEndpoint);
+bool GlobalLuaState::onClientConnected(int clientEndpoint, int serverEndpoint) {
+	return luaCallOnConnectionEvent(lua_onClientConnectedFunction, "onClientConnected", clientEndpoint, serverEndpoint);
 }
 
 bool GlobalLuaState::onServerPacket(int clientEndpoint,
@@ -461,7 +459,6 @@ PacketFilter::~PacketFilter() {
 	}
 	serverEndpoint->detachEndpoint();
 	luaL_unref(GlobalLuaState::getInstance()->getLuaState(), LUA_REGISTRYINDEX, lua_serverEndpointRef);
-
 }
 
 bool PacketFilter::onServerPacket(const TS_MESSAGE* packet) {
