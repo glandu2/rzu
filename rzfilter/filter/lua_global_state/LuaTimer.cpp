@@ -1,6 +1,6 @@
 #include "LuaTimer.h"
-#include "LuaUtils.h"
 #include "ClassCounter.h"
+#include "LuaUtils.h"
 
 DECLARE_CLASSCOUNT_STATIC(LuaTimer)
 

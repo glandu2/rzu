@@ -13,4 +13,3 @@ private:
 
 	static int getTimeInMsec(lua_State* L);
 };
-

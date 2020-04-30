@@ -71,4 +71,3 @@ SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
                                     IFilter* oldFilter);
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
-

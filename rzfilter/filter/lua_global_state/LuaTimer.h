@@ -5,6 +5,7 @@
 
 class LuaTimer : public Object {
 	DECLARE_CLASS(LuaTimer);
+
 public:
 	static int initLua(lua_State* L);
 
@@ -32,4 +33,3 @@ private:
 	int luaUserDataRef = LUA_NOREF;
 	int callbackLuaFunction = LUA_NOREF;
 };
-
