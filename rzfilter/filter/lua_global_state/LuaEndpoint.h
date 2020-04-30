@@ -16,6 +16,8 @@ public:
 	void detachEndpoint();
 
 	static void initLua(lua_State* L);
+	static int index(lua_State* L);
+	static int newindex(lua_State* L);
 	static int gc(lua_State* L);
 
 private:
@@ -40,5 +42,5 @@ private:
 	IFilterEndpoint* endpoint;
 	bool isServerEndpoint;
 	IFilter::ServerType serverType;
+	int userdatatable = LUA_NOREF;
 };
-

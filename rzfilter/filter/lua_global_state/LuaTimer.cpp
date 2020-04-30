@@ -105,6 +105,9 @@ int LuaTimer::stop(lua_State* L) {
 		return 0;
 
 	int result = self->timer.stop();
+
+	self->updateRef(L, 1);
+
 	if(result < 0)
 		return luaL_error(L, "%s: %s", uv_err_name(result), uv_strerror(result));
 
@@ -179,6 +182,8 @@ void LuaTimer::onTimerCallback() {
 			return;
 		}
 		lua_pop(L, 1);  // remove the message handler
+	} else {
+		timer.stop();
 	}
 }
 
