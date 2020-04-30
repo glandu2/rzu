@@ -184,8 +184,10 @@ int LuaEndpoint::index(lua_State* L) {
 		return 1;
 	lua_pop(L, 1);
 
-	lua_pushvalue(L, 2); /* duplicate key */
 	lua_rawgeti(L, LUA_REGISTRYINDEX, self->userdatatable);
+	lua_pushvalue(L, 2); /* duplicate key */
+	lua_rawget(L, -2);
+	lua_remove(L, -2);
 	return 1;
 }
 
