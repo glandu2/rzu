@@ -47,6 +47,7 @@ private:
 	std::string password;
 	cval<int>& serverIdx;
 	cval<int>& delayTime;
+	int nextDelay;
 
 	bool disconnectRequested;
 	bool connectedToGS;
