@@ -416,7 +416,7 @@ bool GlobalLuaState::pushPacket(
 		origin = SessionPacketOrigin::Client;
 
 	ok = processPacket<LuaSerializePackerCallback>(
-	    sessionType, origin, packet->id, serializationSucess, L, version, packet);
+	    sessionType, origin, version, packet->id, serializationSucess, L, version, packet);
 
 	return ok && serializationSucess;
 }

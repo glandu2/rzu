@@ -33,13 +33,16 @@ bool PacketFilter::onServerPacket(const TS_MESSAGE* packet) {
 	if(serverType != ST_Game)
 		return true;
 
-	switch(packet->id) {
-		case_packet_is(TS_SC_LOGIN_RESULT)
-		    packet->process(this, &PacketFilter::onLoginResultMessage, server->getPacketVersion());
-		break;
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::GameClient, SessionPacketOrigin::Server, server->getPacketVersion());
+	switch(packetType) {
+		case TS_SC_LOGIN_RESULT::packetID:
+			packet->process(this, &PacketFilter::onLoginResultMessage, server->getPacketVersion());
+			break;
 
-		case_packet_is(TS_SC_ENTER) packet->process(this, &PacketFilter::onEnterMessage, server->getPacketVersion());
-		break;
+		case TS_SC_ENTER::packetID:
+			packet->process(this, &PacketFilter::onEnterMessage, server->getPacketVersion());
+			break;
 
 		case TS_SC_ATTACK_EVENT::packetID:
 			packet->process(this, &PacketFilter::onAttackEventMessage, server->getPacketVersion());
