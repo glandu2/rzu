@@ -87,14 +87,15 @@ void AuctionWorker::onAuctionSearchTimer() {
 	}
 }
 
-void AuctionWorker::onAuctionSearchResult(const TS_SC_AUCTION_SEARCH* packet, uint32_t epic) {
+void AuctionWorker::onAuctionSearchResult(const TS_SC_AUCTION_SEARCH_FLAT* packet, uint32_t epic) {
 	auctionSearchTimer.stop();
 	auctionDelayTimer.start(this, &AuctionWorker::onAuctionTimer, CONFIG_GET()->client.auctionSearchDelay.get(), 0);
 
 	if(request) {
-		const int auctionInfoSize = (packet->size - sizeof(TS_SC_AUCTION_SEARCH)) / 40;
+		const int auctionInfoSize = (packet->size - sizeof(TS_SC_AUCTION_SEARCH_FLAT)) / 40;
 		for(int i = 0; i < packet->auction_info_count; i++) {
-			const TS_AUCTION_INFO* auctionInfo = (const TS_AUCTION_INFO*) &packet->auctionInfos[auctionInfoSize * i];
+			const TS_AUCTION_INFO_FLAT* auctionInfo =
+			    (const TS_AUCTION_INFO_FLAT*) &packet->auctionInfos[auctionInfoSize * i];
 			auctionManager->addAuctionInfo(
 			    request.get(), auctionInfo->uid, epic, (const uint8_t*) auctionInfo, auctionInfoSize);
 		}
