@@ -51,7 +51,9 @@ EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 }
 
 EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
-	switch(packet->id) {
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::AuthClient, SessionPacketOrigin::Client, packetVersion);
+	switch(packetType) {
 		case TS_CA_VERSION::packetID:
 			onVersion(static_cast<const TS_CA_VERSION*>(packet));
 			break;
