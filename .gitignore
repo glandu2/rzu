@@ -8,6 +8,7 @@ bin*/
 obj*/
 internal*/
 .kdev4/
+.clangd/
 
 *.ilk
 *.exe
