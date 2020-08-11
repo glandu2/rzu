@@ -78,6 +78,7 @@ bool PacketConverterFilter::convertPacketAndSend(SessionType sessionType,
 		bool packetProcessed =
 		    processPacket<SendPacketFunctor>(sessionType,
 		                                     isServerMsg ? SessionPacketOrigin::Server : SessionPacketOrigin::Client,
+		                                     version,
 		                                     packet->id,
 		                                     packetNeedToBeForwarded,
 		                                     source,

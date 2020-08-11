@@ -19,6 +19,7 @@ AuthSession::AuthSession(GameSession* gameSession,
       password(password),
       serverIdx(serverIdx),
       delayTime(delayTime),
+      nextDelay(delayTime.get()),
       disconnectRequested(false) {}
 
 void AuthSession::connect() {
@@ -27,7 +28,7 @@ void AuthSession::connect() {
 }
 
 void AuthSession::delayedConnect() {
-	int delay = delayTime.get();
+	int delay = nextDelay;
 	if(delay > 0) {
 		log(LL_Info, "Will connect to auth in %dms\n", delay);
 		delayRecoTimer.start(this, &AuthSession::onDelayRecoExpired, delay, 0);
@@ -52,9 +53,18 @@ void AuthSession::onDelayRecoExpired() {
 
 void AuthSession::onAuthDisconnected(bool causedByRemote) {
 	if(disconnectRequested == false) {
-		if(causedByRemote)
+		if(causedByRemote) {
 			log(LL_Error, "Unexpected disconnection from Auth\n");
+		} else {
+			nextDelay = delayTime.get();
+		}
+
 		delayedConnect();
+
+		// In case of disconnection by server, increase the reconnection delay in case of repeated kicks
+		if(causedByRemote && nextDelay < 600 * 1000) {
+			nextDelay *= 2;
+		}
 	} else {
 		log(LL_Info, "Disconnected from auth by request\n");
 		if(gameSession->getState() == Stream::UnconnectedState)
@@ -118,9 +128,18 @@ void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t 
 
 void AuthSession::onGameDisconnected(bool causedByRemote) {
 	if(disconnectRequested == false) {
-		if(causedByRemote)
+		if(causedByRemote) {
 			log(LL_Error, "Unexpected disconnection from GS\n");
+		} else {
+			nextDelay = delayTime.get();
+		}
+
 		delayedConnect();
+
+		// In case of disconnection by server, increase the reconnection delay in case of repeated kicks
+		if(causedByRemote && nextDelay < 600 * 1000) {
+			nextDelay *= 2;
+		}
 	} else {
 		log(LL_Info, "Disconnected from GS by request\n");
 		if(getState() == Stream::UnconnectedState)

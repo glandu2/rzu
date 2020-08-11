@@ -14,12 +14,14 @@ namespace GameServer {
 LobbyHandler::LobbyHandler(ClientSession* session) : ConnectionHandler(session), charactersPopulated(false) {}
 
 void LobbyHandler::onPacketReceived(const TS_MESSAGE* packet) {
-	switch(packet->id) {
-		case_packet_is(TS_CS_CHARACTER_LIST)
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::GameClient, SessionPacketOrigin::Client, session->getVersion());
+	switch(packetType) {
+		case TS_CS_CHARACTER_LIST::packetID:
 		    packet->process(this, &LobbyHandler::onCharacterListQuery, session->getVersion());
 		break;
 
-		case_packet_is(TS_CS_LOGIN) packet->process(this, &LobbyHandler::onCharacterLogin, session->getVersion());
+		case TS_CS_LOGIN::packetID: packet->process(this, &LobbyHandler::onCharacterLogin, session->getVersion());
 		break;
 
 		case TS_CS_CHECK_CHARACTER_NAME::packetID:

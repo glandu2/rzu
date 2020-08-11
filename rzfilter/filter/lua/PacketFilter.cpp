@@ -95,7 +95,8 @@ int LuaEndpointMetaTable::sendPacket(lua_State* L) {
 	else
 		origin = SessionPacketOrigin::Server;
 
-	if(!processPacket<SendPacketFromLuaCallback>(sessionType, origin, packetId, ok, L, endpoint)) {
+	if(!processPacket<SendPacketFromLuaCallback>(
+	       sessionType, origin, endpoint->getPacketVersion(), packetId, ok, L, endpoint)) {
 		luaL_error(L,
 		           "Packet id unknown: %d for session type %s and origin %s\n",
 		           packetId,
@@ -486,7 +487,7 @@ bool PacketFilter::pushPacket(lua_State* L, const TS_MESSAGE* packet, int versio
 		origin = SessionPacketOrigin::Client;
 
 	ok = processPacket<LuaSerializePackerCallback>(
-	    sessionType, origin, packet->id, serializationSucess, L, version, packet);
+	    sessionType, origin, version, packet->id, serializationSucess, L, version, packet);
 
 	return ok && serializationSucess;
 }

@@ -69,7 +69,9 @@ void ClientSession::onAccountLoginResult(uint16_t result,
 
 EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
 	if(accountId == UINT32_MAX) {
-		switch(packet->id) {
+		packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+		    packet->id, SessionType::GameClient, SessionPacketOrigin::Client, packetVersion);
+		switch(packetType) {
 			case TS_CS_ACCOUNT_WITH_AUTH::packetID:
 				packet->process(this, &ClientSession::onAccountWithAuth, packetVersion);
 				break;

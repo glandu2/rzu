@@ -40,7 +40,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
                                                        IFilterEndpoint* server,
                                                        const TS_MESSAGE* packet,
                                                        bool) {
-	if(packet->id == TS_CA_VERSION::packetID) {
+	if(packet->id == TS_CA_VERSION::getId(client->getPacketVersion())) {
 		TS_CA_VERSION pkt;
 		if(packet->process(pkt, client->getPacketVersion())) {
 			// Don't overwrite version if it is a request string and not a version
@@ -57,7 +57,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 
 			server->sendPacket(pkt);
 		}
-	} else if(packet->id == TS_CA_RSA_PUBLIC_KEY::packetID) {
+	} else if(packet->id == TS_CA_RSA_PUBLIC_KEY::getId(client->getPacketVersion())) {
 		TS_CA_RSA_PUBLIC_KEY pkt;
 		if(packet->process(pkt, client->getPacketVersion())) {
 			RsaCipher clientRsaCipher;
@@ -76,7 +76,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		} else {
 			return true;
 		}
-	} else if(packet->id == TS_CA_ACCOUNT::packetID) {
+	} else if(packet->id == TS_CA_ACCOUNT::getId(client->getPacketVersion())) {
 		TS_CA_ACCOUNT pkt;
 		std::vector<uint8_t> plainPassword;
 
@@ -123,7 +123,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		} else {
 			return true;
 		}
-	} else if(packet->id == TS_CA_IMBC_ACCOUNT::packetID) {
+	} else if(packet->id == TS_CA_IMBC_ACCOUNT::getId(client->getPacketVersion())) {
 		TS_CA_IMBC_ACCOUNT pkt;
 		std::vector<uint8_t> plainPassword;
 
@@ -161,7 +161,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		} else {
 			return true;
 		}
-	} else if(packet->id == TS_AC_AES_KEY_IV::packetID) {
+	} else if(packet->id == TS_AC_AES_KEY_IV::getId(server->getPacketVersion())) {
 		TS_AC_AES_KEY_IV pkt;
 		if(packet->process(pkt, server->getPacketVersion())) {
 			if(account.useImbc) {
@@ -215,10 +215,10 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		} else {
 			return true;
 		}
-	} else if(packet->id == TS_AC_ACCOUNT_NAME::packetID) {
+	} else if(packet->id == TS_AC_ACCOUNT_NAME::getId(client->getPacketVersion())) {
 		if(client->getPacketVersion() >= EPIC_9_4)
 			return true;
-	} else if(packet->id == TS_AC_SELECT_SERVER::packetID) {
+	} else if(packet->id == TS_AC_SELECT_SERVER::getId(client->getPacketVersion())) {
 		TS_AC_SELECT_SERVER pkt;
 		uint64_t otp;
 
@@ -262,7 +262,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		} else {
 			return true;
 		}
-	} else if(packet->id == TS_AC_RESULT_WITH_STRING::packetID) {
+	} else if(packet->id == TS_AC_RESULT_WITH_STRING::getId(client->getPacketVersion())) {
 		TS_AC_RESULT_WITH_STRING pkt;
 		if(packet->process(pkt, server->getPacketVersion())) {
 			if(client->getPacketVersion() >= EPIC_8_1) {
@@ -306,7 +306,7 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 					pkt.szVersion = "20180117";
 				else if(target->getPacketVersion() <= EPIC_9_5_3)
 					pkt.szVersion = "20181211";
-				else if(target->getPacketVersion() <= EPIC_9_6)
+				else if(target->getPacketVersion() <= EPIC_9_6_2)
 					pkt.szVersion = "20190102";
 				else
 					pkt.szVersion = GlobalCoreConfig::get()->client.gameVersion;
@@ -358,9 +358,9 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 		} else {
 			return true;
 		}
-	} else if(packet->id == TS_CS_CHECK_ILLEGAL_USER::packetID) {
+	} else if(packet->id == TS_CS_CHECK_ILLEGAL_USER::getId(version)) {
 		return false;
-	} else if(packet->id == TS_SC_STATE::packetID) {
+	} else if(packet->id == TS_SC_STATE::getId(version)) {
 		TS_SC_STATE pkt;
 		if(packet->process(pkt, version)) {
 			// Epic 3 client crashes if the state code is not in db_tenacity(ascii).rdb
@@ -416,7 +416,7 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 		} else {
 			return true;
 		}
-	} else if(packet->id == TS_CS_ACCOUNT_WITH_AUTH::packetID) {
+	} else if(packet->id == TS_CS_ACCOUNT_WITH_AUTH::getId(version)) {
 		TS_CS_ACCOUNT_WITH_AUTH pkt;
 		if(packet->process(pkt, version)) {
 			Object::logStatic(

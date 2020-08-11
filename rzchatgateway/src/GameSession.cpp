@@ -43,13 +43,16 @@ void GameSession::onDisconnected(EventTag<AutoClientSession>) {
 }
 
 void GameSession::onPacketReceived(const TS_MESSAGE* packet, EventTag<AutoClientSession>) {
-	switch(packet->id) {
-		case_packet_is(TS_SC_LOGIN_RESULT);
-		packet->process(this, &GameSession::onCharacterLoginResult, packetVersion);
-		break;
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::GameClient, SessionPacketOrigin::Server, packetVersion);
+	switch(packetType) {
+		case TS_SC_LOGIN_RESULT::packetID:;
+			packet->process(this, &GameSession::onCharacterLoginResult, packetVersion);
+			break;
 
-		case_packet_is(TS_SC_ENTER) packet->process(this, &GameSession::onEnter, packetVersion);
-		break;
+		case TS_SC_ENTER::packetID:
+			packet->process(this, &GameSession::onEnter, packetVersion);
+			break;
 
 		case TS_SC_CHAT_LOCAL::packetID:
 			packet->process(this, &GameSession::onChatLocal, packetVersion);

@@ -7,19 +7,20 @@
 #include <algorithm>
 #include <time.h>
 
+#include "GameClient/TS_CS_AUCTION_SEARCH.h"
 #include "GameClient/TS_CS_CHARACTER_LIST.h"
 #include "GameClient/TS_CS_GAME_TIME.h"
 #include "GameClient/TS_CS_LOGIN.h"
 #include "GameClient/TS_CS_LOGOUT.h"
 #include "GameClient/TS_CS_REPORT.h"
 #include "GameClient/TS_CS_UPDATE.h"
+#include "GameClient/TS_SC_AUCTION_SEARCH.h"
 #include "GameClient/TS_SC_CHARACTER_LIST.h"
 #include "GameClient/TS_SC_DISCONNECT_DESC.h"
 #include "GameClient/TS_SC_GAME_TIME.h"
 #include "GameClient/TS_SC_LOGIN_RESULT.h"
 #include "GameClient/TS_SC_RESULT.h"
 #include "GameClient/TS_TIMESYNC.h"
-#include "TS_CS_AUCTION_SEARCH.h"
 #include "TS_SC_AUCTION_SEARCH.h"
 
 GameSession::GameSession(AuctionWorker* auctionWorker,
@@ -94,17 +95,19 @@ uint32_t GameSession::getGameTime() {
 }
 
 void GameSession::onGamePacketReceived(const TS_MESSAGE* packet) {
-	switch(packet->id) {
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::GameClient, SessionPacketOrigin::Server, packetVersion);
+	switch(packetType) {
 		case TS_SC_CHARACTER_LIST::packetID:
 			packet->process(this, &GameSession::onCharacterList, version.get());
 			break;
 
-			case_packet_is(TS_SC_LOGIN_RESULT)
-			    packet->process(this, &GameSession::onCharacterLoginResult, version.get());
+		case TS_SC_LOGIN_RESULT::packetID:
+			packet->process(this, &GameSession::onCharacterLoginResult, version.get());
 			break;
 
 		case TS_SC_AUCTION_SEARCH::packetID:
-			auctionWorker->onAuctionSearchResult((const TS_SC_AUCTION_SEARCH*) packet, version.get());
+			auctionWorker->onAuctionSearchResult((const TS_SC_AUCTION_SEARCH_FLAT*) packet, version.get());
 			if(shouldReconnect)
 				abortSession();
 			break;
@@ -159,7 +162,7 @@ void GameSession::onCharacterLoginResult(const TS_SC_LOGIN_RESULT* packet) {
 }
 
 void GameSession::onResult(const TS_SC_RESULT* resultPacket) {
-	if(resultPacket->request_msg_id == TS_CS_AUCTION_SEARCH::packetID) {
+	if(resultPacket->request_msg_id == TS_CS_AUCTION_SEARCH::getId(packetVersion)) {
 		auctionWorker->onAuctionSearchFailed(resultPacket->result);
 	}
 }
@@ -195,13 +198,12 @@ void GameSession::setConnected(bool connected) {
 
 void GameSession::auctionSearch(int category_id, int page) {
 	TS_CS_AUCTION_SEARCH auctionSearchPacket;
-	TS_MESSAGE::initMessage<TS_CS_AUCTION_SEARCH>(&auctionSearchPacket);
 
 	auctionSearchPacket.category_id = category_id;
 	auctionSearchPacket.sub_category_id = -1;
-	memset(auctionSearchPacket.keyword, 0, sizeof(auctionSearchPacket.keyword));
+	auctionSearchPacket.keyword.clear();
 	auctionSearchPacket.page_num = page;
 	auctionSearchPacket.is_equipable = false;
 
-	sendPacket(&auctionSearchPacket);
+	sendPacket(auctionSearchPacket);
 }

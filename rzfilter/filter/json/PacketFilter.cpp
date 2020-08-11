@@ -50,6 +50,7 @@ void PacketFilter::printPacketJson(SessionType sessionType, const TS_MESSAGE* pa
 	bool packetProcessed =
 	    processPacket<PrintPacketFunctor>(sessionType,
 	                                      isServerMsg ? SessionPacketOrigin::Server : SessionPacketOrigin::Client,
+	                                      version,
 	                                      packet->id,
 	                                      dummy,
 	                                      this,

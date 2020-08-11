@@ -45,8 +45,6 @@ public:
 	void banAddress(StreamAddress address);
 	bool isStrictForwardEnabled();
 
-	const char* getPacketName(int16_t id);
-
 	BanManager* getBanManager() { return getServer()->getBanManager(); }
 
 	void logPacket(bool toClient, const TS_MESSAGE* msg);

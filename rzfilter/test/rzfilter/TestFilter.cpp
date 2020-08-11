@@ -156,7 +156,7 @@ TEST(Filter_Test, auth_to_gs_connection) {
 
 		test.log(Object::LL_Info, "received game version packet on server side\n");
 
-		EXPECT_EQ("20190102", packet.szVersion);
+		EXPECT_EQ("20200713", packet.szVersion);
 	});
 
 	gameServer.addCallback([&](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -529,7 +529,7 @@ TEST(Filter_Test, auth_to_gs_connection_no_close_in_lua_keep_client) {
 
 		// Sending packet from the client while not having the server connected should not crash the filter
 		TS_CS_VERSION versionPacket;
-		versionPacket.szVersion = "20190102";
+		versionPacket.szVersion = "20200713";
 		RzHashReversible256::generatePayload(versionPacket);
 		gameClient.sendPacket(versionPacket, EPIC_LATEST);
 	});

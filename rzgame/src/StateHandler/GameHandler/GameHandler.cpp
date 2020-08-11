@@ -15,7 +15,9 @@ GameHandler::GameHandler(ClientSession* session, std::unique_ptr<Character> char
     : ConnectionHandler(session), character(std::move(character)) {}
 
 void GameHandler::onPacketReceived(const TS_MESSAGE* packet) {
-	switch(packet->id) {
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::GameClient, SessionPacketOrigin::Client, session->getVersion());
+	switch(packetType) {
 		case TS_TIMESYNC::packetID: {
 			TS_TIMESYNC response;
 			response.time = TimeManager::getRzTime();
@@ -35,7 +37,7 @@ void GameHandler::onPacketReceived(const TS_MESSAGE* packet) {
 			packet->process(this, &GameHandler::onPutoffItem, session->getVersion());
 			break;
 
-			case_packet_is(TS_CS_MOVE_REQUEST)
+			case TS_CS_MOVE_REQUEST::packetID:
 			    packet->process(this, &GameHandler::onMoveRequest, session->getVersion());
 			break;
 

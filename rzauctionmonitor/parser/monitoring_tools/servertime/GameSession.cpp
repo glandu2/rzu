@@ -57,9 +57,12 @@ void GameSession::waitNextGameSecond() {
 }
 
 void GameSession::onPacketReceived(const TS_MESSAGE* packet, EventTag<AutoClientSession>) {
-	switch(packet->id) {
-		case_packet_is(TS_SC_ENTER) packet->process(this, &GameSession::onEnter, packetVersion);
-		break;
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::GameClient, SessionPacketOrigin::Server, packetVersion);
+	switch(packetType) {
+		case TS_SC_ENTER::packetID:
+			packet->process(this, &GameSession::onEnter, packetVersion);
+			break;
 
 		case TS_TIMESYNC::packetID:
 			packet->process(this, &GameSession::onTimeSync, packetVersion);

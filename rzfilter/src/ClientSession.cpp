@@ -60,9 +60,11 @@ EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 }
 
 void ClientSession::logPacket(bool toClient, const TS_MESSAGE* msg) {
-	const char* packetName = ::getPacketName(msg->id,
-	                                         authMode ? SessionType::AuthClient : SessionType::GameClient,
-	                                         toClient ? SessionPacketOrigin::Server : SessionPacketOrigin::Client);
+	const char* packetName =
+	    PacketMetadata::getPacketName(msg->id,
+	                                  authMode ? SessionType::AuthClient : SessionType::GameClient,
+	                                  toClient ? SessionPacketOrigin::Server : SessionPacketOrigin::Client,
+	                                  packetVersion);
 
 	log(LL_Debug,
 	    "%s packet id: %5d, name %s, size: %d\n",

@@ -8,7 +8,7 @@
 #include <memory>
 
 class AuctionManager;
-struct TS_SC_AUCTION_SEARCH;
+struct TS_SC_AUCTION_SEARCH_FLAT;
 
 class AuctionWorker : public Object, public IListener {
 	DECLARE_CLASS(AuctionWorker)
@@ -40,7 +40,7 @@ public:
 
 	bool hasRequest() { return request.get() != nullptr; }
 	void wakeUp();
-	void onAuctionSearchResult(const TS_SC_AUCTION_SEARCH* packet, uint32_t epic);
+	void onAuctionSearchResult(const TS_SC_AUCTION_SEARCH_FLAT* packet, uint32_t epic);
 	void onAuctionSearchFailed(int resultCode);
 
 protected:
