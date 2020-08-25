@@ -43,6 +43,7 @@ public:
 
 	virtual void notifyError(int status) override;
 	virtual void notifyOutputAvailable() override;
+
 	void importState();
 	int exportState(std::string& fullFilename, AUCTION_FILE& auctionFile);
 
@@ -69,8 +70,7 @@ private:
 	P2ParseAuction parseAuctionStep;
 	P3AggregateStats aggregateStatsStep;
 	P4ComputeStats computeStatsStep;
-	P5InsertToSqlServer sendToWebServerStep;
+	P5InsertToSqlServer sendToSqlServerStep;
 	P6InsertHistoryToSqlServer sendHistoryToSqlStep;
 	P6Commit commitStep;
 };
-

@@ -29,7 +29,7 @@ AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
       auctionStateFile(auctionStateFile),
       started(false),
       scanAuctionStep(changeWaitSeconds),
-      sendToWebServerStep(),
+      sendToSqlServerStep(),
       commitStep(this) {
 	this->plug(&readAuctionStep)
 	    ->plug(&deserializeAuctionStep)
@@ -37,7 +37,7 @@ AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
 	    ->plug(&aggregateStatsStep)
 	    ->plug(&computeStatsStep)
 	    ->plug(&sendHistoryToSqlStep)
-	    ->plug(&sendToWebServerStep)
+	    ->plug(&sendToSqlServerStep)
 	    ->plug(&commitStep);
 	uv_fs_event_init(EventLoop::getLoop(), &fsEvent);
 	fsEvent.data = this;
