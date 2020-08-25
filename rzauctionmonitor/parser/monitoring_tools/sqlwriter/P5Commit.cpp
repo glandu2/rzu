@@ -15,12 +15,13 @@ void P5Commit::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 }
 
 int P5Commit::processWork(std::shared_ptr<WorkItem> workItem) {
-	PipelineState sourceData = std::move(workItem->getSource());
+	auto sources = std::move(workItem->getSources());
+	PipelineState sourceData = sources.back();
 
 	if(sourceData.fullDump.has_value()) {
 		workItem->setName(sourceData.lastFilenameParsed);
 
-		log(LL_Debug, "Saving state at file %s\n", sourceData.lastFilenameParsed.c_str());
+		log(LL_Info, "Saving state in file %s\n", sourceData.lastFilenameParsed.c_str());
 
 		return auctionPipeline->exportState(sourceData.lastFilenameParsed, sourceData.fullDump.value());
 	} else {
