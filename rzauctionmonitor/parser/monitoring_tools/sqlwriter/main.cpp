@@ -1,6 +1,7 @@
 #include "AuctionParser.h"
 #include "AuctionPipeline.h"
 #include "AuctionSQLWriter.h"
+#include "Console/ConsoleSession.h"
 #include "Core/CrashHandler.h"
 #include "Core/EventLoop.h"
 #include "Core/Log.h"
@@ -25,6 +26,7 @@ int main(int argc, char* argv[]) {
 
 	DbConnectionPool dbConnectionPool;
 	DbBindingLoader::get()->initAll(&dbConnectionPool);
+	PipelineStepMonitor::init();
 
 	ConfigInfo::get()->init(argc, argv);
 
@@ -54,6 +56,7 @@ int main(int argc, char* argv[]) {
 
 	serverManager.addServer("auction.monitor", &auctionParser, nullptr);
 
+	ConsoleServer consoleServer(&serverManager);
 	// DB_Item::createTable(&dbConnectionPool);
 	serverManager.start();
 
