@@ -122,6 +122,7 @@ private:
 
 private:
 	static void commandDumpStats(IWritableConsole* console, const std::vector<std::string>& args);
+	static void commandDumpIncrementalStats(IWritableConsole* console, const std::vector<std::string>& args);
 	static void commandResetStats(IWritableConsole* console, const std::vector<std::string>& args);
 
 private:
