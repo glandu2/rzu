@@ -28,6 +28,7 @@ class P3AggregateStats
 public:
 	P3AggregateStats();
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
+	virtual void doCancelWork(std::shared_ptr<WorkItem> item) override { work.cancel(); }
 
 private:
 	int aggregateStats(const std::vector<AUCTION_FILE>& auctions,
@@ -63,4 +64,3 @@ private:
 private:
 	BackgroundWork<P3AggregateStats, std::shared_ptr<WorkItem>> work;
 };
-

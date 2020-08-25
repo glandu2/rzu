@@ -22,6 +22,7 @@ class P2ParseAuction : public PipelineStep<std::pair<PipelineState, AUCTION_SIMP
 public:
 	P2ParseAuction();
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
+	virtual void doCancelWork(std::shared_ptr<WorkItem> item) override { work.cancel(); }
 
 	void importState(const AUCTION_FILE* auctionData);
 
@@ -41,4 +42,3 @@ private:
 	bool previousWasNewDay;
 	time_t previousTime;
 };
-

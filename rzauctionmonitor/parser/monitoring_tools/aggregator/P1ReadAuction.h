@@ -13,6 +13,7 @@ class P1ReadAuction : public PipelineStep<std::pair<std::string, std::string>,
 public:
 	P1ReadAuction();
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
+	virtual void doCancelWork(std::shared_ptr<WorkItem> item) override { work.cancel(); }
 
 private:
 	int processWork(std::shared_ptr<WorkItem> item);
