@@ -330,7 +330,7 @@ bool DB_InsertItem::createTable(DbConnectionPool* dbConnectionPool) {
 }
 
 P4InsertToSqlServer::P4InsertToSqlServer()
-    : PipelineStep<std::pair<PipelineState, AUCTION_FILE>, PipelineState>(10, 2) {}
+    : PipelineStep<std::pair<PipelineState, AUCTION_FILE>, PipelineState>(100, 10, 1) {}
 
 void P4InsertToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	std::vector<std::pair<PipelineState, AUCTION_FILE>> inputData = std::move(item->getSources());

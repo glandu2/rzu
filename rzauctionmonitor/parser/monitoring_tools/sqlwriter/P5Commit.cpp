@@ -6,7 +6,7 @@
 #include "Core/Utils.h"
 
 P5Commit::P5Commit(AuctionPipeline* auctionPipeline)
-    : PipelineStep<PipelineState, void>(10),
+    : PipelineStep<PipelineState, void>(10, 1),
       auctionPipeline(auctionPipeline),
       work(this, &P5Commit::processWork, &P5Commit::afterWork) {}
 
