@@ -21,23 +21,23 @@ struct DB_InsertItem {
 		int8_t duration_type;
 		int64_t bid_price;
 		int64_t price;
-		DbString<32> seller;
+		std::string seller;
 		int8_t bid_flag;
 
-		uint32_made_int32_t handle;
+		uint32_t handle;
 		int32_t code;
 		int64_t item_uid;
 		int64_t count;
 		int32_t ethereal_durability;
-		uint32_made_int32_t endurance;
+		uint32_t endurance;
 		uint8_t enhance;
 		uint8_t level;
 		uint16_t enhance_chance;
-		uint32_made_int32_t flag;
+		uint32_t flag;
 		int32_t socket[4];
-		uint32_made_int32_t awaken_option_value[5];
+		uint32_t awaken_option_value[5];
 		int32_t awaken_option_data[5];
-		uint32_made_int32_t random_type[10];
+		uint32_t random_type[10];
 		int64_t random_value_1[10];
 		int64_t random_value_2[10];
 		int32_t remain_time;
@@ -46,8 +46,8 @@ struct DB_InsertItem {
 		int32_t elemental_effect_attack_point;
 		int32_t elemental_effect_magic_point;
 		int32_t appearance_code;
-		uint32_made_int32_t summon_code;
-		uint32_made_int32_t item_effect_id;
+		uint32_t summon_code;
+		uint32_t item_effect_id;
 	};
 
 	struct Output {};
@@ -147,7 +147,7 @@ template<> void DbQueryJob<DB_InsertItem>::init(DbConnectionPool* dbConnectionPo
 */
 	createBinding(dbConnectionPool,
 	              DB_InsertItem::connectionString,
-	              "{ CALL add_auctions2 (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+	              "{ CALL add_auctions (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
 	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
 	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }",
 	              DbQueryBinding::EM_NoRow);
@@ -323,7 +323,7 @@ bool DB_InsertItem::addAuction(std::vector<DB_InsertItem::Input>& auctions, cons
 
 P6InsertHistoryToSqlServer::P6InsertHistoryToSqlServer()
     : PipelineStep<std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>,
-                   std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>>(3, 3) {}
+                   std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>>(3, 1) {}
 
 void P6InsertHistoryToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>> inputData = std::move(item->getSource());

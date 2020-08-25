@@ -111,8 +111,10 @@ void AuctionPipeline::importState() {
 		    aggregationStateFile.c_str(),
 		    (int) aggregationState.auctionData.auctions.size());
 
+		log(LL_Info, "Last auctions file was %s\n", aggregationState.lastParsedFile.c_str());
+
 		lastQueuedFile = aggregationState.lastParsedFile;
-		parseAuctionStep.importState(&aggregationState.auctionData);
+		parseAuctionStep.importState(aggregationState.lastParsedFile, &aggregationState.auctionData);
 	} else {
 		log(LL_Error, "Cant read state file %s\n", aggregationStateFile.c_str());
 	}
@@ -192,8 +194,8 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 	while(UV_EOF != uv_fs_scandir_next(req, &dent)) {
 		if(dent.type != UV_DIRENT_DIR && strcmp(thisInstance->lastQueuedFile.c_str(), dent.name) < 0)
 			orderedFiles.push_back(dent.name);
-		if(orderedFiles.size() > 10000)
-			break;
+		//		if(orderedFiles.size() > 10000)
+		//			break;
 	}
 
 	std::sort(orderedFiles.begin(), orderedFiles.end(), [](const std::string& a, const std::string& b) {

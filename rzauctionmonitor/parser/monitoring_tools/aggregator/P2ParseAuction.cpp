@@ -12,22 +12,27 @@ P2ParseAuction::P2ParseAuction()
       auctionWriter(19),
       currentDate(-1),
       previousWasNewDay(false),
-      previousTime(0) {}
+      previousTime(0),
+      skipNextDay(false) {}
 
 void P2ParseAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	work.run(item);
 }
 
-void P2ParseAuction::importState(const AUCTION_FILE* auctionData) {
+void P2ParseAuction::importState(const std::string& dumpedFile, const AUCTION_FILE* auctionData) {
 	auctionWriter.importDump(auctionData);
 	aggregatedDumps.clear();
 	aggregatedDumps.emplace_back(*auctionData);
+	currentDate = auctionData->header.categories.front().beginTime;
+	firstFileOfDay = dumpedFile;
+	previousWasNewDay = false;
+	skipNextDay = true;
 }
 
 int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 	auto sources = std::move(item->getSources());
 	for(std::pair<PipelineState, AUCTION_SIMPLE_FILE>& input : sources) {
-		const std::string& filename = input.first.lastFilenameParsed;
+		const std::string& filename = input.first.associatedFilename;
 		time_t dumpBeginTime;
 		bool isFull;
 
@@ -36,7 +41,7 @@ int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 
 		isFull = AuctionFile::isFileFullType(input.second, &auctionWriter);
 
-		log(LL_Debug, "Processing file %s, detected type: %s\n", filename.c_str(), isFull ? "full" : "diff");
+		log(LL_Info, "Processing file %s, detected type: %s\n", filename.c_str(), isFull ? "full" : "diff");
 
 		for(size_t i = 0; i < input.second.header.categories.size(); i++) {
 			const AUCTION_CATEGORY_INFO& category = input.second.header.categories[i];
@@ -56,6 +61,8 @@ int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 
 		dumpBeginTime = auctionWriter.getCategoryTimeManager().getEstimatedPreviousCategoryBeginTime(0);
 
+		log(LL_Debug, "File %s dumpBeginTime: %lld\n", filename.c_str(), dumpBeginTime);
+
 		if(dumpBeginTime == 0) {
 			log(LL_Warning, "Begin time of first category is 0 after parsing file %s\n", filename.c_str());
 			dumpBeginTime = currentDate;
@@ -64,20 +71,33 @@ int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 		AUCTION_FILE auctionFile;
 		// full dump if its a new day
 		if(previousWasNewDay) {
-			input.first.timestamp = previousTime;
-			addResult(item, std::make_pair(std::move(input.first), std::move(aggregatedDumps)));
+			if(!skipNextDay) {
+				PipelineState pipelineState;
+				pipelineState.timestamp = previousTime;
+				pipelineState.associatedFilename = firstFileOfDay;
+				addResult(item, std::make_pair(std::move(pipelineState), std::move(aggregatedDumps)));
+			} else {
+				skipNextDay = false;
+			}
 
 			aggregatedDumps.clear();
 		}
 
 		if(aggregatedDumps.empty()) {
 			aggregatedDumps.emplace_back(auctionWriter.exportDump(true, true));
+			firstFileOfDay = input.first.associatedFilename;
 		} else {
 			aggregatedDumps.emplace_back(auctionWriter.exportDump(false, true));
 		}
 
 		previousTime = currentDate;
 		previousWasNewDay = isNewDay(filename, dumpBeginTime);
+		if(previousWasNewDay) {
+			log(LL_Info,
+			    "Last file of day parsed, previousTime: %lld, dumpBeginTime: %lld\n",
+			    previousTime,
+			    dumpBeginTime);
+		}
 	}
 
 	return 0;

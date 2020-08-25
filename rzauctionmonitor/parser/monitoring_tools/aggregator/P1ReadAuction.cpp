@@ -26,7 +26,7 @@ int P1ReadAuction::processWork(std::shared_ptr<WorkItem> item) {
 
 		if(!data.empty()) {
 			PipelineState state;
-			state.lastFilenameParsed = std::move(filename);
+			state.associatedFilename = std::move(filename);
 			addResult(item, std::make_pair(std::move(state), std::move(data)));
 		}
 	}

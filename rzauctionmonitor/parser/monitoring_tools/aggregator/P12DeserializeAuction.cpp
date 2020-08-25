@@ -12,7 +12,7 @@ void P12DeserializeAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item)
 int P12DeserializeAuction::processWork(std::shared_ptr<WorkItem> item) {
 	auto sources = std::move(item->getSources());
 	for(std::pair<PipelineState, std::vector<AuctionWriter::file_data_byte>>& input : sources) {
-		const std::string& filename = input.first.lastFilenameParsed;
+		const std::string& filename = input.first.associatedFilename;
 		const std::vector<AuctionWriter::file_data_byte>& data = input.second;
 		int version;
 		AuctionFileFormat fileFormat;

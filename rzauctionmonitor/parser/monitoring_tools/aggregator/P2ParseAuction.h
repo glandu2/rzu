@@ -24,7 +24,7 @@ public:
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
 	virtual void doCancelWork(std::shared_ptr<WorkItem> item) override { work.cancel(); }
 
-	void importState(const AUCTION_FILE* auctionData);
+	void importState(const std::string& dumpedFile, const AUCTION_FILE* auctionData);
 
 private:
 	int processWork(std::shared_ptr<WorkItem> item);
@@ -39,6 +39,8 @@ private:
 	AuctionComplexDiffWriter auctionWriter;
 	time_t currentDate;
 	std::vector<AUCTION_FILE> aggregatedDumps;
+	std::string firstFileOfDay;
 	bool previousWasNewDay;
 	time_t previousTime;
+	bool skipNextDay;
 };
