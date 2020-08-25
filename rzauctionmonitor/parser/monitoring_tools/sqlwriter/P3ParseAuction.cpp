@@ -28,7 +28,7 @@ int P3ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 
 		isFull = AuctionFile::isFileFullType(input.second, &auctionWriter);
 
-		log(LL_Debug,
+		log(LL_Info,
 		    "Processing file %s, detected type: %s\n",
 		    input.first.lastFilenameParsed.c_str(),
 		    isFull ? "full" : "diff");
@@ -60,10 +60,9 @@ int P3ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 
 		if(auctionDump.auctions.empty()) {
 			log(LL_Debug, "No new auction to parse\n");
-			return 0;
+		} else {
+			addResult(item, std::make_pair(std::move(input.first), std::move(auctionDump)));
 		}
-
-		addResult(item, std::make_pair(std::move(input.first), std::move(auctionDump)));
 	}
 
 	return 0;
