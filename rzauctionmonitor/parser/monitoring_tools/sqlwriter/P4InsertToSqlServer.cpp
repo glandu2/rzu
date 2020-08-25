@@ -1,4 +1,5 @@
 #include "P4InsertToSqlServer.h"
+#include "AuctionComplexDiffWriter.h"
 #include "AuctionSQLWriter.h"
 #include "Database/DbConnection.h"
 #include "Database/DbConnectionPool.h"
@@ -50,11 +51,11 @@ struct DB_InsertItem {
 
 	struct Output {};
 
-	static void addAuction(std::vector<DB_InsertItem::Input>& auctions, const AUCTION_INFO& auctionInfo);
+	static bool addAuction(std::vector<DB_InsertItem::Input>& auctions, const AUCTION_INFO& auctionInfo);
 	static bool createTable(DbConnectionPool* dbConnectionPool);
 
 protected:
-	static void fillItemInfo(Input& input, uint32_t epic, const std::vector<uint8_t>& auctionInfo);
+	static bool fillItemInfo(Input& input, uint32_t epic, const std::vector<uint8_t>& auctionInfo);
 };
 
 template<> void DbQueryJob<DB_InsertItem>::init(DbConnectionPool* dbConnectionPool) {
@@ -142,16 +143,24 @@ template<> void DbQueryJob<DB_InsertItem>::init(DbConnectionPool* dbConnectionPo
 }
 DECLARE_DB_BINDING(DB_InsertItem, "db_auctions");
 
-void DB_InsertItem::fillItemInfo(DB_InsertItem::Input& input, uint32_t epic, const std::vector<uint8_t>& data) {
+bool DB_InsertItem::fillItemInfo(DB_InsertItem::Input& input, uint32_t epic, const std::vector<uint8_t>& data) {
 	TS_SEARCHED_AUCTION_INFO item;
+
+	if(data.empty()) {
+		Object::logStatic(Object::LL_Warning, "DB_Item", "auctions uid %llu: no item data\n", input.uid);
+		return true;
+	}
+
 	MessageBuffer structBuffer(data.data(), data.size(), epic);
 
 	item.deserialize(&structBuffer);
 	if(!structBuffer.checkFinalSize()) {
 		Object::logStatic(Object::LL_Error, "DB_Item", "Invalid item data, can't deserialize\n");
+		return false;
 	} else {
 		if(structBuffer.getParsedSize() != data.size()) {
 			Object::logStatic(Object::LL_Warning, "DB_Item", "Invalid item data size, can't deserialize safely\n");
+			return false;
 		}
 
 		static_assert(sizeof(input.socket) == sizeof(item.auction_details.item_info.socket), "wrong size: socket");
@@ -195,9 +204,11 @@ void DB_InsertItem::fillItemInfo(DB_InsertItem::Input& input, uint32_t epic, con
 		input.summon_code = item.auction_details.item_info.summon_code;
 		input.item_effect_id = item.auction_details.item_info.item_effect_id;
 	}
+
+	return true;
 }
 
-void DB_InsertItem::addAuction(std::vector<DB_InsertItem::Input>& auctions, const AUCTION_INFO& auctionInfo) {
+bool DB_InsertItem::addAuction(std::vector<DB_InsertItem::Input>& auctions, const AUCTION_INFO& auctionInfo) {
 	DB_InsertItem::Input input = {};
 
 	input.uid = auctionInfo.uid;
@@ -214,9 +225,14 @@ void DB_InsertItem::addAuction(std::vector<DB_InsertItem::Input>& auctions, cons
 	input.seller = auctionInfo.seller;
 	input.bid_flag = auctionInfo.bid_flag;
 
-	fillItemInfo(input, auctionInfo.epic, auctionInfo.data);
+	uint32_t epic = AuctionComplexDiffWriter::parseEpic(auctionInfo.epic, auctionInfo.time);
+	if(!fillItemInfo(input, epic, auctionInfo.data)) {
+		return false;
+	}
 
 	auctions.push_back(input);
+
+	return true;
 }
 
 bool DB_InsertItem::createTable(DbConnectionPool* dbConnectionPool) {
@@ -326,14 +342,25 @@ void P4InsertToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	                                 [](size_t sum, const std::pair<PipelineState, AUCTION_FILE>& input) {
 		                                 return input.second.auctions.size() + sum;
 	                                 }));
+
+	if(!inputData.empty())
+		item->setName(inputData.front().first.lastFilenameParsed);
+
 	for(auto& input : inputData) {
 		for(size_t i = 0; i < input.second.auctions.size(); i++) {
 			const AUCTION_INFO& auctionInfo = input.second.auctions[i];
-			DB_InsertItem::addAuction(dbInputs, auctionInfo);
+			if(!DB_InsertItem::addAuction(dbInputs, auctionInfo)) {
+				log(LL_Error,
+				    "%s: Failed to prepare data for saving in database\n",
+				    input.first.lastFilenameParsed.c_str());
+				workDone(item, EBADMSG);
+				return;
+			}
 		}
-
 		addResult(item, std::move(input.first));
 	}
+
+	log(LL_Info, "Saving %llu auctions in database\n", dbInputs.size());
 
 	dbQuery.executeDbQuery<DB_InsertItem>([this, item](auto, int status) { workDone(item, status); }, dbInputs);
 }
