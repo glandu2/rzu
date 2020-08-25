@@ -39,18 +39,18 @@ int main(int argc, char* argv[]) {
 	ConfigInfo::get()->dump();
 
 	ServersManager serverManager;
-	SqlWriter sqlWriter;
-	AuctionParser auctionParser(&sqlWriter,
-	                            CONFIG_GET()->input.auctionsPath,
-	                            CONFIG_GET()->input.changeWaitSeconds,
-	                            CONFIG_GET()->states.statesPath,
-	                            CONFIG_GET()->states.auctionStateFile,
-	                            CONFIG_GET()->states.aggregationStateFile);
+	//	SqlWriter sqlWriter;
+	//	AuctionParser auctionParser(&sqlWriter,
+	//	                            CONFIG_GET()->input.auctionsPath,
+	//	                            CONFIG_GET()->input.changeWaitSeconds,
+	//	                            CONFIG_GET()->states.statesPath,
+	//	                            CONFIG_GET()->states.auctionStateFile,
+	//	                            CONFIG_GET()->states.aggregationStateFile);
 
-	//	AuctionPipeline auctionParser(CONFIG_GET()->input.auctionsPath,
-	//	                              CONFIG_GET()->input.changeWaitSeconds,
-	//	                              CONFIG_GET()->states.statesPath,
-	//	                              CONFIG_GET()->states.auctionStateFile);
+	AuctionPipeline auctionParser(CONFIG_GET()->input.auctionsPath,
+	                              CONFIG_GET()->input.changeWaitSeconds,
+	                              CONFIG_GET()->states.statesPath,
+	                              CONFIG_GET()->states.auctionStateFile);
 
 	serverManager.addServer("auction.monitor", &auctionParser, nullptr);
 
