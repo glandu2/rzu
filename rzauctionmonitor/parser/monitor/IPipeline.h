@@ -97,6 +97,8 @@ public:
 protected:
 	virtual size_t getInputQueueSize() = 0;
 	virtual size_t getBlockSize() = 0;
+	virtual size_t getMaxInputQueueSize() = 0;
+	virtual size_t getMaxParallelWork() = 0;
 	float getActiveToIdleTimeRatio();
 	float getItemPerSecond();
 	void resetStats();
@@ -140,7 +142,9 @@ public:
 	PipelineStepBase& operator=(const PipelineStepBase&) = delete;
 
 	virtual size_t getInputQueueSize() { return inputQueue.size(); }
+	virtual size_t getMaxInputQueueSize() { return maxSize; }
 	virtual size_t getBlockSize() { return maxBlockSize; }
+	virtual size_t getMaxParallelWork() { return maxParallelWork; }
 
 	virtual int64_t inputAvailable() override {
 		return static_cast<int64_t>(maxSize) - static_cast<int64_t>(getRunningWorkNumber()) -
