@@ -75,7 +75,7 @@ void AuctionPipeline::importState() {
 
 	aggregationStateFile = statesPath.get() + "/" + aggregationStateFile;
 
-	std::vector<uint8_t> data;
+	std::vector<AuctionWriter::file_data_byte> data;
 
 	if(AuctionWriter::readAuctionDataFromFile(aggregationStateFile, data)) {
 		PIPELINE_STATE aggregationState;

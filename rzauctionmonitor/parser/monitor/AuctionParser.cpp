@@ -132,7 +132,7 @@ void AuctionParser::onScandir(uv_fs_t* req) {
 }
 
 bool AuctionParser::parseFile(std::string fullFilename) {
-	std::vector<uint8_t> data;
+	std::vector<AuctionWriter::file_data_byte> data;
 	int version;
 	AuctionFileFormat fileFormat;
 	AuctionFile auctionFile;
@@ -190,7 +190,7 @@ bool AuctionParser::importState() {
 	if(!auctionStateFile.empty()) {
 		auctionStateFile = statesPath.get() + "/" + auctionStateFile;
 
-		std::vector<uint8_t> data;
+		std::vector<AuctionWriter::file_data_byte> data;
 
 		if(AuctionWriter::readAuctionDataFromFile(auctionStateFile, data)) {
 			AUCTION_FILE auctionFileData;

@@ -1,9 +1,8 @@
 #include "P12DeserializeAuction.h"
-#include "AuctionWriter.h"
 
 P12DeserializeAuction::P12DeserializeAuction()
-    : PipelineStep<std::pair<PipelineState, std::vector<uint8_t>>, std::pair<PipelineState, AUCTION_SIMPLE_FILE>>(
-          10, 1, 1),
+    : PipelineStep<std::pair<PipelineState, std::vector<AuctionWriter::file_data_byte>>,
+                   std::pair<PipelineState, AUCTION_SIMPLE_FILE>>(10, 1, 1),
       work(this, &P12DeserializeAuction::processWork, &P12DeserializeAuction::afterWork) {}
 
 void P12DeserializeAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
@@ -12,9 +11,9 @@ void P12DeserializeAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item)
 
 int P12DeserializeAuction::processWork(std::shared_ptr<WorkItem> item) {
 	auto sources = std::move(item->getSources());
-	for(std::pair<PipelineState, std::vector<uint8_t>>& input : sources) {
+	for(std::pair<PipelineState, std::vector<AuctionWriter::file_data_byte>>& input : sources) {
 		const std::string& filename = input.first.lastFilenameParsed;
-		const std::vector<uint8_t>& data = input.second;
+		const std::vector<AuctionWriter::file_data_byte>& data = input.second;
 		int version;
 		AuctionFileFormat fileFormat;
 		AUCTION_SIMPLE_FILE auctionFile;

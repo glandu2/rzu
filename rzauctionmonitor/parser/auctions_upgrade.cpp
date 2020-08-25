@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
 	if(!stateFileName.empty()) {
 		Object::logStatic(Object::LL_Info, "main", "Loading state file %s\n", stateFileName.c_str());
 
-		std::vector<uint8_t> data;
+		std::vector<AuctionWriter::file_data_byte> data;
 
 		if(AuctionWriter::readAuctionDataFromFile(stateFileName, data)) {
 			AUCTION_FILE auctionFileData;
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 
 		Object::logStatic(Object::LL_Info, "main", "Reading file \"%s\"\n", filename);
 
-		std::vector<uint8_t> data;
+		std::vector<AuctionWriter::file_data_byte> data;
 		int version;
 		AuctionFileFormat fileFormat;
 		AuctionFile auctionFile;

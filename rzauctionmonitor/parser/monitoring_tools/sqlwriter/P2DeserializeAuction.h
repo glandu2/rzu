@@ -2,12 +2,13 @@
 
 #include "AuctionParser.h"
 #include "AuctionSimpleFile.h"
+#include "AuctionWriter.h"
 #include "Core/BackgroundWork.h"
 #include "Core/Object.h"
 #include "IPipeline.h"
 #include "PipelineState.h"
 
-class P2DeserializeAuction : public PipelineStep<std::pair<PipelineState, std::vector<uint8_t>>,
+class P2DeserializeAuction : public PipelineStep<std::pair<PipelineState, std::vector<AuctionWriter::file_data_byte>>,
                                                  std::pair<PipelineState, AUCTION_SIMPLE_FILE>> {
 	DECLARE_CLASSNAME(P2DeserializeAuction, 0)
 public:
@@ -21,4 +22,3 @@ private:
 private:
 	BackgroundWork<P2DeserializeAuction, std::shared_ptr<WorkItem>> work;
 };
-
