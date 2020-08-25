@@ -24,9 +24,11 @@ int P1ReadAuction::processWork(std::shared_ptr<WorkItem> item) {
 			return EIO;
 		}
 
-		PipelineState state;
-		state.lastFilenameParsed = std::move(filename);
-		addResult(item, std::make_pair(std::move(state), std::move(data)));
+		if(!data.empty()) {
+			PipelineState state;
+			state.lastFilenameParsed = std::move(filename);
+			addResult(item, std::make_pair(std::move(state), std::move(data)));
+		}
 	}
 
 	return 0;
