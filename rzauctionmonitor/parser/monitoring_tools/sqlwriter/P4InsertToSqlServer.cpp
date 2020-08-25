@@ -1,4 +1,5 @@
 #include "P4InsertToSqlServer.h"
+#include "AuctionSQLWriter.h"
 #include "Database/DbConnection.h"
 #include "Database/DbConnectionPool.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
@@ -7,7 +8,6 @@
 #include <numeric>
 
 struct DB_InsertItem {
-	static cval<std::string>& connectionString;
 	struct Input {
 		int32_t uid;
 		int16_t diff_flag;
@@ -57,12 +57,9 @@ protected:
 	static void fillItemInfo(Input& input, uint32_t epic, const std::vector<uint8_t>& auctionInfo);
 };
 
-cval<std::string>& DB_InsertItem::connectionString =
-    CFG_CREATE("connectionstring", "DRIVER=SQLite3 ODBC Driver;Database=auctions.sqlite3;");
-
 template<> void DbQueryJob<DB_InsertItem>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-	              DB_InsertItem::connectionString,
+	              DB_Item::connectionString,
 	              "{ CALL add_auctions (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
 	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
 	              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }",
@@ -223,7 +220,7 @@ void DB_InsertItem::addAuction(std::vector<DB_InsertItem::Input>& auctions, cons
 }
 
 bool DB_InsertItem::createTable(DbConnectionPool* dbConnectionPool) {
-	DbConnection* connection = dbConnectionPool->getConnection(DB_InsertItem::connectionString.get().c_str());
+	DbConnection* connection = dbConnectionPool->getConnection(DB_Item::connectionString.get().c_str());
 	if(!connection) {
 		Object::logStatic(Object::LL_Error, "DB_Item", "Failed to open DB connection\n");
 		return false;
