@@ -65,7 +65,8 @@ bool AuctionPipeline::isStarted() {
 }
 
 void AuctionPipeline::notifyError(int status) {
-	ServersManager::getInstance()->forceStop();
+	if(started)
+		ServersManager::getInstance()->forceStop();
 }
 
 void AuctionPipeline::notifyOutputAvailable() {}
