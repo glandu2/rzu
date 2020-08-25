@@ -25,6 +25,5 @@ private:
 	BackgroundWork<P3ParseAuction, std::shared_ptr<WorkItem>> work;
 
 	AuctionComplexDiffWriter auctionWriter;
-	size_t fileNumberProcessedSinceLastCommit;
+	time_t timeSinceLastCommit;
 };
-
