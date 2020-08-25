@@ -16,7 +16,7 @@ public:
 	virtual ~IPipelineConsumer() {}
 	virtual void queue(T data) = 0;
 	virtual void cancel() = 0;
-	virtual size_t inputAvailable() = 0;
+	virtual int64_t inputAvailable() = 0;
 
 	virtual void setProducer(IPipelineProducer<T>* producer) = 0;
 };
@@ -142,7 +142,10 @@ public:
 	virtual size_t getInputQueueSize() { return inputQueue.size(); }
 	virtual size_t getBlockSize() { return maxBlockSize; }
 
-	virtual size_t inputAvailable() override { return maxSize - getRunningWorkNumber() - inputQueue.size(); }
+	virtual int64_t inputAvailable() override {
+		return static_cast<int64_t>(maxSize) - static_cast<int64_t>(getRunningWorkNumber()) -
+		       static_cast<int64_t>(inputQueue.size());
+	}
 
 	virtual void queue(Input inputToMove) override {
 		inputQueue.emplace_back(std::move(inputToMove));
@@ -201,7 +204,7 @@ protected:
 			}
 		}
 
-		if(inputAvailable() && prev) {
+		if(inputAvailable() > 0 && prev) {
 			prev->notifyOutputAvailable();
 		}
 	}
@@ -251,7 +254,7 @@ public:
 		return nextPipeline;
 	}
 
-	virtual size_t inputAvailable() override {
+	virtual int64_t inputAvailable() override {
 		if(next)
 			return PipelineStepBase<Input, Output>::inputAvailable() + next->inputAvailable();
 		else
@@ -281,9 +284,8 @@ protected:
 	}
 
 private:
-	virtual bool isNextFull() final { return next && !next->inputAvailable(); }
+	virtual bool isNextFull() final { return next && next->inputAvailable() <= 0; }
 
 private:
 	IPipelineConsumer<Output>* next;
 };
-
