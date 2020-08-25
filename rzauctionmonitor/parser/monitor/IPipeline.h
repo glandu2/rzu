@@ -24,10 +24,13 @@ public:
 template<class T> class IPipelineProducer {
 public:
 	virtual ~IPipelineProducer() {}
-	virtual void cancel() = 0;
+	virtual void notifyError(int status) = 0;
 	virtual void notifyOutputAvailable() = 0;
 
-	virtual void setConsumer(IPipelineConsumer<T>* consumer) = 0;
+	template<class NextPipeline> NextPipeline* plug(NextPipeline* nextPipeline) {
+		nextPipeline->setProducer(this);
+		return nextPipeline;
+	}
 };
 
 template<class SourceData, class OutputData> class PipelineWorkBase {
@@ -163,8 +166,11 @@ public:
 			work->cancelWork();
 		for(const std::shared_ptr<WorkItem>& work : workInProgress)
 			doCancelWork(work);
+	}
+
+	void notifyError(int status) {
 		if(prev)
-			prev->cancel();
+			prev->notifyError(status);
 	}
 
 	void clear() { inputQueue.clear(); }
@@ -186,7 +192,9 @@ protected:
 	void workDone(std::shared_ptr<WorkItem> item, int status) {
 		if(status)
 			log(LL_Error, "%s: Work done with status %d\n", item->getName().c_str(), status);
-		workInProgress.erase(std::remove(workInProgress.begin(), workInProgress.end(), item));
+		auto it = std::remove(workInProgress.begin(), workInProgress.end(), item);
+		if(it < workInProgress.end())
+			workInProgress.erase(it);
 		notifyWorkDone();
 	}
 
@@ -236,7 +244,10 @@ public:
 protected:
 	void workDone(std::shared_ptr<WorkItem> item, int status = 0) {
 		PipelineStepBase<Input, Output>::workDone(item, status);
-		PipelineStepBase<Input, Output>::doNextWork();
+		if(!item->isCanceled() && !status)
+			PipelineStepBase<Input, Output>::doNextWork();
+		else if(status)
+			PipelineStepBase<Input, Output>::notifyError(status);
 	}
 
 private:
@@ -254,8 +265,7 @@ public:
 
 	template<class NextPipeline> NextPipeline* plug(NextPipeline* nextPipeline) {
 		setConsumer(nextPipeline);
-		nextPipeline->setProducer(this);
-		return nextPipeline;
+		return IPipelineProducer<Output>::plug(nextPipeline);
 	}
 
 	virtual int64_t inputAvailable() override {
@@ -271,8 +281,10 @@ public:
 			next->cancel();
 	}
 
+	virtual void notifyError(int status) override { PipelineStepBase<Input, Output>::notifyError(status); }
+
 	virtual void notifyOutputAvailable() override { PipelineStepBase<Input, Output>::doNextWork(); }
-	virtual void setConsumer(IPipelineConsumer<Output>* consumer) override { next = consumer; }
+	void setConsumer(IPipelineConsumer<Output>* consumer) { next = consumer; }
 
 protected:
 	template<class T> void addResult(std::shared_ptr<WorkItem>& item, T&& output) {
@@ -281,10 +293,13 @@ protected:
 
 	void workDone(std::shared_ptr<WorkItem> item, int status = 0) {
 		PipelineStepBase<Input, Output>::workDone(item, status);
-		if(!item->isCanceled() && next && !status) {
-			item->queueToNext(next);
+		if(!item->isCanceled() && !status) {
+			if(next)
+				item->queueToNext(next);
+			PipelineStepBase<Input, Output>::doNextWork();
+		} else if(status) {
+			notifyError(status);
 		}
-		PipelineStepBase<Input, Output>::doNextWork();
 	}
 
 private:

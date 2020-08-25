@@ -23,7 +23,9 @@
  * parseAuctions (cpu) => reduce stats to json String
  * sendToHttp (network) */
 
-class AuctionPipeline : public Object, public StartableObject {
+class AuctionPipeline : public Object,
+                        public StartableObject,
+                        public IPipelineProducer<std::pair<std::string, std::string>> {
 	DECLARE_CLASSNAME(AuctionPipeline, 0)
 public:
 	AuctionPipeline(cval<std::string>& auctionsPath,
@@ -34,6 +36,9 @@ public:
 	virtual bool start() override;
 	virtual void stop() override;
 	virtual bool isStarted() override;
+
+	virtual void notifyError(int status) override;
+	virtual void notifyOutputAvailable() override;
 
 	void importState();
 	int exportState(std::string& fullFilename, AUCTION_FILE& auctionFile);
@@ -62,4 +67,3 @@ private:
 	P4InsertToSqlServer insertToSqlServerStep;
 	P5Commit commitStep;
 };
-
