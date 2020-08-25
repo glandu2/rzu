@@ -14,6 +14,7 @@ class P2DeserializeAuction : public PipelineStep<std::pair<PipelineState, std::v
 public:
 	P2DeserializeAuction();
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
+	virtual void doCancelWork(std::shared_ptr<WorkItem> item) override { work.cancel(); }
 
 private:
 	int processWork(std::shared_ptr<WorkItem> item);

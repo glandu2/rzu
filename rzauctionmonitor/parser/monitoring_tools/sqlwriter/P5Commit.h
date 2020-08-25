@@ -13,6 +13,7 @@ class P5Commit : public PipelineStep<PipelineState, void> {
 public:
 	P5Commit(AuctionPipeline* auctionPipeline);
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
+	virtual void doCancelWork(std::shared_ptr<WorkItem> item) override { work.cancel(); }
 
 private:
 	int processWork(std::shared_ptr<WorkItem> item);
@@ -22,4 +23,3 @@ private:
 	AuctionPipeline* auctionPipeline;
 	BackgroundWork<P5Commit, std::shared_ptr<WorkItem>> work;
 };
-
