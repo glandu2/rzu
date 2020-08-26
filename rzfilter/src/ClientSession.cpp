@@ -59,30 +59,6 @@ EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 	return PacketSession::onDisconnected(causedByRemote);
 }
 
-void ClientSession::logPacket(bool toClient, const TS_MESSAGE* msg) {
-	const char* packetName =
-	    PacketMetadata::getPacketName(msg->id,
-	                                  authMode ? SessionType::AuthClient : SessionType::GameClient,
-	                                  toClient ? SessionPacketOrigin::Server : SessionPacketOrigin::Client,
-	                                  packetVersion);
-
-	log(LL_Debug,
-	    "%s packet id: %5d, name %s, size: %d\n",
-	    (toClient) ? "SERV->CLI" : "CLI->SERV",
-	    msg->id,
-	    packetName,
-	    int(msg->size - sizeof(TS_MESSAGE)));
-
-	getStream()->packetLog(Object::LL_Debug,
-	                       reinterpret_cast<const unsigned char*>(msg) + sizeof(TS_MESSAGE),
-	                       (int) msg->size - sizeof(TS_MESSAGE),
-	                       "%s packet id: %5d, name %s, size: %d\n",
-	                       (toClient) ? "SERV->CLI" : "CLI->SERV",
-	                       msg->id,
-	                       packetName,
-	                       int(msg->size - sizeof(TS_MESSAGE)));
-}
-
 void ClientSession::detachServer() {
 	serverSession = nullptr;
 }

@@ -76,4 +76,3 @@ private:
 
 	std::vector<TS_MESSAGE*> pendingMessages;
 };
-
