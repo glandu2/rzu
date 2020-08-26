@@ -8,6 +8,12 @@ std::vector<PipelineStepMonitor*> PipelineStepMonitor::monitors;
 void PipelineStepMonitor::init() {
 	ConsoleCommands::get()->addCommand(
 	    "pipeline.stats", "stats", 0, 0, &PipelineStepMonitor::commandDumpStats, "Dump pipeline step stats");
+	ConsoleCommands::get()->addCommand("pipeline.incrementalstats",
+	                                   "istats",
+	                                   0,
+	                                   0,
+	                                   &PipelineStepMonitor::commandDumpIncrementalStats,
+	                                   "Dump pipeline step stats since previous dump");
 	ConsoleCommands::get()->addCommand(
 	    "pipeline.reset",
 	    std::string(),
@@ -74,18 +80,26 @@ void PipelineStepMonitor::commandDumpStats(IWritableConsole* console, const std:
 	}
 
 	for(PipelineStepMonitor* monitor : monitors) {
-		console->writef("%*s: current input queue: %6d, block size: %4d, running works: %2d, active time ratio: %5.1f, "
-		                "item per second: "
-		                "%10.3f, processed items: %" PRIu64 "\r\n",
-		                (int) classNameMaxSize,
-		                monitor->getClassName(),
-		                (int) monitor->getInputQueueSize(),
-		                (int) monitor->getBlockSize(),
-		                (int) monitor->running,
-		                (double) monitor->getActiveToIdleTimeRatio() * 100.0,
-		                (double) monitor->getItemPerSecond(),
-		                (uint64_t) monitor->processedInputs);
+		console->writef(
+		    "%*s: current input queue: %6d / %6d, block size: %4d, running works: %2d / %2d, active time ratio: %5.1f, "
+		    "item per second: "
+		    "%10.3f, processed items: %" PRIu64 "\r\n",
+		    (int) classNameMaxSize,
+		    monitor->getClassName(),
+		    (int) monitor->getInputQueueSize(),
+		    (int) monitor->getMaxInputQueueSize(),
+		    (int) monitor->getBlockSize(),
+		    (int) monitor->running,
+		    (int) monitor->getMaxParallelWork(),
+		    (double) monitor->getActiveToIdleTimeRatio() * 100.0,
+		    (double) monitor->getItemPerSecond(),
+		    (uint64_t) monitor->processedInputs);
 	}
+}
+
+void PipelineStepMonitor::commandDumpIncrementalStats(IWritableConsole* console, const std::vector<std::string>& args) {
+	commandDumpStats(console, args);
+	commandResetStats(console, args);
 }
 
 void PipelineStepMonitor::commandResetStats(IWritableConsole* console, const std::vector<std::string>& args) {

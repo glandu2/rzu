@@ -50,7 +50,7 @@ void SqlWriter::exportState(std::string filename, const std::string& lastParsedF
 void SqlWriter::importState(std::string filename, std::string& lastParsedFile) {
 	log(LL_Info, "Loading sqlwriter state file %s\n", filename.c_str());
 
-	std::vector<uint8_t> data;
+	std::vector<AuctionWriter::file_data_byte> data;
 
 	if(AuctionWriter::readAuctionDataFromFile(filename, data)) {
 		SQLWRITER_STATE aggregationState;

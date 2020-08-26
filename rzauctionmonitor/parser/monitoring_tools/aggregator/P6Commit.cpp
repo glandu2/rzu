@@ -26,7 +26,7 @@ int P6Commit::processWork(std::shared_ptr<WorkItem> workItem) {
 	log(LL_Debug, "Saving state for date %02d/%02d/%04d\n", currentDay.tm_mday, currentDay.tm_mon, currentDay.tm_year);
 
 	if(!sourceData.dumps.empty())
-		return auctionPipeline->exportState(sourceData.base.lastFilenameParsed, sourceData.dumps[0]);
+		return auctionPipeline->exportState(sourceData.base.associatedFilename, sourceData.dumps[0]);
 	else
 		return -ENOENT;
 }

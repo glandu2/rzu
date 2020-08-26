@@ -21,4 +21,3 @@ public:
 private:
 	DbQueryJobRef dbQuery;
 };
-

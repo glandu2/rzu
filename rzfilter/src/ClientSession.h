@@ -47,8 +47,6 @@ public:
 
 	BanManager* getBanManager() { return getServer()->getBanManager(); }
 
-	void logPacket(bool toClient, const TS_MESSAGE* msg);
-
 	void detachServer();
 
 protected:
@@ -67,4 +65,3 @@ private:
 	ServerSession* serverSession;
 	bool authMode;
 };
-

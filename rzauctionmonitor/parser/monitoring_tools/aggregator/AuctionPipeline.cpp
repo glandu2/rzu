@@ -1,6 +1,7 @@
 #include "AuctionPipeline.h"
 #include "AuctionWriter.h"
 #include "Core/EventLoop.h"
+#include "NetSession/ServersManager.h"
 #include <algorithm>
 #include <errno.h>
 #include <time.h>
@@ -28,14 +29,15 @@ AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
       auctionStateFile(auctionStateFile),
       started(false),
       scanAuctionStep(changeWaitSeconds),
-      sendToWebServerStep(),
+      sendToSqlServerStep(),
       commitStep(this) {
-	readAuctionStep.plug(&deserializeAuctionStep)
+	this->plug(&readAuctionStep)
+	    ->plug(&deserializeAuctionStep)
 	    ->plug(&parseAuctionStep)
 	    ->plug(&aggregateStatsStep)
 	    ->plug(&computeStatsStep)
 	    ->plug(&sendHistoryToSqlStep)
-	    ->plug(&sendToWebServerStep)
+	    ->plug(&sendToSqlServerStep)
 	    ->plug(&commitStep);
 	uv_fs_event_init(EventLoop::getLoop(), &fsEvent);
 	fsEvent.data = this;
@@ -66,6 +68,13 @@ bool AuctionPipeline::isStarted() {
 	return started;
 }
 
+void AuctionPipeline::notifyError(int status) {
+	if(started)
+		ServersManager::getInstance()->forceStop();
+}
+
+void AuctionPipeline::notifyOutputAvailable() {}
+
 void AuctionPipeline::importState() {
 	std::string aggregationStateFile = this->auctionStateFile.get();
 
@@ -75,7 +84,7 @@ void AuctionPipeline::importState() {
 
 	aggregationStateFile = statesPath.get() + "/" + aggregationStateFile;
 
-	std::vector<uint8_t> data;
+	std::vector<AuctionWriter::file_data_byte> data;
 
 	if(AuctionWriter::readAuctionDataFromFile(aggregationStateFile, data)) {
 		PIPELINE_STATE aggregationState;
@@ -102,8 +111,10 @@ void AuctionPipeline::importState() {
 		    aggregationStateFile.c_str(),
 		    (int) aggregationState.auctionData.auctions.size());
 
+		log(LL_Info, "Last auctions file was %s\n", aggregationState.lastParsedFile.c_str());
+
 		lastQueuedFile = aggregationState.lastParsedFile;
-		parseAuctionStep.importState(&aggregationState.auctionData);
+		parseAuctionStep.importState(aggregationState.lastParsedFile, &aggregationState.auctionData);
 	} else {
 		log(LL_Error, "Cant read state file %s\n", aggregationStateFile.c_str());
 	}
@@ -183,8 +194,8 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 	while(UV_EOF != uv_fs_scandir_next(req, &dent)) {
 		if(dent.type != UV_DIRENT_DIR && strcmp(thisInstance->lastQueuedFile.c_str(), dent.name) < 0)
 			orderedFiles.push_back(dent.name);
-		if(orderedFiles.size() > 10000)
-			break;
+		//		if(orderedFiles.size() > 10000)
+		//			break;
 	}
 
 	std::sort(orderedFiles.begin(), orderedFiles.end(), [](const std::string& a, const std::string& b) {

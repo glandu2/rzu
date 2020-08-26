@@ -15,7 +15,9 @@ It handle player connections, authentication and game server selection.
 
 It support many database (default configuration is for SQL Server), clients/GS since epic 2 (running fine with 5.2 GS and newer).
 
-It is portable on Windows and Linux.
+See features bellow for more details.
+
+It is portable on Windows and Linux, raspberry pi.
 
 Database support
 ----------------
@@ -42,11 +44,11 @@ The server has most of the feature of the official auth server with some additio
  * Auth server using RSA/AES or DES
  * Auth server using [IMBC autologin](#imbc)
  * Auto server reconnect to SQL database on failure
- * Guild icon server with an integrated mini webserver (can serve only JPG images)
- * Network traffic dump (not enabled by default)
- * Support epic 2 to latest
- * Support GS reconnection without GS restart with [GS autoreconnect](https://github.com/glandu2/rzgamereconnect/) (in case of bad network connection between auth and GS or auth restart)
- * Support security password (for bank access, character delete, ...)
+ * Guild icon server with an integrated mini webserver (can serve only JPG images, it is not supposed to replace IIS or apache)
+ * Network traffic dump in hex and JSON format (not enabled by default)
+ * Supports epic 2 to latest
+ * Supports GS reconnection without GS restart with [GS autoreconnect](https://github.com/glandu2/rzgamereconnect/) (in case of bad network connection between auth and GS or auth restart)
+ * Supports security password (for bank access, character delete, ...)
  * Optionnaly encrypted database password/connection string (both old DES and 9.1 encryption)
  * Send log to [Log Server](https://github.com/glandu2/rzlog/)
 
@@ -434,18 +436,23 @@ Variable|Type|Description|Default value
 ban.ipfile|String|The filename that list banned IPs. The file must have one IP per line in the form of: x.x.x.x|bannedip.txt
 configfile|String|The configuration filename. Only the command line has an effect, it's used to change the config file to use|auth.opt
 core.appname|String|The application name. Provided only for information purpose and is currently not used anywhere|rzauth
+core.config.showhidden|Boolean|When starting, the configuration is dumped on the console. This variable controls whether to dump sensitive variables like passwords. If false, sensitive variables won't be printed|false
+core.encoding|String|Encoding to use for strings from the client to/from a database|CP1252
 core.log.consolelevel|String|The log level for the console. Available values are: "fatal", "error", "warning", "info", "debug" and "trace"|<value of core.log.level>
 core.log.dir|String|The directory where to put log files|log
 core.log.enable|Boolean|If true, logging is enabled. Log messages are written to the file `<core.log.dir>/<core.log.file>_YYYY-MM-DD.log`. If false, no log is output to file and on console|true
 core.log.file|String|The base filename of the log file. Real filename will have the date appended to its name|auth.log
 core.log.level|String|The log level. The level is used for the file and for the console if core.log.consolelevel has not been set to another value. Available values are: "fatal", "error", "warning", "info", "debug" and "trace"|info
 core.log.maxqueuesize|Integer|The log message queue size. Larger number means more memory used when there are many log message to write to disk. If there are too many log message, they are discarded|10000
+core.stream_cipher|String|The RC4 cipher to be used in communication between the client and the server|
 core.usetcpnodelay|Boolean|If true, all connections will use TCP_NODELAY attribute|false
 trafficdump.consolelevel|String|The log level for the console. Available values are the same as core.log.consolelevel. This should be left to "fatal" (traffic dump is very verbose)|fatal
 trafficdump.dir|String|The directory where to put traffic dump files|traffic_log
 trafficdump.enable|Boolean|If true, traffic dump is enabled. Data is written to the file `<trafficdump.dir>/<trafficdump.file>_YYYY-MM-DD.log`. If false, no traffic dump is done|true
 trafficdump.file|String|The base filename of the log file. Real filename will have the date appended to its name|auth.log
 trafficdump.level|String|The log level. The level is used for the file and for the console if core.log.consolelevel has not been set to another value. Connection state changes have the "info" level and data dump has the "debug" level|debug
+trafficdump.dump_raw|Boolean|When the trafficdump is enabled, this control whether to dump packets in raw hexdump format. In older versions, only this format was available for trafficdump. This has no effect if the trafficdump is not enabled|false
+trafficdump.dump_json|Boolean|When the trafficdump is enabled, this control whether to dump packets in JSON format. This has no effect if the trafficdump is not enabled|true
 
 
 ### Informative variables

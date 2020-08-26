@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
 
 		if(filename[0] == '/')
 			continue;
-		std::vector<uint8_t> data;
+		std::vector<AuctionWriter::file_data_byte> data;
 		int version;
 		AuctionFileFormat fileFormat;
 

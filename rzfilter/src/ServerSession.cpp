@@ -199,27 +199,7 @@ void ServerSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 	if(!CONFIG_GET()->trafficDump.enableServer.get())
 		return;
 
-	const char* packetName =
-	    PacketMetadata::getPacketName(msg->id,
-	                                  isAuthMode() ? SessionType::AuthClient : SessionType::GameClient,
-	                                  outgoing ? SessionPacketOrigin::Client : SessionPacketOrigin::Server,
-	                                  packetVersion);
-
-	log(LL_Debug,
-	    "%s packet id: %5d, name %s, size: %d\n",
-	    (!outgoing) ? "SERV->CLI" : "CLI->SERV",
-	    msg->id,
-	    packetName,
-	    int(msg->size - sizeof(TS_MESSAGE)));
-
-	getStream()->packetLog(Object::LL_Debug,
-	                       reinterpret_cast<const unsigned char*>(msg) + sizeof(TS_MESSAGE),
-	                       (int) msg->size - sizeof(TS_MESSAGE),
-	                       "%s packet id: %5d, name %s, size: %d\n",
-	                       (!outgoing) ? "SERV->CLI" : "CLI->SERV",
-	                       msg->id,
-	                       packetName,
-	                       int(msg->size - sizeof(TS_MESSAGE)));
+	EncryptedSession<PacketSession>::logPacket(outgoing, msg);
 }
 
 void ServerSession::updateObjectName() {

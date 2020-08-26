@@ -1,6 +1,7 @@
 #include "AuctionPipeline.h"
 #include "AuctionWriter.h"
 #include "Core/EventLoop.h"
+#include <NetSession/ServersManager.h>
 #include <algorithm>
 #include <errno.h>
 #include <time.h>
@@ -29,7 +30,8 @@ AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
       started(false),
       scanAuctionStep(changeWaitSeconds),
       commitStep(this) {
-	readAuctionStep.plug(&deserializeAuctionStep)
+	this->plug(&readAuctionStep)
+	    ->plug(&deserializeAuctionStep)
 	    ->plug(&parseAuctionStep)
 	    ->plug(&insertToSqlServerStep)
 	    ->plug(&commitStep);
@@ -62,6 +64,13 @@ bool AuctionPipeline::isStarted() {
 	return started;
 }
 
+void AuctionPipeline::notifyError(int status) {
+	if(started)
+		ServersManager::getInstance()->forceStop();
+}
+
+void AuctionPipeline::notifyOutputAvailable() {}
+
 void AuctionPipeline::importState() {
 	std::string aggregationStateFile = this->auctionStateFile.get();
 
@@ -71,7 +80,7 @@ void AuctionPipeline::importState() {
 
 	aggregationStateFile = statesPath.get() + "/" + aggregationStateFile;
 
-	std::vector<uint8_t> data;
+	std::vector<AuctionWriter::file_data_byte> data;
 
 	if(AuctionWriter::readAuctionDataFromFile(aggregationStateFile, data)) {
 		PIPELINE_STATE aggregationState;

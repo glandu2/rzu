@@ -14,6 +14,7 @@ class P3ParseAuction
 public:
 	P3ParseAuction();
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
+	virtual void doCancelWork(std::shared_ptr<WorkItem> item) override { work.cancel(); }
 
 	void importState(const AUCTION_FILE* auctionData);
 
@@ -25,6 +26,5 @@ private:
 	BackgroundWork<P3ParseAuction, std::shared_ptr<WorkItem>> work;
 
 	AuctionComplexDiffWriter auctionWriter;
-	size_t fileNumberProcessedSinceLastCommit;
+	time_t timeSinceLastCommit;
 };
-

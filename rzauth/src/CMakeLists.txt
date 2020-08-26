@@ -10,4 +10,3 @@ endif()
 find_package(OpenSSL REQUIRED)
 add_exe(${TARGET_NAME} "${SOURCE_FILES}" rzu ${OPENSSL_LIBRARIES})
 target_include_directories(${TARGET_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
-

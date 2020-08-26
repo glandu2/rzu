@@ -9,7 +9,7 @@ P3ParseAuction::P3ParseAuction()
     : PipelineStep<std::pair<PipelineState, AUCTION_SIMPLE_FILE>, std::pair<PipelineState, AUCTION_FILE>>(100, 1, 10),
       work(this, &P3ParseAuction::processWork, &P3ParseAuction::afterWork),
       auctionWriter(19),
-      fileNumberProcessedSinceLastCommit(0) {}
+      timeSinceLastCommit(0) {}
 
 void P3ParseAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	work.run(item);
@@ -28,7 +28,7 @@ int P3ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 
 		isFull = AuctionFile::isFileFullType(input.second, &auctionWriter);
 
-		log(LL_Debug,
+		log(LL_Info,
 		    "Processing file %s, detected type: %s\n",
 		    input.first.lastFilenameParsed.c_str(),
 		    isFull ? "full" : "diff");
@@ -49,21 +49,20 @@ int P3ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 
 		auctionWriter.endProcess();
 
-		fileNumberProcessedSinceLastCommit++;
-
 		AUCTION_FILE auctionDump = auctionWriter.exportDump(false, true);
 
-		if(fileNumberProcessedSinceLastCommit > 1000) {
-			fileNumberProcessedSinceLastCommit = 0;
+		// Save state every 10s
+		if(time(nullptr) > timeSinceLastCommit + 10) {
+			log(LL_Info, "Doing full dump for state save\n");
+			timeSinceLastCommit = time(nullptr);
 			input.first.fullDump = auctionWriter.exportDump(true, true);
 		}
 
 		if(auctionDump.auctions.empty()) {
 			log(LL_Debug, "No new auction to parse\n");
-			return 0;
+		} else {
+			addResult(item, std::make_pair(std::move(input.first), std::move(auctionDump)));
 		}
-
-		addResult(item, std::make_pair(std::move(input.first), std::move(auctionDump)));
 	}
 
 	return 0;

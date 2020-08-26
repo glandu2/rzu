@@ -1,3 +1,7 @@
+-- rzfilter lua module to output a combatlog file
+-- To be used to parse DPS and heal/s data with Advanced Combat Tracker tool
+-- See https://advancedcombattracker.com/
+
 local json = require("json")
 local utils = require("utils")
 

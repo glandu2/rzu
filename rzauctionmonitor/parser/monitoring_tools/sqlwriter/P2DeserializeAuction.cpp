@@ -1,9 +1,8 @@
 #include "P2DeserializeAuction.h"
-#include "AuctionWriter.h"
 
 P2DeserializeAuction::P2DeserializeAuction()
-    : PipelineStep<std::pair<PipelineState, std::vector<uint8_t>>, std::pair<PipelineState, AUCTION_SIMPLE_FILE>>(
-          100, 1, 10),
+    : PipelineStep<std::pair<PipelineState, std::vector<AuctionWriter::file_data_byte>>,
+                   std::pair<PipelineState, AUCTION_SIMPLE_FILE>>(100, 1, 10),
       work(this, &P2DeserializeAuction::processWork, &P2DeserializeAuction::afterWork) {}
 
 void P2DeserializeAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
@@ -12,9 +11,9 @@ void P2DeserializeAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) 
 
 int P2DeserializeAuction::processWork(std::shared_ptr<WorkItem> item) {
 	auto sources = std::move(item->getSources());
-	for(std::pair<PipelineState, std::vector<uint8_t>>& input : sources) {
-		std::string& filename = input.first.lastFilenameParsed;
-		const std::vector<uint8_t>& data = input.second;
+	for(std::pair<PipelineState, std::vector<AuctionWriter::file_data_byte>>& input : sources) {
+		const std::string& filename = input.first.lastFilenameParsed;
+		const std::vector<AuctionWriter::file_data_byte>& data = input.second;
 		int version;
 		AuctionFileFormat fileFormat;
 		AUCTION_SIMPLE_FILE auctionFile;
@@ -33,6 +32,7 @@ int P2DeserializeAuction::processWork(std::shared_ptr<WorkItem> item) {
 		}
 
 		addResult(item, std::make_pair(std::move(input.first), std::move(auctionFile)));
+		log(LL_Debug, "Deserialization ok for file %s\n", filename.c_str());
 	}
 
 	return 0;

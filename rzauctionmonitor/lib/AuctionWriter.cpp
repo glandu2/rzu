@@ -101,7 +101,8 @@ void AuctionWriter::writeAuctionDataToFile(std::string auctionsFile, const std::
 	}
 }
 
-bool AuctionWriter::readAuctionDataFromFile(std::string auctionsFile, std::vector<uint8_t>& data) {
+bool AuctionWriter::readAuctionDataFromFile(std::string auctionsFile,
+                                            std::vector<AuctionWriter::file_data_byte>& data) {
 	std::unique_ptr<FILE, int (*)(FILE*)> file(nullptr, &fclose);
 
 	data.clear();
@@ -115,6 +116,11 @@ bool AuctionWriter::readAuctionDataFromFile(std::string auctionsFile, std::vecto
 	fseek(file.get(), 0, SEEK_END);
 	size_t fileSize = ftell(file.get());
 	fseek(file.get(), 0, SEEK_SET);
+
+	if(fileSize == 0) {
+		// Empty file
+		return true;
+	}
 
 	if(fileSize > 50 * 1024 * 1024) {
 		logStatic(LL_Error,
@@ -172,7 +178,9 @@ bool AuctionWriter::readAuctionDataFromFile(std::string auctionsFile, std::vecto
 	return true;
 }
 
-bool AuctionWriter::getAuctionFileFormat(const std::vector<uint8_t>& data, int* version, AuctionFileFormat* format) {
+bool AuctionWriter::getAuctionFileFormat(const std::vector<AuctionWriter::file_data_byte>& data,
+                                         int* version,
+                                         AuctionFileFormat* format) {
 	union FileHeader {
 		struct OldHeader {
 			uint32_t size;
@@ -183,25 +191,29 @@ bool AuctionWriter::getAuctionFileFormat(const std::vector<uint8_t>& data, int* 
 	};
 	const FileHeader* header = reinterpret_cast<const FileHeader*>(data.data());
 
-	if(!strcmp(header->newHeader.signature, "RAH")) {
+	if(data.size() > sizeof(header->newHeader) && !strcmp(header->newHeader.signature, "RAH")) {
 		*format = AFF_Complex;
 		*version = header->newHeader.file_version;
-	} else if(!strcmp(header->newHeader.signature, "RHS")) {
+	} else if(data.size() > sizeof(header->newHeader) && !strcmp(header->newHeader.signature, "RHS")) {
 		*format = AFF_Simple;
 		*version = header->newHeader.file_version;
 	} else {
-		int trueVersion = header->oldHeader.version;
+		int trueVersion = 0;
 
-		if(trueVersion > 1000)
-			trueVersion = 0;
+		if(data.size() > sizeof(header->oldHeader)) {
+			trueVersion = header->oldHeader.version;
 
-		if(header->oldHeader.size > 4096 || trueVersion > 2) {
-			logStatic(LL_Error,
-			          getStaticClassName(),
-			          "Bad old format, size: %d, version: %d (limit: 4096, 2)\n",
-			          header->oldHeader.size,
-			          trueVersion);
-			return false;
+			if(trueVersion > 1000)
+				trueVersion = 0;
+
+			if(header->oldHeader.size > 4096 || trueVersion > 2) {
+				logStatic(LL_Error,
+				          getStaticClassName(),
+				          "Bad old format, size: %d, version: %d (limit: 4096, 2)\n",
+				          header->oldHeader.size,
+				          trueVersion);
+				return false;
+			}
 		}
 
 		*format = AFF_Old;
@@ -211,7 +223,7 @@ bool AuctionWriter::getAuctionFileFormat(const std::vector<uint8_t>& data, int* 
 	return true;
 }
 
-template<class T> bool AuctionWriter::deserializeFile(const std::vector<uint8_t>& buffer, T* auctionFile) {
+template<class T> bool AuctionWriter::deserializeFile(const std::vector<file_data_byte>& buffer, T* auctionFile) {
 	if(buffer.size() < sizeof(AuctionFileHeader)) {
 		logStatic(LL_Error, getStaticClassName(), "File size too small, can't deserialize\n");
 		return false;
@@ -231,9 +243,9 @@ template<class T> bool AuctionWriter::deserializeFile(const std::vector<uint8_t>
 }
 
 template<class AuctionHeader>
-bool AuctionWriter::deserializeOldFile(const std::vector<uint8_t>& data, AUCTION_SIMPLE_FILE* auctionFile) {
-	const uint8_t* p = data.data();
-	const uint8_t* const endp = data.data() + data.size();
+bool AuctionWriter::deserializeOldFile(const std::vector<file_data_byte>& data, AUCTION_SIMPLE_FILE* auctionFile) {
+	const file_data_byte* p = data.data();
+	const file_data_byte* const endp = data.data() + data.size();
 	bool reserved = false;
 
 	while(p < endp) {
@@ -282,7 +294,7 @@ bool AuctionWriter::deserializeOldFile(const std::vector<uint8_t>& data, AUCTION
 	return true;
 }
 
-bool AuctionWriter::deserialize(AUCTION_SIMPLE_FILE* file, const std::vector<uint8_t>& data) {
+bool AuctionWriter::deserialize(AUCTION_SIMPLE_FILE* file, const std::vector<file_data_byte>& data) {
 	int version;
 	AuctionFileFormat fileFormat;
 
@@ -352,7 +364,7 @@ bool AuctionWriter::deserialize(AUCTION_SIMPLE_FILE* file, const std::vector<uin
 	return true;
 }
 
-bool AuctionWriter::deserialize(AUCTION_FILE* file, const std::vector<uint8_t>& data) {
+bool AuctionWriter::deserialize(AUCTION_FILE* file, const std::vector<file_data_byte>& data) {
 	return deserializeFile(data, file);
 }
 
@@ -394,7 +406,7 @@ int AuctionWriter::compressGzip(std::vector<uint8_t>& compressedData,
 	return err;
 }
 
-int AuctionWriter::uncompressGzip(std::vector<uint8_t>& uncompressedData,
+int AuctionWriter::uncompressGzip(std::vector<AuctionWriter::file_data_byte>& uncompressedData,
                                   const std::vector<uint8_t>& compressedData,
                                   const char*& msg) {
 	z_stream stream;
@@ -412,11 +424,50 @@ int AuctionWriter::uncompressGzip(std::vector<uint8_t>& uncompressedData,
 	stream.avail_in = static_cast<uLong>(compressedData.size());
 	stream.next_in = compressedData.data();
 
+	uint32_t dataSize = 6 * 1024 * 1024;
+
+	if(compressedData.size() < 4) {
+		logStatic(LL_Warning,
+		          "AuctionWriter",
+		          "Can't read uncompressed size from file, file too short: %u\n",
+		          (unsigned int) compressedData.size());
+	} else {
+		uint32_t header = static_cast<uint32_t>(compressedData[0]) | static_cast<uint32_t>(compressedData[0]) << 8;
+		uint32_t dataSizeFromFile = static_cast<uint32_t>(compressedData[compressedData.size() - 4]) |
+		                            static_cast<uint32_t>(compressedData[compressedData.size() - 3]) << 8 |
+		                            static_cast<uint32_t>(compressedData[compressedData.size() - 2]) << 16 |
+		                            static_cast<uint32_t>(compressedData[compressedData.size() - 1]) << 24;
+
+		if(header != 0x8B1F) {
+			// File is not GZIPed
+		} else if(dataSizeFromFile > 10 * 1024 * 1024) {
+			logStatic(
+			    LL_Warning,
+			    "AuctionWriter",
+			    "Uncompressed size read from file is too large (> 10MB): %u, decompressing using default buffer size\n",
+			    (unsigned int) dataSizeFromFile);
+		} else if(dataSizeFromFile == 0) {
+			logStatic(LL_Warning, "AuctionWriter", "Uncompressed size from file is 0\n");
+		} else {
+			dataSize = dataSizeFromFile;
+		}
+	}
+
 	/* run inflate() on input until output buffer not full */
 	do {
-		uncompressedData.resize(uncompressedData.size() + 1024 * 1024);
+		if(uncompressedData.empty() && dataSize > 0) {
+			uncompressedData.resize(dataSize);
+		} else {
+			if(!uncompressedData.empty())
+				logStatic(LL_Warning,
+				          "AuctionWriter",
+				          "Size of %u wasn't enough for uncompressed zlib data\n",
+				          (unsigned int) uncompressedData.size());
+			else
+				uncompressedData.resize(uncompressedData.size() + 7 * 1024 * 1024);
+		}
 		stream.avail_out = static_cast<uLong>(uncompressedData.size()) - outputIndex;
-		stream.next_out = &uncompressedData[outputIndex];
+		stream.next_out = reinterpret_cast<Bytef*>(&uncompressedData[outputIndex]);
 		err = inflate(&stream, Z_NO_FLUSH);
 		switch(err) {
 			case Z_NEED_DICT:

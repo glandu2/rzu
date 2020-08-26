@@ -186,5 +186,5 @@ uint32_t AuctionComplexDiffWriter::parseEpic(uint32_t inputEpic, int64_t timesta
 	if(timestamp < 1552986000)  // 2019-03-19T09:00:00.000Z
 		return EPIC_9_5_3;
 	else
-		return EPIC_9_6;
+		return EPIC_9_6_1;
 }
