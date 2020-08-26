@@ -39,3 +39,5 @@ core.log.level:info
 
 filter.modulename:rzfilter_lua_module
 
+# If you don't want to use any modules (for example to only dump packets), you can set this:
+#filter.modulename.enable:false

@@ -6,7 +6,8 @@ local timer = require("timer")
 
 print("New client connection, current time: " .. utils:getTimeInMsec())
 
-local filterImplementation = combatlog
+-- Choose an functionality to use:
+-- local filterImplementation = combatlog
 -- local filterImplementation = chattimestamps
 -- local filterImplementation = packetlogger
 
@@ -135,42 +136,26 @@ local filterImplementation = combatlog
 
 
 --- Called when rzfilter receive a packet from the server (auth or GS) to be forwarded to the client
--- @param client represent the client connection (see
 function onServerPacket(client, server, packet, serverType)
-	if filterImplementation and
-	   filterImplementation.onServerPacket and
-	   filterImplementation.onServerPacket(client, server, packet, serverType) ~= false
+	-- If a filterImplementation is choosen run its onServerPacket function
+	if filterImplementation and filterImplementation.onServerPacket
 	then
-		return not client:sendPacket(packet)
-	end
-	--[[
-	if packet.id == TS_SC_GAME_GUARD_AUTH_QUERY then
-		return false
+		return filterImplementation.onServerPacket(client, server, packet, serverType)
 	end
 	
-	client:sendPacket(packet)
-	return false
-	--]]
+	-- Else return true to forward the packet as-is
 	return true
 end
 
 
+--- Called when rzfilter receive a packet from the client to be forwarded to the server (auth or GS)
 function onClientPacket(client, server, packet, serverType)
-	if filterImplementation and
-	   filterImplementation.onClientPacket and
-	   filterImplementation.onClientPacket(client, server, packet, serverType) ~= false
+	-- If a filterImplementation is choosen run its onServerPacket function
+	if filterImplementation and filterImplementation.onClientPacket
 	then
-		return not server:sendPacket(packet)
+		return filterImplementation.onClientPacket(client, server, packet, serverType)
 	end
 
-	--[[
-	if packet.id == TS_CS_GAME_GUARD_AUTH_ANSWER then
-		return false
-	end
-	
-	server:sendPacket(packet)
-	return false
-	--]]
+	-- Else return true to forward the packet as-is
 	return true
 end
-

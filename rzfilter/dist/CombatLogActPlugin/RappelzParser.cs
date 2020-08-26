@@ -10,6 +10,10 @@ using System.Windows.Forms;
 using System.Xml;
 using Advanced_Combat_Tracker;
 
+// Combatlog parser for Rappelz.
+// This is a parser plugin for Advanced Combat Tracker that parse combatlog files created
+// by the combatlog.lua lua module of rzfilter.
+
 // This parser needs skillnames.csv, statenames.csv and mobnames.csv files
 // To be able to parse skill, buffs and mobs names
 
