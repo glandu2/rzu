@@ -11,3 +11,4 @@ install(
 	DESTINATION ./
 	RENAME ${TARGET_NAME}_user_guide.md
 )
+install(DIRECTORY dist/ DESTINATION ./)
