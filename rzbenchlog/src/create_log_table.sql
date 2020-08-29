@@ -1,0 +1,20 @@
+﻿CREATE TABLE dbo.log(
+	log_date datetime NOT NULL,
+	thread_id int NOT NULL,
+	log_id int NOT NULL,
+	n1 bigint NOT NULL,
+	n2 bigint NOT NULL,
+	n3 bigint NOT NULL,
+	n4 bigint NOT NULL,
+	n5 bigint NOT NULL,
+	n6 bigint NOT NULL,
+	n7 bigint NOT NULL,
+	n8 bigint NOT NULL,
+	n9 bigint NOT NULL,
+	n10 bigint NOT NULL,
+	n11 bigint NOT NULL,
+	s1 varchar(255) NULL,
+	s2 varchar(255) NULL,
+	s3 varchar(255) NULL,
+	s4 varchar(255) NULL
+);
