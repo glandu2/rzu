@@ -1,16 +1,29 @@
-rzu
+rzu emu
 =======
 
-Root project for these sub-projects:
-* rzauth (Auth emu)
-* rzbenchauth (auth benchmark tool)
-* rzchatgateway (IRC <-> in-game chat gateway)
-* rzgamereconnect (GS autoreconnect to auth tool)
-* librzu
-* libuv
-* zlib
-* rztest
-* gtest
+rzemu is unified repository containing several tools and servers for various things.
+
+These servers and tool sub-projects are:
+* [rzauth](rzauth): Complete auth emu.
+* [rzbenchauth](rzbenchauth): auth benchmark tool.
+* [rzchatgateway](rzchatgateway): IRC <-> in-game chat gateway.
+* [rzgamereconnect](rzgamereconnect): GS autoreconnect to auth tool.
+* [rzauctionmonitor](rzauctionmonitor): Auctions monitoring tools, parsers and importer to a SQL database.
+* [rzbenchlog](rzbenchlog): log server benchmark tool.
+* [rzclientreconnect](rzclientreconnect) Tool to connect a client with multiple account at once, and allowing reconnecting them without closing the client.
+* [rzfilter](rzfilter) Packet filter tool, allowing to parse and/or modify them using lua scripts.
+* [rzgame](rzgame) Incomplete game server emu.
+* [rzlog](rzlog) Log server (to a file or SQL database) (potentially incomplete).
+* [rztest](rztest) Library used to implement unit tests for rzemu tools and servers.
+* [rztestgs](rztestgs) Incomplete game server tester tool.
+* [librzu](librzu) Library containing common stuff to all servers and tools.
+
+External dependencies (as git submodules):
+* libuv: Network and misc library allowing to be fully portable between Windows, Linux and other OSes.
+* zlib: Compression library
+* gtest: Google test, used for unit tests
+* libiconv: Charset conversion library
+* liblua: LUA VM library
 
 How to compile
 --------------
