@@ -1,4 +1,4 @@
-version: 5.1.{build}
+version: 5.2.{build}
 image: Visual Studio 2019
 environment:
   matrix:
@@ -91,4 +91,17 @@ test_script:
       7z a test_logs.zip crashdump.dmp log\ traffic_log\
       Push-AppveyorArtifact test_logs.zip
     }
-deploy: off
+deploy:
+  release: rzemu v$(APPVEYOR_BUILD_VERSION)
+  description: 'rzemu release v$(APPVEYOR_BUILD_VERSION)'
+  provider: GitHub
+  auth_token:
+    secure: BIuFpW5S/V5SGJ2UAnLNm/XSiBPemDobnPC2+9B3ElNYSfxdrCgvtHvAsTAA3d5h
+  artifact: /rzemu.*\.zip/  # upload all binaries package (not tests logs)
+  draft: false
+  prerelease: false
+  force_update: true
+  on:
+    branch: master                 # release from master branch only
+    APPVEYOR_REPO_TAG: true        # deploy on tag push only
+
