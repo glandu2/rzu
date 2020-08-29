@@ -1,44 +1,5 @@
 [submodule "libuv"]
 	path = libuv
-	url = http://docmiou-dnsalias.zapto.org:10617/cgit.cgi/libuv
-[submodule "libuv"]
-	path = libuv
-	url = http://docmiou-dnsalias.zapto.org:10617/cgit.cgi/libuv
-[submodule "libuv"]
-	path = libuv
-	url = ../libuv
-[submodule "zlib"]
-	path = zlib
-	url = ../zlib
-[submodule "gtest"]
-	path = gtest
-	url = ../gtest
-[submodule "libuv"]
-	path = libuv
-	url = ../libuv.git
-[submodule "zlib"]
-	path = zlib
-	url = ../zlib.git
-[submodule "gtest"]
-	path = gtest
-	url = ../gtest.git
-[submodule "libiconv"]
-	path = libiconv
-	url = ../libiconv.git
-[submodule "libuv"]
-	path = libuv
-	url = ../libuv
-[submodule "zlib"]
-	path = zlib
-	url = ../zlib
-[submodule "gtest"]
-	path = gtest
-	url = ../gtest
-[submodule "libiconv"]
-	path = libiconv
-	url = ../libiconv
-[submodule "libuv"]
-	path = libuv
 	url = ../libuv
 	branch = feature/cmake_support
 [submodule "zlib"]
