@@ -7,8 +7,6 @@
 #include "Core/Log.h"
 #include "LibRzuInit.h"
 
-class IListener;
-
 static void init() {
 	CFG_CREATE("ip", "127.0.0.1");
 	CFG_CREATE("port", 4516);
@@ -18,7 +16,7 @@ static void init() {
 }
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	init();
 	ConfigInfo::get()->init(argc, argv);
 	ConfigInfo::get()->dump();

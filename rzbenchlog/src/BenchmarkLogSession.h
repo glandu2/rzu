@@ -1,7 +1,4 @@
-#ifndef BenchmarkLogSession_H
-#define BenchmarkLogSession_H
-
-#include <string>
+#pragma once
 
 #include "Core/EventChain.h"
 #include "Core/Timer.h"
@@ -30,4 +27,3 @@ private:
 	Timer<BenchmarkLogSession> delayTimer;
 };
 
-#endif  // BenchmarkLogSession_H
