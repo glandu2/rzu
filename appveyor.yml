@@ -1,0 +1,95 @@
+version: 4.1.{build}
+image: Visual Studio 2019
+environment:
+  matrix:
+  - GENERATOR: Visual Studio 16 2019
+    BUILD_DIR: build-amd64
+    OPENSSL_ARCH: Win64
+install:
+- ps: >-
+    $openssl_download_page = wget "http://slproweb.com/products/Win32OpenSSL.html"
+
+    $openssl_latest_link = $openssl_download_page.ParsedHtml.getElementsByTagName("a") | where { $_.innerText -match "$env:OPENSSL_ARCH OpenSSL v[0-9\.a-zA-Z]+$" } | Select-Object -first 1
+
+    $openssl_latest_url = "https://slproweb.com/" + $openssl_latest_link.pathname
+
+
+    Write-Host "Using OpenSSL from $openssl_latest_url"
+
+
+    #Start-FileDownload $openssl_latest_url
+
+    #Start-Process $openssl_latest_link.nameProp -ArgumentList "/silent /verysilent /sp- /suppressmsgboxes" -Wait
+
+
+    Write-Host "Done installing OpenSSL"
+
+
+    Write-Host "Downloading SQLite ODBC Driver x64..."
+
+    $exePath = "$($env:TEMP)\sqliteodbc_w64.exe"
+
+    (New-Object Net.WebClient).DownloadFile('http://www.ch-werner.de/sqliteodbc/sqliteodbc_w64.exe', $exePath)
+
+    Write-Host "Installing..."
+
+    cmd /c start /wait $exePath /S
+
+
+    Write-Host "Done installing SQLite ODBC Driver x64"
+
+
+    git submodule -q update --init --recursive
+build_script:
+- cmd: >-
+    mkdir %BUILD_DIR%
+
+    cd %BUILD_DIR%
+
+
+    cmake .. -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=TRUE  -DCPACK_PACKAGE_VERSION=%APPVEYOR_BUILD_VERSION%
+
+    cmake --build . --target package --config RelWithDebInfo -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" || ver > nul
+
+    FOR %%f in (rzemu-*.zip) DO appveyor PushArtifact %%f
+test_script:
+- ps: >-
+    $env:PATH += ";C:\OpenSSL-${env:OPENSSL_ARCH}\bin"
+
+
+    echo "Running tests..."
+
+    try {
+    	$buffer = ""
+    	ctest -VV -C RelWithDebInfo | % {
+    		$match_test_end = $_ | Select-String "RzuTestPrinter.: \[\s+([A-Z]+)\s+\] ([0-9A-Za-z_\.]+) \(([0-9]+) ms\)$"
+    		$match_test_running = $_ | Select-String "RzuTestPrinter.: \[\s+RUN\s+\] ([0-9A-Za-z_\.]+)$"
+    		if($match_test_running) {
+    			$test_name = $match_test_running.matches[0].groups[1].value
+    			Add-AppveyorTest $test_name -Outcome Running
+    			$buffer = ""
+    		} elseif($match_test_end) {
+    			$test_name = $match_test_end.matches[0].groups[2].value
+    			$test_status = $match_test_end.matches[0].groups[1].value
+    			$test_duration = $match_test_end.matches[0].groups[3].value
+
+    			if("$test_status" -eq "OK") {
+    				Update-AppveyorTest $test_name -Outcome Passed -Duration $test_duration -StdOut $buffer
+    			} elseif("$test_status" -eq "FAILED") {
+    				Update-AppveyorTest $test_name -Outcome Failed -Duration $test_duration -StdOut $buffer
+    			} else {
+    				Update-AppveyorTest $test_name -Outcome Inconclusive -Duration $test_duration -StdOut $buffer
+    			}
+    			$buffer = ""
+    		} else {
+    			$buffer += $_ + "`n"
+    		}
+    		
+    		echo $_
+    	}
+    } finally {
+      echo "Compressing test logs"
+      7z a test_logs.zip crashdump.dmp log\ traffic_log\
+      Push-AppveyorArtifact test_logs.zip
+    }
+deploy: off
