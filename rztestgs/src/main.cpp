@@ -1,6 +1,7 @@
 #include "Config/ConfigInfo.h"
 #include "Config/GlobalCoreConfig.h"
 #include "Core/EventLoop.h"
+#include "Core/Log.h"
 #include "LibRzuInit.h"
 #include "TestGs.h"
 #include "rztestgsGitVersion.h"
@@ -10,7 +11,7 @@
 static void init();
 
 int main(int argc, char* argv[]) {
-	LibRzuInit();
+	LibRzuScopedUse useLibRzu;
 	init();
 	ConfigInfo::get()->init(argc, argv);
 	ConfigInfo::get()->dump();

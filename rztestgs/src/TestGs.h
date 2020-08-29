@@ -1,5 +1,4 @@
-#ifndef PLAYERCOUNTMONITOR_H
-#define PLAYERCOUNTMONITOR_H
+#pragma once
 
 #include "Core/IListener.h"
 #include "Core/Timer.h"
@@ -27,4 +26,3 @@ private:
 	int connectedTimes;
 };
 
-#endif  // PLAYERCOUNTMONITOR_H

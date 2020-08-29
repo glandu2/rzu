@@ -3,4 +3,4 @@ project(rzplayercount)
 
 set(TARGET_NAME rztestgs)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/src" src)
+add_subdirectory(src)
