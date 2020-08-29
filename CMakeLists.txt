@@ -221,9 +221,13 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzauctionmonitor/CMakeLists.txt")
   add_subdirectory(rzauctionmonitor)
 endif()
 
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rztestgs")
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rztestgs/CMakeLists.txt")
   add_subdirectory(rztestgs)
 endif()
+
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzrequester")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzrequester/CMakeLists.txt")
   add_subdirectory(rzrequester)
