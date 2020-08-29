@@ -110,12 +110,13 @@ void GameClientSession::sendServerPacketToClient(TS_SC_CHAT& packet) {
 	sendPacket(packet);
 }
 
-template<class Packet> void GameClientSession::sendClientPacketToServer(Packet& packet) {
-	if(!connectionToServer || !controlledServer)
-		return;
+template<class Packet>
+void GameClientSession::sendClientPacketToServer(Packet& packet) {
+        if(!connectionToServer || !controlledServer)
+                return;
 
-	convertPacketHandles(controlledServer, packet);
-	controlledServer->onClientPacketReceived(packet);
+        convertPacketHandles(controlledServer, packet);
+        controlledServer->onClientPacketReceived(packet);
 }
 
 template<class Packet> struct GameClientSession::ConvertHandlesFunctor {
@@ -154,6 +155,7 @@ void GameClientSession::onServerPacket(ConnectionToServer* connection, const TS_
 		bool packetProcessed = processPacket<ConvertHandlesFunctor>(
 		    SessionType::GameClient,
 		    SessionPacketOrigin::Server,
+		    packetVersion,
 		    packet->id,
 		    dummy,
 		    this,
@@ -575,18 +577,20 @@ EventChain<PacketSession> GameClientSession::onPacketReceived(const TS_MESSAGE* 
 
 	bool forwardPacket = true;
 
-	switch(packet->id) {
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::GameClient, SessionPacketOrigin::Client, packetVersion);
+	switch(packetType) {
 		case TS_CS_ACCOUNT_WITH_AUTH::packetID:
 			packet->process(this, &GameClientSession::onAccountWithAuth, packetVersion);
 			forwardPacket = false;
 			break;
 
-			case_packet_is(TS_CS_CHARACTER_LIST);
+		case TS_CS_CHARACTER_LIST::packetID:
 			packet->process(this, &GameClientSession::onCharacterList, packetVersion);
 			forwardPacket = false;
 			break;
 
-			case_packet_is(TS_CS_LOGIN);
+		case TS_CS_LOGIN::packetID:
 			packet->process(this, &GameClientSession::onLogin, packetVersion);
 			forwardPacket = false;
 			break;
@@ -605,6 +609,7 @@ EventChain<PacketSession> GameClientSession::onPacketReceived(const TS_MESSAGE* 
 		bool packetProcessed = processPacket<ConvertHandlesFunctor>(
 		    SessionType::GameClient,
 		    SessionPacketOrigin::Client,
+		    packetVersion,
 		    packet->id,
 		    dummy,
 		    this,

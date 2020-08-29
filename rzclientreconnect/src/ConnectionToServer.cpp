@@ -72,10 +72,12 @@ void ConnectionToServer::onConnected(EventTag<AutoClientSession>) {
 }
 
 void ConnectionToServer::onPacketReceived(const TS_MESSAGE* packet, EventTag<AutoClientSession>) {
-	switch(packet->id) {
-		case_packet_is(TS_SC_ENTER);
-		packet->process(this, &ConnectionToServer::onEnter, packetVersion);
-		break;
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::GameClient, SessionPacketOrigin::Server, packetVersion);
+	switch(packetType) {
+		case TS_SC_ENTER::packetID:
+			packet->process(this, &ConnectionToServer::onEnter, packetVersion);
+			break;
 		case TS_SC_LEAVE::packetID:
 			packet->process(this, &ConnectionToServer::onLeave, packetVersion);
 			break;
@@ -125,7 +127,7 @@ void ConnectionToServer::onPacketReceived(const TS_MESSAGE* packet, EventTag<Aut
 			packet->process(this, &ConnectionToServer::onSummonNotice, packetVersion);
 			break;
 
-			case_packet_is(TS_SC_LOGIN_RESULT);
+		case TS_SC_LOGIN_RESULT::packetID:
 			packet->process(this, &ConnectionToServer::onLoginResult, packetVersion);
 			break;
 		case TS_SC_CHAT::packetID:

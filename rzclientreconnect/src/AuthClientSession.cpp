@@ -22,7 +22,9 @@ AuthClientSession::AuthClientSession()
 AuthClientSession::~AuthClientSession() {}
 
 EventChain<PacketSession> AuthClientSession::onPacketReceived(const TS_MESSAGE* packet) {
-	switch(packet->id) {
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::AuthClient, SessionPacketOrigin::Client, packetVersion);
+	switch(packetType) {
 		case TS_CA_VERSION::packetID:
 			packet->process(this, &AuthClientSession::onVersion, packetVersion);
 			break;
