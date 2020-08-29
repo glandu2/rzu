@@ -1,4 +1,4 @@
-version: 4.1.{build}
+version: 5.1.{build}
 image: Visual Studio 2019
 environment:
   matrix:
@@ -8,9 +8,9 @@ environment:
 install:
 - ps: >-
     $openssl_download_page = wget "http://slproweb.com/products/Win32OpenSSL.html"
-
-    $openssl_latest_link = $openssl_download_page.ParsedHtml.getElementsByTagName("a") | where { $_.innerText -match "$env:OPENSSL_ARCH OpenSSL v[0-9\.a-zA-Z]+$" } | Select-Object -first 1
-
+    
+    $openssl_latest_link = $openssl_download_page.ParsedHtml.getElementsByTagName("a") | where { $_.href -match "$($env:OPENSSL_ARCH)OpenSSL-[0-9\.a-zA-Z]+" } | Select-Object -first 1
+    
     $openssl_latest_url = "https://slproweb.com/" + $openssl_latest_link.pathname
 
 
@@ -18,7 +18,7 @@ install:
 
 
     #Start-FileDownload $openssl_latest_url
-
+    
     #Start-Process $openssl_latest_link.nameProp -ArgumentList "/silent /verysilent /sp- /suppressmsgboxes" -Wait
 
 
@@ -43,22 +43,21 @@ install:
 build_script:
 - cmd: >-
     mkdir %BUILD_DIR%
-
+    
     cd %BUILD_DIR%
 
-
+    
     cmake .. -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=TRUE  -DCPACK_PACKAGE_VERSION=%APPVEYOR_BUILD_VERSION%
-
+    
     cmake --build . --target package --config RelWithDebInfo -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" || ver > nul
-
+    
     FOR %%f in (rzemu-*.zip) DO appveyor PushArtifact %%f
 test_script:
 - ps: >-
     $env:PATH += ";C:\OpenSSL-${env:OPENSSL_ARCH}\bin"
 
-
     echo "Running tests..."
-
+    
     try {
     	$buffer = ""
     	ctest -VV -C RelWithDebInfo | % {
