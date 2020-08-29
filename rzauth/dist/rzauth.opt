@@ -1,0 +1,89 @@
+##########################
+# Database configuration
+##########################
+
+auth.db.server:127.0.0.1
+auth.db.port:1433
+auth.db.name:Auth
+auth.db.account:sa
+
+# MD5 salt
+auth.db.salt:2011
+
+# The password is in plain text for auth.db.password if you have one (either auth.db.password or auth.db.cryptedpassword)
+auth.db.password:
+
+# Use auth.db.cryptedpassword instead of auth.db.password to use an encrypted password
+# To use it, comment auth.db.password and uncomment this line
+#auth.db.cryptedpassword:<password encrypted using Pyrok tool>
+
+##########################
+# IP / Port configuration
+##########################
+
+# Where clients will connect (this is default values)
+auth.clients.ip:0.0.0.0
+auth.clients.port:4500
+
+# Where the gameserver will connect (this is default values)
+auth.gameserver.ip:127.0.0.1
+auth.gameserver.port:4502
+
+# Where the gameserver will connect (this is default values)
+upload.gameserver.ip:127.0.0.1
+upload.gameserver.port:4616
+
+# Upload configuration, use "upload" folder for guild icons
+upload.dir=upload
+upload.clients.ip=0.0.0.0
+upload.clients.port=4617
+# Use port 5000 for the guild icon mini webserver, you will need to ajust the GS configuration to point to that port
+upload.iconserver.ip=0.0.0.0
+upload.iconserver.port:5000
+
+# Note: here is the configuration to put in the *GS* to configure the guild icons
+#gameserver.opt:
+# S game.guild_icon_base_url:/
+# S game.url_list:guild_icon_upload.ip|< auth emu external IP >|guild_icon_upload.port|< value of upload.clients.port >|guild_test_download.url|upload/|web_download|< auth emu external IP >:< value of upload.iconserver.port >
+
+
+############################
+# SQL queries configuration
+############################
+
+# SQL query available parameters (-1 if not used, else 1 for the first parameter, and so on)
+#sql.db_account.param.account:1
+#sql.db_account.param.password:2
+#sql.db_account.param.ip:-1
+# Default SQL query used to get account data from database
+#sql.db_account.query:SELECT * FROM account WHERE account = ? AND password = ?;
+
+# Configure security password query. If this query return at least one row, the security password is accepted
+#sql.db_securitynocheck.query:SELECT securty_no FROM account WHERE account = ? AND securty_no = ?;
+
+
+# You can also use a stored procedure instead of plain SQL queries if using SQL Server:
+#sql.db_account.param.account:1
+#sql.db_account.param.ip:2
+#sql.db_account.param.password:3
+#sql.db_account.query:{CALL smp_account(?, ?, ?)}
+#sql.db_updatelastserveridx.param.accountid:1
+#sql.db_updatelastserveridx.param.serveridx:2
+#sql.db_updatelastserveridx.query:{CALL smp_update_last_login_server_idx(?, ?)}
+#sql.db_securitynocheck.param.account:1
+#sql.db_securitynocheck.param.securityno:2
+#sql.db_securitynocheck.query:{CALL smp_check_security(?, ?)}
+
+##########################
+# Logging level
+##########################
+
+# This one set the level for both the log file and the console unless consolelevel is set
+# available levels: fatal, error, warning, info, debug, trace
+#core.log.level:info
+
+# This one set the log level for the console only
+#core.log.consolelevel:info
+
+# Enable traffic dump, will be in traffic_log folder (default off)
+#trafficdump.enable:true
