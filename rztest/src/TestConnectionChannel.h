@@ -21,6 +21,11 @@ template<typename T> class cval;
 	ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type); \
 	ASSERT_NE(nullptr, packet)
 
+#define AGET_PACKET_WITH_ID(type_, id_) \
+	event.getPacket<type_>(id_); \
+	ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type); \
+	ASSERT_NE(nullptr, packet)
+
 #define DESERIALIZE_PACKET(target, version) \
 	ASSERT_EQ(TestConnectionChannel::Event::Packet, event.type); \
 	ASSERT_EQ(true, event.deserializePacket(target, version));
@@ -39,14 +44,15 @@ public:
 		const TS_MESSAGE* packet;
 
 		template<typename T>
-		typename std::enable_if<std::is_base_of<TS_MESSAGE, T>::value, const T*>::type getPacket() {
+		typename std::enable_if<std::is_base_of<TS_MESSAGE, T>::value, const T*>::type getPacket(
+		    uint16_t expectedId = T::packetID) {
 			const T* p = static_cast<const T*>(packet);
 			if(!p)
 				return nullptr;
 
 			// force taking the value instead of reference to packetID
-			EXPECT_EQ((const uint16_t) T::packetID, p->id);
-			if(p->id == T::packetID)
+			EXPECT_EQ(expectedId, p->id);
+			if(p->id == expectedId)
 				return p;
 			else
 				return nullptr;
@@ -203,4 +209,3 @@ private:
 	std::list<EventCallback> eventCallbacks;
 	RzTest* test;
 };
-

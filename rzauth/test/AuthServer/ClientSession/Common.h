@@ -16,7 +16,7 @@ void sendAccountDESDouble(TestConnectionChannel* channel, const char* account, c
 
 RSA* createRSAKey();
 void freeRSAKey(RSA* rsaCipher);
-void sendRSAKey(RSA* rsaCipher, TestConnectionChannel* channel);
+void sendRSAKey(RSA* rsaCipher, TestConnectionChannel* channel, uint16_t id = 0);
 void parseAESKey(RSA* rsaCipher, const TS_AC_AES_KEY_IV* packet, unsigned char aes_key_iv[]);
 template<typename PacketType>
 void prepareAccountRSAPacket(unsigned char aes_key_iv[32],
@@ -47,4 +47,3 @@ void addClientLoginToServerListScenario(TestConnectionChannel& auth,
                                         const char* version = "201501120");
 
 }  // namespace AuthServer
-

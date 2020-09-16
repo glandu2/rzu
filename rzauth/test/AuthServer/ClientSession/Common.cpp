@@ -79,7 +79,7 @@ void freeRSAKey(RSA* rsaCipher) {
 	RSA_free(rsaCipher);
 }
 
-void sendRSAKey(RSA* rsaCipher, TestConnectionChannel* channel) {
+void sendRSAKey(RSA* rsaCipher, TestConnectionChannel* channel, uint16_t id) {
 	TS_CA_RSA_PUBLIC_KEY* keyMsg;
 	int public_key_size;
 
@@ -88,6 +88,11 @@ void sendRSAKey(RSA* rsaCipher, TestConnectionChannel* channel) {
 
 	public_key_size = BIO_get_mem_data(b, NULL);
 	keyMsg = TS_MESSAGE_WNA::create<TS_CA_RSA_PUBLIC_KEY, unsigned char>(public_key_size);
+
+	if(id) {
+		keyMsg->id = id;
+		keyMsg->msg_check_sum = TS_MESSAGE::checkMessage(keyMsg);
+	}
 
 	keyMsg->key_size = public_key_size;
 

@@ -51,14 +51,13 @@ EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 }
 
 EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
-	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
-	    packet->id, SessionType::AuthClient, SessionPacketOrigin::Client, packetVersion);
-	switch(packetType) {
+	switch(packet->id) {
 		case TS_CA_VERSION::packetID:
 			onVersion(static_cast<const TS_CA_VERSION*>(packet));
 			break;
 
 		case TS_CA_RSA_PUBLIC_KEY::packetID:
+		case TS_CA_RSA_PUBLIC_KEY::packetID2:
 			onRsaKey(static_cast<const TS_CA_RSA_PUBLIC_KEY*>(packet));
 			break;
 
@@ -145,6 +144,15 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 
 	std::unique_ptr<TS_AC_AES_KEY_IV, void (*)(TS_MESSAGE*)> aesKeyMessage(
 	    TS_MESSAGE_WNA::create<TS_AC_AES_KEY_IV, unsigned char>(RSA_size(rsaCipher.get())), &TS_MESSAGE_WNA::destroy);
+
+	if(packet->id == TS_CA_RSA_PUBLIC_KEY::packetID2) {
+		log(LL_Debug,
+		    "RSA: using new %d/%d packet IDs for AES key\n",
+		    TS_CA_RSA_PUBLIC_KEY::packetID2,
+		    TS_AC_AES_KEY_IV::packetID2);
+		aesKeyMessage->id = TS_AC_AES_KEY_IV::packetID2;
+		aesKeyMessage->msg_check_sum = TS_MESSAGE::checkMessage(aesKeyMessage.get());
+	}
 
 	for(int i = 0; i < 32; i++)
 		aesKey[i] = rand() & 0xFF;

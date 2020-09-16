@@ -53,6 +53,32 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, valid) {
 	test.run();
 }
 
+TEST_F(TS_CA_ACCOUNT_RSA_Test, valid_new_ids) {
+	RzTest test;
+	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
+
+	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+		ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
+		AuthServer::sendVersion(channel);
+		sendRSAKey(rsaCipher, channel, TS_CA_RSA_PUBLIC_KEY::packetID2);
+	});
+
+	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+		const TS_AC_AES_KEY_IV* packet = AGET_PACKET_WITH_ID(TS_AC_AES_KEY_IV, TS_AC_AES_KEY_IV::packetID2);
+		parseAESKey(rsaCipher, packet, aes_key_iv);
+		sendAccountRSA(aes_key_iv, channel, "test1", "admin");
+	});
+
+	auth.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+		AuthServer::expectAuthResult(event, TS_RESULT_SUCCESS, TS_AC_RESULT::LSF_EULA_ACCEPTED);
+		channel->closeSession();
+	});
+
+	test.addChannel(&auth);
+	auth.start();
+	test.run();
+}
+
 TEST_F(TS_CA_ACCOUNT_RSA_Test, invalid_account) {
 	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
