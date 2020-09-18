@@ -189,7 +189,7 @@ bool DbQueryBinding::process(IDbQueryJob* queryJob) {
 		if(mode != EM_NoRow) {
 			log(LL_Trace, "Fetching data\n");
 			std::vector<const ColumnBinding*> currentColumnBinding;
-			getDataErrorOccured = !getColumnsMapping(connection, &currentColumnBinding);
+			getColumnsMapping(connection, &currentColumnBinding);
 
 			size_t rowFetched = 0;
 			while(connection->fetch() && (rowFetched == 0 || mode == EM_MultiRows)) {
