@@ -269,7 +269,7 @@ bool DbQueryBinding::processBatch(IDbQueryJob* queryJob) {
 	connection->setAutoCommit(false);
 
 	size_t inputNumber = queryJob->getInputNumber();
-	paramStatus.resize(inputNumber, SQL_PARAM_UNUSED);
+	paramStatus.resize(inputNumber, SQL_PARAM_SUCCESS);
 	connection->setAttribute(SQL_ATTR_PARAM_BIND_TYPE, (void*) queryJob->getInputSize(), 0);
 	connection->setAttribute(SQL_ATTR_PARAMSET_SIZE, (void*) inputNumber, 0);
 	connection->setAttribute(SQL_ATTR_PARAM_STATUS_PTR, (void*) paramStatus.data(), 0);
@@ -362,7 +362,7 @@ bool DbQueryBinding::processBatch(IDbQueryJob* queryJob) {
 
 					case SQL_PARAM_UNUSED:
 						result = SQL_SUCCESS;
-						statusStr = "result unused";
+						statusStr = "parameter unused";
 						break;
 
 					case SQL_PARAM_DIAG_UNAVAILABLE:
@@ -417,7 +417,7 @@ bool DbQueryBinding::processBatch(IDbQueryJob* queryJob) {
 
 				case SQL_PARAM_UNUSED:
 					result = SQL_ERROR;
-					statusStr = "result unused";
+					statusStr = "parameter unused";
 					break;
 
 				case SQL_PARAM_DIAG_UNAVAILABLE:
@@ -433,11 +433,12 @@ bool DbQueryBinding::processBatch(IDbQueryJob* queryJob) {
 
 			if(!connection->checkResult(result, "SQLExecute")) {
 				if(parameterBindings.empty()) {
-					log(LL_Error, "DB query %s failed at input %d: %s\n", queryStr.c_str(), (int) i, statusStr);
+					log(LL_Warning, "DB query %s warning at input %d: %s\n", queryStr.c_str(), (int) i, statusStr);
 				} else {
-					log(LL_Error,
-					    "DB query %s: %s\nParameters:\n%s",
+					log(LL_Warning,
+					    "DB query %s warning at input %d: %s\nParameters:\n%s",
 					    queryStr.c_str(),
+					    (int) i,
 					    statusStr,
 					    logParameters(queryJob->getInputPointer(i)).c_str());
 				}
