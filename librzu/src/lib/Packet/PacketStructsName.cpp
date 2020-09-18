@@ -70,7 +70,7 @@ const PacketInfo* getPacketMetadata(uint16_t id,
 				return &packetInfo;
 		}
 	}
-	Object::logStatic(Object::LL_Error,
+	Object::logStatic(Object::LL_Debug,
 	                  "convertPacketIdToTypeId",
 	                  "Unknown packet ID %u for session type %u, origin %u and version 0x%x\n",
 	                  id,
