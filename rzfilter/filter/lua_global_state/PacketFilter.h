@@ -33,8 +33,11 @@ private:
 	GlobalLuaState();
 	~GlobalLuaState();
 
+	void closeLuaVM();
+	void createLuaVM();
 	void initLuaVM();
 	void deinitLuaVM();
+
 	static int luaPrintToLogs(lua_State* L);
 
 	bool luaCallPacket(int function,
@@ -64,11 +67,34 @@ private:
 
 private:
 	lua_State* L = nullptr;
-	int lua_onServerPacketFunction = LUA_NOREF;
-	int lua_onClientPacketFunction = LUA_NOREF;
-	int lua_onUnknownPacketFunction = LUA_NOREF;
-	int lua_onClientConnectedFunction = LUA_NOREF;
-	int lua_onClientDisconnectedFunction = LUA_NOREF;
+
+	struct LuaScriptFunctionRef {
+		const char* const name;
+		const char* const signature;
+		int ref;
+
+		LuaScriptFunctionRef(const char* name, const char* signature)
+		    : name(name), signature(signature), ref(LUA_NOREF) {}
+	};
+
+	LuaScriptFunctionRef lua_onServerPacketFunction{
+	    "onServerPacket",
+	    "bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* "
+	    "packet, ServerType serverType)"};
+	LuaScriptFunctionRef lua_onClientPacketFunction{
+	    "onClientPacket",
+	    "bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* "
+	    "packet, ServerType serverType)"};
+	LuaScriptFunctionRef lua_onUnknownPacketFunction{
+	    "onUnknownPacket",
+	    "bool onUnknownPacket(IFilterEndpoint* fromEndpoint, IFilterEndpoint* toEndpoint, int "
+	    "packetId, ServerType serverType, bool isServerPacket)"};
+	LuaScriptFunctionRef lua_onClientConnectedFunction{
+	    "onClientConnected", "bool onClientConnected(IFilterEndpoint* client, IFilterEndpoint* server)"};
+	LuaScriptFunctionRef lua_onClientDisconnectedFunction{
+	    "onClientDisconnected", "bool onClientDisconnected(IFilterEndpoint* client, IFilterEndpoint* server)"};
+
+	const std::vector<LuaScriptFunctionRef*> luaFunctions;
 
 	Timer<GlobalLuaState> reloadCheckTimer;
 	time_t currentLuaFileMtime;
