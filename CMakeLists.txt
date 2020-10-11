@@ -103,6 +103,18 @@ endif()
 # Compile subprojects if existing
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "deps")
 
+include(FetchContent)
+FetchContent_Declare(
+  curl
+  URL     https://github.com/curl/curl/releases/download/curl-7_72_0/curl-7.72.0.tar.xz
+)
+
+set(HTTP_ONLY ON)
+set(CMAKE_USE_OPENSSL ON)
+set(BUILD_CURL_EXE OFF)
+set(BUILD_TESTING OFF)
+FetchContent_MakeAvailable(curl)
+
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
   add_subdirectory(libuv)
   install_pdb("uv")

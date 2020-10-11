@@ -95,10 +95,11 @@ private:
 // >= 10000: -= 1000
 #define EPIC_9_6_3 0x090603  // GS packet ID modified with version 20200713
 
+#define EPIC_9_6_4 0x090604  // GS packet ID modified with version 20200922
+
 // Latest released epic
-#define EPIC_LATEST EPIC_9_6_3
+#define EPIC_LATEST EPIC_9_6_4
 
 // Flags
 
 #define EPIC_FLAG_TESTSERVER 1
-

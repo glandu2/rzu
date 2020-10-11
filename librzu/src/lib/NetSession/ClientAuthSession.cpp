@@ -4,8 +4,11 @@
 #include "Cipher/RsaCipher.h"
 #include "ClientGameSession.h"
 #include "Config/GlobalCoreConfig.h"
+#include "Core/EventLoop.h"
 #include "Packet/PacketEpics.h"
+#include "Stream/Curl.h"
 
+#include "AuthClient/TS_AC_ACCOUNT_NAME.h"
 #include "AuthClient/TS_AC_AES_KEY_IV.h"
 #include "AuthClient/TS_AC_RESULT.h"
 #include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
@@ -96,6 +99,10 @@ EventChain<PacketSession> ClientAuthSession::onPacketReceived(const TS_MESSAGE* 
 			packet->process(this, &ClientAuthSession::onPacketAuthPasswordKey, packetVersion);
 			break;
 
+		case TS_AC_ACCOUNT_NAME::packetID:
+			packet->process(this, &ClientAuthSession::onPacketAccountName, packetVersion);
+			break;
+
 		case TS_AC_RESULT::packetID:
 			packet->process(this, &ClientAuthSession::onPacketAuthResult, packetVersion);
 			break;
@@ -171,38 +178,95 @@ EventChain<SocketSession> ClientAuthSession::onConnected() {
 }
 
 void ClientAuthSession::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) {
-	TS_CA_ACCOUNT accountMsg;
-	std::vector<uint8_t> encryptedPassword;
-
 	if(!rsaCipher.privateDecrypt(packet->data.data(), packet->data.size(), aesKey) || aesKey.size() != 32) {
 		log(LL_Warning, "onPacketAuthPasswordKey: invalid decrypted data size: %d\n", (int) aesKey.size());
 		closeSession();
 		return;
 	}
 
-	AesPasswordCipher aesCipher;
-	aesCipher.init(aesKey.data());
+	if(username != "bora") {
+		TS_CA_ACCOUNT accountMsg;
+		std::vector<uint8_t> encryptedPassword;
+		AesPasswordCipher aesCipher;
+		aesCipher.init(aesKey.data());
 
-	if(!aesCipher.encrypt((const uint8_t*) password.c_str(), password.size(), encryptedPassword)) {
-		log(LL_Warning, "onPacketAuthPasswordKey: could not encrypt password !\n");
-		closeSession();
-		return;
+		if(!aesCipher.encrypt((const uint8_t*) password.c_str(), password.size(), encryptedPassword)) {
+			log(LL_Warning, "onPacketAuthPasswordKey: could not encrypt password !\n");
+			closeSession();
+			return;
+		}
+
+		if(encryptedPassword.size() > sizeof(accountMsg.passwordAes.password)) {
+			log(LL_Warning, "onPacketAuthPasswordKey: encrypted password too large !\n");
+			closeSession();
+			return;
+		}
+
+		memcpy(accountMsg.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
+		accountMsg.passwordAes.password_size = (int) encryptedPassword.size();
+
+		accountMsg.account = username;
+		sendPacket(accountMsg);
+	} else {
+		if(!curl)
+			curl.reset(new Curl);
+		char cookies[128];
+		snprintf(cookies, sizeof(cookies), "SESSION=%s;", password.c_str());
+
+		log(LL_Debug, "Using bora login with session %s\n", password.c_str());
+
+		CURLM* curlHandle = curl_easy_init();
+		curl_easy_setopt(
+		    curlHandle, CURLOPT_URL, GlobalCoreConfig::get()->client.boraCodeGeneratorCommand.get().c_str());
+		curl_easy_setopt(curlHandle, CURLOPT_NOBODY, 1);
+		curl_easy_setopt(curlHandle, CURLOPT_COOKIE, cookies);
+		curl_easy_setopt(curlHandle, CURLOPT_VERBOSE, 1);
+
+		curl_easy_setopt(curlHandle, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_easy_setopt(curlHandle, CURLOPT_SSL_VERIFYPEER, 0);
+
+		curl->addHandle(
+		    curlHandle,
+		    [](CURLM* curlHandle, CURLcode result, void* arg) {
+			    ClientAuthSession* thisInstance = (ClientAuthSession*) arg;
+			    const char* location = nullptr;
+			    long httpStatus = -1;
+
+			    if(result != CURLE_OK) {
+				    thisInstance->log(LL_Error, "Failed to query URL: %d\n", result);
+				    thisInstance->closeSession();
+			    } else if(curl_easy_getinfo(curlHandle, CURLINFO_RESPONSE_CODE, &httpStatus) != CURLE_OK ||
+			              httpStatus >= 400) {
+				    thisInstance->log(LL_Error, "OAuth Server replied HTTP error code %ld\n", httpStatus);
+				    thisInstance->closeSession();
+			    } else if(curl_easy_getinfo(curlHandle, CURLINFO_REDIRECT_URL, &location) != CURLE_OK ||
+			              location == nullptr) {
+				    thisInstance->log(
+				        LL_Error, "URL has no location (not a redirect?), http status is %ld\n", httpStatus);
+				    thisInstance->closeSession();
+			    } else {
+				    thisInstance->log(LL_Info, "Received location: %s with http status %ld\n", location, httpStatus);
+				    const char* lastEqualPos = strstr(location, "code=");
+
+				    if(lastEqualPos) {
+					    TS_CA_ACCOUNT accountMsg;
+
+					    memset(accountMsg.passwordAes.password, 0, sizeof(accountMsg.passwordAes.password));
+					    strcpy((char*) accountMsg.passwordAes.password, lastEqualPos + 5);
+					    accountMsg.passwordAes.password_size = 0;
+					    accountMsg.account = "bora";
+					    thisInstance->sendPacket(accountMsg);
+				    } else {
+					    thisInstance->log(LL_Error, "Cannot find '=' in redirected url %s\n", location);
+					    thisInstance->closeSession();
+				    }
+			    }
+		    },
+		    this);
 	}
-
-	if(encryptedPassword.size() > sizeof(accountMsg.passwordAes.password)) {
-		log(LL_Warning, "onPacketAuthPasswordKey: encrypted password too large !\n");
-		closeSession();
-		return;
-	}
-
-	memcpy(accountMsg.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
 
 	// password.fill(0);
 	password.clear();
-
-	accountMsg.account = username;
-	accountMsg.passwordAes.password_size = (int) encryptedPassword.size();
-	sendPacket(accountMsg);
 }
 
 void ClientAuthSession::onPacketServerList(const TS_AC_SERVER_LIST* packet) {
@@ -282,6 +346,10 @@ void ClientAuthSession::onPacketSelectServerResult(const TS_AC_SELECT_SERVER* pa
 
 	std::vector<ServerConnectionInfo> empty;
 	serverList.swap(empty);
+}
+
+void ClientAuthSession::onPacketAccountName(const TS_AC_ACCOUNT_NAME* packet) {
+	username = packet->account;
 }
 
 void ClientAuthSession::onPacketAuthResult(const TS_AC_RESULT* packet) {

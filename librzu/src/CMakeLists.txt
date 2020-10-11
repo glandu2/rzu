@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.12)
 
 file(GLOB_RECURSE SOURCE_FILES *.cpp)
 file(GLOB_RECURSE HEADER_FILES *.h *.inl)
@@ -80,9 +80,10 @@ if( versioncmakefound )
 	add_git_version_info(${TARGET_NAME}_GitVersion SOURCE_FILES)
 endif()
 
+
 find_package(OpenSSL REQUIRED)
 find_package(ODBC REQUIRED)
-set(LIBS uv ${OPENSSL_LIBRARIES} z iconv ${ODBC_LIBRARY})
+set(LIBS uv ${OPENSSL_LIBRARIES} z iconv ${ODBC_LIBRARY} CURL::libcurl)
 if(WIN32)
 	list(APPEND LIBS dbghelp)
 endif()
@@ -103,22 +104,33 @@ if(BUILD_SHARED_LIBS)
 		)
 endif()
 
+# Install libcurl and OpenSSL DLLs on Windows
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 	if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-		set(OPENSSL_LIBCRYPTO_PREFIX "-x64")
+		set(DLL_LIB_SUFFIX "-x64")
 	else()
-		set(OPENSSL_LIBCRYPTO_PREFIX "")
+		set(DLL_LIB_SUFFIX "")
 	endif()
 
 	find_file(OPENSSL_LIBEAY32_DLL
 		NAMES
 		"libeay32.dll"
-		"libcrypto-${OPENSSL_VERSION_MAJOR}_${OPENSSL_VERSION_MINOR}${OPENSSL_LIBCRYPTO_PREFIX}.dll"
+		"libcrypto-${OPENSSL_VERSION_MAJOR}_${OPENSSL_VERSION_MINOR}${DLL_LIB_SUFFIX}.dll"
 		HINTS
 		${OPENSSL_INCLUDE_DIR}/../bin
 		NO_DEFAULT_PATH)
 	if(OPENSSL_LIBEAY32_DLL)
 		install(PROGRAMS ${OPENSSL_LIBEAY32_DLL} DESTINATION ./ COMPONENT "deps")
+	endif()
+
+	find_file(OPENSSL_LIBSSL_DLL
+		NAMES
+		"libssl-${OPENSSL_VERSION_MAJOR}_${OPENSSL_VERSION_MINOR}${DLL_LIB_SUFFIX}.dll"
+		HINTS
+		${OPENSSL_INCLUDE_DIR}/../bin
+		NO_DEFAULT_PATH)
+	if(OPENSSL_LIBSSL_DLL)
+		install(PROGRAMS ${OPENSSL_LIBSSL_DLL} DESTINATION ./ COMPONENT "deps")
 	endif()
 endif()
 

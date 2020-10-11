@@ -43,10 +43,16 @@ struct RZU_EXTERN GlobalCoreConfig : public IListener {
 	struct Client {
 		cval<std::string>& authVersion;
 		cval<std::string>& gameVersion;
+		cval<std::string>& boraCodeGeneratorCommand;
 
 		Client()
 		    : authVersion(CFG_CREATE("client.auth_version", "201507080")),
-		      gameVersion(CFG_CREATE("client.game_version", "20200713")) {}
+		      gameVersion(CFG_CREATE("client.game_version", "20200922")),
+		      boraCodeGeneratorCommand(
+		          CFG_CREATE("client.bora_command",
+		                     "https://accounts.boraecosystem.com/member/oauth/"
+		                     "authorize?response_type=code&client_id=rAu3fzNDKd1QgEsL&redirect_uri=https://"
+		                     "accounts.boraecosystem.com/member/oauth/pub")) {}
 	} client;
 
 	struct AdminConfig {

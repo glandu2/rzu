@@ -3,11 +3,14 @@
 #include "EncryptedSession.h"
 #include "PacketEnums.h"
 #include "PacketSession.h"
+#include <memory>
 #include <stdint.h>
 #include <string>
+#include <uv.h>
 #include <vector>
 
 struct TS_MESSAGE;
+struct TS_AC_ACCOUNT_NAME;
 struct TS_AC_SERVER_LIST;
 struct TS_AC_SELECT_SERVER;
 struct TS_AC_AES_KEY_IV;
@@ -18,6 +21,7 @@ struct TS_AC_RESULT_WITH_STRING;
 class ClientGameSession;
 class DesPasswordCipher;
 class RsaCipher;
+class Curl;
 
 class RZU_EXTERN ClientAuthSession : public EncryptedSession<PacketSession> {
 	DECLARE_CLASS(ClientAuthSession)
@@ -64,6 +68,7 @@ private:
 	void onPacketServerList(const TS_AC_SERVER_LIST* packet);
 	void onPacketSelectServerResult(const TS_AC_SELECT_SERVER* packet);
 	void onPacketGameAuthResult(const TS_SC_RESULT* packet);
+	void onPacketAccountName(const TS_AC_ACCOUNT_NAME* packet);
 	void onPacketAuthResult(const TS_AC_RESULT* packet);
 	void onPacketAuthStringResult(const TS_AC_RESULT_WITH_STRING* packet);
 
@@ -96,8 +101,10 @@ private:
 	int selectedServer;
 	uint64_t oneTimePassword;
 	bool normalDisconnect;
+	uv_process_t boraCommandProcess;
+	uv_pipe_t boraCommandProcessPipe;
+	std::unique_ptr<Curl> curl;
 
 	static DesPasswordCipher desCipher;
 	static RsaCipher rsaCipher;
 };
-
