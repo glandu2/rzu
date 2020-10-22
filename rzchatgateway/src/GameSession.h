@@ -24,7 +24,7 @@ public:
 	            uint16_t port,
 	            const std::string& account,
 	            const std::string& password,
-	            int serverIdx,
+	            const std::string& serverName,
 	            const std::string& playername,
 	            int epic,
 	            int delayTime = 5000,
@@ -52,4 +52,3 @@ private:
 	std::vector<TS_CS_CHAT_REQUEST> messageQueue;
 	std::unordered_map<unsigned int, std::string> playerNames;
 };
-

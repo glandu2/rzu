@@ -26,7 +26,7 @@ public:
 	AuctionWorker(AuctionManager* auctionManager,
 	              cval<std::string>& ip,
 	              cval<int>& port,
-	              cval<int>& serverIdx,
+	              cval<std::string>& serverName,
 	              cval<int>& delayTime,
 	              cval<int>& autoRecoDelay,
 	              const std::string& account,
@@ -64,4 +64,3 @@ private:
 
 	Callback<StoppedCallback> stopCallback;
 };
-

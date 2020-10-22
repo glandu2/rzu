@@ -24,12 +24,12 @@ GameSession::GameSession(const std::string& ip,
                          uint16_t port,
                          const std::string& account,
                          const std::string& password,
-                         int serverIdx,
+                         const std::string& serverName,
                          const std::string& playername,
                          int epic,
                          int delayTime,
                          int ggRecoTime)
-    : AutoClientSession(ip, port, account, password, serverIdx, playername, epic, true, delayTime, ggRecoTime) {}
+    : AutoClientSession(ip, port, account, password, serverName, playername, epic, true, delayTime, ggRecoTime) {}
 
 void GameSession::onClockExpired() {
 	uint32_t gameTime = getGameTime() * 10;

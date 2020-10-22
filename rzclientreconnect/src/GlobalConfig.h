@@ -22,7 +22,7 @@ struct GlobalConfig {
 		cval<int>& port;
 		cval<std::string>& account;
 		cval<std::string>& password;
-		cval<int>& serverIdx;
+		cval<std::string>& serverName;
 		cval<std::string>& playerName;
 
 		AuthConfig()
@@ -30,7 +30,7 @@ struct GlobalConfig {
 		      port(CFG_CREATE("server.port", 4500)),
 		      account(CFG_CREATE("server.account", "")),
 		      password(CFG_CREATE("server.password", "", true)),
-		      serverIdx(CFG_CREATE("server.gsindex", 0)),
+		      serverName(CFG_CREATE("server.gsname", "servername")),
 		      playerName(CFG_CREATE("server.playername", "")) {}
 	} server;
 
@@ -70,4 +70,3 @@ struct GlobalConfig {
 };
 
 #define CONFIG_GET() GlobalConfig::get()
-

@@ -20,7 +20,7 @@ public:
 	            uint16_t port,
 	            const std::string& account,
 	            const std::string& password,
-	            int serverIdx,
+	            const std::string& serverName,
 	            const std::string& playername,
 	            int epic = EPIC_LATEST,
 	            int delayTime = 5000,
@@ -45,4 +45,3 @@ private:
 
 	std::unordered_map<unsigned int, std::string> playerNames;
 };
-

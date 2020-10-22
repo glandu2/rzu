@@ -34,7 +34,7 @@ static void init() {
 
 	CFG_CREATE("game.account", "test1");
 	CFG_CREATE("game.password", "admin");
-	CFG_CREATE("game.gsindex", 1);
+	CFG_CREATE("game.gsname", "servername");
 	CFG_CREATE("game.playername", "Player");
 	CFG_CREATE("game.epic", EPIC_LATEST);
 
@@ -89,13 +89,13 @@ int main(int argc, char* argv[]) {
 
 	std::string account = CFG_GET("game.account")->getString();
 	std::string password = CFG_GET("game.password")->getString();
-	int serverIdx = CFG_GET("game.gsindex")->getInt();
+	std::string serverName = CFG_GET("game.gsname")->getString();
 	std::string playername = CFG_GET("game.playername")->getString();
 
 	Object::logStatic(Object::LL_Info, "main", "Starting chat gateway\n");
 
 	GameSession* gameSession =
-	    new GameSession(enableGateway, ip, port, account, password, serverIdx, playername, epic, recoDelay, autoReco);
+	    new GameSession(enableGateway, ip, port, account, password, serverName, playername, epic, recoDelay, autoReco);
 	IrcClient* ircClient = new IrcClient(ircIp, ircPort, ircHost, ircChannel, ircNick, &trafficLogger);
 
 	gameSession->setIrcClient(ircClient);

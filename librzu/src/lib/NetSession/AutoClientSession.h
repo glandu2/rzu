@@ -23,7 +23,7 @@ public:
 	                uint16_t port,
 	                const std::string& account,
 	                const std::string& password,
-	                int serverIdx,
+	                const std::string& serverName,
 	                int delayTime,
 	                int ggRecoTime,
 	                int epic);
@@ -48,7 +48,7 @@ private:
 	uint16_t port;
 	std::string account;
 	std::string password;
-	int serverIdx;
+	std::string serverName;
 
 	int delayTime;
 	int ggRecoTime;
@@ -63,7 +63,7 @@ public:
 	                           uint16_t port,
 	                           const std::string& account,
 	                           const std::string& password,
-	                           int serverIdx,
+	                           const std::string& serverName,
 	                           const std::string& playername,
 	                           int epic = EPIC_LATEST,
 	                           bool manageTimesync = true,
@@ -122,4 +122,3 @@ private:
 
 	Timer<AutoClientSession> updateTimer;
 };
-

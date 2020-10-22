@@ -20,7 +20,7 @@ AutoAuthSession::AutoAuthSession(AutoClientSession* gameSession,
                                  uint16_t port,
                                  const std::string& account,
                                  const std::string& password,
-                                 int serverIdx,
+                                 const std::string& serverName,
                                  int delayTime,
                                  int ggRecoTime,
                                  int epic)
@@ -30,7 +30,7 @@ AutoAuthSession::AutoAuthSession(AutoClientSession* gameSession,
       port(port),
       account(account),
       password(password),
-      serverIdx(serverIdx),
+      serverName(serverName),
       delayTime(delayTime),
       ggRecoTime(ggRecoTime) {}
 
@@ -73,6 +73,7 @@ void AutoAuthSession::onAuthResult(TS_ResultCode result, const std::string& resu
 
 void AutoAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t lastSelectedServerId) {
 	bool serverFound = false;
+	int serverIndex = 0;
 
 	log(LL_Debug, "Server list (last id: %d)\n", lastSelectedServerId);
 	for(size_t i = 0; i < servers.size(); i++) {
@@ -85,13 +86,14 @@ void AutoAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 		    serverInfo.serverPort,
 		    serverInfo.userRatio);
 
-		if(serverInfo.serverId == serverIdx && !serverFound) {
+		if(serverInfo.serverName == serverName && !serverFound) {
 			serverFound = true;
+			serverIndex = serverInfo.serverId;
 		}
 	}
 
 	if(!serverFound) {
-		log(LL_Error, "Server with index %d not found\n", serverIdx);
+		log(LL_Error, "Server \"%s\" not found\n", serverName.c_str());
 		log(LL_Info, "Server list (last id: %d)\n", lastSelectedServerId);
 		for(size_t i = 0; i < servers.size(); i++) {
 			const ServerInfo& serverInfo = servers.at(i);
@@ -106,8 +108,8 @@ void AutoAuthSession::onServerList(const std::vector<ServerInfo>& servers, uint1
 
 		closeSession();
 	} else {
-		log(LL_Info, "Connecting to GS with index %d\n", serverIdx);
-		selectServer(serverIdx);
+		log(LL_Info, "Connecting to GS %s with index %d\n", serverName.c_str(), serverIndex);
+		selectServer(serverIndex);
 
 		if(ggRecoTime > 0) {
 			log(LL_Debug, "Starting GG timer: %ds\n", ggRecoTime);
@@ -138,14 +140,14 @@ AutoClientSession::AutoClientSession(const std::string& ip,
                                      uint16_t port,
                                      const std::string& account,
                                      const std::string& password,
-                                     int serverIdx,
+                                     const std::string& serverName,
                                      const std::string& playername,
                                      int epic,
                                      bool manageTimesync,
                                      int delayTime,
                                      int ggRecoTime)
     : ClientGameSession(epic),
-      authSession(this, ip, port, account, password, serverIdx, delayTime, ggRecoTime, epic),
+      authSession(this, ip, port, account, password, serverName, delayTime, ggRecoTime, epic),
       manageTimesync(manageTimesync),
       playername(playername),
       connectedInGame(false),

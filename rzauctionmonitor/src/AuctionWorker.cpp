@@ -6,7 +6,7 @@
 AuctionWorker::AuctionWorker(AuctionManager* auctionManager,
                              cval<std::string>& ip,
                              cval<int>& port,
-                             cval<int>& serverIdx,
+                             cval<std::string>& serverName,
                              cval<int>& delayTime,
                              cval<int>& autoRecoDelay,
                              const std::string& account,
@@ -14,13 +14,13 @@ AuctionWorker::AuctionWorker(AuctionManager* auctionManager,
                              const std::string& playername)
     : auctionManager(auctionManager),
       gameSession(this, playername, autoRecoDelay, CONFIG_GET()->client.version),
-      authSession(&gameSession, ip, port, serverIdx, delayTime, account, password, CONFIG_GET()->client.version),
+      authSession(&gameSession, ip, port, serverName, delayTime, account, password, CONFIG_GET()->client.version),
       isConnected(false),
       idle(true) {
 	log(LL_Info,
-	    "Initialized worker using character %s on GS %d@%s:%d\n",
+	    "Initialized worker using character %s on GS %s@%s:%d\n",
 	    playername.c_str(),
-	    serverIdx.get(),
+	    serverName.get().c_str(),
 	    ip.get().c_str(),
 	    port.get());
 	auctionDelayTimer.unref();

@@ -8,9 +8,10 @@ struct GlobalConfig {
 	struct ClientConfig {
 		cval<bool>& useRsa;
 		cval<std::string>&ip, &accountFile, &auctionListDir, &auctionListFile;
-		cval<int>&port, &gsindex, &autoRecoDelay, &recoDelay, &recoTimeout, &auctionSearchDelay, &auctionSearchTimeout;
+		cval<int>&port, &autoRecoDelay, &recoDelay, &recoTimeout, &auctionSearchDelay, &auctionSearchTimeout;
 		cval<bool>&doFullAuctionDump, &doStateAuctionDump;
 		cval<std::string>& stateFile;
+		cval<std::string>& gsname;
 		cval<bool>& autoStart;
 		cval<int>& version;
 
@@ -21,7 +22,6 @@ struct GlobalConfig {
 		      auctionListDir(CFG_CREATE("client.auctions_dir", "auctions")),
 		      auctionListFile(CFG_CREATE("client.auctions_file", "auctions.bin.gz")),
 		      port(CFG_CREATE("client.port", 4500)),
-		      gsindex(CFG_CREATE("client.gs_index", 1)),
 		      autoRecoDelay(CFG_CREATE("client.auto_reco_delay", 0)),
 		      recoDelay(CFG_CREATE("client.reco_delay", 5000)),
 		      recoTimeout(CFG_CREATE("client.reco_timeout", 10000)),
@@ -30,6 +30,7 @@ struct GlobalConfig {
 		      doFullAuctionDump(CFG_CREATE("client.do_full_auction_dump", false)),
 		      doStateAuctionDump(CFG_CREATE("client.do_state_auction_dump", false)),
 		      stateFile(CFG_CREATE("client.initial_state_file", "")),
+		      gsname(CFG_CREATE("client.gsname", "servername")),
 		      autoStart(CFG_CREATE("client.autostart", true)),
 		      version(CFG_CREATE("client.version", EPIC_LATEST)) {
 			Utils::autoSetAbsoluteDir(auctionListDir);
@@ -55,4 +56,3 @@ struct GlobalConfig {
 };
 
 #define CONFIG_GET() GlobalConfig::get()
-

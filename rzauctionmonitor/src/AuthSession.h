@@ -14,7 +14,7 @@ public:
 	AuthSession(GameSession* gameSession,
 	            cval<std::string>& ip,
 	            cval<int>& port,
-	            cval<int>& serverIdx,
+	            cval<std::string>& serverName,
 	            cval<int>& delayTime,
 	            const std::string& account,
 	            const std::string& password,
@@ -45,7 +45,7 @@ private:
 	cval<int>& port;
 	std::string account;
 	std::string password;
-	cval<int>& serverIdx;
+	cval<std::string>& serverName;
 	cval<int>& delayTime;
 	int nextDelay;
 
@@ -55,4 +55,3 @@ private:
 	Timer<AuthSession> delayRecoTimer;
 	Callback<DisconnectedCallback> disconnectedCallback;
 };
-

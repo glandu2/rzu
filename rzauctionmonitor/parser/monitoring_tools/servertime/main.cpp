@@ -33,7 +33,7 @@ static void init() {
 
 	CFG_CREATE("game.account", "test1");
 	CFG_CREATE("game.password", "admin", true);
-	CFG_CREATE("game.gsindex", 1);
+	CFG_CREATE("game.gsname", "servername");
 	CFG_CREATE("game.playername", "Player");
 
 	CFG_CREATE("autoreco", 0);
@@ -73,13 +73,13 @@ int main(int argc, char* argv[]) {
 
 	std::string account = CFG_GET("game.account")->getString();
 	std::string password = CFG_GET("game.password")->getString();
-	int serverIdx = CFG_GET("game.gsindex")->getInt();
+	std::string serverName = CFG_GET("game.gsname")->getString();
 	std::string playername = CFG_GET("game.playername")->getString();
 	int epic = CFG_GET("server.epic")->getInt();
 
 	Object::logStatic(Object::LL_Info, "main", "Starting server time monitor on epic 0x%06X\n", epic);
 
-	GameSession gameSession(ip, port, account, password, serverIdx, playername, epic, recoDelay, autoReco);
+	GameSession gameSession(ip, port, account, password, serverName, playername, epic, recoDelay, autoReco);
 	gameSession.connect();
 
 	EventLoop::getInstance()->run(UV_RUN_DEFAULT);

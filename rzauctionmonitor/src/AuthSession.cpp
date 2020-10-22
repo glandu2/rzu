@@ -6,7 +6,7 @@
 AuthSession::AuthSession(GameSession* gameSession,
                          cval<std::string>& ip,
                          cval<int>& port,
-                         cval<int>& serverIdx,
+                         cval<std::string>& serverName,
                          cval<int>& delayTime,
                          const std::string& account,
                          const std::string& password,
@@ -17,7 +17,7 @@ AuthSession::AuthSession(GameSession* gameSession,
       port(port),
       account(account),
       password(password),
-      serverIdx(serverIdx),
+      serverName(serverName),
       delayTime(delayTime),
       nextDelay(delayTime.get()),
       disconnectRequested(false) {}
@@ -88,7 +88,8 @@ void AuthSession::onAuthResult(TS_ResultCode result, const std::string& resultSt
 
 void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t lastSelectedServerId) {
 	bool serverFound = false;
-	int serverIdxToSelect = serverIdx.get();
+	int serverIndex = 0;
+	std::string serverNameToSelect = serverName.get();
 
 	log(LL_Debug, "Server list (last id: %d)\n", lastSelectedServerId);
 	for(size_t i = 0; i < servers.size(); i++) {
@@ -101,13 +102,14 @@ void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t 
 		    serverInfo.serverPort,
 		    serverInfo.userRatio);
 
-		if(serverInfo.serverId == serverIdxToSelect && !serverFound) {
+		if(serverInfo.serverName == serverNameToSelect && !serverFound) {
 			serverFound = true;
+			serverIndex = serverInfo.serverId;
 		}
 	}
 
 	if(!serverFound) {
-		log(LL_Error, "Server with index %d not found\n", serverIdxToSelect);
+		log(LL_Error, "Server \"%s\" not found\n", serverNameToSelect.c_str());
 		log(LL_Info, "Server list (last id: %d)\n", lastSelectedServerId);
 		for(size_t i = 0; i < servers.size(); i++) {
 			const ServerInfo& serverInfo = servers.at(i);
@@ -119,11 +121,12 @@ void AuthSession::onServerList(const std::vector<ServerInfo>& servers, uint16_t 
 			    serverInfo.serverPort,
 			    serverInfo.userRatio);
 		}
+		closeSession();
+	} else {
+		log(LL_Info, "Connecting to GS %s with index %d\n", serverNameToSelect.c_str(), serverIndex);
+		selectServer(serverIndex);
+		connectedToGS = false;
 	}
-
-	log(LL_Info, "Connecting to GS with index %d\n", serverIdxToSelect);
-	selectServer(serverIdxToSelect);
-	connectedToGS = false;
 }
 
 void AuthSession::onGameDisconnected(bool causedByRemote) {
