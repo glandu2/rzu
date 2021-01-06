@@ -239,10 +239,10 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		} else {
 			return true;
 		}
-	} else if(packet->id == TS_AC_ACCOUNT_NAME::getId(client->getPacketVersion())) {
+	} else if(packet->id == TS_AC_ACCOUNT_NAME::getId(server->getPacketVersion())) {
 		if(client->getPacketVersion() >= EPIC_9_4)
 			return true;
-	} else if(packet->id == TS_AC_SELECT_SERVER::getId(client->getPacketVersion())) {
+	} else if(packet->id == TS_AC_SELECT_SERVER::getId(server->getPacketVersion())) {
 		TS_AC_SELECT_SERVER pkt;
 		uint64_t otp;
 
@@ -289,7 +289,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		} else {
 			return true;
 		}
-	} else if(packet->id == TS_AC_RESULT_WITH_STRING::getId(client->getPacketVersion())) {
+	} else if(packet->id == TS_AC_RESULT_WITH_STRING::getId(server->getPacketVersion())) {
 		TS_AC_RESULT_WITH_STRING pkt;
 		if(packet->process(pkt, server->getPacketVersion())) {
 			if(client->getPacketVersion() >= EPIC_8_1) {
