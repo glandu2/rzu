@@ -8,7 +8,9 @@ CREATE_STRUCT(TS_OTP_ACCOUNT_PASSWORD_PLAIN);
 
 #define TS_OTP_ACCOUNT_PASSWORD_AES_DEF(_) \
 	_(simple)(uint32_t, password_size) \
-	_(array)(uint8_t, password, 64)
+	_(def)(array)(uint8_t, password, 77) \
+	_(impl)(array)(uint8_t, password, 64, version < EPIC_9_6_5) \
+	_(impl)(array)(uint8_t, password, 77, version >= EPIC_9_6_5)
 CREATE_STRUCT(TS_OTP_ACCOUNT_PASSWORD_AES);
 
 #define TS_CA_OTP_ACCOUNT_DEF(_) \

@@ -8,7 +8,9 @@
 	_(simple)(uint16_t, deaths) \
 	_(simple)(uint32_t, score) \
 	_(simple)(uint32_t, unknown_2) \
-	_(string)(name, 16)
+	_(def)(string)(name, 20) \
+	_(impl)(string)(name, 16, version < EPIC_9_6_5) \
+	_(impl)(string)(name, 20, version >= EPIC_9_6_5)
 
 CREATE_STRUCT(TS_DEATHMATCH_RANKING_INFO);
 #undef TS_DEATHMATCH_RANKING_INFO_DEF
