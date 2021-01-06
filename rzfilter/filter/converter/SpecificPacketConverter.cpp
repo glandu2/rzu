@@ -335,6 +335,10 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 					pkt.szVersion = "20181211";
 				else if(target->getPacketVersion() <= EPIC_9_6_2)
 					pkt.szVersion = "20190102";
+				else if(target->getPacketVersion() >= EPIC_9_6_3)
+					pkt.szVersion = "20200713";
+				else if(target->getPacketVersion() >= EPIC_9_6_4)
+					pkt.szVersion = "20200922";
 				else
 					pkt.szVersion = GlobalCoreConfig::get()->client.gameVersion;
 			}
