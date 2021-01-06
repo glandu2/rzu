@@ -79,13 +79,24 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 	} else if(packet->id == TS_CA_ACCOUNT::getId(client->getPacketVersion())) {
 		TS_CA_ACCOUNT pkt;
 		std::vector<uint8_t> plainPassword;
+		account.isBoraAccount = false;
 
 		if(packet->process(pkt, client->getPacketVersion())) {
 			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
-				clientAesCipher.decrypt(
-				    pkt.passwordAes.password,
-				    Utils::clamp(pkt.passwordAes.password_size, 0u, (unsigned int) sizeof(pkt.passwordAes.password)),
-				    plainPassword);
+				if(pkt.account == "bora" && pkt.passwordAes.password_size == 0) {
+					plainPassword =
+					    Utils::convertToDataArray(pkt.passwordAes.password, sizeof(pkt.passwordAes.password));
+					account.isBoraAccount = true;
+				} else {
+					if(!clientAesCipher.decrypt(
+					       pkt.passwordAes.password,
+					       Utils::clamp(
+					           pkt.passwordAes.password_size, 0u, (unsigned int) sizeof(pkt.passwordAes.password)),
+					       plainPassword)) {
+						Object::logStatic(
+						    Object::LL_Error, "rzfilter_version_converter", "Failed to decrypt AES password\n");
+					}
+				}
 			} else {
 				int size = (client->getPacketVersion() >= EPIC_5_1) ? 61 : 32;
 				plainPassword.resize(size);
@@ -129,10 +140,13 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 
 		if(packet->process(pkt, client->getPacketVersion())) {
 			if(client->getPacketVersion() >= EPIC_8_1_1_RSA) {
-				clientAesCipher.decrypt(
-				    pkt.passwordAes.password,
-				    Utils::clamp(pkt.passwordAes.password_size, 0u, (unsigned int) sizeof(pkt.passwordAes.password)),
-				    plainPassword);
+				if(!clientAesCipher.decrypt(
+				       pkt.passwordAes.password,
+				       Utils::clamp(pkt.passwordAes.password_size, 0u, (unsigned int) sizeof(pkt.passwordAes.password)),
+				       plainPassword)) {
+					Object::logStatic(
+					    Object::LL_Error, "rzfilter_version_converter", "Failed to decrypt AES password\n");
+				}
 			} else {
 				plainPassword =
 				    Utils::convertToDataArray(pkt.passwordPlain.password, sizeof(pkt.passwordPlain.password));
@@ -192,21 +206,31 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 				accountPkt.account = account.account;
 				accountPkt.additionalInfos = account.additionalInfos;
 
-				std::vector<uint8_t> aesKey;
-				serverRsaCipher.privateDecrypt(pkt.data.data(), pkt.data.size(), aesKey);
-				if(aesKey.size() == 32)
-					serverAesCipher.init(aesKey.data());
-				else
-					Object::logStatic(
-					    Object::LL_Error, "rzfilter_version_converter", "Bad AES key size: %d\n", (int) aesKey.size());
+				if(account.isBoraAccount) {
+					accountPkt.passwordAes.password_size = 0;
+					memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
+					memcpy(accountPkt.passwordAes.password,
+					       account.password.data(),
+					       std::min(sizeof(accountPkt.passwordAes.password), account.password.size()));
+				} else {
+					std::vector<uint8_t> aesKey;
+					serverRsaCipher.privateDecrypt(pkt.data.data(), pkt.data.size(), aesKey);
+					if(aesKey.size() == 32)
+						serverAesCipher.init(aesKey.data());
+					else
+						Object::logStatic(Object::LL_Error,
+						                  "rzfilter_version_converter",
+						                  "Bad AES key size: %d\n",
+						                  (int) aesKey.size());
 
-				std::vector<uint8_t> encryptedPassword;
-				serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
-				memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
-				memcpy(accountPkt.passwordAes.password,
-				       encryptedPassword.data(),
-				       std::min(sizeof(accountPkt.passwordAes.password), encryptedPassword.size()));
-				accountPkt.passwordAes.password_size = (uint32_t) encryptedPassword.size();
+					std::vector<uint8_t> encryptedPassword;
+					serverAesCipher.encrypt(account.password.data(), account.password.size(), encryptedPassword);
+					memset(accountPkt.passwordAes.password, 0, sizeof(accountPkt.passwordAes.password));
+					memcpy(accountPkt.passwordAes.password,
+					       encryptedPassword.data(),
+					       std::min(sizeof(accountPkt.passwordAes.password), encryptedPassword.size()));
+					accountPkt.passwordAes.password_size = (uint32_t) encryptedPassword.size();
+				}
 
 				server->sendPacket(accountPkt);
 
@@ -225,9 +249,12 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		if(packet->process(pkt, server->getPacketVersion())) {
 			if(server->getPacketVersion() >= EPIC_8_1_1_RSA) {
 				std::vector<uint8_t> plainOTP;
-				serverAesCipher.decrypt(pkt.encrypted_data,
-				                        Utils::clamp(pkt.encrypted_data_size, 0, (int) sizeof(pkt.encrypted_data)),
-				                        plainOTP);
+				if(!serverAesCipher.decrypt(pkt.encrypted_data,
+				                            Utils::clamp(pkt.encrypted_data_size, 0, (int) sizeof(pkt.encrypted_data)),
+				                            plainOTP)) {
+					Object::logStatic(
+					    Object::LL_Error, "rzfilter_version_converter", "Failed to decrypt AES OTP password\n");
+				}
 				if(plainOTP.size() >= sizeof(otp)) {
 					otp = *reinterpret_cast<uint64_t*>(plainOTP.data());
 				} else {
