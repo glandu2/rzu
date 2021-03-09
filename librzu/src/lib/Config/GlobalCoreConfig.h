@@ -50,9 +50,9 @@ struct RZU_EXTERN GlobalCoreConfig : public IListener {
 		      gameVersion(CFG_CREATE("client.game_version", "20200922")),
 		      boraCodeGeneratorCommand(
 		          CFG_CREATE("client.bora_command",
-		                     "https://accounts.boraecosystem.com/member/oauth/"
+		                     "https://accounts.play2bit.com/member/oauth/"
 		                     "authorize?response_type=code&client_id=rAu3fzNDKd1QgEsL&redirect_uri=https://"
-		                     "accounts.boraecosystem.com/member/oauth/pub")) {}
+		                     "accounts.play2bit.com/member/oauth/pub")) {}
 	} client;
 
 	struct AdminConfig {
