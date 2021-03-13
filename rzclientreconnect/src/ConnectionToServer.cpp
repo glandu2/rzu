@@ -847,7 +847,10 @@ void ConnectionToServer::updateCreaturePosition(CreatureData& data, float& x, fl
 			const MOVE_INFO& moveInfo = activeMove->move_infos.front();
 			float dx = moveInfo.tx - x;
 			float dy = moveInfo.ty - y;
-			uint32_t nextStepEnd = activeMove->start_time + sqrtf(dx * dx + dy * dy) / ((float) activeMove->speed / 30);
+
+			// Add 0.5f for rounding (else nextStepEnd might be one less than start_time because of truncation)
+			uint32_t nextStepEnd =
+			    activeMove->start_time + sqrtf(dx * dx + dy * dy) / ((float) activeMove->speed / 30.0f) + 0.5f;
 
 			log(LL_Debug,
 			    "0x%x: checking move to %d, %d, delta %d, %d, start time: %u, current time: %u\n",
