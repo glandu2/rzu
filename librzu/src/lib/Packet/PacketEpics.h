@@ -99,8 +99,10 @@ private:
 
 #define EPIC_9_6_5 0x090605  // some int16_t fields were replaced with int32_t
 
+#define EPIC_9_6_6 0x090606  // GS packet ID modified with version 20210128
+
 // Latest released epic
-#define EPIC_LATEST EPIC_9_6_5
+#define EPIC_LATEST EPIC_9_6_6
 
 // Flags
 
