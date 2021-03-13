@@ -53,6 +53,9 @@ void AutoAuthSession::onDelayRecoExpired() {
 }
 
 void AutoAuthSession::onAuthDisconnected(bool causedByRemote) {
+	if(causedByRemote) {
+		log(LL_Error, "Unexpected disconnection from Auth (maybe wrong version ?)\n");
+	}
 	if(gameSession->onAuthDisconnected(causedByRemote))
 		delayedConnect();
 }

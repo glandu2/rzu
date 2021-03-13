@@ -54,7 +54,7 @@ void AuthSession::onDelayRecoExpired() {
 void AuthSession::onAuthDisconnected(bool causedByRemote) {
 	if(disconnectRequested == false) {
 		if(causedByRemote) {
-			log(LL_Error, "Unexpected disconnection from Auth\n");
+			log(LL_Error, "Unexpected disconnection from Auth (maybe wrong version ?)\n");
 		} else {
 			nextDelay = delayTime.get();
 		}
