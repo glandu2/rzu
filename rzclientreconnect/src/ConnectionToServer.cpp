@@ -847,10 +847,21 @@ void ConnectionToServer::updateCreaturePosition(CreatureData& data, float& x, fl
 			const MOVE_INFO& moveInfo = activeMove->move_infos.front();
 			float dx = moveInfo.tx - x;
 			float dy = moveInfo.ty - y;
+			float speed = float(activeMove->speed) / 30.0f;
 
-			// Add 0.5f for rounding (else nextStepEnd might be one less than start_time because of truncation)
-			uint32_t nextStepEnd =
-			    activeMove->start_time + sqrtf(dx * dx + dy * dy) / ((float) activeMove->speed / 30.0f) + 0.5f;
+			// If speed is 0, then we can't move and this step will never end
+			if(speed <= 0) {
+				log(LL_Error, "Bad move: speed is <= 0, this step would never end ! Skipping this buggy step");
+
+				activeMove->move_infos.erase(activeMove->move_infos.begin());
+				x = moveInfo.tx;
+				y = moveInfo.ty;
+				continue;
+			}
+
+			// Add 0.5f for rounding
+			// Use double a float might not have enough precision for 32 bits absolute integers
+			uint32_t nextStepEnd = uint32_t(double(activeMove->start_time) + sqrtf(dx * dx + dy * dy) / speed + 0.5);
 
 			log(LL_Debug,
 			    "0x%x: checking move to %d, %d, delta %d, %d, start time: %u, current time: %u\n",
