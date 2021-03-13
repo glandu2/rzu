@@ -93,8 +93,8 @@ test_script:
     }
 deploy:
   tag: $(APPVEYOR_REPO_TAG_NAME)
-  release: rzemu v$(APPVEYOR_REPO_TAG_NAME)
-  description: 'rzemu release v$(APPVEYOR_REPO_TAG_NAME)'
+  release: rzemu $(APPVEYOR_REPO_TAG_NAME)
+  description: 'rzemu release $(APPVEYOR_REPO_TAG_NAME)'
   provider: GitHub
   auth_token:
     secure: BIuFpW5S/V5SGJ2UAnLNm/XSiBPemDobnPC2+9B3ElNYSfxdrCgvtHvAsTAA3d5h
