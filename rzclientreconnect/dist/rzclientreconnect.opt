@@ -18,12 +18,12 @@ server.gsname:Abhuva (PvP)
 server.playername:Myplayername
 
 # Delay between a disconnection from GS and a reconnection (in ms)
-recodelay:5000
+general.delayTime:5000
 
 # Delay after sucessful connection to automatically reconnect from the GS
 # Used to automatically reconnect to avoid GG kick
 # If 0, no autoreconnection is done (unless kicked by the GS or when losing network)
-autoreco:280
+general.recoDelay:280
 
 
 # Usual debug config

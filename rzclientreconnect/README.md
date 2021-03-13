@@ -10,7 +10,7 @@ This can be useful in case of bad network condition, or when being sometimes kic
 * Replace `server.account` and `server.password` with account/password to use (see comments in the template file)
 * Set `server.gsname` with the GS server name
 * Set `server.playername` with the character to connect to
-* If needed, adjust `autoreco` with the period between reconnection in seconds
+* If needed, adjust `general.recoDelay` with the period between reconnection in seconds
 
 * Start reclientreconnect
 
