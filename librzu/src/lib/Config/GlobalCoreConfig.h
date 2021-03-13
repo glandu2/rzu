@@ -46,8 +46,8 @@ struct RZU_EXTERN GlobalCoreConfig : public IListener {
 		cval<std::string>& boraCodeGeneratorCommand;
 
 		Client()
-		    : authVersion(CFG_CREATE("client.auth_version", "201507080")),
-		      gameVersion(CFG_CREATE("client.game_version", "20200922")),
+		    : authVersion(CFG_CREATE("client.auth_version", "20210128")),
+		      gameVersion(CFG_CREATE("client.game_version", "20210128")),
 		      boraCodeGeneratorCommand(
 		          CFG_CREATE("client.bora_command",
 		                     "https://accounts.play2bit.com/member/oauth/"
