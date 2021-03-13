@@ -1,0 +1,32 @@
+# To connect using rzclientreconnect, use a random account and password in Sframe, anything will be accepted
+# Example of command line to use: (don't use bora parameters):
+# RappelzCmdLauncher.exe SFrame.exe /auth_ip:127.0.0.1 /locale:windows-1252 /country:FR
+
+# Auth server IP
+server.ip:127.0.0.1
+server.port:4500
+
+# Account name and password
+# For bora account, use "bora" as account name and the SESSION cookie as password
+server.account:bora
+server.password:<SESSION cookie>
+
+# GS Name
+server.gsname:Abhuva (PvP)
+
+# Player name to use
+server.playername:Myplayername
+
+# Delay between a disconnection from GS and a reconnection (in ms)
+recodelay:5000
+
+# Delay after sucessful connection to automatically reconnect from the GS
+# Used to automatically reconnect to avoid GG kick
+# If 0, no autoreconnection is done (unless kicked by the GS or when losing network)
+autoreco:280
+
+
+# Usual debug config
+core.log.level:debug
+#trafficdump.enable:true
+#trafficdump.enable_server:true
