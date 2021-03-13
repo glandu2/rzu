@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(rzu-parent)
+cmake_policy(SET CMP0065 NEW)
+
 enable_testing()
 
 set(CUSTOM_CMAKE_MODULES_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
@@ -9,12 +11,13 @@ set(CMAKE_VERBOSE_MAKEFILE false CACHE BOOL "Print compilation commands")
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (one of Debug, Release, RelWithDebInfo, MinSizeRel)")
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs instead of static")
 
+
 # Packaging
 
 set(CPACK_NSIS_DISPLAY_NAME "rzu - Glandu2")
 set(CPACK_PACKAGE_NAME "rzemu")
 set(CPACK_PACKAGE_VENDOR "Glandu2")
-set(CPACK_PACKAGE_VERSION "5.0" CACHE STRING "Version string")
+set(CPACK_PACKAGE_VERSION "5.4" CACHE STRING "Version string")
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_STRIP_FILES ON)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
