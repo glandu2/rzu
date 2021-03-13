@@ -1,4 +1,5 @@
 #include "Cipher/RzHashReversible256.h"
+#include "Config/GlobalCoreConfig.h"
 #include "Environment.h"
 #include "GlobalConfig.h"
 #include "RzTest.h"
@@ -73,7 +74,7 @@ TEST(Filter_Test, auth_to_gs_connection) {
 
 		test.log(Object::LL_Info, "received auth version packet on server side\n");
 
-		EXPECT_EQ("201507080", packet.szVersion);
+		EXPECT_EQ(GlobalCoreConfig::get()->client.authVersion.get(), packet.szVersion);
 
 		authServer.sendPacket(serverListPacket, EPIC_LATEST);
 	});
@@ -156,7 +157,7 @@ TEST(Filter_Test, auth_to_gs_connection) {
 
 		test.log(Object::LL_Info, "received game version packet on server side\n");
 
-		EXPECT_EQ("20200713", packet.szVersion);
+		EXPECT_EQ(GlobalCoreConfig::get()->client.gameVersion.get(), packet.szVersion);
 	});
 
 	gameServer.addCallback([&](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
@@ -529,7 +530,7 @@ TEST(Filter_Test, auth_to_gs_connection_no_close_in_lua_keep_client) {
 
 		// Sending packet from the client while not having the server connected should not crash the filter
 		TS_CS_VERSION versionPacket;
-		versionPacket.szVersion = "20200713";
+		versionPacket.szVersion = GlobalCoreConfig::get()->client.gameVersion.get();
 		RzHashReversible256::generatePayload(versionPacket);
 		gameClient.sendPacket(versionPacket, EPIC_LATEST);
 	});
