@@ -16,7 +16,8 @@ CREATE_STRUCT(MOVE_REQUEST_INFO);
 	_(simple)(ar_time_t, cur_time) \
 	_(simple)(bool, speed_sync) \
 	_(count) (uint16_t, move_infos) \
-	_(dynarray)(MOVE_REQUEST_INFO, move_infos)
+	_(dynarray)(MOVE_REQUEST_INFO, move_infos) \
+	_(endarray)(uint8_t, dummy_padding)
 
 #define TS_CS_MOVE_REQUEST_ID(X) \
 	X(5, version < EPIC_9_2) \

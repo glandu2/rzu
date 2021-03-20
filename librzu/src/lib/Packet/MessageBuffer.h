@@ -286,9 +286,11 @@ public:
 		if(getSize() > getParsedSize())
 			remainingSize = getSize() - getParsedSize();
 
+		remainingSize = remainingSize / sizeof(T);
+
 		if(checkAvailableBuffer(fieldName, remainingSize)) {
 			if(remainingSize > 0)
-				val.assign(p, remainingSize);
+				val.assign(reinterpret_cast<T*>(p), reinterpret_cast<T*>(p) + remainingSize);
 			else
 				val.clear();
 			p += remainingSize;
