@@ -7,5 +7,5 @@ fi
 
 VERSION="$1"
 
-sed -i -r 's/CPACK_PACKAGE_VERSION "[0-9\.]+"/CPACK_PACKAGE_VERSION "'"${VERSION}"'"/' CMakeLists.txt
+sed -i -r 's/set\(GIT_VERSION "[0-9\.]+"/set\(GIT_VERSION "'"${VERSION}"'"/' CMakeLists.txt
 sed -i -r "s/version: [0-9\.]+\.\{build\}/version: ${VERSION}.{build}/" appveyor.yml

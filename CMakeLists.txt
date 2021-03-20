@@ -13,12 +13,24 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs instead of static")
 
 
 # Packaging
+find_package(Git QUIET)
+if(GIT_FOUND)
+execute_process(
+	COMMAND ${GIT_EXECUTABLE} describe --tags --always --dirty
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	OUTPUT_VARIABLE GIT_VERSION
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+else()
+set(GIT_VERSION "5.4")
+endif()
+
 
 set(CPACK_NSIS_DISPLAY_NAME "rzu - Glandu2")
 set(CPACK_PACKAGE_NAME "rzemu")
 set(CPACK_PACKAGE_VENDOR "Glandu2")
 if(NOT DEFINED CPACK_PACKAGE_VERSION)
-	set(CPACK_PACKAGE_VERSION "5.4")
+	set(CPACK_PACKAGE_VERSION "${GIT_VERSION}")
 endif()
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_STRIP_FILES ON)
