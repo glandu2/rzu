@@ -3,6 +3,7 @@
 #include "AuctionWriter.h"
 #include <errno.h>
 
+#include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 
 P2ParseAuction::P2ParseAuction()
@@ -61,7 +62,7 @@ int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 
 		dumpBeginTime = auctionWriter.getCategoryTimeManager().getEstimatedPreviousCategoryBeginTime(0);
 
-		log(LL_Debug, "File %s dumpBeginTime: %lld\n", filename.c_str(), dumpBeginTime);
+		log(LL_Debug, "File %s dumpBeginTime: %" PRIu64 "\n", filename.c_str(), dumpBeginTime);
 
 		if(dumpBeginTime == 0) {
 			log(LL_Warning, "Begin time of first category is 0 after parsing file %s\n", filename.c_str());
@@ -94,7 +95,7 @@ int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 		previousWasNewDay = isNewDay(filename, dumpBeginTime);
 		if(previousWasNewDay) {
 			log(LL_Info,
-			    "Last file of day parsed, previousTime: %lld, dumpBeginTime: %lld\n",
+			    "Last file of day parsed, previousTime: %" PRIu64 ", dumpBeginTime: %" PRIu64 "\n",
 			    previousTime,
 			    dumpBeginTime);
 		}

@@ -8,7 +8,6 @@
 #include "GlobalConfig.h"
 #include "LibRzuInit.h"
 #include "NetSession/ServersManager.h"
-#include "P5InsertToSqlServer.h"
 
 static void onTerminate(void* instance) {
 	ServersManager* serverManager = (ServersManager*) instance;
