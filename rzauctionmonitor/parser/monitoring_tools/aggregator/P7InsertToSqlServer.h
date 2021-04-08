@@ -11,11 +11,11 @@
 struct DB_AuctionSummary;
 template<class T> class DbQueryJob;
 
-class P5InsertToSqlServer : public PipelineStep<std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>,
+class P7InsertToSqlServer : public PipelineStep<std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>,
                                                 PipelineAggregatedState> {
-	DECLARE_CLASSNAME(P5InsertToSqlServer, 0)
+	DECLARE_CLASSNAME(P7InsertToSqlServer, 0)
 public:
-	P5InsertToSqlServer();
+	P7InsertToSqlServer();
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
 
 private:

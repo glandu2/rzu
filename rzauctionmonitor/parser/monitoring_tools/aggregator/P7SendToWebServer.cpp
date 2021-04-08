@@ -1,7 +1,7 @@
-#include "P5SendToWebServer.h"
+#include "P7SendToWebServer.h"
 #include "GlobalConfig.h"
 
-P5SendToWebServer::P5SendToWebServer(cval<std::string>& ip,
+P7SendToWebServer::P7SendToWebServer(cval<std::string>& ip,
                                      cval<int>& port,
                                      cval<std::string>& url,
                                      cval<std::string>& pwd)
@@ -10,7 +10,7 @@ P5SendToWebServer::P5SendToWebServer(cval<std::string>& ip,
       url(url),
       pwd(pwd) {}
 
-void P5SendToWebServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
+void P7SendToWebServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	std::pair<PipelineAggregatedState, std::string> jsonData = std::move(item->getSource());
 	std::string fullUrl;
 	struct tm currentDateTm;

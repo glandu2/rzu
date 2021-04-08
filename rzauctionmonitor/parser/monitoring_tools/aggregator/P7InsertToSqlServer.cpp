@@ -1,4 +1,4 @@
-#include "P5InsertToSqlServer.h"
+#include "P7InsertToSqlServer.h"
 #include "GlobalConfig.h"
 
 struct DB_AuctionSummary {
@@ -61,11 +61,11 @@ template<> void DbQueryJob<DB_AuctionSummary>::init(DbConnectionPool* dbConnecti
 }
 DECLARE_DB_BINDING(DB_AuctionSummary, "db_auctions");
 
-P5InsertToSqlServer::P5InsertToSqlServer()
+P7InsertToSqlServer::P7InsertToSqlServer()
     : PipelineStep<std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>, PipelineAggregatedState>(3,
                                                                                                                    1) {}
 
-void P5InsertToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
+void P7InsertToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>> inputData = std::move(item->getSource());
 
 	time_t currentDayTime = inputData.first.base.timestamp;
@@ -76,7 +76,7 @@ void P5InsertToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 
 	item->setName(std::to_string(currentDayTime));
 	log(LL_Info,
-	    "Sending data to SQL table for day %02d/%02d/%04d\n",
+	    "Sending aggregated data to SQL table for day %02d/%02d/%04d\n",
 	    currentDay.tm_mday,
 	    currentDay.tm_mon,
 	    currentDay.tm_year);

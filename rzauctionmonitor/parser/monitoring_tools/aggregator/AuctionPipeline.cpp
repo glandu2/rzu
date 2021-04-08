@@ -36,6 +36,7 @@ AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
 	    ->plug(&parseAuctionStep)
 	    ->plug(&aggregateStatsStep)
 	    ->plug(&computeStatsStep)
+	    ->plug(&sendDataToSqlStep)
 	    ->plug(&sendHistoryToSqlStep)
 	    ->plug(&sendToSqlServerStep)
 	    ->plug(&commitStep);
@@ -194,6 +195,7 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 	while(UV_EOF != uv_fs_scandir_next(req, &dent)) {
 		if(dent.type != UV_DIRENT_DIR && strcmp(thisInstance->lastQueuedFile.c_str(), dent.name) < 0)
 			orderedFiles.push_back(dent.name);
+		//#warning "remove this"
 		//		if(orderedFiles.size() > 10000)
 		//			break;
 	}

@@ -17,10 +17,11 @@
 #include "P2ParseAuction.h"
 #include "P3AggregateStats.h"
 #include "P4ComputeStats.h"
-#include "P5InsertToSqlServer.h"
-#include "P5SendToWebServer.h"
-#include "P6Commit.h"
+#include "P5InsertDataToSqlServer.h"
 #include "P6InsertHistoryToSqlServer.h"
+#include "P7InsertToSqlServer.h"
+#include "P7SendToWebServer.h"
+#include "P8Commit.h"
 
 /* scandir (disk, fast) => strings
  * readFile(disk) => AuctionComplexDiffWriter
@@ -70,7 +71,8 @@ private:
 	P2ParseAuction parseAuctionStep;
 	P3AggregateStats aggregateStatsStep;
 	P4ComputeStats computeStatsStep;
-	P5InsertToSqlServer sendToSqlServerStep;
+	P5InsertDataToSqlServer sendDataToSqlStep;
 	P6InsertHistoryToSqlServer sendHistoryToSqlStep;
-	P6Commit commitStep;
+	P7InsertToSqlServer sendToSqlServerStep;
+	P8Commit commitStep;
 };

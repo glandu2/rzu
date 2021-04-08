@@ -8,10 +8,10 @@
 
 class AuctionPipeline;
 
-class P6Commit : public PipelineStep<PipelineAggregatedState, void> {
-	DECLARE_CLASSNAME(P6Commit, 0)
+class P8Commit : public PipelineStep<PipelineAggregatedState, void> {
+	DECLARE_CLASSNAME(P8Commit, 0)
 public:
-	P6Commit(AuctionPipeline* auctionPipeline);
+	P8Commit(AuctionPipeline* auctionPipeline);
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
 	virtual void doCancelWork(std::shared_ptr<WorkItem> item) override { work.cancel(); }
 
@@ -21,5 +21,5 @@ private:
 
 private:
 	AuctionPipeline* auctionPipeline;
-	BackgroundWork<P6Commit, std::shared_ptr<WorkItem>> work;
+	BackgroundWork<P8Commit, std::shared_ptr<WorkItem>> work;
 };

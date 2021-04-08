@@ -1,21 +1,21 @@
-#include "P6Commit.h"
 #include "AuctionComplexDiffWriter.h"
 #include "AuctionPipeline.h"
 #include "AuctionWriter.h"
 #include "Config/ConfigParamVal.h"
 #include "Core/Utils.h"
+#include "P8Commit.h"
 #include <errno.h>
 
-P6Commit::P6Commit(AuctionPipeline* auctionPipeline)
+P8Commit::P8Commit(AuctionPipeline* auctionPipeline)
     : PipelineStep<PipelineAggregatedState, void>(1),
       auctionPipeline(auctionPipeline),
-      work(this, &P6Commit::processWork, &P6Commit::afterWork) {}
+      work(this, &P8Commit::processWork, &P8Commit::afterWork) {}
 
-void P6Commit::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
+void P8Commit::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	work.run(item);
 }
 
-int P6Commit::processWork(std::shared_ptr<WorkItem> workItem) {
+int P8Commit::processWork(std::shared_ptr<WorkItem> workItem) {
 	PipelineAggregatedState sourceData = std::move(workItem->getSource());
 	struct tm currentDay;
 
@@ -31,6 +31,6 @@ int P6Commit::processWork(std::shared_ptr<WorkItem> workItem) {
 		return -ENOENT;
 }
 
-void P6Commit::afterWork(std::shared_ptr<WorkItem> item, int status) {
+void P8Commit::afterWork(std::shared_ptr<WorkItem> item, int status) {
 	workDone(item, status);
 }

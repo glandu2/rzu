@@ -7,11 +7,11 @@
 #include "PipelineState.h"
 #include <stdint.h>
 
-class P5SendToWebServer
+class P7SendToWebServer
     : public PipelineStep<std::pair<PipelineAggregatedState, std::string>, PipelineAggregatedState> {
-	DECLARE_CLASSNAME(P5SendToWebServer, 0)
+	DECLARE_CLASSNAME(P7SendToWebServer, 0)
 public:
-	P5SendToWebServer(cval<std::string>& ip, cval<int>& port, cval<std::string>& url, cval<std::string>& pwd);
+	P7SendToWebServer(cval<std::string>& ip, cval<int>& port, cval<std::string>& url, cval<std::string>& pwd);
 	virtual void doWork(std::shared_ptr<WorkItem> item) override;
 
 private:
@@ -19,4 +19,3 @@ private:
 	cval<std::string>& url;
 	cval<std::string>& pwd;
 };
-
