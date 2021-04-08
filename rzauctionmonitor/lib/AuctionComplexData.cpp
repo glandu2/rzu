@@ -12,6 +12,7 @@ AuctionComplexData::AuctionComplexData(
       deleted(false),
       deletedCount(0),
       price(0),
+      rawDataEpic(epic),
       estimatedEndTimeFromAdded(true),
       estimatedEndTimeMin(0),
       estimatedEndTimeMax(0) {

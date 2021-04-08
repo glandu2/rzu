@@ -81,4 +81,3 @@ private:
 	uint64_t estimatedEndTimeMin;
 	uint64_t estimatedEndTimeMax;
 };
-
