@@ -100,7 +100,7 @@ bool DbQueryBinding::process(IDbQueryJob* queryJob) {
 	};
 
 	DbConnection* connection;
-	std::vector<UnicodeString> unicodeStrings;
+	std::list<UnicodeString> unicodeStrings;
 
 	if(enabled.get() == false) {
 		errorCount = 0;
