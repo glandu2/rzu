@@ -1,5 +1,6 @@
 #include "Curl.h"
 #include "Core/EventLoop.h"
+#include <stdlib.h>
 
 Curl::Curl() {
 	multi_handle = curl_multi_init();
@@ -199,7 +200,7 @@ int Curl::curlOnSocketFunctionStatic(CURL* easy, curl_socket_t s, int action, vo
 			}
 			break;
 		default:
-			abort();
+			break;
 	}
 
 	return 0;
