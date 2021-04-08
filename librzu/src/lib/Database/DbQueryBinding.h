@@ -80,7 +80,7 @@ public:
 		      isNullPtr(isNullPtr) {}
 	};
 
-	enum ExecuteMode { EM_NoRow, EM_OneRow, EM_MultiRows };
+	enum ExecuteMode { EM_NoRow, EM_OneRow, EM_MultiRows, EM_Insert };
 
 public:
 	DbQueryBinding(DbConnectionPool* dbConnectionPool,
@@ -95,9 +95,13 @@ protected:
 
 	bool process(IDbQueryJob* queryJob);
 
+	void createBatchedInsertQuery(std::string& queryStrBatched, const std::string& queryStr, size_t batchSize);
+	bool processInserts(IDbQueryJob* queryJob);
+
 	bool processBatch(IDbQueryJob* queryJob);
 	static void setString(DbConnection* connection,
 	                      const ParameterBinding& paramBinding,
+	                      size_t parameterIndexOffset,
 	                      SQLLEN* StrLen_or_Ind,
 	                      const std::string& str,
 	                      std::string& outStr);
@@ -121,4 +125,3 @@ private:
 	int errorCount;
 	bool columnMappingErrorsShown;
 };
-
