@@ -23,7 +23,8 @@ CREATE_STRUCT(TS_ACCOUNT_PASSWORD_DES);
 #define TS_ACCOUNT_PASSWORD_AES_DEF(_) \
 	_(simple)(uint32_t, password_size) \
 	_(def)(array)(uint8_t, password, 516) \
-	_(impl)(array)(uint8_t, password, 516, version >= EPIC_9_6_6) \
+	_(impl)(array)(uint8_t, password, 65, version >= EPIC_9_6_7) \
+	_(impl)(array)(uint8_t, password, 516, version >= EPIC_9_6_6 && version < EPIC_9_6_7) \
 	_(impl)(array)(uint8_t, password, 77, version < EPIC_9_6_6)
 CREATE_STRUCT(TS_ACCOUNT_PASSWORD_AES);
 

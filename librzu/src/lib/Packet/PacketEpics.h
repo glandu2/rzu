@@ -101,8 +101,10 @@ private:
 
 #define EPIC_9_6_6 0x090606  // GS packet ID modified with version 20210128
 
+#define EPIC_9_6_7 0x090607  // changes to player and item data
+
 // Latest released epic
-#define EPIC_LATEST EPIC_9_6_6
+#define EPIC_LATEST EPIC_9_6_7
 
 // Flags
 

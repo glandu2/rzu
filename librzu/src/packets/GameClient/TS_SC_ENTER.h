@@ -69,15 +69,16 @@ CREATE_STRUCT(TS_SC_ENTER__FIELD_PROP_INFO);
 	_(simple) (int32_t, mp) \
 	_(simple) (int32_t, max_mp) \
 	_(simple) (int32_t, level) \
-	_(simple) (uint8_t, race) \
-	_(simple) (uint32_t, skin_color, version >= EPIC_4_1) \
-	_(simple) (bool, is_first_enter) \
-	_(simple) (int32_t, energy, version >= EPIC_4_1)
+	_(simple) (uint8_t, race, version < EPIC_9_6_7) \
+	_(simple) (uint32_t, skin_color, version >= EPIC_4_1 && version < EPIC_9_6_7) \
+	_(simple) (bool, is_first_enter, version < EPIC_9_6_7) \
+	_(simple) (int32_t, energy, version >= EPIC_4_1 && version < EPIC_9_6_7)
 CREATE_STRUCT(TS_SC_ENTER__CREATURE_INFO);
 #undef TS_SC_ENTER__CREATURE_INFO_DEF
 
 #define TS_SC_ENTER__MONSTER_INFO_DEF(_) \
 	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
+	_(simple) (uint32_t, unknown, version >= EPIC_9_6_7) \
 	_(simple) (EncodedInt<EncodingScrambled>, monster_id) \
 	_(simple) (bool, is_tamed)
 CREATE_STRUCT(TS_SC_ENTER__MONSTER_INFO);
@@ -95,13 +96,16 @@ CREATE_STRUCT(TS_SC_ENTER__SUMMON_INFO);
 #undef TS_SC_ENTER__SUMMON_INFO_DEF
 
 #define TS_SC_ENTER__NPC_INFO_DEF(_) \
-	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
+	_(simple) (TS_CREATURE_STATUS, status) \
+	_(simple) (float, face_direction) \
 	_(simple) (EncodedInt<EncodingRandomized>, npc_id)
 CREATE_STRUCT(TS_SC_ENTER__NPC_INFO);
 #undef TS_SC_ENTER__NPC_INFO_DEF
 
 #define TS_SC_ENTER__PLAYER_INFO_DEF(_) \
 	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
+	_(simple) (uint32_t, race, version >= EPIC_9_6_7) \
+	_(simple) (uint32_t, skin_color, version >= EPIC_9_6_7) \
 	_(simple) (uint8_t, sex) \
 	_(simple) (uint32_t, faceId) \
 	_(simple) (uint32_t, faceTextureId, version >= EPIC_6_3) \
@@ -117,12 +121,14 @@ CREATE_STRUCT(TS_SC_ENTER__NPC_INFO);
 	_(simple) (uint32_t, guild_id) \
 	_(simple) (uint32_t, title_code, version >= EPIC_8_1) \
 	_(simple) (uint32_t, back_board, version >= EPIC_9_3) \
-	_(simple) (int32_t, energy, version < EPIC_4_1)
+	_(simple) (int32_t, energy, version < EPIC_4_1 || version >= EPIC_9_6_7)
 CREATE_STRUCT(TS_SC_ENTER__PLAYER_INFO);
 #undef TS_SC_ENTER__PLAYER_INFO_DEF
 
 #define TS_SC_ENTER__PET_INFO_DEF(_) \
-	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo) \
+	_(simple) (TS_CREATURE_STATUS, status) \
+	_(simple) (float, face_direction) \
+	_(simple) (int32_t, level) \
 	_(simple) (ar_handle_t, master_handle) \
 	_(simple) (EncodedInt<EncodingRandomized>, pet_code) \
 	_(def)(string)(name, 20) \
@@ -133,12 +139,17 @@ CREATE_STRUCT(TS_SC_ENTER__PET_INFO);
 
 #define TS_SC_ENTER_DEF(_) \
 	_(simple) (TS_SC_ENTER__TYPE, type) \
+	_(def)(simple) (TS_SC_ENTER__OBJ_TYPE, objType) \
+	_(impl)(simple) (TS_SC_ENTER__OBJ_TYPE, objType, version >= EPIC_9_6_7) \
+	_(def)(simple) (uint8_t, layer) \
+	_(impl)(simple) (uint8_t, layer, version >= EPIC_9_6_7) \
+	_(simple) (uint8_t, unknown, version >= EPIC_9_6_7) \
 	_(simple) (ar_handle_t, handle) \
 	_(simple) (float, x) \
 	_(simple) (float, y) \
 	_(simple) (float, z) \
-	_(simple) (uint8_t, layer) \
-	_(simple) (TS_SC_ENTER__OBJ_TYPE, objType) \
+	_(impl)(simple) (uint8_t, layer, version < EPIC_9_6_7) \
+	_(impl)(simple) (TS_SC_ENTER__OBJ_TYPE, objType, version < EPIC_9_6_7) \
 	_(simple) (TS_SC_ENTER__PLAYER_INFO    , playerInfo   , objType == EOT_Player) \
 	_(simple) (TS_SC_ENTER__NPC_INFO       , npcInfo      , objType == EOT_NPC) \
 	_(simple) (TS_SC_ENTER__ITEM_INFO      , itemInfo     , objType == EOT_Item) \

@@ -15,7 +15,8 @@
 	  _(impl)(array)(uint32_t, wear_info, 14, version < EPIC_4_1) \
 	  _(impl)(array)(uint32_t, wear_info, 24, version >= EPIC_4_1 && version < EPIC_9_5) \
 	  _(impl)(array)(uint32_t, wear_info, 28, version >= EPIC_9_5 && version < EPIC_9_6) \
-	  _(impl)(array)(uint32_t, wear_info, 32, version >= EPIC_9_6) \
+	  _(impl)(array)(uint32_t, wear_info, 32, version >= EPIC_9_6 && version < EPIC_9_6_7) \
+	  _(impl)(array)(uint32_t, wear_info, 24, version >= EPIC_9_6_7) \
 	_(simple) (uint32_t, level) \
 	_(simple) (uint32_t, job) \
 	_(simple) (uint32_t, job_level) \
@@ -28,26 +29,30 @@
 	  _(impl)(string)(name, 19, version < EPIC_9_6) \
 	  _(impl)(string)(name, 20, version >= EPIC_9_6) \
 	_(simple) (uint32_t, skin_color, version >= EPIC_4_1) \
-	_(string) (szCreateTime, 30) \
-	_(string) (szDeleteTime, 30) \
+	_(string) (szCreateTime, 30, version < EPIC_9_6_7) \
+	_(string) (szDeleteTime, 30, version < EPIC_9_6_7) \
 	_(def)(array)(uint32_t, wear_item_enhance_info, 32) \
 	  _(impl)(array)(uint32_t, wear_item_enhance_info, 14, version < EPIC_4_1) \
 	  _(impl)(array)(uint32_t, wear_item_enhance_info, 24, version >= EPIC_4_1 && version < EPIC_9_5) \
 	  _(impl)(array)(uint32_t, wear_item_enhance_info, 28, version >= EPIC_9_5 && version < EPIC_9_6) \
-	  _(impl)(array)(uint32_t, wear_item_enhance_info, 32, version >= EPIC_9_6) \
+	  _(impl)(array)(uint32_t, wear_item_enhance_info, 32, version >= EPIC_9_6 && version < EPIC_9_6_7) \
+	  _(impl)(array)(uint8_t,  wear_item_enhance_info, 24, version >= EPIC_9_6_7) \
 	_(def)(array)(uint32_t, wear_item_level_info, 32) \
 	  _(impl)(array)(uint32_t, wear_item_level_info, 14, version < EPIC_4_1) \
 	  _(impl)(array)(uint32_t, wear_item_level_info, 24, version >= EPIC_4_1 && version < EPIC_9_5) \
 	  _(impl)(array)(uint32_t, wear_item_level_info, 28, version >= EPIC_9_5 && version < EPIC_9_6) \
-	  _(impl)(array)(uint32_t, wear_item_level_info, 32, version >= EPIC_9_6) \
+	  _(impl)(array)(uint32_t, wear_item_level_info, 32, version >= EPIC_9_6 && version < EPIC_9_6_7) \
+	  _(impl)(array)(uint8_t,  wear_item_level_info, 24, version >= EPIC_9_6_7) \
 	_(def)(array)(uint8_t, wear_item_elemental_type, 32) \
 	  _(impl)(array)(uint8_t, wear_item_elemental_type, 24, version >= EPIC_6_1 && version < EPIC_9_5) \
 	  _(impl)(array)(uint8_t, wear_item_elemental_type, 28, version >= EPIC_9_5 && version < EPIC_9_6) \
-	  _(impl)(array)(uint8_t, wear_item_elemental_type, 32, version >= EPIC_9_6) \
+	  _(impl)(array)(uint8_t, wear_item_elemental_type, 32, version >= EPIC_9_6 && version < EPIC_9_6_7) \
+	  _(impl)(array)(uint8_t, wear_item_elemental_type, 24, version >= EPIC_9_6_7) \
 	_(def)(array)(uint32_t, wear_appearance_code, 32) \
 	  _(impl)(array)(uint32_t, wear_appearance_code, 24, version >= EPIC_7_4 && version < EPIC_9_5) \
 	  _(impl)(array)(uint32_t, wear_appearance_code, 28, version >= EPIC_9_5 && version < EPIC_9_6) \
-	  _(impl)(array)(uint32_t, wear_appearance_code, 32, version >= EPIC_9_6) \
+	  _(impl)(array)(uint32_t, wear_appearance_code, 32, version >= EPIC_9_6 && version < EPIC_9_6_7) \
+	  _(impl)(array)(uint32_t, wear_appearance_code, 24, version >= EPIC_9_6_7) \
 
 CREATE_STRUCT(LOBBY_CHARACTER_INFO);
 #undef LOBBY_CHARACTER_INFO_DEF // struct is 304 bytes long in epic2

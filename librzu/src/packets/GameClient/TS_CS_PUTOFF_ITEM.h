@@ -3,7 +3,9 @@
 #include "Packet/PacketDeclaration.h"
 
 #define TS_CS_PUTOFF_ITEM_DEF(_) \
-	_(simple) (int8_t, position) \
+	_(def)(simple) (int32_t, position) \
+	_(impl)(simple)(int32_t, position, version >= EPIC_9_6_7) \
+	_(impl)(simple)(int8_t, position, version < EPIC_9_6_7) \
 	_(simple) (ar_handle_t, target_handle)
 
 #define TS_CS_PUTOFF_ITEM_ID(X) \

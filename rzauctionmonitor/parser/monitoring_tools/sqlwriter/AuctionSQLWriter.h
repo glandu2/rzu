@@ -33,8 +33,8 @@ struct DB_Item {
 		uint32_t awaken_option_value[5];
 		int32_t awaken_option_data[5];
 		uint32_t random_type[10];
-		int64_t random_value_1[10];
-		int64_t random_value_2[10];
+		float random_value_1[10];
+		float random_value_2[10];
 		int32_t remain_time;
 		uint8_t elemental_effect_type;
 		int32_t elemental_effect_remain_time;
@@ -54,4 +54,3 @@ struct DB_Item {
 protected:
 	static void fillItemInfo(Input& input, const std::vector<uint8_t>& auctionInfo);
 };
-
