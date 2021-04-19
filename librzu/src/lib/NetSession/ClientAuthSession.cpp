@@ -196,14 +196,24 @@ void ClientAuthSession::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) 
 			return;
 		}
 
-		if(encryptedPassword.size() > sizeof(accountMsg.passwordAes.password)) {
-			log(LL_Warning, "onPacketAuthPasswordKey: encrypted password too large !\n");
-			closeSession();
-			return;
-		}
-
-		memcpy(accountMsg.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
 		accountMsg.passwordAes.password_size = (int) encryptedPassword.size();
+
+		if(packetVersion >= EPIC_9_6_7) {
+			// The client can use a maximum of 516 bytes for the password
+			if(encryptedPassword.size() > 516) {
+				log(LL_Warning, "onPacketAuthPasswordKey: encrypted password too large !\n");
+				closeSession();
+				return;
+			}
+			accountMsg.passwordAes.password_dyn = std::move(encryptedPassword);
+		} else {
+			if(encryptedPassword.size() > sizeof(accountMsg.passwordAes.password)) {
+				log(LL_Warning, "onPacketAuthPasswordKey: encrypted password too large !\n");
+				closeSession();
+				return;
+			}
+			memcpy(accountMsg.passwordAes.password, encryptedPassword.data(), encryptedPassword.size());
+		}
 
 		accountMsg.account = username;
 		sendPacket(accountMsg);
@@ -251,9 +261,16 @@ void ClientAuthSession::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) 
 				    if(lastEqualPos) {
 					    TS_CA_ACCOUNT accountMsg;
 
-					    memset(accountMsg.passwordAes.password, 0, sizeof(accountMsg.passwordAes.password));
-					    strcpy((char*) accountMsg.passwordAes.password, lastEqualPos + 5);
 					    accountMsg.passwordAes.password_size = 0;
+
+					    if(thisInstance->packetVersion >= EPIC_9_6_7) {
+						    const uint8_t* data_to_copy = reinterpret_cast<const uint8_t*>(lastEqualPos + 5);
+						    size_t size_to_copy = strlen(lastEqualPos + 5);
+						    accountMsg.passwordAes.password_dyn.assign(data_to_copy, data_to_copy + size_to_copy);
+					    } else {
+						    memset(accountMsg.passwordAes.password, 0, sizeof(accountMsg.passwordAes.password));
+						    strcpy((char*) accountMsg.passwordAes.password, lastEqualPos + 5);
+					    }
 					    accountMsg.account = "bora";
 					    thisInstance->sendPacket(accountMsg);
 				    } else {

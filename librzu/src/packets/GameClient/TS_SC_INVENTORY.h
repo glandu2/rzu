@@ -24,7 +24,6 @@ CREATE_STRUCT(TS_ITEM_AWAKEN_OPTION);
 	_(simple) (uint16_t, enhance_chance, version >= EPIC_9_2) \
 	_(simple) (uint32_t, flag) \
 	_(array)  (int32_t, socket, 4) \
-	/* 145 bytes to end */\
 	_(array)  (int32_t, dummy_socket, 2, version < EPIC_6_1, {0}) \
 	_(simple) (TS_ITEM_AWAKEN_OPTION, awaken_option, version >= EPIC_8_1) \
 	_(def)(array) (uint32_t, random_type, 10) \
@@ -44,7 +43,6 @@ CREATE_STRUCT(TS_ITEM_AWAKEN_OPTION);
 	_(simple) (int32_t, elemental_effect_attack_point, version >= EPIC_6_1) \
 	_(simple) (int32_t, elemental_effect_magic_point, version >= EPIC_6_1) \
 	_(simple) (int32_t, appearance_code, version >= EPIC_7_4) \
-	/* 145 bytes from socket[3] */\
 	_(simple) (uint32_t, summon_code, version >= EPIC_8_2) \
 	_(simple) (uint32_t, item_effect_id, version >= EPIC_9_6_1, 0)
 CREATE_STRUCT(TS_ITEM_BASE_INFO);

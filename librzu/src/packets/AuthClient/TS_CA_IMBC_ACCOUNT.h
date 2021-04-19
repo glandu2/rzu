@@ -10,7 +10,7 @@ CREATE_STRUCT(TS_IMBC_ACCOUNT_PASSWORD_PLAIN);
 
 #define TS_IMBC_ACCOUNT_PASSWORD_AES_DEF(_) \
 	_(simple)(uint32_t, password_size) \
-	_(array)(uint8_t, password, 64)
+	_(endarray)(uint8_t, password) /* At least 64 bytes, or more if needed */
 CREATE_STRUCT(TS_IMBC_ACCOUNT_PASSWORD_AES);
 
 #define TS_CA_IMBC_ACCOUNT_DEF(_) \
