@@ -181,7 +181,7 @@ TEST(TS_CA_SERVER_LIST, two_epic2_gs_list) {
 	                     4610,
 	                     [&auth](TestConnectionChannel* channel, TestConnectionChannel::Event event) { auth.start(); });
 
-	addClientLoginToServerListScenario(auth, AM_Des, "test1", "admin", nullptr, "200609280");
+	addClientLoginToServerListScenario(auth, AM_Des, "test1", "admin", nullptr, true);
 
 	auth.addCallback([&game1, &game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_AC_SERVER_LIST_EPIC2* packet = AGET_PACKET(TS_AC_SERVER_LIST_EPIC2);

@@ -36,11 +36,11 @@ protected:
 	void onServerList(const TS_CA_SERVER_LIST* packet);
 	void onSelectServer(const TS_CA_SELECT_SERVER* packet);
 
+	void setMinimumPacketVersion(packet_version_t version);
+
 private:
 	~ClientSession();
 
-	bool useRsaAuth;
-	bool isEpic2;
 	uint16_t lastLoginServerId;
 	uint32_t serverIdxOffset;
 	unsigned char aesKey[32];

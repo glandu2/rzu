@@ -2,6 +2,9 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Used for epic autodetection
+#define TS_CA_ACCOUNT_SIZE_PRE_EPIC_5_2 58
+
 enum TS_ADDITIONAL_INFO_TYPE :  int8_t
 {
 	TAIT_BLACKBOX = 0,

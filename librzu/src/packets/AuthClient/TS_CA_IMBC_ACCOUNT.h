@@ -4,6 +4,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+#define TS_CA_IMBC_ACCOUNT_SIZE_PRE_EPIC_7_4 79
+
 #define TS_IMBC_ACCOUNT_PASSWORD_PLAIN_DEF(_) \
 	_(array)(uint8_t, password, 48)
 CREATE_STRUCT(TS_IMBC_ACCOUNT_PASSWORD_PLAIN);

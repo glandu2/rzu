@@ -11,7 +11,7 @@ typedef struct rsa_st RSA;
 namespace AuthServer {
 
 void sendVersion(TestConnectionChannel* channel, const char* versionStr = "201501120");
-void sendAccountDES(TestConnectionChannel* channel, const char* account, const char* password);
+void sendAccountDES(TestConnectionChannel* channel, const char* account, const char* password, bool isEpic2 = false);
 void sendAccountDESDouble(TestConnectionChannel* channel, const char* account, const char* password);
 
 RSA* createRSAKey();
@@ -44,6 +44,6 @@ void addClientLoginToServerListScenario(TestConnectionChannel& auth,
                                         const char* account,
                                         const char* password,
                                         unsigned char* aesKey = nullptr,
-                                        const char* version = "201501120");
+                                        bool isEpic2 = false);
 
 }  // namespace AuthServer

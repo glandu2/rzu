@@ -13,25 +13,23 @@
 
 #include "LogServerClient.h"
 
-#include "AuthClient/Flat/TS_AC_AES_KEY_IV.h"
-#include "AuthClient/Flat/TS_AC_RESULT.h"
-#include "AuthClient/Flat/TS_AC_SELECT_SERVER.h"
-#include "AuthClient/Flat/TS_CA_ACCOUNT.h"
-#include "AuthClient/Flat/TS_CA_IMBC_ACCOUNT.h"
-#include "AuthClient/Flat/TS_CA_RSA_PUBLIC_KEY.h"
 #include "AuthClient/Flat/TS_CA_SELECT_SERVER.h"
-#include "AuthClient/Flat/TS_CA_SERVER_LIST.h"
 #include "AuthClient/Flat/TS_CA_VERSION.h"
+#include "AuthClient/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/TS_AC_RESULT.h"
+#include "AuthClient/TS_AC_SELECT_SERVER.h"
 #include "AuthClient/TS_AC_SERVER_LIST.h"
+#include "AuthClient/TS_CA_ACCOUNT.h"
+#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
+#include "AuthClient/TS_CA_SERVER_LIST.h"
 #include "GameClient/TS_SC_RESULT.h"
 #include "Packet/PacketEpics.h"
 
 namespace AuthServer {
 
 ClientSession::ClientSession()
-    : EncryptedSession<PacketSession>(SessionType::AuthClient, SessionPacketOrigin::Server, EPIC_LATEST),
-      useRsaAuth(false),
-      isEpic2(false),
+    : EncryptedSession<PacketSession>(SessionType::AuthClient, SessionPacketOrigin::Server, EPIC_2),
       lastLoginServerId(1),
       serverIdxOffset(0),
       clientData(nullptr) {}
@@ -51,30 +49,51 @@ EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 }
 
 EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
-	switch(packet->id) {
+	bool packetValid = true;
+
+	if(packet->id == TS_CA_RSA_PUBLIC_KEY::getId(EPIC_9_6_3)) {
+		setMinimumPacketVersion(EPIC_9_6_3);
+		log(LL_Debug, "RSA: using new packet IDs for AES key\n");
+	}
+
+	if(packet->id == TS_CA_RSA_PUBLIC_KEY::getId(packetVersion)) {
+		setMinimumPacketVersion(EPIC_8_1_1_RSA);
+	}
+
+	if(packet->id == TS_CA_ACCOUNT::getId(EPIC_5_2) && packet->size > TS_CA_ACCOUNT_SIZE_PRE_EPIC_5_2) {
+		setMinimumPacketVersion(EPIC_5_2);
+	}
+
+	if(packet->id == TS_CA_IMBC_ACCOUNT::getId(EPIC_7_4) && packet->size > TS_CA_IMBC_ACCOUNT_SIZE_PRE_EPIC_7_4) {
+		setMinimumPacketVersion(EPIC_7_4);
+	}
+
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
+	    packet->id, SessionType::AuthClient, SessionPacketOrigin::Client, packetVersion);
+
+	switch(packetType) {
 		case TS_CA_VERSION::packetID:
 			onVersion(static_cast<const TS_CA_VERSION*>(packet));
 			break;
 
 		case TS_CA_RSA_PUBLIC_KEY::packetID:
-		case TS_CA_RSA_PUBLIC_KEY::packetID2:
-			onRsaKey(static_cast<const TS_CA_RSA_PUBLIC_KEY*>(packet));
+			packetValid = packet->process(this, &ClientSession::onRsaKey, packetVersion);
 			break;
 
 		case TS_CA_ACCOUNT::packetID:
-			onAccount(static_cast<const TS_CA_ACCOUNT*>(packet));
+			packetValid = packet->process(this, &ClientSession::onAccount, packetVersion);
 			break;
 
 		case TS_CA_IMBC_ACCOUNT::packetID:
-			onImbcAccount(static_cast<const TS_CA_IMBC_ACCOUNT*>(packet));
+			packetValid = packet->process(this, &ClientSession::onImbcAccount, packetVersion);
 			break;
 
 		case TS_CA_SERVER_LIST::packetID:
-			onServerList(static_cast<const TS_CA_SERVER_LIST*>(packet));
+			packetValid = packet->process(this, &ClientSession::onServerList, packetVersion);
 			break;
 
 		case TS_CA_SELECT_SERVER::packetID:
-			onSelectServer(static_cast<const TS_CA_SELECT_SERVER*>(packet));
+			onSelectServer((const TS_CA_SELECT_SERVER*) packet);
 			break;
 
 		case 9999:
@@ -83,6 +102,11 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 		default:
 			log(LL_Debug, "Unknown packet ID: %d, size: %d\n", packet->id, packet->size);
 			break;
+	}
+
+	if(!packetValid) {
+		log(LL_Debug, "Received invalid packet data for ID: %d, size: %d\n", packet->id, packet->size);
+		abortSession();
 	}
 
 	return PacketSession::onPacketReceived(packet);
@@ -111,30 +135,30 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.request_msg_id = packet->id;
 		sendPacket(result, EPIC_LATEST);
 	} else if(!memcmp(packet->szVersion, "200609280", 9) || !memcmp(packet->szVersion, "Creer", 5)) {
-		isEpic2 = true;
 		packetVersion = EPIC_2;
 		log(LL_Debug, "Client is epic 2\n");
+	} else {
+		uint32_t version = strtol(packet->szVersion, NULL, 10);
+		if(version >= 20210128 && version < 100000000) {
+			packetVersion = EPIC_9_6_7;  // Skip EPIC_9_6_6 for better TS_CA_ACCOUNT handling
+		} else if(version >= 201507080) {
+			packetVersion = EPIC_9_2;
+		} else if(version >= 200701120) {
+			packetVersion = EPIC_4_1;
+		} else {
+			packetVersion = EPIC_2;
+		}
 	}
 }
 
 void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
+	TS_AC_AES_KEY_IV aesKeyMessage;
 	std::unique_ptr<RSA, void (*)(RSA*)> rsaCipher(nullptr, &RSA_free);
 	std::unique_ptr<BIO, int (*)(BIO*)> bio(nullptr, &BIO_free);
 
-	const int expectedKeySize = packet->size - sizeof(TS_CA_RSA_PUBLIC_KEY);
-
-	if(packet->key_size != expectedKeySize) {
-		log(LL_Warning,
-		    "RSA: key_size is invalid: %d, expected (from msg size): %d\n",
-		    packet->key_size,
-		    expectedKeySize);
-		abortSession();
-		return;
-	}
-
 	ERR_clear_error();
 
-	bio.reset(BIO_new_mem_buf((void*) packet->key, packet->key_size));
+	bio.reset(BIO_new_mem_buf(packet->key.data(), (int) packet->key.size()));
 	rsaCipher.reset(PEM_read_bio_RSA_PUBKEY(bio.get(), NULL, NULL, NULL));
 	if(!rsaCipher) {
 		log(LL_Warning, "RSA: invalid certificate: %s\n", ERR_error_string(ERR_get_error(), nullptr));
@@ -142,126 +166,92 @@ void ClientSession::onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet) {
 		return;
 	}
 
-	std::unique_ptr<TS_AC_AES_KEY_IV, void (*)(TS_MESSAGE*)> aesKeyMessage(
-	    TS_MESSAGE_WNA::create<TS_AC_AES_KEY_IV, unsigned char>(RSA_size(rsaCipher.get())), &TS_MESSAGE_WNA::destroy);
-
-	if(packet->id == TS_CA_RSA_PUBLIC_KEY::packetID2) {
-		log(LL_Debug,
-		    "RSA: using new %d/%d packet IDs for AES key\n",
-		    TS_CA_RSA_PUBLIC_KEY::packetID2,
-		    TS_AC_AES_KEY_IV::packetID2);
-		aesKeyMessage->id = TS_AC_AES_KEY_IV::packetID2;
-		aesKeyMessage->msg_check_sum = TS_MESSAGE::checkMessage(aesKeyMessage.get());
-	}
+	aesKeyMessage.data.resize(RSA_size(rsaCipher.get()));
 
 	for(int i = 0; i < 32; i++)
 		aesKey[i] = rand() & 0xFF;
 
-	int blockSize =
-	    RSA_public_encrypt(32, aesKey, aesKeyMessage->rsa_encrypted_data, rsaCipher.get(), RSA_PKCS1_PADDING);
+	int blockSize = RSA_public_encrypt(32, aesKey, aesKeyMessage.data.data(), rsaCipher.get(), RSA_PKCS1_PADDING);
 	if(blockSize < 0) {
 		log(LL_Warning, "RSA: encrypt error: %s\n", ERR_error_string(ERR_get_error(), nullptr));
 		abortSession();
 		return;
 	}
 
-	aesKeyMessage->data_size = blockSize;
+	aesKeyMessage.data.resize(blockSize);
 
-	useRsaAuth = true;
-	sendPacket(aesKeyMessage.get());
+	sendPacket(aesKeyMessage);
 }
 
 void ClientSession::onAccount(const TS_CA_ACCOUNT* packet) {
-	std::string account;
-	std::vector<unsigned char> cryptedPassword;
+	std::vector<uint8_t> cryptedPassword;
 
 	if(dbQuery.inProgress()) {
 		TS_AC_RESULT result;
-		TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
-		result.request_msg_id = TS_CA_ACCOUNT::packetID;
+		result.request_msg_id = packet->getReceivedId();
 		result.result = TS_RESULT_CLIENT_SIDE_ERROR;
 		result.login_flag = 0;
-		sendPacket(&result);
+		sendPacket(result);
 		log(LL_Info, "Client connection with a auth request already in progress\n");
 		return;
 	}
 
-	if(useRsaAuth) {
-		const TS_CA_ACCOUNT_RSA* accountv2 = reinterpret_cast<const TS_CA_ACCOUNT_RSA*>(packet);
-
-		account = Utils::convertToString(accountv2->account, sizeof(accountv2->account) - 1);
-		cryptedPassword =
-		    Utils::convertToDataArray(accountv2->password, sizeof(accountv2->password), accountv2->password_size);
+	if(packetVersion >= EPIC_9_6_7) {
+		cryptedPassword = std::move(packet->passwordAes.password_dyn);
+		if(packet->passwordAes.password_size != 0 && packet->passwordAes.password_size < cryptedPassword.size())
+			cryptedPassword.resize(packet->passwordAes.password_size);
+	} else if(packetVersion >= EPIC_8_1_1_RSA) {
+		cryptedPassword = Utils::convertToDataArray(
+		    packet->passwordAes.password, sizeof(packet->passwordAes.password), packet->passwordAes.password_size);
 	} else {
-		if(packet->size == sizeof(TS_CA_ACCOUNT_EPIC4)) {
-			const TS_CA_ACCOUNT_EPIC4* accountE4 = reinterpret_cast<const TS_CA_ACCOUNT_EPIC4*>(packet);
-
-			// If not already logged, log client epic <= 4
-			if(!isEpic2)
-				log(LL_Debug, "Client is epic 4 or older\n");
-
-			account = Utils::convertToString(accountE4->account, sizeof(accountE4->account) - 1);
-			cryptedPassword = Utils::convertToDataArray(accountE4->password, sizeof(accountE4->password));
-		} else {
-			account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
-			cryptedPassword = Utils::convertToDataArray(packet->password, sizeof(packet->password));
-		}
+		cryptedPassword = Utils::convertToDataArray(packet->passwordDes.password, sizeof(packet->passwordDes.password));
 	}
 
-	log(LL_Debug, "Login request for account %s\n", account.c_str());
+	log(LL_Debug, "Login request for account %s\n", packet->account.c_str());
 
-	DB_AccountData::Input input(account,
+	DB_AccountData::Input input(packet->account,
 	                            getStream()->getRemoteAddress(),
-	                            useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_DES,
+	                            packetVersion >= EPIC_8_1_1_RSA ? DB_AccountData::EM_AES : DB_AccountData::EM_DES,
 	                            cryptedPassword,
 	                            aesKey);
 	dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
 }
 
 void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
-	std::string account;
-	std::vector<unsigned char> cryptedPassword;
+	std::vector<uint8_t> cryptedPassword;
 
 	if(dbQuery.inProgress()) {
 		TS_AC_RESULT result;
-		TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 		result.request_msg_id = TS_CA_ACCOUNT::packetID;
 		result.result = TS_RESULT_CLIENT_SIDE_ERROR;
 		result.login_flag = 0;
-		sendPacket(&result);
+		sendPacket(result);
 		log(LL_Info, "Client IMBC connection with a auth request already in progress\n");
 		return;
 	}
 
-	if(useRsaAuth) {
-		const TS_CA_IMBC_ACCOUNT_RSA* accountv2 = reinterpret_cast<const TS_CA_IMBC_ACCOUNT_RSA*>(packet);
-
-		account = Utils::convertToString(accountv2->account, sizeof(accountv2->account) - 1);
-		cryptedPassword =
-		    Utils::convertToDataArray(accountv2->password, sizeof(accountv2->password), accountv2->password_size);
-	} else if(packet->size == sizeof(TS_CA_IMBC_ACCOUNT_OLD)) {
-		const TS_CA_IMBC_ACCOUNT_OLD* accountOld = reinterpret_cast<const TS_CA_IMBC_ACCOUNT_OLD*>(packet);
-		account = Utils::convertToString(accountOld->account, sizeof(accountOld->account) - 1);
-		cryptedPassword = Utils::convertToDataArray(accountOld->password, sizeof(accountOld->password));
+	if(packetVersion >= EPIC_8_1_1_RSA) {
+		cryptedPassword = std::move(packet->passwordAes.password);
+		if(packet->passwordAes.password_size != 0 && packet->passwordAes.password_size < cryptedPassword.size())
+			cryptedPassword.resize(packet->passwordAes.password_size);
 	} else {
-		account = Utils::convertToString(packet->account, sizeof(packet->account) - 1);
-		cryptedPassword = Utils::convertToDataArray(packet->password, sizeof(packet->password));
+		cryptedPassword =
+		    Utils::convertToDataArray(packet->passwordPlain.password, sizeof(packet->passwordPlain.password));
 	}
 
 	if(CONFIG_GET()->auth.client.enableImbc.get() == false) {
 		TS_AC_RESULT result;
-		TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 		result.request_msg_id = TS_CA_ACCOUNT::packetID;
 		result.result = TS_RESULT_ACCESS_DENIED;
 		result.login_flag = 0;
-		sendPacket(&result);
-		log(LL_Debug, "Refused IMBC connection (IMBC is disabled) for account %s\n", account.c_str());
+		sendPacket(result);
+		log(LL_Debug, "Refused IMBC connection (IMBC is disabled) for account %s\n", packet->account.c_str());
 	} else {
-		log(LL_Debug, "IMBC Login request for account %s\n", account.c_str());
+		log(LL_Debug, "IMBC Login request for account %s\n", packet->account.c_str());
 
-		DB_AccountData::Input input(account,
+		DB_AccountData::Input input(packet->account,
 		                            getStream()->getRemoteAddress(),
-		                            useRsaAuth ? DB_AccountData::EM_AES : DB_AccountData::EM_None,
+		                            packetVersion >= EPIC_8_1_1_RSA ? DB_AccountData::EM_AES : DB_AccountData::EM_None,
 		                            cryptedPassword,
 		                            aesKey);
 		dbQuery.executeDbQuery<DB_AccountData, DB_Account>(this, &ClientSession::clientAuthResult, input);
@@ -270,7 +260,6 @@ void ClientSession::onImbcAccount(const TS_CA_IMBC_ACCOUNT* packet) {
 
 void ClientSession::clientAuthResult(DB_Account* query) {
 	TS_AC_RESULT result;
-	TS_MESSAGE::initMessage<TS_AC_RESULT>(&result);
 
 	result.request_msg_id = TS_CA_ACCOUNT::packetID;
 	result.login_flag = 0;
@@ -278,7 +267,7 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 	auto& results = query->getResults();
 	if(results.size() == 0 || results.size() > 1) {
 		result.result = TS_RESULT_NOT_EXIST;
-		sendPacket(&result);
+		sendPacket(result);
 		return;
 	}
 
@@ -363,13 +352,13 @@ void ClientSession::clientAuthResult(DB_Account* query) {
 			}
 		} else {
 			result.result = 0;
-			result.login_flag = TS_AC_RESULT::LSF_EULA_ACCEPTED;
+			result.login_flag = TS_LOGIN_SUCCESS_FLAG::LSF_EULA_ACCEPTED;
 			this->lastLoginServerId = output->last_login_server_idx;
 			this->serverIdxOffset = output->server_idx_offset;
 		}
 	}
 
-	sendPacket(&result);
+	sendPacket(result);
 }
 
 void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
@@ -419,7 +408,7 @@ void ClientSession::onServerList(const TS_CA_SERVER_LIST* packet) {
 		serverData.user_ratio = (userRatio > 100) ? 100 : userRatio;
 	}
 
-	sendPacket(serverListPacket, isEpic2 ? EPIC_2 : EPIC_9_1);
+	sendPacket(serverListPacket);
 }
 
 void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
@@ -443,14 +432,13 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 
 		log(LL_Debug, "Client choose server idx %d\n", packet->server_idx);
 
-		if(useRsaAuth) {
-			TS_AC_SELECT_SERVER_RSA result;
-			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER_RSA>(&result);
-			result.result = 0;
+		TS_AC_SELECT_SERVER result;
+
+		result.result = 0;
+		result.pending_time = 0;
+
+		if(packetVersion >= EPIC_8_1_1_RSA) {
 			result.encrypted_data_size = 16;
-			result.pending_time = 0;
-			result.unknown = 0;
-			result.unknown2 = 0;
 
 			std::unique_ptr<EVP_CIPHER_CTX, void (*)(EVP_CIPHER_CTX*)> e_ctx(nullptr, &EVP_CIPHER_CTX_free);
 			int bytesWritten;
@@ -471,25 +459,31 @@ void ClientSession::onSelectServer(const TS_CA_SELECT_SERVER* packet) {
 			if(EVP_EncryptFinal_ex(e_ctx.get(), result.encrypted_data + bytesWritten, &bytesWritten) < 0)
 				goto cleanup;
 
-			sendPacket(&result);
+			sendPacket(result);
 			ok = true;
 
 		cleanup:
 			if(!ok)
 				abortSession();
 		} else {
-			TS_AC_SELECT_SERVER result;
-			TS_MESSAGE::initMessage<TS_AC_SELECT_SERVER>(&result);
-
-			result.result = 0;
 			result.one_time_key = oneTimePassword;
-			result.pending_time = 0;
 
-			sendPacket(&result);
+			sendPacket(result);
 		}
 	} else {
 		abortSession();
 		log(LL_Warning, "Attempt to connect to an invalid server idx: %d\n", packet->server_idx);
+	}
+}
+
+void ClientSession::setMinimumPacketVersion(packet_version_t version) {
+	if(packetVersion < version) {
+		packetVersion = version;
+		log(LL_Debug,
+		    "Detected at least version %x.%x.%x\n",
+		    version.getAsInt() >> 16,
+		    (version.getAsInt() >> 8) & 0xFF,
+		    version.getAsInt() & 0xFF);
 	}
 }
 

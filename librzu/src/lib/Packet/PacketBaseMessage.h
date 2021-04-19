@@ -52,10 +52,10 @@ struct TS_MESSAGE {
 	static void destroy(TS_MESSAGE* msg) { delete[](char*) msg; }
 
 	template<class T, class U>
-	void process(U* instance, void (U::*processFunction)(const T*), packet_version_t version) const;
+	bool process(U* instance, void (U::*processFunction)(const T*), packet_version_t version) const;
 
 	template<class T, class U, typename... Args>
-	void process(U* instance,
+	bool process(U* instance,
 	             void (U::*processFunction)(const T*, Args...),
 	             packet_version_t version,
 	             Args... args) const;
@@ -97,18 +97,21 @@ private:
 #include "MessageBuffer.h"
 
 template<class T, class U>
-void TS_MESSAGE::process(U* instance, void (U::*processFunction)(const T*), packet_version_t version) const {
+bool TS_MESSAGE::process(U* instance, void (U::*processFunction)(const T*), packet_version_t version) const {
 	T packet;
 	MessageBuffer buffer((void*) this, this->size, version);
 
 	packet.deserialize(&buffer);
 	if(buffer.checkPacketFinalSize()) {
 		(instance->*processFunction)(&packet);
+		return true;
 	}
+
+	return false;
 }
 
 template<class T, class U, typename... Args>
-void TS_MESSAGE::process(U* instance,
+bool TS_MESSAGE::process(U* instance,
                          void (U::*processFunction)(const T*, Args...),
                          packet_version_t version,
                          Args... args) const {
@@ -118,7 +121,10 @@ void TS_MESSAGE::process(U* instance,
 	packet.deserialize(&buffer);
 	if(buffer.checkPacketFinalSize()) {
 		(instance->*processFunction)(&packet, args...);
+		return true;
 	}
+
+	return false;
 }
 
 template<class T> bool TS_MESSAGE::process(T& packet, packet_version_t version) const {

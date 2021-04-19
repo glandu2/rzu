@@ -299,7 +299,7 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, long_password_47_chars) {
 	test.run();
 }
 
-TEST_F(TS_CA_ACCOUNT_RSA_Test, long_password_60_chars) {
+TEST_F(TS_CA_ACCOUNT_RSA_Test, long_password_76_chars) {
 	RzTest test;
 	TestConnectionChannel auth(TestConnectionChannel::Client, CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, true);
 
@@ -313,8 +313,10 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, long_password_60_chars) {
 		const TS_AC_AES_KEY_IV* packet = AGET_PACKET(TS_AC_AES_KEY_IV);
 		parseAESKey(rsaCipher, packet, aes_key_iv);
 		TS_CA_ACCOUNT_RSA accountMsg;
-		prepareAccountRSAPacket(
-		    aes_key_iv, &accountMsg, "testPw60Chars", "60_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		prepareAccountRSAPacket(aes_key_iv,
+		                        &accountMsg,
+		                        "testPw76Chars",
+		                        "76_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
 		channel->sendPacket(&accountMsg);
 	});

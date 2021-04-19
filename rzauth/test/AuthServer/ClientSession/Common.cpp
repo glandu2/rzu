@@ -21,15 +21,26 @@ void sendVersion(TestConnectionChannel* channel, const char* versionStr) {
 	channel->sendPacket(&version);
 }
 
-void sendAccountDES(TestConnectionChannel* channel, const char* account, const char* password) {
-	TS_CA_ACCOUNT accountPacket;
-	TS_MESSAGE::initMessage(&accountPacket);
+void sendAccountDES(TestConnectionChannel* channel, const char* account, const char* password, bool isEpic2) {
+	if(isEpic2) {
+		TS_CA_ACCOUNT_EPIC4 accountPacket;
+		TS_MESSAGE::initMessage(&accountPacket);
 
-	strcpy(accountPacket.account, account);
-	strcpy(reinterpret_cast<char*>(accountPacket.password), password);
-	DesPasswordCipher("MERONG").encrypt(accountPacket.password, sizeof(accountPacket.password));
+		strcpy(accountPacket.account, account);
+		strcpy(reinterpret_cast<char*>(accountPacket.password), password);
+		DesPasswordCipher("MERONG").encrypt(accountPacket.password, sizeof(accountPacket.password));
 
-	channel->sendPacket(&accountPacket);
+		channel->sendPacket(&accountPacket);
+	} else {
+		TS_CA_ACCOUNT accountPacket;
+		TS_MESSAGE::initMessage(&accountPacket);
+
+		strcpy(accountPacket.account, account);
+		strcpy(reinterpret_cast<char*>(accountPacket.password), password);
+		DesPasswordCipher("MERONG").encrypt(accountPacket.password, sizeof(accountPacket.password));
+
+		channel->sendPacket(&accountPacket);
+	}
 }
 
 void sendAccountDESDouble(TestConnectionChannel* channel, const char* account, const char* password) {
@@ -194,12 +205,12 @@ void addClientLoginToServerListScenario(TestConnectionChannel& auth,
                                         const char* account,
                                         const char* password,
                                         unsigned char* aesKey,
-                                        const char* version) {
+                                        bool isEpic2) {
 	if(method == AM_Aes) {
 		RSA* rsaCipher = createRSAKey();
-		auth.addCallback([rsaCipher, version](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+		auth.addCallback([rsaCipher](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 			ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-			sendVersion(channel, version);
+			sendVersion(channel, "201501120");
 			sendRSAKey(rsaCipher, channel);
 		});
 
@@ -218,10 +229,10 @@ void addClientLoginToServerListScenario(TestConnectionChannel& auth,
 		    });
 	} else {
 		auth.addCallback(
-		    [account, password, version](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+		    [account, password, isEpic2](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 			    ASSERT_EQ(TestConnectionChannel::Event::Connection, event.type);
-			    sendVersion(channel, version);
-			    sendAccountDES(channel, account, password);
+			    sendVersion(channel, isEpic2 ? "200609280" : "201501120");
+			    sendAccountDES(channel, account, password, isEpic2);
 		    });
 	}
 
