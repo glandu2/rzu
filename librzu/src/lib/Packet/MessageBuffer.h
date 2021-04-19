@@ -113,7 +113,7 @@ public:
 	                                                                                   size_t size) {
 		if(checkAvailableBuffer(fieldName, sizeof(T) * size)) {
 			for(size_t i = 0; i < size; ++i) {
-				*reinterpret_cast<T*>(p) = val[i];
+				*reinterpret_cast<T*>(p) = (T) val[i];
 				p += sizeof(T);
 			}
 		}
