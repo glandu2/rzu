@@ -23,7 +23,9 @@ void RzTest::abortTest() {
 	}
 }
 
-void RzTest::run(int timeoutMs) {
+void RzTest::run(int timeoutMs, std::function<void()> onAbortTest) {
+	this->onAbortTest = onAbortTest;
+
 	if(timeoutMs)
 		timeoutTimer.start(this, &RzTest::onTestTimeout, timeoutMs, 0);
 
@@ -51,5 +53,6 @@ void RzTest::updateObjectName() {
 
 void RzTest::onTestTimeout() {
 	EXPECT_TRUE(false) << "Test timeout, closing all connections";
+	onAbortTest();
 	abortTest();
 }

@@ -16,7 +16,7 @@ public:
 
 	void addChannel(TestConnectionChannel* channel);
 	void abortTest();
-	void run(int timeoutMs = 0);
+	void run(int timeoutMs = 0, std::function<void(void)> onAbortTest = std::function<void(void)>{});
 
 protected:
 	virtual void updateObjectName() override;
@@ -26,5 +26,6 @@ private:
 	std::list<TestConnectionChannel*> channels;
 	std::vector<char*> testedExecArgs;
 	Timer<RzTest> timeoutTimer;
+	std::function<void(void)> onAbortTest;
 };
 
