@@ -269,12 +269,14 @@ public:
 	typename std::enable_if<!is_primitive<T>::value, void>::type readDynArray(const char* fieldName,
 	                                                                          std::vector<T>& val,
 	                                                                          uint32_t sizeToRead) {
-		val.resize(sizeToRead, T{});
+		if(checkAvailableBuffer(fieldName, sizeToRead)) {
+			val.resize(sizeToRead, T{});
 
-		auto it = val.begin();
-		auto itEnd = val.end();
-		for(; it != itEnd; ++it)
-			read<T>(fieldName, *it);
+			auto it = val.begin();
+			auto itEnd = val.end();
+			for(; it != itEnd; ++it)
+				read<T>(fieldName, *it);
+		}
 	}
 
 	// End array with primitive, read to the end of stream
