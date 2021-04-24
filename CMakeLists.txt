@@ -22,7 +22,7 @@ execute_process(
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 else()
-set(GIT_VERSION "5.5")
+set(GIT_VERSION "5.6")
 endif()
 
 
