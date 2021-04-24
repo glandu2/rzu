@@ -7,7 +7,7 @@
 class RZTEST_EXTERN Terminator : public SocketSession {
 	DECLARE_CLASS(Terminator)
 public:
-	void start(std::string host, uint16_t port, std::string command = "terminate", int timeoutMs = 0);
+	void start(std::string host, uint16_t port, std::string command = "terminate", int timeoutMs = 5000);
 
 protected:
 	EventChain<SocketSession> onConnected();

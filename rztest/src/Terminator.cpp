@@ -30,7 +30,7 @@ EventChain<SocketSession> Terminator::onDataReceived() {
 	if(getStream()) {
 		std::vector<char> dataRecv;
 		getStream()->readAll(&dataRecv);
-		log(LL_Debug, "Received data: %*s\n", (int) dataRecv.size(), dataRecv.data());
+		log(LL_Debug, "Received data: %.*s\n", (int) dataRecv.size(), dataRecv.data());
 	}
 
 	return SocketSession::onDataReceived();
