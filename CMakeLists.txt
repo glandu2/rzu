@@ -16,7 +16,7 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs instead of static")
 find_package(Git QUIET)
 if(GIT_FOUND)
 execute_process(
-	COMMAND ${GIT_EXECUTABLE} describe --tags --always --dirty
+	COMMAND ${GIT_EXECUTABLE} describe --tags --always
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	OUTPUT_VARIABLE GIT_VERSION
 	OUTPUT_STRIP_TRAILING_WHITESPACE
