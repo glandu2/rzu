@@ -22,7 +22,12 @@ void TestProcessBase::TearDown() {
 	if(TestGlobalConfig::get()->enableExecutableSpawn.get()) {
 		for(size_t i = 0; i < processes.size(); i++) {
 			if(doKillAll)
+#ifdef WIN32
+				uv_process_kill(processes[i], SIGINT);
+#else
 				uv_process_kill(processes[i], SIGTERM);
+#endif
+
 			uv_ref((uv_handle_t*) processes[i]);
 		}
 
