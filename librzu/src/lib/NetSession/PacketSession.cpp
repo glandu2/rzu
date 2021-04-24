@@ -37,6 +37,8 @@ EventChain<SocketSession> PacketSession::onConnected() {
 }
 
 void PacketSession::dispatchPacket(const TS_MESSAGE* packetData) {
+	preProcessPacketReceived(packetData);
+
 	// Log before to avoid having logging a packet send after having received this packet before logging this packet
 	logPacket(false, packetData);
 

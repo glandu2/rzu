@@ -60,6 +60,7 @@ public:
 protected:
 	EventChain<SocketSession> onConnected();
 
+	virtual void preProcessPacketReceived(const TS_MESSAGE* packet) {}
 	virtual EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet) { return EventChain<PacketSession>(); }
 
 	void dispatchPacket(const TS_MESSAGE* packetData);
