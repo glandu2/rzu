@@ -82,7 +82,7 @@ bool ClientAuthSession::selectServer(uint16_t serverId) {
 }
 
 EventChain<SocketSession> ClientAuthSession::onDisconnected(bool causedByRemote) {
-	if(normalDisconnect == false) {
+	if(normalDisconnect == false || gameSession == nullptr) {
 		onAuthDisconnected(causedByRemote);
 	} else {
 		normalDisconnect = false;
