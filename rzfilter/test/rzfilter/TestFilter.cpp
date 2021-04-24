@@ -2,6 +2,7 @@
 #include "Config/GlobalCoreConfig.h"
 #include "Environment.h"
 #include "GlobalConfig.h"
+#include "Packet/PacketVersionUtils.h"
 #include "RzTest.h"
 #include "gtest/gtest.h"
 
@@ -74,7 +75,7 @@ TEST(Filter_Test, auth_to_gs_connection) {
 
 		test.log(Object::LL_Info, "received auth version packet on server side\n");
 
-		EXPECT_EQ(GlobalCoreConfig::get()->client.authVersion.get(), packet.szVersion);
+		EXPECT_EQ(PacketVersionUtils::getAuthVersionString(EPIC_LATEST), packet.szVersion);
 
 		authServer.sendPacket(serverListPacket, EPIC_LATEST);
 	});

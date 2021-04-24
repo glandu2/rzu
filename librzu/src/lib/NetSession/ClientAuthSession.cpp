@@ -6,6 +6,7 @@
 #include "Config/GlobalCoreConfig.h"
 #include "Core/EventLoop.h"
 #include "Packet/PacketEpics.h"
+#include "Packet/PacketVersionUtils.h"
 #include "Stream/Curl.h"
 
 #include "AuthClient/TS_AC_ACCOUNT_NAME.h"
@@ -38,8 +39,8 @@ bool ClientAuthSession::connect(const std::string& ip,
                                 const std::string& password) {
 	this->username = account;
 	this->password = password;
-	this->authVersion = GlobalCoreConfig::get()->client.authVersion;
-	this->gameVersion = GlobalCoreConfig::get()->client.gameVersion;
+	this->authVersion = PacketVersionUtils::getAuthVersionString(packetVersion);
+	this->gameVersion = PacketVersionUtils::getGameVersionString(packetVersion);
 	this->cipherMethod = packetVersion >= EPIC_8_1_1_RSA ? ClientAuthSession::ACM_RSA_AES : ClientAuthSession::ACM_DES;
 	//	this->rsaCipher = 0;
 	this->selectedServer = 0;

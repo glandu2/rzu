@@ -6,6 +6,7 @@
 #include "Config/GlobalCoreConfig.h"
 #include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
+#include "Packet/PacketVersionUtils.h"
 #include <algorithm>
 
 #include "AuthClient/TS_AC_ACCOUNT_NAME.h"
@@ -45,14 +46,7 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		if(packet->process(pkt, client->getPacketVersion())) {
 			// Don't overwrite version if it is a request string and not a version
 			if(isNormalVersion(pkt.szVersion)) {
-				if(server->getPacketVersion() >= EPIC_9_6_6)
-					pkt.szVersion = "20210128";
-				else if(server->getPacketVersion() >= EPIC_9_2)
-					pkt.szVersion = "201507080";
-				else if(server->getPacketVersion() >= EPIC_4_1)
-					pkt.szVersion = "200701120";
-				else
-					pkt.szVersion = "200609280";
+				pkt.szVersion = PacketVersionUtils::getAuthVersionString(server->getPacketVersion());
 			}
 
 			server->sendPacket(pkt);
@@ -344,26 +338,7 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 		if(packet->process(pkt, version)) {
 			// Don't overwrite version if it is a request string and not a version
 			if(isNormalVersion(pkt.szVersion)) {
-				if(target->getPacketVersion() >= EPIC_9_6_6)
-					pkt.szVersion = "20210128";
-				else if(target->getPacketVersion() >= EPIC_9_6_4)
-					pkt.szVersion = "20200922";
-				else if(target->getPacketVersion() >= EPIC_9_6_3)
-					pkt.szVersion = "20200713";
-				else if(target->getPacketVersion() >= EPIC_9_6)
-					pkt.szVersion = "20190102";
-				else if(target->getPacketVersion() >= EPIC_9_5_3)
-					pkt.szVersion = "20181211";
-				else if(target->getPacketVersion() >= EPIC_9_5_2)
-					pkt.szVersion = "20180117";
-				else if(target->getPacketVersion() >= EPIC_9_4_AR)
-					pkt.szVersion = "205001120";
-				else if(target->getPacketVersion() >= EPIC_9_2)
-					pkt.szVersion = "201507080";
-				else if(target->getPacketVersion() >= EPIC_4_1)
-					pkt.szVersion = "200701120";
-				else
-					pkt.szVersion = "200609280";
+				pkt.szVersion = PacketVersionUtils::getGameVersionString(target->getPacketVersion());
 			}
 
 			if(target->getPacketVersion() >= EPIC_9_5_2) {
