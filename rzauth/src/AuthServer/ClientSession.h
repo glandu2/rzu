@@ -26,8 +26,9 @@ public:
 	void clientAuthResult(DB_Account* query);
 
 protected:
-	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet);
-	EventChain<SocketSession> onDisconnected(bool causedByRemote);
+	void preProcessPacketReceived(const TS_MESSAGE* packet) override;
+	EventChain<PacketSession> onPacketReceived(const TS_MESSAGE* packet) override;
+	EventChain<SocketSession> onDisconnected(bool causedByRemote) override;
 
 	void onVersion(const TS_CA_VERSION* packet);
 	void onRsaKey(const TS_CA_RSA_PUBLIC_KEY* packet);

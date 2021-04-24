@@ -48,9 +48,7 @@ EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 	return PacketSession::onDisconnected(causedByRemote);
 }
 
-EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
-	bool packetValid = true;
-
+void ClientSession::preProcessPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == TS_CA_RSA_PUBLIC_KEY::getId(EPIC_9_6_3)) {
 		setMinimumPacketVersion(EPIC_9_6_3);
 		log(LL_Debug, "RSA: using new packet IDs for AES key\n");
@@ -67,6 +65,10 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 	if(packet->id == TS_CA_IMBC_ACCOUNT::getId(EPIC_7_4) && packet->size > TS_CA_IMBC_ACCOUNT_SIZE_PRE_EPIC_7_4) {
 		setMinimumPacketVersion(EPIC_7_4);
 	}
+}
+
+EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* packet) {
+	bool packetValid = true;
 
 	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
 	    packet->id, SessionType::AuthClient, SessionPacketOrigin::Client, packetVersion);
@@ -105,7 +107,11 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 	}
 
 	if(!packetValid) {
-		log(LL_Debug, "Received invalid packet data for ID: %d, size: %d\n", packet->id, packet->size);
+		log(LL_Debug,
+		    "Received invalid packet data for ID: %d and version %x, size: %d\n",
+		    packet->id,
+		    packetVersion.getAsInt(),
+		    packet->size);
 		abortSession();
 	}
 
@@ -113,6 +119,8 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 }
 
 void ClientSession::onVersion(const TS_CA_VERSION* packet) {
+	packetVersion = EPIC_2;
+
 	if(!memcmp(packet->szVersion, "TEST", 4)) {
 		uint32_t totalUserCount = ClientData::getClientCount();
 		TS_SC_RESULT result;
@@ -135,18 +143,18 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.request_msg_id = packet->id;
 		sendPacket(result, EPIC_LATEST);
 	} else if(!memcmp(packet->szVersion, "200609280", 9) || !memcmp(packet->szVersion, "Creer", 5)) {
-		packetVersion = EPIC_2;
+		setMinimumPacketVersion(EPIC_2);
 		log(LL_Debug, "Client is epic 2\n");
 	} else {
 		uint32_t version = strtol(packet->szVersion, NULL, 10);
 		if(version >= 20210128 && version < 100000000) {
-			packetVersion = EPIC_9_6_7;  // Skip EPIC_9_6_6 for better TS_CA_ACCOUNT handling
+			setMinimumPacketVersion(EPIC_9_6_7);  // Skip EPIC_9_6_6 for better TS_CA_ACCOUNT handling
 		} else if(version >= 201507080) {
-			packetVersion = EPIC_9_2;
+			setMinimumPacketVersion(EPIC_9_2);
 		} else if(version >= 200701120) {
-			packetVersion = EPIC_4_1;
+			setMinimumPacketVersion(EPIC_4_1);
 		} else {
-			packetVersion = EPIC_2;
+			setMinimumPacketVersion(EPIC_2);
 		}
 	}
 }
