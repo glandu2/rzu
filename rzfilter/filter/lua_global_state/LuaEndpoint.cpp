@@ -56,8 +56,7 @@ int LuaEndpoint::sendPacket(lua_State* L) {
 	else
 		origin = SessionPacketOrigin::Server;
 
-	if(!processPacket<SendPacketFromLuaCallback>(
-	       sessionType, origin, endpoint->getPacketVersion(), packetId, ok, L, endpoint)) {
+	if(!processPacket<SendPacketFromLuaCallback>(sessionType, origin, EPIC_LATEST, packetId, ok, L, endpoint)) {
 		luaL_error(L,
 		           "Packet id unknown: %d for session type %s and origin %s\n",
 		           packetId,
