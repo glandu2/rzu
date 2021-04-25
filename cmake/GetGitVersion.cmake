@@ -1,7 +1,7 @@
 find_package(Git QUIET)
 if(GIT_FOUND)
 execute_process(
-	COMMAND ${GIT_EXECUTABLE} describe --always --dirty --abbrev=40
+	COMMAND ${GIT_EXECUTABLE} describe --tags --always --dirty
 	WORKING_DIRECTORY ${WORKINGDIR}
 	OUTPUT_VARIABLE GIT_VERSION
 	OUTPUT_STRIP_TRAILING_WHITESPACE
