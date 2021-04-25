@@ -7,6 +7,7 @@
 #include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 #include "Packet/PacketVersionUtils.h"
+#include "PacketIterator.h"
 #include <algorithm>
 
 #include "AuthClient/TS_AC_ACCOUNT_NAME.h"
@@ -32,10 +33,15 @@
 #include "GameClient/TS_SC_MOVE.h"
 #include "GameClient/TS_SC_MOVE_ACK.h"
 #include "GameClient/TS_SC_NPC_TRADE_INFO.h"
+#include "GameClient/TS_SC_RESULT.h"
 #include "GameClient/TS_SC_STATE.h"
 #include "GameClient/TS_SC_WEAR_INFO.h"
 
 #include "GameClient/TS_SC_BONUS_EXP_JP.h"
+
+template<class T> struct ConvertPacketId {
+	uint16_t operator()(packet_version_t targetVersion) { return T::getId(targetVersion); }
+};
 
 bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
                                                        IFilterEndpoint* server,
@@ -306,14 +312,46 @@ bool SpecificPacketConverter::convertAuthPacketAndSend(IFilterEndpoint* client,
 		} else {
 			return true;
 		}
+	} else if(packet->id == TS_AC_RESULT::getId(server->getPacketVersion())) {
+		TS_AC_RESULT pkt;
+		if(packet->process(pkt, server->getPacketVersion())) {
+			// Convert packet id in request_msg_id field
+			processPacket<ConvertPacketId>(SessionType::AuthClient,
+			                               SessionPacketOrigin::Client,
+			                               server->getPacketVersion(),
+			                               pkt.request_msg_id,
+			                               pkt.request_msg_id,
+			                               client->getPacketVersion());
+
+			client->sendPacket(pkt);
+		} else {
+			return true;
+		}
 	} else if(packet->id == TS_AC_RESULT_WITH_STRING::getId(server->getPacketVersion())) {
 		TS_AC_RESULT_WITH_STRING pkt;
 		if(packet->process(pkt, server->getPacketVersion())) {
 			if(client->getPacketVersion() >= EPIC_8_1) {
+				// Convert packet id in request_msg_id field
+				processPacket<ConvertPacketId>(SessionType::AuthClient,
+				                               SessionPacketOrigin::Client,
+				                               server->getPacketVersion(),
+				                               pkt.request_msg_id,
+				                               pkt.request_msg_id,
+				                               client->getPacketVersion());
+
 				client->sendPacket(pkt);
 			} else {
 				TS_AC_RESULT resultPkt;
 				resultPkt.request_msg_id = pkt.request_msg_id;
+
+				// Convert packet id in request_msg_id field
+				processPacket<ConvertPacketId>(SessionType::GameClient,
+				                               SessionPacketOrigin::Client,
+				                               server->getPacketVersion(),
+				                               resultPkt.request_msg_id,
+				                               resultPkt.request_msg_id,
+				                               client->getPacketVersion());
+
 				resultPkt.result = pkt.result;
 				resultPkt.login_flag = pkt.login_flag;
 				client->sendPacket(resultPkt);
@@ -362,6 +400,21 @@ bool SpecificPacketConverter::convertGamePacketAndSend(IFilterEndpoint* target,
 		if(packet->process(pkt, version)) {
 			if(target->getPacketVersion() >= EPIC_9_5_2 && version < EPIC_9_5_2)
 				RzHashReversible256::generatePayload(pkt);
+
+			target->sendPacket(pkt);
+		} else {
+			return true;
+		}
+	} else if(packet->id == TS_SC_RESULT::getId(version)) {
+		TS_SC_RESULT pkt;
+		if(packet->process(pkt, version)) {
+			// Convert packet id in request_msg_id field
+			processPacket<ConvertPacketId>(SessionType::GameClient,
+			                               SessionPacketOrigin::Client,
+			                               version,
+			                               pkt.request_msg_id,
+			                               pkt.request_msg_id,
+			                               target->getPacketVersion());
 
 			target->sendPacket(pkt);
 		} else {
