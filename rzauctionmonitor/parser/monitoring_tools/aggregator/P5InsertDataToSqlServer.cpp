@@ -299,8 +299,15 @@ void P5InsertDataToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> ite
 	addResult(item, std::move(inputData));
 
 	dbQuery.executeDbQuery<DB_InsertItem>(
-	    [this, item](auto, int status) {
+	    [this, item, currentDay](auto, int status) {
+		    log(LL_Info,
+		        "Done Sending %d auctions data to SQL table for day %02d/%02d/%04d\n",
+		        (int) dbInputs.size(),
+		        currentDay.tm_mday,
+		        currentDay.tm_mon,
+		        currentDay.tm_year);
 		    dbInputs.clear();
+
 		    workDone(item, status);
 	    },
 	    dbInputs);
