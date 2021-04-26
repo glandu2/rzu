@@ -266,7 +266,7 @@ void ClientAuthSession::onPacketAuthPasswordKey(const TS_AC_AES_KEY_IV* packet) 
 
 					    if(thisInstance->packetVersion >= EPIC_9_6_7) {
 						    const uint8_t* data_to_copy = reinterpret_cast<const uint8_t*>(lastEqualPos + 5);
-						    size_t size_to_copy = strlen(lastEqualPos + 5);
+						    size_t size_to_copy = strlen(lastEqualPos + 5) + 1;
 						    accountMsg.passwordAes.password_dyn.assign(data_to_copy, data_to_copy + size_to_copy);
 					    } else {
 						    memset(accountMsg.passwordAes.password, 0, sizeof(accountMsg.passwordAes.password));
