@@ -690,7 +690,7 @@ void GameClientSession::onLogin(const TS_CS_LOGIN* packet) {
 }
 
 void GameClientSession::onChatRequest(const TS_CS_CHAT_REQUEST* packet, bool* forwardPacket) {
-	if(packet->szTarget == "rzcr") {
+	if(packet->szTarget == "rzcr" && packet->type == CHAT_WHISPER) {
 		std::vector<std::string> args = Utils::parseCommand(packet->message);
 
 		*forwardPacket = false;
