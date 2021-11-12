@@ -13,7 +13,7 @@ struct DB_Item {
 		DbDateTime estimatedEndMin;
 		DbDateTime estimatedEndMax;
 		int16_t category;
-		int8_t duration_type;
+		uint8_t duration_type;
 		int64_t bid_price;
 		int64_t price;
 		std::string seller;

@@ -4,7 +4,7 @@
 
 #pragma pack(push, 1)
 struct AuctionDataEnd {
-	int8_t duration_type;
+	uint8_t duration_type;
 	int64_t bid_price;
 	int64_t price;
 	char seller[31];
@@ -14,9 +14,11 @@ struct AuctionDataEnd {
 
 enum DurationType {
 	DT_Unknown = 0,
-	DT_Short = 1,   // 6h
-	DT_Medium = 2,  // 24h
-	DT_Long = 3     // 72h
+	DT_Short = 1,    // 6h
+	DT_Medium = 2,   // 24h
+	DT_Long = 3,     // 72h
+	DT_Minutes = 4,  // Minutes remaining = value - 4
+	DT_Hours = 64,   // Hours remaining = value - 64
 };
 enum BidFlag { BF_Bidded = 0, BF_MyBid = 1, BF_NoBid = 2 };
 

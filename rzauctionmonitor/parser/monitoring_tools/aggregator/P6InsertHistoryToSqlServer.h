@@ -17,7 +17,7 @@ struct DB_InsertHistory {
 		DbDateTime previous_time;
 		DbDateTime time;
 		int16_t diff_type;
-		int8_t duration_type;
+		uint8_t duration_type;
 		int64_t bid_price;
 		int8_t bid_flag;
 		DbDateTime estimated_end_min;

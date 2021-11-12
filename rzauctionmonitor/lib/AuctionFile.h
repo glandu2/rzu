@@ -16,7 +16,7 @@
 	_(simple)  (uint32_t, epic, version >= AUCTION_V6, 0xFFFFFF) \
 	_(count)   (uint16_t, data) \
 	_(dynarray)(uint8_t, data) \
-	_(simple)  (int8_t, duration_type, version >= AUCTION_V4) \
+	_(simple)  (uint8_t, duration_type, version >= AUCTION_V4) \
 	_(simple)  (int64_t, bid_price, version >= AUCTION_V4) \
 	_(simple)  (int64_t, price, version >= AUCTION_V4) \
 	_(string)  (seller, 31, version >= AUCTION_V4) \

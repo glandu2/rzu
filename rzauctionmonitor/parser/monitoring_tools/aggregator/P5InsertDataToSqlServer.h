@@ -16,7 +16,7 @@ struct DB_InsertItem {
 		int32_t uid;
 		DbDateTime created_time_min;
 		DbDateTime created_time_max;
-		int8_t original_duration_type;
+		uint8_t original_duration_type;
 		int16_t category;
 		int64_t price;
 		int64_t original_bid_price;

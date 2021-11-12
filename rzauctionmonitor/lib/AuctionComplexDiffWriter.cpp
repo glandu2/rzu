@@ -180,8 +180,11 @@ void AuctionComplexDiffWriter::importDump(const AUCTION_FILE* auctionFile) {
 }
 
 uint32_t AuctionComplexDiffWriter::parseEpic(uint32_t inputEpic, int64_t timestamp) {
-	if(inputEpic != 0xFFFFFF)
+	if(inputEpic != 0xFFFFFF) {
+		if(inputEpic == EPIC_9_6_7 && timestamp >= 1634716800)  // 2021-10-20T08:00:00Z
+			return EPIC_9_6_8;
 		return inputEpic;
+	}
 
 	if(timestamp < 1552986000)  // 2019-03-19T09:00:00.000Z
 		return EPIC_9_5_3;

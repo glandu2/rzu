@@ -103,8 +103,10 @@ private:
 
 #define EPIC_9_6_7 0x090607  // changes to player and item data
 
+#define EPIC_9_6_8 0x090608  // no changes in packets, but change in how duration_type is handled in auctions messages
+
 // Latest released epic
-#define EPIC_LATEST EPIC_9_6_7
+#define EPIC_LATEST EPIC_9_6_8
 
 // Flags
 

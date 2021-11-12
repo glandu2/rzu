@@ -42,7 +42,7 @@ struct AuctionInputTestData {
 
 		auctionData.bid_flag = (int8_t) bid_flag;
 		auctionData.bid_price = bid_price;
-		auctionData.duration_type = (int8_t) duration_type;
+		auctionData.duration_type = (uint8_t) duration_type;
 		auctionData.price = price;
 		strcpy(auctionData.seller, seller.c_str());
 

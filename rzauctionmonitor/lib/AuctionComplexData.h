@@ -53,7 +53,7 @@ protected:
 
 	bool parseData(uint32_t epic, const uint8_t* data, size_t len);
 	void postParseData(bool newData);
-	uint32_t durationTypeToSecond(DurationType durationType);
+	uint32_t durationTypeToSecond(DurationType durationType, uint32_t epic);
 	void setStatus(ProcessStatus status, uint64_t time);
 
 	DiffType getAuctionDiffType() const;

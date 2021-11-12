@@ -236,9 +236,10 @@ bool AuctionComplexData::parseData(uint32_t epic, const uint8_t* data, size_t le
 	}
 
 	const AuctionDataEnd* auctionDataEnd = reinterpret_cast<const AuctionDataEnd*>(data + len - sizeof(AuctionDataEnd));
+	DurationType durationType = static_cast<DurationType>(auctionDataEnd->duration_type);
 
 	if(len < sizeof(AuctionDataEnd) || auctionDataEnd->bid_flag < BF_Bidded || auctionDataEnd->bid_flag > BF_NoBid ||
-	   auctionDataEnd->duration_type < DT_Short || auctionDataEnd->duration_type > DT_Long) {
+	   durationTypeToSecond(durationType, epic) == 0) {
 		if(len < sizeof(AuctionDataEnd)) {
 			log(LL_Error,
 			    "Auction data smaller than auction end section, uid: 0x%08X, data size = %" PRIdS "\n",
@@ -246,7 +247,7 @@ bool AuctionComplexData::parseData(uint32_t epic, const uint8_t* data, size_t le
 			    len);
 		} else {
 			log(LL_Error,
-			    "Auction data contains invalid values: uid: 0x%08X, bid flag = %d, duration_type = %d\n",
+			    "Auction data contains invalid values: uid: 0x%08X, bid flag = %d, duration_type = %u\n",
 			    getUid().get(),
 			    auctionDataEnd->bid_flag,
 			    auctionDataEnd->duration_type);
@@ -265,7 +266,6 @@ bool AuctionComplexData::parseData(uint32_t epic, const uint8_t* data, size_t le
 	seller = Utils::convertToString(auctionDataEnd->seller, sizeof(auctionDataEnd->seller) - 1);
 	price = auctionDataEnd->price;
 
-	DurationType durationType = static_cast<DurationType>(auctionDataEnd->duration_type);
 	BidFlag bidFlag = static_cast<BidFlag>(auctionDataEnd->bid_flag);
 	int64_t bidPrice = auctionDataEnd->bid_price;
 
@@ -283,7 +283,7 @@ void AuctionComplexData::postParseData(bool newData) {
 	DurationType newDurationType = this->dynamicData.durationType;
 
 	if(newDurationType != DT_Unknown) {
-		uint32_t durationSecond = durationTypeToSecond(newDurationType);
+		uint32_t durationSecond = durationTypeToSecond(newDurationType, rawDataEpic);
 		uint64_t endMin;
 		uint64_t endMax;
 
@@ -308,16 +308,36 @@ void AuctionComplexData::postParseData(bool newData) {
 	}
 }
 
-uint32_t AuctionComplexData::durationTypeToSecond(DurationType durationType) {
-	switch(durationType) {
-		case DT_Long:
-			return 72 * 3600;
-		case DT_Medium:
-			return 24 * 3600;
-		case DT_Short:
-			return 6 * 3600;
-		case DT_Unknown:
-			return 0;
+uint32_t AuctionComplexData::durationTypeToSecond(DurationType durationType, uint32_t epic) {
+	// Duration type changed format begining at maintenance update on 2021-10-20 08:00:00 UTC
+	if(epic >= EPIC_9_6_8) {
+		if(durationType >= DT_Hours)
+			return (durationType - 64) * 3600;
+
+		if(durationType >= DT_Minutes)
+			return (durationType - 4) * 60;
+
+		switch(durationType) {
+			case DT_Long:
+				return 7 * 24 * 3600;
+			case DT_Medium:
+				return 3 * 24 * 3600;
+			case DT_Short:
+				return 1 * 24 * 3600;
+			default:
+				return 0;
+		}
+	} else {
+		switch(durationType) {
+			case DT_Long:
+				return 72 * 3600;
+			case DT_Medium:
+				return 24 * 3600;
+			case DT_Short:
+				return 6 * 3600;
+			default:
+				return 0;
+		}
 	}
 
 	return 0;

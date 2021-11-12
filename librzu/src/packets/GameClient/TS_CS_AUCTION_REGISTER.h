@@ -7,7 +7,7 @@
 	_(simple)(int32_t, item_count) \
 	_(simple)(int64_t, start_price) \
 	_(simple)(int64_t, instant_purchase_price) \
-	_(simple)(int8_t, duration_type)
+	_(simple)(uint8_t, duration_type)
 
 #define TS_CS_AUCTION_REGISTER_ID(X) \
 	X(1309, version < EPIC_9_6_3) \
