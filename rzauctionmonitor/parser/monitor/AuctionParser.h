@@ -26,6 +26,9 @@ struct AuctionFile {
 	                           AuctionComplexDiffWriter* auctionWriter,
 	                           size_t* outAlreadyExistingAuctions = nullptr,
 	                           size_t* outAddedAuctionsInFile = nullptr) {
+		if(auctions.header.dumpType != DT_UnknownDumpType)
+			return auctions.header.dumpType == DT_Full;
+
 		bool isFull = true;
 		size_t alreadyExistingAuctions = 0;
 		size_t addedAuctionsInFile = 0;
@@ -34,7 +37,9 @@ struct AuctionFile {
 			const AUCTION_SIMPLE_INFO& auctionData = auctions.auctions[i];
 			if(auctionData.diffType != D_Added && auctionData.diffType != D_Base)
 				isFull = false;
-			if(auctionData.diffType == D_Added && auctionWriter->hasAuction(AuctionUid(auctionData.uid)))
+
+			AuctionComplexData* knownAuctionData = auctionWriter->getAuction(AuctionUid(auctionData.uid));
+			if(auctionData.diffType == D_Added && knownAuctionData && !knownAuctionData->isDeleted())
 				alreadyExistingAuctions++;
 			if(auctionData.diffType == D_Added || auctionData.diffType == D_Base)
 				addedAuctionsInFile++;
@@ -94,4 +99,3 @@ private:
 	uv_fs_t scandirReq;
 	std::string lastParsedFile;
 };
-
