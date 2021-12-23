@@ -110,13 +110,12 @@ void GameClientSession::sendServerPacketToClient(TS_SC_CHAT& packet) {
 	sendPacket(packet);
 }
 
-template<class Packet>
-void GameClientSession::sendClientPacketToServer(Packet& packet) {
-        if(!connectionToServer || !controlledServer)
-                return;
+template<class Packet> void GameClientSession::sendClientPacketToServer(Packet& packet) {
+	if(!connectionToServer || !controlledServer)
+		return;
 
-        convertPacketHandles(controlledServer, packet);
-        controlledServer->onClientPacketReceived(packet);
+	convertPacketHandles(controlledServer, packet);
+	controlledServer->onClientPacketReceived(packet);
 }
 
 template<class Packet> struct GameClientSession::ConvertHandlesFunctor {
