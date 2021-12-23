@@ -55,6 +55,7 @@ GlobalLuaState::GlobalLuaState()
 	if(ret == 0 && (info.st_mode & S_IFREG))
 		newLuaFileMtime = currentLuaFileMtime = info.st_mtime;
 
+	createLuaVM();
 	initLuaVM();
 
 	reloadCheckTimer.start(this, &GlobalLuaState::onCheckReload, 5000, 5000);
@@ -63,6 +64,7 @@ GlobalLuaState::GlobalLuaState()
 
 GlobalLuaState::~GlobalLuaState() {
 	deinitLuaVM();
+	closeLuaVM();
 }
 
 GlobalLuaState* GlobalLuaState::getInstance() {
