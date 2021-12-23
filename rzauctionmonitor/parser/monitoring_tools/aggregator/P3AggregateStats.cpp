@@ -86,7 +86,7 @@ int P3AggregateStats::processWork(std::shared_ptr<WorkItem> workItem) {
 
 		log(LL_Info,
 		    "Aggregating statistics of %d auctions for day %s\n",
-		    (int) auctionsByUid.size(),
+		    (int) input.second.size(),
 		    timestampStr.c_str());
 
 		if(input.second.empty()) {
