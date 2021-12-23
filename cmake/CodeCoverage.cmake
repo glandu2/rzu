@@ -81,31 +81,33 @@ IF(NOT CMAKE_COMPILER_IS_GNUCXX)
 	MESSAGE(WARNING "Compiler is not GNU gcc! Clang Version 3.0.0 and greater supports gcov as well, but older versions don't.")
 ENDIF() # NOT CMAKE_COMPILER_IS_GNUCXX
 
-SET(CMAKE_CXX_FLAGS_COVERAGE
-    "${CMAKE_CXX_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the C++ compiler during coverage builds.")
-SET(CMAKE_C_FLAGS_COVERAGE
-    "${CMAKE_C_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the C compiler during coverage builds.")
-SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE
-    "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used for linking binaries during coverage builds.")
-SET(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-    "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the shared libraries linker during coverage builds.")
-SET(CMAKE_MODULE_LINKER_FLAGS_COVERAGE
-    "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the module libraries linker during coverage builds.")
-SET(CMAKE_STATIC_LINKER_FLAGS_COVERAGE
-    "${CMAKE_STATIC_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
-    CACHE STRING "Flags used by the module libraries linker during coverage builds.")
-MARK_AS_ADVANCED(
-    CMAKE_CXX_FLAGS_COVERAGE
-    CMAKE_C_FLAGS_COVERAGE
-    CMAKE_EXE_LINKER_FLAGS_COVERAGE
-	CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-	CMAKE_MODULE_LINKER_FLAGS_COVERAGE
-	CMAKE_STATIC_LINKER_FLAGS_COVERAGE)
+if(NOT CMAKE_CXX_FLAGS_COVERAGE)
+	SET(CMAKE_CXX_FLAGS_COVERAGE
+		"${CMAKE_CXX_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
+		CACHE STRING "Flags used by the C++ compiler during coverage builds." FORCE)
+	SET(CMAKE_C_FLAGS_COVERAGE
+		"${CMAKE_C_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
+		CACHE STRING "Flags used by the C compiler during coverage builds." FORCE)
+	SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE
+		"${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
+		CACHE STRING "Flags used for linking binaries during coverage builds." FORCE)
+	SET(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+		"${CMAKE_SHARED_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
+		CACHE STRING "Flags used by the shared libraries linker during coverage builds." FORCE)
+	SET(CMAKE_MODULE_LINKER_FLAGS_COVERAGE
+		"${CMAKE_MODULE_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
+		CACHE STRING "Flags used by the module libraries linker during coverage builds." FORCE)
+	SET(CMAKE_STATIC_LINKER_FLAGS_COVERAGE
+		"${CMAKE_STATIC_LINKER_FLAGS_DEBUG} --coverage -fprofile-arcs -ftest-coverage"
+		CACHE STRING "Flags used by the module libraries linker during coverage builds." FORCE)
+	MARK_AS_ADVANCED(
+		CMAKE_CXX_FLAGS_COVERAGE
+		CMAKE_C_FLAGS_COVERAGE
+		CMAKE_EXE_LINKER_FLAGS_COVERAGE
+		CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+		CMAKE_MODULE_LINKER_FLAGS_COVERAGE
+		CMAKE_STATIC_LINKER_FLAGS_COVERAGE)
+endif()
 
 if(EXISTS ${LCOV_PATH} AND EXISTS ${GENHTML_PATH})
 	message("Adding coverage target")
