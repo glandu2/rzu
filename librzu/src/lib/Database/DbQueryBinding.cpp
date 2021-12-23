@@ -394,15 +394,16 @@ bool DbQueryBinding::processInserts(IDbQueryJob* queryJob) {
 						          unicodeString.str);
 						unicodeString.strLen = unicodeString.str.size();
 					} else {
-						connection->bindParameter(*paramBinding.index + boundParameterIndexOffset,
-						                          paramBinding.way,
-						                          paramBinding.cType,
-						                          paramBinding.dbType,
-						                          paramBinding.dbSize,
-						                          paramBinding.dbPrecision,
-						                          (char*) inputInstance + paramBinding.bufferOffset,
-						                          0,
-						                          StrLen_or_Ind);
+						connection->bindParameter(
+						    static_cast<SQLUSMALLINT>(*paramBinding.index + boundParameterIndexOffset),
+						    paramBinding.way,
+						    paramBinding.cType,
+						    paramBinding.dbType,
+						    paramBinding.dbSize,
+						    paramBinding.dbPrecision,
+						    (char*) inputInstance + paramBinding.bufferOffset,
+						    0,
+						    StrLen_or_Ind);
 					}
 
 					boundParameterCount++;
@@ -656,7 +657,7 @@ void DbQueryBinding::setString(DbConnection* connection,
 	localToUtf16.convert(str, outStr, 2);
 
 	// If the string is empty, put a size of 1 else SQL server complains about invalid precision
-	connection->bindParameter(*paramBinding.index + parameterIndexOffset,
+	connection->bindParameter(static_cast<SQLUSMALLINT>(*paramBinding.index + parameterIndexOffset),
 	                          SQL_PARAM_INPUT,
 	                          SQL_C_WCHAR,
 	                          SQL_WVARCHAR,
