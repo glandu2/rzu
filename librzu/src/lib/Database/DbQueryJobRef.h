@@ -53,6 +53,14 @@ public:
 	}
 
 	template<class DbMappingClass, class Lambda>
+	void executeDbQuery(Lambda callback, const typename DbMappingClass::Input& input) {
+		auto query = new DbQueryJobLambda<DbMappingClass, Lambda>(callback);
+		query->setDbQueryJobRef(this);
+		dbQueryJobs.push_back(query);
+		query->execute(&input, 1);
+	}
+
+	template<class DbMappingClass, class Lambda>
 	void executeDbQuery(Lambda callback, const std::vector<typename DbMappingClass::Input>& inputs) {
 		auto query = new DbQueryJobLambda<DbMappingClass, Lambda>(callback);
 		query->setDbQueryJobRef(this);
@@ -71,4 +79,3 @@ private:
 	DbQueryJobRef(const DbQueryJobRef&);
 	DbQueryJobRef& operator=(const DbQueryJobRef& other);
 };
-
