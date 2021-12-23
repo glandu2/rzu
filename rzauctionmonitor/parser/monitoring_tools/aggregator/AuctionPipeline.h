@@ -18,6 +18,7 @@
 #include "P3AggregateStats.h"
 #include "P4ComputeStats.h"
 #include "P5InsertDataToSqlServer.h"
+#include "P5InsertFilenameToSqlServer.h"
 #include "P6InsertHistoryToSqlServer.h"
 #include "P7InsertToSqlServer.h"
 #include "P7SendToWebServer.h"
@@ -71,6 +72,7 @@ private:
 	P2ParseAuction parseAuctionStep;
 	P3AggregateStats aggregateStatsStep;
 	P4ComputeStats computeStatsStep;
+	P5InsertFilenameToSqlServer sendFilenameToSqlStep;
 	P5InsertDataToSqlServer sendDataToSqlStep;
 	P6InsertHistoryToSqlServer sendHistoryToSqlStep;
 	P7InsertToSqlServer sendToSqlServerStep;

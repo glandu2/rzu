@@ -23,7 +23,8 @@ template<> void DbQueryJob<DB_InsertHistory>::init(DbConnectionPool* dbConnectio
 	              "\"bid_price\", "
 	              "\"bid_flag\", "
 	              "\"estimated_end_min\", "
-	              "\"estimated_end_max\") "
+	              "\"estimated_end_max\", "
+	              "\"filename_uid\") "
 	              "VALUES\n"
 	              "%s\n"
 	              "on conflict do nothing;",
@@ -38,10 +39,13 @@ template<> void DbQueryJob<DB_InsertHistory>::init(DbConnectionPool* dbConnectio
 	addParam("bid_flag", &InputType::bid_flag);
 	addParam("estimated_end_min", &InputType::estimated_end_min);
 	addParam("estimated_end_max", &InputType::estimated_end_max);
+	addParam("filename_uid", &InputType::filename_uid);
 }
 DECLARE_DB_BINDING(DB_InsertHistory, "db_auctions_history");
 
-void DB_InsertHistory::addAuction(std::vector<DB_InsertHistory::Input>& auctions, const AUCTION_INFO& auctionInfo) {
+void DB_InsertHistory::addAuction(std::vector<DB_InsertHistory::Input>& auctions,
+                                  int32_t filename_uid,
+                                  const AUCTION_INFO& auctionInfo) {
 	DB_InsertHistory::Input input = {};
 
 	input.uid = auctionInfo.uid;
@@ -53,6 +57,7 @@ void DB_InsertHistory::addAuction(std::vector<DB_InsertHistory::Input>& auctions
 	input.bid_flag = auctionInfo.bid_flag;
 	input.estimated_end_min.setUnixTime(auctionInfo.estimatedEndTimeMin);
 	input.estimated_end_max.setUnixTime(auctionInfo.estimatedEndTimeMax);
+	input.filename_uid = filename_uid;
 
 	auctions.push_back(input);
 }
@@ -79,7 +84,7 @@ void P6InsertHistoryToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> 
 		for(const AUCTION_INFO& auctionInfo : auctionsDumps.auctions) {
 			// The first dump is a full dump, only put lines that would be in the partial dump to the SQL server
 			if(AuctionWriter::diffTypeInPartialDump((DiffType) auctionInfo.diffType)) {
-				DB_InsertHistory::addAuction(dbInputs, auctionInfo);
+				DB_InsertHistory::addAuction(dbInputs, inputData.first.base.filenameUid, auctionInfo);
 			}
 		}
 	}

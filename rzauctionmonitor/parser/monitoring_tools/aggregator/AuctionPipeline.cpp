@@ -36,6 +36,7 @@ AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
 	    ->plug(&parseAuctionStep)
 	    ->plug(&aggregateStatsStep)
 	    ->plug(&computeStatsStep)
+	    ->plug(&sendFilenameToSqlStep)
 	    ->plug(&sendDataToSqlStep)
 	    ->plug(&sendHistoryToSqlStep)
 	    ->plug(&sendToSqlServerStep)

@@ -7,6 +7,7 @@
 
 struct PipelineState {
 	std::string associatedFilename;
+	int32_t filenameUid;
 	time_t timestamp;
 };
 

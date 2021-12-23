@@ -22,11 +22,14 @@ struct DB_InsertHistory {
 		int8_t bid_flag;
 		DbDateTime estimated_end_min;
 		DbDateTime estimated_end_max;
+		int32_t filename_uid;
 	};
 
 	struct Output {};
 
-	static void addAuction(std::vector<DB_InsertHistory::Input>& auctions, const AUCTION_INFO& auctionInfo);
+	static void addAuction(std::vector<DB_InsertHistory::Input>& auctions,
+	                       int32_t filename_uid,
+	                       const AUCTION_INFO& auctionInfo);
 	static bool createTable(DbConnectionPool* dbConnectionPool);
 };
 
