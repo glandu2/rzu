@@ -314,8 +314,9 @@ uint32_t AuctionComplexData::durationTypeToSecond(DurationType durationType, uin
 		if(durationType >= DT_Hours)
 			return (durationType - 64) * 3600;
 
+		// Add 1 as we get 0 minutes left sometimes
 		if(durationType >= DT_Minutes)
-			return (durationType - 4) * 60;
+			return (durationType - 4 + 1) * 60;
 
 		switch(durationType) {
 			case DT_Long:
