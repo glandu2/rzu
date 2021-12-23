@@ -4,13 +4,24 @@
 #include "Core/Log.h"
 #include "LibRzuInit.h"
 #include "Packet/JSONWriter.h"
+#include <Packet/MessageBuffer.h>
 #include <stdint.h>
 #include <vector>
 
 cval<bool>& compactJson = CFG_CREATE("compactjson", false);
 
-template<class AUCTION_FILE> int writeJson(const AUCTION_FILE& auctionFile) {
-	JSONWriter jsonWriter(auctionFile.header.file_version, compactJson.get());
+// clang-format off
+#define PIPELINE_STATE_DEF(_) \
+    _(simple)  (uint16_t, file_version) \
+    _(count)   (uint8_t, lastParsedFile) \
+    _(dynstring)(lastParsedFile, false) \
+    _(simple)  (AUCTION_FILE, auctionData)
+    CREATE_STRUCT(PIPELINE_STATE);
+#undef PIPELINE_STATE_DEF
+// clang-format on
+
+template<class AUCTION_FILE> int writeJson(const AUCTION_FILE& auctionFile, packet_version_t version) {
+	JSONWriter jsonWriter(version, compactJson.get());
 	auctionFile.serialize(&jsonWriter);
 	jsonWriter.finalize();
 	Object::logStatic(Object::LL_Fatal, "main", "%s\n", jsonWriter.toString().c_str());
@@ -60,7 +71,16 @@ int main(int argc, char* argv[]) {
 
 		if(!AuctionWriter::getAuctionFileFormat(data, &version, &fileFormat)) {
 			Object::logStatic(Object::LL_Error, "main", "Invalid file, unrecognized header signature: %s\n", filename);
-			return 1;
+
+			PIPELINE_STATE file;
+
+			MessageBuffer structBuffer(data.data(), data.size(), 0xFFFFFF);
+
+			file.deserialize(&structBuffer);
+			if(!structBuffer.checkFinalSize()) {
+				return 1;
+			}
+			writeJson(file, 0xFFFFFF);
 		}
 
 		if(fileFormat == AFF_Complex) {
@@ -69,14 +89,14 @@ int main(int argc, char* argv[]) {
 				Object::logStatic(Object::LL_Error, "main", "Can't deserialize file %s\n", filename);
 				return 3;
 			}
-			writeJson(file);
+			writeJson(file, file.header.file_version);
 		} else {
 			AUCTION_SIMPLE_FILE file;
 			if(!AuctionWriter::deserialize(&file, data)) {
 				Object::logStatic(Object::LL_Error, "main", "Can't deserialize file %s\n", filename);
 				return 3;
 			}
-			writeJson(file);
+			writeJson(file, file.header.file_version);
 		}
 	}
 
