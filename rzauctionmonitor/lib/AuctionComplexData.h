@@ -31,7 +31,8 @@ public:
 	                   uint16_t category,
 	                   uint32_t epic,
 	                   const uint8_t* data,
-	                   size_t len);
+	                   size_t len,
+	                   bool ignoreNoData = false);
 
 	bool update(uint64_t time, uint32_t epic, const uint8_t* data, size_t len);
 	void remove(uint64_t time);

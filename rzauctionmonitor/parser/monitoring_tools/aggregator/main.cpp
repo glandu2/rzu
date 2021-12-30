@@ -48,10 +48,7 @@ int main(int argc, char* argv[]) {
 
 	ServersManager serverManager;
 
-	AuctionPipeline auctionParser(CONFIG_GET()->input.auctionsPath,
-	                              CONFIG_GET()->input.changeWaitSeconds,
-	                              CONFIG_GET()->states.statesPath,
-	                              CONFIG_GET()->states.auctionStateFile);
+	AuctionPipeline auctionParser(CONFIG_GET()->input.auctionsPath, CONFIG_GET()->input.changeWaitSeconds);
 
 	serverManager.addServer("auction.monitor", &auctionParser, &CONFIG_GET()->input.autoStart);
 

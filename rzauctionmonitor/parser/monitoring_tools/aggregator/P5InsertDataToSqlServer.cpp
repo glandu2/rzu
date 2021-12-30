@@ -1,4 +1,5 @@
 #include "P5InsertDataToSqlServer.h"
+#include "AuctionComplexDiffWriter.h"
 #include "AuctionWriter.h"
 #include "Core/PrintfFormats.h"
 #include "Database/DbConnection.h"
@@ -8,12 +9,9 @@
 #include "Packet/MessageBuffer.h"
 #include <numeric>
 
-cval<std::string>& DB_InsertItem::connectionString =
-    CFG_CREATE("db_auctions_data.connectionstring", "DRIVER=SQLite3 ODBC Driver;Database=auctions.sqlite3;");
-
 template<> void DbQueryJob<DB_InsertItem>::init(DbConnectionPool* dbConnectionPool) {
 	createBinding(dbConnectionPool,
-	              DB_InsertItem::connectionString,
+	              CONFIG_GET()->db.connectionString,
 	              "INSERT INTO auctions_data ("
 	              "\"uid\", "
 	              "\"created_time_min\", "
@@ -253,59 +251,50 @@ bool DB_InsertItem::addAuction(std::vector<DB_InsertItem::Input>& auctions, cons
 }
 
 P5InsertDataToSqlServer::P5InsertDataToSqlServer()
-    : PipelineStep<std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>,
-                   std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>>(1, 1) {}
+    : PipelineStep<std::pair<PipelineState, AUCTION_FILE>, std::pair<PipelineState, AUCTION_FILE>>(500, 1, 100) {}
 
 void P5InsertDataToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
-	std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>> inputData = std::move(item->getSource());
-	PipelineAggregatedState& aggregatedState = inputData.first;
-	struct tm currentDay;
-	Utils::getGmTime(aggregatedState.base.timestamp, &currentDay);
-
-	item->setName(std::to_string(aggregatedState.base.timestamp));
+	auto sources = std::move(item->getSources());
 
 	dbInputs.clear();
-	dbInputs.reserve(
-	    std::accumulate(aggregatedState.dumps.begin(),
-	                    aggregatedState.dumps.end(),
-	                    (size_t) 0,
-	                    [](size_t sum, const AUCTION_FILE& input) { return input.auctions.size() + sum; }));
-	for(auto& auctionsDumps : aggregatedState.dumps) {
-		for(AUCTION_INFO& auctionInfo : auctionsDumps.auctions) {
+	dbInputs.reserve(std::accumulate(sources.begin(),
+	                                 sources.end(),
+	                                 (size_t) 0,
+	                                 [](size_t sum, const std::pair<PipelineState, AUCTION_FILE>& input) {
+		                                 return input.second.auctions.size() + sum;
+	                                 }));
+
+	for(std::pair<PipelineState, AUCTION_FILE>& inputData : sources) {
+		PipelineState& aggregatedState = inputData.first;
+		struct tm currentDay;
+		Utils::getGmTime(aggregatedState.timestamp, &currentDay);
+
+		item->setName(std::to_string(aggregatedState.timestamp));
+
+		for(AUCTION_INFO& auctionInfo : inputData.second.auctions) {
 			// Only add data when it is a new auction
 			if(auctionInfo.diffType == D_Added) {
 				if(!DB_InsertItem::addAuction(dbInputs, auctionInfo)) {
 					log(LL_Error,
 					    "%" PRId64 ": Failed to prepare data for saving in database\n",
-					    auctionsDumps.header.categories.back().endTime);
+					    inputData.second.header.categories.back().endTime);
 					workDone(item, EBADMSG);
 					return;
 				}
 			}
 
 			// Free memory used by raw data
-			std::vector<uint8_t> tmp;
-			auctionInfo.data.swap(tmp);
+			auctionInfo.data.clear();
+			auctionInfo.data.shrink_to_fit();
 		}
+		addResult(item, std::move(inputData));
 	}
 
-	log(LL_Info,
-	    "Sending %d auctions data to SQL table for day %02d/%02d/%04d\n",
-	    (int) dbInputs.size(),
-	    currentDay.tm_mday,
-	    currentDay.tm_mon,
-	    currentDay.tm_year);
-
-	addResult(item, std::move(inputData));
+	log(LL_Info, "Sending %d auctions data to SQL table\n", (int) dbInputs.size());
 
 	dbQuery.executeDbQuery<DB_InsertItem>(
-	    [this, item, currentDay](auto, int status) {
-		    log(LL_Info,
-		        "Done Sending %d auctions data to SQL table for day %02d/%02d/%04d\n",
-		        (int) dbInputs.size(),
-		        currentDay.tm_mday,
-		        currentDay.tm_mon,
-		        currentDay.tm_year);
+	    [this, item](auto, int status) {
+		    log(LL_Info, "Done Sending %d auctions data to SQL table\n", (int) dbInputs.size());
 		    dbInputs.clear();
 
 		    workDone(item, status);

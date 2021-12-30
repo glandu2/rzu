@@ -4,16 +4,15 @@
 #include "Core/Object.h"
 #include "Database/DbQueryJobRef.h"
 #include "IPipeline.h"
-#include "P4ComputeStats.h"
 #include "PipelineState.h"
 #include <stdint.h>
 
 template<class T> class DbQueryJob;
 
 struct DB_InsertFilename {
-	static cval<std::string>& connectionString;
 	struct Input {
 		std::string filename;
+		DbDateTime start_time;
 	};
 
 	struct Output {
@@ -22,8 +21,7 @@ struct DB_InsertFilename {
 };
 
 class P5InsertFilenameToSqlServer
-    : public PipelineStep<std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>,
-                          std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>> {
+    : public PipelineStep<std::pair<PipelineState, AUCTION_FILE>, std::pair<PipelineState, AUCTION_FILE>> {
 	DECLARE_CLASSNAME(P5InsertFilenameToSqlServer, 0)
 public:
 	P5InsertFilenameToSqlServer();

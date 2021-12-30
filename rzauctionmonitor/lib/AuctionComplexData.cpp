@@ -5,8 +5,14 @@
 #include "Core/PrintfFormats.h"
 #include "Core/Utils.h"
 
-AuctionComplexData::AuctionComplexData(
-    uint32_t uid, uint64_t timeMin, uint64_t timeMax, uint16_t category, uint32_t epic, const uint8_t* data, size_t len)
+AuctionComplexData::AuctionComplexData(uint32_t uid,
+                                       uint64_t timeMin,
+                                       uint64_t timeMax,
+                                       uint16_t category,
+                                       uint32_t epic,
+                                       const uint8_t* data,
+                                       size_t len,
+                                       bool ignoreNoData)
     : IAuctionData(AuctionUid(uid), category, timeMin, timeMax),
       processStatus(PS_Added),
       deleted(false),
@@ -19,7 +25,8 @@ AuctionComplexData::AuctionComplexData(
 	parseData(epic, data, len);
 	postParseData(true);
 
-	if(data == nullptr || len == 0)
+	// Only log an error when not importing data where we don't need the raw data
+	if((data == nullptr || len == 0) && !ignoreNoData)
 		log(LL_Error, "Auction added without data: 0x%08X\n", getUid().get());
 }
 
@@ -121,7 +128,8 @@ AuctionComplexData* AuctionComplexData::createFromDump(const AUCTION_INFO* aucti
 	                                                     auctionInfo->category,
 	                                                     auctionInfo->epic,
 	                                                     auctionInfo->data.data(),
-	                                                     auctionInfo->data.size());
+	                                                     auctionInfo->data.size(),
+	                                                     true);
 
 	auction->deleted = auctionInfo->deleted;
 	auction->deletedCount = auctionInfo->deletedCount;

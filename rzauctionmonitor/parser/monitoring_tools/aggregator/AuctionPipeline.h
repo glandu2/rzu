@@ -6,6 +6,7 @@
 #include "Core/Timer.h"
 #include "IPipeline.h"
 #include "NetSession/StartableObject.h"
+#include "P0LoadActiveAuctions.h"
 #include <stdint.h>
 #include <string>
 #include <uv.h>
@@ -15,14 +16,9 @@
 #include "P12DeserializeAuction.h"
 #include "P1ReadAuction.h"
 #include "P2ParseAuction.h"
-#include "P3AggregateStats.h"
-#include "P4ComputeStats.h"
 #include "P5InsertDataToSqlServer.h"
 #include "P5InsertFilenameToSqlServer.h"
 #include "P6InsertHistoryToSqlServer.h"
-#include "P7InsertToSqlServer.h"
-#include "P7SendToWebServer.h"
-#include "P8Commit.h"
 
 /* scandir (disk, fast) => strings
  * readFile(disk) => AuctionComplexDiffWriter
@@ -34,10 +30,7 @@ class AuctionPipeline : public Object,
                         public IPipelineProducer<std::pair<std::string, std::string>> {
 	DECLARE_CLASSNAME(AuctionPipeline, 0)
 public:
-	AuctionPipeline(cval<std::string>& auctionsPath,
-	                cval<int>& changeWaitSeconds,
-	                cval<std::string>& statesPath,
-	                cval<std::string>& auctionStateFile);
+	AuctionPipeline(cval<std::string>& auctionsPath, cval<int>& changeWaitSeconds);
 
 	virtual bool start() override;
 	virtual void stop() override;
@@ -45,9 +38,6 @@ public:
 
 	virtual void notifyError(int status) override;
 	virtual void notifyOutputAvailable() override;
-
-	void importState();
-	int exportState(std::string& fullFilename, AUCTION_FILE& auctionFile);
 
 protected:
 	void onTimeout();
@@ -57,8 +47,6 @@ protected:
 private:
 	cval<std::string>& auctionsPath;
 	cval<int>& changeWaitSeconds;
-	cval<std::string>& statesPath;
-	cval<std::string>& auctionStateFile;
 
 	Timer<AuctionPipeline> dirWatchTimer;
 	bool started;
@@ -66,15 +54,13 @@ private:
 	uv_fs_event_t fsEvent;
 	std::string lastQueuedFile;
 
+	P0LoadActiveAuctions loadActiveAuctions;
+
 	P0ScanAuctions scanAuctionStep;
 	P1ReadAuction readAuctionStep;
 	P12DeserializeAuction deserializeAuctionStep;
 	P2ParseAuction parseAuctionStep;
-	P3AggregateStats aggregateStatsStep;
-	P4ComputeStats computeStatsStep;
 	P5InsertFilenameToSqlServer sendFilenameToSqlStep;
 	P5InsertDataToSqlServer sendDataToSqlStep;
 	P6InsertHistoryToSqlServer sendHistoryToSqlStep;
-	P7InsertToSqlServer sendToSqlServerStep;
-	P8Commit commitStep;
 };

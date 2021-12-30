@@ -19,6 +19,14 @@ struct GlobalConfig {
 		      pwd(CFG_CREATE("webserver.pwd", "")) {}
 	} webserver;
 
+	struct DbConfig {
+		cval<std::string>& connectionString;
+
+		DbConfig()
+		    : connectionString(
+		          CFG_CREATE("db.connectionstring", "DRIVER=SQLite3 ODBC Driver;Database=auctions.sqlite3;")) {}
+	} db;
+
 	struct InputConfig {
 		cval<std::string>& auctionsPath;
 		cval<int>& changeWaitSeconds;
@@ -31,19 +39,6 @@ struct GlobalConfig {
 			Utils::autoSetAbsoluteDir(auctionsPath);
 		}
 	} input;
-
-	struct StatesConfig {
-		cval<std::string>& statesPath;
-		cval<std::string>& auctionStateFile;
-		cval<std::string>& aggregationStateFile;
-
-		StatesConfig()
-		    : statesPath(CFG_CREATE("state.path", "parser_states")),
-		      auctionStateFile(CFG_CREATE("state.auctionfile", "auction_state.bin")),
-		      aggregationStateFile(CFG_CREATE("state.aggregationfile", "aggregation_state.bin")) {
-			Utils::autoSetAbsoluteDir(statesPath);
-		}
-	} states;
 
 	struct TrafficDump {
 		cval<bool>& enable;
@@ -64,4 +59,3 @@ struct GlobalConfig {
 };
 
 #define CONFIG_GET() GlobalConfig::get()
-

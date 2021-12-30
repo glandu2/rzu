@@ -4,14 +4,12 @@
 #include "Core/Object.h"
 #include "Database/DbQueryJobRef.h"
 #include "IPipeline.h"
-#include "P4ComputeStats.h"
 #include "PipelineState.h"
 #include <stdint.h>
 
 template<class T> class DbQueryJob;
 
 struct DB_InsertHistory {
-	static cval<std::string>& connectionString;
 	struct Input {
 		int32_t uid;
 		DbDateTime previous_time;
@@ -34,8 +32,7 @@ struct DB_InsertHistory {
 };
 
 class P6InsertHistoryToSqlServer
-    : public PipelineStep<std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>,
-                          std::pair<PipelineAggregatedState, std::vector<AUCTION_INFO_PER_DAY>>> {
+    : public PipelineStep<std::pair<PipelineState, AUCTION_FILE>, std::pair<PipelineState, AUCTION_FILE>> {
 	DECLARE_CLASSNAME(P6InsertHistoryToSqlServer, 0)
 public:
 	P6InsertHistoryToSqlServer();

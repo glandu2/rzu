@@ -7,27 +7,18 @@
 #include "Core/Utils.h"
 
 P2ParseAuction::P2ParseAuction()
-    : PipelineStep<std::pair<PipelineState, AUCTION_SIMPLE_FILE>, std::pair<PipelineState, std::vector<AUCTION_FILE>>>(
-          10, 1, 1),
+    : PipelineStep<std::pair<PipelineState, AUCTION_SIMPLE_FILE>, std::pair<PipelineState, AUCTION_FILE>>(10, 1, 1),
       work(this, &P2ParseAuction::processWork, &P2ParseAuction::afterWork),
       auctionWriter(19),
-      currentDate(-1),
-      previousWasNewDay(false),
-      previousTime(0),
-      skipNextDay(false) {}
+      currentDate(-1) {}
 
 void P2ParseAuction::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 	work.run(item);
 }
 
-void P2ParseAuction::importState(const std::string& dumpedFile, const AUCTION_FILE* auctionData) {
+void P2ParseAuction::importState(const AUCTION_FILE* auctionData) {
 	auctionWriter.importDump(auctionData);
-	aggregatedDumps.clear();
-	aggregatedDumps.emplace_back(*auctionData);
 	currentDate = auctionData->header.categories.front().beginTime;
-	firstFileOfDay = dumpedFile;
-	previousWasNewDay = false;
-	skipNextDay = true;
 }
 
 int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
@@ -67,91 +58,17 @@ int P2ParseAuction::processWork(std::shared_ptr<WorkItem> item) {
 		if(dumpBeginTime == 0) {
 			log(LL_Warning, "Begin time of first category is 0 after parsing file %s\n", filename.c_str());
 			dumpBeginTime = currentDate;
-		}
-
-		AUCTION_FILE auctionFile;
-		// full dump if its a new day
-		if(previousWasNewDay) {
-			if(!skipNextDay) {
-				PipelineState pipelineState;
-				pipelineState.timestamp = previousTime;
-				pipelineState.associatedFilename = firstFileOfDay;
-				addResult(item, std::make_pair(std::move(pipelineState), std::move(aggregatedDumps)));
-			} else {
-				skipNextDay = false;
-			}
-
-			aggregatedDumps.clear();
-		}
-
-		if(aggregatedDumps.empty()) {
-			aggregatedDumps.emplace_back(auctionWriter.exportDump(true, true));
-			firstFileOfDay = input.first.associatedFilename;
 		} else {
-			aggregatedDumps.emplace_back(auctionWriter.exportDump(false, true));
+			currentDate = dumpBeginTime;
 		}
 
-		previousTime = currentDate;
-		previousWasNewDay = isNewDay(filename, dumpBeginTime);
-		if(previousWasNewDay) {
-			log(LL_Info,
-			    "Last file of day parsed, previousTime: %" PRIu64 ", dumpBeginTime: %" PRIu64 "\n",
-			    previousTime,
-			    dumpBeginTime);
-		}
+		PipelineState pipelineState;
+		pipelineState.timestamp = dumpBeginTime;
+		pipelineState.associatedFilename = input.first.associatedFilename;
+		addResult(item, std::make_pair(std::move(pipelineState), auctionWriter.exportDump(false, false)));
 	}
 
 	return 0;
-}
-
-bool P2ParseAuction::isNewDay(const std::string& filename, time_t dumpBeginTime) {
-	bool result = false;
-	int dateCompareResult = compareWithCurrentDate(dumpBeginTime);
-	if(dateCompareResult > 0) {
-		if(currentDate != -1)
-			result = true;  // New day only if not the first day
-		currentDate = dumpBeginTime;
-	} else if(dateCompareResult < 0) {
-		log(LL_Warning,
-		    "New date is smaller than current date: %d < %d at file %s\n",
-		    (int) dumpBeginTime,
-		    (int) currentDate,
-		    filename.c_str());
-	} else {
-		log(LL_Debug, "Date from %d to %d not changed\n", (int) currentDate, (int) dumpBeginTime);
-	}
-
-	return result;
-}
-
-int P2ParseAuction::compareWithCurrentDate(time_t other) {
-	struct tm currentDateTm;
-	struct tm otherDateTm;
-
-	Utils::getGmTime(currentDate, &currentDateTm);
-	Utils::getGmTime(other, &otherDateTm);
-
-	if(currentDate == -1) {
-		log(LL_Debug, "New date at %04d-%02d-%02d\n", otherDateTm.tm_year, otherDateTm.tm_mon, otherDateTm.tm_mday);
-		return 1;
-	}
-
-	log(LL_Debug,
-	    "Date changed from %04d-%02d-%02d to %04d-%02d-%02d\n",
-	    currentDateTm.tm_year,
-	    currentDateTm.tm_mon,
-	    currentDateTm.tm_mday,
-	    otherDateTm.tm_year,
-	    otherDateTm.tm_mon,
-	    otherDateTm.tm_mday);
-
-	if(otherDateTm.tm_year != currentDateTm.tm_year)
-		return otherDateTm.tm_year - currentDateTm.tm_year;
-
-	if(otherDateTm.tm_mon != currentDateTm.tm_mon)
-		return otherDateTm.tm_mon - currentDateTm.tm_mon;
-
-	return otherDateTm.tm_mday - currentDateTm.tm_mday;
 }
 
 void P2ParseAuction::afterWork(std::shared_ptr<WorkItem> item, int status) {

@@ -19,28 +19,17 @@ CREATE_STRUCT(PIPELINE_STATE);
 #undef PIPELINE_STATE_DEF
 // clang-format on
 
-AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
-                                 cval<int>& changeWaitSeconds,
-                                 cval<std::string>& statesPath,
-                                 cval<std::string>& auctionStateFile)
+AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath, cval<int>& changeWaitSeconds)
     : auctionsPath(auctionsPath),
       changeWaitSeconds(changeWaitSeconds),
-      statesPath(statesPath),
-      auctionStateFile(auctionStateFile),
       started(false),
-      scanAuctionStep(changeWaitSeconds),
-      sendToSqlServerStep(),
-      commitStep(this) {
+      scanAuctionStep(changeWaitSeconds) {
 	this->plug(&readAuctionStep)
 	    ->plug(&deserializeAuctionStep)
 	    ->plug(&parseAuctionStep)
-	    ->plug(&aggregateStatsStep)
-	    ->plug(&computeStatsStep)
 	    ->plug(&sendFilenameToSqlStep)
 	    ->plug(&sendDataToSqlStep)
-	    ->plug(&sendHistoryToSqlStep)
-	    ->plug(&sendToSqlServerStep)
-	    ->plug(&commitStep);
+	    ->plug(&sendHistoryToSqlStep);
 	uv_fs_event_init(EventLoop::getLoop(), &fsEvent);
 	fsEvent.data = this;
 }
@@ -48,11 +37,26 @@ AuctionPipeline::AuctionPipeline(cval<std::string>& auctionsPath,
 bool AuctionPipeline::start() {
 	if(!isStarted()) {
 		started = true;
-		importState();
-		log(LL_Info, "Starting watching auctions directory %s\n", auctionsPath.get().c_str());
-		// dirWatchTimer.start(this, &AuctionPipeline::onTimeout, 1000, 0);
-		uv_fs_event_start(&fsEvent, &AuctionPipeline::onFsEvent, auctionsPath.get().c_str(), 0);
-		onTimeout();
+		loadActiveAuctions.load(
+		    [this](bool success, int result, const AUCTION_FILE* auctionData, std::string lastParsedFile) {
+			    if(success) {
+				    if(auctionData) {
+					    lastQueuedFile = std::move(lastParsedFile);
+					    parseAuctionStep.importState(auctionData);
+				    } else {
+					    lastQueuedFile.clear();
+				    }
+				    log(LL_Info,
+				        "Starting watching auctions directory %s from %s\n",
+				        auctionsPath.get().c_str(),
+				        lastQueuedFile.c_str());
+				    // dirWatchTimer.start(this, &AuctionPipeline::onTimeout, 1000, 0);
+				    uv_fs_event_start(&fsEvent, &AuctionPipeline::onFsEvent, auctionsPath.get().c_str(), 0);
+				    onTimeout();
+			    } else {
+				    started = false;
+			    }
+		    });
 	}
 
 	return true;
@@ -76,94 +80,6 @@ void AuctionPipeline::notifyError(int status) {
 }
 
 void AuctionPipeline::notifyOutputAvailable() {}
-
-void AuctionPipeline::importState() {
-	std::string aggregationStateFile = this->auctionStateFile.get();
-
-	if(aggregationStateFile.empty()) {
-		return;
-	}
-
-	aggregationStateFile = statesPath.get() + "/" + aggregationStateFile;
-
-	std::vector<AuctionWriter::file_data_byte> data;
-
-	if(AuctionWriter::readAuctionDataFromFile(aggregationStateFile, data)) {
-		PIPELINE_STATE aggregationState;
-
-		if(data.size() < 2) {
-			log(LL_Info, "Auction state file %s is too small\n", aggregationStateFile.c_str());
-			return;
-		}
-
-		uint16_t version = *reinterpret_cast<const uint16_t*>(data.data());
-		MessageBuffer buffer(data.data(), data.size(), version);
-		aggregationState.deserialize(&buffer);
-		if(buffer.checkFinalSize() == false) {
-			log(LL_Error, "Can't deserialize state file %s\n", aggregationStateFile.c_str());
-			log(LL_Error,
-			    "Wrong buffer size, size: %u, field: %s\n",
-			    buffer.getSize(),
-			    buffer.getFieldInOverflow().c_str());
-			return;
-		}
-
-		log(LL_Info,
-		    "Loading auction state file %s with %d auctions\n",
-		    aggregationStateFile.c_str(),
-		    (int) aggregationState.auctionData.auctions.size());
-
-		log(LL_Info, "Last auctions file was %s\n", aggregationState.lastParsedFile.c_str());
-
-		lastQueuedFile = aggregationState.lastParsedFile;
-		parseAuctionStep.importState(aggregationState.lastParsedFile, &aggregationState.auctionData);
-	} else {
-		log(LL_Error, "Cant read state file %s\n", aggregationStateFile.c_str());
-	}
-}
-
-int AuctionPipeline::exportState(std::string& fullFilename, AUCTION_FILE& auctionFile) {
-	// Executed in thread
-	PIPELINE_STATE aggregationState;
-
-	std::string aggregationStateFile = this->auctionStateFile.get();
-
-	if(aggregationStateFile.empty()) {
-		return 0;
-	}
-
-	log(LL_Info, "Writing auction state file %s\n", aggregationStateFile.c_str());
-
-	aggregationStateFile = statesPath.get() + "/" + aggregationStateFile;
-
-	std::string filename;
-	size_t lastSlash = fullFilename.find_last_of('/');
-	if(lastSlash != std::string::npos) {
-		filename = fullFilename.substr(lastSlash);
-	} else {
-		filename = fullFilename;
-	}
-
-	aggregationState.file_version = PIPELINE_STATE_VERSION;
-	aggregationState.lastParsedFile = std::move(filename);
-	aggregationState.auctionData = std::move(auctionFile);
-
-	std::vector<uint8_t> data;
-	data.resize(aggregationState.getSize(aggregationState.file_version));
-	MessageBuffer buffer(data.data(), data.size(), aggregationState.file_version);
-	aggregationState.serialize(&buffer);
-	if(buffer.checkFinalSize() == false) {
-		log(LL_Error,
-		    "Wrong buffer size, size: %u, field: %s\n",
-		    buffer.getSize(),
-		    buffer.getFieldInOverflow().c_str());
-
-		return ERANGE;
-	}
-	AuctionWriter::writeAuctionDataToFile(aggregationStateFile, data);
-
-	return 0;
-}
 
 void AuctionPipeline::onTimeout() {
 	//	if(readAuctionStep.isFull()) {
@@ -190,6 +106,8 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 		return;
 	}
 
+	thisInstance->log(LL_Info, "Scanning dir %s for new files to parse\n", req->path);
+
 	std::vector<std::string> orderedFiles;
 
 	// Get all file names after lastQueuedFile and order by name
@@ -204,6 +122,8 @@ void AuctionPipeline::onScandir(uv_fs_t* req) {
 	std::sort(orderedFiles.begin(), orderedFiles.end(), [](const std::string& a, const std::string& b) {
 		return strcmp(a.c_str(), b.c_str()) < 0;
 	});
+
+	thisInstance->log(LL_Info, "Scanned %d new files to parse\n", (int) orderedFiles.size());
 
 	auto it = orderedFiles.begin();
 	auto itEnd = orderedFiles.end();
