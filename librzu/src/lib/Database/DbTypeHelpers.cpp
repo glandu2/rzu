@@ -15,6 +15,19 @@ void DbDateTime::setUnixTime(time_t t, uint32_t nanoFraction) {
 	fraction = nanoFraction;
 }
 
+time_t DbDateTime::getUnixTime() const {
+	struct tm date;
+
+	date.tm_year = year;
+	date.tm_mon = month;
+	date.tm_mday = day;
+	date.tm_hour = hour;
+	date.tm_min = minute;
+	date.tm_sec = second;
+
+	return Utils::getTimeGm(&date);
+}
+
 void DbPrintableTypeBinding<SQL_TIMESTAMP_STRUCT>::print(std::ostringstream& stream, void* data) {
 	SQL_TIMESTAMP_STRUCT* date = reinterpret_cast<SQL_TIMESTAMP_STRUCT*>(data);
 	char buffer[128];
