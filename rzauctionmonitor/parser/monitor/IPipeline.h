@@ -245,9 +245,9 @@ public:
 protected:
 	void workDone(std::shared_ptr<WorkItem> item, int status = 0) {
 		PipelineStepBase<Input, Output>::workDone(item, status);
-		if(!item->isCanceled() && !status)
+		if(!item->isCanceled() && !status) {
 			PipelineStepBase<Input, Output>::doNextWork();
-		else if(status)
+		} else if(status)
 			PipelineStepBase<Input, Output>::notifyError(status);
 	}
 
