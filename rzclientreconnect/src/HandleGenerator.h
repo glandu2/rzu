@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 #include <vector>
 
@@ -29,4 +30,3 @@ template<typename T> T HandleGenerator<T>::allocateId() {
 template<typename T> void HandleGenerator<T>::freeId(T id) {
 	freeIds.emplace_back(id);
 }
-

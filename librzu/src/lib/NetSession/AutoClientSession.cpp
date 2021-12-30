@@ -166,7 +166,7 @@ void AutoClientSession::connect() {
 void AutoClientSession::setConnected(bool connected) {
 	if(connected && !connectedInGame) {
 		if(manageTimesync) {
-			TS_CS_GAME_TIME gameTimePkt;
+			TS_CS_GAME_TIME gameTimePkt{};
 			sendPacket(gameTimePkt);
 
 			updateTimer.start(this, &AutoClientSession::onUpdatePacketExpired, 5000, 5000);

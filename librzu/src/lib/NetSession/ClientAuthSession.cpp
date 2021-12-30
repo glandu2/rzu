@@ -56,7 +56,7 @@ void ClientAuthSession::close() {
 }
 
 void ClientAuthSession::retreiveServerList() {
-	TS_CA_SERVER_LIST getServerListMsg;
+	TS_CA_SERVER_LIST getServerListMsg{};
 
 	sendPacket(getServerListMsg);
 }
