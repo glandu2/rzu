@@ -36,41 +36,26 @@ uint64_t Utils::getTimeInMsec() {
 
 // From ffmpeg http://www.ffmpeg.org/doxygen/trunk/cutils_8c-source.html
 struct tm* Utils::getGmTime(time_t secs, struct tm* tm) {
-	int days, y, ny, m;
-	int md[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
-	auto isLeap = [](int y) { return ((y) % 4 == 0) && (((y) % 100) != 0 || ((y) % 400) == 0); };
-	auto leapsCount = [](int y) { return ((y) / 4 - (y) / 100 + (y) / 400); };
-
-	days = (int) (secs / 86400);
-	secs %= 86400;
-	tm->tm_hour = (int) (secs / 3600);
-	tm->tm_min = (secs % 3600) / 60;
-	tm->tm_sec = secs % 60;
-
-	/* oh well, may be someone some day will invent a formula for this stuff */
-	y = 1970; /* start "guessing" */
-	while(days > 365) {
-		ny = (y + days / 366);
-		days -= (ny - y) * 365 + leapsCount(ny - 1) - leapsCount(y - 1);
-		y = ny;
-	}
-	if(days == 365 && !isLeap(y)) {
-		days = 0;
-		y++;
-	}
-
-	tm->tm_yday = days;
-
-	md[1] = isLeap(y) ? 29 : 28;
-	for(m = 0; days >= md[m]; m++)
-		days -= md[m];
-
-	tm->tm_year = y;    /* unlike gmtime_r we store complete year here */
-	tm->tm_mon = m + 1; /* unlike gmtime_r tm_mon is from 1 to 12 */
-	tm->tm_mday = days + 1;
-
+#ifdef _WIN32
+	gmtime_s(tm, &secs);
+	tm->tm_year += 1900;
+	tm->tm_mon += 1;
 	return tm;
+#else
+	return gmtime_r(&secs, tm);
+#endif
+}
+
+time_t Utils::getTimeGm(const struct tm* tm) {
+	struct tm tm_copy = *tm;
+	tm_copy.tm_year -= 1900;
+	tm_copy.tm_mon -= 1;
+
+#ifdef _WIN32
+	return _mkgmtime(&tm_copy);
+#else
+	return timegm(&tm_copy);
+#endif
 }
 
 int Utils::mkdir(const char* dir) {

@@ -23,6 +23,7 @@ class RZU_EXTERN Utils {
 public:
 	static uint64_t getTimeInMsec();
 	static struct tm* getGmTime(time_t secs, struct tm* tm);
+	static time_t getTimeGm(const struct tm* tm);
 	static int mkdir(const char* dir);
 	static const char* getApplicationPath();
 	static const char* getApplicationName();
@@ -68,4 +69,3 @@ private:
 	static char applicationName[260];
 	static bool applicationFilePathInitialized;
 };
-
