@@ -131,6 +131,10 @@ set(CMAKE_USE_OPENSSL ON)
 set(BUILD_CURL_EXE OFF)
 set(BUILD_TESTING OFF)
 FetchContent_MakeAvailable(curl)
+install(TARGETS libcurl
+  RUNTIME DESTINATION ./
+  LIBRARY DESTINATION ./
+)
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
   add_subdirectory(libuv)
