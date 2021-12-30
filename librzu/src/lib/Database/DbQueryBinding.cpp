@@ -119,10 +119,15 @@ bool DbQueryBinding::process(IDbQueryJob* queryJob) {
 
 	DbConnection* connection;
 	std::list<UnicodeString> unicodeStrings;
+	size_t inputNumber = queryJob->getInputNumber();
 
 	if(enabled.get() == false) {
 		errorCount = 0;
 		return false;
+	}
+
+	if(inputNumber == 0) {
+		return true;
 	}
 
 	// If Insert, use multivalue insert
@@ -150,7 +155,6 @@ bool DbQueryBinding::process(IDbQueryJob* queryJob) {
 
 	bool getDataErrorOccured = false;  // if true, show query after all getData
 
-	size_t inputNumber = queryJob->getInputNumber();
 	for(size_t inputIndex = 0; inputIndex < inputNumber && !getDataErrorOccured; inputIndex++) {
 		void* inputInstance = queryJob->getInputPointer(inputIndex);
 
