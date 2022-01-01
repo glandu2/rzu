@@ -1,1 +1,4 @@
+#include <stdint.h>
+
 const char* @TARGET_NAME@Version = "Git rev @GIT_VERSION@ build on @CURRENT_DATE@";
+uint64_t @TARGET_NAME@BuildDate = @CURRENT_TIME_T@;

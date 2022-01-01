@@ -130,15 +130,9 @@ void ClientSession::onVersion(const TS_CA_VERSION* packet) {
 		result.request_msg_id = packet->id;
 		sendPacket(result, EPIC_LATEST);
 	} else if(!memcmp(packet->szVersion, "INFO", 4)) {
-		static uint32_t gitVersionSuffix = 0;
 		TS_SC_RESULT result;
 
-		if(gitVersionSuffix == 0) {
-			std::string shaPart(rzauthVersion + 8, 8);
-			gitVersionSuffix = strtoul(shaPart.c_str(), nullptr, 16);
-		}
-
-		result.value = gitVersionSuffix ^ 0xADADADAD;
+		result.value = (rzauthBuildDate & 0xFFFFFFFF) ^ 0xADADADAD;
 		result.result = 0;
 		result.request_msg_id = packet->id;
 		sendPacket(result, EPIC_LATEST);

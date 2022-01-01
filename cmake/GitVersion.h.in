@@ -1,6 +1,9 @@
 #ifndef @TARGET_NAME@_GIT_VERSION_H
 #define @TARGET_NAME@_GIT_VERSION_H
 
+#include <stdint.h>
+
 extern const char* @TARGET_NAME@Version;
+extern uint64_t @TARGET_NAME@BuildDate;
 
 #endif
