@@ -370,8 +370,15 @@ void ConnectionToServer::onChat(const TS_SC_CHAT* packet) {
 			int32_t partyId;
 			int32_t password;
 
-			std::from_chars(args[3].c_str(), args[3].c_str() + args[3].size(), partyId);
-			std::from_chars(args[4].c_str(), args[4].c_str() + args[4].size(), password);
+			if(std::from_chars(args[3].c_str(), args[3].c_str() + args[3].size(), partyId).ec != std::errc{}) {
+				log(LL_Error, "Received party invitation with invalid number for partyId: %s\n", args[3].c_str());
+				return;
+			}
+
+			if(std::from_chars(args[4].c_str(), args[4].c_str() + args[4].size(), password).ec != std::errc{}) {
+				log(LL_Error, "Received party invitation with invalid number for password: %s\n", args[4].c_str());
+				return;
+			}
 
 			// Autoaccept invitation
 			log(LL_Info, "Received party invitation from %s, autoaccepting\n", args[1].c_str());
