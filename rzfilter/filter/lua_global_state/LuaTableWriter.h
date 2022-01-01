@@ -149,7 +149,7 @@ public:
 			Object::logStatic(Object::LL_Error,
 			                  "rzfilter_lua_global_state_module",
 			                  "Bad field type for %s, expected integer, got %s\n",
-			                  fieldName,
+			                  fieldName ? fieldName : "<null>",
 			                  lua_typename(L, lua_type(L, -1)));
 			ok = false;
 		}
@@ -169,7 +169,7 @@ public:
 			Object::logStatic(Object::LL_Error,
 			                  "rzfilter_lua_global_state_module",
 			                  "Bad field type for %s, expected integer, got %s\n",
-			                  fieldName,
+			                  fieldName ? fieldName : "<null>",
 			                  lua_typename(L, lua_type(L, -1)));
 			ok = false;
 		}
@@ -191,7 +191,7 @@ public:
 			Object::logStatic(Object::LL_Error,
 			                  "rzfilter_lua_global_state_module",
 			                  "Bad field type for %s, expected number, got %s\n",
-			                  fieldName,
+			                  fieldName ? fieldName : "<null>",
 			                  lua_typename(L, lua_type(L, -1)));
 			ok = false;
 		}
@@ -216,7 +216,7 @@ public:
 			Object::logStatic(Object::LL_Error,
 			                  "rzfilter_lua_global_state_module",
 			                  "Bad field type for %s, expected table, got %s\n",
-			                  fieldName,
+			                  fieldName ? fieldName : "<null>",
 			                  lua_typename(L, lua_type(L, -1)));
 			ok = false;
 		} else {
@@ -233,7 +233,7 @@ public:
 			Object::logStatic(Object::LL_Error,
 			                  "rzfilter_lua_global_state_module",
 			                  "Bad field type for %s, expected string, got %s\n",
-			                  fieldName,
+			                  fieldName ? fieldName : "<null>",
 			                  lua_typename(L, lua_type(L, -1)));
 			ok = false;
 		}
@@ -259,7 +259,7 @@ public:
 			Object::logStatic(Object::LL_Error,
 			                  "rzfilter_lua_global_state_module",
 			                  "Bad field type for %s, expected array, got %s\n",
-			                  fieldName,
+			                  fieldName ? fieldName : "<null>",
 			                  lua_typename(L, lua_type(L, -1)));
 			ok = false;
 		} else {
@@ -281,7 +281,7 @@ public:
 			Object::logStatic(Object::LL_Error,
 			                  "rzfilter_lua_global_state_module",
 			                  "Bad field type for %s, expected array, got %s\n",
-			                  fieldName,
+			                  fieldName ? fieldName : "<null>",
 			                  lua_typename(L, lua_type(L, -1)));
 			ok = false;
 		} else {

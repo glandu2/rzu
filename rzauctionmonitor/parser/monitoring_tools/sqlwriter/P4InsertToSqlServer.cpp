@@ -1,6 +1,7 @@
 #include "P4InsertToSqlServer.h"
 #include "AuctionComplexDiffWriter.h"
 #include "AuctionSQLWriter.h"
+#include "Core/PrintfFormats.h"
 #include "Database/DbConnection.h"
 #include "Database/DbConnectionPool.h"
 #include "GameClient/TS_SC_AUCTION_SEARCH.h"
@@ -147,7 +148,7 @@ bool DB_InsertItem::fillItemInfo(DB_InsertItem::Input& input, uint32_t epic, con
 	TS_SEARCHED_AUCTION_INFO item;
 
 	if(data.empty()) {
-		Object::logStatic(Object::LL_Warning, "DB_Item", "auctions uid %llu: no item data\n", input.uid);
+		Object::logStatic(Object::LL_Warning, "DB_Item", "auctions uid %" PRId32 ": no item data\n", input.uid);
 		return true;
 	}
 
@@ -360,7 +361,7 @@ void P4InsertToSqlServer::doWork(std::shared_ptr<PipelineStep::WorkItem> item) {
 		addResult(item, std::move(input.first));
 	}
 
-	log(LL_Info, "Saving %llu auctions in database\n", dbInputs.size());
+	log(LL_Info, "Saving % " PRIdS " auctions in database\n", dbInputs.size());
 
 	dbQuery.executeDbQuery<DB_InsertItem>([this, item](auto, int status) { workDone(item, status); }, dbInputs);
 }
