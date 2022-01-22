@@ -38,12 +38,13 @@ uint64_t Utils::getTimeInMsec() {
 struct tm* Utils::getGmTime(time_t secs, struct tm* tm) {
 #ifdef _WIN32
 	gmtime_s(tm, &secs);
+#else
+	gmtime_r(&secs, tm);
+#endif
+
 	tm->tm_year += 1900;
 	tm->tm_mon += 1;
 	return tm;
-#else
-	return gmtime_r(&secs, tm);
-#endif
 }
 
 time_t Utils::getTimeGm(const struct tm* tm) {
