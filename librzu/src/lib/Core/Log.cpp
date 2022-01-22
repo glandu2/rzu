@@ -313,8 +313,12 @@ void Log::logWritterThread() {
 		uv_mutex_unlock(&this->messageListMutex);
 
 		// Flush only if we will wait
-		if(pendingMessages == 0 && logFile)
-			fflush(logFile);
+		if(pendingMessages == 0) {
+			if(logFile) {
+				fflush(logFile);
+			}
+			fflush(stdout);
+		}
 
 		uv_mutex_lock(&this->messageListMutex);
 		while(this->messageQueue.size() == 0 && this->stop == false) {
