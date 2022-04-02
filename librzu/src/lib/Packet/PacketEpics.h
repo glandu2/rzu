@@ -105,8 +105,12 @@ private:
 
 #define EPIC_9_6_8 0x090608  // no changes in packets, but change in how duration_type is handled in auctions messages
 
+#define EPIC_9_7_0 0x090700  // TS_SC_STAT_INFO changed
+
+#define EPIC_9_7_1 0x090701  // GS version changed to 20220210
+
 // Latest released epic
-#define EPIC_LATEST EPIC_9_6_8
+#define EPIC_LATEST EPIC_9_7_1
 
 // Flags
 

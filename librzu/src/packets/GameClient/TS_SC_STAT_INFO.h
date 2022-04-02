@@ -42,6 +42,8 @@ CREATE_STRUCT(TS_STAT_INFO_BASE);
   _(def)(simple)(int32_t, nMagicDefence) \
   _(impl)(simple)(int32_t, nMagicDefence, version >= EPIC_9_5_1) \
   _(impl)(simple)(int16_t, nMagicDefence, version < EPIC_9_5_1) \
+  _(def)(simple)(int32_t, nMaxWeight) \
+  _(impl)(simple)(int32_t, nMaxWeight, version >= EPIC_9_7_0) \
   _(simple)(int16_t, nAccuracyRight) \
   _(simple)(int16_t, nAccuracyLeft, version < EPIC_9_6_2, 0) \
   _(simple)(int16_t, nMagicAccuracy) \
@@ -49,10 +51,10 @@ CREATE_STRUCT(TS_STAT_INFO_BASE);
   _(simple)(int16_t, nMagicAvoid) \
   _(simple)(int16_t, nBlockChance) \
   _(simple)(int16_t, nMoveSpeed) \
+  _(simple)(int16_t, unknown, version >= EPIC_9_7_0) \
   _(simple)(int16_t, nAttackSpeed) \
   _(simple)(int16_t, nAttackRange) \
-  _(def)(simple)(int32_t, nMaxWeight) \
-  _(impl)(simple)(int32_t, nMaxWeight, version >= EPIC_7_4) \
+  _(impl)(simple)(int32_t, nMaxWeight, version >= EPIC_7_4 && version < EPIC_9_7_0) \
   _(impl)(simple)(int16_t, nMaxWeight, version < EPIC_7_4) \
   _(simple)(int16_t, nCastingSpeed) \
   _(simple)(int16_t, nCoolTimeSpeed) \

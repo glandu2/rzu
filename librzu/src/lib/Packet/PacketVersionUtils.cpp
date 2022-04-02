@@ -15,7 +15,9 @@ std::string getDefaultAuthVersionString(packet_version_t version) {
 }
 
 std::string getDefaultGameVersionString(packet_version_t version) {
-	if(version >= EPIC_9_6_6)
+	if(version >= EPIC_9_7_1)
+		return "20220210";
+	else if(version >= EPIC_9_6_6)
 		return "20210128";
 	else if(version >= EPIC_9_6_4)
 		return "20200922";
