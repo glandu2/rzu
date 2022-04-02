@@ -3,10 +3,7 @@
 
 namespace PacketVersionUtils {
 
-std::string getAuthVersionString(packet_version_t version) {
-	if(!GlobalCoreConfig::get()->client.authVersion.isDefault())
-		return GlobalCoreConfig::get()->client.authVersion;
-
+std::string getDefaultAuthVersionString(packet_version_t version) {
 	if(version >= EPIC_9_6_6)
 		return "20210128";
 	else if(version >= EPIC_9_2)
@@ -17,10 +14,7 @@ std::string getAuthVersionString(packet_version_t version) {
 		return "200609280";
 }
 
-std::string getGameVersionString(packet_version_t version) {
-	if(!GlobalCoreConfig::get()->client.gameVersion.isDefault())
-		return GlobalCoreConfig::get()->client.gameVersion;
-
+std::string getDefaultGameVersionString(packet_version_t version) {
 	if(version >= EPIC_9_6_6)
 		return "20210128";
 	else if(version >= EPIC_9_6_4)
@@ -41,6 +35,20 @@ std::string getGameVersionString(packet_version_t version) {
 		return "200701120";
 	else
 		return "200609280";
+}
+
+std::string getAuthVersionString(packet_version_t version) {
+	if(!GlobalCoreConfig::get()->client.authVersion.isDefault())
+		return GlobalCoreConfig::get()->client.authVersion;
+
+	return getDefaultAuthVersionString(version);
+}
+
+std::string getGameVersionString(packet_version_t version) {
+	if(!GlobalCoreConfig::get()->client.gameVersion.isDefault())
+		return GlobalCoreConfig::get()->client.gameVersion;
+
+	return getDefaultGameVersionString(version);
 }
 
 }  // namespace PacketVersionUtils

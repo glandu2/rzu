@@ -1,5 +1,6 @@
 #include "GlobalCoreConfig.h"
 #include "NetSession/EncryptedSession.h"
+#include "Packet/PacketVersionUtils.h"
 #include "rzuGitVersion.h"
 
 GlobalCoreConfig* GlobalCoreConfig::get() {
@@ -30,4 +31,9 @@ void GlobalCoreConfig::App::updateStreamCipher(IListener* instance) {
 	GlobalCoreConfig::App* thisInstance = (GlobalCoreConfig::App*) instance;
 
 	encryptedSessionCachedCipher.prepare(thisInstance->streamCipher.get().c_str());
+}
+
+void GlobalCoreConfig::Client::updateDefaultVersions() {
+	authVersion.setDefault(PacketVersionUtils::getDefaultAuthVersionString(EPIC_LATEST));
+	gameVersion.setDefault(PacketVersionUtils::getDefaultGameVersionString(EPIC_LATEST));
 }

@@ -6,6 +6,9 @@
 
 namespace PacketVersionUtils {
 
+std::string RZU_EXTERN getDefaultAuthVersionString(packet_version_t version);
+std::string RZU_EXTERN getDefaultGameVersionString(packet_version_t version);
+
 std::string RZU_EXTERN getAuthVersionString(packet_version_t version);
 std::string RZU_EXTERN getGameVersionString(packet_version_t version);
 
