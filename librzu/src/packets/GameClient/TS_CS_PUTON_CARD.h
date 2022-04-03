@@ -3,8 +3,10 @@
 #include "Packet/PacketDeclaration.h"
 
 #define TS_CS_PUTON_CARD_DEF(_) \
-	_(simple)(int8_t, position) \
-	_(simple)(ar_handle_t, item_handle)
+	_(def)(simple)(int32_t, position) \
+	_(impl)(simple)(int8_t, position, version < EPIC_9_6_7) \
+	_(simple)(ar_handle_t, item_handle) \
+	_(impl)(simple)(int32_t, position, version >= EPIC_9_6_7)
 
 #define TS_CS_PUTON_CARD_ID(X) \
 	X(214, version < EPIC_9_6_3) \

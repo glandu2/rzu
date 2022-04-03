@@ -3,9 +3,11 @@
 #include "Packet/PacketDeclaration.h"
 
 #define TS_CS_PUTON_ITEM_DEF(_) \
-	_(simple) (int8_t, position) \
+	_(def)(simple) (int8_t, position) \
+	_(impl)(simple) (int8_t, position, version < EPIC_9_6_7) \
 	_(simple) (ar_handle_t, item_handle) \
-	_(simple) (ar_handle_t, target_handle)
+	_(simple) (ar_handle_t, target_handle) \
+	_(impl)(simple) (int8_t, position, version >= EPIC_9_6_7)
 
 #define TS_CS_PUTON_ITEM_ID(X) \
 	X(200, version < EPIC_9_6_3) \

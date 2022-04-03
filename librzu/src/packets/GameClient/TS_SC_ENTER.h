@@ -27,7 +27,8 @@ enum TS_SC_ENTER__TYPE : uint8_t {
 #define TS_SC_ENTER__ITEM_PICK_UP_ORDER_DEF(_) \
 	_(simple) (ar_time_t, drop_time) \
 	_(array)  (ar_handle_t, hPlayer, 3) \
-	_(array)  (int32_t, nPartyID, 3)
+	_(array)  (int32_t, nPartyID, 3) \
+	_(simple) (uint32_t, unknown, version >= EPIC_9_6_7)
 CREATE_STRUCT(TS_SC_ENTER__ITEM_PICK_UP_ORDER);
 #undef TS_SC_ENTER__ITEM_PICK_UP_ORDER_DEF
 

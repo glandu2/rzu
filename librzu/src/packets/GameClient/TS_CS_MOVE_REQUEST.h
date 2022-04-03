@@ -14,7 +14,7 @@ CREATE_STRUCT(MOVE_REQUEST_INFO);
 	_(simple)(float, x) \
 	_(simple)(float, y) \
 	_(simple)(ar_time_t, cur_time) \
-	_(simple)(bool, speed_sync) \
+	_(simple)(uint8_t, speed_sync) \
 	_(count) (uint16_t, move_infos) \
 	_(dynarray)(MOVE_REQUEST_INFO, move_infos) \
 	_(endarray)(uint8_t, dummy_padding)
