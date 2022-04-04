@@ -1,6 +1,6 @@
 #include "ConnectionToServer.h"
+#include "ConnectionToClient.h"
 #include "Core/Utils.h"
-#include "GameClientSession.h"
 #include "GlobalConfig.h"
 #include <charconv>
 #include <math.h>
@@ -42,14 +42,14 @@ ConnectionToServer::ConnectionToServer(const std::string& account,
 
 ConnectionToServer::~ConnectionToServer() {}
 
-const GameData& ConnectionToServer::attachClient(GameClientSession* gameClientSession) {
-	if(this->gameClientSession && gameClientSession) {
+const GameData& ConnectionToServer::attachClient(ConnectionToClient* connectionToClient) {
+	if(this->connectionToClient && connectionToClient) {
 		log(LL_Warning,
 		    "Connection to server already attached to %p, asked to attach to %p\n",
-		    this->gameClientSession,
-		    gameClientSession);
+		    this->connectionToClient,
+		    connectionToClient);
 	}
-	this->gameClientSession = gameClientSession;
+	this->connectionToClient = connectionToClient;
 
 	updateAllPositions();
 	return gameData;
@@ -222,8 +222,8 @@ void ConnectionToServer::onPacketReceived(const TS_MESSAGE* packet, EventTag<Aut
 	}
 
 	// Forward packet
-	if(gameClientSession) {
-		gameClientSession->onServerPacket(this, packet);
+	if(connectionToClient) {
+		connectionToClient->onServerPacket(this, packet);
 	}
 }
 
@@ -366,7 +366,7 @@ void ConnectionToServer::onChat(const TS_SC_CHAT* packet) {
 		}
 
 		if(args[0] == "INVITE") {
-			if(gameClientSession && !gameClientSession->isKnownLocalPlayer(args[1])) {
+			if(connectionToClient && !connectionToClient->isKnownLocalPlayer(args[1])) {
 				log(LL_Info, "Received party invitation from unknown player %s, ignoring\n", args[1].c_str());
 				return;
 			}
@@ -935,9 +935,9 @@ void ConnectionToServer::updateAllPositions() {
 void ConnectionToServer::onDisconnected(EventTag<AutoClientSession>) {
 	moveUpdateTimer.stop();
 
-	if(gameClientSession) {
-		gameClientSession->sendCharMessage("%s disconnected, reconnecting", getPlayerName().c_str());
-		gameClientSession->onServerDisconnected(this, std::move(gameData));
+	if(connectionToClient) {
+		connectionToClient->sendCharMessage("%s disconnected, reconnecting", getPlayerName().c_str());
+		connectionToClient->onServerDisconnected(this, std::move(gameData));
 	}
 	gameData.clear();
 	if(gameData.localPlayer.loginResult) {

@@ -20,11 +20,11 @@ struct TS_CS_GAME_TIME;
 struct TS_CS_CHAT_REQUEST;
 struct TS_CS_TARGETING;
 
-class GameClientSession : public EncryptedSession<PacketSession>, public IPacketInterface {
-	DECLARE_CLASS(GameClientSession)
+class ConnectionToClient : public EncryptedSession<PacketSession>, public IPacketInterface {
+	DECLARE_CLASS(ConnectionToClient)
 
 public:
-	GameClientSession();
+	ConnectionToClient();
 
 	virtual void onPacketFromClient(const TS_MESSAGE* packet) override;
 	virtual void onPacketFromServer(const TS_MESSAGE* packet) override;
@@ -62,7 +62,7 @@ private:
 	void onTargeting(const TS_CS_TARGETING* packet);
 
 private:
-	~GameClientSession();
+	~ConnectionToClient();
 
 	UpdateClientFromGameData updateClientFromGameData;
 

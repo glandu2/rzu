@@ -12,7 +12,7 @@
 #include "NetSession/SessionServer.h"
 
 #include "AuthClientSession.h"
-#include "GameClientSession.h"
+#include "ConnectionToClient.h"
 
 void runServers(Log* trafficLogger);
 
@@ -71,11 +71,11 @@ void runServers(Log* trafficLogger) {
 	                                                   trafficLogger,
 	                                                   &clientBanManager);
 
-	SessionServer<GameClientSession> gameSessionServer(CONFIG_GET()->client.listener.listenIp,
-	                                                   CONFIG_GET()->client.gamePort,
-	                                                   &CONFIG_GET()->client.listener.idleTimeout,
-	                                                   trafficLogger,
-	                                                   &clientBanManager);
+	SessionServer<ConnectionToClient> gameSessionServer(CONFIG_GET()->client.listener.listenIp,
+	                                                    CONFIG_GET()->client.gamePort,
+	                                                    &CONFIG_GET()->client.listener.idleTimeout,
+	                                                    trafficLogger,
+	                                                    &clientBanManager);
 
 	serverManager.addServer("auth", &authSessionServer, &CONFIG_GET()->client.listener.autoStart);
 	serverManager.addServer("game", &gameSessionServer, &CONFIG_GET()->client.listener.autoStart);

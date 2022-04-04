@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Cipher/AesPasswordCipher.h"
-#include "GameClientSession.h"
+#include "ConnectionToClient.h"
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
 #include <stdint.h>

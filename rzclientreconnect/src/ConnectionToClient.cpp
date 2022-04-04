@@ -1,4 +1,4 @@
-#include "GameClientSession.h"
+#include "ConnectionToClient.h"
 #include "GlobalConfig.h"
 #include "PacketHandleConverter.h"
 #include <numeric>
@@ -27,26 +27,26 @@
 /* TODO:
  * handle chat, guild, party, friends
  */
-GameClientSession::GameClientSession()
+ConnectionToClient::ConnectionToClient()
     : EncryptedSession<PacketSession>(
           SessionType::GameClient, SessionPacketOrigin::Server, CONFIG_GET()->generalConfig.epic.get()),
       updateClientFromGameData(this) {
 	log(LL_Info, "Client connected to game client session\n");
 }
 
-void GameClientSession::onPacketFromClient(const TS_MESSAGE* packet) {
-	log(LL_Error, "onPacketFromClient called on GameClientSession\n");
+void ConnectionToClient::onPacketFromClient(const TS_MESSAGE* packet) {
+	log(LL_Error, "onPacketFromClient called on ConnectionToClient\n");
 }
 
-void GameClientSession::onPacketFromServer(const TS_MESSAGE* packet) {
+void ConnectionToClient::onPacketFromServer(const TS_MESSAGE* packet) {
 	sendPacket(packet);
 }
 
-packet_version_t GameClientSession::getPacketVersion() {
+packet_version_t ConnectionToClient::getPacketVersion() {
 	return packetVersion;
 }
 
-void GameClientSession::sendCharMessage(const char* msg, ...) {
+void ConnectionToClient::sendCharMessage(const char* msg, ...) {
 	TS_SC_CHAT chatMessage;
 	va_list args;
 
@@ -62,7 +62,7 @@ void GameClientSession::sendCharMessage(const char* msg, ...) {
 	sendPacket(chatMessage);
 }
 
-bool GameClientSession::isKnownLocalPlayer(std::string_view playerName) {
+bool ConnectionToClient::isKnownLocalPlayer(std::string_view playerName) {
 	for(auto& connection : connections) {
 		if(connection.getPlayerName() == playerName)
 			return true;
@@ -70,7 +70,7 @@ bool GameClientSession::isKnownLocalPlayer(std::string_view playerName) {
 	return false;
 }
 
-ar_handle_t GameClientSession::convertHandle(ConnectionToServer* targetServer, ar_handle_t val) {
+ar_handle_t ConnectionToClient::convertHandle(ConnectionToServer* targetServer, ar_handle_t val) {
 	if(targetServer == connectionToServer && val == targetServer->getLocalPlayerServerHandle()) {
 		return getLocalPlayerClientHandle();
 	} else if(val == getLocalPlayerClientHandle()) {
@@ -79,7 +79,7 @@ ar_handle_t GameClientSession::convertHandle(ConnectionToServer* targetServer, a
 	return val;
 }
 
-template<class Packet> void GameClientSession::convertPacketHandles(ConnectionToServer* targetServer, Packet& packet) {
+template<class Packet> void ConnectionToClient::convertPacketHandles(ConnectionToServer* targetServer, Packet& packet) {
 	auto handleConverterLambda = [this, targetServer](const char* fieldName, ar_handle_t& val) {
 		ar_handle_t newVal = convertHandle(targetServer, val);
 		if(val != newVal) {
@@ -96,22 +96,22 @@ template<class Packet> void GameClientSession::convertPacketHandles(ConnectionTo
 	packet.deserialize(&handleConverter);
 }
 
-template<class Packet> void GameClientSession::sendServerPacketToClient(const Packet& packet) {
+template<class Packet> void ConnectionToClient::sendServerPacketToClient(const Packet& packet) {
 	Packet packetCopy = packet;
 	sendServerPacketToClient(packetCopy);
 }
 
-template<class Packet> void GameClientSession::sendClientPacketToServer(const Packet& packet) {
+template<class Packet> void ConnectionToClient::sendClientPacketToServer(const Packet& packet) {
 	Packet packetCopy = packet;
 	sendClientPacketToServer(packetCopy);
 }
 
-template<class Packet> void GameClientSession::sendServerPacketToClient(Packet& packet) {
+template<class Packet> void ConnectionToClient::sendServerPacketToClient(Packet& packet) {
 	convertPacketHandles(connectionToServer, packet);
 	sendPacket(packet);
 }
 
-void GameClientSession::sendServerPacketToClient(TS_SC_CHAT& packet) {
+void ConnectionToClient::sendServerPacketToClient(TS_SC_CHAT& packet) {
 	if(packet.type >= CHAT_PARTY_SYSTEM) {
 		Utils::stringReplaceAll(packet.message, std::to_string(localPlayerClientHandle.get()), "CLIENTHNDL");
 		Utils::stringReplaceAll(
@@ -123,7 +123,7 @@ void GameClientSession::sendServerPacketToClient(TS_SC_CHAT& packet) {
 	sendPacket(packet);
 }
 
-template<class Packet> void GameClientSession::sendClientPacketToServer(Packet& packet) {
+template<class Packet> void ConnectionToClient::sendClientPacketToServer(Packet& packet) {
 	if(!connectionToServer || !controlledServer)
 		return;
 
@@ -131,9 +131,9 @@ template<class Packet> void GameClientSession::sendClientPacketToServer(Packet& 
 	controlledServer->onClientPacketReceived(packet);
 }
 
-template<class Packet> struct GameClientSession::ConvertHandlesFunctor {
+template<class Packet> struct ConnectionToClient::ConvertHandlesFunctor {
 	template<class SenderLambda>
-	bool operator()(GameClientSession* self,
+	bool operator()(ConnectionToClient* self,
 	                const TS_MESSAGE* packet,
 	                packet_version_t version,
 	                const SenderLambda& sendPacketLambda) {
@@ -152,7 +152,7 @@ template<class Packet> struct GameClientSession::ConvertHandlesFunctor {
 };
 
 // In case of a serialization error
-void GameClientSession::onServerPacket(ConnectionToServer* connection, const TS_MESSAGE* packet) {
+void ConnectionToClient::onServerPacket(ConnectionToServer* connection, const TS_MESSAGE* packet) {
 	if(packet->id == TS_SC_LOGIN_RESULT::getId(packetVersion)) {
 		if(!isClientLogged) {
 			localPlayerClientHandle = connection->getLocalPlayerServerHandle();
@@ -183,12 +183,12 @@ void GameClientSession::onServerPacket(ConnectionToServer* connection, const TS_
 	}
 }
 
-void GameClientSession::onServerDisconnected(ConnectionToServer*, GameData&& gameData) {
+void ConnectionToClient::onServerDisconnected(ConnectionToServer*, GameData&& gameData) {
 	// Remove the player and all inventory items
 	updateClientFromGameData.removePlayerData(gameData);
 }
 
-void GameClientSession::activateConnectionToServer(ConnectionToServer* connectionToServer) {
+void ConnectionToClient::activateConnectionToServer(ConnectionToServer* connectionToServer) {
 	if(this->connectionToServer)
 		updateClientFromGameData.removePlayerData(this->connectionToServer->attachClient(nullptr));
 
@@ -199,9 +199,9 @@ void GameClientSession::activateConnectionToServer(ConnectionToServer* connectio
 		updateClientFromGameData.addPlayerData(this->connectionToServer->attachClient(this));
 }
 
-void GameClientSession::spawnConnectionToServer(const std::string& account,
-                                                const std::string& password,
-                                                const std::string& playername) {
+void ConnectionToClient::spawnConnectionToServer(const std::string& account,
+                                                 const std::string& password,
+                                                 const std::string& playername) {
 	log(LL_Info, "Spawning server connection %d\n", (int) connections.size());
 
 	connections.emplace_back(account, password, playername);
@@ -217,7 +217,7 @@ void GameClientSession::spawnConnectionToServer(const std::string& account,
 	connection->connect();
 }
 
-EventChain<PacketSession> GameClientSession::onPacketReceived(const TS_MESSAGE* packet) {
+EventChain<PacketSession> ConnectionToClient::onPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == 9999)
 		return EncryptedSession<PacketSession>::onPacketReceived(packet);
 
@@ -227,26 +227,26 @@ EventChain<PacketSession> GameClientSession::onPacketReceived(const TS_MESSAGE* 
 	    packet->id, SessionType::GameClient, SessionPacketOrigin::Client, packetVersion);
 	switch(packetType) {
 		case TS_CS_ACCOUNT_WITH_AUTH::packetID:
-			packet->process(this, &GameClientSession::onAccountWithAuth, packetVersion);
+			packet->process(this, &ConnectionToClient::onAccountWithAuth, packetVersion);
 			forwardPacket = false;
 			break;
 
 		case TS_CS_CHARACTER_LIST::packetID:
-			packet->process(this, &GameClientSession::onCharacterList, packetVersion);
+			packet->process(this, &ConnectionToClient::onCharacterList, packetVersion);
 			forwardPacket = false;
 			break;
 
 		case TS_CS_LOGIN::packetID:
-			packet->process(this, &GameClientSession::onLogin, packetVersion);
+			packet->process(this, &ConnectionToClient::onLogin, packetVersion);
 			forwardPacket = false;
 			break;
 
 		case TS_CS_CHAT_REQUEST::packetID:
-			packet->process(this, &GameClientSession::onChatRequest, packetVersion, &forwardPacket);
+			packet->process(this, &ConnectionToClient::onChatRequest, packetVersion, &forwardPacket);
 			break;
 
 		case TS_CS_TARGETING::packetID:
-			packet->process(this, &GameClientSession::onTargeting, packetVersion);
+			packet->process(this, &ConnectionToClient::onTargeting, packetVersion);
 			break;
 	}
 
@@ -272,7 +272,7 @@ EventChain<PacketSession> GameClientSession::onPacketReceived(const TS_MESSAGE* 
 	return EncryptedSession<PacketSession>::onPacketReceived(packet);
 }
 
-void GameClientSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH* packet) {
+void ConnectionToClient::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH* packet) {
 	TS_SC_RESULT result;
 
 	log(LL_Info, "Received account with auth with account\n");
@@ -284,7 +284,7 @@ void GameClientSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH* packet)
 	sendPacket(result);
 }
 
-void GameClientSession::onCharacterList(const TS_CS_CHARACTER_LIST* packet) {
+void ConnectionToClient::onCharacterList(const TS_CS_CHARACTER_LIST* packet) {
 	TS_SC_CHARACTER_LIST fakeCharacterList{};
 
 	log(LL_Info, "Received character list query\n");
@@ -324,7 +324,7 @@ void GameClientSession::onCharacterList(const TS_CS_CHARACTER_LIST* packet) {
 	sendPacket(fakeCharacterList);
 }
 
-void GameClientSession::onLogin(const TS_CS_LOGIN* packet) {
+void ConnectionToClient::onLogin(const TS_CS_LOGIN* packet) {
 	log(LL_Info, "Received client's login\n");
 
 	timeSync.clear();
@@ -335,7 +335,7 @@ void GameClientSession::onLogin(const TS_CS_LOGIN* packet) {
 		                        CONFIG_GET()->server.playerName.get());
 }
 
-void GameClientSession::onChatRequest(const TS_CS_CHAT_REQUEST* packet, bool* forwardPacket) {
+void ConnectionToClient::onChatRequest(const TS_CS_CHAT_REQUEST* packet, bool* forwardPacket) {
 	if(packet->szTarget == "rzcr" && packet->type == CHAT_WHISPER) {
 		std::vector<std::string> args = Utils::parseCommand(packet->message);
 
@@ -477,11 +477,11 @@ void GameClientSession::onChatRequest(const TS_CS_CHAT_REQUEST* packet, bool* fo
 	}
 }
 
-void GameClientSession::onTargeting(const TS_CS_TARGETING* packet) {
+void ConnectionToClient::onTargeting(const TS_CS_TARGETING* packet) {
 	lastTargetedPlayerClientHandle = packet->target;
 }
 
-GameClientSession::~GameClientSession() {
+ConnectionToClient::~ConnectionToClient() {
 	log(LL_Info, "Client disconnected, closing server connections\n");
 	activateConnectionToServer(nullptr);
 	for(auto& connection : connections)
