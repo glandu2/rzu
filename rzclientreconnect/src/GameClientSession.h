@@ -1,8 +1,10 @@
 #pragma once
 
 #include "ConnectionToServer.h"
+#include "IPacketInterface.h"
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
+#include "UpdateClientFromGameData.h"
 #include <list>
 #include <stdint.h>
 #include <string>
@@ -18,11 +20,15 @@ struct TS_CS_GAME_TIME;
 struct TS_CS_CHAT_REQUEST;
 struct TS_CS_TARGETING;
 
-class GameClientSession : public EncryptedSession<PacketSession> {
+class GameClientSession : public EncryptedSession<PacketSession>, public IPacketInterface {
 	DECLARE_CLASS(GameClientSession)
 
 public:
 	GameClientSession();
+
+	virtual void onPacketFromClient(const TS_MESSAGE* packet) override;
+	virtual void onPacketFromServer(const TS_MESSAGE* packet) override;
+	virtual packet_version_t getPacketVersion() override;
 
 	void sendCharMessage(const char* msg, ...);
 
@@ -34,13 +40,6 @@ public:
 	void onServerDisconnected(ConnectionToServer* connectionToServer, GameData&& gameData);
 
 private:
-	void removePlayerData(const GameData& gameData);
-	void removeCreatureData(const CreatureData& creatureData, bool isLocalPlayer);
-	void addPlayerData(const GameData& gameData);
-	void sendLoginResultToClient(const TS_SC_LOGIN_RESULT* loginResult);
-	void sendPartyInfo(const LocalPlayerData::PartyInfo* party);
-	void sendCreatureData(const CreatureData& creatureData, bool isForLocalPlayer);
-
 	void activateConnectionToServer(ConnectionToServer* connectionToServer);
 	void spawnConnectionToServer(const std::string& account,
 	                             const std::string& password,
@@ -65,6 +64,8 @@ private:
 private:
 	~GameClientSession();
 
+	UpdateClientFromGameData updateClientFromGameData;
+
 	// Current main player
 	ConnectionToServer* connectionToServer = nullptr;
 	// The player currently controlled
@@ -78,4 +79,3 @@ private:
 
 	std::vector<int32_t> timeSync;
 };
-

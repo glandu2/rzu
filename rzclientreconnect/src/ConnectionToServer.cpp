@@ -16,8 +16,12 @@
 #include "GameClient/TS_SC_HAIR_INFO.h"
 #include "GameClient/TS_SC_HPMP.h"
 #include "GameClient/TS_SC_INVENTORY.h"
+#include "GameClient/TS_SC_LEAVE.h"
 #include "GameClient/TS_SC_LOGIN_RESULT.h"
+#include "GameClient/TS_SC_PROPERTY.h"
 #include "GameClient/TS_SC_REGEN_HPMP.h"
+#include "GameClient/TS_SC_REMOVE_PET_INFO.h"
+#include "GameClient/TS_SC_REMOVE_SUMMON_INFO.h"
 #include "GameClient/TS_SC_STATUS_CHANGE.h"
 #include "GameClient/TS_SC_UPDATE_ITEM_COUNT.h"
 #include "GameClient/TS_SC_WARP.h"
@@ -939,10 +943,6 @@ void ConnectionToServer::onDisconnected(EventTag<AutoClientSession>) {
 	if(gameData.localPlayer.loginResult) {
 		log(LL_Error, "Game data cleared but remaining data was still their old value\n");
 	}
-}
-
-void GameData::clear() {
-	*this = GameData{};
 }
 
 LocalPlayerData::PartyInfo* LocalPlayerData::findPartyByMember(const std::string& name) {
