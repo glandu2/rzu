@@ -3,6 +3,7 @@
 #include "Packet/MessageBuffer.h"
 
 struct TS_MESSAGE;
+class ConnectionToServer;
 
 class IPacketInterface {
 public:

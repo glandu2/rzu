@@ -1,7 +1,7 @@
 #include "ConnectionToServer.h"
-#include "ConnectionToClient.h"
 #include "Core/Utils.h"
 #include "GlobalConfig.h"
+#include "MultiServerManager.h"
 #include <charconv>
 #include <math.h>
 #include <stdlib.h>
@@ -26,7 +26,8 @@
 #include "GameClient/TS_SC_UPDATE_ITEM_COUNT.h"
 #include "GameClient/TS_SC_WARP.h"
 
-ConnectionToServer::ConnectionToServer(const std::string& account,
+ConnectionToServer::ConnectionToServer(MultiServerManager* multiServerManager,
+                                       const std::string& account,
                                        const std::string& password,
                                        const std::string& playername)
     : AutoClientSession(CONFIG_GET()->server.ip.get(),
@@ -38,25 +39,14 @@ ConnectionToServer::ConnectionToServer(const std::string& account,
                         CONFIG_GET()->generalConfig.epic.get(),
                         false,
                         CONFIG_GET()->generalConfig.delayTime.get(),
-                        CONFIG_GET()->generalConfig.recoDelay.get()) {}
+                        CONFIG_GET()->generalConfig.recoDelay.get()),
+      multiServerManager(multiServerManager) {}
 
 ConnectionToServer::~ConnectionToServer() {}
 
-const GameData& ConnectionToServer::attachClient(ConnectionToClient* connectionToClient) {
-	if(this->connectionToClient && connectionToClient) {
-		log(LL_Warning,
-		    "Connection to server already attached to %p, asked to attach to %p\n",
-		    this->connectionToClient,
-		    connectionToClient);
-	}
-	this->connectionToClient = connectionToClient;
-
+const GameData& ConnectionToServer::getGameData() {
 	updateAllPositions();
 	return gameData;
-}
-
-const GameData& ConnectionToServer::detachClient() {
-	return attachClient(nullptr);
 }
 
 void ConnectionToServer::onClientPacketReceived(const TS_CS_LOGOUT& packet) {
@@ -222,9 +212,7 @@ void ConnectionToServer::onPacketReceived(const TS_MESSAGE* packet, EventTag<Aut
 	}
 
 	// Forward packet
-	if(connectionToClient) {
-		connectionToClient->onServerPacket(this, packet);
-	}
+	multiServerManager->onPacketFromServer(this, packet);
 }
 
 void ConnectionToServer::onEnter(const TS_SC_ENTER* packet) {
@@ -366,7 +354,7 @@ void ConnectionToServer::onChat(const TS_SC_CHAT* packet) {
 		}
 
 		if(args[0] == "INVITE") {
-			if(connectionToClient && !connectionToClient->isKnownLocalPlayer(args[1])) {
+			if(!multiServerManager->isKnownLocalPlayer(args[1])) {
 				log(LL_Info, "Received party invitation from unknown player %s, ignoring\n", args[1].c_str());
 				return;
 			}
@@ -923,6 +911,10 @@ void ConnectionToServer::updateCreaturePosition(CreatureData& data, float& x, fl
 }
 
 void ConnectionToServer::updateAllPositions() {
+	// Check if we are logged in
+	if(!gameData.localPlayer.loginResult)
+		return;
+
 	log(LL_Debug, "Updating all positions\n");
 	updateCreaturePosition(
 	    gameData.localPlayer.creatureData, gameData.localPlayer.loginResult->x, gameData.localPlayer.loginResult->y);
@@ -935,11 +927,9 @@ void ConnectionToServer::updateAllPositions() {
 void ConnectionToServer::onDisconnected(EventTag<AutoClientSession>) {
 	moveUpdateTimer.stop();
 
-	if(connectionToClient) {
-		connectionToClient->sendCharMessage("%s disconnected, reconnecting", getPlayerName().c_str());
-		connectionToClient->onServerDisconnected(this, std::move(gameData));
-	}
+	multiServerManager->onServerDisconnected(this, std::move(gameData));
 	gameData.clear();
+
 	if(gameData.localPlayer.loginResult) {
 		log(LL_Error, "Game data cleared but remaining data was still their old value\n");
 	}

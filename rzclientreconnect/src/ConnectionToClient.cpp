@@ -30,7 +30,7 @@
 ConnectionToClient::ConnectionToClient()
     : EncryptedSession<PacketSession>(
           SessionType::GameClient, SessionPacketOrigin::Server, CONFIG_GET()->generalConfig.epic.get()),
-      updateClientFromGameData(this) {
+      multiServerManager(this) {
 	log(LL_Info, "Client connected to game client session\n");
 }
 
@@ -39,7 +39,7 @@ void ConnectionToClient::onPacketFromClient(const TS_MESSAGE* packet) {
 }
 
 void ConnectionToClient::onPacketFromServer(const TS_MESSAGE* packet) {
-	sendPacket(packet);
+	onServerPacket(multiServerManager.getConnectionToServer(), packet);
 }
 
 packet_version_t ConnectionToClient::getPacketVersion() {
@@ -62,16 +62,9 @@ void ConnectionToClient::sendCharMessage(const char* msg, ...) {
 	sendPacket(chatMessage);
 }
 
-bool ConnectionToClient::isKnownLocalPlayer(std::string_view playerName) {
-	for(auto& connection : connections) {
-		if(connection.getPlayerName() == playerName)
-			return true;
-	}
-	return false;
-}
-
 ar_handle_t ConnectionToClient::convertHandle(ConnectionToServer* targetServer, ar_handle_t val) {
-	if(targetServer == connectionToServer && val == targetServer->getLocalPlayerServerHandle()) {
+	if(targetServer == multiServerManager.getConnectionToServer() &&
+	   val == targetServer->getLocalPlayerServerHandle()) {
 		return getLocalPlayerClientHandle();
 	} else if(val == getLocalPlayerClientHandle()) {
 		return targetServer->getLocalPlayerServerHandle();
@@ -107,7 +100,7 @@ template<class Packet> void ConnectionToClient::sendClientPacketToServer(const P
 }
 
 template<class Packet> void ConnectionToClient::sendServerPacketToClient(Packet& packet) {
-	convertPacketHandles(connectionToServer, packet);
+	convertPacketHandles(multiServerManager.getConnectionToServer(), packet);
 	sendPacket(packet);
 }
 
@@ -115,20 +108,24 @@ void ConnectionToClient::sendServerPacketToClient(TS_SC_CHAT& packet) {
 	if(packet.type >= CHAT_PARTY_SYSTEM) {
 		Utils::stringReplaceAll(packet.message, std::to_string(localPlayerClientHandle.get()), "CLIENTHNDL");
 		Utils::stringReplaceAll(
-		    packet.message, std::to_string(connectionToServer->getLocalPlayerServerHandle().get()), "SERVERHNDL");
+		    packet.message,
+		    std::to_string(multiServerManager.getConnectionToServer()->getLocalPlayerServerHandle().get()),
+		    "SERVERHNDL");
 		Utils::stringReplaceAll(packet.message, "SERVERHNDL", std::to_string(localPlayerClientHandle.get()));
 		Utils::stringReplaceAll(
-		    packet.message, "CLIENTHNDL", std::to_string(connectionToServer->getLocalPlayerServerHandle().get()));
+		    packet.message,
+		    "CLIENTHNDL",
+		    std::to_string(multiServerManager.getConnectionToServer()->getLocalPlayerServerHandle().get()));
 	}
 	sendPacket(packet);
 }
 
 template<class Packet> void ConnectionToClient::sendClientPacketToServer(Packet& packet) {
-	if(!connectionToServer || !controlledServer)
+	if(!multiServerManager.getControlledServer())
 		return;
 
-	convertPacketHandles(controlledServer, packet);
-	controlledServer->onClientPacketReceived(packet);
+	convertPacketHandles(multiServerManager.getControlledServer(), packet);
+	multiServerManager.getControlledServer()->onClientPacketReceived(packet);
 }
 
 template<class Packet> struct ConnectionToClient::ConvertHandlesFunctor {
@@ -183,40 +180,6 @@ void ConnectionToClient::onServerPacket(ConnectionToServer* connection, const TS
 	}
 }
 
-void ConnectionToClient::onServerDisconnected(ConnectionToServer*, GameData&& gameData) {
-	// Remove the player and all inventory items
-	updateClientFromGameData.removePlayerData(gameData);
-}
-
-void ConnectionToClient::activateConnectionToServer(ConnectionToServer* connectionToServer) {
-	if(this->connectionToServer)
-		updateClientFromGameData.removePlayerData(this->connectionToServer->attachClient(nullptr));
-
-	this->connectionToServer = connectionToServer;
-	this->controlledServer = connectionToServer;
-
-	if(this->connectionToServer)
-		updateClientFromGameData.addPlayerData(this->connectionToServer->attachClient(this));
-}
-
-void ConnectionToClient::spawnConnectionToServer(const std::string& account,
-                                                 const std::string& password,
-                                                 const std::string& playername) {
-	log(LL_Info, "Spawning server connection %d\n", (int) connections.size());
-
-	connections.emplace_back(account, password, playername);
-	ConnectionToServer* connection = &connections.back();
-
-	if(!connectionToServer)
-		activateConnectionToServer(connection);
-
-	if(CONFIG_GET()->trafficDump.enableServer.get())
-		connection->setPacketLogger(getStream()->getPacketLogger());
-	else
-		connection->setPacketLogger(nullptr);
-	connection->connect();
-}
-
 EventChain<PacketSession> ConnectionToClient::onPacketReceived(const TS_MESSAGE* packet) {
 	if(packet->id == 9999)
 		return EncryptedSession<PacketSession>::onPacketReceived(packet);
@@ -250,7 +213,7 @@ EventChain<PacketSession> ConnectionToClient::onPacketReceived(const TS_MESSAGE*
 			break;
 	}
 
-	if(forwardPacket && connectionToServer && (isClientLogged || packet->id == TS_TIMESYNC::packetID)) {
+	if(forwardPacket && (isClientLogged || packet->id == TS_TIMESYNC::packetID)) {
 		bool dummy;
 		bool packetProcessed = processPacket<ConvertHandlesFunctor>(
 		    SessionType::GameClient,
@@ -265,7 +228,7 @@ EventChain<PacketSession> ConnectionToClient::onPacketReceived(const TS_MESSAGE*
 
 		if(!packetProcessed) {
 			log(Object::LL_Debug, "Can't send packet id %d (unknown packet)\n", packet->id);
-			connectionToServer->onClientPacketReceived(packet);
+			multiServerManager.onPacketFromClient(packet);
 		}
 	}
 
@@ -288,6 +251,8 @@ void ConnectionToClient::onCharacterList(const TS_CS_CHARACTER_LIST* packet) {
 	TS_SC_CHARACTER_LIST fakeCharacterList{};
 
 	log(LL_Info, "Received character list query\n");
+
+	ConnectionToServer* connectionToServer = multiServerManager.getConnectionToServer();
 
 	if(connectionToServer)
 		fakeCharacterList.current_server_time = connectionToServer->getGameTime();
@@ -329,14 +294,12 @@ void ConnectionToClient::onLogin(const TS_CS_LOGIN* packet) {
 
 	timeSync.clear();
 
-	if(connections.empty())
-		spawnConnectionToServer(CONFIG_GET()->server.account.get(),
-		                        CONFIG_GET()->server.password.get(),
-		                        CONFIG_GET()->server.playerName.get());
+	multiServerManager.ensureOneConnectionToServer();
 }
 
 void ConnectionToClient::onChatRequest(const TS_CS_CHAT_REQUEST* packet, bool* forwardPacket) {
 	if(packet->szTarget == "rzcr" && packet->type == CHAT_WHISPER) {
+		ConnectionToServer* connectionToServer = multiServerManager.getConnectionToServer();
 		std::vector<std::string> args = Utils::parseCommand(packet->message);
 
 		*forwardPacket = false;
@@ -350,27 +313,15 @@ void ConnectionToClient::onChatRequest(const TS_CS_CHAT_REQUEST* packet, bool* f
 			sendCharMessage("Available commands: add, remove, list, switch");
 		} else if(args[0] == "add") {
 			if(args.size() == 4) {
-				spawnConnectionToServer(args[1], args[2], args[3]);
+				multiServerManager.spawnConnectionToServer(args[1], args[2], args[3]);
 				sendCharMessage("Connecting character %s", args[3].c_str());
 			} else {
 				sendCharMessage("Usage: add (account) (password) (character)");
 			}
 		} else if(args[0] == "remove") {
 			if(args.size() == 2) {
-				std::list<ConnectionToServer>::iterator connectionIt = connections.end();
-				for(auto it = connections.begin(); it != connections.end(); ++it) {
-					if(it->getPlayerName() == args[1]) {
-						connectionIt = it;
-						break;
-					}
-				}
-				if(connectionIt != connections.end()) {
-					ConnectionToServer* newConnection = &(*connectionIt);
-					sendCharMessage("Disconnecting character %s", newConnection->getPlayerName().c_str());
-					if(newConnection == connectionToServer)
-						activateConnectionToServer(nullptr);
-					newConnection->closeSession();
-					connections.erase(connectionIt);
+				if(multiServerManager.remoteConnectionToServerByName(args[1])) {
+					sendCharMessage("Disconnecting character %s", args[1].c_str());
 				} else {
 					sendCharMessage("Error: no connection with player %s", args[1].c_str());
 				}
@@ -379,96 +330,36 @@ void ConnectionToClient::onChatRequest(const TS_CS_CHAT_REQUEST* packet, bool* f
 			}
 		} else if(args[0] == "list") {
 			sendCharMessage("Connected players:");
-			for(auto& connection : connections) {
+			for(const auto& connection : multiServerManager.getConnections()) {
 				sendCharMessage(
 				    "%s (handle 0x%x)", connection.getPlayerName().c_str(), connection.getLocalPlayerServerHandle());
 			}
 		} else if(args[0] == "switch") {
 			if(args.size() == 2) {
-				ConnectionToServer* newConnection = nullptr;
-				for(auto& connection : connections) {
-					if(connection.getPlayerName() == args[1]) {
-						newConnection = &connection;
-						break;
-					}
-				}
-				if(newConnection) {
-					if(newConnection == connectionToServer)
-						sendCharMessage("Warning: player %s was already active player", args[1].c_str());
-					sendCharMessage("Switching to player %s", args[1].c_str());
-					activateConnectionToServer(newConnection);
-				} else {
-					sendCharMessage("Error: no connection with player %s", args[1].c_str());
-				}
+				multiServerManager.setActiveConnectionToServer(multiServerManager.getConnectionToServerByName(args[1]));
 			} else if(args.size() == 1) {
 				if(lastTargetedPlayerClientHandle.get()) {
 					ar_handle_t lastTargetedPlayerServerHandle =
 					    convertHandle(connectionToServer, lastTargetedPlayerClientHandle);
-					ConnectionToServer* newConnection = nullptr;
 
-					for(auto& connection : connections) {
-						if(connection.getLocalPlayerServerHandle() == lastTargetedPlayerServerHandle) {
-							newConnection = &connection;
-							break;
-						}
-					}
-
-					if(newConnection) {
-						if(newConnection == connectionToServer) {
-							sendCharMessage("Warning: player %s was already active player",
-							                newConnection->getPlayerName().c_str());
-						}
-						sendCharMessage("Switching to player %s", newConnection->getPlayerName().c_str());
-						activateConnectionToServer(newConnection);
-					} else {
-						sendCharMessage("Error: no connection with targeted player (handle 0x%x)",
-						                lastTargetedPlayerServerHandle);
-					}
+					multiServerManager.setActiveConnectionToServer(
+					    multiServerManager.getConnectionToServerByHandle(lastTargetedPlayerServerHandle));
 				}
 			} else {
 				sendCharMessage("Usage: switch (character) (character is optional if a player is selected)");
 			}
 		} else if(args[0] == "control") {
 			if(args.size() == 2) {
-				ConnectionToServer* newConnection = nullptr;
-				for(auto& connection : connections) {
-					if(connection.getPlayerName() == args[1]) {
-						newConnection = &connection;
-						break;
-					}
-				}
-				if(newConnection) {
-					if(newConnection == controlledServer)
-						sendCharMessage("Warning: player %s was already controlled player", args[1].c_str());
-					sendCharMessage("Switching control to player %s", args[1].c_str());
-					controlledServer = newConnection;
-				} else {
-					sendCharMessage("Error: no connection with player %s", args[1].c_str());
-				}
+				ConnectionToServer* newConnection = multiServerManager.getConnectionToServerByName(args[1]);
+				multiServerManager.setControlConnectionToServer(newConnection);
 			} else if(args.size() == 1) {
 				if(lastTargetedPlayerClientHandle.get()) {
 					ar_handle_t lastTargetedPlayerServerHandle =
 					    convertHandle(connectionToServer, lastTargetedPlayerClientHandle);
-					ConnectionToServer* newConnection = nullptr;
 
-					for(auto& connection : connections) {
-						if(connection.getLocalPlayerServerHandle() == lastTargetedPlayerServerHandle) {
-							newConnection = &connection;
-							break;
-						}
-					}
-
-					if(newConnection) {
-						if(newConnection == controlledServer) {
-							sendCharMessage("Warning: player %s was already controlled player",
-							                newConnection->getPlayerName().c_str());
-						}
-						sendCharMessage("Switching control to player %s", newConnection->getPlayerName().c_str());
-						controlledServer = newConnection;
-					} else {
-						sendCharMessage("Error: no connection with targeted player (handle 0x%x)",
-						                lastTargetedPlayerServerHandle);
-					}
+					ConnectionToServer* newConnection =
+					    multiServerManager.getConnectionToServerByHandle(lastTargetedPlayerServerHandle);
+					multiServerManager.setControlConnectionToServer(newConnection);
 				}
 			} else {
 				sendCharMessage("Usage: control (character) (character is optional if a player is selected)");
@@ -481,9 +372,4 @@ void ConnectionToClient::onTargeting(const TS_CS_TARGETING* packet) {
 	lastTargetedPlayerClientHandle = packet->target;
 }
 
-ConnectionToClient::~ConnectionToClient() {
-	log(LL_Info, "Client disconnected, closing server connections\n");
-	activateConnectionToServer(nullptr);
-	for(auto& connection : connections)
-		connection.abortSession();
-}
+ConnectionToClient::~ConnectionToClient() {}

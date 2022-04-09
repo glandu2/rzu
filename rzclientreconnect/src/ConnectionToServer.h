@@ -7,7 +7,7 @@
 #include "NetSession/StartableObject.h"
 #include <memory>
 
-class ConnectionToClient;
+class MultiServerManager;
 struct TS_CS_LOGOUT;
 struct TS_CS_SET_PROPERTY;
 struct TS_EQUIP_SUMMON;
@@ -62,14 +62,16 @@ class ConnectionToServer : public AutoClientSession {
 	DECLARE_CLASS(ConnectionToServer)
 
 public:
-	ConnectionToServer(const std::string& account, const std::string& password, const std::string& playername);
+	ConnectionToServer(MultiServerManager* multiServerManager,
+	                   const std::string& account,
+	                   const std::string& password,
+	                   const std::string& playername);
 	~ConnectionToServer();
 
-	const GameData& attachClient(ConnectionToClient* connectionToClient);
-	const GameData& detachClient();
+	const GameData& getGameData();
 	void updateAllPositions();
 
-	ar_handle_t getLocalPlayerServerHandle() {
+	ar_handle_t getLocalPlayerServerHandle() const {
 		if(gameData.localPlayer.loginResult)
 			return gameData.localPlayer.loginResult->handle;
 		else
@@ -157,7 +159,7 @@ private:
 	void updateCreaturePosition(CreatureData& data, float& x, float& y);
 
 private:
-	ConnectionToClient* connectionToClient = nullptr;
+	MultiServerManager* multiServerManager;
 
 	GameData gameData;
 	Timer<ConnectionToServer> moveUpdateTimer;

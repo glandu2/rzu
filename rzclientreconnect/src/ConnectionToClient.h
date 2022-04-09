@@ -2,9 +2,9 @@
 
 #include "ConnectionToServer.h"
 #include "IPacketInterface.h"
+#include "MultiServerManager.h"
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
-#include "UpdateClientFromGameData.h"
 #include <list>
 #include <stdint.h>
 #include <string>
@@ -34,17 +34,10 @@ public:
 
 	ar_handle_t getLocalPlayerClientHandle() { return localPlayerClientHandle; }
 	bool getIsClientLogged() { return isClientLogged; }
-	bool isKnownLocalPlayer(std::string_view playerName);
 
 	void onServerPacket(ConnectionToServer* connectionToServer, const TS_MESSAGE* packet);
-	void onServerDisconnected(ConnectionToServer* connectionToServer, GameData&& gameData);
 
 private:
-	void activateConnectionToServer(ConnectionToServer* connectionToServer);
-	void spawnConnectionToServer(const std::string& account,
-	                             const std::string& password,
-	                             const std::string& playername);
-
 	ar_handle_t convertHandle(ConnectionToServer* targetServer, ar_handle_t val);
 	template<class Packet> struct ConvertHandlesFunctor;
 	template<class Packet> void convertPacketHandles(ConnectionToServer* targetServer, Packet& packet);
@@ -64,14 +57,7 @@ private:
 private:
 	~ConnectionToClient();
 
-	UpdateClientFromGameData updateClientFromGameData;
-
-	// Current main player
-	ConnectionToServer* connectionToServer = nullptr;
-	// The player currently controlled
-	ConnectionToServer* controlledServer = nullptr;
-	// All connected players
-	std::list<ConnectionToServer> connections;
+	MultiServerManager multiServerManager;
 
 	ar_handle_t localPlayerClientHandle{};
 	ar_handle_t lastTargetedPlayerClientHandle{};
