@@ -34,7 +34,6 @@ uint64_t Utils::getTimeInMsec() {
 #endif
 }
 
-// From ffmpeg http://www.ffmpeg.org/doxygen/trunk/cutils_8c-source.html
 struct tm* Utils::getGmTime(time_t secs, struct tm* tm) {
 #ifdef _WIN32
 	gmtime_s(tm, &secs);
