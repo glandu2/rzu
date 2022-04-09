@@ -72,11 +72,11 @@ public:
 
 	void connect();
 
-	ar_time_t getGameTime() { return ar_time_t{getLocalGameTime().get() + gameTimeOffset}; }
-	time_t getEpochTime() { return time(nullptr) + epochTimeOffset; }
-	const std::string& getPlayerName() { return playername; }
-	bool isConnected() { return connectedInGame; }
-	ar_handle_t getLocalPlayerHandle() { return handle; }
+	ar_time_t getGameTime() const { return ar_time_t{getLocalGameTime().get() + gameTimeOffset}; }
+	time_t getEpochTime() const { return time(nullptr) + epochTimeOffset; }
+	const std::string& getPlayerName() const { return playername; }
+	bool isConnected() const { return connectedInGame; }
+	ar_handle_t getLocalPlayerHandle() const { return handle; }
 
 protected:
 	template<class T> struct EventTag {};
@@ -107,7 +107,7 @@ private:
 	void onSetTime(const TS_SC_SET_TIME* packet);
 	void onGameTime(const TS_SC_GAME_TIME* packet);
 
-	ar_time_t getLocalGameTime();
+	ar_time_t getLocalGameTime() const;
 
 private:
 	AutoAuthSession authSession;

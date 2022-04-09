@@ -204,7 +204,7 @@ void AutoClientSession::onUpdatePacketExpired() {
 	sendPacket(updatPkt);
 }
 
-ar_time_t AutoClientSession::getLocalGameTime() {
+ar_time_t AutoClientSession::getLocalGameTime() const {
 	return ar_time_t(uint32_t(uv_hrtime() / (10 * 1000 * 1000)));
 }
 
