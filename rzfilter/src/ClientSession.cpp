@@ -41,8 +41,9 @@ ClientSession::~ClientSession() {}
 EventChain<SocketSession> ClientSession::onConnected() {
 	log(LL_Info, "Client connected, connecting server session\n");
 
-	if(serverSession)
-		serverSession->connect(getServerIp(), getServerPort());
+	if(serverSession) {
+		serverSession->connect(getServerIp(), getServerPort(), getStream()->getRemoteAddress());
+	}
 	setDirtyObjectName();
 	getStream()->setNoDelay(true);
 

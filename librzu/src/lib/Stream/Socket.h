@@ -26,14 +26,12 @@ protected:
 
 	virtual void onStateChanged(State oldState, State newState);
 
-	StreamAddress getAddress(int (*getsockaddrFunction)(const uv_tcp_t* handle,
-	                                                struct sockaddr* name,
-							                        int* namelen) );
+	StreamAddress getAddress(int (*getsockaddrFunction)(const uv_tcp_t* handle, struct sockaddr* name, int* namelen));
 
 private:
 	static void enableFastPath(uv_tcp_t* socket);
 
 private:
 	uv_tcp_t socket;
+	bool initialized;
 };
-

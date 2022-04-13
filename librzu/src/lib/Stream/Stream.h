@@ -62,6 +62,7 @@ public:
 	                         bool* changed = nullptr,
 	                         bool enablePacketLogger = true);
 
+	bool bindBeforeConnect(const std::string& bindIp, uint16_t bindPort);
 	bool connect(const std::string& hostName, uint16_t port);
 	bool listen(const std::string& interfaceIp, uint16_t port);
 
@@ -149,4 +150,3 @@ private:
 	                                      // (idle)
 	bool closeCausedByRemote;
 };
-

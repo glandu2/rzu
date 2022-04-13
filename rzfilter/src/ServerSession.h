@@ -25,7 +25,9 @@ public:
 	              FilterManager* converterFilterManager);
 	~ServerSession();
 
-	void connect(std::string ip, uint16_t port);
+	virtual void assignStream(Stream* stream) override;
+
+	void connect(std::string ip, uint16_t port, StreamAddress clientIp);
 
 	void sendPacket(const TS_MESSAGE* message);
 
@@ -64,6 +66,7 @@ protected:
 private:
 	using SocketSession::connect;
 
+	std::string localHostBindIp;
 	bool authMode;
 	ClientSession* clientSession;
 	GameClientSessionManager* gameClientSessionManager;

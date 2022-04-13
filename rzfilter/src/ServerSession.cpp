@@ -57,9 +57,39 @@ ServerSession::ServerSession(bool authMode,
 
 ServerSession::~ServerSession() {}
 
-void ServerSession::connect(std::string ip, uint16_t port) {
+void ServerSession::assignStream(Stream* stream) {
+	EncryptedSession<PacketSession>::assignStream(stream);
+
+	if(!localHostBindIp.empty()) {
+		getStream()->bindBeforeConnect(localHostBindIp, 0);
+	}
+}
+
+void ServerSession::connect(std::string ip, uint16_t port, StreamAddress clientIp) {
 	log(LL_Debug, "Connecting to server %s:%d\n", ip.c_str(), port);
-	SocketSession::connect(ip.c_str(), port);
+
+	if(CONFIG_GET()->server.clientIpBlockSupport.get() && ip == "127.0.0.1" &&
+	   clientIp.type == StreamAddress::ST_SocketIpv4) {
+		char clientAddress[INET6_ADDRSTRLEN];
+		char computedBindAddress[INET6_ADDRSTRLEN];
+
+		clientIp.getName(clientAddress, sizeof(clientAddress));
+
+		StreamAddress bindAddress = clientIp;
+		// ip is network order (big endian), replace the first ip part with 127 to make it a localhost IP
+		bindAddress.rawAddress.ipv4.s_addr = 127 | (bindAddress.rawAddress.ipv4.s_addr & 0xFFFFFF00);
+		bindAddress.getName(computedBindAddress, sizeof(computedBindAddress));
+		localHostBindIp = computedBindAddress;
+
+		log(LL_Debug,
+		    "Binding client %s to localhost IP %s to handle GS ip blocking\n",
+		    clientAddress,
+		    localHostBindIp.c_str());
+	} else {
+		localHostBindIp.clear();
+	}
+
+	EncryptedSession<PacketSession>::connect(ip.c_str(), port);
 	if(getStream() && clientSession && clientSession->getStream()) {
 		getStream()->setPacketLogger(clientSession->getStream()->getPacketLogger());
 	}

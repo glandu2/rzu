@@ -40,7 +40,8 @@ static void init_fastpath_support(void) {
 }
 #endif
 
-Socket::Socket(uv_loop_t* uvLoop, bool logPackets) : Stream(uvLoop, (uv_stream_t*) &socket, logPackets) {}
+Socket::Socket(uv_loop_t* uvLoop, bool logPackets)
+    : Stream(uvLoop, (uv_stream_t*) &socket, logPackets), initialized(false) {}
 
 Socket::~Socket() {
 	if(getState() != UnconnectedState)
@@ -90,12 +91,18 @@ int Socket::connect_impl(uv_connect_t* connectRequest, const std::string& hostNa
 	struct sockaddr* dest = nullptr;
 
 	if(hostName.find(':') != std::string::npos) {
-		uv_tcp_init_ex(getLoop(), &socket, AF_INET6);
+		if(!initialized) {
+			uv_tcp_init_ex(getLoop(), &socket, AF_INET6);
+			initialized = true;
+		}
 
 		uv_ip6_addr(hostName.c_str(), port, &dest6);
 		dest = (struct sockaddr*) &dest6;
 	} else {
-		uv_tcp_init_ex(getLoop(), &socket, AF_INET);
+		if(!initialized) {
+			uv_tcp_init_ex(getLoop(), &socket, AF_INET);
+			initialized = true;
+		}
 
 		uv_ip4_addr(hostName.c_str(), port, &dest4);
 		dest = (struct sockaddr*) &dest4;
@@ -114,12 +121,18 @@ int Socket::bind_impl(const std::string& interfaceIp, uint16_t port) {
 	struct sockaddr* bindAddr;
 
 	if(interfaceIp.find(':') != std::string::npos) {
-		uv_tcp_init_ex(getLoop(), &socket, AF_INET6);
+		if(!initialized) {
+			uv_tcp_init_ex(getLoop(), &socket, AF_INET6);
+			initialized = true;
+		}
 
 		uv_ip6_addr(interfaceIp.c_str(), port, &bindAddr6);
 		bindAddr = (struct sockaddr*) &bindAddr6;
 	} else {
-		uv_tcp_init_ex(getLoop(), &socket, AF_INET);
+		if(!initialized) {
+			uv_tcp_init_ex(getLoop(), &socket, AF_INET);
+			initialized = true;
+		}
 
 		uv_ip4_addr(interfaceIp.c_str(), port, &bindAddr4);
 		bindAddr = (struct sockaddr*) &bindAddr4;
@@ -170,6 +183,8 @@ void Socket::onStateChanged(State oldState, State newState) {
 	if(newState == ConnectedState) {
 		if(GlobalCoreConfig::get()->app.useTcpNoDelay.get())
 			uv_tcp_nodelay(&socket, true);
+	} else if(newState == ClosingState) {
+		initialized = false;
 	}
 }
 

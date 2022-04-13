@@ -11,12 +11,14 @@ struct GlobalConfig {
 		cval<int>& port;
 		cval<int>& epic;
 		cval<bool>& strictforward;
+		cval<bool>& clientIpBlockSupport;
 
 		AuthConfig()
 		    : ip(CFG_CREATE("server.ip", "remote.auth.server.ip")),  // user must change this
 		      port(CFG_CREATE("server.port", 4500)),
 		      epic(CFG_CREATE("server.epic", EPIC_LATEST)),
-		      strictforward(CFG_CREATE("server.strictforward", false)) {}
+		      strictforward(CFG_CREATE("server.strictforward", false)),
+		      clientIpBlockSupport(CFG_CREATE("server.client_ip_block_support", false)) {}
 	} server;
 
 	struct GameConfig : IListener {
@@ -75,4 +77,3 @@ struct GlobalConfig {
 };
 
 #define CONFIG_GET() GlobalConfig::get()
-

@@ -99,9 +99,25 @@ Stream* Stream::getStream(StreamType type, Stream* existingStream, bool* changed
 	return newStream;
 }
 
+bool Stream::bindBeforeConnect(const std::string& bindIp, uint16_t bindPort) {
+	if(getState() != UnconnectedState) {
+		log(LL_Warning, "Attempt to bind a not unconnected stream to %s:%u\n", bindIp.c_str(), bindPort);
+		return false;
+	}
+
+	int result = bind_impl(bindIp, bindPort);
+	if(result < 0) {
+		log(LL_Warning, "Cant bind: %s\n", uv_strerror(result));
+		onStreamError(result);
+		return false;
+	}
+
+	return true;
+}
+
 bool Stream::connect(const std::string& hostName, uint16_t port) {
 	if(getState() != UnconnectedState) {
-		log(LL_Warning, "Attempt to connect a not unconnected stream to %s\n", hostName.c_str());
+		log(LL_Warning, "Attempt to connect a not unconnected stream to %s:%u\n", hostName.c_str(), port);
 		return false;
 	}
 
