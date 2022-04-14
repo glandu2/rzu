@@ -97,8 +97,9 @@ CREATE_STRUCT(TS_SC_ENTER__SUMMON_INFO);
 #undef TS_SC_ENTER__SUMMON_INFO_DEF
 
 #define TS_SC_ENTER__NPC_INFO_DEF(_) \
-	_(simple) (TS_CREATURE_STATUS, status) \
-	_(simple) (float, face_direction) \
+	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo, version < EPIC_9_6_7) \
+	_(simple) (TS_CREATURE_STATUS, status, version >= EPIC_9_6_7) \
+	_(simple) (float, face_direction, version >= EPIC_9_6_7) \
 	_(simple) (EncodedInt<EncodingRandomized>, npc_id)
 CREATE_STRUCT(TS_SC_ENTER__NPC_INFO);
 #undef TS_SC_ENTER__NPC_INFO_DEF
@@ -127,9 +128,10 @@ CREATE_STRUCT(TS_SC_ENTER__PLAYER_INFO);
 #undef TS_SC_ENTER__PLAYER_INFO_DEF
 
 #define TS_SC_ENTER__PET_INFO_DEF(_) \
-	_(simple) (TS_CREATURE_STATUS, status) \
-	_(simple) (float, face_direction) \
-	_(simple) (int32_t, level) \
+	_(simple) (TS_SC_ENTER__CREATURE_INFO, creatureInfo, version < EPIC_9_6_7) \
+	_(simple) (TS_CREATURE_STATUS, status, version >= EPIC_9_6_7) \
+	_(simple) (float, face_direction, version >= EPIC_9_6_7) \
+	_(simple) (int32_t, level, version >= EPIC_9_6_7) \
 	_(simple) (ar_handle_t, master_handle) \
 	_(simple) (EncodedInt<EncodingRandomized>, pet_code) \
 	_(def)(string)(name, 20) \
