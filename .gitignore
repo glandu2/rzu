@@ -9,6 +9,8 @@ obj*/
 internal*/
 .kdev4/
 .clangd/
+.cache/
+compile_commands.json
 
 *.ilk
 *.exe
@@ -45,3 +47,7 @@ $RECYCLE.BIN/
 
 
 RSATests
+lsqlite3
+openshift-ah
+rzplayercount
+rzrequester
