@@ -27,6 +27,7 @@ public:
 	                    int packetVersion,
 	                    IFilter::ServerType serverType,
 	                    bool isStrictForwardEnabled);
+	bool onServerDisconnected(int clientEndpoint, int serverEndpoint);
 	bool onClientDisconnected(int clientEndpoint, int serverEndpoint);
 
 private:
@@ -91,6 +92,9 @@ private:
 	    "packetId, ServerType serverType, bool isServerPacket)"};
 	LuaScriptFunctionRef lua_onClientConnectedFunction{
 	    "onClientConnected", "bool onClientConnected(IFilterEndpoint* client, IFilterEndpoint* server)"};
+
+	LuaScriptFunctionRef lua_onServerDisconnectedFunction{
+	    "onServerDisconnected", "bool onServerDisconnected(IFilterEndpoint* client, IFilterEndpoint* server)"};
 	LuaScriptFunctionRef lua_onClientDisconnectedFunction{
 	    "onClientDisconnected", "bool onClientDisconnected(IFilterEndpoint* client, IFilterEndpoint* server)"};
 
@@ -108,6 +112,7 @@ public:
 
 	virtual bool onServerPacket(const TS_MESSAGE* packet) override;
 	virtual bool onClientPacket(const TS_MESSAGE* packet) override;
+	virtual void onServerDisconnected() override;
 	virtual void onClientDisconnected() override;
 
 private:

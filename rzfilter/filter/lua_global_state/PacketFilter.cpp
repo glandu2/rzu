@@ -47,6 +47,7 @@ GlobalLuaState::GlobalLuaState()
                    &lua_onClientPacketFunction,
                    &lua_onUnknownPacketFunction,
                    &lua_onClientConnectedFunction,
+                   &lua_onServerDisconnectedFunction,
                    &lua_onClientDisconnectedFunction},
       currentLuaFileMtime(0),
       newLuaFileMtime(0) {
@@ -246,6 +247,11 @@ bool GlobalLuaState::onClientPacket(int clientEndpoint,
 	                     isStrictForwardEnabled);
 }
 
+bool GlobalLuaState::onServerDisconnected(int clientEndpoint, int serverEndpoint) {
+	return luaCallOnConnectionEvent(
+	    lua_onServerDisconnectedFunction.ref, "onServerDisconnected", clientEndpoint, serverEndpoint);
+}
+
 bool GlobalLuaState::onClientDisconnected(int clientEndpoint, int serverEndpoint) {
 	return luaCallOnConnectionEvent(
 	    lua_onClientDisconnectedFunction.ref, "onClientDisconnected", clientEndpoint, serverEndpoint);
@@ -412,8 +418,10 @@ PacketFilter::~PacketFilter() {
 		clientEndpoint->detachEndpoint();
 		luaL_unref(GlobalLuaState::getInstance()->getLuaState(), LUA_REGISTRYINDEX, lua_clientEndpointRef);
 	}
-	serverEndpoint->detachEndpoint();
-	luaL_unref(GlobalLuaState::getInstance()->getLuaState(), LUA_REGISTRYINDEX, lua_serverEndpointRef);
+	if(serverEndpoint) {
+		serverEndpoint->detachEndpoint();
+		luaL_unref(GlobalLuaState::getInstance()->getLuaState(), LUA_REGISTRYINDEX, lua_serverEndpointRef);
+	}
 }
 
 bool PacketFilter::onServerPacket(const TS_MESSAGE* packet) {
@@ -432,6 +440,12 @@ bool PacketFilter::onClientPacket(const TS_MESSAGE* packet) {
 	                                                     client->getPacketVersion(),
 	                                                     serverType,
 	                                                     client->isStrictForwardEnabled());
+}
+
+void PacketFilter::onServerDisconnected() {
+	GlobalLuaState::getInstance()->onServerDisconnected(lua_clientEndpointRef, lua_serverEndpointRef);
+
+	IFilter::onServerDisconnected();
 }
 
 void PacketFilter::onClientDisconnected() {
