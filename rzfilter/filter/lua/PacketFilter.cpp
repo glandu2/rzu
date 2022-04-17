@@ -193,6 +193,12 @@ bool PacketFilter::onClientPacket(const TS_MESSAGE* packet) {
 	return luaCallPacket(lua_onClientPacketFunction, "onClientPacket", packet, client->getPacketVersion(), false);
 }
 
+void PacketFilter::onServerDisconnected() {
+	luaCallOnDisconnected(lua_onServerDisconnectedFunction, "onServerDisconnected");
+
+	IFilter::onServerDisconnected();
+}
+
 void PacketFilter::onClientDisconnected() {
 	if(!luaCallOnDisconnected(lua_onClientDisconnectedFunction, "onClientDisconnected")) {
 		IFilter::onClientDisconnected();
@@ -326,6 +332,7 @@ void PacketFilter::initLuaVM() {
 	lua_onServerPacketFunction = LUA_NOREF;
 	lua_onClientPacketFunction = LUA_NOREF;
 	lua_onUnknownPacketFunction = LUA_NOREF;
+	lua_onServerDisconnectedFunction = LUA_NOREF;
 	lua_onClientDisconnectedFunction = LUA_NOREF;
 
 	luaL_openlibs(L);
@@ -415,6 +422,19 @@ void PacketFilter::initLuaVM() {
 	}
 	lua_pop(L, 1);
 
+	lua_getglobal(L, "onServerDisconnected");
+	if(lua_isfunction(L, -1)) {
+		lua_onServerDisconnectedFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+		lua_pushnil(L);  // for the next pop as luaL_ref pop the value
+	} else {
+		lua_onServerDisconnectedFunction = LUA_NOREF;
+		Object::logStatic(Object::LL_Info,
+		                  "rzfilter_lua_module",
+		                  "Lua register: onServerDisconnected must be a lua function matching its C counterpart: "
+		                  "bool onServerDisconnected(IFilterEndpoint* client, IFilterEndpoint* server)\n");
+	}
+	lua_pop(L, 1);
+
 	lua_getglobal(L, "onClientDisconnected");
 	if(lua_isfunction(L, -1)) {
 		lua_onClientDisconnectedFunction = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -442,6 +462,10 @@ void PacketFilter::deinitLuaVM() {
 		if(lua_onUnknownPacketFunction != LUA_NOREF) {
 			luaL_unref(L, LUA_REGISTRYINDEX, lua_onUnknownPacketFunction);
 			lua_onUnknownPacketFunction = LUA_NOREF;
+		}
+		if(lua_onServerDisconnectedFunction != LUA_NOREF) {
+			luaL_unref(L, LUA_REGISTRYINDEX, lua_onServerDisconnectedFunction);
+			lua_onServerDisconnectedFunction = LUA_NOREF;
 		}
 		if(lua_onClientDisconnectedFunction != LUA_NOREF) {
 			luaL_unref(L, LUA_REGISTRYINDEX, lua_onClientDisconnectedFunction);
