@@ -28,4 +28,3 @@ protected:
 	IFilterEndpoint* server;
 	ServerType serverType;
 };
-

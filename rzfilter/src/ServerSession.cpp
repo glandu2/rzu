@@ -116,7 +116,8 @@ EventChain<SocketSession> ServerSession::onDisconnected(bool causedByRemote) {
 	log(LL_Warning, "Disconnected from server\n");
 	if(clientSession) {
 		clientSession->detachServer();
-		clientSession->closeSession();
+		toClientBaseEndpoint->close();
+		detachClient();
 	}
 
 	deleteLater();

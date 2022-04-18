@@ -55,6 +55,7 @@ EventChain<SocketSession> ClientSession::onDisconnected(bool causedByRemote) {
 	if(serverSession) {
 		serverSession->detachClient();
 		serverSession->onClientDisconnected();
+		detachServer();
 	}
 
 	return PacketSession::onDisconnected(causedByRemote);
