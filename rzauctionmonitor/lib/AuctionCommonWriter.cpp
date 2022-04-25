@@ -4,6 +4,8 @@
 #include "Core/Utils.h"
 #include "Packet/MessageBuffer.h"
 #include "zlib.h"
+#include <algorithm>
+#include <limits>
 #include <memory>
 #include <stdio.h>
 #include <string.h>
@@ -205,7 +207,8 @@ int AuctionCommonWriter::uncompressGzip(std::vector<uint8_t>& uncompressedData,
 	/* run inflate() on input until output buffer not full */
 	do {
 		uncompressedData.resize(uncompressedData.size() + 1024 * 1024);
-		stream.avail_out = static_cast<uLong>(uncompressedData.size()) - outputIndex;
+		size_t remaining_size = uncompressedData.size() - outputIndex;
+		stream.avail_out = std::clamp(remaining_size, (size_t) 0, (size_t) std::numeric_limits<uInt>::max());
 		stream.next_out = &uncompressedData[outputIndex];
 		err = inflate(&stream, Z_NO_FLUSH);
 		switch(err) {
