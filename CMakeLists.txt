@@ -267,3 +267,7 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzrequester/CMakeLists.txt")
 endif()
 
 include(CPack OPTIONAL)
+
+# VSCode support
+add_custom_target(do_package DEPENDS package)
+configure_file(cmake/clangd.in ${CMAKE_SOURCE_DIR}/.clangd @ONLY)
