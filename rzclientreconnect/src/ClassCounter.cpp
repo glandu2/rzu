@@ -3,6 +3,9 @@
 #include "AuthClientSession.h"
 DECLARE_CLASSCOUNT_STATIC(AuthClientSession)
 
+#include "BotHandler.h"
+DECLARE_CLASSCOUNT_STATIC(BotHandler)
+
 #include "ConnectionToClient.h"
 DECLARE_CLASSCOUNT_STATIC(ConnectionToClient)
 
