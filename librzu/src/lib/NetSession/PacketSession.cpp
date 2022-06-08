@@ -181,11 +181,22 @@ EventChain<SocketSession> PacketSession::onDataReceived() {
 			break;
 		} else if(buffer->currentMessageSize == 0) {
 			read(&buffer->currentMessageSize, 4);
-			if(buffer->currentMessageSize <= 4)
-				buffer->currentMessageSize = 0;
-			buffer->discardPacket = buffer->currentMessageSize > MAX_PACKET_SIZE;
+			if(buffer->currentMessageSize <= 4) {
+				// Debug level to avoid flooding logs if receiving packets with 0s
+				log(LL_Debug, "Invalid packet size of %u, tcp stream is probably desync\n", buffer->currentMessageSize);
 
-			buffer->currentMessageSize -= 4;
+				buffer->currentMessageSize = 0;
+			} else {
+				buffer->discardPacket = buffer->currentMessageSize > MAX_PACKET_SIZE;
+				if(buffer->discardPacket) {
+					log(LL_Warning,
+					    "Packet size too big (%u > %u), will be discarded\n",
+					    buffer->currentMessageSize,
+					    MAX_PACKET_SIZE);
+				}
+
+				buffer->currentMessageSize -= 4;
+			}
 		}
 
 		if(buffer->currentMessageSize != 0 && buffer->discardPacket) {
