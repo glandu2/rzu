@@ -130,7 +130,11 @@ set(HTTP_ONLY ON)
 set(CMAKE_USE_OPENSSL ON)
 set(BUILD_CURL_EXE OFF)
 set(BUILD_TESTING OFF)
-FetchContent_MakeAvailable(curl)
+FetchContent_GetProperties(curl)
+if(NOT curl_POPULATED)
+  FetchContent_Populate(curl)
+  add_subdirectory(${curl_SOURCE_DIR} ${curl_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 install(TARGETS libcurl
   RUNTIME DESTINATION ./
   LIBRARY DESTINATION ./
