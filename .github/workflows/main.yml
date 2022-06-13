@@ -1,0 +1,150 @@
+# This is a basic workflow to help you get started with Actions
+
+name: main
+
+# Controls when the workflow will run
+# Triggers the workflow on push or pull request events
+on: [ push, pull_request, workflow_dispatch ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Linux build
+  linux:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ninja-build cmake unixodbc-dev libsqliteodbc libssl-dev libreadline-dev gdb valgrind
+
+      # Runs a set of commands using the runners shell
+      - name: Build
+        run: |
+          ulimit -c unlimited
+          sudo sh -c 'echo "core.%e.%p.%s.%t" > /proc/sys/kernel/core_pattern'
+          mkdir build
+          cd build
+          cmake .. -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=TRUE
+          cmake --build . --target package --config RelWithDebInfo
+          rm build/rzemu-*-rzfilter.*
+
+      - name: Test
+        run: |
+          valgrind --leak-check=full --trace-children=yes ctest -VV
+          for i in $(find ./ -maxdepth 1 -name 'core*' -print); do
+            echo "Core $i" && file "$i" &&
+            gdb "$(file "$i" | sed -r "s/.*from '([^ ']+)[ '].*/\1/")" "$i" -ex "thread apply all bt" -ex "set pagination 0" -batch
+          done
+          zip -r test_logs.zip core* log traffic_log
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          # Artifact name
+          name: "rzu-linux" # optional, default is artifact
+          # A file, directory or wildcard pattern that describes what to upload
+          path: build/*.zip
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          # Artifact name
+          name: "test_logs_linux.zip" # optional, default is artifact
+          # A file, directory or wildcard pattern that describes what to upload
+          path: test_logs.zip
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+            files: 'build/*.zip'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  windows:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      
+      - name: Install dependencies
+        id: dependencies
+        run: |
+          $openssl_download_page = wget "http://slproweb.com/products/Win32OpenSSL.html"
+          $openssl_latest_link = $openssl_download_page.ParsedHtml.getElementsByTagName("a") | where { $_.href -match "$($env:OPENSSL_ARCH)OpenSSL-[0-9\.a-zA-Z]+" } | Select-Object -first 1
+          $openssl_latest_url = "https://slproweb.com/" + $openssl_latest_link.pathname
+          
+          Write-Host "Using OpenSSL from $openssl_latest_url"
+          Start-FileDownload $openssl_latest_url
+          Start-Process $openssl_latest_link.nameProp -ArgumentList "/silent /verysilent /sp- /suppressmsgboxes" -Wait
+          
+          Write-Host "Done installing OpenSSL"
+          
+          Write-Host "Downloading SQLite ODBC Driver x64..."
+          $exePath = "$($env:TEMP)\sqliteodbc_w64.exe"
+          (New-Object Net.WebClient).DownloadFile('http://www.ch-werner.de/sqliteodbc/sqliteodbc_w64.exe', $exePath)
+          Write-Host "Installing..."
+          cmd /c start /wait $exePath /S
+          
+          Write-Host "Done installing SQLite ODBC Driver x64"
+
+      # Runs a set of commands using the runners shell
+      - name: Build
+        run: |
+          mkdir build
+          
+          cmake -S . -B build -DBUILD_SHARED_LIBS=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          if ($lastexitcode -ne 0) { exit $lastexitcode }
+          
+          cmake --build build --target package --config RelWithDebInfo
+          if ($lastexitcode -ne 0) { exit $lastexitcode }
+          
+          rm build/rzemu-*-rzfilter.zip
+
+      - name: Test
+        run: |
+          try {
+            ctest -VV -C RelWithDebInfo
+          } finally {
+            echo "Compressing test logs"
+            7z a test_logs.zip crashdump.dmp log traffic_log
+          }
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          # Artifact name
+          name: "rzu-windows" # optional, default is artifact
+          # A file, directory or wildcard pattern that describes what to upload
+          path: build/*.zip
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          # Artifact name
+          name: "test_logs_windows.zip" # optional, default is artifact
+          # A file, directory or wildcard pattern that describes what to upload
+          path: test_logs.zip
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+            files: 'build/*.zip'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
