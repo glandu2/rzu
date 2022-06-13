@@ -35,7 +35,7 @@ jobs:
           cd build
           cmake .. -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=TRUE
           cmake --build . --target package --config RelWithDebInfo
-          rm build/rzemu-*-rzfilter.*
+          rm rzemu-*-rzfilter.*
 
       - name: Test
         run: |
@@ -85,13 +85,14 @@ jobs:
       - name: Install dependencies
         id: dependencies
         run: |
-          $openssl_download_page = wget "http://slproweb.com/products/Win32OpenSSL.html"
-          $openssl_latest_link = $openssl_download_page.ParsedHtml.getElementsByTagName("a") | where { $_.href -match "$($env:OPENSSL_ARCH)OpenSSL-[0-9\.a-zA-Z]+" } | Select-Object -first 1
-          $openssl_latest_url = "https://slproweb.com/" + $openssl_latest_link.pathname
+          $openssl_download_page = Invoke-WebRequest "http://slproweb.com/products/Win32OpenSSL.html"
+          $openssl_download_link = Select-String -Pattern '<a href="/download/(Win64OpenSSL-[^"]+)"' -InputObject $openssl_download_page
+          $openssl_latest_link = $openssl_download_link.Matches[0].Groups[1].Value
+          $openssl_latest_url = "https://slproweb.com/download/" + $openssl_latest_link
           
           Write-Host "Using OpenSSL from $openssl_latest_url"
-          Start-FileDownload $openssl_latest_url
-          Start-Process $openssl_latest_link.nameProp -ArgumentList "/silent /verysilent /sp- /suppressmsgboxes" -Wait
+          (New-Object Net.WebClient).DownloadFile($openssl_latest_url, $openssl_latest_link)
+          Start-Process $openssl_latest_link -ArgumentList "/silent /verysilent /sp- /suppressmsgboxes" -Wait
           
           Write-Host "Done installing OpenSSL"
           
@@ -107,14 +108,15 @@ jobs:
       - name: Build
         run: |
           mkdir build
+          cd build
           
-          cmake -S . -B build -DBUILD_SHARED_LIBS=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake .. -DBUILD_SHARED_LIBS=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo
           if ($lastexitcode -ne 0) { exit $lastexitcode }
           
-          cmake --build build --target package --config RelWithDebInfo
+          cmake --build . --target package --config RelWithDebInfo
           if ($lastexitcode -ne 0) { exit $lastexitcode }
           
-          rm build/rzemu-*-rzfilter.zip
+          rm rzemu-*-rzfilter.zip
 
       - name: Test
         run: |
