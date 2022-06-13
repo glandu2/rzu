@@ -39,12 +39,15 @@ jobs:
 
       - name: Test
         run: |
+          cd build
           valgrind --leak-check=full --trace-children=yes ctest -VV
+          RESULT=$0
           for i in $(find ./ -maxdepth 1 -name 'core*' -print); do
             echo "Core $i" && file "$i" &&
             gdb "$(file "$i" | sed -r "s/.*from '([^ ']+)[ '].*/\1/")" "$i" -ex "thread apply all bt" -ex "set pagination 0" -batch
           done
           zip -r test_logs.zip core* log traffic_log
+          exit $RESULT
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
@@ -56,6 +59,7 @@ jobs:
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
+        if: always()
         with:
           # Artifact name
           name: "test_logs_linux.zip" # optional, default is artifact
@@ -121,6 +125,7 @@ jobs:
       - name: Test
         run: |
           try {
+            cd build
             ctest -VV -C RelWithDebInfo
           } finally {
             echo "Compressing test logs"
@@ -137,6 +142,7 @@ jobs:
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
+        if: always()
         with:
           # Artifact name
           name: "test_logs_windows.zip" # optional, default is artifact
