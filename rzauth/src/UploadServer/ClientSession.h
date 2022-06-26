@@ -3,6 +3,7 @@
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
 
+#include "UploadClient/flat/TS_CU_DOWNLOAD_ICON.h"
 #include "UploadClient/flat/TS_CU_LOGIN.h"
 #include "UploadClient/flat/TS_CU_UPLOAD.h"
 
@@ -21,6 +22,7 @@ protected:
 
 	void onLogin(const TS_CU_LOGIN* packet);
 	void onUpload(const TS_CU_UPLOAD* packet);
+	void onDownload(const TS_CU_DOWNLOAD_ICON* packet);
 
 	bool checkJpegImage(uint32_t length, const unsigned char* data);
 

@@ -4,12 +4,14 @@
 #include "GameServerSession.h"
 #include "IconServerSession.h"
 #include "UploadRequest.h"
+#include <memory>
 
 #include "Core/Utils.h"
 #include <stdio.h>
 #include <time.h>
 
 #include "PacketEnums.h"
+#include "UploadClient/flat/TS_UC_DOWNLOAD_ICON.h"
 #include "UploadClient/flat/TS_UC_LOGIN_RESULT.h"
 #include "UploadClient/flat/TS_UC_UPLOAD.h"
 
@@ -33,6 +35,10 @@ EventChain<PacketSession> ClientSession::onPacketReceived(const TS_MESSAGE* pack
 
 		case TS_CU_UPLOAD::packetID:
 			onUpload(static_cast<const TS_CU_UPLOAD*>(packet));
+			break;
+
+		case TS_CU_DOWNLOAD_ICON::packetID:
+			onDownload(static_cast<const TS_CU_DOWNLOAD_ICON*>(packet));
 			break;
 
 		default:
@@ -155,6 +161,74 @@ void ClientSession::onUpload(const TS_CU_UPLOAD* packet) {
 	}
 
 	sendPacket(&result);
+}
+
+void ClientSession::onDownload(const TS_CU_DOWNLOAD_ICON* packet) {
+	StreamAddress remoteAddress = getStream()->getRemoteAddress();
+	char ip[INET6_ADDRSTRLEN];
+
+	remoteAddress.getName(ip, sizeof(ip));
+
+	log(LL_Debug, "Download from client %s:%d\n", ip, remoteAddress.port);
+
+	std::string fileName = Utils::convertToString(packet->file_name, sizeof(packet->file_name) - 1);
+
+	if(!IconServerSession::checkName(fileName.c_str(), fileName.size())) {
+		// send error, invalid file name
+		log(LL_Warning, "Download attempt of invalid filename: \"%s\"\n", fileName.c_str());
+		return;
+	}
+
+	std::string fullFileName = CONFIG_GET()->upload.client.uploadDir.get() + "/" + fileName;
+	std::unique_ptr<FILE, int (*)(FILE*)> file(fopen(fullFileName.c_str(), "rb"), fclose);
+
+	if(!file) {
+		// send error, file does not exists
+		log(LL_Warning, "Download attempt of %s, but the file doesn\'t exist\n", fullFileName.c_str());
+		return;
+	}
+
+	fseek(file.get(), 0, SEEK_END);
+	size_t fileSize = ftell(file.get());
+	fseek(file.get(), 0, SEEK_SET);
+
+	if(fileSize > 64000) {
+		// send error, file is too big
+		log(LL_Warning, "Download attempt of %s but file is too large (%d > 64000)\n", fileName.c_str(), fileSize);
+		return;
+	}
+
+	std::unique_ptr<char[]> buffer(new char[fileSize]);
+
+	size_t bytesTransferred = 0;
+	size_t nbrw = 0;
+	while(bytesTransferred < fileSize) {
+		nbrw = fread(buffer.get() + bytesTransferred, 1, fileSize - bytesTransferred, file.get());
+		if(nbrw <= 0)
+			break;
+		bytesTransferred += nbrw;
+	}
+
+	file.reset();
+
+	if(nbrw <= 0) {
+		// send error, can't read file
+		log(LL_Warning, "Download attempt of %s but can\'t read file: %d\n", fileName.c_str(), errno);
+		return;
+	}
+
+	// send file
+	TS_UC_DOWNLOAD_ICON* result;
+	result = TS_MESSAGE_WNA::create<TS_UC_DOWNLOAD_ICON, char>(fileSize);
+	result->guild_id = packet->guild_id;
+	result->icon_size = (uint32_t) fileSize;
+	memcpy(result->guild_name, packet->guild_name, sizeof(packet->guild_name));
+	memcpy(result->file_name, packet->file_name, sizeof(packet->file_name));
+	memcpy(result->icon_data, buffer.get(), fileSize);
+
+	buffer.reset();
+
+	sendPacket(result);
 }
 
 bool ClientSession::checkJpegImage(uint32_t length, const unsigned char* data) {
