@@ -3,8 +3,8 @@
 #include "NetSession/EncryptedSession.h"
 #include "NetSession/PacketSession.h"
 
-#include "UploadClient/TS_CU_LOGIN.h"
-#include "UploadClient/TS_CU_UPLOAD.h"
+#include "UploadClient/flat/TS_CU_LOGIN.h"
+#include "UploadClient/flat/TS_CU_UPLOAD.h"
 
 namespace UploadServer {
 
@@ -31,4 +31,3 @@ private:
 };
 
 }  // namespace UploadServer
-

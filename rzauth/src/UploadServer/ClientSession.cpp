@@ -2,6 +2,7 @@
 #include "../GlobalConfig.h"
 #include "Core/PrintfFormats.h"
 #include "GameServerSession.h"
+#include "IconServerSession.h"
 #include "UploadRequest.h"
 
 #include "Core/Utils.h"
@@ -9,8 +10,8 @@
 #include <time.h>
 
 #include "PacketEnums.h"
-#include "UploadClient/TS_UC_LOGIN_RESULT.h"
-#include "UploadClient/TS_UC_UPLOAD.h"
+#include "UploadClient/flat/TS_UC_LOGIN_RESULT.h"
+#include "UploadClient/flat/TS_UC_UPLOAD.h"
 
 namespace UploadServer {
 

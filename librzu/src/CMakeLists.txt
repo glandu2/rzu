@@ -67,6 +67,7 @@ endfunction()
 
 generate_packets_includes("AuthClient" INCLUDE_PART FUNCTION_SWITCH_PART FUNCTION_ITERATE_PART "AC" "CA")
 generate_packets_includes("GameClient" INCLUDE_PART FUNCTION_SWITCH_PART FUNCTION_ITERATE_PART "SC" "CS")
+generate_packets_includes("UploadClient" INCLUDE_PART FUNCTION_SWITCH_PART FUNCTION_ITERATE_PART "UC" "CU")
 
 configure_file(packets/PacketIterator.h.in packets/PacketIterator.h @ONLY NEWLINE_STYLE UNIX)
 list(APPEND HEADER_FILES packets/PacketIterator.h.in)

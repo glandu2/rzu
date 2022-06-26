@@ -1,10 +1,10 @@
 #include "../GlobalConfig.h"
 #include "PacketEnums.h"
 #include "RzTest.h"
-#include "UploadClient/TS_CU_LOGIN.h"
-#include "UploadClient/TS_CU_UPLOAD.h"
-#include "UploadClient/TS_UC_LOGIN_RESULT.h"
-#include "UploadClient/TS_UC_UPLOAD.h"
+#include "UploadClient/flat/TS_CU_LOGIN.h"
+#include "UploadClient/flat/TS_CU_UPLOAD.h"
+#include "UploadClient/flat/TS_UC_LOGIN_RESULT.h"
+#include "UploadClient/flat/TS_UC_UPLOAD.h"
 #include "gtest/gtest.h"
 
 /*

@@ -1,14 +1,9 @@
 #pragma once
 
-#include "Packet/PacketBaseMessage.h"
+#include "Packet/PacketDeclaration.h"
 
-#pragma pack(push, 1)
-struct TS_CU_UPLOAD : public TS_MESSAGE_WNA
-{
-	uint32_t file_length;
-	unsigned char file_contents[0];
+#define TS_CU_UPLOAD_DEF(_) \
+	_(count)(uint32_t, file_contents) \
+	_(dynarray)(uint8_t, file_contents)
 
-	static const uint16_t packetID = 50007;
-};
-#pragma pack(pop)
-
+CREATE_PACKET(TS_CU_UPLOAD, 50007, SessionType::UploadClient, SessionPacketOrigin::Client);
