@@ -19,13 +19,13 @@ public:
 	                    int serverEndpoint,
 	                    const TS_MESSAGE* packet,
 	                    int packetVersion,
-	                    IFilter::ServerType serverType,
+	                    SessionType sessionType,
 	                    bool isStrictForwardEnabled);
 	bool onClientPacket(int clientEndpoint,
 	                    int serverEndpoint,
 	                    const TS_MESSAGE* packet,
 	                    int packetVersion,
-	                    IFilter::ServerType serverType,
+	                    SessionType sessionType,
 	                    bool isStrictForwardEnabled);
 	bool onServerDisconnected(int clientEndpoint, int serverEndpoint);
 	bool onClientDisconnected(int clientEndpoint, int serverEndpoint);
@@ -48,13 +48,13 @@ private:
 	                   const TS_MESSAGE* packet,
 	                   int version,
 	                   bool isServerPacket,
-	                   IFilter::ServerType serverType,
+	                   SessionType sessionType,
 	                   bool isStrictForwardEnabled);
 	bool luaCallUnknownPacket(int clientEndpoint,
 	                          int serverEndpoint,
 	                          const TS_MESSAGE* packet,
 	                          bool isServerPacket,
-	                          IFilter::ServerType serverType,
+	                          SessionType sessionType,
 	                          bool isStrictForwardEnabled);
 
 	bool luaCallOnConnectionEvent(int luaOnEventFunction,
@@ -62,7 +62,7 @@ private:
 	                              int clientEndpoint,
 	                              int serverEndpoint);
 
-	bool pushPacket(lua_State* L, const TS_MESSAGE* packet, int version, bool isServer, IFilter::ServerType serverType);
+	bool pushPacket(lua_State* L, const TS_MESSAGE* packet, int version, bool isServer, SessionType sessionType);
 
 	void onCheckReload();
 
@@ -81,15 +81,15 @@ private:
 	LuaScriptFunctionRef lua_onServerPacketFunction{
 	    "onServerPacket",
 	    "bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* "
-	    "packet, ServerType serverType)"};
+	    "packet, SessionType sessionType)"};
 	LuaScriptFunctionRef lua_onClientPacketFunction{
 	    "onClientPacket",
 	    "bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* "
-	    "packet, ServerType serverType)"};
+	    "packet, SessionType sessionType)"};
 	LuaScriptFunctionRef lua_onUnknownPacketFunction{
 	    "onUnknownPacket",
 	    "bool onUnknownPacket(IFilterEndpoint* fromEndpoint, IFilterEndpoint* toEndpoint, int "
-	    "packetId, ServerType serverType, bool isServerPacket)"};
+	    "packetId, SessionType sessionType, bool isServerPacket)"};
 	LuaScriptFunctionRef lua_onClientConnectedFunction{
 	    "onClientConnected", "bool onClientConnected(IFilterEndpoint* client, IFilterEndpoint* server)"};
 
@@ -107,7 +107,7 @@ private:
 
 class PacketFilter : public IFilter {
 public:
-	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType, PacketFilter* data);
+	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType, PacketFilter* data);
 	~PacketFilter();
 
 	virtual bool onServerPacket(const TS_MESSAGE* packet) override;
@@ -128,7 +128,7 @@ SYMBOL_EXPORT void destroyGlobalFilter(void* globalData);
 
 SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
                                     IFilterEndpoint* server,
-                                    IFilter::ServerType serverType,
+                                    SessionType sessionType,
                                     IFilter* oldFilter);
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }

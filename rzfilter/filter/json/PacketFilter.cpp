@@ -6,9 +6,9 @@
 
 PacketFilter::PacketFilter(IFilterEndpoint* client,
                            IFilterEndpoint* server,
-                           ServerType serverType,
+                           SessionType sessionType,
                            PacketFilter* oldFilter)
-    : IFilter(client, server, serverType) {
+    : IFilter(client, server, sessionType) {
 	if(oldFilter) {
 		data = oldFilter->data;
 		oldFilter->data = nullptr;
@@ -23,19 +23,13 @@ PacketFilter::~PacketFilter() {
 }
 
 bool PacketFilter::onServerPacket(const TS_MESSAGE* packet) {
-	if(serverType == ST_Game)
-		printPacketJson(SessionType::GameClient, packet, server->getPacketVersion(), true);
-	else
-		printPacketJson(SessionType::AuthClient, packet, server->getPacketVersion(), true);
+	printPacketJson(sessionType, packet, server->getPacketVersion(), true);
 
 	return true;
 }
 
 bool PacketFilter::onClientPacket(const TS_MESSAGE* packet) {
-	if(serverType == ST_Game)
-		printPacketJson(SessionType::GameClient, packet, server->getPacketVersion(), false);
-	else
-		printPacketJson(SessionType::AuthClient, packet, server->getPacketVersion(), false);
+	printPacketJson(sessionType, packet, server->getPacketVersion(), false);
 
 	return true;
 }
@@ -62,12 +56,9 @@ void PacketFilter::printPacketJson(SessionType sessionType, const TS_MESSAGE* pa
 	}
 }
 
-IFilter* createFilter(IFilterEndpoint* client,
-                      IFilterEndpoint* server,
-                      IFilter::ServerType serverType,
-                      IFilter* oldFilter) {
+IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType, IFilter* oldFilter) {
 	Object::logStatic(Object::LL_Info, "rzfilter_json", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketFilter(client, server, serverType, (PacketFilter*) oldFilter);
+	return new PacketFilter(client, server, sessionType, (PacketFilter*) oldFilter);
 }
 
 void destroyFilter(IFilter* filter) {

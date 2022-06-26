@@ -46,8 +46,8 @@ void FilterManager::init() {
 	    "filter.reload", "freload", 0, 0, &reloadFiltersCommand, "Reload filter for all connections");
 }
 
-std::unique_ptr<FilterProxy> FilterManager::createFilter(IFilter::ServerType serverType) {
-	std::unique_ptr<FilterProxy> filterProxy = std::unique_ptr<FilterProxy>(new FilterProxy(this, serverType));
+std::unique_ptr<FilterProxy> FilterManager::createFilter(SessionType sessionType) {
+	std::unique_ptr<FilterProxy> filterProxy = std::unique_ptr<FilterProxy>(new FilterProxy(this, sessionType));
 
 	packetFilters.push_back(filterProxy.get());
 

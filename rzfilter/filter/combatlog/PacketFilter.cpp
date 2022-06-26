@@ -7,9 +7,9 @@
 
 PacketFilter::PacketFilter(IFilterEndpoint* client,
                            IFilterEndpoint* server,
-                           ServerType serverType,
+                           SessionType sessionType,
                            PacketFilter* oldFilter)
-    : IFilter(client, server, serverType) {
+    : IFilter(client, server, sessionType) {
 	if(oldFilter) {
 		data = oldFilter->data;
 		oldFilter->data = nullptr;
@@ -30,7 +30,7 @@ bool PacketFilter::onServerPacket(const TS_MESSAGE* packet) {
 	clientp = client;
 	serverVersion = server->getPacketVersion();
 
-	if(serverType != ST_Game)
+	if(sessionType != SessionType::GameClient)
 		return true;
 
 	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(
@@ -413,12 +413,9 @@ template<class Packet> void PacketFilter::showPacketJson(const Packet* packet, i
 	Object::logStatic(Object::LL_Info, "rzfilter_combatlog", "%s packet:\n%s\n", Packet::getName(), jsonData.c_str());
 }
 
-IFilter* createFilter(IFilterEndpoint* client,
-                      IFilterEndpoint* server,
-                      IFilter::ServerType serverType,
-                      IFilter* oldFilter) {
+IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType, IFilter* oldFilter) {
 	Object::logStatic(Object::LL_Info, "rzfilter_combatlog", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketFilter(client, server, serverType, (PacketFilter*) oldFilter);
+	return new PacketFilter(client, server, sessionType, (PacketFilter*) oldFilter);
 }
 
 void destroyFilter(IFilter* filter) {

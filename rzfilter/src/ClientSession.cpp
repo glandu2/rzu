@@ -10,15 +10,14 @@
 #include "Packet/PacketEpics.h"
 #include "PacketEnums.h"
 
-ClientSession::ClientSession(bool authMode,
+ClientSession::ClientSession(SessionType sessionType,
                              GameClientSessionManager* gameClientSessionManager,
                              FilterManager* filterManager,
                              FilterManager* converterFilterManager)
-    : EncryptedSession<PacketSession>(authMode ? SessionType::AuthClient : SessionType::GameClient,
-                                      SessionPacketOrigin::Server,
-                                      CONFIG_GET()->client.epic.get()),
-      serverSession(new ServerSession(authMode, this, gameClientSessionManager, filterManager, converterFilterManager)),
-      authMode(authMode) {}
+    : EncryptedSession<PacketSession>(sessionType, SessionPacketOrigin::Server, CONFIG_GET()->client.epic.get()),
+      serverSession(
+          new ServerSession(sessionType, this, gameClientSessionManager, filterManager, converterFilterManager)),
+      sessionType(sessionType) {}
 
 StreamAddress ClientSession::getAddress() {
 	if(getStream())

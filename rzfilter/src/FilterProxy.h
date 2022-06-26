@@ -9,7 +9,7 @@ class FilterManager;
 
 class FilterProxy {
 public:
-	FilterProxy(FilterManager* filterManager, IFilter::ServerType serverType);
+	FilterProxy(FilterManager* filterManager, SessionType sessionType);
 	~FilterProxy();
 
 	void onServerPacket(const TS_MESSAGE* packet);
@@ -34,10 +34,9 @@ protected:
 private:
 	FilterManager* filterManager;
 	IFilter* filterModule;
-	IFilter::ServerType serverType;
+	SessionType sessionType;
 	IFilterEndpoint* client;
 	IFilterEndpoint* server;
 	FilterEndpoint toServerEndpoint;
 	FilterEndpoint toClientEndpoint;
 };
-

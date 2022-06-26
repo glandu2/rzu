@@ -2,17 +2,16 @@
 
 #include "IFilterEndpoint.h"
 #include "Packet/PacketBaseMessage.h"
+#include "Packet/PacketStructsName.h"
 
 class IFilter {
 public:
-	enum ServerType { ST_Auth, ST_Game };
-
 	typedef void (*DestroyGlobalFilterFunction)(void* argument);
 	typedef void* (*InitializeGlobalFilterFunction)();
 	typedef void (*DestroyFilterFunction)(IFilter* filter);
 	typedef IFilter* (*CreateFilterFunction)(IFilterEndpoint* client,
 	                                         IFilterEndpoint* server,
-	                                         ServerType serverType,
+	                                         SessionType sessionType,
 	                                         IFilter* oldFilter);
 
 	virtual ~IFilter() {}
@@ -22,9 +21,9 @@ public:
 	virtual void onClientDisconnected() { server->close(); }
 
 protected:
-	IFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType)
-	    : client(client), server(server), serverType(serverType) {}
+	IFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType)
+	    : client(client), server(server), sessionType(sessionType) {}
 	IFilterEndpoint* client;
 	IFilterEndpoint* server;
-	ServerType serverType;
+	SessionType sessionType;
 };

@@ -7,8 +7,10 @@
 #include <vector>
 
 AuthClientSession::AuthClientSession(InputParameters parameters)
-    : ClientSession(
-          true, parameters.gameClientSessionManager, parameters.filterManager, parameters.converterFilterManager) {}
+    : ClientSession(SessionType::AuthClient,
+                    parameters.gameClientSessionManager,
+                    parameters.filterManager,
+                    parameters.converterFilterManager) {}
 
 AuthClientSession::~AuthClientSession() {}
 

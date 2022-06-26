@@ -25,6 +25,7 @@ struct GlobalConfig {
 		ListenerConfig listener;
 		cval<std::string>& gameExternalIp;
 		cval<int>& gameBasePort;
+		cval<int>& uploadBasePort;
 		cval<int>& epic;
 		cval<bool>& strictforward;
 
@@ -32,6 +33,7 @@ struct GlobalConfig {
 		    : listener("client.listen", "127.0.0.1", 4500, true, 0),
 		      gameExternalIp(CFG_CREATE("client.externalip", "127.0.0.1")),
 		      gameBasePort(CFG_CREATE("client.gsbaseport", 0)),
+		      uploadBasePort(CFG_CREATE("client.uploadbaseport", 0)),
 		      epic(CFG_CREATE("client.epic", EPIC_LATEST)),
 		      strictforward(CFG_CREATE("client.strictforward", false)) {
 			listener.listenIp.addListener(this, &updateDefaultExternalIp);

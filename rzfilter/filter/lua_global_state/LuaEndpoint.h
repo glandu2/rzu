@@ -12,7 +12,7 @@ public:
 	static LuaEndpoint* createInstance(lua_State* L,
 	                                   IFilterEndpoint* endpoint,
 	                                   bool isServerEndpoint,
-	                                   IFilter::ServerType serverType);
+	                                   SessionType sessionType);
 	void detachEndpoint();
 
 	static void initLua(lua_State* L);
@@ -24,8 +24,8 @@ private:
 	static const char* const NAME;
 	static const luaL_Reg FUNCTIONS[];
 
-	LuaEndpoint(IFilterEndpoint* endpoint, bool isServerEndpoint, IFilter::ServerType serverType)
-	    : endpoint(endpoint), isServerEndpoint(isServerEndpoint), serverType(serverType) {}
+	LuaEndpoint(IFilterEndpoint* endpoint, bool isServerEndpoint, SessionType sessionType)
+	    : endpoint(endpoint), isServerEndpoint(isServerEndpoint), sessionType(sessionType) {}
 	~LuaEndpoint();
 
 	static LuaEndpoint* check_userdata(lua_State* L, int idx);
@@ -41,6 +41,6 @@ private:
 
 	IFilterEndpoint* endpoint;
 	bool isServerEndpoint;
-	IFilter::ServerType serverType;
+	SessionType sessionType;
 	int userdatatable = LUA_NOREF;
 };

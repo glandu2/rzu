@@ -82,13 +82,8 @@ int LuaEndpointMetaTable::sendPacket(lua_State* L) {
 	lua_pop(L, 1);
 
 	bool ok = true;
-	SessionType sessionType;
+	SessionType sessionType = self->sessionType;
 	SessionPacketOrigin origin;
-
-	if(self->serverType == IFilter::ST_Auth)
-		sessionType = SessionType::AuthClient;
-	else
-		sessionType = SessionType::GameClient;
 
 	if(self->isServerEndpoint)
 		origin = SessionPacketOrigin::Client;
@@ -165,10 +160,10 @@ template<class T> bool LuaEndpointMetaTable::sendPacketFromLua(lua_State* L, IFi
 	return true;
 }
 
-PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType, PacketFilter*)
-    : IFilter(client, server, serverType),
-      clientEndpoint(client, false, serverType),
-      serverEndpoint(server, true, serverType),
+PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType, PacketFilter*)
+    : IFilter(client, server, sessionType),
+      clientEndpoint(client, false, sessionType),
+      serverEndpoint(server, true, sessionType),
       currentLuaFileMtime(0),
       newLuaFileMtime(0) {
 	struct stat info;
@@ -226,7 +221,7 @@ bool PacketFilter::luaCallPacket(
 			lua_settop(L, topBeforeCall);
 			return luaCallUnknownPacket(packet, isServerPacket);
 		}
-		lua_pushinteger(L, serverType);
+		lua_pushinteger(L, (int) sessionType);
 
 		int result = lua_pcall(L, 4, 1, -6);
 		if(result) {
@@ -268,7 +263,7 @@ bool PacketFilter::luaCallUnknownPacket(const TS_MESSAGE* packet, bool isServerP
 		pushEndpoint(L, &clientEndpoint);
 		pushEndpoint(L, &serverEndpoint);
 		lua_pushinteger(L, packet->id);
-		lua_pushinteger(L, serverType);
+		lua_pushinteger(L, (int) sessionType);
 		lua_pushboolean(L, isServerPacket);
 
 		int result = lua_pcall(L, 5, 1, -7);
@@ -342,8 +337,9 @@ void PacketFilter::initLuaVM() {
 	lua_setglobal(L, "print");
 
 	iteratePackets<LuaDeclarePacketTypeNameCallback>(L);
-	pushEnum(L, "ST_Auth", ST_Auth);
-	pushEnum(L, "ST_Game", ST_Game);
+	pushEnum(L, "ST_Auth", (int) SessionType::AuthClient);
+	pushEnum(L, "ST_Game", (int) SessionType::GameClient);
+	pushEnum(L, "ST_Upload", (int) SessionType::UploadClient);
 
 	// LuaEndpointMetaTable metatable wrapping IFilterEndpoint
 	luaL_newmetatable(L, LuaEndpointMetaTable::NAME);
@@ -390,7 +386,7 @@ void PacketFilter::initLuaVM() {
 		                  "rzfilter_lua_module",
 		                  "Lua register: onServerPacket must be a lua function matching its C counterpart: "
 		                  "bool onServerPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* "
-		                  "packet, ServerType serverType)\n");
+		                  "packet, SessionType sessionType)\n");
 	}
 	lua_pop(L, 1);
 
@@ -404,7 +400,7 @@ void PacketFilter::initLuaVM() {
 		                  "rzfilter_lua_module",
 		                  "Lua register: onClientPacket must be a lua function matching its C counterpart: "
 		                  "bool onClientPacket(IFilterEndpoint* client, IFilterEndpoint* server, const TS_MESSAGE* "
-		                  "packet, ServerType serverType)\n");
+		                  "packet, SessionType sessionType)\n");
 	}
 	lua_pop(L, 1);
 
@@ -418,7 +414,7 @@ void PacketFilter::initLuaVM() {
 		                  "rzfilter_lua_module",
 		                  "Lua register: onUnknownPacket must be a lua function matching its C counterpart: "
 		                  "bool onUnknownPacket(IFilterEndpoint* fromEndpoint, IFilterEndpoint* toEndpoint, int "
-		                  "packetId, ServerType serverType, bool isServerPacket)\n");
+		                  "packetId, SessionType sessionType, bool isServerPacket)\n");
 	}
 	lua_pop(L, 1);
 
@@ -496,13 +492,7 @@ void PacketFilter::pushEndpoint(lua_State* L, LuaEndpointMetaTable* endpoint) {
 bool PacketFilter::pushPacket(lua_State* L, const TS_MESSAGE* packet, int version, bool isServer) {
 	bool ok;
 	bool serializationSucess = false;
-	SessionType sessionType;
 	SessionPacketOrigin origin;
-
-	if(serverType == IFilter::ST_Auth)
-		sessionType = SessionType::AuthClient;
-	else
-		sessionType = SessionType::GameClient;
 
 	if(isServer)
 		origin = SessionPacketOrigin::Server;
@@ -532,12 +522,9 @@ void PacketFilter::onCheckReload() {
 	}
 }
 
-IFilter* createFilter(IFilterEndpoint* client,
-                      IFilterEndpoint* server,
-                      IFilter::ServerType serverType,
-                      IFilter* oldFilter) {
+IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType, IFilter* oldFilter) {
 	Object::logStatic(Object::LL_Info, "rzfilter_lua_module", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketFilter(client, server, serverType, (PacketFilter*) oldFilter);
+	return new PacketFilter(client, server, sessionType, (PacketFilter*) oldFilter);
 }
 
 void destroyFilter(IFilter* filter) {

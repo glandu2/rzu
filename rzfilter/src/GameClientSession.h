@@ -3,12 +3,15 @@
 #include "ClientSession.h"
 
 class AuthClientSession;
+class GameClientSessionManager;
 
 class GameClientSession : public ClientSession {
 	DECLARE_CLASS(GameClientSession)
 
 public:
 	struct Parameter {
+		SessionType sessionType;
+		GameClientSessionManager* gameClientSessionManager;
 		std::string serverIp;
 		uint16_t serverPort;
 		FilterManager* filterManager;
@@ -28,4 +31,3 @@ private:
 	std::string serverIp;
 	uint16_t serverPort;
 };
-

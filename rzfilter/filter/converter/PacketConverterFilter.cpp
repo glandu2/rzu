@@ -3,24 +3,18 @@
 
 PacketConverterFilter::PacketConverterFilter(IFilterEndpoint* client,
                                              IFilterEndpoint* server,
-                                             ServerType serverType,
+                                             SessionType sessionType,
                                              PacketConverterFilter*)
-    : IFilter(client, server, serverType) {}
+    : IFilter(client, server, sessionType) {}
 
 PacketConverterFilter::~PacketConverterFilter() {}
 
 bool PacketConverterFilter::onServerPacket(const TS_MESSAGE* packet) {
-	if(serverType == ST_Game)
-		return convertPacketAndSend(SessionType::GameClient, server, client, packet, server->getPacketVersion(), true);
-	else
-		return convertPacketAndSend(SessionType::AuthClient, server, client, packet, server->getPacketVersion(), true);
+	return convertPacketAndSend(sessionType, server, client, packet, server->getPacketVersion(), true);
 }
 
 bool PacketConverterFilter::onClientPacket(const TS_MESSAGE* packet) {
-	if(serverType == ST_Game)
-		return convertPacketAndSend(SessionType::GameClient, client, server, packet, client->getPacketVersion(), false);
-	else
-		return convertPacketAndSend(SessionType::AuthClient, client, server, packet, client->getPacketVersion(), false);
+	return convertPacketAndSend(sessionType, client, server, packet, client->getPacketVersion(), false);
 }
 
 template<typename Packet>
@@ -99,12 +93,9 @@ bool PacketConverterFilter::convertPacketAndSend(SessionType sessionType,
 	return false;
 }
 
-IFilter* createFilter(IFilterEndpoint* client,
-                      IFilterEndpoint* server,
-                      IFilter::ServerType serverType,
-                      IFilter* oldFilter) {
+IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType, IFilter* oldFilter) {
 	Object::logStatic(Object::LL_Info, "rzfilter_version_converter", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketConverterFilter(client, server, serverType, (PacketConverterFilter*) oldFilter);
+	return new PacketConverterFilter(client, server, sessionType, (PacketConverterFilter*) oldFilter);
 }
 
 void destroyFilter(IFilter* filter) {

@@ -9,7 +9,7 @@ class PacketConverterFilter : public IFilter {
 public:
 	PacketConverterFilter(IFilterEndpoint* client,
 	                      IFilterEndpoint* server,
-	                      ServerType serverType,
+	                      SessionType sessionType,
 	                      PacketConverterFilter* data);
 	~PacketConverterFilter();
 
@@ -31,8 +31,7 @@ private:
 extern "C" {
 SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
                                     IFilterEndpoint* server,
-                                    IFilter::ServerType serverType,
+                                    SessionType sessionType,
                                     IFilter* oldFilter);
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }
-

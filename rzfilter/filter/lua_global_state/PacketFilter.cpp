@@ -84,7 +84,7 @@ bool GlobalLuaState::luaCallPacket(int function,
                                    const TS_MESSAGE* packet,
                                    int version,
                                    bool isServerPacket,
-                                   IFilter::ServerType serverType,
+                                   SessionType sessionType,
                                    bool isStrictForwardEnabled) {
 	if(packet->id == 9999)
 		return false;
@@ -99,14 +99,14 @@ bool GlobalLuaState::luaCallPacket(int function,
 		lua_rawgeti(L, LUA_REGISTRYINDEX, function);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, clientEndpoint);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, serverEndpoint);
-		if(!pushPacket(L, packet, version, isServerPacket, serverType)) {
+		if(!pushPacket(L, packet, version, isServerPacket, sessionType)) {
 			Object::logStatic(
 			    Object::LL_Error, "rzfilter_lua_global_state_module", "Cannot deserialize packet id: %d\n", packet->id);
 			lua_settop(L, topBeforeCall);
 			return luaCallUnknownPacket(
-			    clientEndpoint, serverEndpoint, packet, isServerPacket, serverType, isStrictForwardEnabled);
+			    clientEndpoint, serverEndpoint, packet, isServerPacket, sessionType, isStrictForwardEnabled);
 		}
-		lua_pushinteger(L, serverType);
+		lua_pushinteger(L, (int) sessionType);
 
 		int result = lua_pcall(L, 4, 1, -6);
 		if(result) {
@@ -135,7 +135,7 @@ bool GlobalLuaState::luaCallUnknownPacket(int clientEndpoint,
                                           int serverEndpoint,
                                           const TS_MESSAGE* packet,
                                           bool isServerPacket,
-                                          IFilter::ServerType serverType,
+                                          SessionType sessionType,
                                           bool isStrictForwardEnabled) {
 	bool returnValue = !isStrictForwardEnabled;
 
@@ -148,7 +148,7 @@ bool GlobalLuaState::luaCallUnknownPacket(int clientEndpoint,
 		lua_rawgeti(L, LUA_REGISTRYINDEX, clientEndpoint);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, serverEndpoint);
 		lua_pushinteger(L, packet->id);
-		lua_pushinteger(L, serverType);
+		lua_pushinteger(L, (int) sessionType);
 		lua_pushboolean(L, isServerPacket);
 
 		int result = lua_pcall(L, 5, 1, -7);
@@ -217,7 +217,7 @@ bool GlobalLuaState::onServerPacket(int clientEndpoint,
                                     int serverEndpoint,
                                     const TS_MESSAGE* packet,
                                     int packetVersion,
-                                    IFilter::ServerType serverType,
+                                    SessionType sessionType,
                                     bool isStrictForwardEnabled) {
 	return luaCallPacket(lua_onServerPacketFunction.ref,
 	                     "onServerPacket",
@@ -226,7 +226,7 @@ bool GlobalLuaState::onServerPacket(int clientEndpoint,
 	                     packet,
 	                     packetVersion,
 	                     true,
-	                     serverType,
+	                     sessionType,
 	                     isStrictForwardEnabled);
 }
 
@@ -234,7 +234,7 @@ bool GlobalLuaState::onClientPacket(int clientEndpoint,
                                     int serverEndpoint,
                                     const TS_MESSAGE* packet,
                                     int packetVersion,
-                                    IFilter::ServerType serverType,
+                                    SessionType sessionType,
                                     bool isStrictForwardEnabled) {
 	return luaCallPacket(lua_onClientPacketFunction.ref,
 	                     "onClientPacket",
@@ -243,7 +243,7 @@ bool GlobalLuaState::onClientPacket(int clientEndpoint,
 	                     packet,
 	                     packetVersion,
 	                     false,
-	                     serverType,
+	                     sessionType,
 	                     isStrictForwardEnabled);
 }
 
@@ -276,8 +276,9 @@ void GlobalLuaState::createLuaVM() {
 	lua_setglobal(L, "print");
 
 	iteratePackets<LuaDeclarePacketTypeNameCallback>(L);
-	pushEnum(L, "ST_Auth", IFilter::ST_Auth);
-	pushEnum(L, "ST_Game", IFilter::ST_Game);
+	pushEnum(L, "ST_Auth", (int) SessionType::AuthClient);
+	pushEnum(L, "ST_Game", (int) SessionType::GameClient);
+	pushEnum(L, "ST_Upload", (int) SessionType::UploadClient);
 
 	LuaEndpoint::initLua(L);
 	luaL_requiref(L, "timer", &LuaTimer::initLua, true);
@@ -360,16 +361,10 @@ int GlobalLuaState::luaPrintToLogs(lua_State* L) {
 }
 
 bool GlobalLuaState::pushPacket(
-    lua_State* L, const TS_MESSAGE* packet, int version, bool isServer, IFilter::ServerType serverType) {
+    lua_State* L, const TS_MESSAGE* packet, int version, bool isServer, SessionType sessionType) {
 	bool ok;
 	bool serializationSucess = false;
-	SessionType sessionType;
 	SessionPacketOrigin origin;
-
-	if(serverType == IFilter::ST_Auth)
-		sessionType = SessionType::AuthClient;
-	else
-		sessionType = SessionType::GameClient;
 
 	if(isServer)
 		origin = SessionPacketOrigin::Server;
@@ -401,13 +396,13 @@ void GlobalLuaState::onCheckReload() {
 	}
 }
 
-PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType, PacketFilter*)
-    : IFilter(client, server, serverType) {
+PacketFilter::PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType, PacketFilter*)
+    : IFilter(client, server, sessionType) {
 	clientEndpoint =
-	    LuaEndpoint::createInstance(GlobalLuaState::getInstance()->getLuaState(), client, false, serverType);
+	    LuaEndpoint::createInstance(GlobalLuaState::getInstance()->getLuaState(), client, false, sessionType);
 	lua_clientEndpointRef = luaL_ref(GlobalLuaState::getInstance()->getLuaState(), LUA_REGISTRYINDEX);
 	serverEndpoint =
-	    LuaEndpoint::createInstance(GlobalLuaState::getInstance()->getLuaState(), server, true, serverType);
+	    LuaEndpoint::createInstance(GlobalLuaState::getInstance()->getLuaState(), server, true, sessionType);
 	lua_serverEndpointRef = luaL_ref(GlobalLuaState::getInstance()->getLuaState(), LUA_REGISTRYINDEX);
 
 	GlobalLuaState::getInstance()->onClientConnected(lua_clientEndpointRef, lua_serverEndpointRef);
@@ -429,7 +424,7 @@ bool PacketFilter::onServerPacket(const TS_MESSAGE* packet) {
 	                                                     lua_serverEndpointRef,
 	                                                     packet,
 	                                                     server->getPacketVersion(),
-	                                                     serverType,
+	                                                     sessionType,
 	                                                     server->isStrictForwardEnabled());
 }
 
@@ -438,7 +433,7 @@ bool PacketFilter::onClientPacket(const TS_MESSAGE* packet) {
 	                                                     lua_serverEndpointRef,
 	                                                     packet,
 	                                                     client->getPacketVersion(),
-	                                                     serverType,
+	                                                     sessionType,
 	                                                     client->isStrictForwardEnabled());
 }
 
@@ -458,12 +453,9 @@ void PacketFilter::onClientDisconnected() {
 	clientEndpoint = nullptr;
 }
 
-IFilter* createFilter(IFilterEndpoint* client,
-                      IFilterEndpoint* server,
-                      IFilter::ServerType serverType,
-                      IFilter* oldFilter) {
+IFilter* createFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType, IFilter* oldFilter) {
 	Object::logStatic(Object::LL_Info, "rzfilter_lua_global_state_module", "Loaded filter from data: %p\n", oldFilter);
-	return new PacketFilter(client, server, serverType, (PacketFilter*) oldFilter);
+	return new PacketFilter(client, server, sessionType, (PacketFilter*) oldFilter);
 }
 
 void destroyFilter(IFilter* filter) {

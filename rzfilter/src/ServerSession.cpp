@@ -3,35 +3,39 @@
 #include "Core/EventLoop.h"
 #include "GlobalConfig.h"
 #include "Packet/PacketStructsName.h"
+#include <charconv>
+#include <iterator>
+#include <sstream>
 #include <stdlib.h>
 
 #include "AuthClient/TS_AC_SERVER_LIST.h"
 #include "AuthClient/TS_CA_SELECT_SERVER.h"
+#include "GameClient/TS_SC_URL_LIST.h"
 #include "GameClientSessionManager.h"
 #include <algorithm>
 
 #include "FilterManager.h"
 #include "FilterProxy.h"
 
-ServerSession::ServerSession(bool authMode,
+uint16_t ServerSession::uploadBasePort = 0;
+
+ServerSession::ServerSession(SessionType sessionType,
                              ClientSession* clientSession,
                              GameClientSessionManager* gameClientSessionManager,
                              FilterManager* filterManager,
                              FilterManager* converterFilterManager)
-    : EncryptedSession<PacketSession>(authMode ? SessionType::AuthClient : SessionType::GameClient,
-                                      SessionPacketOrigin::Client,
-                                      CONFIG_GET()->server.epic.get()),
-      authMode(authMode),
+    : EncryptedSession<PacketSession>(sessionType, SessionPacketOrigin::Client, CONFIG_GET()->server.epic.get()),
+      sessionType(sessionType),
       clientSession(clientSession),
       gameClientSessionManager(gameClientSessionManager),
       clientEndpointProxy(clientSession) {
 	if(filterManager)
-		packetFilter = filterManager->createFilter(authMode ? IFilter::ST_Auth : IFilter::ST_Game);
+		packetFilter = filterManager->createFilter(sessionType);
 	else
 		packetFilter = nullptr;
 
 	if(converterFilterManager)
-		packetConverterFilter = converterFilterManager->createFilter(authMode ? IFilter::ST_Auth : IFilter::ST_Game);
+		packetConverterFilter = converterFilterManager->createFilter(sessionType);
 	else
 		packetConverterFilter = nullptr;
 
@@ -170,7 +174,8 @@ void ServerSession::detachClient() {
 }
 
 EventChain<PacketSession> ServerSession::onPacketReceived(const TS_MESSAGE* packet) {
-	if(authMode && packet->id == TS_AC_SERVER_LIST::packetID && clientSession && gameClientSessionManager) {
+	if(sessionType == SessionType::AuthClient && packet->id == TS_AC_SERVER_LIST::packetID && clientSession &&
+	   gameClientSessionManager) {
 		TS_AC_SERVER_LIST serverListPkt;
 		if(packet->process(serverListPkt, getPacketVersion())) {
 			std::string listenIp = CONFIG_GET()->client.listener.listenIp.get();
@@ -189,6 +194,7 @@ EventChain<PacketSession> ServerSession::onPacketReceived(const TS_MESSAGE* pack
 			for(size_t i = 0; i < serversOrdered.size(); i++) {
 				TS_SERVER_INFO& server = *serversOrdered[i];
 				uint16_t listenPort = gameClientSessionManager->ensureListening(
+				    SessionType::GameClient,
 				    listenIp,
 				    baseListenPort,
 				    server.server_ip,
@@ -197,13 +203,13 @@ EventChain<PacketSession> ServerSession::onPacketReceived(const TS_MESSAGE* pack
 				    clientSession->getBanManager());
 				if(!listenPort) {
 					log(LL_Error,
-					    "Failed to listen on %s for server %s:%d\n",
+					    "Failed to listen on %s for game server %s:%d\n",
 					    listenIp.c_str(),
 					    server.server_ip.c_str(),
 					    server.server_port);
 				} else {
 					log(LL_Debug,
-					    "Listening on %s:%d for server %s:%d\n",
+					    "Listening on %s:%d for game server %s:%d\n",
 					    listenIp.c_str(),
 					    listenPort,
 					    server.server_ip.c_str(),
@@ -218,6 +224,78 @@ EventChain<PacketSession> ServerSession::onPacketReceived(const TS_MESSAGE* pack
 			}
 		}
 		toClientBaseEndpoint->sendPacket(serverListPkt);
+	} else if(sessionType == SessionType::GameClient && packet->id == TS_SC_URL_LIST::getId(getPacketVersion()) &&
+	          clientSession && gameClientSessionManager) {
+		TS_SC_URL_LIST urlListPkt;
+		if(packet->process(urlListPkt, getPacketVersion())) {
+			static const char* const GUILD_ICON_IP_KEY = "guild_icon_upload.ip";
+			static const char* const GUILD_ICON_PORT_KEY = "guild_icon_upload.port";
+
+			std::string listenIp = CONFIG_GET()->client.listener.listenIp.get();
+			std::istringstream urlListStream(urlListPkt.url_list);
+			std::string key;
+			std::string value;
+			std::string guildIconUploadIp;
+			uint16_t guildIconUploadPort = 0;
+			std::vector<std::string> urlList;
+
+			if(!uploadBasePort)
+				uploadBasePort = CONFIG_GET()->client.uploadBasePort.get();
+
+			while(std::getline(urlListStream, key, '|') && std::getline(urlListStream, value, '|')) {
+				if(key == GUILD_ICON_IP_KEY) {
+					guildIconUploadIp = value;
+				} else if(key == GUILD_ICON_PORT_KEY) {
+					std::from_chars(value.data(), value.data() + value.size(), guildIconUploadPort);
+				} else {
+					urlList.push_back(key);
+					urlList.push_back(value);
+				}
+			}
+
+			if(!guildIconUploadIp.empty() && guildIconUploadPort != 0) {
+				uint16_t listenPort = gameClientSessionManager->ensureListening(
+				    SessionType::UploadClient,
+				    listenIp,
+				    uploadBasePort,
+				    guildIconUploadIp,
+				    guildIconUploadPort,
+				    clientSession->getStream() ? clientSession->getStream()->getPacketLogger() : nullptr,
+				    clientSession->getBanManager());
+				if(!listenPort) {
+					log(LL_Error,
+					    "Failed to listen on %s for upload server %s:%d\n",
+					    listenIp.c_str(),
+					    guildIconUploadIp.c_str(),
+					    guildIconUploadPort);
+				} else {
+					log(LL_Debug,
+					    "Listening on %s:%d for upload server %s:%d\n",
+					    listenIp.c_str(),
+					    listenPort,
+					    guildIconUploadIp.c_str(),
+					    guildIconUploadPort);
+				}
+
+				urlList.push_back(GUILD_ICON_IP_KEY);
+				urlList.push_back(CONFIG_GET()->client.gameExternalIp.get());
+				urlList.push_back(GUILD_ICON_PORT_KEY);
+				urlList.push_back(std::to_string(listenPort));
+
+				// If not using random ports (ie: port 0), increment the base port for subsequent Upload server
+				if(uploadBasePort)
+					uploadBasePort++;
+
+				std::ostringstream urlListOutput;
+				std::copy(urlList.begin(), urlList.end(), std::ostream_iterator<std::string>(urlListOutput, "|"));
+				urlListPkt.url_list = urlListOutput.str();
+
+				// remove last '|'
+				if(!urlListPkt.url_list.empty())
+					urlListPkt.url_list.resize(urlListPkt.url_list.size() - 1);
+			}
+		}
+		toClientBaseEndpoint->sendPacket(urlListPkt);
 	} else {
 		// log(LL_Debug, "Received packet id %d from server, forwarding to client\n", packet->id);
 		toClientBaseEndpoint->sendPacket(packet);

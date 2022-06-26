@@ -21,7 +21,7 @@ class ClientSession : public EncryptedSession<PacketSession>, public IFilterEndp
 	DECLARE_CLASS(ClientSession)
 
 public:
-	ClientSession(bool authMode,
+	ClientSession(SessionType sessionType,
 	              GameClientSessionManager* gameClientSessionManager,
 	              FilterManager* filterManager,
 	              FilterManager* converterFilterManager);
@@ -63,5 +63,5 @@ protected:
 
 private:
 	ServerSession* serverSession;
-	bool authMode;
+	SessionType sessionType;
 };

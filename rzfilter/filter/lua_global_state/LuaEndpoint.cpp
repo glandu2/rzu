@@ -43,13 +43,8 @@ int LuaEndpoint::sendPacket(lua_State* L) {
 	lua_pop(L, 1);
 
 	bool ok = true;
-	SessionType sessionType;
+	SessionType sessionType = self->sessionType;
 	SessionPacketOrigin origin;
-
-	if(self->serverType == IFilter::ST_Auth)
-		sessionType = SessionType::AuthClient;
-	else
-		sessionType = SessionType::GameClient;
 
 	if(self->isServerEndpoint)
 		origin = SessionPacketOrigin::Client;
@@ -128,8 +123,8 @@ template<class T> bool LuaEndpoint::sendPacketFromLua(lua_State* L, IFilterEndpo
 LuaEndpoint* LuaEndpoint::createInstance(lua_State* L,
                                          IFilterEndpoint* endpoint,
                                          bool isServerEndpoint,
-                                         IFilter::ServerType serverType) {
-	LuaEndpoint* self = new LuaEndpoint(endpoint, isServerEndpoint, serverType);
+                                         SessionType sessionType) {
+	LuaEndpoint* self = new LuaEndpoint(endpoint, isServerEndpoint, sessionType);
 	*static_cast<LuaEndpoint**>(lua_newuserdata(L, sizeof(LuaEndpoint*))) = self;
 
 	luaL_getmetatable(L, NAME);

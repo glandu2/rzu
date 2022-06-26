@@ -6,7 +6,8 @@ GameClientSessionManager::GameClientSessionManager(FilterManager* filterManager,
 
 GameClientSessionManager::~GameClientSessionManager() {}
 
-uint16_t GameClientSessionManager::ensureListening(std::string listenIp,
+uint16_t GameClientSessionManager::ensureListening(SessionType sessionType,
+                                                   std::string listenIp,
                                                    uint16_t listenPort,
                                                    std::string serverIp,
                                                    uint16_t serverPort,
@@ -24,6 +25,14 @@ uint16_t GameClientSessionManager::ensureListening(std::string listenIp,
 		if(serverStream)
 			return serverStream->getLocalAddress().port;
 	} else {
+		const char* fromName = nullptr;
+
+		PacketMetadata::getPacketOriginName(true, sessionType, SessionPacketOrigin::Server, &fromName, nullptr);
+
+		serverFilter->sessionServer.setName((std::string("gameClient.") + fromName).c_str());
+
+		serverFilter->serverParameters.sessionType = sessionType;
+		serverFilter->serverParameters.gameClientSessionManager = this;
 		serverFilter->serverParameters.serverIp = serverIp;
 		serverFilter->serverParameters.serverPort = serverPort;
 		serverFilter->serverParameters.filterManager = filterManager;

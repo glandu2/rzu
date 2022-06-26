@@ -13,7 +13,8 @@ public:
 	GameClientSessionManager(FilterManager* filterManager, FilterManager* converterFilterManager);
 	~GameClientSessionManager();
 
-	uint16_t ensureListening(std::string listenIp,
+	uint16_t ensureListening(SessionType sessionType,
+	                         std::string listenIp,
 	                         uint16_t listenPort,
 	                         std::string serverIp,
 	                         uint16_t serverPort,
@@ -47,4 +48,3 @@ private:
 	GameClientSessionManager(const GameClientSessionManager&);
 	GameClientSessionManager& operator=(const GameClientSessionManager&);
 };
-

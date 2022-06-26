@@ -19,15 +19,15 @@ struct LuaEndpointMetaTable {
 
 	IFilterEndpoint* endpoint;
 	bool isServerEndpoint;
-	IFilter::ServerType serverType;
+	SessionType sessionType;
 
-	LuaEndpointMetaTable(IFilterEndpoint* endpoint, bool isServerEndpoint, IFilter::ServerType serverType)
-	    : endpoint(endpoint), isServerEndpoint(isServerEndpoint), serverType(serverType) {}
+	LuaEndpointMetaTable(IFilterEndpoint* endpoint, bool isServerEndpoint, SessionType sessionType)
+	    : endpoint(endpoint), isServerEndpoint(isServerEndpoint), sessionType(sessionType) {}
 };
 
 class PacketFilter : public IFilter {
 public:
-	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, ServerType serverType, PacketFilter* data);
+	PacketFilter(IFilterEndpoint* client, IFilterEndpoint* server, SessionType sessionType, PacketFilter* data);
 	~PacketFilter();
 
 	virtual bool onServerPacket(const TS_MESSAGE* packet) override;
@@ -69,7 +69,7 @@ private:
 extern "C" {
 SYMBOL_EXPORT IFilter* createFilter(IFilterEndpoint* client,
                                     IFilterEndpoint* server,
-                                    IFilter::ServerType serverType,
+                                    SessionType sessionType,
                                     IFilter* oldFilter);
 SYMBOL_EXPORT void destroyFilter(IFilter* filter);
 }

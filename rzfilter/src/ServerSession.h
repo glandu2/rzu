@@ -18,7 +18,7 @@ class GameClientSessionManager;
 class ServerSession : public EncryptedSession<PacketSession>, public IFilterEndpoint {
 	DECLARE_CLASS(ServerSession)
 public:
-	ServerSession(bool authMode,
+	ServerSession(SessionType sessionType,
 	              ClientSession* clientSession,
 	              GameClientSessionManager* gameClientSessionManager,
 	              FilterManager* filterManager,
@@ -47,7 +47,6 @@ public:
 	StreamAddress getAddress();
 	void banAddress(StreamAddress address);
 	bool isStrictForwardEnabled();
-	bool isAuthMode() { return authMode; }
 
 	void onClientPacketReceived(const TS_MESSAGE* packet);
 	void onClientDisconnected();
@@ -67,7 +66,7 @@ private:
 	using SocketSession::connect;
 
 	std::string localHostBindIp;
-	bool authMode;
+	SessionType sessionType;
 	ClientSession* clientSession;
 	GameClientSessionManager* gameClientSessionManager;
 
@@ -78,4 +77,6 @@ private:
 	IFilterEndpoint* toClientBaseEndpoint;
 
 	std::vector<TS_MESSAGE*> pendingMessages;
+
+	static uint16_t uploadBasePort;
 };

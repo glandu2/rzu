@@ -20,7 +20,7 @@ public:
 
 	static void init();
 
-	std::unique_ptr<FilterProxy> createFilter(IFilter::ServerType serverType);
+	std::unique_ptr<FilterProxy> createFilter(SessionType sessionType);
 	std::string getName();
 
 protected:
@@ -58,4 +58,3 @@ private:
 
 	static std::list<FilterManager*> instance;
 };
-

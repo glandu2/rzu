@@ -1,10 +1,10 @@
 #include "FilterProxy.h"
 #include "FilterManager.h"
 
-FilterProxy::FilterProxy(FilterManager* filterManager, IFilter::ServerType serverType)
+FilterProxy::FilterProxy(FilterManager* filterManager, SessionType sessionType)
     : filterManager(filterManager),
       filterModule(nullptr),
-      serverType(serverType),
+      sessionType(sessionType),
       client(nullptr),
       server(nullptr),
       toServerEndpoint(this, false),
@@ -57,7 +57,7 @@ void FilterProxy::bindEndpoints(IFilterEndpoint* client, IFilterEndpoint* server
 void FilterProxy::recreateFilterModule(IFilter::CreateFilterFunction createFilterFunction,
                                        IFilter::DestroyFilterFunction destroyFilterFunction) {
 	IFilter* oldFilter = filterModule;
-	filterModule = createFilterFunction(client, server, serverType, oldFilter);
+	filterModule = createFilterFunction(client, server, sessionType, oldFilter);
 	if(oldFilter && destroyFilterFunction)
 		destroyFilterFunction(oldFilter);
 }
