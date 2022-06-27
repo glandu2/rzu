@@ -38,6 +38,7 @@ jobs:
           rm rzemu-*-rzfilter.*
 
       - name: Test
+        if: ${{ false }}
         run: |
           cd build
           valgrind --leak-check=full --trace-children=yes ctest -VV
