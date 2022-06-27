@@ -131,6 +131,7 @@ jobs:
           } finally {
             echo "Compressing test logs"
             7z a test_logs.zip crashdump.dmp log traffic_log
+            echo "Done (suppress 7z error code)"
           }
 
       - name: Upload a Build Artifact
