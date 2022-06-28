@@ -312,11 +312,15 @@ TEST_F(TS_CA_ACCOUNT_RSA_Test, long_password_76_chars) {
 	auth.addCallback([this](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_AC_AES_KEY_IV* packet = AGET_PACKET(TS_AC_AES_KEY_IV);
 		parseAESKey(rsaCipher, packet, aes_key_iv);
-		TS_CA_ACCOUNT_RSA accountMsg;
-		prepareAccountRSAPacket(aes_key_iv,
-		                        &accountMsg,
-		                        "testPw76Chars",
-		                        "76_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
+		struct TestPacket : public TS_CA_ACCOUNT_RSA {
+			char overflowRoom[128];
+		} accountMsg;
+		prepareAccountRSAPacket<TS_CA_ACCOUNT_RSA>(
+		    aes_key_iv,
+		    &accountMsg,
+		    "testPw76Chars",
+		    "76_chars_long_password_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
 		channel->sendPacket(&accountMsg);
 	});
