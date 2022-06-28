@@ -117,7 +117,7 @@ jobs:
           cmake .. -DBUILD_SHARED_LIBS=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo
           if ($lastexitcode -ne 0) { exit $lastexitcode }
           
-          cmake --build . --target package --config RelWithDebInfo
+          cmake --build . --target package --config RelWithDebInfo --parallel
           if ($lastexitcode -ne 0) { exit $lastexitcode }
           
           rm rzemu-*-rzfilter.zip
