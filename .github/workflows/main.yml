@@ -40,7 +40,8 @@ jobs:
       - name: Test
         run: |
           cd build
-          LD_LIBRARY_PATH=/usr/lib/*-linux-gnu/odbc valgrind --leak-check=full --trace-children=yes ctest -VV
+          set +e
+          LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/odbc valgrind --leak-check=full --trace-children=yes ctest -VV
           RESULT=$0
           for i in $(find ./ -maxdepth 1 -name 'core*' -print); do
             echo "Core $i" && file "$i" &&
@@ -64,7 +65,7 @@ jobs:
           # Artifact name
           name: "test_logs_linux.zip" # optional, default is artifact
           # A file, directory or wildcard pattern that describes what to upload
-          path: test_logs.zip
+          path: build/test_logs.zip
 
       - name: Publish
         uses: softprops/action-gh-release@v1
@@ -148,7 +149,7 @@ jobs:
           # Artifact name
           name: "test_logs_windows.zip" # optional, default is artifact
           # A file, directory or wildcard pattern that describes what to upload
-          path: test_logs.zip
+          path: build/test_logs.zip
 
       - name: Publish
         uses: softprops/action-gh-release@v1
