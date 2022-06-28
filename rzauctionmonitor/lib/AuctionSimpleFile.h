@@ -14,9 +14,9 @@ struct AuctionDataEnd {
 
 enum DurationType {
 	DT_Unknown = 0,
-	DT_Short = 1,    // 6h
-	DT_Medium = 2,   // 24h
-	DT_Long = 3,     // 72h
+	DT_Short = 1,    // Old: 6h   New: 1 day
+	DT_Medium = 2,   // Old: 24h  New: 3 days
+	DT_Long = 3,     // Old: 72h  New: 7 days
 	DT_Minutes = 4,  // Minutes remaining = value - 4
 	DT_Hours = 64,   // Hours remaining = value - 64
 };
