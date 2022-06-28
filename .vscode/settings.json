@@ -1,0 +1,11 @@
+{
+    "C_Cpp.autoAddFileAssociations": false,
+    "C_Cpp.codeAnalysis.clangTidy.enabled": false,
+    "C_Cpp.clang_format_fallbackStyle": "none",
+    "C_Cpp.clang_format_style": "file",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
+    "cmake.preferredGenerators": [
+        "Ninja"
+    ],
+}
