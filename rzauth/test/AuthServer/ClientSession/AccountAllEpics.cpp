@@ -179,7 +179,7 @@ TEST_P(TS_CA_ACCOUNT_AllEpicsTest, valid) {
 		                     gameSession.connect(CONFIG_GET()->auth.ip, CONFIG_GET()->auth.port, "test1", "admin");
 	                     });
 
-	game2.addCallback([&game1](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
+	game2.addCallback([&game1, &game2](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
 		const TS_AG_CLIENT_LOGIN* packet = AGET_PACKET(TS_AG_CLIENT_LOGIN);
 
 		ASSERT_EQ(TS_RESULT_SUCCESS, packet->result);
@@ -192,8 +192,11 @@ TEST_P(TS_CA_ACCOUNT_AllEpicsTest, valid) {
 		//		EXPECT_EQ(0, packet->nContinuousLogoutTime);
 
 		sendClientLogout(channel, "test1");
-		channel->closeSession();
+
+		sendGameLogout(&game1);
+		sendGameLogout(&game2);
 		game1.closeSession();
+		game2.closeSession();
 	});
 
 	game1.addCallback([](TestConnectionChannel* channel, TestConnectionChannel::Event event) {
