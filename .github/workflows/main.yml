@@ -124,14 +124,14 @@ jobs:
 
       - name: Test
         run: |
-          try {
-            cd build
-            ctest -VV -C RelWithDebInfo
-          } finally {
-            echo "Compressing test logs"
-            7z a test_logs.zip crashdump.dmp log traffic_log
-            echo "Done (suppress 7z error code)"
-          }
+          cd build
+          ctest -VV -C RelWithDebInfo
+          $test_result = $lastexitcode
+          
+          echo "Compressing test logs"
+          7z a test_logs.zip crashdump.dmp log traffic_log
+          
+          exit $test_result
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
