@@ -32,6 +32,6 @@
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "git submodule update --init --recursive",
 	"waitFor": "postCreateCommand",
-	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode"
+	// Use vscode user when running full docker, run as root when using rootless docker
+	// "remoteUser": "vscode"
 }
