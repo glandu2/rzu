@@ -41,8 +41,9 @@ jobs:
         run: |
           cd build
           set +e
+          set -x
           LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/odbc valgrind --leak-check=full --trace-children=yes ctest -VV
-          RESULT=$0
+          export RESULT=$0
           for i in $(find ./ -maxdepth 1 -name 'core*' -print); do
             echo "Core $i" && file "$i" &&
             gdb "$(file "$i" | sed -r "s/.*from '([^ ']+)[ '].*/\1/")" "$i" -ex "thread apply all bt" -ex "set pagination 0" -batch
