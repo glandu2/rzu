@@ -491,5 +491,9 @@ And all rows in the `one_time_passwords` table would be temporary. The one time 
 Note about Visual C++ Runtime
 =============================
 
-If Windows complains about missing msvcr100.dll or msvcp100.dll, install the [Visual C++ 2010 runtime redistributable x86](http://www.microsoft.com/en-us/download/details.aspx?id=5555).
+If Windows complains about missing one of these files, install the [Visual C++ runtime redistributable x64](https://aka.ms/vs/17/release/vc_redist.x64.exe) for Visual Studio 2015, 2017, 2019 and 2022:
+
+  - `msvcp*.dll`
+  - `vcruntime*.dll`
+  - `api-ms-win*.dll`
 
