@@ -92,7 +92,7 @@ jobs:
         id: dependencies
         run: |
           $openssl_download_page = Invoke-WebRequest "http://slproweb.com/products/Win32OpenSSL.html"
-          $openssl_download_link = Select-String -Pattern '<a href="/download/(Win64OpenSSL-[^"]+)"' -InputObject $openssl_download_page
+          $openssl_download_link = Select-String -Pattern '<a href="/download/(Win64OpenSSL-1_[^"]+)"' -InputObject $openssl_download_page
           $openssl_latest_link = $openssl_download_link.Matches[0].Groups[1].Value
           $openssl_latest_url = "https://slproweb.com/download/" + $openssl_latest_link
           
