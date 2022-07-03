@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
 project(rzu-parent)
+
+# Don't export any symbols from executables
 cmake_policy(SET CMP0065 NEW)
+
+# Ensure option honor internal variable even in subprojets (like gtest)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 enable_testing()
 
@@ -156,9 +161,10 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/zlib/CMakeLists.txt")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gtest/CMakeLists.txt")
-  set(BUILD_GMOCK OFF CACHE BOOL "")
-  set(INSTALL_GTEST OFF CACHE BOOL "")
-  set(gtest_hide_internal_symbols ON CACHE BOOL "")
+  set(BUILD_GMOCK OFF)
+  set(INSTALL_GTEST OFF)
+  set(gtest_hide_internal_symbols ON)
+  set(gtest_force_shared_crt ON)
   add_subdirectory(gtest EXCLUDE_FROM_ALL)
   if(BUILD_SHARED_LIBS)
     target_compile_definitions(gtest
