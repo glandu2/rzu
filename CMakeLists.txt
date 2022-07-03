@@ -140,10 +140,12 @@ if(NOT curl_POPULATED)
   FetchContent_Populate(curl)
   add_subdirectory(${curl_SOURCE_DIR} ${curl_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
-install(TARGETS libcurl
-  RUNTIME DESTINATION ./
-  LIBRARY DESTINATION ./
-)
+if(BUILD_SHARED_LIBS)
+	install(TARGETS libcurl
+	  RUNTIME DESTINATION ./
+	  LIBRARY DESTINATION ./
+	)
+endif()
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/libuv/CMakeLists.txt")
   add_subdirectory(libuv)
