@@ -30,18 +30,9 @@ else()
 set(GIT_VERSION "5.7")
 endif()
 
-
-set(CPACK_NSIS_DISPLAY_NAME "rzu - Glandu2")
-set(CPACK_PACKAGE_NAME "rzemu")
-set(CPACK_PACKAGE_VENDOR "Glandu2")
 if(NOT DEFINED CPACK_PACKAGE_VERSION)
 	set(CPACK_PACKAGE_VERSION "${GIT_VERSION}")
 endif()
-set(CPACK_GENERATOR "ZIP")
-set(CPACK_STRIP_FILES ON)
-set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
-message("Package name: ${CPACK_PACKAGE_FILE_NAME}")
 
 message("Using ${CMAKE_BUILD_TYPE} mode")
 message("Using shared libs: ${BUILD_SHARED_LIBS}")
@@ -278,6 +269,23 @@ set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "rzrequester")
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/rzrequester/CMakeLists.txt")
   add_subdirectory(rzrequester)
 endif()
+
+configure_file(cmake/CPackInstallDeps.cmake.in CPackInstallDeps.cmake @ONLY)
+install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/CPackInstallDeps.cmake" ALL_COMPONENTS EXCLUDE_FROM_ALL)
+
+set(CPACK_NSIS_DISPLAY_NAME "rzu - Glandu2")
+set(CPACK_PACKAGE_NAME "rzemu")
+set(CPACK_PACKAGE_VENDOR "Glandu2")
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_STRIP_FILES ON)
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+
+# Don't create a deps archive
+get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
+list(REMOVE_ITEM CPACK_COMPONENTS_ALL "deps")
+
+message(STATUS "Package name: ${CPACK_PACKAGE_FILE_NAME}")
 
 include(CPack OPTIONAL)
 

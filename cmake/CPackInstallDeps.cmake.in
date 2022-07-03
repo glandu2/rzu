@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.13)
+
+if(CMAKE_INSTALL_COMPONENT AND NOT CMAKE_INSTALL_COMPONENT STREQUAL "deps")
+	execute_process(COMMAND ${CMAKE_COMMAND} --install @CMAKE_BINARY_DIR@ --component deps --config ${CMAKE_INSTALL_CONFIG_NAME} --prefix "${CMAKE_INSTALL_PREFIX}")
+endif()
