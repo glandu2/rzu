@@ -33,7 +33,7 @@ jobs:
           sudo sh -c 'echo "core.%e.%p.%s.%t" > /proc/sys/kernel/core_pattern'
           mkdir build
           cd build
-          cmake .. -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=TRUE
+          cmake .. -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=FALSE
           cmake --build . --target package --config RelWithDebInfo
           rm rzemu-*-rzfilter.*
 
@@ -116,7 +116,7 @@ jobs:
           mkdir build
           cd build
           
-          cmake .. -DBUILD_SHARED_LIBS=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake .. -DBUILD_SHARED_LIBS=FALSE -DCMAKE_BUILD_TYPE=RelWithDebInfo
           if ($lastexitcode -ne 0) { exit $lastexitcode }
           
           cmake --build . --target package --config RelWithDebInfo --parallel
