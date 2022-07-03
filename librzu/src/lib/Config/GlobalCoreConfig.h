@@ -73,6 +73,7 @@ struct RZU_EXTERN GlobalCoreConfig : public IListener {
 		cval<bool>& enable;
 		cval<std::string>&dir, &file, &level, &consoleLevel;
 		cval<int>& maxQueueSize;
+		cval<bool>& dumpPacketErrors;
 
 		Log()
 		    : enable(CFG_CREATE("core.log.enable", true)),
@@ -80,7 +81,8 @@ struct RZU_EXTERN GlobalCoreConfig : public IListener {
 		      file(CFG_CREATE("core.log.file", CFG_GET("core.appname")->getString() + ".log")),
 		      level(CFG_CREATE("core.log.level", "info")),
 		      consoleLevel(CFG_CREATE("core.log.consolelevel", "info")),
-		      maxQueueSize(CFG_CREATE("core.log.maxqueuesize", 10000)) {
+		      maxQueueSize(CFG_CREATE("core.log.maxqueuesize", 10000)),
+		      dumpPacketErrors(CFG_CREATE("core.log.dump_packet_errors", false)) {
 			Utils::autoSetAbsoluteDir(dir);
 			level.addListener(this, &updateConsoleLevel);
 		}

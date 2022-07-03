@@ -1,4 +1,6 @@
 #include "MessageBuffer.h"
+#include "Config/GlobalCoreConfig.h"
+#include "Core/Log.h"
 #include "Core/Utils.h"
 #include <algorithm>
 
@@ -39,37 +41,46 @@ bool MessageBuffer::checkFinalSize() {
 }
 
 void MessageBuffer::logBadPacketSize() {
+	char message[512];
+
 	uint32_t msgSize = *reinterpret_cast<const uint32_t*>(buffer->buffer.base);
 	if(bufferOverflow) {
-		log(LL_Error,
-		    "Packet read/write overflow: id: %d, packet size: %d, buffer size: %d, offset: %d, field: %s\n",
-		    getMessageId(),
-		    msgSize,
-		    getSize(),
-		    uint32_t(p - buffer->buffer.base),
-		    bufferOverflow ? getFieldInOverflow().c_str() : "<no overflow>");
+		sprintf(message,
+		        "Packet read/write overflow: id: %d, packet size: %d, buffer size: %d, offset: %d, field: %s\n",
+		        getMessageId(),
+		        msgSize,
+		        getSize(),
+		        uint32_t(p - buffer->buffer.base),
+		        bufferOverflow ? getFieldInOverflow().c_str() : "<no overflow>");
 	} else if(msgSize != getSize()) {
-		log(LL_Error,
-		    "Packet size is not buffer size: id: %d, packet size: %d, buffer size: %d, offset: %d\n",
-		    getMessageId(),
-		    msgSize,
-		    getSize(),
-		    uint32_t(p - buffer->buffer.base));
+		sprintf(message,
+		        "Packet size is not buffer size: id: %d, packet size: %d, buffer size: %d, offset: %d\n",
+		        getMessageId(),
+		        msgSize,
+		        getSize(),
+		        uint32_t(p - buffer->buffer.base));
 	} else if(uint32_t(p - buffer->buffer.base) != msgSize) {
-		log(LL_Error,
-		    "Packet was not fully read/written: id: %d, packet size: %d, buffer size: %d, offset: %d\n",
-		    getMessageId(),
-		    msgSize,
-		    getSize(),
-		    uint32_t(p - buffer->buffer.base));
+		sprintf(message,
+		        "Packet was not fully read/written: id: %d, packet size: %d, buffer size: %d, offset: %d\n",
+		        getMessageId(),
+		        msgSize,
+		        getSize(),
+		        uint32_t(p - buffer->buffer.base));
 	} else {
-		log(LL_Error,
-		    "Packet has invalid data: id: %d, packet size: %d, buffer size: %d, offset: %d, field: %s\n",
-		    getMessageId(),
-		    msgSize,
-		    getSize(),
-		    uint32_t(p - buffer->buffer.base),
-		    bufferOverflow ? getFieldInOverflow().c_str() : "<no overflow>");
+		sprintf(message,
+		        "Packet has invalid data: id: %d, packet size: %d, buffer size: %d, offset: %d, field: %s\n",
+		        getMessageId(),
+		        msgSize,
+		        getSize(),
+		        uint32_t(p - buffer->buffer.base),
+		        bufferOverflow ? getFieldInOverflow().c_str() : "<no overflow>");
+	}
+
+	Log* logger = Log::get();
+	if(GlobalCoreConfig::get()->log.dumpPacketErrors && logger) {
+		logger->logPacket(LL_Error, (const uint8_t*) buffer->buffer.base, getSize(), "MessageBuffer: %s", message);
+	} else {
+		log(LL_Error, "%s", message);
 	}
 }
 
