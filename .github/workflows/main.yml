@@ -35,7 +35,6 @@ jobs:
           cd build
           cmake .. -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=FALSE
           cmake --build . --target package --config RelWithDebInfo
-          rm rzemu-*-rzfilter.*
 
       - name: Test
         run: |
@@ -122,8 +121,6 @@ jobs:
           cmake --build . --target package --config RelWithDebInfo --parallel
           if ($lastexitcode -ne 0) { exit $lastexitcode }
           
-          rm rzemu-*-rzfilter.zip
-
       - name: Test
         run: |
           cd build
