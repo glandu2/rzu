@@ -33,7 +33,7 @@ jobs:
           sudo sh -c 'echo "core.%e.%p.%s.%t" > /proc/sys/kernel/core_pattern'
           mkdir build
           cd build
-          cmake .. -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=FALSE
+          cmake .. -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=TRUE
           cmake --build . --target package --config RelWithDebInfo
 
       - name: Test
