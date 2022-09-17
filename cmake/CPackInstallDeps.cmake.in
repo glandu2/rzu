@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
 
 if(CMAKE_INSTALL_COMPONENT AND NOT CMAKE_INSTALL_COMPONENT STREQUAL "deps" AND NOT CMAKE_INSTALL_COMPONENT STREQUAL "symbols")
-	execute_process(COMMAND ${CMAKE_COMMAND} --install @CMAKE_BINARY_DIR@ --component deps --config ${CMAKE_INSTALL_CONFIG_NAME} --prefix "${CMAKE_INSTALL_PREFIX}")
+	if(CMAKE_INSTALL_DO_STRIP)
+		set(STRIP_COMMAND --strip)
+	else()
+		set(STRIP_COMMAND)
+	endif()
+	execute_process(COMMAND ${CMAKE_COMMAND} --install @CMAKE_BINARY_DIR@ ${STRIP_COMMAND} --component deps --config ${CMAKE_INSTALL_CONFIG_NAME} --prefix "${CMAKE_INSTALL_PREFIX}")
 endif()
