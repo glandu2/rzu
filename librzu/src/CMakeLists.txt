@@ -89,21 +89,19 @@ if(WIN32)
 	list(APPEND LIBS dbghelp)
 endif()
 
-add_lib(${TARGET_NAME} "${SOURCE_FILES};${HEADER_FILES}" "${LIBS}")
+add_shared_lib(${TARGET_NAME} "${SOURCE_FILES};${HEADER_FILES}" "${LIBS}")
 target_include_directories(${TARGET_NAME}
 	PUBLIC lib packets ${CMAKE_CURRENT_BINARY_DIR}/packets ${ODBC_INCLUDE_DIR}
 	PRIVATE ${OPENSSL_INCLUDE_DIR}
-	)
+)
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 	target_compile_definitions(${TARGET_NAME} PUBLIC NOMINMAX)
 endif()
 
-if(BUILD_SHARED_LIBS)
-	target_compile_definitions(${TARGET_NAME}
-		PRIVATE BUILDING_LIBRZU
-		INTERFACE USING_RZU_SHARED
-		)
-endif()
+target_compile_definitions(${TARGET_NAME}
+	PRIVATE BUILDING_LIBRZU
+	INTERFACE USING_RZU_SHARED
+)
 
 # Install libcurl and OpenSSL DLLs on Windows
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")

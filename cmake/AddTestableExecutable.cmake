@@ -61,9 +61,24 @@ function(add_lib name sources)
     install(TARGETS ${name}
       RUNTIME DESTINATION ./
       LIBRARY DESTINATION ./
-	)
+    )
     install_pdb(${name})
   endif()
+endfunction()
+
+function(add_shared_lib name sources)
+  add_library(${name} SHARED ${sources})
+  # To support mixing linking in static and dynamic libraries, link each
+  # library in with an extra call to target_link_libraries.
+  foreach(lib "${ARGN}")
+    target_link_libraries(${name} ${lib})
+  endforeach()
+
+  install(TARGETS ${name}
+    RUNTIME DESTINATION ./
+    LIBRARY DESTINATION ./
+  )
+  install_pdb(${name})
 endfunction()
 
 function(add_module name sources)
