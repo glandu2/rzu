@@ -92,22 +92,26 @@ void CrashHandler::commandListObjectsCount(IWritableConsole* console, const std:
 	std::map<std::string, unsigned long*>::const_iterator it, itEnd;
 
 #ifdef __GLIBC__
+#if __GLIBC_PREREQ(2, 33)
+	struct mallinfo2 memUsage = mallinfo2();
+#else
 	struct mallinfo memUsage = mallinfo();
+#endif
 	console->writef("Memory usage:\r\n"
-	                " heap size: %d\r\n"
-	                " unused chunks: %d\r\n"
-	                " mmap chunks: %d\r\n"
-	                " mmap mem size: %d\r\n"
-	                " used mem size: %d\r\n"
-	                " unused mem size: %d\r\n"
-	                " trailing releasable size: %d\r\n\r\n",
-	                memUsage.arena,
-	                memUsage.ordblks,
-	                memUsage.hblks,
-	                memUsage.hblkhd,
-	                memUsage.uordblks,
-	                memUsage.fordblks,
-	                memUsage.keepcost);
+	                " heap size: %zu\r\n"
+	                " unused chunks: %zu\r\n"
+	                " mmap chunks: %zu\r\n"
+	                " mmap mem size: %zu\r\n"
+	                " used mem size: %zu\r\n"
+	                " unused mem size: %zu\r\n"
+	                " trailing releasable size: %zu\r\n\r\n",
+	                (size_t) memUsage.arena,
+	                (size_t) memUsage.ordblks,
+	                (size_t) memUsage.hblks,
+	                (size_t) memUsage.hblkhd,
+	                (size_t) memUsage.uordblks,
+	                (size_t) memUsage.fordblks,
+	                (size_t) memUsage.keepcost);
 #endif
 
 #if defined(_WIN32) && defined(_DEBUG)

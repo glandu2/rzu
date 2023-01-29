@@ -194,7 +194,10 @@ void ClientSession::onDownload(const TS_CU_DOWNLOAD_ICON* packet) {
 
 	if(fileSize > 64000) {
 		// send error, file is too big
-		log(LL_Warning, "Download attempt of %s but file is too large (%d > 64000)\n", fileName.c_str(), fileSize);
+		log(LL_Warning,
+		    "Download attempt of %s but file is too large (%" PRIuS " > 64000)\n",
+		    fileName.c_str(),
+		    fileSize);
 		return;
 	}
 

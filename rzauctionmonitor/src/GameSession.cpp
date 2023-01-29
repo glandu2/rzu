@@ -55,7 +55,7 @@ void GameSession::onGameConnected() {
 }
 
 void GameSession::close() {
-	TS_CS_LOGOUT logoutPkt;
+	TS_CS_LOGOUT logoutPkt{};
 	sendPacket(logoutPkt);
 	closeSession();
 }
