@@ -102,32 +102,34 @@ void PacketSession::logPacket(bool outgoing, const TS_MESSAGE* msg) {
 	if(dumpJsonPackets.get()) {
 		bool dummy;
 		bool ok = false;
-		processPacket<PrintPacketFunctor>(sessionType,
-		                                  PacketMetadata::getPacketOriginFromDirection(outgoing, packetOrigin),
-		                                  packetVersion,
-		                                  msg->id,
-		                                  dummy,
-		                                  this,
-		                                  msg,
-		                                  packetVersion,
-		                                  outgoing,
-		                                  &ok);
+		SessionPacketOrigin origin = PacketMetadata::getPacketOriginFromDirection(outgoing, packetOrigin);
+
+		processPacket<PrintPacketFunctor>(
+		    sessionType, origin, packetVersion, msg->id, dummy, this, msg, packetVersion, outgoing, &ok);
 
 		if(!ok) {
+			const char* packetName = nullptr;
 			const char* fromName = nullptr;
 			const char* toName = nullptr;
 
 			PacketMetadata::getPacketOriginName(outgoing, sessionType, packetOrigin, &fromName, &toName);
 
-			log(Object::LL_Debug, "Can't log json for packet id %d (unknown packet)\n", msg->id);
+			// Guess packet name from ID
+			packetName = PacketMetadata::getPacketName(msg->id, sessionType, origin, packetVersion);
+
+			if(!packetName)
+				packetName = "unknown packet";
+
+			log(Object::LL_Debug, "Can't log json for packet id %d (%s)\n", msg->id, packetName);
 			getStream()->packetLog(LL_Debug,
 			                       reinterpret_cast<const unsigned char*>(msg) + sizeof(TS_MESSAGE),
 			                       (int) msg->size - sizeof(TS_MESSAGE),
-			                       "Packet %s, %s -> %s id: %5d (unknown), size: %d\n",
+			                       "Packet %s, %s -> %s id: %5d (%s), size: %d\n",
 			                       (outgoing) ? "out" : "in",
 			                       fromName,
 			                       toName,
 			                       msg->id,
+			                       packetName,
 			                       int(msg->size - sizeof(TS_MESSAGE)));
 		}
 	}
