@@ -18,7 +18,10 @@ bool tryDeserializeData(const std::vector<uint8_t>& data, uint32_t epic) {
 		Object::logStatic(Object::LL_Error, "DB_Item", "Invalid item data, can't deserialize\n");
 		return false;
 	} else if(structBuffer.getParsedSize() != data.size()) {
-		Object::logStatic(Object::LL_Warning, "DB_Item", "Invalid item data size, can't deserialize safely\n");
+		Object::logStatic(Object::LL_Warning,
+		                  "DB_Item",
+		                  "Invalid item data size, can't deserialize safely with epic 0x%" PRIx32 "\n",
+		                  epic);
 		return false;
 	}
 

@@ -3,8 +3,12 @@
 #include "Packet/PacketDeclaration.h"
 
 #define TS_ITEM_AWAKEN_OPTION_DEF(_) \
-	_(array) (uint32_t, value, 5) \
-	_(array) (int32_t, data, 5)
+	_(def)(array) (uint32_t, value, 7) \
+	  _(impl)(array) (uint32_t, value, 5, version < EPIC_9_8_0) \
+	  _(impl)(array) (uint32_t, value, 7, version >= EPIC_9_8_0) \
+	_(def)(array) (int32_t, data, 7) \
+	  _(impl)(array) (int32_t, data, 5, version < EPIC_9_8_0) \
+	  _(impl)(array) (int32_t, data, 7, version >= EPIC_9_8_0)
 CREATE_STRUCT(TS_ITEM_AWAKEN_OPTION);
 #undef TS_ITEM_AWAKEN_OPTION_DEF
 

@@ -39,11 +39,15 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 	              "\"awaken_option_value_2\", "
 	              "\"awaken_option_value_3\", "
 	              "\"awaken_option_value_4\", "
+	              "\"awaken_option_value_5\", "
+	              "\"awaken_option_value_6\", "
 	              "\"awaken_option_data_0\", "
 	              "\"awaken_option_data_1\", "
 	              "\"awaken_option_data_2\", "
 	              "\"awaken_option_data_3\", "
 	              "\"awaken_option_data_4\", "
+	              "\"awaken_option_data_5\", "
+	              "\"awaken_option_data_6\", "
 	              "\"remain_time\", "
 	              "\"elemental_effect_type\", "
 	              "\"elemental_effect_remain_time\", "
@@ -84,11 +88,15 @@ template<> void DbQueryJob<DB_Item>::init(DbConnectionPool* dbConnectionPool) {
 	addParam("awaken_option_value_2", &InputType::awaken_option_value, 2);
 	addParam("awaken_option_value_3", &InputType::awaken_option_value, 3);
 	addParam("awaken_option_value_4", &InputType::awaken_option_value, 4);
+	addParam("awaken_option_value_5", &InputType::awaken_option_value, 5);
+	addParam("awaken_option_value_6", &InputType::awaken_option_value, 6);
 	addParam("awaken_option_data_0", &InputType::awaken_option_data, 0);
 	addParam("awaken_option_data_1", &InputType::awaken_option_data, 1);
 	addParam("awaken_option_data_2", &InputType::awaken_option_data, 2);
 	addParam("awaken_option_data_3", &InputType::awaken_option_data, 3);
 	addParam("awaken_option_data_4", &InputType::awaken_option_data, 4);
+	addParam("awaken_option_data_5", &InputType::awaken_option_data, 5);
+	addParam("awaken_option_data_6", &InputType::awaken_option_data, 6);
 	addParam("remain_time", &InputType::remain_time);
 	addParam("elemental_effect_type", &InputType::elemental_effect_type);
 	addParam("elemental_effect_remain_time", &InputType::elemental_effect_remain_time);
@@ -224,11 +232,15 @@ bool DB_Item::createTable(DbConnectionPool* dbConnectionPool) {
 	                                        "    \"awaken_option_value_2\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_value_3\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_value_4\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_value_5\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_value_6\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_0\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_1\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_2\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_3\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_4\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_data_5\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_data_6\" int NOT NULL,\r\n"
 	                                        "    \"remain_time\" int NOT NULL,\r\n"
 	                                        "    \"elemental_effect_type\" smallint NOT NULL,\r\n"
 	                                        "    \"elemental_effect_remain_time\" int NOT NULL,\r\n"

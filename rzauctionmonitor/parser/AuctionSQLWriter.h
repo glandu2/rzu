@@ -16,8 +16,8 @@ struct ItemData {
 	uint8_t level;
 	int32_t flag;
 	int32_t socket[4];
-	uint32_t awaken_option_value[5];
-	int32_t awaken_option_data[5];
+	uint32_t awaken_option_value[7];
+	int32_t awaken_option_data[7];
 	int32_t remain_time;
 	uint8_t elemental_effect_type;
 	int32_t elemental_effect_remain_time;
@@ -55,8 +55,8 @@ struct DB_Item {
 		uint8_t level;
 		int32_t flag;
 		int32_t socket[4];
-		uint32_t awaken_option_value[5];
-		int32_t awaken_option_data[5];
+		uint32_t awaken_option_value[7];
+		int32_t awaken_option_data[7];
 		int32_t remain_time;
 		uint8_t elemental_effect_type;
 		int32_t elemental_effect_remain_time;

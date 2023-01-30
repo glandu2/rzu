@@ -31,8 +31,8 @@ struct DB_InsertItem {
 		uint16_t enhance_chance;
 		uint32_t flag;
 		int32_t socket[4];
-		uint32_t awaken_option_value[5];
-		int32_t awaken_option_data[5];
+		uint32_t awaken_option_value[7];
+		int32_t awaken_option_data[7];
 		uint32_t random_type[10];
 		float random_value_1[10];
 		float random_value_2[10];

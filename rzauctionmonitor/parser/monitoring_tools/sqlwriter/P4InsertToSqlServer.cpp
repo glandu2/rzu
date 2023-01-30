@@ -35,8 +35,8 @@ struct DB_InsertItem {
 		uint16_t enhance_chance;
 		uint32_t flag;
 		int32_t socket[4];
-		uint32_t awaken_option_value[5];
-		int32_t awaken_option_data[5];
+		uint32_t awaken_option_value[7];
+		int32_t awaken_option_data[7];
 		uint32_t random_type[10];
 		float random_value_1[10];
 		float random_value_2[10];
@@ -98,11 +98,15 @@ template<> void DbQueryJob<DB_InsertItem>::init(DbConnectionPool* dbConnectionPo
 	addParam("awaken_option_value_2", &InputType::awaken_option_value, 2);
 	addParam("awaken_option_value_3", &InputType::awaken_option_value, 3);
 	addParam("awaken_option_value_4", &InputType::awaken_option_value, 4);
+	addParam("awaken_option_value_5", &InputType::awaken_option_value, 5);
+	addParam("awaken_option_value_6", &InputType::awaken_option_value, 6);
 	addParam("awaken_option_data_0", &InputType::awaken_option_data, 0);
 	addParam("awaken_option_data_1", &InputType::awaken_option_data, 1);
 	addParam("awaken_option_data_2", &InputType::awaken_option_data, 2);
 	addParam("awaken_option_data_3", &InputType::awaken_option_data, 3);
 	addParam("awaken_option_data_4", &InputType::awaken_option_data, 4);
+	addParam("awaken_option_data_5", &InputType::awaken_option_data, 5);
+	addParam("awaken_option_data_6", &InputType::awaken_option_data, 6);
 	addParam("random_type_0", &InputType::random_type, 0);
 	addParam("random_type_1", &InputType::random_type, 1);
 	addParam("random_type_2", &InputType::random_type, 2);
@@ -160,7 +164,10 @@ bool DB_InsertItem::fillItemInfo(DB_InsertItem::Input& input, uint32_t epic, con
 		return false;
 	} else {
 		if(structBuffer.getParsedSize() != data.size()) {
-			Object::logStatic(Object::LL_Warning, "DB_Item", "Invalid item data size, can't deserialize safely\n");
+			Object::logStatic(Object::LL_Warning,
+			                  "DB_Item",
+			                  "Invalid item data size, can't deserialize safely with epic 0x%" PRIx32 "\n",
+			                  epic);
 			return false;
 		}
 
@@ -274,11 +281,15 @@ bool DB_InsertItem::createTable(DbConnectionPool* dbConnectionPool) {
 	                                        "    \"awaken_option_value_2\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_value_3\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_value_4\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_value_6\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_value_6\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_0\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_1\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_2\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_3\" int NOT NULL,\r\n"
 	                                        "    \"awaken_option_data_4\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_data_5\" int NOT NULL,\r\n"
+	                                        "    \"awaken_option_data_6\" int NOT NULL,\r\n"
 	                                        "    \"random_type_0\" int NOT NULL,\r\n"
 	                                        "    \"random_type_1\" int NOT NULL,\r\n"
 	                                        "    \"random_type_2\" int NOT NULL,\r\n"
