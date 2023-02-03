@@ -1,0 +1,51 @@
+# Build results
+
+debug/
+release/
+x64/
+build*/
+bin*/
+obj*/
+internal*/
+.kdev4/
+.clangd/
+
+*.ilk
+*.exe
+*.lib
+*.o
+*.pdb
+*.so*
+*.user*
+CMakeLists.txt.*
+Makefile*
+.directory
+
+
+project*/
+releases/
+data
+
+# CMake file api directory
+/.cmake/
+
+#############
+## Windows detritus
+#############
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+
+RSATests
+
+# Dockerfile isn't used for the build, this avoids rebuild when changing only the Dockerfile without additional impact
+Dockerfile
+docker-compose.yml

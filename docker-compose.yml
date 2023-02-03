@@ -1,0 +1,97 @@
+version: "3.9"
+
+x-docker-program-image: &docker-program-image
+  context: .
+  dockerfile: Dockerfile
+
+services:
+  rzauctionmonitor:
+    image: rzauctionmonitor
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzauctionmonitor
+
+  rzauth:
+    image: rzauth
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzauth
+
+  rzbenchauth:
+    image: rzbenchauth
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzbenchauth
+
+  rzbenchlog:
+    image: rzbenchlog
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzbenchlog
+
+  rzchatgateway:
+    image: rzchatgateway
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzchatgateway
+
+  rzclientreconnect:
+    image: rzclientreconnect
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzclientreconnect
+
+  rzfilter:
+    image: rzfilter
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzfilter
+
+  rzgame:
+    image: rzgame
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzgame
+
+  rzgamereconnect:
+    image: rzgamereconnect
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzgamereconnect
+
+  rzlog:
+    image: rzlog
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzlog
+
+  rzplayercount:
+    image: rzplayercount
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzplayercount
+
+  rzrequester:
+    image: rzrequester
+    build:
+      <<: *docker-program-image
+      args:
+        program: rzrequester
+
+  rztestgs:
+    image: rztestgs
+    build:
+      <<: *docker-program-image
+      args:
+        program: rztestgs
