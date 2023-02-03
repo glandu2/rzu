@@ -111,7 +111,7 @@ private:
 
 #define EPIC_9_7_2 0x090702  // Changed wear_info in TS_SC_CHARACTER_LIST and TS_SC_WEAR_INFO and GS version to 20220622
 
-#define EPIC_9_8_0 0x090800  // TS_ITEM_AWAKEN_OPTION increased from 5 to 7 stats
+#define EPIC_9_8_0 0x090800  // GS version changed to 20230126, TS_ITEM_AWAKEN_OPTION increased from 5 to 7 stats
 
 // Latest released epic
 #define EPIC_LATEST EPIC_9_8_0
