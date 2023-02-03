@@ -5,6 +5,7 @@
 #include "Extern.h"
 #include <stdint.h>
 #include <string>
+#include <time.h>
 #include <vector>
 
 class RZAUCTION_EXTERN AuctionCommonWriter : public Object {

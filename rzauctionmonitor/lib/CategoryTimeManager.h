@@ -4,6 +4,7 @@
 #include "Core/Object.h"
 #include "Extern.h"
 #include <stdint.h>
+#include <time.h>
 #include <vector>
 
 class RZAUCTION_EXTERN CategoryTimeManager : public Object {
