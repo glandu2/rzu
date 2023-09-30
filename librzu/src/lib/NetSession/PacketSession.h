@@ -42,7 +42,7 @@ public:
 		} else {
 			if(logPacketEnabled()) {
 				logPacketWithoutJson(true, (const TS_MESSAGE*) buffer.getData(), data.getName());
-				logPacketJson(&data, packetVersion, true);
+				logPacketJson(&data, true, packetVersion, true);
 			}
 
 			write(buffer.getWriteRequest());
@@ -73,7 +73,8 @@ private:
 
 	template<class Packet> struct PrintPacketFunctor;
 	template<class Packet>
-	RZU_EXTERN void logPacketJson(const Packet* packet, packet_version_t version, bool outgoing, bool* ok = nullptr);
+	RZU_EXTERN void logPacketJson(
+	    const Packet* packet, bool isValid, packet_version_t version, bool outgoing, bool* ok = nullptr);
 
 protected:
 	packet_version_t packetVersion;

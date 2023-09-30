@@ -60,6 +60,12 @@ struct TS_MESSAGE {
 	             packet_version_t version,
 	             Args... args) const;
 
+	template<class T, class U, typename... Args>
+	bool processEvenIfInvalid(U* instance,
+	                          void (U::*processFunction)(const T* packet, bool isValid, Args...),
+	                          packet_version_t version,
+	                          Args... args) const;
+
 	template<class T> bool process(T& packet, packet_version_t version) const;
 };
 
@@ -125,6 +131,22 @@ bool TS_MESSAGE::process(U* instance,
 	}
 
 	return false;
+}
+
+template<class T, class U, typename... Args>
+bool TS_MESSAGE::processEvenIfInvalid(U* instance,
+                                      void (U::*processFunction)(const T* packet, bool isValid, Args...),
+                                      packet_version_t version,
+                                      Args... args) const {
+	bool isValid;
+	T packet;
+	MessageBuffer buffer((void*) this, this->size, version);
+
+	packet.deserialize(&buffer);
+	isValid = buffer.checkPacketFinalSize();
+	(instance->*processFunction)(&packet, isValid, args...);
+
+	return isValid;
 }
 
 template<class T> bool TS_MESSAGE::process(T& packet, packet_version_t version) const {

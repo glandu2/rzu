@@ -46,7 +46,8 @@ void PacketSession::dispatchPacket(const TS_MESSAGE* packetData) {
 }
 
 template<class Packet>
-RZU_EXTERN void PacketSession::logPacketJson(const Packet* packet, packet_version_t version, bool outgoing, bool* ok) {
+RZU_EXTERN void PacketSession::logPacketJson(
+    const Packet* packet, bool isValid, packet_version_t version, bool outgoing, bool* ok) {
 	if(!dumpJsonPackets.get())
 		return;
 
@@ -70,7 +71,8 @@ RZU_EXTERN void PacketSession::logPacketJson(const Packet* packet, packet_versio
 
 	packetLogger->log(level,
 	                  getStream(),
-	                  "Packet json %s, %s -> %s id: %5d (%s):\n%s\n",
+	                  "%sPacket json %s, %s -> %s id: %5d (%s):\n%s\n",
+	                  isValid ? "" : "Partial invalid ",
 	                  (outgoing) ? "out" : "in",
 	                  fromName,
 	                  toName,
@@ -79,12 +81,12 @@ RZU_EXTERN void PacketSession::logPacketJson(const Packet* packet, packet_versio
 	                  jsonData.c_str());
 
 	if(ok)
-		*ok = true;
+		*ok = isValid;
 }
 
 template<class Packet> struct PacketSession::PrintPacketFunctor {
 	bool operator()(PacketSession* self, const TS_MESSAGE* packet, packet_version_t version, bool outgoing, bool* ok) {
-		packet->process(self, &PacketSession::logPacketJson<Packet>, version, version, outgoing, ok);
+		packet->processEvenIfInvalid(self, &PacketSession::logPacketJson<Packet>, version, version, outgoing, ok);
 		return true;
 	}
 };
