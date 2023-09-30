@@ -42,6 +42,9 @@ private:
 	void onDelayRecoExpired();
 	void onGGTimerExpired();
 
+	// Prevent using direct connect
+	using ClientAuthSession::connect;
+
 private:
 	AutoClientSession* gameSession;
 	std::string ip;
