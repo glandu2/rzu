@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_EXP_UPDATE_DEF(_) \
 	_(simple) (ar_handle_t, handle) \
 	_(simple) (uint64_t, exp) \

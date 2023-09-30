@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_ADD_PET_INFO_DEF(_) \
 	_(simple)(ar_handle_t, cage_handle) \
 	_(simple)(ar_handle_t, pet_handle) \

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_GET_BOOTHS_NAME_DEF(_) \
 	_(count)(int32_t, handles) \
 	_(dynarray)(ar_handle_t, handles)

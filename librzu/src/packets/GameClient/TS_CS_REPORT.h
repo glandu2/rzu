@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 // Null terminator not included in report
 // Server support no null terminator (client does not include it)
 // Must be sent once only and after version

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_SWAP_EQUIP_DEF(_)
 
 // Since EPIC_7_2

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 enum TS_CHAT_TYPE : uint8_t
 {
 	CHAT_NORMAL = 0x0,

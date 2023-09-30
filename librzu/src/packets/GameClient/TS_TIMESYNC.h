@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_TIMESYNC_DEF(_) \
 	_(simple) (ar_time_t, time)
 

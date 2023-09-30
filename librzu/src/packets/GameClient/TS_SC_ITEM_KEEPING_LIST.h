@@ -4,6 +4,7 @@
 #include "TS_SC_INVENTORY.h"
 
 // Last tested: EPIC_9_8_1
+
 #define TS_ITEM_KEEPING_INFO_DEF(_) \
 	_(simple) (int32_t, keeping_uid) \
 	_(simple) (TS_ITEM_FIXED_INFO, item_info) \

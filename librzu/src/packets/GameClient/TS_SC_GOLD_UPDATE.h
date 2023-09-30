@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_GOLD_UPDATE_DEF(_) \
 	_(def)(simple) (uint64_t, gold) \
 	_(impl)(simple)(uint64_t, gold, version >= EPIC_4_1_1) \

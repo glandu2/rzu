@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_AC_AES_KEY_IV_DEF(_) \
 	_(count)(uint32_t, data) \
 	_(dynarray)(uint8_t, data)

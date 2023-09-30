@@ -4,6 +4,7 @@
 #include "TS_SC_INVENTORY.h"
 
 // Last tested: EPIC_9_8_1
+
 #define TS_FARM_SUMMON_INFO_DEF(_) \
 	_(simple)(int32_t, index) \
 	_(simple)(int64_t, exp) \

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 enum TS_MIX_TYPE : int8_t
 {
 	MIX_TYPE_NONE = 0,

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_MARKET_ITEM_INFO_DEF(_) \
 	_(simple)(int32_t, code) \
 	_(def)(simple) (int64_t, price) \

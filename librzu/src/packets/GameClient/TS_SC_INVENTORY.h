@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_ITEM_SOCKETS_DEF(_) \
 	_(array)  (int32_t, socket, 4) \
 	_(array)  (int32_t, dummy_socket, 2, version < EPIC_6_1, {0})

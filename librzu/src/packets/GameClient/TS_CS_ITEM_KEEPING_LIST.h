@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_ITEM_KEEPING_LIST_DEF(_) \
 	_(simple)(int32_t, page_num)
 

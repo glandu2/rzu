@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_BELT_SLOT_INFO_DEF(_) \
 	_(def)(array) (ar_handle_t, handle, 8) \
 	  _(impl)(array) (ar_handle_t, handle, 6, version < EPIC_9_5) \

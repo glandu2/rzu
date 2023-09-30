@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_PUTON_ITEM_DEF(_) \
 	_(def)(simple) (int8_t, position) \
 	_(impl)(simple) (int8_t, position, version < EPIC_9_6_7) \

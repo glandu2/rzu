@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 
 enum TS_CREATURE_STATUS : uint32_t {
   // Creature

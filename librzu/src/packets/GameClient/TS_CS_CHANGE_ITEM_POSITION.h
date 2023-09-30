@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_CHANGE_ITEM_POSITION_DEF(_) \
 	_(simple)(bool, is_storage) \
 	_(simple)(ar_handle_t, item_handle_1) \

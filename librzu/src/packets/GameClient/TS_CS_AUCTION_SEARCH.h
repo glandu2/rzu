@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_AUCTION_SEARCH_DEF(_) \
 	_(simple)(int32_t, category_id) \
 	_(simple)(int32_t, sub_category_id) \

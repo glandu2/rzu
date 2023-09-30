@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_LOGIN_DEF(_) \
 	_(def)(string)(name, 24) \
 	_(impl)(string)(name, 24, version >= EPIC_9_3) \

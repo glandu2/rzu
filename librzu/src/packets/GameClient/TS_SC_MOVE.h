@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define MOVE_INFO_DEF(_) \
 	_(simple)(float, tx) \
 	_(simple)(float, ty)

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 // checked with e4
 #define TS_SC_GAME_TIME_DEF(_) \
 	_(simple) (ar_time_t, t) \

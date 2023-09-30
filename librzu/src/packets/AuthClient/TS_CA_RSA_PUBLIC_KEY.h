@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CA_RSA_PUBLIC_KEY_DEF(_) \
 	_(count)(int32_t, key) \
 	_(dynarray)(uint8_t, key)

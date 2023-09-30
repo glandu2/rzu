@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_AC_SELECT_SERVER_DEF(_) \
 	_(simple)(uint16_t, result) \
 	_(simple)(int64_t, one_time_key, version < EPIC_8_1_1_RSA) \

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_UPDATE_DEF(_) \
 	_(simple) (ar_handle_t, handle) \
 	_(simple) (ar_time_t, time, version >= EPIC_9_2, static_cast<ar_time_t>(0)) \

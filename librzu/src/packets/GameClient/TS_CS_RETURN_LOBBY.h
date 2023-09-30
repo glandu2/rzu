@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_RETURN_LOBBY_DEF(_)
 
 #define TS_CS_RETURN_LOBBY_ID(X) \

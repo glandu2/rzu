@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_QUEST_STATUS_DEF(_) \
 	_(simple)(int32_t, code) \
 	_(def)(array) (uint32_t, status, 6) \

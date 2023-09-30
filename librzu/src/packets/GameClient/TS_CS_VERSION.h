@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_VERSION_DEF(_) \
 	_(string)(szVersion, 20) \
 	_(array)(uint8_t, checksum, 256, version >= EPIC_9_5_2)

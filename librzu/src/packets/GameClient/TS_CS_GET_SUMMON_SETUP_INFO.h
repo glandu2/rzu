@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_GET_SUMMON_SETUP_INFO_DEF(_) \
 	_(simple)(bool, show_dialog)
 

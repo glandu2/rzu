@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_STOP_WATCH_BOOTH_DEF(_) \
 	_(simple)(ar_handle_t, target)
 

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_SKILL_DEF(_) \
 	_(simple)(uint16_t, skill_id) \
 	_(simple)(ar_handle_t, caster) \

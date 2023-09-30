@@ -3,6 +3,8 @@
 #include "Packet/PacketDeclaration.h"
 #include "PacketEnums.h"
 
+// Last tested: EPIC_9_8_1
+
 #define LOBBY_CHARACTER_INFO_DEF(_) \
 	_(simple) (uint32_t, sex) \
 	_(simple) (uint32_t, race) \

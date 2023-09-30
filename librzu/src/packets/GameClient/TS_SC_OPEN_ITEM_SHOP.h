@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_OPEN_ITEM_SHOP_DEF(_) \
 	_(simple)(int32_t, client_id) \
 	_(simple)(int32_t, account_id) \

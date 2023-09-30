@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_GAME_TIME_DEF(_)
 
 #define TS_CS_GAME_TIME_ID(X) \

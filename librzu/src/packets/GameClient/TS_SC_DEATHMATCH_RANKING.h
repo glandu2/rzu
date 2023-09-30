@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_DEATHMATCH_RANKING_INFO_DEF(_) \
 	_(simple)(int32_t, rank) \
 	_(simple)(uint16_t, kills) \

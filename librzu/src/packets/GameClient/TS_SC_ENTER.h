@@ -7,6 +7,8 @@
 
 #include "TS_SC_STATUS_CHANGE.h"
 
+// Last tested: EPIC_9_8_1
+
 enum TS_SC_ENTER__OBJ_TYPE : uint8_t {
 	EOT_Player = 0,
 	EOT_NPC = 1,

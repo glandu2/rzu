@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_ADDED_SKILL_LIST_DEF(_) \
 	_(simple) (uint32_t, skill_id) \
 	_(simple) (bool, restricted_to_type) \

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_MIX_INFO_DEF(_) \
 	_(simple)(ar_handle_t, handle) \
 	_(simple)(uint16_t, count)

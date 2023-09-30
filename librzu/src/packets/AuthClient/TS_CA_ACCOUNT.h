@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 // Used for epic autodetection
 #define TS_CA_ACCOUNT_SIZE_PRE_EPIC_5_2 58
 

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_GAME_GUARD_AUTH_V1_DEF(_) \
 	_(simple)(uint32_t, dwIndex) \
 	_(simple)(uint32_t, dwValue1) \

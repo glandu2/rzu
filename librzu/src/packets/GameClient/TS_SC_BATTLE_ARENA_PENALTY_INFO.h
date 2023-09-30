@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_BATTLE_ARENA_PENALTY_INFO_DEF(_) \
 	_(simple)(ar_time_t, nBlockTime) \
 	_(simple)(int32_t, nPenaltyCount) \

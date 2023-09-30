@@ -3,6 +3,8 @@
 #include "Packet/PacketDeclaration.h"
 #include "TS_SC_GAME_GUARD_AUTH_QUERY.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_GAME_GUARD_AUTH_ANSWER_DEF(_) \
 	_(simple)(TS_GAME_GUARD_AUTH, auth)
 

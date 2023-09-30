@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SKILL_LEVEL_INFO_DEF(_) \
 	_(simple)(int32_t, skill_id) \
 	_(simple)(int8_t, skill_level)

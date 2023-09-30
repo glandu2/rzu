@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 enum TS_STATE_RESULT_TYPE : uint16_t {
 	SRT_Damage = 1,
 	SRT_MagicDamage = 2,

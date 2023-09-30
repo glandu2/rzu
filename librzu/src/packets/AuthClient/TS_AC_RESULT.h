@@ -3,6 +3,8 @@
 #include "Packet/PacketDeclaration.h"
 #include "PacketEnums.h"
 
+// Last tested: EPIC_9_8_1
+
 enum TS_LOGIN_SUCCESS_FLAG
 {
 	LSF_EULA_ACCEPTED = 0x1,

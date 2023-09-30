@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_INSTANCE_GAME_SCORE_REQUEST_DEF(_) \
 	_(simple)(uint32_t, holicpoint) \
 	_(simple)(uint32_t, bearroad_ranking) \

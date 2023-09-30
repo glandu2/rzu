@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_PUTOFF_ITEM_DEF(_) \
 	_(def)(simple) (int32_t, position) \
 	_(impl)(simple)(int8_t, position, version < EPIC_9_6_7) \

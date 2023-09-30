@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 
 #define TS_SC_WEAR_INFO__ITEM_WEAR_INFO_DEF(_) \
     _(simple) (uint8_t, item_type) \

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 // No string size field
 // String value include null terminator
 #define TS_SC_PROPERTY_DEF(_) \

@@ -3,6 +3,8 @@
 #include "Packet/PacketDeclaration.h"
 #include "TS_SC_DEATHMATCH_RANKING.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_DEATHMATCH_RANKING_OPEN_DEF(_) \
 	_(array)(TS_DEATHMATCH_RANKING_INFO, players, 5)
 

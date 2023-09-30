@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_RESULT_FOSTER_DEF(_) \
 	_(simple)(int8_t, result)
 

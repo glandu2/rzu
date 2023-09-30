@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_SET_PROPERTY_DEF(_) \
 	_(string)(name, 16) \
 	_(endstring)(string_value, true)

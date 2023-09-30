@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CU_DOWNLOAD_ICON_DEF(_) \
 	_(simple)(uint32_t, guild_id) \
 	_(simple)(uint32_t, icon_size) \

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_BUY_ITEM_DEF(_) \
 	_(simple)(int32_t, item_code) \
 	_(def)(simple) (uint16_t, buy_count) \

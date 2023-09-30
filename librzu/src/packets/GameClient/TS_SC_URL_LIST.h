@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 // len does not include null terminator
 // packet does not include null terminator
 #define TS_SC_URL_LIST_DEF(_) \

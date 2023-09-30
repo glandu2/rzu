@@ -3,6 +3,8 @@
 #include "Packet/PacketDeclaration.h"
 #include "PacketEnums.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_LOGIN_RESULT_DEF(_) \
 	_(def)(simple)(uint16_t, result) \
 	  _(impl)(simple)(uint16_t, result, version >= EPIC_7_1) \

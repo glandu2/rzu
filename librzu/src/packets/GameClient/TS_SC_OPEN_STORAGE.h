@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_OPEN_STORAGE_DEF(_) \
 	_(simple)(int32_t, maxStorageItemCount, version >= EPIC_7_4, 10000)
 

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_COMMERCIAL_ITEM_INFO_DEF(_) \
 	_(simple)(uint32_t, commercial_item_uid) \
 	_(simple)(int32_t, code) \

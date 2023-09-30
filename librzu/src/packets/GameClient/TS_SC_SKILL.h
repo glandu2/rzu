@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 // Some enum with specified underlying type (after ":")
 enum TS_SKILL__TYPE : uint8_t
 {

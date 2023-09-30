@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SERVER_INFO_DEF(_) \
 	_(def)(simple) (uint32_t, server_idx) \
 	_(impl)(simple) (uint16_t, server_idx, version <  EPIC_9_6_5) \

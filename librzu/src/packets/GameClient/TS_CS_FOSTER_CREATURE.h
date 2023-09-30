@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_TICKET_INFO_DEF(_) \
 	_(simple)(ar_handle_t, ticket_handle) \
 	_(simple)(int32_t, ticket_count)

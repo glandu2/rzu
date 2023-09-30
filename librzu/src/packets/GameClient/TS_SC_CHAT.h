@@ -3,6 +3,8 @@
 #include "Packet/PacketDeclaration.h"
 #include "TS_CS_CHAT_REQUEST.h"
 
+// Last tested: EPIC_9_8_1
+
 // Message len include null terminator
 // Message must have null terminator
 #define TS_SC_CHAT_DEF(_) \

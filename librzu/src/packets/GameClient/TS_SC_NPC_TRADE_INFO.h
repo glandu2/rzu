@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_NPC_TRADE_INFO_DEF(_) \
 	_(simple)(bool, is_sell) \
 	_(simple)(int32_t, code) \

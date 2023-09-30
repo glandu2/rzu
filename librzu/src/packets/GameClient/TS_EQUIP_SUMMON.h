@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_EQUIP_SUMMON_DEF(_) \
 	_(simple) (bool, open_dialog) \
 	_(array) (ar_handle_t, card_handle, 6)

@@ -3,6 +3,8 @@
 #include "Packet/PacketDeclaration.h"
 #include "TS_SC_INVENTORY.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_BOOTH_ITEM_INFO_DEF(_) \
 	_(simple)(uint16_t, item_type, version >= EPIC_9_8_1) \
 	_(def)(simple)(int64_t, gold) \

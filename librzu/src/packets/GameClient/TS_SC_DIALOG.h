@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 // strings len does not include null terminator
 // Server does not include null terminator in strings
 #define TS_SC_DIALOG_DEF(_) \

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 // Server check size - 9 == trigger_length
 // No null terminator allowed
 #define TS_CS_DIALOG_DEF(_) \

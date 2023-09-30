@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_QUEST_INFO_DEF(_) \
 	_(simple) (uint32_t, code) \
 	_(simple) (uint32_t, startID) \

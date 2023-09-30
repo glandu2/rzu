@@ -3,6 +3,8 @@
 #include "Packet/PacketDeclaration.h"
 #include "TS_SC_HUNTAHOLIC_INSTANCE_INFO.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_SC_HUNTAHOLIC_INSTANCE_LIST_DEF(_) \
 	_(simple)(int32_t, huntaholic_id) \
 	_(simple)(int32_t, page) \

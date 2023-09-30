@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_TITLE_CONDITION_INFO_DEF(_) \
 	_(simple)(int32_t, type) \
 	_(simple)(int64_t, count)

@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 #define TS_CS_REQUEST_FARM_INFO_DEF(_)
 
 // Since EPIC_7_3

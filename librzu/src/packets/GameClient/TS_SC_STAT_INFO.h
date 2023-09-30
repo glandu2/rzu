@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 enum TS_STAT_INFO__TYPE : uint8_t
 {
   SIT_Total = 0,

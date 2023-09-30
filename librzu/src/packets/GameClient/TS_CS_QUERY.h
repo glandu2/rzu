@@ -2,6 +2,8 @@
 
 #include "Packet/PacketDeclaration.h"
 
+// Last tested: EPIC_9_8_1
+
 // Sent by the client when receiving a packet about an unknown handle.
 // This trigger a TS_SC_ENTER from the GS
 #define TS_CS_QUERY_DEF(_) \
