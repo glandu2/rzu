@@ -5,7 +5,7 @@
 
 #define TS_AUCTION_INFO_DEF(_) \
 	_(simple) (int32_t , auction_uid) \
-	_(simple) (TS_ITEM_BASE_INFO, item_info) \
+	_(simple) (TS_ITEM_FIXED_INFO, item_info) \
 	_(simple) (uint8_t, duration_type) \
 	_(simple) (uint64_t, bidded_price) \
 	_(simple) (uint64_t, instant_purchase_price)

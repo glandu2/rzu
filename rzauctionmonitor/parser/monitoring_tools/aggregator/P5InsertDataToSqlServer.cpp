@@ -194,16 +194,17 @@ bool DB_InsertItem::fillItemInfo(DB_InsertItem::Input& input, uint32_t epic, con
 			return false;
 		}
 
-		static_assert(sizeof(input.socket) == sizeof(item.auction_details.item_info.socket), "wrong size: socket");
+		static_assert(sizeof(input.socket) == sizeof(item.auction_details.item_info.sockets.socket),
+		              "wrong size: socket");
 		static_assert(sizeof(input.awaken_option_value) == sizeof(item.auction_details.item_info.awaken_option.value),
 		              "wrong size: awaken_option_value");
 		static_assert(sizeof(input.awaken_option_data) == sizeof(item.auction_details.item_info.awaken_option.data),
 		              "wrong size: awaken_option_data");
-		static_assert(sizeof(input.random_type) == sizeof(item.auction_details.item_info.random_type),
+		static_assert(sizeof(input.random_type) == sizeof(item.auction_details.item_info.random_stats.type),
 		              "wrong size: random_type");
-		static_assert(sizeof(input.random_value_1) == sizeof(item.auction_details.item_info.random_value_1),
+		static_assert(sizeof(input.random_value_1) == sizeof(item.auction_details.item_info.random_stats.value_1),
 		              "wrong size: random_value_1");
-		static_assert(sizeof(input.random_value_2) == sizeof(item.auction_details.item_info.random_value_2),
+		static_assert(sizeof(input.random_value_2) == sizeof(item.auction_details.item_info.random_stats.value_2),
 		              "wrong size: random_value_2");
 
 		input.handle = item.auction_details.item_info.handle;
@@ -216,21 +217,21 @@ bool DB_InsertItem::fillItemInfo(DB_InsertItem::Input& input, uint32_t epic, con
 		input.level = item.auction_details.item_info.level;
 		input.enhance_chance = item.auction_details.item_info.enhance_chance;
 		input.flag = item.auction_details.item_info.flag;
-		memcpy(input.socket, item.auction_details.item_info.socket, sizeof(input.socket));
+		memcpy(input.socket, item.auction_details.item_info.sockets.socket, sizeof(input.socket));
 		memcpy(input.awaken_option_value,
 		       item.auction_details.item_info.awaken_option.value,
 		       sizeof(input.awaken_option_value));
 		memcpy(input.awaken_option_data,
 		       item.auction_details.item_info.awaken_option.data,
 		       sizeof(input.awaken_option_data));
-		memcpy(input.random_type, item.auction_details.item_info.random_type, sizeof(input.random_type));
-		memcpy(input.random_value_1, item.auction_details.item_info.random_value_1, sizeof(input.random_value_1));
-		memcpy(input.random_value_2, item.auction_details.item_info.random_value_2, sizeof(input.random_value_2));
+		memcpy(input.random_type, item.auction_details.item_info.random_stats.type, sizeof(input.random_type));
+		memcpy(input.random_value_1, item.auction_details.item_info.random_stats.value_1, sizeof(input.random_value_1));
+		memcpy(input.random_value_2, item.auction_details.item_info.random_stats.value_2, sizeof(input.random_value_2));
 		input.remain_time = item.auction_details.item_info.remain_time;
-		input.elemental_effect_type = item.auction_details.item_info.elemental_effect_type;
-		input.elemental_effect_remain_time = item.auction_details.item_info.elemental_effect_remain_time;
-		input.elemental_effect_attack_point = item.auction_details.item_info.elemental_effect_attack_point;
-		input.elemental_effect_magic_point = item.auction_details.item_info.elemental_effect_magic_point;
+		input.elemental_effect_type = item.auction_details.item_info.elemental_effect.type;
+		input.elemental_effect_remain_time = item.auction_details.item_info.elemental_effect.remain_time;
+		input.elemental_effect_attack_point = item.auction_details.item_info.elemental_effect.attack_point;
+		input.elemental_effect_magic_point = item.auction_details.item_info.elemental_effect.magic_point;
 		input.appearance_code = item.auction_details.item_info.appearance_code;
 		input.summon_code = item.auction_details.item_info.summon_code;
 		input.item_effect_id = item.auction_details.item_info.item_effect_id;

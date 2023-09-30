@@ -3,9 +3,10 @@
 #include "Packet/PacketDeclaration.h"
 #include "TS_SC_INVENTORY.h"
 
+// Last tested: EPIC_9_8_1
 #define TS_ITEM_KEEPING_INFO_DEF(_) \
 	_(simple) (int32_t, keeping_uid) \
-	_(simple) (TS_ITEM_BASE_INFO, item_info) \
+	_(simple) (TS_ITEM_FIXED_INFO, item_info) \
 	_(simple) (int32_t, duration) \
 	_(simple) (uint8_t, keeping_type) \
 	_(simple) (int32_t, related_item_code) \

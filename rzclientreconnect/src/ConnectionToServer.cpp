@@ -627,7 +627,7 @@ void ConnectionToServer::onRemovePetInfo(const TS_SC_REMOVE_PET_INFO* packet) {
 
 void ConnectionToServer::onInventory(const TS_SC_INVENTORY* packet) {
 	for(auto& item : packet->items) {
-		gameData.localPlayer.itemsByHandle[item.base_info.handle] = item;
+		gameData.localPlayer.itemsByHandle[item.handle] = item;
 	}
 }
 
@@ -812,7 +812,7 @@ void ConnectionToServer::onChangeTitleCondition(const TS_SC_CHANGE_TITLE_CONDITI
 
 void ConnectionToServer::onUpdateItemCount(const TS_SC_UPDATE_ITEM_COUNT* packet) {
 	if(packet->count)
-		gameData.localPlayer.itemsByHandle[packet->item_handle].base_info.count = packet->count;
+		gameData.localPlayer.itemsByHandle[packet->item_handle].count = packet->count;
 	else
 		gameData.localPlayer.itemsByHandle.erase(packet->item_handle);
 }

@@ -29,24 +29,24 @@ Item::Item(DB_Item* dbItem) {
 void Item::fillInventoryItem(TS_ITEM_INFO& item) {
 	item.own_summon_handle = summon_id;
 	item.index = idx;
-	item.base_info.code = code;
-	item.base_info.count = count;
-	item.base_info.flag = flag;
-	item.base_info.handle = handle;
-	item.base_info.ethereal_durability = ethereal_durability;
-	item.base_info.endurance = endurance;
-	item.base_info.enhance = enhance;
-	item.base_info.level = level;
-	item.base_info.uid = sid;
-	item.base_info.remain_time = remain_time;
-	memcpy(item.base_info.socket, socket, Utils_countOf(socket));
-	item.base_info.elemental_effect_remain_time = 0;
-	item.base_info.elemental_effect_attack_point = 0;
-	item.base_info.elemental_effect_magic_point = 0;
-	item.base_info.elemental_effect_type = 0;
-	item.base_info.appearance_code = appearance_code;
-	memset(item.base_info.awaken_option.data, 0, sizeof(item.base_info.awaken_option.data));
-	memset(item.base_info.awaken_option.value, 0, sizeof(item.base_info.awaken_option.value));
+	item.code = code;
+	item.count = count;
+	item.flag = flag;
+	item.handle = handle;
+	item.ethereal_durability = ethereal_durability;
+	item.endurance = endurance;
+	item.enhance = enhance;
+	item.level = level;
+	item.uid = sid;
+	item.remain_time = remain_time;
+	memcpy(item.sockets.socket, socket, Utils_countOf(socket));
+	item.elemental_effect.remain_time = 0;
+	item.elemental_effect.attack_point = 0;
+	item.elemental_effect.magic_point = 0;
+	item.elemental_effect.type = 0;
+	item.appearance_code = appearance_code;
+	memset(item.awaken_option.data, 0, sizeof(item.awaken_option.data));
+	memset(item.awaken_option.value, 0, sizeof(item.awaken_option.value));
 }
 
 }  // namespace GameServer

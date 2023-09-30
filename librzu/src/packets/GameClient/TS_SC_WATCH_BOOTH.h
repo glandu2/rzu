@@ -4,9 +4,11 @@
 #include "TS_SC_INVENTORY.h"
 
 #define TS_BOOTH_ITEM_INFO_DEF(_) \
-	_(simple)(TS_ITEM_BASE_INFO, item) \
+	_(simple)(uint16_t, item_type, version >= EPIC_9_8_1) \
 	_(def)(simple)(int64_t, gold) \
-	_(impl)(simple)(int64_t, gold, version >= EPIC_4_1_1) \
+	_(impl)(simple)(int64_t, gold, version >= EPIC_9_8_1) \
+	_(simple)(TS_ITEM_FIXED_BASE_INFO, item) \
+	_(impl)(simple)(int64_t, gold, version >= EPIC_4_1_1 && version < EPIC_9_8_1) \
 	_(impl)(simple)(int32_t, gold, version < EPIC_4_1_1)
 CREATE_STRUCT(TS_BOOTH_ITEM_INFO);
 #undef TS_BOOTH_ITEM_INFO_DEF

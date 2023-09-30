@@ -3,9 +3,11 @@
 #include "Packet/PacketDeclaration.h"
 #include "TS_SC_INVENTORY.h"
 
+// Last tested: EPIC_9_8_1
 #define TS_FARM_SUMMON_INFO_DEF(_) \
 	_(simple)(int32_t, index) \
 	_(simple)(int64_t, exp) \
+	_(simple)(int64_t, unknown, version >= EPIC_9_8_1) /* Not sure about when it was added */ \
 	_(def)(string)(name, 20) \
 	  _(impl)(string)(name, 19, version < EPIC_9_6) \
 	  _(impl)(string)(name, 20, version >= EPIC_9_6) \
@@ -14,7 +16,7 @@
 	_(simple)(int32_t, refresh_time) \
 	_(simple)(int8_t, using_cash) \
 	_(simple)(int8_t, using_cracker) \
-	_(simple)(TS_ITEM_BASE_INFO, card_info)
+	_(simple)(TS_ITEM_FIXED_INFO, card_info)
 
 CREATE_STRUCT(TS_FARM_SUMMON_INFO);
 #undef TS_FARM_SUMMON_INFO_DEF

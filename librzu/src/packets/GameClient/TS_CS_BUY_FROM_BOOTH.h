@@ -3,10 +3,11 @@
 #include "Packet/PacketDeclaration.h"
 #include "TS_SC_INVENTORY.h"
 
+// Last tested: EPIC_9_8_1
 #define TS_CS_BUY_FROM_BOOTH_DEF(_) \
 	_(simple)(ar_handle_t, target) \
 	_(count)(int16_t, items) \
-	_(dynarray)(TS_ITEM_BASE_INFO, items)
+	_(dynarray)(TS_ITEM_FIXED_INFO, items)
 
 #define TS_CS_BUY_FROM_BOOTH_ID(X) \
 	X(705, version < EPIC_9_6_3) \

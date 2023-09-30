@@ -113,8 +113,10 @@ private:
 
 #define EPIC_9_8_0 0x090800  // GS version changed to 20230126, TS_ITEM_AWAKEN_OPTION increased from 5 to 7 stats
 
+#define EPIC_9_8_1 0x090801  // new fields in TS_SC_INVENTORY
+
 // Latest released epic
-#define EPIC_LATEST EPIC_9_8_0
+#define EPIC_LATEST EPIC_9_8_1
 
 // Flags
 
