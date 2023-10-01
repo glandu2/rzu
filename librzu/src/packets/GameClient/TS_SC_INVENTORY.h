@@ -86,10 +86,10 @@ CREATE_STRUCT(TS_ITEM_ELEMENTAL_EFFECT);
 	_(impl)(simple) (uint16_t, summon_code, version >= EPIC_9_8_1) \
 	_(impl)(simple) (uint32_t, flag, version < EPIC_9_8_1) \
 	_(simple) (TS_ITEM_SOCKETS, sockets, (base_info2_condition)) \
-	_(simple) (TS_ITEM_AWAKEN_OPTION, awaken_option, version >= EPIC_8_1 && (base_info3_condition)) \
-	_(simple) (TS_ITEM_RANDOM_STATS, random_stats, version >= EPIC_8_2 && (base_info3_condition)) \
+	_(simple) (TS_ITEM_AWAKEN_OPTION, awaken_option, version >= EPIC_8_1 && (version < EPIC_9_8_1 || (base_info3_condition))) \
+	_(simple) (TS_ITEM_RANDOM_STATS, random_stats, version >= EPIC_8_2 && (version < EPIC_9_8_1 || (base_info3_condition))) \
 	_(impl)(simple) (int32_t, remain_time, version < EPIC_9_8_1) \
-	_(simple) (TS_ITEM_ELEMENTAL_EFFECT, elemental_effect, version >= EPIC_6_1 && (base_info4_condition)) \
+	_(simple) (TS_ITEM_ELEMENTAL_EFFECT, elemental_effect, version >= EPIC_6_1 && (version < EPIC_9_8_1 || (base_info4_condition))) \
 	_(impl)(simple) (int32_t, appearance_code, version >= EPIC_7_4 && version < EPIC_9_8_1) \
 	_(impl)(simple) (uint32_t, summon_code, version >= EPIC_8_2 && version < EPIC_9_8_1) \
 	_(impl)(simple) (uint32_t, item_effect_id, version >= EPIC_9_6_1 && version < EPIC_9_8_1, 0)
@@ -99,6 +99,19 @@ CREATE_STRUCT(TS_ITEM_ELEMENTAL_EFFECT);
 	TS_ITEM_BASE_INFO_DEF(_, true, true, true)
 CREATE_STRUCT(TS_ITEM_FIXED_BASE_INFO);
 #undef TS_ITEM_FIXED_BASE_INFO_DEF
+
+#define TS_ITEM_FIXED_INFO_DEF(_) \
+	_(def)(simple) (int16_t , wear_position) \
+	_(def)(simple) (ar_handle_t, own_summon_handle) \
+	_(def)(simple) (int32_t , index) \
+    \
+	_(simple) (int16_t , type, version >= EPIC_9_8_1) \
+	_(impl)(simple) (int16_t , wear_position, version >= EPIC_9_8_1) \
+	_(impl)(simple) (int16_t , index, version >= EPIC_9_8_1) \
+	_(impl)(simple) (ar_handle_t, own_summon_handle, version >= EPIC_9_8_1) \
+	TS_ITEM_BASE_INFO_DEF(_, true, true, true)
+CREATE_STRUCT(TS_ITEM_FIXED_INFO);
+#undef TS_ITEM_FIXED_INFO_DEF
 
 #define TS_ITEM_DYNAMIC_INFO_DEF(_, use_fixed_size) \
 	_(def)(simple) (int16_t , wear_position) \
@@ -114,11 +127,11 @@ CREATE_STRUCT(TS_ITEM_FIXED_BASE_INFO);
 	_(impl)(simple) (ar_handle_t, own_summon_handle, version < EPIC_9_8_1) \
 	_(impl)(simple) (int32_t , index, version >= EPIC_4_1_1 && version < EPIC_9_8_1)
 
-// For TS_AUCTION_INFO
-#define TS_ITEM_FIXED_INFO_DEF(_) \
+// For TS_TRADE
+#define TS_ITEM_TRADE_INFO_DEF(_) \
 	TS_ITEM_DYNAMIC_INFO_DEF(_, true)
-CREATE_STRUCT(TS_ITEM_FIXED_INFO);
-#undef TS_ITEM_FIXED_INFO_DEF
+CREATE_STRUCT(TS_ITEM_TRADE_INFO);
+#undef TS_ITEM_TRADE_INFO_DEF
 
 // For TS_SC_INVENTORY
 #define TS_ITEM_INFO_DEF(_) \
