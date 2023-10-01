@@ -6,7 +6,7 @@
 #define TS_TRADE_DEF(_) \
 	_(simple)(ar_handle_t, target_player) \
 	_(simple)(int8_t, mode) \
-	_(simple)(TS_ITEM_INFO, item_info)
+	_(simple)(TS_ITEM_TRADE_INFO, item_info)
 
 #define TS_TRADE_ID(X) \
 	X(280, version < EPIC_9_6_3) \
