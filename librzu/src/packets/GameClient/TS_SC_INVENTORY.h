@@ -85,7 +85,7 @@ CREATE_STRUCT(TS_ITEM_ELEMENTAL_EFFECT);
 	_(impl)(simple) (uint32_t, endurance, version >= EPIC_9_8_1) \
 	_(impl)(simple) (uint16_t, summon_code, version >= EPIC_9_8_1) \
 	_(impl)(simple) (uint32_t, flag, version < EPIC_9_8_1) \
-	_(simple) (TS_ITEM_SOCKETS, sockets, (base_info2_condition)) \
+	_(simple) (TS_ITEM_SOCKETS, sockets, (version < EPIC_9_8_1 || (base_info2_condition))) \
 	_(simple) (TS_ITEM_AWAKEN_OPTION, awaken_option, version >= EPIC_8_1 && (version < EPIC_9_8_1 || (base_info3_condition))) \
 	_(simple) (TS_ITEM_RANDOM_STATS, random_stats, version >= EPIC_8_2 && (version < EPIC_9_8_1 || (base_info3_condition))) \
 	_(impl)(simple) (int32_t, remain_time, version < EPIC_9_8_1) \
